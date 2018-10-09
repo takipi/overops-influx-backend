@@ -278,8 +278,8 @@ public class EventsFunction extends GrafanaFunction {
 		String[] services = getServiceIds(request);
 
 		for (String serviceId : services) {
-			List<List<Object>> serviceRenderedObjects = processServiceEvents(serviceId, request, timeSpan, fields);
-			series.values.addAll(serviceRenderedObjects);
+			List<List<Object>> serviceObjects = processServiceEvents(serviceId, request, timeSpan, fields);
+			series.values.addAll(serviceObjects);
 		}
 
 		return createQueryResults(Collections.singletonList(series));

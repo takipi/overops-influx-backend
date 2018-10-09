@@ -34,22 +34,15 @@ public class QueryServlet extends HttpServlet {
 			return;
 		}
 		
-		try
-		{
-			Auth auth = ServletUtil.getAuthentication(request);
-			
-			Object output = executeQuery(query, auth);
-			
-			String json = new Gson().toJson(output);
-			
-			System.out.println(json);
-			
-			response.getWriter().append(json);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		Auth auth = ServletUtil.getAuthentication(request);
+		
+		Object output = executeQuery(query, auth);
+		
+		String json = new Gson().toJson(output);
+		
+		System.out.println(json);
+		
+		response.getWriter().append(json);
 	}
 	
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -58,6 +51,6 @@ public class QueryServlet extends HttpServlet {
 	}
 
 	private static QueryResult executeQuery(String query, Auth auth) {
-		return GrafanaFunction.processQuery(GrafanaApiClient.getApiClient(auth.hostname, auth.token), query);
+		return GrafanaFunction.processQuery(GrafanaApiClient.getApiClient(auth), query);
 	}
 }

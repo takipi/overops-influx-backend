@@ -5,6 +5,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
@@ -49,7 +53,7 @@ public class GraphFunction extends GrafanaFunction {
 		super(apiClient);
 	}
 	
-	private List<Series> processServiceGraph(String serviceId, String viewId, String viewName, GraphInput request,
+	private List<Pair<Series, Long>> processServiceGraph(String serviceId, String viewId, String viewName, GraphInput request,
 			Pair<String, String> timeSpan, boolean multiService, int pointsWanted) {
 		
 		GraphRequest.Builder builder = GraphRequest.newBuilder().setServiceId(serviceId).setViewId(viewId)
@@ -64,7 +68,7 @@ public class GraphFunction extends GrafanaFunction {
 			throw new IllegalStateException("GraphResult code " + response.responseCode);
 		}
 
-		List<Series> result = new ArrayList<Series>(response.data.graphs.size());
+		List<Pair<Series, Long>> result = new ArrayList<Pair<Series, Long>>(response.data.graphs.size());
 
 		for (Graph graph : response.data.graphs) {
 			Series series = new Series();
@@ -82,6 +86,8 @@ public class GraphFunction extends GrafanaFunction {
 			if (response.data.graphs.size() > 1) {
 				series.tags = Collections.singletonList(graph.id);
 			}
+			
+			long volume = 0;
 
 			for (GraphPoint gp : graph.points) {
 				DateTime gpTime = ISODateTimeFormat.dateTimeParser().parseDateTime(gp.time);
@@ -93,10 +99,11 @@ public class GraphFunction extends GrafanaFunction {
 					value = gp.stats.hits;
 				}
 
+				volume += value;
 				series.values.add(Arrays.asList(new Object[] { Long.valueOf(gpTime.getMillis()), value }));
 			}
 
-			result.add(series);
+			result.add(Pair.of(series, Long.valueOf(volume)));
 		}
 
 		return result;
@@ -110,6 +117,17 @@ public class GraphFunction extends GrafanaFunction {
 		} else {
 			return Collections.emptyMap();
 		}
+	}
+	
+	protected List<Series> processSeries(List<Pair<Series, Long>> series, GraphInput request) {
+	
+		List<Series> result = new ArrayList<Series>();
+	
+		for (Pair<Series, Long> entry : series) {
+			result.add(entry.getFirst());
+		}
+		
+		return result;
 	}
 	
 	@Override
@@ -135,18 +153,20 @@ public class GraphFunction extends GrafanaFunction {
 		
 		String[] services = getServiceIds(request);
 
-		List<Series> series = new ArrayList<Series>();
-
+		List<Pair<Series, Long>> series = new ArrayList<Pair<Series, Long>>();
+		
 		for (String serviceId : services) {
 			
 			Map<String, String> views = getViews(serviceId, request);
 			
 			for (Map.Entry<String,String> entry : views.entrySet()) {
-				List<Series> serviceSeries = processServiceGraph(serviceId, entry.getKey(), entry.getValue(), request, timeSpan, services.length > 1, pointsWanted);
+				List<Pair<Series, Long>> serviceSeries = processServiceGraph(serviceId, entry.getKey(), entry.getValue(), request, timeSpan, services.length > 1, pointsWanted);
 				series.addAll(serviceSeries);
 			}
 		}
-
-		return createQueryResults(series);
+		
+		List<Series> result = processSeries(series, request);
+		
+		return createQueryResults(result);
 	}
 }

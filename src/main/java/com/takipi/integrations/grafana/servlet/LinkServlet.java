@@ -20,7 +20,7 @@ public class LinkServlet extends HttpServlet {
 		Auth auth = ServletUtil.getAuthentication(request);
 		
 		String encoded = request.getParameter("link");
-		String url = EventLinkEncoder.getSnapshotLink(GrafanaApiClient.getApiClient(auth.hostname, auth.token), encoded);
+		String url = EventLinkEncoder.getSnapshotLink(GrafanaApiClient.getApiClient(auth), encoded);
 		
 		StringBuilder builder = new StringBuilder();
 		builder.append("<!DOCTYPE html>\\\n<html>\n<head>\n<!-- HTML meta refresh URL redirection -->\n<meta http-equiv=\"refresh\"");
@@ -36,4 +36,5 @@ public class LinkServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		doGet(request, response);
 	}
+
 }

@@ -1,12 +1,39 @@
 package com.takipi.integrations.grafana.utils;
 
 import com.takipi.common.api.ApiClient;
+import com.takipi.integrations.grafana.servlet.ServletUtil.Auth;
 
 public class GrafanaApiClient {
+
+	public static ApiClient getApiClient(Auth auth) {
+	
+		String host;
+		String token;
+		
+		if (auth != null) {
+			host = auth.hostname;
+			token = auth.token;
+		} else {
+			String authProp = System.getProperty("auth");
+			
+			if (authProp == null) {
+				throw new IllegalArgumentException();
+			}
+			
+			int index = authProp.indexOf('=');
+			
+			if (index == -1) {
+				throw new IllegalArgumentException(authProp);
+			}
+			
+			host = authProp.substring(1, index);
+			token = authProp.substring(index + 1, authProp.length() - 1);
+		}
+		
+		return getApiClient(host, token);
+	}
+
 	public static ApiClient getApiClient(String hostname, String token) {
-			return ApiClient.newBuilder()
-					.setHostname(hostname)
-					.setApiKey(token)
-					.build();
+		return ApiClient.newBuilder().setHostname(hostname).setApiKey(token).build();
 	}
 }
