@@ -1,0 +1,39 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.5.RELEASE")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+bootJar {
+    baseName = 'overops-as-influx'
+    version =  '0.1.0'
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    compile(
+      "org.springframework.boot:spring-boot-starter-web",
+      "org.apache.commons:commons-lang3:3.7",
+  		"com.takipi:api-client:1.5.0",
+      "com.takipi:overops-functions:1.2.1",
+      "org.ocpsoft.prettytime:prettytime:4.0.2.Final"
+    )
+    
+    testCompile("junit:junit")
+}
