@@ -43,8 +43,8 @@ public class EventLinkEncoder {
 		long fromValue = TimeUtils.decodeBase64(parts[2]);
 		long toDelta = TimeUtils.decodeBase64(parts[3]);
 
-		String from = TimeUtils.getDateTime(fromValue);
-		String to = TimeUtils.getDateTime(fromValue + toDelta);
+		String from = TimeUtils.getDateTimeFromEpoch(fromValue);
+		String to = TimeUtils.getDateTimeFromEpoch(fromValue + toDelta);
 		
 		EventSnapshotRequest.Builder builder = EventSnapshotRequest.newBuilder().setFrom(from).setTo(to)
 				.setServiceId(serviceId).setEventId(eventId);

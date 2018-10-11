@@ -52,7 +52,7 @@ public class TimeUtils {
 		return v;
 	}
 
-	public static String getDateTime(long epoch) {
+	public static String getDateTimeFromEpoch(long epoch) {
 		return new DateTime(epoch).toString(fmt);
 	}
 
@@ -63,7 +63,7 @@ public class TimeUtils {
 		return to - from;
 	}
 
-	public static String getDateTime(String epoch) {
+	public static String getDateTimeFromEpoch(String epoch) {
 		return new DateTime(Long.valueOf(epoch)).toString(fmt);
 	}
 
@@ -85,10 +85,8 @@ public class TimeUtils {
 
 		return result;
 	}
-
-	private static int getTimeDelta(String timeFilter) {
-
-		String timeWindowWithUnit = timeFilter.substring(LAST_TIME_WINDOW.length(), timeFilter.length());
+	
+	public static int parseInterval(String timeWindowWithUnit) {
 		String timwWindow = timeWindowWithUnit.substring(0, timeWindowWithUnit.length() - 1);
 
 		char timeUnit = timeWindowWithUnit.charAt(timeWindowWithUnit.length() - 1);
@@ -101,12 +99,21 @@ public class TimeUtils {
 		} else if (timeUnit == 'm') {
 			return delta;
 		} else {
-			throw new IllegalStateException("Uknown time unit for " + timeFilter);
+			throw new IllegalStateException("Uknown time unit for " + timeWindowWithUnit);
 		}
+	}
+
+	private static int getTimeDelta(String timeFilter) {
+		String timeWindowWithUnit = timeFilter.substring(LAST_TIME_WINDOW.length(), timeFilter.length());
+		return parseInterval(timeWindowWithUnit);
 	}
 
 	public static long getLongTime(String value) {
 		return fmt.parseDateTime(value).getMillis();
+	}
+	
+	public static DateTime getDateTime(String value) {
+		return fmt.parseDateTime(value);
 	}
 
 	public static Pair<DateTime, DateTime> getTimeFilter(String timeFilter) {

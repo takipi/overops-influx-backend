@@ -17,7 +17,6 @@ import com.takipi.common.api.util.Pair;
 import com.takipi.integrations.grafana.input.CategoryInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.GraphInput;
-import com.takipi.integrations.grafana.output.QueryResult;
 import com.takipi.integrations.grafana.output.Series;
 
 public class CategoryFunction extends GraphFunction {
@@ -89,13 +88,7 @@ public class CategoryFunction extends GraphFunction {
 			return output;
 		}
 		
-		series.sort(new Comparator<Pair<Series, Long>>() {
-
-			@Override
-			public int compare(Pair<Series, Long> o1, Pair<Series, Long> o2) {
-				return (int)(o1.getSecond().longValue() - o2.getSecond().longValue());
-			}
-		});
+		sortSeriesByVolume(series);
 		
 		List<Series> result = new ArrayList<Series>();
 		
@@ -103,16 +96,28 @@ public class CategoryFunction extends GraphFunction {
 			result.add(series.get(i).getFirst());
 		}
 		
+		sortByName(result);
+		
 		return result;
 	}
 	
+	private void sortSeriesByVolume(List<Pair<Series, Long>> series) {
+		series.sort(new Comparator<Pair<Series, Long>>() {
+
+			@Override
+			public int compare(Pair<Series, Long> o1, Pair<Series, Long> o2) {
+				return (int)(o1.getSecond().longValue() - o2.getSecond().longValue());
+			}
+		});
+	}
+	
 	@Override
-	public QueryResult process(FunctionInput functionIput) {
-		if (!(functionIput instanceof CategoryInput)) {
-			throw new IllegalArgumentException("functionIput");
+	public List<Series> process(FunctionInput functionInput) {
+		if (!(functionInput instanceof CategoryInput)) {
+			throw new IllegalArgumentException("functionInput");
 		}
 		
-		return super.process(functionIput);
+		return super.process(functionInput);
 	}
 	
 }

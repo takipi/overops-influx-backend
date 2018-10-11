@@ -4,4 +4,7 @@ import com.takipi.integrations.grafana.functions.GroupByFunction.AggregationFiel
 
 public class GroupByInput extends VolumeInput {
 	public AggregationField field;
+	public boolean addTags;
+	public int limit;
+	public String interval;
 }

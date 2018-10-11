@@ -1,6 +1,7 @@
 package com.takipi.integrations.grafana.servlet;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -9,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.gson.Gson;
-import com.takipi.integrations.grafana.functions.GrafanaFunction;
+import com.takipi.integrations.grafana.functions.FunctionParser;
 import com.takipi.integrations.grafana.output.QueryResult;
 import com.takipi.integrations.grafana.servlet.ServletUtil.Auth;
 import com.takipi.integrations.grafana.utils.GrafanaApiClient;
@@ -17,7 +18,9 @@ import com.takipi.integrations.grafana.utils.GrafanaApiClient;
 @WebServlet("/query")
 public class QueryServlet extends HttpServlet {
 	private static final long serialVersionUID = -8413366001016047591L;
-
+	
+	private static final DecimalFormat df = new DecimalFormat("#.00"); 
+	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
@@ -36,12 +39,14 @@ public class QueryServlet extends HttpServlet {
 		
 		Auth auth = ServletUtil.getAuthentication(request);
 		
+		long t1 = System.currentTimeMillis();
 		Object output = executeQuery(query, auth);
-		
 		String json = new Gson().toJson(output);
+		long t2 = System.currentTimeMillis();;	
 		
-		System.out.println(json);
-		
+		double secs = (double)(t2 - t1) / 1000;
+		System.out.println(query);
+		System.out.println(df.format(secs) + " secs: " + json + "\n");
 		response.getWriter().append(json);
 	}
 	
@@ -51,6 +56,6 @@ public class QueryServlet extends HttpServlet {
 	}
 
 	private static QueryResult executeQuery(String query, Auth auth) {
-		return GrafanaFunction.processQuery(GrafanaApiClient.getApiClient(auth), query);
+		return FunctionParser.processQuery(GrafanaApiClient.getApiClient(auth), query);
 	}
 }

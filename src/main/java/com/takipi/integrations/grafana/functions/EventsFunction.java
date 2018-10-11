@@ -13,7 +13,6 @@ import com.takipi.common.api.result.event.EventResult;
 import com.takipi.common.api.util.Pair;
 import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
-import com.takipi.integrations.grafana.output.QueryResult;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.utils.ArrayUtils;
 import com.takipi.integrations.grafana.utils.EventLinkEncoder;
@@ -116,13 +115,22 @@ public class EventsFunction extends GrafanaFunction {
 
 		return builder.toString();
 	}
+	
+	private static String formatLocation(Location location) {
+		int sepIdex = Math.max(location.class_name.lastIndexOf('.') + 1, 0);
+		String SimpleName = location.class_name.substring(sepIdex, location.class_name.length());
+		
+		return SimpleName + "." + location.method_name;
+	}
 
 	private static String formatFieldValue(Object value, Field field) {
 
+		if (value == null) {
+			return "";
+		}
+		
 		if (value instanceof Location) {
-			Location location = (Location) value;
-			int sepIdex = Math.max(location.class_name.lastIndexOf('.') + 1, 0);
-			return location.class_name.substring(sepIdex, location.class_name.length());
+			return formatLocation((Location)value);
 		}
 
 		if (value instanceof List) {
@@ -131,14 +139,8 @@ public class EventsFunction extends GrafanaFunction {
 
 		if ((field.getName().equals("first_seen")) 
 		|| (field.getName().equals("last_seen"))) {
-
-			if (value != null) {
-				return TimeUtils.prettifyTime((String) value);
-			}
-		}
-
-		if (value == null) {
-			return "";
+			
+			return TimeUtils.prettifyTime((String) value);
 		}
 
 		return value.toString();
@@ -259,7 +261,7 @@ public class EventsFunction extends GrafanaFunction {
 	}
 
 	@Override
-	public QueryResult process(FunctionInput functionInput) {
+	public  List<Series> process(FunctionInput functionInput) {
 		if (!(functionInput instanceof EventsInput)) {
 			throw new IllegalArgumentException("functionInput");
 		}
@@ -282,7 +284,7 @@ public class EventsFunction extends GrafanaFunction {
 			series.values.addAll(serviceObjects);
 		}
 
-		return createQueryResults(Collections.singletonList(series));
+		return Collections.singletonList(series);
 	}
 
 	static {

@@ -9,7 +9,6 @@ import com.takipi.common.api.ApiClient;
 import com.takipi.common.api.data.service.SummarizedService;
 import com.takipi.common.udf.util.ApiFilterUtil;
 import com.takipi.integrations.grafana.input.FunctionInput;
-import com.takipi.integrations.grafana.output.QueryResult;
 import com.takipi.integrations.grafana.output.Series;
 
 public class EnvironmentsFunction extends GrafanaFunction {
@@ -39,7 +38,7 @@ public class EnvironmentsFunction extends GrafanaFunction {
 	}
 
 	@Override
-	public QueryResult process(FunctionInput functionInput) {
+	public  List<Series> process(FunctionInput functionInput) {
 		
 		List<SummarizedService> services =  ApiFilterUtil.getEnvironments(apiClient);
 		
@@ -53,6 +52,6 @@ public class EnvironmentsFunction extends GrafanaFunction {
 			series.values.add(Arrays.asList(new Object[] {KEY_VALUE, service.name + SERVICE_SEPERATOR + service.id}));
 		}
 		
-		return createQueryResults(Collections.singletonList(series));
+		return Collections.singletonList(series);
 	}
 }

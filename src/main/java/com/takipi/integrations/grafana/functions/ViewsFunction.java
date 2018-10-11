@@ -12,7 +12,6 @@ import com.takipi.common.api.data.view.SummarizedView;
 import com.takipi.common.udf.util.ApiViewUtil;
 import com.takipi.integrations.grafana.input.EnvironmentsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
-import com.takipi.integrations.grafana.output.QueryResult;
 import com.takipi.integrations.grafana.output.Series;
 
 public class ViewsFunction extends GrafanaFunction {
@@ -42,7 +41,7 @@ public class ViewsFunction extends GrafanaFunction {
 	}
 
 	@Override
-	public QueryResult process(FunctionInput functionInput) {
+	public  List<Series> process(FunctionInput functionInput) {
 		
 		if (!(functionInput instanceof EnvironmentsInput)) {
 			throw new IllegalArgumentException("functionInput");
@@ -80,6 +79,6 @@ public class ViewsFunction extends GrafanaFunction {
 			}
 		});
 		
-		return createQueryResults(Collections.singletonList(series));
+		return Collections.singletonList(series);
 	}
 }

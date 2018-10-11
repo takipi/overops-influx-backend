@@ -45,7 +45,7 @@ public class FilterInput extends EnvironmentsInput {
 	}
 	
 	private boolean hasFilter(String value) {
-		return (value != null) && (value.length() == 0) && (!value.equals(GrafanaFunction.VAR_ALL));
+		return (value != null) && (value.length() != 0) && (!value.equals(GrafanaFunction.VAR_ALL));
 
 	}
 	
