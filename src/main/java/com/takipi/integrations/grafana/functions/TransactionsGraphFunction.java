@@ -18,6 +18,7 @@ import com.takipi.common.api.request.transaction.TransactionsGraphRequest;
 import com.takipi.common.api.result.transaction.TransactionsGraphResult;
 import com.takipi.common.api.url.UrlClient.Response;
 import com.takipi.common.api.util.Pair;
+import com.takipi.integrations.grafana.functions.GraphFunction.SeriesVolume;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput;
@@ -120,9 +121,9 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		return result;
 	}
 
-	private Pair<List<List<Object>>, Long> getAvgSerivesValues(List<TransactionGraph> graphs,
+	private SeriesVolume getAvgSerivesValues(List<TransactionGraph> graphs,
 			Collection<String> transactions) {
-
+		
 		Map<Long, Double> values = new TreeMap<Long, Double>();
 
 		for (TransactionGraph graph : graphs) {
@@ -157,10 +158,10 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			result.add(Arrays.asList(new Object[] { time, avgSum / values.size() }));
 		}
 
-		return Pair.of(result, 0L);
+		return SeriesVolume.of(result, 0L);
 	}
 
-	private Pair<List<List<Object>>, Long> getInvSerivesValues(List<TransactionGraph> graphs,
+	private SeriesVolume getInvSerivesValues(List<TransactionGraph> graphs,
 			Collection<String> transactions) {
 
 		Map<Long, Long> values = new TreeMap<Long, Long>();
@@ -201,7 +202,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			volume += value.longValue();
 		}
 
-		return Pair.of(result, Long.valueOf(volume));
+		return SeriesVolume.of(result, Long.valueOf(volume));
 	}
 
 	private GraphSeries createAggregateGraphSeries(String serviceId, List<TransactionGraph> graphs,
@@ -217,7 +218,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			tagName = volumeType.toString();
 		}
 
-		Pair<List<List<Object>>, Long> seriesValues;
+		SeriesVolume seriesValues;
 
 		if (volumeType.equals(VolumeType.avg_time)) {
 			seriesValues = getAvgSerivesValues(graphs, transactions);
@@ -228,9 +229,9 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 
 		series.name = EMPTY_NAME;
 		series.columns = Arrays.asList(new String[] { TIME_COLUMN, tagName });
-		series.values = seriesValues.getFirst();
+		series.values = seriesValues.values;
 
-		return GraphSeries.of(series, seriesValues.getSecond().longValue());
+		return GraphSeries.of(series, seriesValues.volume);
 
 	}
 
@@ -247,15 +248,14 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 
 		series.columns = Arrays.asList(new String[] { TIME_COLUMN, volumeType.toString() });
 
-		Pair<List<List<Object>>, Long> seriesData = processGraphPoints(graph, volumeType);
+		SeriesVolume seriesData = processGraphPoints(graph, volumeType);
 
-		series.values = seriesData.getFirst();
-		Long seriesVolume = seriesData.getSecond();
+		series.values = seriesData.values;
 
-		return GraphSeries.of(series, seriesVolume);
+		return GraphSeries.of(series, seriesData.volume);
 	}
 
-	private Pair<List<List<Object>>, Long> processGraphPoints(TransactionGraph graph, VolumeType volumeType) {
+	private SeriesVolume processGraphPoints(TransactionGraph graph, VolumeType volumeType) {
 
 		long volume = 0;
 		List<List<Object>> values = new ArrayList<List<Object>>(graph.points.size());
@@ -275,7 +275,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			values.add(Arrays.asList(new Object[] { Long.valueOf(gpTime.getMillis()), value }));
 		}
 
-		return Pair.of(values, Long.valueOf(volume));
+		return SeriesVolume.of(values, Long.valueOf(volume));
 	}
 
 	@Override
