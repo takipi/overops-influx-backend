@@ -118,7 +118,7 @@ public class TimeUtils {
 
 	public static Pair<DateTime, DateTime> getTimeFilter(String timeFilter) {
 		if ((timeFilter == null) || (timeFilter.isEmpty())) {
-			throw new IllegalArgumentException("time cannt be empty");
+			throw new IllegalArgumentException("time cannot be empty");
 		}
 
 		DateTime from;

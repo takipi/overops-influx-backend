@@ -13,10 +13,9 @@ import com.takipi.common.api.data.view.ViewInfo;
 import com.takipi.common.api.request.category.CategoriesRequest;
 import com.takipi.common.api.result.category.CategoriesResult;
 import com.takipi.common.api.url.UrlClient.Response;
-import com.takipi.common.api.util.Pair;
+import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.CategoryInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
-import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.output.Series;
 
 public class CategoryFunction extends GraphFunction {
@@ -44,14 +43,12 @@ public class CategoryFunction extends GraphFunction {
 	}
 	
 	@Override
-	protected Map<String, String> getViews(String serviceId, GraphInput input) {
+	protected Map<String, String> getViews(String serviceId, BaseGraphInput input) {
 		
 		CategoriesRequest request = CategoriesRequest.newBuilder().setServiceId(serviceId).build();
 		Response<CategoriesResult> response = apiClient.get(request);
 		
-		if (response.isBadResponse()) {
-			throw new IllegalStateException("Could not list categories in" + serviceId + ". Code " + response.responseCode);
-		}
+		validateResponse(response);
 		
 		if (response.data.categories == null) {
 			return Collections.emptyMap();
@@ -79,7 +76,13 @@ public class CategoryFunction extends GraphFunction {
 		return Collections.emptyMap();
 	}
 	
-	protected List<Series> processSeries(List<Pair<Series, Long>> series, GraphInput request) {
+	@Override
+	protected boolean isAsync(String[] serviceIds) {
+		return true;
+	}
+	
+	@Override
+	protected List<Series> processSeries(List<GraphSeries> series, BaseGraphInput request) {
 		
 		CategoryInput categoryInput = (CategoryInput)request;
 		List<Series> output = super.processSeries(series, request);
@@ -93,7 +96,7 @@ public class CategoryFunction extends GraphFunction {
 		List<Series> result = new ArrayList<Series>();
 		
 		for (int i = 0; i < Math.min(categoryInput.viewLimit, series.size()); i++) {
-			result.add(series.get(i).getFirst());
+			result.add(series.get(i).series);
 		}
 		
 		sortByName(result);
@@ -101,12 +104,12 @@ public class CategoryFunction extends GraphFunction {
 		return result;
 	}
 	
-	private void sortSeriesByVolume(List<Pair<Series, Long>> series) {
-		series.sort(new Comparator<Pair<Series, Long>>() {
+	private void sortSeriesByVolume(List<GraphSeries> series) {
+		series.sort(new Comparator<GraphSeries>() {
 
 			@Override
-			public int compare(Pair<Series, Long> o1, Pair<Series, Long> o2) {
-				return (int)(o1.getSecond().longValue() - o2.getSecond().longValue());
+			public int compare(GraphSeries o1, GraphSeries o2) {
+				return (int)(o1.volume - o2.volume);
 			}
 		});
 	}

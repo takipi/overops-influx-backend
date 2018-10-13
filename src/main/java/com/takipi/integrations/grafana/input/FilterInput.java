@@ -1,9 +1,9 @@
 package com.takipi.integrations.grafana.input;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.takipi.integrations.grafana.functions.GrafanaFunction;
 import com.takipi.integrations.grafana.utils.ArrayUtils;
@@ -14,15 +14,17 @@ public class FilterInput extends EnvironmentsInput {
 	public String applications;
 	public String servers;
 	public String deployments;
+	public String introducedBy;
+	public String types;
 	
-	private Collection<String> getServiceFilters(String value, String serviceId) {
+	protected Collection<String> getServiceFilters(String value, String serviceId) {
 		
 		if (GrafanaFunction.VAR_ALL.equals(value)) {
 			return Collections.emptySet();
 		}
 		
 		String[] values = ArrayUtils.safeSplitArray(value, GrafanaFunction.GRAFANA_SEPERATOR, false);
-		List<String> result = new ArrayList<String>();
+		Set<String> result = new HashSet<String>();
 		
 		for (int i= 0; i < values.length; i++) {
 			String service = values[i];
@@ -30,7 +32,7 @@ public class FilterInput extends EnvironmentsInput {
 			
 			String[] parts = clean.split(GrafanaFunction.SERVICE_SEPERATOR);
 				
-			if (parts.length > 1) {
+			if ((serviceId != null) && (parts.length > 1)) {
 				if (!serviceId.equals(parts[1])) {
 					continue;
 				}
@@ -61,6 +63,14 @@ public class FilterInput extends EnvironmentsInput {
 		return hasFilter(deployments);
 	}
 	
+	public boolean hasIntroducedBy() {
+		return hasFilter(introducedBy);
+	}
+	
+	public boolean hasTypes() {
+		return ((types != null) && (types.length() > 0));
+	}
+	
 	public Collection<String> getApplications(String serviceId) {
 		return getServiceFilters(applications, serviceId);
 	}
@@ -71,5 +81,23 @@ public class FilterInput extends EnvironmentsInput {
 	
 	public Collection<String> getServers(String serviceId) {
 		return getServiceFilters(servers, serviceId);
+	}
+	
+	public Collection<String> getIntroducedBy(String serviceId) {
+		
+		if (introducedBy == null) {
+			return Collections.emptySet();
+		}
+		
+		return getServiceFilters(introducedBy, serviceId);
+	}
+	
+	public Collection<String> getTypes() {
+		
+		if (types == null) {
+			return Collections.emptySet();
+		}
+		
+		return getServiceFilters(types, null);
 	}
 }

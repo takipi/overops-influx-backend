@@ -130,19 +130,25 @@ public class FunctionParser {
 	static {
 		factories = new HashMap<String, FunctionFactory>();
 		
-		//widget functions
+		//event functions
 		registerFunction(new EventsFunction.Factory());
 		registerFunction(new GraphFunction.Factory());
 		registerFunction(new GroupByFunction.Factory());
 		registerFunction(new VolumeFunction.Factory());
 		registerFunction(new CategoryFunction.Factory());
 		
+		//transaction functions
+		registerFunction(new TransactionsVolumeFunction.Factory());
+		registerFunction(new TransactionsGraphFunction.Factory());
+		registerFunction(new TransactionsListFunction.Factory());
+
 		//variable functions
 		registerFunction(new EnvironmentsFunction.Factory());
 		registerFunction(new ApplicationsFunction.Factory());
 		registerFunction(new ServersFunction.Factory());
 		registerFunction(new DeploymentsFunction.Factory());
 		registerFunction(new ViewsFunction.Factory());
+		registerFunction(new TransactionsFunction.Factory());
 	}
 	
 }

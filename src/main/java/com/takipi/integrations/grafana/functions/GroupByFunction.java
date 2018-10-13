@@ -15,13 +15,14 @@ import java.util.concurrent.ExecutorCompletionService;
 import org.joda.time.DateTime;
 
 import com.takipi.common.api.ApiClient;
-import com.takipi.common.api.request.volume.EventsVolumeRequest;
+import com.takipi.common.api.request.event.EventsVolumeRequest;
 import com.takipi.common.api.result.event.EventResult;
-import com.takipi.common.api.result.volume.EventsVolumeResult;
+import com.takipi.common.api.result.event.EventsVolumeResult;
 import com.takipi.common.api.url.UrlClient.Response;
 import com.takipi.common.api.util.Pair;
 import com.takipi.common.api.util.ValidationUtil.VolumeType;
 import com.takipi.common.udf.util.ApiFilterUtil;
+import com.takipi.integrations.grafana.input.BaseVolumeInput.AggregationType;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.GroupByInput;
 import com.takipi.integrations.grafana.output.Series;
@@ -51,7 +52,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 		}
 	}
 
-	protected static class EventVolume {
+	private static class EventVolume {
 		protected long sum;
 		protected long count;
 		protected Comparable<Object> compareBy;
@@ -100,8 +101,16 @@ public class GroupByFunction extends BaseVolumeFunction {
 		public AsyncResult call() throws Exception {
 
 			List<EventResult> events = getEventList(serviceId, request, timeSpan);
+			
+			Collection<String> types = request.getTypes();
+			Collection<String> introducedBy = request.getIntroducedBy(serviceId);
 
 			for (EventResult event : events) {
+				
+				if (filterEvent(types, introducedBy, event)) {
+					continue;
+				}
+				
 				processEventGroupBy(request, map, event, timeSpan.getFirst());
 			}
 
@@ -110,7 +119,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 	}
 
 	protected class FilterAsyncTask extends BaseAsyncTask {
-		protected String key;
+		protected String groupKey;
 		protected GroupByInput request;
 		protected String serviceId;
 		protected String viewId;
@@ -124,7 +133,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 				Collection<String> servers, Collection<String> deployments) {
 
 			super(map);
-			this.key = key;
+			this.groupKey = key;
 			this.request = request;
 			this.serviceId = serviceId;
 			this.viewId = viewId;
@@ -136,7 +145,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 		@Override
 		public AsyncResult call() throws Exception {
-			executeVolumeRequest(map, key, request, serviceId, viewId, timeSpan, applications, servers, deployments);
+			executeVolumeRequest(map, groupKey, request, serviceId, viewId, timeSpan, applications, servers, deployments);
 			return null;
 		}
 	}
@@ -180,8 +189,8 @@ public class GroupByFunction extends BaseVolumeFunction {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static void processEventGroupBy(GroupByInput request, Map<String, EventVolume> map, EventResult event,
-			String time) {
+	private static void processEventGroupBy(GroupByInput request, Map<String, EventVolume> map, 
+		EventResult event, String time) {
 
 		long value;
 
@@ -238,13 +247,14 @@ public class GroupByFunction extends BaseVolumeFunction {
 	private List<BaseAsyncTask> processApplicationsGroupBy(Map<String, EventVolume> map, GroupByInput request,
 			String serviceId, Pair<String, String> timeSpan) {
 
-		List<BaseAsyncTask> result = new ArrayList<BaseAsyncTask>();
-
 		String viewId = getViewId(serviceId, request.view);
 
 		if (viewId == null) {
-			return result;
+			return Collections.emptyList();
 		}
+		
+		List<BaseAsyncTask> result = new ArrayList<BaseAsyncTask>();
+
 
 		Collection<String> applications;
 
@@ -268,13 +278,13 @@ public class GroupByFunction extends BaseVolumeFunction {
 	private List<BaseAsyncTask> processServersGroupBy(Map<String, EventVolume> map, GroupByInput request,
 			String serviceId, Pair<String, String> timeSpan) {
 
-		List<BaseAsyncTask> result = new ArrayList<BaseAsyncTask>();
-
 		String viewId = getViewId(serviceId, request.view);
 
 		if (viewId == null) {
-			return result;
+			return Collections.emptyList();
 		}
+		
+		List<BaseAsyncTask> result = new ArrayList<BaseAsyncTask>();
 
 		Collection<String> servers;
 
@@ -316,24 +326,26 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 		Response<EventsVolumeResult> response = apiClient.get(builder.build());
 
-		if ((response.isBadResponse()) || (response.data == null)) {
+		if (response.isBadResponse()) {
 			throw new IllegalStateException("Could not acquire volume for app / srv/ dep " + applications + "/"
 					+ servers + "/" + deployments + " in service " + serviceId + " . Error " + response.responseCode);
 		}
 
-		updateMap(map, key, timeSpan.getFirst(), response.data.events, request.volumeType);
+		if (response.data != null) {
+			updateMap(map, serviceId, key, timeSpan.getFirst(), response.data.events, request);
+		}
 	}
 
 	private List<BaseAsyncTask> processDeploymentsGroupBy(Map<String, EventVolume> map, GroupByInput request,
 			String serviceId, Pair<String, String> timeSpan) {
 
-		List<BaseAsyncTask> result = new ArrayList<BaseAsyncTask>();
-
 		String viewId = getViewId(serviceId, request.view);
 
 		if (viewId == null) {
-			return result;
+			return Collections.emptyList();
 		}
+		
+		List<BaseAsyncTask> result = new ArrayList<BaseAsyncTask>();
 
 		Collection<String> deployments;
 
@@ -348,22 +360,30 @@ public class GroupByFunction extends BaseVolumeFunction {
 			result.add(new FilterAsyncTask(map, deployment, request, serviceId, viewId, timeSpan,
 					request.getApplications(serviceId), request.getServers(serviceId),
 					Collections.singleton(deployment)));
-
 		}
 
 		return result;
 	}
 
-	private void updateMap(Map<String, EventVolume> map, String key, String time, List<EventResult> events,
-			VolumeType volumeType) {
+	private void updateMap(Map<String, EventVolume> map, String serviceId, String key, String time, List<EventResult> events,
+			GroupByInput input) {
+		
 		if (events == null) {
 			return;
 		}
 
+		Collection<String> types = input.getTypes();
+		Collection<String> introducedBy = input.getIntroducedBy(serviceId);
+
 		for (EventResult event : events) {
+			
+			if (filterEvent(types, introducedBy, event)) {
+				continue;
+			}
+		
 			long value;
 
-			if (volumeType.equals(VolumeType.invocations)) {
+			if (input.volumeType.equals(VolumeType.invocations)) {
 				value = event.stats.invocations;
 			} else {
 				value = event.stats.hits;
@@ -375,6 +395,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 	private void updateGroupResutMap(Map<String, GroupResult> map, String serviceId, String groupByKey,
 			EventVolume eventVolume) {
+		
 		GroupResult groupResult = map.get(groupByKey);
 
 		if (groupResult == null) {

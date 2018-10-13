@@ -3,6 +3,7 @@ package com.takipi.integrations.grafana.functions;
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -60,10 +61,18 @@ public class EventsFunction extends GrafanaFunction {
 		if (events == null) {
 			return Collections.emptyList();
 		}
-
+		
+		Collection<String> introducedBy = request.getIntroducedBy(serviceId);
+		Collection<String> types = request.getTypes();
+		
 		List<List<Object>> result = new ArrayList<List<Object>>(events.size());
 
 		for (EventResult event : events) {
+			
+			if (filterEvent(types, introducedBy, event)) {
+				continue;
+			}	
+			
 			List<Object> outputObject = processEvent(serviceId, request, event, fields, timeSpan);
 			result.add(outputObject);
 		}
@@ -116,13 +125,6 @@ public class EventsFunction extends GrafanaFunction {
 		return builder.toString();
 	}
 	
-	private static String formatLocation(Location location) {
-		int sepIdex = Math.max(location.class_name.lastIndexOf('.') + 1, 0);
-		String SimpleName = location.class_name.substring(sepIdex, location.class_name.length());
-		
-		return SimpleName + "." + location.method_name;
-	}
-
 	private static String formatFieldValue(Object value, Field field) {
 
 		if (value == null) {
@@ -280,8 +282,8 @@ public class EventsFunction extends GrafanaFunction {
 		String[] services = getServiceIds(request);
 
 		for (String serviceId : services) {
-			List<List<Object>> serviceObjects = processServiceEvents(serviceId, request, timeSpan, fields);
-			series.values.addAll(serviceObjects);
+			List<List<Object>> serviceEvents = processServiceEvents(serviceId, request, timeSpan, fields);
+			series.values.addAll(serviceEvents);
 		}
 
 		return Collections.singletonList(series);

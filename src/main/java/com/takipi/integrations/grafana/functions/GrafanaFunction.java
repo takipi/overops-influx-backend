@@ -1,5 +1,6 @@
 package com.takipi.integrations.grafana.functions;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -7,12 +8,13 @@ import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
 import com.takipi.common.api.ApiClient;
+import com.takipi.common.api.data.event.Location;
 import com.takipi.common.api.data.service.SummarizedService;
 import com.takipi.common.api.data.view.SummarizedView;
 import com.takipi.common.api.request.TimeframeRequest;
-import com.takipi.common.api.request.volume.EventsVolumeRequest;
+import com.takipi.common.api.request.event.EventsVolumeRequest;
 import com.takipi.common.api.result.event.EventResult;
-import com.takipi.common.api.result.volume.EventsVolumeResult;
+import com.takipi.common.api.result.event.EventsVolumeResult;
 import com.takipi.common.api.url.UrlClient.Response;
 import com.takipi.common.api.util.Pair;
 import com.takipi.common.api.util.ValidationUtil.VolumeType;
@@ -52,7 +54,24 @@ public abstract class GrafanaFunction {
 	public GrafanaFunction(ApiClient apiClient) {
 		this.apiClient = apiClient;
 	}
+	
+	protected static String getSimpleClassName(String className) {
+		String qualified = className.replace('/', '.'); 
+		int sepIdex = Math.max(qualified.lastIndexOf('.') + 1, 0);
+		String result = qualified.substring(sepIdex, qualified.length());
+		return result;
+	}
+	
+	protected void validateResponse(Response<?> response){
+		if ((response.isBadResponse()) || (response.data == null)) {
+			throw new IllegalStateException("EventsResult code " + response.responseCode);
+		}
 
+	}
+	protected static String formatLocation(Location location) {
+		return getSimpleClassName(location.class_name) + "." + location.method_name;
+	}
+	
 	protected String[] getServiceIds (EnvironmentsInput input) {
 		String[] serviceIds = input.getServiceIds();
 		
@@ -71,6 +90,20 @@ public abstract class GrafanaFunction {
 		return result;
 	}
 	
+	protected boolean filterEvent(Collection<String> types, Collection<String> introducedBy, 
+		EventResult eventResult) {
+		
+		if ((types != null) && (!types.isEmpty()) && (!types.contains(eventResult.name))) {
+			return true;
+		}
+		
+		if ((introducedBy != null) && (!introducedBy.isEmpty()) && (!introducedBy.contains(eventResult.introduced_by))) {
+			return true;
+		}
+		
+		return false;
+	}
+	
 	protected List<EventResult> getEventList(String serviceId, ViewInput request,
 			Pair<String, String> timeSpan) {
 
@@ -85,20 +118,19 @@ public abstract class GrafanaFunction {
 
 		applyFilters(request, serviceId, builder);
 
-		Response<EventsVolumeResult> eventsResult = apiClient.get(builder.build());
+		Response<EventsVolumeResult> response = apiClient.get(builder.build());
 
-		if (eventsResult.isBadResponse()) {
-			throw new IllegalStateException("EventsResult code " + eventsResult.responseCode);
-		}
+		validateResponse(response);
 		
-		if (eventsResult.data == null) {
+		if (response.data == null) {
 			return Collections.emptyList();
 		}
 		
-		return eventsResult.data.events;
+		return response.data.events;
 	}
 
 	public static void applyFilters(FilterInput request, String serviceId, TimeframeRequest.Builder builder) {
+		
 		for (String app : request.getApplications(serviceId)) {
 			builder.addApp(app);
 		}

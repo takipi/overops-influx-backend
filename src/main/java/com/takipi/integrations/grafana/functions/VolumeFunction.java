@@ -1,18 +1,18 @@
 package com.takipi.integrations.grafana.functions;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 
 import com.takipi.common.api.ApiClient;
 import com.takipi.common.api.request.ViewTimeframeRequest;
 import com.takipi.common.api.request.event.EventsRequest;
-import com.takipi.common.api.request.volume.EventsVolumeRequest;
+import com.takipi.common.api.request.event.EventsVolumeRequest;
 import com.takipi.common.api.result.event.EventResult;
 import com.takipi.common.api.result.event.EventsResult;
-import com.takipi.common.api.result.volume.EventsVolumeResult;
+import com.takipi.common.api.result.event.EventsVolumeResult;
 import com.takipi.common.api.url.UrlClient.Response;
 import com.takipi.common.api.util.Pair;
+import com.takipi.integrations.grafana.input.BaseVolumeInput.AggregationType;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.VolumeInput;
 import com.takipi.integrations.grafana.output.Series;
@@ -38,11 +38,6 @@ public class VolumeFunction extends BaseVolumeFunction {
 		}
 	}
 	
-	private static class EventVolume {
-		protected long sum;
-		protected long count;
-	}
-
 	public VolumeFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
@@ -55,13 +50,6 @@ public class VolumeFunction extends BaseVolumeFunction {
 		applyFilters(request, serviceId, builder);
 	}
 	
-	private void validateResponse(Response<?> response){
-		if ((response.isBadResponse()) || (response.data == null)) {
-			throw new IllegalStateException("EventsResult code " + response.responseCode);
-		}
-
-	}
-
 	private EventVolume processServiceVolume(String serviceId, VolumeInput request, Pair<String, String> timeSpan) {
 
 		EventVolume result = new EventVolume();
@@ -91,8 +79,15 @@ public class VolumeFunction extends BaseVolumeFunction {
 		if (events == null) {
 			return result;
 		}
+		
+		Collection<String> types = request.getTypes();
+		Collection<String> introducedBy = request.getIntroducedBy(serviceId);
 
 		for (EventResult event : events) {
+			
+			if (filterEvent(types, introducedBy, event)) {
+				continue;
+			}
 
 			if (event.stats != null) {
 				switch (request.volumeType) {
@@ -114,21 +109,22 @@ public class VolumeFunction extends BaseVolumeFunction {
 
 	@Override
 	public  List<Series> process(FunctionInput functionInput) {
+		
+		super.process(functionInput);
+		
 		if (!(functionInput instanceof VolumeInput)) {
 			throw new IllegalArgumentException("functionInput");
 		}
 
 		VolumeInput request = (VolumeInput) functionInput;
 		
-		if ((request.type == null)) {
-			throw new IllegalArgumentException("type");
+		if ((request.volumeType == null)) {
+			throw new IllegalArgumentException("VolumeType");
 		}
 
 		Pair<String, String> timeSpan = TimeUtils.parseTimeFilter(request.timeFilter);
 
 		String[] services = getServiceIds(request);
-
-		Long time = Long.valueOf(TimeUtils.getLongTime(timeSpan.getSecond()));
 
 		EventVolume volume = new EventVolume();
 
@@ -139,32 +135,6 @@ public class VolumeFunction extends BaseVolumeFunction {
 			volume.count = volume.count + serviceVolume.count;
 		}
 
-		Series series = new Series();
-
-		series.name = SERIES_NAME;
-		series.columns = Arrays.asList(new String[] { TIME_COLUMN, SUM_COLUMN });
-
-		Object value;
-
-		switch (request.type) {
-		case sum:
-			value = Long.valueOf(volume.sum);
-			break;
-
-		case avg:
-			value = Double.valueOf((double) volume.sum / (double) volume.count);
-			break;
-
-		case count:
-			value = Long.valueOf(volume.count);
-			break;
-
-		default:
-			throw new IllegalStateException(String.valueOf(request.type));
-		}
-
-		series.values = Collections.singletonList(Arrays.asList(new Object[] { time, value }));
-
-		return Collections.singletonList(series);
+		return createSeries(request, timeSpan, volume);
 	}
 }

@@ -46,9 +46,9 @@ public class QueryServlet extends HttpServlet {
 		
 		double secs = (double)(t2 - t1) / 1000;
 		System.out.println(query);
-		System.out.println(df.format(secs) + " secs: " + json + "\n");
+		System.out.println(df.format(secs) + " secs: " + json.substring(0, Math.min(1000, json.length())) + "\n");
 		response.getWriter().append(json);
-	}
+	} 
 	
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
