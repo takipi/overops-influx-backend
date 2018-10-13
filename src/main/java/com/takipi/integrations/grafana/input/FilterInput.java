@@ -10,12 +10,14 @@ import com.takipi.integrations.grafana.utils.ArrayUtils;
 
 public class FilterInput extends EnvironmentsInput {
 	
+	
 	public String timeFilter;
 	public String applications;
 	public String servers;
 	public String deployments;
 	public String introducedBy;
 	public String types;
+	public String transactions;
 	
 	protected Collection<String> getServiceFilters(String value, String serviceId) {
 		
@@ -100,4 +102,18 @@ public class FilterInput extends EnvironmentsInput {
 		
 		return getServiceFilters(types, null);
 	}
+	
+	public Collection<String> getTransactions(String serviceId) {
+		
+		if ((transactions == null) || (transactions.length() == 0)){
+			return null;
+		}
+	
+		return getServiceFilters(transactions, serviceId);
+	}
+	
+	public EventFilter getEventFilter(String serviceId) {
+		return EventFilter.of(getTypes(), getIntroducedBy(serviceId), getTransactions(serviceId));
+	}
+	
 }

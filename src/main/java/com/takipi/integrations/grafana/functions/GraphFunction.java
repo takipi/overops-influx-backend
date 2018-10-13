@@ -2,7 +2,6 @@ package com.takipi.integrations.grafana.functions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -108,9 +107,8 @@ public class GraphFunction extends BaseGraphFunction {
 		List<List<Object>> values = new ArrayList<List<Object>>(graph.points.size());
 
 		
-		Collection<String> types = request.getTypes();
-		Collection<String> introducedBy = request.getIntroducedBy(serviceId);
-		
+		EventFilter eventFilter = request.getEventFilter(serviceId);
+
 		Map<String, EventResult> eventMap;
 
 		if (request.hasIntroducedBy()) {
@@ -134,7 +132,7 @@ public class GraphFunction extends BaseGraphFunction {
 					EventResult event = eventMap.get(gpc.id);
 
 					//if the event wasn't found we err on the side of adding its stats.
-					if ((event != null) && (filterEvent(types, introducedBy, event))) {
+					if ((event != null) && (eventFilter.filter(event))) {
 						continue;
 					}
 				}

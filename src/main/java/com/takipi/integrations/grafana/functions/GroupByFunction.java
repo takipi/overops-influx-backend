@@ -102,12 +102,11 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 			List<EventResult> events = getEventList(serviceId, request, timeSpan);
 			
-			Collection<String> types = request.getTypes();
-			Collection<String> introducedBy = request.getIntroducedBy(serviceId);
+			EventFilter eventFilter = request.getEventFilter(serviceId);
 
 			for (EventResult event : events) {
 				
-				if (filterEvent(types, introducedBy, event)) {
+				if (eventFilter.filter(event)) {
 					continue;
 				}
 				
@@ -372,12 +371,11 @@ public class GroupByFunction extends BaseVolumeFunction {
 			return;
 		}
 
-		Collection<String> types = input.getTypes();
-		Collection<String> introducedBy = input.getIntroducedBy(serviceId);
+		EventFilter eventFilter = input.getEventFilter(serviceId);
 
 		for (EventResult event : events) {
 			
-			if (filterEvent(types, introducedBy, event)) {
+			if (eventFilter.filter(event)) {
 				continue;
 			}
 		

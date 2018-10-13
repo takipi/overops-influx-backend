@@ -3,7 +3,6 @@ package com.takipi.integrations.grafana.functions;
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -62,14 +61,13 @@ public class EventsFunction extends GrafanaFunction {
 			return Collections.emptyList();
 		}
 		
-		Collection<String> introducedBy = request.getIntroducedBy(serviceId);
-		Collection<String> types = request.getTypes();
-		
+		EventFilter eventFilter = request.getEventFilter(serviceId);
+	
 		List<List<Object>> result = new ArrayList<List<Object>>(events.size());
 
 		for (EventResult event : events) {
 			
-			if (filterEvent(types, introducedBy, event)) {
+			if (eventFilter.filter(event)) {
 				continue;
 			}	
 			

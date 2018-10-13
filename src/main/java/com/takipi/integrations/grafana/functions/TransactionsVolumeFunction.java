@@ -1,5 +1,6 @@
 package com.takipi.integrations.grafana.functions;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.takipi.common.api.ApiClient;
@@ -56,10 +57,24 @@ public class TransactionsVolumeFunction extends BaseVolumeFunction {
 		if ((response.data == null) || (response.data.transactions == null)) {
 			return null;
 		}
+		
+		Collection<String> transactions;
+
+		if (input.transactions != null) {
+			transactions = input.getTransactions(serviceId);
+		} else {
+			transactions = null;
+		}
 
 		EventVolume result = new EventVolume();
 		
 		for (Transaction transaction : response.data.transactions) {
+			
+			String entryPoint = getSimpleClassName(transaction.name);
+
+			if ((transactions != null) && (!transactions.contains(entryPoint))) {
+				continue;
+			}
 			
 			switch (input.volumeType) {
 			case invocations:

@@ -78,7 +78,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		Collection<String> transactions;
 
 		if (input.transactions != null) {
-			transactions = input.getTransactions();
+			transactions = input.getTransactions(serviceId);
 		} else {
 			transactions = null;
 		}

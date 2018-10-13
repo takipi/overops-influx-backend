@@ -2,7 +2,6 @@ package com.takipi.integrations.grafana.functions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -134,16 +133,11 @@ public class TransactionsListFunction extends GrafanaFunction {
 			return null;
 		}
 
-		Collection<String> introducedBy = input.getIntroducedBy(serviceId);
-		Collection<String> types = input.getTypes();
-
 		Map<String, TransactionData> result = new TreeMap<String, TransactionData>();
 
-		for (EventResult event : response.data.events) {
+		EventFilter eventFilter = input.getEventFilter(serviceId);
 
-			if (filterEvent(types, introducedBy, event)) {
-				continue;
-			}
+		for (EventResult event : response.data.events) {
 
 			TransactionData transaction = result.get(event.entry_point.class_name);
 
@@ -151,6 +145,10 @@ public class TransactionsListFunction extends GrafanaFunction {
 				transaction = new TransactionData();
 				transaction.entryPoint = event.entry_point;
 				result.put(event.entry_point.class_name, transaction);
+			}
+			
+			if (eventFilter.filter(event)) {
+				continue;
 			}
 
 			if (event.type.equals("Timer")) {

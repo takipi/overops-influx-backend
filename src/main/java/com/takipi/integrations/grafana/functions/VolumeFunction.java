@@ -1,6 +1,5 @@
 package com.takipi.integrations.grafana.functions;
 
-import java.util.Collection;
 import java.util.List;
 
 import com.takipi.common.api.ApiClient;
@@ -80,12 +79,11 @@ public class VolumeFunction extends BaseVolumeFunction {
 			return result;
 		}
 		
-		Collection<String> types = request.getTypes();
-		Collection<String> introducedBy = request.getIntroducedBy(serviceId);
-
+		EventFilter eventFilter = request.getEventFilter(serviceId);
+		
 		for (EventResult event : events) {
 			
-			if (filterEvent(types, introducedBy, event)) {
+			if (eventFilter.filter(event)) {
 				continue;
 			}
 

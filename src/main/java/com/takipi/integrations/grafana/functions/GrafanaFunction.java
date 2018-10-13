@@ -1,6 +1,5 @@
 package com.takipi.integrations.grafana.functions;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -55,7 +54,7 @@ public abstract class GrafanaFunction {
 		this.apiClient = apiClient;
 	}
 	
-	protected static String getSimpleClassName(String className) {
+	public static String getSimpleClassName(String className) {
 		String qualified = className.replace('/', '.'); 
 		int sepIdex = Math.max(qualified.lastIndexOf('.') + 1, 0);
 		String result = qualified.substring(sepIdex, qualified.length());
@@ -89,21 +88,7 @@ public abstract class GrafanaFunction {
 		
 		return result;
 	}
-	
-	protected boolean filterEvent(Collection<String> types, Collection<String> introducedBy, 
-		EventResult eventResult) {
 		
-		if ((types != null) && (!types.isEmpty()) && (!types.contains(eventResult.name))) {
-			return true;
-		}
-		
-		if ((introducedBy != null) && (!introducedBy.isEmpty()) && (!introducedBy.contains(eventResult.introduced_by))) {
-			return true;
-		}
-		
-		return false;
-	}
-	
 	protected List<EventResult> getEventList(String serviceId, ViewInput request,
 			Pair<String, String> timeSpan) {
 
