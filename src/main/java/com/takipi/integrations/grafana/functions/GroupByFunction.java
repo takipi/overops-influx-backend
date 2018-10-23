@@ -67,27 +67,27 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 		public static GroupByKey of(String key, DateTime time) {
 			GroupByKey result = new GroupByKey();
-			result. key =  key;
+			result.key = key;
 			result.time = time;
 
 			return result;
 		}
-		
+
 		@Override
 		public boolean equals(Object obj) {
-			GroupByKey other = (GroupByKey)obj;
-			
+			GroupByKey other = (GroupByKey) obj;
+
 			if (!key.equals(other.key)) {
 				return false;
 			}
-			
+
 			if (!time.equals(other.time)) {
 				return false;
 			}
-			
+
 			return true;
 		}
-		
+
 		@Override
 		public int hashCode() {
 			return key.hashCode();
@@ -115,6 +115,53 @@ public class GroupByFunction extends BaseVolumeFunction {
 		protected Object count;
 	}
 
+	private static class SeriesResult {
+		private Series series;
+		private Comparable<Object> maxValue;
+
+		public static SeriesResult of(Series series, Comparable<Object> maxValue) {
+			SeriesResult result = new SeriesResult();
+			result.series = series;
+			result.maxValue = maxValue;
+			return result;
+		}
+	}
+
+	protected static class GroupResult {
+		private List<GroupByVolume> volumes;
+		private String serviceId;
+		private Comparable<Object> compareBy;
+
+		public GroupResult(String serviceId) {
+			this.serviceId = serviceId;
+			this.volumes = new ArrayList<GroupByVolume>();
+		}
+
+		public void addVolume(GroupByVolume volume) {
+			volumes.add(volume);
+		}
+
+		public Collection<GroupByVolume> getVolumes() {
+			return volumes;
+		}
+
+		public void updateCompareBy(Comparable<Object> compareBy) {
+			if (this.compareBy == null) {
+				this.compareBy = compareBy;
+			} else if (this.compareBy.compareTo(compareBy) < 0) {
+				this.compareBy = compareBy;
+			}
+		}
+
+		public Comparable<Object> getCompareBy() {
+			return compareBy;
+		}
+
+		public String getServiceId() {
+			return serviceId;
+		}
+	}
+
 	protected class BaseAsyncTask implements Callable<AsyncResult> {
 		public Map<GroupByKey, GroupByVolume> map;
 
@@ -138,8 +185,8 @@ public class GroupByFunction extends BaseVolumeFunction {
 		protected Pair<DateTime, DateTime> timeSpan;
 		protected String viewId;
 
-		protected EventAsyncTask(Map<GroupByKey, GroupByVolume> map, String serviceId, GroupByInput input, String viewId,
-				Pair<DateTime, DateTime> timeSpan) {
+		protected EventAsyncTask(Map<GroupByKey, GroupByVolume> map, String serviceId, GroupByInput input,
+				String viewId, Pair<DateTime, DateTime> timeSpan) {
 			super(map);
 			this.serviceId = serviceId;
 			this.input = input;
@@ -172,11 +219,10 @@ public class GroupByFunction extends BaseVolumeFunction {
 					}
 
 					int index = TimeUtils.getStartDateTimeIndex(intervals, gp.time);
-					
+
 					if (index == -1) {
 						continue;
 					}
-					
 
 					Pair<DateTime, DateTime> interval = intervals.get(index);
 
@@ -287,7 +333,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 		}
 
 		synchronized (map) {
-			
+
 			GroupByKey groupByKey = GroupByKey.of(key, time);
 			GroupByVolume groupByVolume = map.get(groupByKey);
 
@@ -361,8 +407,8 @@ public class GroupByFunction extends BaseVolumeFunction {
 		}
 	}
 
-	private List<BaseAsyncTask> processEventsGroupBy(Map<GroupByKey, GroupByVolume> map, GroupByInput input, String serviceId,
-			String viewId, Pair<DateTime, DateTime> timeSpan) {
+	private List<BaseAsyncTask> processEventsGroupBy(Map<GroupByKey, GroupByVolume> map, GroupByInput input,
+			String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan) {
 
 		return Collections.singletonList(new EventAsyncTask(map, serviceId, input, viewId, timeSpan));
 	}
@@ -412,9 +458,10 @@ public class GroupByFunction extends BaseVolumeFunction {
 		return result;
 	}
 
-	private void executeFilteredGraph(Map<GroupByKey, GroupByVolume> map, String key, GroupByInput input, String serviceId,
-			String viewId, Pair<DateTime, DateTime> timespan, List<Pair<DateTime, DateTime>> intervals,
-			Collection<String> applications, Collection<String> servers, Collection<String> deployments) {
+	private void executeFilteredGraph(Map<GroupByKey, GroupByVolume> map, String key, GroupByInput input,
+			String serviceId, String viewId, Pair<DateTime, DateTime> timespan,
+			List<Pair<DateTime, DateTime>> intervals, Collection<String> applications, Collection<String> servers,
+			Collection<String> deployments) {
 
 		Pair<String, String> span = TimeUtils.toTimespan(timespan);
 
@@ -473,20 +520,20 @@ public class GroupByFunction extends BaseVolumeFunction {
 				}
 
 				int index = TimeUtils.getStartDateTimeIndex(intervals, gp.time);
-				
+
 				if (index == -1) {
 					continue;
 				}
 
 				Pair<DateTime, DateTime> interval = intervals.get(index);
-				
+
 				processEventGroupBy(input, map, event, gpc.stats, interval.getFirst());
 			}
 		}
 	}
 
-	private void executeFilteredVolume(Map<GroupByKey, GroupByVolume> map, String key, GroupByInput input, String serviceId,
-			String viewId, Pair<DateTime, DateTime> timespan, Collection<String> applications,
+	private void executeFilteredVolume(Map<GroupByKey, GroupByVolume> map, String key, GroupByInput input,
+			String serviceId, String viewId, Pair<DateTime, DateTime> timespan, Collection<String> applications,
 			Collection<String> servers, Collection<String> deployments) {
 
 		Pair<String, String> span = TimeUtils.toTimespan(timespan);
@@ -655,53 +702,6 @@ public class GroupByFunction extends BaseVolumeFunction {
 		}
 	}
 
-	private static class SeriesResult {
-		private Series series;
-		private Comparable<Object> maxValue;
-
-		public static SeriesResult of(Series series, Comparable<Object> maxValue) {
-			SeriesResult result = new SeriesResult();
-			result.series = series;
-			result.maxValue = maxValue;
-			return result;
-		}
-	}
-
-	protected static class GroupResult {
-		private List<GroupByVolume> volumes;
-		private String serviceId;
-		private Comparable<Object> compareBy;
-
-		public GroupResult(String serviceId) {
-			this.serviceId = serviceId;
-			this.volumes = new ArrayList<GroupByVolume>();
-		}
-
-		public void addVolume(GroupByVolume volume) {
-			volumes.add(volume);
-		}
-
-		public Collection<GroupByVolume> getVolumes() {
-			return volumes;
-		}
-
-		public void updateCompareBy(Comparable<Object> compareBy) {
-			if (this.compareBy == null) {
-				this.compareBy = compareBy;
-			} else if (this.compareBy.compareTo(compareBy) < 0) {
-				this.compareBy = compareBy;
-			}
-		}
-
-		public Comparable<Object> getCompareBy() {
-			return compareBy;
-		}
-
-		public String getServiceId() {
-			return serviceId;
-		}
-	}
-
 	private List<Pair<DateTime, DateTime>> getTimeSpans(GroupByInput input) {
 
 		Pair<DateTime, DateTime> timeSpan = TimeUtils.getTimeFilter(input.timeFilter);
@@ -794,7 +794,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 					return o1.time.compareTo(o2.time);
 				}
 			});
-			
+
 			for (GroupByVolume eventVolume : groupResult.volumes) {
 				GroupByValue value = getGroupByValue(input, eventVolume);
 				Long time = Long.valueOf(eventVolume.time.getMillis());
