@@ -82,12 +82,12 @@ public class CategoryFunction extends GraphFunction {
 	}
 	
 	@Override
-	protected List<Series> processSeries(List<GraphSeries> series, BaseGraphInput request) {
+	protected List<Series> processSeries(List<GraphSeries> series, BaseGraphInput input) {
 		
-		CategoryInput categoryInput = (CategoryInput)request;
-		List<Series> output = super.processSeries(series, request);
+		CategoryInput categoryInput = (CategoryInput)input;
+		List<Series> output = super.processSeries(series, input);
 		
-		if (categoryInput.viewLimit == 0) {
+		if (categoryInput.limit == 0) {
 			return output;
 		}
 		
@@ -95,8 +95,13 @@ public class CategoryFunction extends GraphFunction {
 		
 		List<Series> result = new ArrayList<Series>();
 		
-		for (int i = 0; i < Math.min(categoryInput.viewLimit, series.size()); i++) {
-			result.add(series.get(i).series);
+		for (int i = 0; i < Math.min(categoryInput.limit, series.size()); i++) {
+			
+			GraphSeries graphSeries = series.get(i);
+			
+			if (graphSeries.volume > 0) {
+				result.add(graphSeries.series);
+			}
 		}
 		
 		sortByName(result);
@@ -109,7 +114,7 @@ public class CategoryFunction extends GraphFunction {
 
 			@Override
 			public int compare(GraphSeries o1, GraphSeries o2) {
-				return (int)(o1.volume - o2.volume);
+				return (int)(o2.volume - o1.volume);
 			}
 		});
 	}

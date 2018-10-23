@@ -90,7 +90,7 @@ public class FunctionParser {
 			return createQueryResults(processSingleQuery(apiClient, singleQueries[0]));
 		}
 				
-		CompletionService<FunctionResult> completionService = new ExecutorCompletionService<FunctionResult>(GrafanaFunction.executor);
+		CompletionService<FunctionResult> completionService = new ExecutorCompletionService<FunctionResult>(GrafanaThreadPool.executor);
 
 		for (String singleQuery : singleQueries) {	
 			completionService.submit(new FunctionAsyncTask(apiClient, singleQuery));			
@@ -141,6 +141,7 @@ public class FunctionParser {
 		registerFunction(new TransactionsVolumeFunction.Factory());
 		registerFunction(new TransactionsGraphFunction.Factory());
 		registerFunction(new TransactionsListFunction.Factory());
+		registerFunction(new TransactionsRateFunction.Factory());
 
 		//variable functions
 		registerFunction(new EnvironmentsFunction.Factory());
@@ -149,6 +150,7 @@ public class FunctionParser {
 		registerFunction(new DeploymentsFunction.Factory());
 		registerFunction(new ViewsFunction.Factory());
 		registerFunction(new TransactionsFunction.Factory());
+		registerFunction(new LabelsFunction.Factory());
 	}
 	
 }

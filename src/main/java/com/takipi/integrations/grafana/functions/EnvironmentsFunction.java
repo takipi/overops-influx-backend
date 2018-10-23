@@ -1,19 +1,14 @@
 package com.takipi.integrations.grafana.functions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import com.takipi.common.api.ApiClient;
 import com.takipi.common.api.data.service.SummarizedService;
 import com.takipi.common.udf.util.ApiFilterUtil;
 import com.takipi.integrations.grafana.input.FunctionInput;
-import com.takipi.integrations.grafana.output.Series;
+import com.takipi.integrations.grafana.input.VariableInput;
 
-public class EnvironmentsFunction extends GrafanaFunction {
-	
-	private static final String KEY_VALUE = "environment";
+public class EnvironmentsFunction extends VariableFunction {
 	
 	public static class Factory implements FunctionFactory {
 
@@ -24,9 +19,9 @@ public class EnvironmentsFunction extends GrafanaFunction {
 
 		@Override
 		public Class<?> getInputClass() {
-			return FunctionInput.class;
+			return VariableInput.class;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "environments";
@@ -38,20 +33,12 @@ public class EnvironmentsFunction extends GrafanaFunction {
 	}
 
 	@Override
-	public  List<Series> process(FunctionInput functionInput) {
-		
-		List<SummarizedService> services =  ApiFilterUtil.getEnvironments(apiClient);
-		
-		Series series = new Series();
+	protected void populateValues(FunctionInput input, VariableAppender appender) {
 
-		series.name = SERIES_NAME;
-		series.columns = Arrays.asList(new String[] { KEY_COLUMN, VALUE_COLUMN });
-		series.values = new ArrayList<List<Object>>(services.size());
-		
+		List<SummarizedService> services = ApiFilterUtil.getEnvironments(apiClient);
+
 		for (SummarizedService service : services) {
-			series.values.add(Arrays.asList(new Object[] {KEY_VALUE, service.name + SERVICE_SEPERATOR + service.id}));
+			appender.append(getServiceValue(service.name, service.id));
 		}
-		
-		return Collections.singletonList(series);
 	}
 }

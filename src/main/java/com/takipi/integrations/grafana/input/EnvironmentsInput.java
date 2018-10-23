@@ -3,7 +3,7 @@ package com.takipi.integrations.grafana.input;
 import com.takipi.integrations.grafana.functions.GrafanaFunction;
 import com.takipi.integrations.grafana.utils.ArrayUtils;
 
-public class EnvironmentsInput extends FunctionInput {
+public class EnvironmentsInput extends VariableInput {
 	
 	public String environments;
 

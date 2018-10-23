@@ -2,20 +2,15 @@ package com.takipi.integrations.grafana.functions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import com.takipi.common.api.ApiClient;
-import com.takipi.common.api.data.event.Location;
 import com.takipi.common.api.data.transaction.Transaction;
-import com.takipi.common.api.request.event.EventsVolumeRequest;
-import com.takipi.common.api.request.transaction.TransactionsVolumeRequest;
 import com.takipi.common.api.result.event.EventResult;
-import com.takipi.common.api.result.event.EventsVolumeResult;
-import com.takipi.common.api.result.transaction.TransactionsVolumeResult;
-import com.takipi.common.api.url.UrlClient.Response;
 import com.takipi.common.api.util.Pair;
 import com.takipi.common.api.util.ValidationUtil.VolumeType;
 import com.takipi.integrations.grafana.input.FunctionInput;
@@ -53,11 +48,9 @@ public class TransactionsListFunction extends GrafanaFunction {
 
 	private class TransactionData {
 
-		protected Location entryPoint;
+		protected String entryPoint;
 		protected long timersHits;
-		protected long timersInvocations;
 		protected long errorsHits;
-		protected long errorsInvocations;
 		protected long invocations;
 		protected double avgTime;
 	}
@@ -67,16 +60,13 @@ public class TransactionsListFunction extends GrafanaFunction {
 
 		String viewId = getViewId(serviceId, input.view);
 
-		Map<String, TransactionData> transactions = getTransactionEvents(serviceId, timeSpan, viewId, input);
+		Map<String, TransactionData> transactions = getTransactions(serviceId, timeSpan, viewId, input);
+		updateTransactionEvents(serviceId, timeSpan, viewId, input, transactions);
 
 		if (transactions == null) {
 			return Collections.emptyList();
 		}
 		 
-		if (!updateTransactionVolumes(serviceId, timeSpan, viewId, input, transactions)) {
-			return Collections.emptyList();
-		}
-		
 		List<List<Object>> result = formatResultObjects(transactions);
 		
 		return result;	
@@ -88,28 +78,26 @@ public class TransactionsListFunction extends GrafanaFunction {
 
 		for (TransactionData transaction : transactions.values()) {
 
-			String name = formatLocation(transaction.entryPoint);
-
+			String name = getSimpleClassName(transaction.entryPoint);
+			
 			double errorRate;
 			
-			if ( transaction.errorsInvocations > 0) {
-				errorRate = (double)transaction.errorsHits / (double)transaction.errorsInvocations;
+			if ( transaction.invocations > 0) {
+				errorRate = (double)transaction.errorsHits / (double)transaction.invocations;
 			} else {
 				errorRate = 0;
 			}
 			
 			double timerRate;
 			
-			if (transaction.timersInvocations > 0) {
-				timerRate = (double)transaction.timersHits / (double)transaction.timersInvocations;
+			if (transaction.invocations > 0) {
+				timerRate = (double)transaction.timersHits / (double)transaction.invocations;
 			} else {
 				timerRate = 0;	
 			}
 
 			Object[] object = new Object[] { name, transaction.invocations,
-					transaction.avgTime, timerRate, transaction.timersHits, errorRate, transaction.errorsHits };
-
-			System.out.println(object);
+					Long.valueOf((long)transaction.avgTime), timerRate, transaction.timersHits, errorRate, transaction.errorsHits };
 			
 			result.add(Arrays.asList(object));
 		}
@@ -117,34 +105,23 @@ public class TransactionsListFunction extends GrafanaFunction {
 		return result;
 	}
 	
-	private Map<String, TransactionData> getTransactionEvents(String serviceId, Pair<String, String> timeSpan,
-			String viewId, TransactionsListIput input) 
+	private void updateTransactionEvents(String serviceId, Pair<String, String> timeSpan,
+			String viewId, TransactionsListIput input, Map<String, TransactionData> transactions) 
 	{
-		EventsVolumeRequest.Builder builder = EventsVolumeRequest.newBuilder().setServiceId(serviceId).setViewId(viewId)
-				.setFrom(timeSpan.getFirst()).setTo(timeSpan.getSecond()).setVolumeType(VolumeType.all);
-
-		applyFilters(input, serviceId, builder);
-
-		Response<EventsVolumeResult> response = apiClient.get(builder.build());
-
-		validateResponse(response);
-
-		if ((response.data == null) || (response.data.events == null)) {
-			return null;
+		Collection<EventResult> events = getEventList(serviceId, input, timeSpan, VolumeType.all);
+		
+		if (events == null) {
+			throw new IllegalStateException("Could not aquire transaction events for " + serviceId);
 		}
 
-		Map<String, TransactionData> result = new TreeMap<String, TransactionData>();
-
 		EventFilter eventFilter = input.getEventFilter(serviceId);
+		
+		for (EventResult event : events) {
 
-		for (EventResult event : response.data.events) {
-
-			TransactionData transaction = result.get(event.entry_point.class_name);
+			TransactionData transaction = transactions.get(event.entry_point.class_name);
 
 			if (transaction == null) {
-				transaction = new TransactionData();
-				transaction.entryPoint = event.entry_point;
-				result.put(event.entry_point.class_name, transaction);
+				continue;
 			}
 			
 			if (eventFilter.filter(event)) {
@@ -153,44 +130,39 @@ public class TransactionsListFunction extends GrafanaFunction {
 
 			if (event.type.equals("Timer")) {
 				transaction.timersHits += event.stats.hits;
-				transaction.timersInvocations += event.stats.invocations;
 			} else {
 				transaction.errorsHits += event.stats.hits;
-				transaction.errorsInvocations += event.stats.invocations;
 			}
 		}
-	
-		return result;
 	}
 	
-	private boolean updateTransactionVolumes(String serviceId, Pair<String, String> timeSpan,
-			String viewId, TransactionsListIput input, Map<String, TransactionData> transactions) {
+	private Map<String, TransactionData> getTransactions(String serviceId, Pair<String, String> timeSpan,
+			String viewId, TransactionsListIput input) {
+				
+		Collection<Transaction> transactions = getTransactions(serviceId, viewId, timeSpan, input);
+
+		Collection<String> transactionsFilter = input.getTransactions(serviceId);
 		
-		TransactionsVolumeRequest.Builder builder = TransactionsVolumeRequest.newBuilder().setServiceId(serviceId)
-				.setViewId(viewId).setFrom(timeSpan.getFirst()).setTo(timeSpan.getSecond());
+		Map<String, TransactionData> result = new HashMap<String, TransactionData>();
 
-		applyFilters(input, serviceId, builder);
-
-		Response<TransactionsVolumeResult> response = apiClient.get(builder.build());
-
-		validateResponse(response);
-
-		if ((response.data == null) || (response.data.transactions == null)) {
-			return false;
-		}
-
-		for (Transaction transaction : response.data.transactions) {
-			TransactionData transactionData = transactions.get(transaction.name.replace('/', '.'));
-
-			if (transactionData == null) {
+		for (Transaction transaction :transactions) {
+			
+			String simpleName = getSimpleClassName(transaction.name);
+				
+			if ((transactionsFilter != null) && (!transactionsFilter.contains(simpleName))) {
 				continue;
 			}
-
+			
+			TransactionData transactionData = new TransactionData();
+			
 			transactionData.invocations = transaction.stats.invocations;
 			transactionData.avgTime = transaction.stats.avg_time;
+			transactionData.entryPoint = transaction.name;
+			
+			result.put(toQualified(transaction.name), transactionData);
 		}
 		
-		return true;
+		return result;
 
 	}
 

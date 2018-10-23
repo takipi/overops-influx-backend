@@ -3,6 +3,7 @@ package com.takipi.integrations.grafana.functions;
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -52,16 +53,16 @@ public class EventsFunction extends GrafanaFunction {
 		super(apiClient);
 	}
 
-	private List<List<Object>> processServiceEvents(String serviceId, EventsInput request,
+	private List<List<Object>> processServiceEvents(String serviceId, EventsInput input,
 			Pair<String, String> timeSpan, Field[] fields) {
 
-		List<EventResult> events = getEventList(serviceId, request, timeSpan);
+		Collection<EventResult> events = getEventList(serviceId, input, timeSpan, input.volumeType);
 
 		if (events == null) {
 			return Collections.emptyList();
 		}
 		
-		EventFilter eventFilter = request.getEventFilter(serviceId);
+		EventFilter eventFilter = input.getEventFilter(serviceId);
 	
 		List<List<Object>> result = new ArrayList<List<Object>>(events.size());
 
@@ -71,7 +72,11 @@ public class EventsFunction extends GrafanaFunction {
 				continue;
 			}	
 			
-			List<Object> outputObject = processEvent(serviceId, request, event, fields, timeSpan);
+			if (event.stats.hits == 0) {
+				continue;
+			}
+			
+			List<Object> outputObject = processEvent(serviceId, input, event, fields, timeSpan);
 			result.add(outputObject);
 		}
 
@@ -123,7 +128,7 @@ public class EventsFunction extends GrafanaFunction {
 		return builder.toString();
 	}
 	
-	private static String formatFieldValue(Object value, Field field) {
+	private static Object formatFieldValue(Object value, Field field, EventsInput input) {
 
 		if (value == null) {
 			return "";
@@ -142,8 +147,22 @@ public class EventsFunction extends GrafanaFunction {
 			
 			return TimeUtils.prettifyTime((String) value);
 		}
+		
+		if ((value instanceof String) && (input.maxColumnLength > 0)) {
+			
+			String str = (String)value;
+			
+			if (str.length() > input.maxColumnLength) {
+				return str.substring(0, input.maxColumnLength);
+				
+			} else 
+			{
+				return str;
+			}
+			
+		}
 
-		return value.toString();
+		return value;
 	}
 
 	private static String parseStats(Stats stats) {
@@ -160,10 +179,10 @@ public class EventsFunction extends GrafanaFunction {
 		}
 	}
 	
-	private Object formatObject(String serviceId, EventsInput request, EventResult event, Field field, Pair<String, String> timeSpan) {
+	private Object formatObject(String serviceId, EventsInput input, EventResult event, Field field, Pair<String, String> timeSpan) {
 		
 		if (field.equals(LINK_FIELD)) {
-			return EventLinkEncoder.encodeLink(serviceId, request, event, timeSpan);
+			return EventLinkEncoder.encodeLink(serviceId, input, event, timeSpan);
 		} 
 		
 		if (field.equals(RATE_FIELD)) {
@@ -171,7 +190,7 @@ public class EventsFunction extends GrafanaFunction {
 		}
 			
 		Object reflectValue = getReflectValue(field, event);
-		return formatFieldValue(reflectValue, field);
+		return formatFieldValue(reflectValue, field, input);
 	}
 
 	private List<Object> processEvent(String serviceId, EventsInput request, EventResult event, Field[] fields,
@@ -262,25 +281,26 @@ public class EventsFunction extends GrafanaFunction {
 
 	@Override
 	public  List<Series> process(FunctionInput functionInput) {
+		
 		if (!(functionInput instanceof EventsInput)) {
 			throw new IllegalArgumentException("functionInput");
 		}
 
-		EventsInput request = (EventsInput) functionInput;
+		EventsInput input = (EventsInput) functionInput;
 
-		Pair<String, String> timeSpan = TimeUtils.parseTimeFilter(request.timeFilter);
-		Field[] fields = getReflectFields(request.fields);
+		Pair<String, String> timeSpan = TimeUtils.parseTimeFilter(input.timeFilter);
+		Field[] fields = getReflectFields(input.fields);
 
 		Series series = new Series();
 
 		series.name = SERIES_NAME;
 		series.values = new ArrayList<List<Object>>();
-		series.columns = getColumns(request.fields);
+		series.columns = getColumns(input.fields);
 
-		String[] services = getServiceIds(request);
+		String[] services = getServiceIds(input);
 
 		for (String serviceId : services) {
-			List<List<Object>> serviceEvents = processServiceEvents(serviceId, request, timeSpan, fields);
+			List<List<Object>> serviceEvents = processServiceEvents(serviceId, input, timeSpan, fields);
 			series.values.addAll(serviceEvents);
 		}
 

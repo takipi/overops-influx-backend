@@ -2,6 +2,7 @@ package com.takipi.integrations.grafana.utils;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.joda.time.DateTime;
@@ -116,6 +117,22 @@ public class TimeUtils {
 		return fmt.parseDateTime(value);
 	}
 
+	public static int getStartDateTimeIndex(List<Pair<DateTime, DateTime>> intervals, String value) {
+
+		DateTime dateTime = TimeUtils.getDateTime(value);
+
+		for (int i = 0; i < intervals.size(); i++) {
+			
+			Pair<DateTime, DateTime> interval = intervals.get(i);
+			
+			if ((dateTime.isAfter(interval.getFirst())) && (dateTime.isBefore(interval.getSecond()))) {
+				return i;
+			}
+		}
+
+		return -1;
+	}
+
 	public static Pair<DateTime, DateTime> getTimeFilter(String timeFilter) {
 		if ((timeFilter == null) || (timeFilter.isEmpty())) {
 			throw new IllegalArgumentException("time cannot be empty");
@@ -144,6 +161,10 @@ public class TimeUtils {
 		}
 
 		throw new IllegalArgumentException("Could not parse time filter " + timeFilter);
+	}
+	
+	public static String toString(DateTime value) {
+		return value.toString(fmt);
 	}
 	
 	public static Pair<String, String> toTimespan(Pair<DateTime, DateTime> pair) {

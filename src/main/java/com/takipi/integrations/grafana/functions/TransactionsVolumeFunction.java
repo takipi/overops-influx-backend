@@ -1,22 +1,21 @@
 package com.takipi.integrations.grafana.functions;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import com.takipi.common.api.ApiClient;
 import com.takipi.common.api.data.transaction.Transaction;
-import com.takipi.common.api.request.transaction.TransactionsVolumeRequest;
-import com.takipi.common.api.result.transaction.TransactionsVolumeResult;
-import com.takipi.common.api.url.UrlClient.Response;
 import com.takipi.common.api.util.Pair;
+import com.takipi.integrations.grafana.input.BaseVolumeInput.AggregationType;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.TransactionsVolumeInput;
+import com.takipi.integrations.grafana.input.TransactionsVolumeInput.TransactionVolumeType;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.utils.TimeUtils;
 
 public class TransactionsVolumeFunction extends BaseVolumeFunction {
 
-	
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -39,68 +38,85 @@ public class TransactionsVolumeFunction extends BaseVolumeFunction {
 		super(apiClient);
 	}
 
-	private EventVolume getTransactionVolumes(String serviceId, Pair<String, String> timeSpan,
-			String viewId, TransactionsVolumeInput input) {
+	private class TransactionVolume {
+		protected double avgTime;
+		protected long invocations;
+	}
+	
+	private TransactionVolume getTransactionVolumes(String serviceId, Pair<String, String> timeSpan, String viewId,
+			TransactionsVolumeInput input) {
+
+		TransactionVolume result = new TransactionVolume();
+
+		long transactionTotal = 0;
+
+		 Collection<Transaction> transactions = getTransactions(serviceId, viewId, timeSpan, input);
 		
-		TransactionsVolumeRequest.Builder builder = TransactionsVolumeRequest.newBuilder().setServiceId(serviceId)
-				.setViewId(viewId).setFrom(timeSpan.getFirst()).setTo(timeSpan.getSecond());
+		if ((input.volumeType.equals(TransactionVolumeType.avg)) || (input.volumeType.equals(TransactionVolumeType.invocations))) {
 
-		applyFilters(input, serviceId, builder);
-
-		Response<TransactionsVolumeResult> response = apiClient.get(builder.build());
-
-		if (response.isBadResponse()) {
-			throw new IllegalStateException(
-					"Transnaction volume for service " + serviceId + " code: " + response.responseCode);
-		}
-
-		if ((response.data == null) || (response.data.transactions == null)) {
-			return null;
-		}
-		
-		Collection<String> transactions;
-
-		if (input.transactions != null) {
-			transactions = input.getTransactions(serviceId);
-		} else {
-			transactions = null;
-		}
-
-		EventVolume result = new EventVolume();
-		
-		for (Transaction transaction : response.data.transactions) {
-			
-			String entryPoint = getSimpleClassName(transaction.name);
-
-			if ((transactions != null) && (!transactions.contains(entryPoint))) {
-				continue;
+			for (Transaction transaction : transactions) {
+				transactionTotal += transaction.stats.invocations;
 			}
-			
-			switch (input.volumeType) {
-			case invocations:
-				result.sum += transaction.stats.invocations;
-				break;
-				
-			case avg:
-				result.sum += transaction.stats.avg_time;
-				break;
-				
-			case stdDev:
-				result.sum += transaction.stats.avg_time_std_deviation;
-				break;
+
+			result.invocations = transactionTotal;
+
+			if (input.volumeType.equals(TransactionVolumeType.avg)) {
+				for (Transaction transaction : transactions) {
+					double rate = (double) transaction.stats.invocations / (double) (transactionTotal);
+					result.avgTime += transaction.stats.avg_time * rate;
+				}
 			}
 		}
-		
-		result.count = response.data.transactions.size();
-		
+
 		return result;
 	}
+	
+	protected EventVolume getTransactionVolume(TransactionsVolumeInput input, Pair<String, String> timeSpan ) {
+		String[] serviceIds = getServiceIds(input);
+
+		long totalInvocations = 0;
+		List<TransactionVolume> servicesVolumes = new ArrayList<TransactionVolume>(serviceIds.length);
+
+		for (String serviceId : serviceIds) {
+
+			String viewId = getViewId(serviceId, input.view);
+			TransactionVolume serviceVolume = getTransactionVolumes(serviceId, timeSpan, viewId, input);
+
+			if (serviceVolume != null) {
+				servicesVolumes.add(serviceVolume);
+				totalInvocations += serviceVolume.invocations;
+			}
+		}
+		
+		EventVolume volume = new EventVolume();
+
+		for (TransactionVolume serviceVolume : servicesVolumes) {
+
+			switch (input.volumeType) {
+			case invocations:
+				volume.sum += serviceVolume.invocations;
+				break;
+
+			case avg:
+				volume.sum += serviceVolume.avgTime * (double) serviceVolume.invocations / (double) totalInvocations;
+				break;
+
+			case count:
+				volume.sum++;
+				break;
+
+			}
+		}
+
+		return volume;
+	}
+	
 
 	@Override
 	public List<Series> process(FunctionInput functionInput) {
 
 		super.process(functionInput);
-		
+
 		if (!(functionInput instanceof TransactionsVolumeInput)) {
 			throw new IllegalArgumentException("functionInput");
 		}
@@ -110,23 +126,11 @@ public class TransactionsVolumeFunction extends BaseVolumeFunction {
 		if (input.volumeType == null) {
 			throw new IllegalArgumentException("volumeType");
 		}
-		
-		Pair<String, String> timeSpan = TimeUtils.parseTimeFilter(input.timeFilter);
-		String[] serviceIds = getServiceIds(input);
 
-		EventVolume volume = new EventVolume();
+		Pair<String, String> timeSpan = TimeUtils.parseTimeFilter(input.timeFilter);
 		
-		for (String serviceId : serviceIds) {
-			
-			String viewId = getViewId(serviceId, input.view);
-			EventVolume serviceVolume = getTransactionVolumes(serviceId, timeSpan, viewId, input);
-			
-			if (serviceVolume != null) {
-				volume.sum = volume.sum + serviceVolume.sum;
-				volume.count = volume.count + serviceVolume.count;
-			}
-		}
+		EventVolume volume = getTransactionVolume(input, timeSpan);
 		
-		return createSeries(input, timeSpan, volume);
+		return createSeries(input, timeSpan, volume, AggregationType.sum);
 	}
 }

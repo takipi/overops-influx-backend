@@ -2,9 +2,9 @@ package com.takipi.integrations.grafana.input;
 
 public class TransactionsVolumeInput extends BaseVolumeInput {
 	
-	public enum VolumeType {
-		invocations, avg, stdDev;
+	public enum TransactionVolumeType {
+		invocations, avg, count;
 	}
 	
-	public VolumeType volumeType;
+	public TransactionVolumeType volumeType;
 }

@@ -11,15 +11,24 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutorCompletionService;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.joda.time.DateTime;
 
 import com.takipi.common.api.ApiClient;
+import com.takipi.common.api.data.event.Stats;
+import com.takipi.common.api.data.metrics.Graph;
+import com.takipi.common.api.data.metrics.Graph.GraphPoint;
+import com.takipi.common.api.data.metrics.Graph.GraphPointContributor;
 import com.takipi.common.api.request.event.EventsVolumeRequest;
+import com.takipi.common.api.request.metrics.GraphRequest;
 import com.takipi.common.api.result.event.EventResult;
 import com.takipi.common.api.result.event.EventsVolumeResult;
+import com.takipi.common.api.result.metrics.GraphResult;
 import com.takipi.common.api.url.UrlClient.Response;
 import com.takipi.common.api.util.Pair;
+import com.takipi.common.api.util.ValidationUtil.GraphType;
 import com.takipi.common.api.util.ValidationUtil.VolumeType;
 import com.takipi.common.udf.util.ApiFilterUtil;
 import com.takipi.integrations.grafana.input.BaseVolumeInput.AggregationType;
@@ -52,14 +61,47 @@ public class GroupByFunction extends BaseVolumeFunction {
 		}
 	}
 
-	private static class EventVolume {
+	protected static class GroupByKey {
+		protected String key;
+		protected DateTime time;
+
+		public static GroupByKey of(String key, DateTime time) {
+			GroupByKey result = new GroupByKey();
+			result. key =  key;
+			result.time = time;
+
+			return result;
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			GroupByKey other = (GroupByKey)obj;
+			
+			if (!key.equals(other.key)) {
+				return false;
+			}
+			
+			if (!time.equals(other.time)) {
+				return false;
+			}
+			
+			return true;
+		}
+		
+		@Override
+		public int hashCode() {
+			return key.hashCode();
+		}
+	}
+
+	protected static class GroupByVolume {
 		protected long sum;
 		protected long count;
 		protected Comparable<Object> compareBy;
-		protected String time;
+		protected DateTime time;
 
-		public static EventVolume of(Comparable<Object> compareBy, String time) {
-			EventVolume result = new EventVolume();
+		public static GroupByVolume of(Comparable<Object> compareBy, DateTime time) {
+			GroupByVolume result = new GroupByVolume();
 			result.compareBy = compareBy;
 			result.time = time;
 
@@ -67,10 +109,16 @@ public class GroupByFunction extends BaseVolumeFunction {
 		}
 	}
 
-	protected class BaseAsyncTask implements Callable<AsyncResult> {
-		public Map<String, EventVolume> map;
+	protected static class GroupByValue {
+		protected Object sum;
+		protected Object avg;
+		protected Object count;
+	}
 
-		protected BaseAsyncTask(Map<String, EventVolume> map) {
+	protected class BaseAsyncTask implements Callable<AsyncResult> {
+		public Map<GroupByKey, GroupByVolume> map;
+
+		protected BaseAsyncTask(Map<GroupByKey, GroupByVolume> map) {
 			this.map = map;
 		}
 
@@ -86,31 +134,89 @@ public class GroupByFunction extends BaseVolumeFunction {
 	protected class EventAsyncTask extends BaseAsyncTask {
 
 		protected String serviceId;
-		protected GroupByInput request;
-		protected Pair<String, String> timeSpan;
+		protected GroupByInput input;
+		protected Pair<DateTime, DateTime> timeSpan;
+		protected String viewId;
 
-		protected EventAsyncTask(Map<String, EventVolume> map, String serviceId, GroupByInput request,
-				Pair<String, String> timeSpan) {
+		protected EventAsyncTask(Map<GroupByKey, GroupByVolume> map, String serviceId, GroupByInput input, String viewId,
+				Pair<DateTime, DateTime> timeSpan) {
 			super(map);
 			this.serviceId = serviceId;
-			this.request = request;
+			this.input = input;
 			this.timeSpan = timeSpan;
+			this.viewId = viewId;
+		}
+
+		private void executeEventsGraph(Map<String, EventResult> eventsMap, EventFilter eventFilter,
+				List<Pair<DateTime, DateTime>> intervals) {
+
+			Graph graph = getEventsGraph(apiClient, serviceId, viewId, intervals.size() * 5, input, input.volumeType,
+					timeSpan.getFirst(), timeSpan.getSecond());
+
+			for (GraphPoint gp : graph.points) {
+
+				if (gp.contributors == null) {
+					continue;
+				}
+
+				for (GraphPointContributor gpc : gp.contributors) {
+
+					EventResult event = eventsMap.get(gpc.id);
+
+					if (event == null) {
+						continue;
+					}
+
+					if (eventFilter.filter(event)) {
+						continue;
+					}
+
+					int index = TimeUtils.getStartDateTimeIndex(intervals, gp.time);
+					
+					if (index == -1) {
+						continue;
+					}
+					
+
+					Pair<DateTime, DateTime> interval = intervals.get(index);
+
+					processEventGroupBy(input, map, event, gpc.stats, interval.getFirst());
+				}
+			}
+		}
+
+		private void executeEventsVolume(Map<String, EventResult> eventsMap, EventFilter eventFilter,
+				Pair<DateTime, DateTime> timespan) {
+
+			for (EventResult event : eventsMap.values()) {
+
+				if (eventFilter.filter(event)) {
+					continue;
+				}
+
+				processEventGroupBy(input, map, event, event.stats, timespan.getFirst());
+			}
+
 		}
 
 		@Override
 		public AsyncResult call() throws Exception {
 
-			List<EventResult> events = getEventList(serviceId, request, timeSpan);
-			
-			EventFilter eventFilter = request.getEventFilter(serviceId);
+			Map<String, EventResult> eventsMap = getEventMap(serviceId, input, TimeUtils.toTimespan(timeSpan),
+					input.volumeType);
 
-			for (EventResult event : events) {
-				
-				if (eventFilter.filter(event)) {
-					continue;
-				}
-				
-				processEventGroupBy(request, map, event, timeSpan.getFirst());
+			EventFilter eventFilter = input.getEventFilter(serviceId);
+
+			List<Pair<DateTime, DateTime>> intervals = getTimeSpans(input);
+
+			if (intervals.size() == 0) {
+				return null;
+			}
+
+			if (intervals.size() > 1) {
+				executeEventsGraph(eventsMap, eventFilter, intervals);
+			} else {
+				executeEventsVolume(eventsMap, eventFilter, intervals.get(0));
 			}
 
 			return null;
@@ -118,22 +224,23 @@ public class GroupByFunction extends BaseVolumeFunction {
 	}
 
 	protected class FilterAsyncTask extends BaseAsyncTask {
+
 		protected String groupKey;
-		protected GroupByInput request;
+		protected GroupByInput input;
 		protected String serviceId;
 		protected String viewId;
-		protected Pair<String, String> timeSpan;
+		protected Pair<DateTime, DateTime> timeSpan;
 		protected Collection<String> applications;
 		protected Collection<String> servers;
 		protected Collection<String> deployments;
 
-		protected FilterAsyncTask(Map<String, EventVolume> map, String key, GroupByInput request,
-				String serviceId, String viewId, Pair<String, String> timeSpan, Collection<String> applications,
+		protected FilterAsyncTask(Map<GroupByKey, GroupByVolume> map, String key, GroupByInput input, String serviceId,
+				String viewId, Pair<DateTime, DateTime> timeSpan, Collection<String> applications,
 				Collection<String> servers, Collection<String> deployments) {
 
 			super(map);
 			this.groupKey = key;
-			this.request = request;
+			this.input = input;
 			this.serviceId = serviceId;
 			this.viewId = viewId;
 			this.timeSpan = timeSpan;
@@ -144,7 +251,21 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 		@Override
 		public AsyncResult call() throws Exception {
-			executeVolumeRequest(map, groupKey, request, serviceId, viewId, timeSpan, applications, servers, deployments);
+
+			List<Pair<DateTime, DateTime>> intervals = getTimeSpans(input);
+
+			if (intervals.size() == 0) {
+				return null;
+			}
+
+			if (intervals.size() == 1) {
+				executeFilteredVolume(map, groupKey, input, serviceId, viewId, timeSpan, applications, servers,
+						deployments);
+			} else {
+				executeFilteredGraph(map, groupKey, input, serviceId, viewId, timeSpan, intervals, applications,
+						servers, deployments);
+			}
+
 			return null;
 		}
 	}
@@ -153,67 +274,70 @@ public class GroupByFunction extends BaseVolumeFunction {
 		super(apiClient);
 	}
 
-	private static void updateMap(Map<String, EventVolume> map, String key, String time, long value) {
-		updateMap(map, key, time, value, null);
+	private static void updateMap(Map<GroupByKey, GroupByVolume> map, GroupByInput input, String key, DateTime time,
+			long value) {
+		updateMap(map, input, key, time, value, null);
 	}
 
-	private static void updateMap(Map<String, EventVolume> map, String key, String time, long value,
-			Comparable<Object> compareBy) {
+	private static void updateMap(Map<GroupByKey, GroupByVolume> map, GroupByInput input, String key, DateTime time,
+			long value, Comparable<Object> compareBy) {
 
 		if (key == null) {
 			return;
 		}
 
-		synchronized (map) {	
-			EventVolume stat = map.get(key);
-	
-			if (stat == null) {
-				stat = EventVolume.of(compareBy, time);
-				map.put(key, stat);
+		synchronized (map) {
+			
+			GroupByKey groupByKey = GroupByKey.of(key, time);
+			GroupByVolume groupByVolume = map.get(groupByKey);
+
+			if (groupByVolume == null) {
+				groupByVolume = GroupByVolume.of(compareBy, time);
+				map.put(groupByKey, groupByVolume);
 			}
-	
-			stat.sum = stat.sum + value;
-			stat.count = stat.count + 1;
-	
-			if (stat.compareBy != null) {
-				int compareResult = stat.compareBy.compareTo(compareBy);
-	
+
+			groupByVolume.sum = groupByVolume.sum + value;
+			groupByVolume.count = groupByVolume.count + 1;
+
+			if (groupByVolume.compareBy != null) {
+				int compareResult = groupByVolume.compareBy.compareTo(compareBy);
+
 				if (compareResult > 0) {
-					stat.compareBy = compareBy;
+					groupByVolume.compareBy = compareBy;
 				}
 			} else {
-				stat.compareBy = compareBy;
+				groupByVolume.compareBy = compareBy;
 			}
 		}
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static void processEventGroupBy(GroupByInput request, Map<String, EventVolume> map, 
-		EventResult event, String time) {
+	private static void processEventGroupBy(GroupByInput request, Map<GroupByKey, GroupByVolume> map, EventResult event,
+			Stats stats, DateTime time) {
 
 		long value;
 
 		if (request.volumeType.equals(VolumeType.invocations)) {
-			value = event.stats.invocations;
+			value = stats.invocations;
 		} else {
-			value = event.stats.hits;
+			value = stats.hits;
 		}
 
 		switch (request.field) {
 		case type:
-			updateMap(map, event.type, time, value);
+			updateMap(map, request, event.type, time, value);
 			break;
 
 		case name:
-			updateMap(map, event.name, time, value);
+			updateMap(map, request, event.name, time, value);
 			break;
 
 		case location:
-			updateMap(map, event.error_location.prettified_name, time, value);
+			updateMap(map, request, event.error_location.prettified_name, time, value);
 			break;
 
 		case entryPoint:
-			updateMap(map, event.entry_point.prettified_name, time, value);
+			updateMap(map, request, event.entry_point.prettified_name, time, value);
 			break;
 
 		case label:
@@ -222,14 +346,14 @@ public class GroupByFunction extends BaseVolumeFunction {
 			}
 
 			for (String label : event.labels) {
-				updateMap(map, label, time, value);
+				updateMap(map, request, label, time, value);
 			}
 
 			break;
 
 		case introduced_by:
 			Comparable compareBy = TimeUtils.getDateTime(event.first_seen);
-			updateMap(map, event.introduced_by, time, value, compareBy);
+			updateMap(map, request, event.introduced_by, time, value, compareBy);
 			break;
 
 		default:
@@ -237,79 +361,138 @@ public class GroupByFunction extends BaseVolumeFunction {
 		}
 	}
 
-	private List<BaseAsyncTask> processEventsGroupBy(Map<String, EventVolume> map, GroupByInput request,
-			String serviceId, Pair<String, String> timeSpan) {
+	private List<BaseAsyncTask> processEventsGroupBy(Map<GroupByKey, GroupByVolume> map, GroupByInput input, String serviceId,
+			String viewId, Pair<DateTime, DateTime> timeSpan) {
 
-		return Collections.singletonList(new EventAsyncTask(map, serviceId, request, timeSpan));
+		return Collections.singletonList(new EventAsyncTask(map, serviceId, input, viewId, timeSpan));
 	}
 
-	private List<BaseAsyncTask> processApplicationsGroupBy(Map<String, EventVolume> map, GroupByInput request,
-			String serviceId, Pair<String, String> timeSpan) {
+	private List<BaseAsyncTask> processApplicationsGroupBy(Map<GroupByKey, GroupByVolume> map, GroupByInput input,
+			String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan) {
 
-		String viewId = getViewId(serviceId, request.view);
-
-		if (viewId == null) {
-			return Collections.emptyList();
-		}
-		
 		List<BaseAsyncTask> result = new ArrayList<BaseAsyncTask>();
-
 
 		Collection<String> applications;
 
-		if (request.hasApplications()) {
-			applications = request.getApplications(serviceId);
+		if (input.hasApplications()) {
+			applications = input.getApplications(serviceId);
 		} else {
 			applications = ApiFilterUtil.getApplications(apiClient, serviceId);
 		}
 
 		for (String application : applications) {
 
-			result.add(new FilterAsyncTask(map, application, request, serviceId, viewId, timeSpan,
-					Collections.singleton(application), request.getServers(serviceId),
-					request.getDeployments(serviceId)));
+			result.add(new FilterAsyncTask(map, application, input, serviceId, viewId, timeSpan,
+					Collections.singleton(application), input.getServers(serviceId), input.getDeployments(serviceId)));
 
 		}
 
 		return result;
 	}
 
-	private List<BaseAsyncTask> processServersGroupBy(Map<String, EventVolume> map, GroupByInput request,
-			String serviceId, Pair<String, String> timeSpan) {
+	private List<BaseAsyncTask> processServersGroupBy(Map<GroupByKey, GroupByVolume> map, GroupByInput input,
+			String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan) {
 
-		String viewId = getViewId(serviceId, request.view);
-
-		if (viewId == null) {
-			return Collections.emptyList();
-		}
-		
 		List<BaseAsyncTask> result = new ArrayList<BaseAsyncTask>();
 
 		Collection<String> servers;
 
-		if (request.hasServers()) {
-			servers = request.getServers(serviceId);
+		if (input.hasServers()) {
+			servers = input.getServers(serviceId);
 		} else {
 			servers = ApiFilterUtil.getSevers(apiClient, serviceId);
 		}
 
 		for (String server : servers) {
 
-			result.add(new FilterAsyncTask(map, server, request, serviceId, viewId, timeSpan,
-					request.getApplications(serviceId), Collections.singleton(server),
-					request.getDeployments(serviceId)));
+			result.add(new FilterAsyncTask(map, server, input, serviceId, viewId, timeSpan,
+					input.getApplications(serviceId), Collections.singleton(server), input.getDeployments(serviceId)));
 		}
 
 		return result;
 	}
 
-	private void executeVolumeRequest(Map<String, EventVolume> map, String key, GroupByInput request, String serviceId,
-			String viewId, Pair<String, String> timeSpan, Collection<String> applications, Collection<String> servers,
-			Collection<String> deployments) {
+	private void executeFilteredGraph(Map<GroupByKey, GroupByVolume> map, String key, GroupByInput input, String serviceId,
+			String viewId, Pair<DateTime, DateTime> timespan, List<Pair<DateTime, DateTime>> intervals,
+			Collection<String> applications, Collection<String> servers, Collection<String> deployments) {
+
+		Pair<String, String> span = TimeUtils.toTimespan(timespan);
+
+		GraphRequest.Builder builder = GraphRequest.newBuilder().setServiceId(serviceId).setViewId(viewId)
+				.setGraphType(GraphType.view).setFrom(span.getFirst()).setTo(span.getSecond())
+				.setVolumeType(input.volumeType).setWantedPointCount(5);
+
+		applyFilters(input, serviceId, builder);
+
+		for (String app : applications) {
+			builder.addApp(app);
+		}
+
+		for (String dep : deployments) {
+			builder.addDeployment(dep);
+		}
+
+		for (String server : servers) {
+			builder.addServer(server);
+		}
+
+		Response<GraphResult> response = apiClient.get(builder.build());
+
+		if (response.isBadResponse()) {
+			throw new IllegalStateException("Could not acquire volume for app / srv/ dep " + applications + "/"
+					+ servers + "/" + deployments + " in service " + serviceId + " . Error " + response.responseCode);
+		}
+
+		if ((response.data == null) || (response.data.graphs == null) || (response.data.graphs.size() == 0)) {
+			return;
+		}
+
+		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, TimeUtils.toTimespan(timespan),
+				input.volumeType);
+
+		EventFilter eventFilter = input.getEventFilter(serviceId);
+
+		Graph graph = response.data.graphs.get(0);
+
+		for (GraphPoint gp : graph.points) {
+
+			if (gp.contributors == null) {
+				continue;
+			}
+
+			for (GraphPointContributor gpc : gp.contributors) {
+
+				EventResult event = eventsMap.get(gpc.id);
+
+				if (event == null) {
+					continue;
+				}
+
+				if (eventFilter.filter(event)) {
+					continue;
+				}
+
+				int index = TimeUtils.getStartDateTimeIndex(intervals, gp.time);
+				
+				if (index == -1) {
+					continue;
+				}
+
+				Pair<DateTime, DateTime> interval = intervals.get(index);
+				
+				processEventGroupBy(input, map, event, gpc.stats, interval.getFirst());
+			}
+		}
+	}
+
+	private void executeFilteredVolume(Map<GroupByKey, GroupByVolume> map, String key, GroupByInput input, String serviceId,
+			String viewId, Pair<DateTime, DateTime> timespan, Collection<String> applications,
+			Collection<String> servers, Collection<String> deployments) {
+
+		Pair<String, String> span = TimeUtils.toTimespan(timespan);
 
 		EventsVolumeRequest.Builder builder = EventsVolumeRequest.newBuilder().setServiceId(serviceId)
-				.setFrom(timeSpan.getFirst()).setTo(timeSpan.getSecond()).setViewId(viewId)
-				.setVolumeType(request.volumeType);
+				.setFrom(span.getFirst()).setTo(span.getSecond()).setViewId(viewId).setVolumeType(input.volumeType);
 
 		for (String app : applications) {
 			builder.addApp(app);
@@ -331,19 +514,13 @@ public class GroupByFunction extends BaseVolumeFunction {
 		}
 
 		if (response.data != null) {
-			updateMap(map, serviceId, key, timeSpan.getFirst(), response.data.events, request);
+			updateMap(map, serviceId, key, timespan.getFirst(), response.data.events, input);
 		}
 	}
 
-	private List<BaseAsyncTask> processDeploymentsGroupBy(Map<String, EventVolume> map, GroupByInput request,
-			String serviceId, Pair<String, String> timeSpan) {
+	private List<BaseAsyncTask> processDeploymentsGroupBy(Map<GroupByKey, GroupByVolume> map, GroupByInput request,
+			String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan) {
 
-		String viewId = getViewId(serviceId, request.view);
-
-		if (viewId == null) {
-			return Collections.emptyList();
-		}
-		
 		List<BaseAsyncTask> result = new ArrayList<BaseAsyncTask>();
 
 		Collection<String> deployments;
@@ -364,21 +541,22 @@ public class GroupByFunction extends BaseVolumeFunction {
 		return result;
 	}
 
-	private void updateMap(Map<String, EventVolume> map, String serviceId, String key, String time, List<EventResult> events,
-			GroupByInput input) {
-		
+	private void updateMap(Map<GroupByKey, GroupByVolume> map, String serviceId, String key, DateTime time,
+			List<EventResult> events, GroupByInput input) {
+
 		if (events == null) {
 			return;
 		}
 
 		EventFilter eventFilter = input.getEventFilter(serviceId);
+		Pattern pattern = input.getPatternFilter();
 
 		for (EventResult event : events) {
-			
+
 			if (eventFilter.filter(event)) {
 				continue;
 			}
-		
+
 			long value;
 
 			if (input.volumeType.equals(VolumeType.invocations)) {
@@ -387,42 +565,46 @@ public class GroupByFunction extends BaseVolumeFunction {
 				value = event.stats.hits;
 			}
 
-			updateMap(map, key, time, value);
+			if (pattern != null) {
+				Matcher match = pattern.matcher(key);
+
+				if ((match != null) && (!match.find())) {
+					continue;
+				}
+			}
+
+			updateMap(map, input, key, time, value);
 		}
 	}
 
-	private void updateGroupResutMap(Map<String, GroupResult> map, String serviceId, String groupByKey,
-			EventVolume eventVolume) {
-		
-		GroupResult groupResult = map.get(groupByKey);
+	private void updateGroupResutMap(Map<String, GroupResult> map, String serviceId, GroupByKey groupByKey,
+			GroupByVolume eventVolume) {
+
+		GroupResult groupResult = map.get(groupByKey.key);
 
 		if (groupResult == null) {
 			groupResult = new GroupResult(serviceId);
-			map.put(groupByKey, groupResult);
+			map.put(groupByKey.key, groupResult);
 		}
 
 		groupResult.updateCompareBy(eventVolume.compareBy);
 		groupResult.addVolume(eventVolume);
 	}
 
-	private Map<String, GroupResult> processServiceGroupBy(String serviceId, GroupByInput request,
-			Collection<Pair<String, String>> timeSpans) {
+	private Map<String, GroupResult> processServiceGroupBy(String serviceId, GroupByInput input,
+			Pair<DateTime, DateTime> timespan) {
 
 		int tasks = 0;
-		CompletionService<AsyncResult> completionService = new ExecutorCompletionService<AsyncResult>(executor);
-		List<Map<String, EventVolume>> outputMaps = new ArrayList<Map<String, EventVolume>>();
+		CompletionService<AsyncResult> completionService = new ExecutorCompletionService<AsyncResult>(
+				GrafanaThreadPool.executor);
 
-		for (Pair<String, String> timespan : timeSpans) {
-			
-			Map<String, EventVolume> outputMap = new HashMap<String, EventVolume>();
-			outputMaps.add(outputMap);
-			
-			List<BaseAsyncTask> serviceTasks = processServiceGroupBy(outputMap, serviceId, request, timespan);
-			tasks += serviceTasks.size();
-			
-			for (BaseAsyncTask task : serviceTasks) {
-				completionService.submit(task);
-			}
+		Map<GroupByKey, GroupByVolume> outputMap = new HashMap<GroupByKey, GroupByVolume>();
+
+		List<BaseAsyncTask> serviceTasks = processServiceGroupBy(outputMap, serviceId, input, timespan);
+		tasks += serviceTasks.size();
+
+		for (BaseAsyncTask task : serviceTasks) {
+			completionService.submit(task);
 		}
 
 		int received = 0;
@@ -438,34 +620,38 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 		Map<String, GroupResult> result = new HashMap<String, GroupResult>();
 
-		for (Map<String, EventVolume> outputMap : outputMaps) {
-			for (Map.Entry<String, EventVolume> entry : outputMap.entrySet()) {
+		for (Map.Entry<GroupByKey, GroupByVolume> entry : outputMap.entrySet()) {
 
-				String groupByKey = entry.getKey();
-				EventVolume eventVolume = entry.getValue();
+			GroupByKey groupByKey = entry.getKey();
+			GroupByVolume eventVolume = entry.getValue();
 
-				updateGroupResutMap(result, serviceId, groupByKey, eventVolume);
-			}
+			updateGroupResutMap(result, serviceId, groupByKey, eventVolume);
 		}
 
 		return result;
 	}
 
-	private List<BaseAsyncTask> processServiceGroupBy(Map<String, EventVolume> map, String serviceId,
-			GroupByInput request, Pair<String, String> timeSpan) {
+	private List<BaseAsyncTask> processServiceGroupBy(Map<GroupByKey, GroupByVolume> map, String serviceId,
+			GroupByInput input, Pair<DateTime, DateTime> timeSpan) {
 
-		switch (request.field) {
+		String viewId = getViewId(serviceId, input.view);
+
+		if (viewId == null) {
+			return Collections.emptyList();
+		}
+
+		switch (input.field) {
 		case application:
-			return processApplicationsGroupBy(map, request, serviceId, timeSpan);
+			return processApplicationsGroupBy(map, input, serviceId, viewId, timeSpan);
 
 		case deployment:
-			return processDeploymentsGroupBy(map, request, serviceId, timeSpan);
+			return processDeploymentsGroupBy(map, input, serviceId, viewId, timeSpan);
 
 		case server:
-			return processServersGroupBy(map, request, serviceId, timeSpan);
+			return processServersGroupBy(map, input, serviceId, viewId, timeSpan);
 
 		default:
-			return processEventsGroupBy(map, request, serviceId, timeSpan);
+			return processEventsGroupBy(map, input, serviceId, viewId, timeSpan);
 		}
 	}
 
@@ -482,20 +668,20 @@ public class GroupByFunction extends BaseVolumeFunction {
 	}
 
 	protected static class GroupResult {
-		private List<EventVolume> volumes;
+		private List<GroupByVolume> volumes;
 		private String serviceId;
 		private Comparable<Object> compareBy;
 
 		public GroupResult(String serviceId) {
 			this.serviceId = serviceId;
-			this.volumes = new ArrayList<EventVolume>();
+			this.volumes = new ArrayList<GroupByVolume>();
 		}
 
-		public void addVolume(EventVolume volume) {
+		public void addVolume(GroupByVolume volume) {
 			volumes.add(volume);
 		}
 
-		public Collection<EventVolume> getVolumes() {
+		public Collection<GroupByVolume> getVolumes() {
 			return volumes;
 		}
 
@@ -516,49 +702,61 @@ public class GroupByFunction extends BaseVolumeFunction {
 		}
 	}
 
-	private Collection<Pair<String, String>> getTimeSpans(GroupByInput request) {
+	private List<Pair<DateTime, DateTime>> getTimeSpans(GroupByInput input) {
 
-		Pair<DateTime, DateTime> timeSpan = TimeUtils.getTimeFilter(request.timeFilter);
+		Pair<DateTime, DateTime> timeSpan = TimeUtils.getTimeFilter(input.timeFilter);
 
-		if ((request.interval == null) || (request.interval.length() == 0)) {
-			return Collections.singleton(TimeUtils.toTimespan(timeSpan));
+		if ((input.interval == null) || (input.interval.length() == 0)) {
+			return Collections.singletonList(timeSpan);
 		}
 
-		long milliInterval = TimeUtils.parseInterval(request.interval) * 1000 * 60;
+		long milliInterval = TimeUtils.parseInterval(input.interval) * 1000 * 60;
 
-		List<Pair<String, String>> result = new ArrayList<Pair<String, String>>();
+		List<Pair<DateTime, DateTime>> result = new ArrayList<Pair<DateTime, DateTime>>();
 
 		DateTime startTime = timeSpan.getFirst();
 		DateTime endTime;
 
 		while (startTime.isBefore(timeSpan.getSecond())) {
 			endTime = startTime.plus(milliInterval);
-			result.add(TimeUtils.toTimespan(Pair.of(startTime, endTime)));
+			result.add(Pair.of(startTime, endTime));
 			startTime = endTime;
 		}
 
 		return result;
 	}
 
-	private static Object getEventVolumeValue(GroupByInput request, EventVolume eventVolume) {
-		Object value;
+	private static GroupByValue getGroupByValue(GroupByInput input, GroupByVolume eventVolume) {
 
-		if (request.type.equals(AggregationType.sum)) {
-			value = Long.valueOf(eventVolume.sum);
+		GroupByValue result = new GroupByValue();
+
+		result.sum = Long.valueOf(eventVolume.sum);
+		result.count = Long.valueOf(eventVolume.count);
+
+		if (eventVolume.count > 0) {
+			result.avg = Double.valueOf((double) eventVolume.sum / (double) eventVolume.count);
 		} else {
-			value = Double.valueOf(eventVolume.sum / eventVolume.count);
+			result.avg = Double.valueOf(0);
 		}
 
-		return value;
+		return result;
 	}
 
-	private static Series createSeries(GroupByInput request, String seriesKey) {
+	private static Series createSeries(GroupByInput input, String seriesKey) {
 		Series series = new Series();
 
-		if (request.addTags) {
+		if (input.addTags) {
 			series.name = SERIES_NAME;
 			series.tags = Collections.singletonList(seriesKey);
-			series.columns = Arrays.asList(new String[] { TIME_COLUMN, SUM_COLUMN });
+
+			Collection<AggregationType> types = getColumnTypes(input);
+
+			series.columns = new ArrayList<String>();
+			series.columns.add(TIME_COLUMN);
+
+			for (AggregationType agType : types) {
+				series.columns.add(agType.toString());
+			}
 		} else {
 			series.name = EMPTY_NAME;
 			series.columns = Arrays.asList(new String[] { TIME_COLUMN, seriesKey });
@@ -569,8 +767,8 @@ public class GroupByFunction extends BaseVolumeFunction {
 		return series;
 	}
 
-	private static Collection<SeriesResult> processGroupResults(GroupByInput request,
-			Map<String, GroupResult> groupResults, boolean multiServices) {
+	private static Collection<SeriesResult> processGroupResults(GroupByInput input,
+			Map<String, GroupResult> groupResults, String[] serviceIds) {
 
 		Map<String, SeriesResult> resultMap = new HashMap<String, SeriesResult>();
 
@@ -579,40 +777,98 @@ public class GroupByFunction extends BaseVolumeFunction {
 			String groupByKey = entry.getKey();
 			GroupResult groupResult = entry.getValue();
 
-			String seriesKey;
-
-			if (multiServices) {
-				seriesKey = groupByKey + GrafanaFunction.SERVICE_SEPERATOR + groupResult.getServiceId();
-			} else {
-				seriesKey = groupByKey;
-			}
+			String seriesKey = getServiceValue(groupByKey, groupResult.getServiceId(), serviceIds);
 
 			SeriesResult seriesResult = resultMap.get(seriesKey);
 
 			if (seriesResult == null) {
-				Series series = createSeries(request, seriesKey);
+				Series series = createSeries(input, seriesKey);
 				seriesResult = SeriesResult.of(series, groupResult.compareBy);
 				resultMap.put(seriesKey, seriesResult);
 			}
 
-			for (EventVolume eventVolume : groupResult.volumes) {
-				Object value = getEventVolumeValue(request, eventVolume);
-				Long time = TimeUtils.getLongTime(eventVolume.time);
-				seriesResult.series.values.add(Arrays.asList(new Object[] { time, value }));
+			groupResult.volumes.sort(new Comparator<GroupByVolume>() {
+
+				@Override
+				public int compare(GroupByVolume o1, GroupByVolume o2) {
+					return o1.time.compareTo(o2.time);
+				}
+			});
+			
+			for (GroupByVolume eventVolume : groupResult.volumes) {
+				GroupByValue value = getGroupByValue(input, eventVolume);
+				Long time = Long.valueOf(eventVolume.time.getMillis());
+				appendGroupByValues(input, value, time, seriesResult.series);
 			}
 		}
 
 		return resultMap.values();
 	}
 
-	private List<SeriesResult> process(GroupByInput request, String[] services,
-			Collection<Pair<String, String>> timeSpans) {
+	private static Collection<AggregationType> getColumnTypes(GroupByInput input) {
+
+		List<AggregationType> result = new ArrayList<>();
+		String[] types = input.type.split(ARRAY_SEPERATOR);
+
+		for (String type : types) {
+
+			AggregationType agType = AggregationType.valueOf(type.trim());
+
+			if (agType == null) {
+				throw new IllegalStateException(type);
+			}
+
+			result.add(agType);
+
+		}
+
+		return result;
+	}
+
+	private static void appendGroupByValues(GroupByInput input, GroupByValue value, Long time, Series series) {
+
+		String[] types = input.type.split(ARRAY_SEPERATOR);
+		Object[] values = new Object[types.length + 1];
+
+		values[0] = time;
+
+		for (int i = 0; i < types.length; i++) {
+
+			Object columnValue;
+
+			String type = types[i];
+			AggregationType agType = AggregationType.valueOf(type.trim());
+
+			switch (agType) {
+			case sum:
+				columnValue = value.sum;
+				break;
+
+			case avg:
+				columnValue = value.avg;
+				break;
+
+			case count:
+				columnValue = value.count;
+				break;
+
+			default:
+				throw new IllegalStateException(agType.toString());
+			}
+
+			values[i + 1] = columnValue;
+		}
+
+		series.values.add(Arrays.asList(values));
+	}
+
+	private List<SeriesResult> process(GroupByInput input, String[] services, Pair<DateTime, DateTime> timeSpan) {
 
 		List<SeriesResult> result = new ArrayList<SeriesResult>();
 
 		for (String serviceId : services) {
-			Map<String, GroupResult> groupResults = processServiceGroupBy(serviceId, request, timeSpans);
-			result.addAll(processGroupResults(request, groupResults, services.length > 1));
+			Map<String, GroupResult> groupResults = processServiceGroupBy(serviceId, input, timeSpan);
+			result.addAll(processGroupResults(input, groupResults, services));
 		}
 
 		return result;
@@ -621,21 +877,22 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 	@Override
 	public List<Series> process(FunctionInput functionInput) {
+
 		if (!(functionInput instanceof GroupByInput)) {
 			throw new IllegalArgumentException("functionInput");
 		}
 
-		GroupByInput request = (GroupByInput) functionInput;
+		GroupByInput input = (GroupByInput) functionInput;
 
-		String[] services = getServiceIds(request);
-		Collection<Pair<String, String>> timeSpans = getTimeSpans(request);
+		String[] services = getServiceIds(input);
 
-		List<SeriesResult> output = process(request, services, timeSpans);
+		Pair<DateTime, DateTime> timespan = TimeUtils.getTimeFilter(input.timeFilter);
+		List<SeriesResult> output = process(input, services, timespan);
 
 		int limit;
 
-		if (request.limit > 0) {
-			limit = Math.min(request.limit, output.size());
+		if (input.limit > 0) {
+			limit = Math.min(input.limit, output.size());
 			sortOutputByValue(output);
 
 		} else {
@@ -649,7 +906,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 			result.add(output.get(i).series);
 		}
 
-		if (request.limit > 0) {
+		if (input.limit > 0) {
 			Collections.reverse(result);
 		}
 
@@ -676,6 +933,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 	}
 
 	private void sortOutputByTag(List<SeriesResult> output) {
+
 		output.sort(new Comparator<SeriesResult>() {
 
 			@Override

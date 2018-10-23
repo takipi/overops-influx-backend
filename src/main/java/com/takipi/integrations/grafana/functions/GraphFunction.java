@@ -65,6 +65,10 @@ public class GraphFunction extends BaseGraphFunction {
 		Map<String, EventResult> result = new HashMap<String, EventResult>();
 		List<EventResult> events = ApiViewUtil.getEvents(apiClient, serviceId, viewId, timeSpan.getFirst(), timeSpan.getSecond());
 
+		if (events == null) {
+			return Collections.emptyMap();
+		}
+		
 		for (EventResult event : events) {
 			result.put(event.id, event);
 		}
@@ -73,24 +77,21 @@ public class GraphFunction extends BaseGraphFunction {
 	}
 
 	protected List<GraphSeries> processServiceGraph(String serviceId, String viewId, String viewName,
-			BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, boolean multiService, int pointsWanted) {
+			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, String[] serviceIds, int pointsWanted) {
 
-		GraphInput input = (GraphInput) request;
+		GraphInput graphInput = (GraphInput) input;
 
-		Graph graph = ApiViewUtil.getEventsGraph(apiClient, serviceId, viewId, pointsWanted, input.volumeType, 
-			timeSpan.getFirst(), timeSpan.getSecond());
+		Graph graph = getEventsGraph(apiClient, serviceId, viewId, pointsWanted, graphInput, 
+			graphInput.volumeType, timeSpan.getFirst(), timeSpan.getSecond());
+		
+		if (graph == null) {
+			return Collections.emptyList();
+		}
 		
 		Series series = new Series();
 
-		String tagName;
-		
-		if (multiService) {
-			tagName = viewName + SERVICE_SEPERATOR + serviceId;
-		} else {
-			tagName = viewName;
-		}
-
-		SeriesVolume seriesData = processGraphPoints(serviceId, viewId, timeSpan, graph, input);
+		String tagName = getSeriesName(input.seriesName, viewName, serviceId, serviceIds);
+		SeriesVolume seriesData = processGraphPoints(serviceId, viewId, timeSpan, graph, graphInput);
 
 		series.name = EMPTY_NAME;
 		series.columns = Arrays.asList(new String[] { TIME_COLUMN, tagName });
@@ -101,21 +102,15 @@ public class GraphFunction extends BaseGraphFunction {
 	}
 
 	private SeriesVolume processGraphPoints(String serviceId, String viewId, 
-			Pair<DateTime, DateTime> timeSpan, Graph graph, GraphInput request) {
+			Pair<DateTime, DateTime> timeSpan, Graph graph, GraphInput input) {
 
 		long volume = 0;
 		List<List<Object>> values = new ArrayList<List<Object>>(graph.points.size());
 
 		
-		EventFilter eventFilter = request.getEventFilter(serviceId);
+		EventFilter eventFilter = input.getEventFilter(serviceId);
 
-		Map<String, EventResult> eventMap;
-
-		if (request.hasIntroducedBy()) {
-			eventMap = getEventMap(serviceId, viewId, timeSpan);
-		} else {
-			eventMap = null;
-		}
+		Map<String, EventResult> eventMap = getEventMap(serviceId, viewId, timeSpan);
 		
 		for (GraphPoint gp : graph.points) {
 
@@ -137,7 +132,7 @@ public class GraphFunction extends BaseGraphFunction {
 					}
 				}
 
-				if (request.volumeType.equals(VolumeType.invocations)) {
+				if (input.volumeType.equals(VolumeType.invocations)) {
 					value += gpc.stats.invocations;
 				} else {
 					value += gpc.stats.hits;
@@ -157,9 +152,9 @@ public class GraphFunction extends BaseGraphFunction {
 			throw new IllegalArgumentException("functionInput");
 		}
 
-		GraphInput request = (GraphInput) functionInput;
+		GraphInput input = (GraphInput) functionInput;
 
-		if ((request.volumeType == null)) {
+		if ((input.volumeType == null)) {
 			throw new IllegalArgumentException("volumeType");
 		}
 

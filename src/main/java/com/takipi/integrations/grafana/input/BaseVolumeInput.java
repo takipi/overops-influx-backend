@@ -6,5 +6,5 @@ public class BaseVolumeInput extends ViewInput  {
 		sum, avg, count;
 	}
 	
-	public AggregationType type;
+	public String type;
 }

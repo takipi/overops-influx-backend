@@ -41,24 +41,24 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		String viewName;
 		BaseGraphInput request;
 		Pair<DateTime, DateTime> timeSpan;
-		boolean hasMultipleServices;
+		String[] serviceIds;
 		int pointsWanted;
 
 		protected AsyncTask(String serviceId, String viewId, String viewName,
-				BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, boolean hasMultipleServices, int pointsWanted) {
+				BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, String[] serviceIds, int pointsWanted) {
 
 			this.serviceId = serviceId;
 			this.viewId = viewId;
 			this.viewName = viewName;
 			this.request = request;
 			this.timeSpan = timeSpan;
-			this.hasMultipleServices = hasMultipleServices;
+			this.serviceIds = serviceIds;
 			this.pointsWanted = pointsWanted;
 		}
 
 		public AsyncResult call() {
 			List<GraphSeries> serviceSeries = processServiceGraph(serviceId, viewId, viewName,
-					request, timeSpan, hasMultipleServices, pointsWanted);
+					request, timeSpan, serviceIds, pointsWanted);
 
 			return new AsyncResult(serviceSeries);
 		}
@@ -76,10 +76,24 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		super(apiClient);
 	}
 
+	protected String getSeriesName(String seriesName, Object volumeType, String serviceId, String[] serviceIds) {
+		String tagName;
+		
+		if (seriesName != null) {
+			tagName = seriesName;
+		} else {
+			tagName = volumeType.toString();	
+		}
+				
+		String result = getServiceValue(tagName, serviceId, serviceIds);
+		
+		return result;
+	}
+	
 	protected List<GraphSeries> processAsync(String[] serviceIds, BaseGraphInput request,
-			Pair<DateTime, DateTime> timeSpan, int pointsWanted, boolean hasMultipleServices) {
+			Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
 
-		CompletionService<AsyncResult> completionService = new ExecutorCompletionService<AsyncResult>(executor);
+		CompletionService<AsyncResult> completionService = new ExecutorCompletionService<AsyncResult>(GrafanaThreadPool.executor);
 
 		int tasks = 0;
 
@@ -94,7 +108,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 
 				tasks++;
 				completionService.submit(new AsyncTask(serviceId, viewId, viewName, request,
-						timeSpan, hasMultipleServices, pointsWanted));
+						timeSpan, serviceIds, pointsWanted));
 			}
 		}
 
@@ -117,7 +131,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 	}
 
 	protected abstract List<GraphSeries> processServiceGraph(String serviceId, String viewId, String viewName,
-			BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, boolean multiService, int pointsWanted);
+			BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, String[] serviceIds, int pointsWanted);
 
 	protected Map<String, String> getViews(String serviceId, BaseGraphInput input) {
 		String viewId = getViewId(serviceId, input.view);
@@ -158,6 +172,10 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 
 	private int getPointsWanted(BaseGraphInput request, Pair<DateTime, DateTime> timePair) {
 
+		if (request.pointsWanted > 0) {
+			return request.pointsWanted;
+		}
+		
 		int result;
 
 		if (request.interval > 0) {
@@ -172,7 +190,8 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 	}
 
 	protected List<GraphSeries> processSync(String[] serviceIds, BaseGraphInput request,
-			Pair<DateTime, DateTime> timeSpan, int pointsWanted, boolean hasMultipleServices) {
+			Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
+		
 		List<GraphSeries> series = new ArrayList<GraphSeries>();
 
 		for (String serviceId : serviceIds) {
@@ -185,7 +204,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 				String viewName = entry.getValue();
 
 				List<GraphSeries> serviceSeries = processServiceGraph(serviceId, viewId, viewName, request,
-						timeSpan, hasMultipleServices, pointsWanted);
+						timeSpan, serviceIds, pointsWanted);
 
 				series.addAll(serviceSeries);
 			}
@@ -211,16 +230,15 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		int pointsWanted = getPointsWanted(request, timeSpan);
 
 		String[] serviceIds = getServiceIds(request);
-		boolean hasMultipleServices = serviceIds.length > 1;
 
 		List<GraphSeries> series;
 		
 		boolean async = isAsync(serviceIds);
 		
 		if (async) {
-			series = processAsync(serviceIds, request, timeSpan, pointsWanted, hasMultipleServices);
+			series = processAsync(serviceIds, request, timeSpan, pointsWanted);
 		} else {	
-			series = processSync(serviceIds, request, timeSpan, pointsWanted, hasMultipleServices);
+			series = processSync(serviceIds, request, timeSpan, pointsWanted);
 		}
 		
 		List<Series> result = processSeries(series, request);

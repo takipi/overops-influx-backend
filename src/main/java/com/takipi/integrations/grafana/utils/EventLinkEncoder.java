@@ -2,6 +2,8 @@ package com.takipi.integrations.grafana.utils;
 
 import java.util.regex.Pattern;
 
+import org.joda.time.DateTime;
+
 import com.takipi.common.api.ApiClient;
 import com.takipi.common.api.request.event.EventSnapshotRequest;
 import com.takipi.common.api.result.event.EventResult;
@@ -72,9 +74,20 @@ public class EventLinkEncoder {
 
 		if ((response.isOK()) && (response.data != null)) {
 			return response.data.link;
-		} else {
-			return "";
 		}
+		
+		DateTime now = DateTime.now();
+		
+		builder.setFrom(TimeUtils.toString(now.minusMonths(1)));
+		builder.setTo(TimeUtils.toString(now));
+
+		response = apiClient.get(builder.build());
+
+		if ((response.isOK()) && (response.data != null)) {
+			return response.data.link;
+		}
+		
+		throw new IllegalStateException("Could not provide link for " + value);
 
 	}
 
