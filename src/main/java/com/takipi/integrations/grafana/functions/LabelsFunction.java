@@ -1,11 +1,14 @@
 package com.takipi.integrations.grafana.functions;
 
+import java.util.regex.Pattern;
+
 import com.takipi.common.api.ApiClient;
 import com.takipi.common.api.data.label.Label;
 import com.takipi.common.api.request.label.LabelsRequest;
 import com.takipi.common.api.result.label.LabelsResult;
 import com.takipi.common.api.url.UrlClient.Response;
 import com.takipi.integrations.grafana.input.EnvironmentsInput;
+import com.takipi.integrations.grafana.input.LabelsInput;
 
 public class LabelsFunction extends EnvironmentVariableFunction {
 	
@@ -18,7 +21,7 @@ public class LabelsFunction extends EnvironmentVariableFunction {
 
 		@Override
 		public Class<?> getInputClass() {
-			return EnvironmentsInput.class;
+			return LabelsInput.class;
 		}
 		
 		@Override
@@ -35,6 +38,12 @@ public class LabelsFunction extends EnvironmentVariableFunction {
 	protected void populateServiceValues(EnvironmentsInput input, String[] serviceIds, String serviceId,
 			VariableAppender appender) {
 		
+		if (!(input instanceof LabelsInput)) {
+			throw new IllegalArgumentException("input");
+		}
+		
+		LabelsInput labelsInput = (LabelsInput)input;
+		
 		LabelsRequest request = LabelsRequest.newBuilder().setServiceId(serviceId).build();
 		Response<LabelsResult> response = apiClient.get(request);
 		
@@ -44,7 +53,19 @@ public class LabelsFunction extends EnvironmentVariableFunction {
 			return;
 		}
 		
+		Pattern filterPattern;
+		
+		if (labelsInput.regexFilter != null) {
+			filterPattern = Pattern.compile(labelsInput.regexFilter);
+		} else {
+			filterPattern = null;
+		}
+		
 		for (Label label : response.data.labels) {
+			
+			if ((filterPattern != null) && (!filterPattern.matcher(label.name).find())) {
+				continue;
+			}
 			
 			String labelName = getServiceValue(label.name, serviceId, serviceIds);
 			appender.append(labelName);
