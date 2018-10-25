@@ -49,7 +49,7 @@ public class ViewsFunction extends EnvironmentVariableFunction {
 			
 			Category category = ApiCategoryUtil.getServiceCategoryByName(apiClient, serviceId, viewsInput.category);
 			
-			if (category.views == null) {
+			if ((category == null) || (category.views == null)) {
 				return;
 			}
 			
