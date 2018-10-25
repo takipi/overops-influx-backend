@@ -2,6 +2,7 @@ package com.takipi.integrations.grafana.functions;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,29 +21,47 @@ import com.takipi.integrations.grafana.output.Series;
 
 public class FunctionParser {
 	
+	private static final String QUERY_SEPERATOR = ";";
+	
 	private static final Map<String, FunctionFactory> factories;
 
-	protected static class FunctionAsyncTask implements Callable<FunctionResult> {
+	protected static class FunctionAsyncTask extends BaseAsyncTask implements Callable<FunctionResult> {
 
 		protected ApiClient apiClient; 
 		protected String query;
+		protected int index;
 		
-		protected FunctionAsyncTask(ApiClient apiClient, String query) {
+		protected FunctionAsyncTask(ApiClient apiClient, String query, int index) {
 			this.apiClient = apiClient;
 			this.query = query;
+			this.index = index;
 		}
 		
 		@Override
 		public FunctionResult call() throws Exception {
-			return new FunctionResult(processSingleQuery(apiClient, query));
+			
+			beforeCall();
+			
+			try {
+				return new FunctionResult(processSingleQuery(apiClient, query), index);
+			} finally {
+				afterCall();
+			}
+		}
+		
+		@Override
+		public String toString() {
+			return query;
 		}
 	}
 	
 	protected static class FunctionResult {
 		protected List<Series> data;
+		protected int index;
 		
-		protected FunctionResult(List<Series> data) {
+		protected FunctionResult(List<Series> data, int index) {
 			this.data = data;
+			this.index = index;
 		}
 	}
 	
@@ -84,42 +103,54 @@ public class FunctionParser {
 
 		String trimmedQuery = query.trim();
 
-		String[] singleQueries = trimmedQuery.split(";");
+		String[] singleQueries = trimmedQuery.split(QUERY_SEPERATOR);
 		
+		QueryResult result = new QueryResult();
+
 		if (singleQueries.length == 1) {
-			return createQueryResults(processSingleQuery(apiClient, singleQueries[0]));
+			ResultContent resultContent = new ResultContent();
+			resultContent.series = processSingleQuery(apiClient, singleQueries[0]);
+			result.results = Collections.singletonList(resultContent);
+			return result;
 		}
 				
 		CompletionService<FunctionResult> completionService = new ExecutorCompletionService<FunctionResult>(GrafanaThreadPool.executor);
 
+		int index = 0;
+		
 		for (String singleQuery : singleQueries) {	
-			completionService.submit(new FunctionAsyncTask(apiClient, singleQuery));			
+			completionService.submit(new FunctionAsyncTask(apiClient, singleQuery, index));	
+			index++;
 		}
 		
 		int received = 0;
-		List<Series> series = new ArrayList<Series>();
-
+		result.results = new ArrayList<ResultContent>();
+			
 		while (received < singleQueries.length) {			
 			try {
 				Future<FunctionResult> future = completionService.take();
-				received++;
 				FunctionResult asynResult = future.get();
-				series.addAll(asynResult.data);
+				
+				ResultContent resultContent = new ResultContent();
+				resultContent.series = asynResult.data;
+				resultContent.statement_id = asynResult.index;
+				result.results.add(resultContent);
+				
+				received++;
+
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
 			} 
 		}
 		
-		return createQueryResults(series);
-	}
-	
-	private static QueryResult createQueryResults(List<Series> series) {
-		ResultContent resultContent = new ResultContent();
-		resultContent.statement_id = 0;
-		resultContent.series = series;
-		QueryResult result = new QueryResult();
-		result.results = Collections.singletonList(resultContent);
+		result.results.sort(new Comparator<ResultContent>() {
 
+			@Override 
+			public int compare(ResultContent o1, ResultContent o2) {
+				return o1.statement_id - o2.statement_id;
+			}
+		});
+		
 		return result;
 	}
 	

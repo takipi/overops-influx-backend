@@ -20,6 +20,7 @@ public class FilterInput extends EnvironmentsInput {
 	public String transactions;
 	public String labels;
 	public String labelsRegex;
+	public String firstSeen;
 
 	protected Collection<String> getServiceFilters(String value, String serviceId, boolean matchCase) {
 
@@ -128,7 +129,7 @@ public class FilterInput extends EnvironmentsInput {
 
 	public EventFilter getEventFilter(String serviceId) {
 		return EventFilter.of(getTypes(), getIntroducedBy(serviceId), getTransactions(serviceId), geLabels(serviceId),
-				labelsRegex);
+				labelsRegex, firstSeen);
 	}
 
 }

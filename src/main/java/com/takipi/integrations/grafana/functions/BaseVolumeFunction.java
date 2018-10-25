@@ -115,11 +115,11 @@ public abstract class BaseVolumeFunction extends GrafanaFunction {
 	protected EventVolume getEventVolume(BaseVolumeInput input, VolumeType volumeType,
 			Pair<String, String> timeSpan) {
 
-		String[] services = getServiceIds(input);
+		String[] serviceIds = getServiceIds(input);
 
 		EventVolume volume = new EventVolume();
 
-		for (String serviceId : services) {
+		for (String serviceId : serviceIds) {
 			EventVolume serviceVolume = processServiceVolume(serviceId, input, volumeType, timeSpan);
 
 			volume.sum = volume.sum + serviceVolume.sum;

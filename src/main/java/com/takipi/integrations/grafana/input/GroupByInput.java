@@ -28,6 +28,4 @@ public class GroupByInput extends VolumeInput {
 		
 		return patternFilter;
 	}
-	
-	
 }

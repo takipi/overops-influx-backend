@@ -76,6 +76,5 @@ public abstract class VariableFunction extends GrafanaFunction {
 		}
 				
 		return Collections.singletonList(series);
-	}
-	
+	}	
 }

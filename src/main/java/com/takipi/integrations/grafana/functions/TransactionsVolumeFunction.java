@@ -52,7 +52,8 @@ public class TransactionsVolumeFunction extends BaseVolumeFunction {
 
 		 Collection<Transaction> transactions = getTransactions(serviceId, viewId, timeSpan, input);
 		
-		if ((input.volumeType.equals(TransactionVolumeType.avg)) || (input.volumeType.equals(TransactionVolumeType.invocations))) {
+		if ((input.volumeType.equals(TransactionVolumeType.avg)) 
+		|| (input.volumeType.equals(TransactionVolumeType.invocations))) {
 
 			for (Transaction transaction : transactions) {
 				transactionTotal += transaction.stats.invocations;

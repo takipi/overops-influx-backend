@@ -35,7 +35,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		}
 	}
 	
-	protected class AsyncTask implements Callable<AsyncResult> {
+	protected class AsyncTask extends BaseAsyncTask implements Callable<AsyncResult> {
 		String serviceId;
 		String viewId;
 		String viewName;
@@ -57,10 +57,25 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		}
 
 		public AsyncResult call() {
-			List<GraphSeries> serviceSeries = processServiceGraph(serviceId, viewId, viewName,
-					request, timeSpan, serviceIds, pointsWanted);
-
-			return new AsyncResult(serviceSeries);
+			
+			beforeCall();
+			
+			try {
+				List<GraphSeries> serviceSeries = processServiceGraph(serviceId, viewId, viewName,
+						request, timeSpan, serviceIds, pointsWanted);
+	
+				return new AsyncResult(serviceSeries);
+			}
+			finally {
+				afterCall();
+			}
+		
+		}
+		
+		@Override
+		public String toString() {
+			return String.join(" ", "Graph", serviceId, viewId, viewName, 
+				request.toString(), timeSpan.toString(), String.valueOf(pointsWanted));
 		}
 	}
 

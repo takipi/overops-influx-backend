@@ -55,8 +55,8 @@ public class LabelsFunction extends EnvironmentVariableFunction {
 		
 		Pattern filterPattern;
 		
-		if (labelsInput.regexFilter != null) {
-			filterPattern = Pattern.compile(labelsInput.regexFilter);
+		if (labelsInput.lablesRegex != null) {
+			filterPattern = Pattern.compile(labelsInput.lablesRegex);
 		} else {
 			filterPattern = null;
 		}

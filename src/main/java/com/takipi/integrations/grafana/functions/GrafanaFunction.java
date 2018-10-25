@@ -45,9 +45,7 @@ public abstract class GrafanaFunction {
 
 	public interface FunctionFactory {
 		public GrafanaFunction create(ApiClient apiClient);
-
 		public Class<?> getInputClass();
-
 		public String getName();
 	}
 
@@ -64,6 +62,8 @@ public abstract class GrafanaFunction {
 	public static final String SERVICE_SEPERATOR = ": ";
 	public static final String VAR_ALL = "*";
 
+	private static final DateTimeFormatter fmt = ISODateTimeFormat.dateTime().withZoneUTC();
+	
 	protected final ApiClient apiClient;
 
 	public GrafanaFunction(ApiClient apiClient) {
@@ -165,8 +165,6 @@ public abstract class GrafanaFunction {
 	protected static Graph getEventsGraph(ApiClient apiClient, String serviceId, String viewId, int pointsCount,
 			ViewInput input, VolumeType volumeType, DateTime from, DateTime to) {
 		
-		DateTimeFormatter fmt = ISODateTimeFormat.dateTime().withZoneUTC();
-
 		GraphRequest.Builder builder = GraphRequest.newBuilder().setServiceId(serviceId).setViewId(viewId)
 				.setGraphType(GraphType.view).setFrom(from.toString(fmt)).setTo(to.toString(fmt))
 				.setVolumeType(volumeType).setWantedPointCount(pointsCount);
@@ -233,9 +231,7 @@ public abstract class GrafanaFunction {
 			Response<EventsVolumeResult> volumeResponse = apiClient.get(builder.build());
 			validateResponse(volumeResponse);
 			events = volumeResponse.data.events;
-
 		} else {
-
 			EventsRequest.Builder builder = EventsRequest.newBuilder();
 			applyBuilder(builder, serviceId, viewId, timeSpan, input);
 			Response<EventsResult> eventResponse = apiClient.get(builder.build());
@@ -298,5 +294,4 @@ public abstract class GrafanaFunction {
 	}
 
 	public abstract List<Series> process(FunctionInput functionInput);
-
 }

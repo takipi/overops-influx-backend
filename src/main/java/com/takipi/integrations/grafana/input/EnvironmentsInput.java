@@ -13,11 +13,12 @@ public class EnvironmentsInput extends VariableInput {
 			return new String[0];
 		}
 
-		String[] services = ArrayUtils.safeSplitArray(environments, GrafanaFunction.GRAFANA_SEPERATOR, false);
-		String[] result = new String[services.length];
+		String[] serviceIds = ArrayUtils.safeSplitArray(environments, GrafanaFunction.GRAFANA_SEPERATOR, false);
+		String[] result = new String[serviceIds.length];
 
-		for (int i = 0; i < services.length; i++) {
-			String service = services[i];
+		for (int i = 0; i < serviceIds.length; i++) {
+			
+			String service = serviceIds[i];
 			String value = service.replace("(", "").replace(")", "");
 			String[] parts = value.split(GrafanaFunction.SERVICE_SEPERATOR);
 

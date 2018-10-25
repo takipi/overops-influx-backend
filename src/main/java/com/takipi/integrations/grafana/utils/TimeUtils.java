@@ -125,6 +125,10 @@ public class TimeUtils {
 			
 			Pair<DateTime, DateTime> interval = intervals.get(i);
 			
+			if ((i == intervals.size() -1) && (dateTime.isAfter(interval.getSecond()))) {
+				return i;
+			}
+			
 			if ((dateTime.isAfter(interval.getFirst())) && (dateTime.isBefore(interval.getSecond()))) {
 				return i;
 			}

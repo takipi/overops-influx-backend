@@ -4,17 +4,24 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.joda.time.DateTime;
+
 import com.takipi.common.api.result.event.EventResult;
+import com.takipi.common.api.util.Pair;
+import com.takipi.integrations.grafana.utils.TimeUtils;
 
 public class EventFilter {
+	
 	private Collection<String> types;
 	private Collection<String> introducedBy;
 	private Collection<String> transactions;
 	private Collection<String> labels;
 	private Pattern labelsPattern;
+	private Pair<DateTime, DateTime> firstSeen;
 
 	public static EventFilter of(Collection<String> types, Collection<String> introducedBy,
-			Collection<String> transactions, Collection<String> labels, String labelsRegex) {
+			Collection<String> transactions, Collection<String> labels, String labelsRegex,
+			String firstSeen) {
 
 		EventFilter result = new EventFilter();
 		result.types = types;
@@ -24,6 +31,10 @@ public class EventFilter {
 
 		if (labelsRegex != null) {
 			result.labelsPattern = Pattern.compile(labelsRegex);
+		}
+		
+		if (firstSeen != null) {
+			result.firstSeen = TimeUtils.getTimeFilter(firstSeen);
 		}
 
 		return result;
@@ -55,6 +66,10 @@ public class EventFilter {
 
 		return false;
 	}
+	
+	public boolean labelMatches(String label) {
+		return (labelsPattern == null) || (labelsPattern.matcher(label).find());
+	}
 
 	public boolean filter(EventResult event) {
 		
@@ -62,7 +77,8 @@ public class EventFilter {
 			return true;
 		}
 
-		if ((introducedBy != null) && (!introducedBy.isEmpty()) && (!introducedBy.contains(event.introduced_by))) {
+		if ((introducedBy != null) && (!introducedBy.isEmpty()) 
+		&& (!introducedBy.contains(event.introduced_by))) {
 			return true;
 		}
 
@@ -92,6 +108,17 @@ public class EventFilter {
 			}
 
 			if (!compareLabelsRegex(event)) {
+				return true;
+			}
+		}
+		
+		if (firstSeen != null) {
+			DateTime eventFirstSeen = TimeUtils.getDateTime(event.first_seen);
+			
+			boolean inRange = (eventFirstSeen.isAfter(firstSeen.getFirst())) 
+				&& (eventFirstSeen.isBefore(firstSeen.getSecond()));
+			
+			if (!inRange) {
 				return true;
 			}
 		}

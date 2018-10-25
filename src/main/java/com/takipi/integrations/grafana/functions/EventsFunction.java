@@ -24,7 +24,6 @@ public class EventsFunction extends GrafanaFunction {
 
 	private static final String LINK = "link";
 	private static final String RATE = "rate";
-
 	private static final String FIRST_SEEN = "first_seen";
 	private static final String LAST_SEEN = "last_seen";
 
@@ -339,9 +338,9 @@ public class EventsFunction extends GrafanaFunction {
 		series.values = new ArrayList<List<Object>>();
 		series.columns = getColumns(input.fields);
 
-		String[] services = getServiceIds(input);
+		String[] serviceIds = getServiceIds(input);
 
-		for (String serviceId : services) {
+		for (String serviceId : serviceIds) {
 			List<List<Object>> serviceEvents = processServiceEvents(serviceId, input, timeSpan, formatters);
 			series.values.addAll(serviceEvents);
 		}

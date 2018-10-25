@@ -105,9 +105,8 @@ public class GraphFunction extends BaseGraphFunction {
 			Pair<DateTime, DateTime> timeSpan, Graph graph, GraphInput input) {
 
 		long volume = 0;
+	
 		List<List<Object>> values = new ArrayList<List<Object>>(graph.points.size());
-
-		
 		EventFilter eventFilter = input.getEventFilter(serviceId);
 
 		Map<String, EventResult> eventMap = getEventMap(serviceId, viewId, timeSpan);

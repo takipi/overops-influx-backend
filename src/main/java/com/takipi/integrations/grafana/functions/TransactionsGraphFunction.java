@@ -49,6 +49,12 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			return "transactionsGraph";
 		}
 	}
+	
+	protected static class TimeAvg {
+		protected long invocations;
+		protected double avgTime;
+	}
+
 
 	public TransactionsGraphFunction(ApiClient apiClient) {
 		super(apiClient);
@@ -122,12 +128,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		return result;
 	}
 	
-	private static class TimeAvg {
-		protected long invocations;
-		protected double avgTime;
-	}
-
-	private SeriesVolume getAvgSerivesValues(List<TransactionGraph> graphs,
+	private SeriesVolume getAvgSeriesValues(List<TransactionGraph> graphs,
 			Collection<String> transactions) {
 		
 		List<TransactionGraph>  targetGraphs;
@@ -167,6 +168,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		}
 
 		for (TransactionGraph graph : targetGraphs) {
+			
 			for (GraphPoint gp : graph.points) {
 				TimeAvg timeAvg = timeAvgMap.get(gp.time);
 				
@@ -186,6 +188,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		Map<Long, TimeAvg> sortedAvgMap = new TreeMap<Long, TimeAvg>();
 
 		for (Map.Entry<String, TimeAvg> entry : timeAvgMap.entrySet()) {
+			
 			String time = entry.getKey();
 			TimeAvg timeAvg = entry.getValue();
 			
@@ -196,6 +199,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		}
 				
 		for (Map.Entry<Long, TimeAvg> entry : sortedAvgMap.entrySet()) {
+			
 			Long time = entry.getKey();
 			TimeAvg timeAvg = entry.getValue();
 	
@@ -205,7 +209,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		return SeriesVolume.of(result, 0L);
 	}
 
-	private SeriesVolume getInvSerivesValues(List<TransactionGraph> graphs,
+	private SeriesVolume getInvSeriesValues(List<TransactionGraph> graphs,
 			Collection<String> transactions) {
 
 		Map<Long, Long> values = new TreeMap<Long, Long>();
@@ -239,6 +243,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		List<List<Object>> result = new ArrayList<List<Object>>();
 
 		for (Map.Entry<Long, Long> entry : values.entrySet()) {
+			
 			Long time = entry.getKey();
 			Long value = entry.getValue();
 
@@ -259,10 +264,10 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		SeriesVolume seriesValues;
 
 		if (input.volumeType.equals(VolumeType.avg_time)) {
-			seriesValues = getAvgSerivesValues(graphs, transactions);
+			seriesValues = getAvgSeriesValues(graphs, transactions);
 
 		} else {
-			seriesValues = getInvSerivesValues(graphs, transactions);
+			seriesValues = getInvSeriesValues(graphs, transactions);
 		}
 
 		series.name = EMPTY_NAME;
@@ -294,6 +299,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		List<List<Object>> values = new ArrayList<List<Object>>(graph.points.size());
 
 		for (GraphPoint gp : graph.points) {
+			
 			DateTime gpTime = ISODateTimeFormat.dateTimeParser().parseDateTime(gp.time);
 
 			double value;
@@ -313,6 +319,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 
 	@Override
 	public List<Series> process(FunctionInput functionInput) {
+		
 		if (!(functionInput instanceof TransactionsGraphInput)) {
 			throw new IllegalArgumentException("functionInput");
 		}
