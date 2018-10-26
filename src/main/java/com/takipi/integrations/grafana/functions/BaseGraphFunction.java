@@ -75,7 +75,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		@Override
 		public String toString() {
 			return String.join(" ", "Graph", serviceId, viewId, viewName, 
-				request.toString(), timeSpan.toString(), String.valueOf(pointsWanted));
+				timeSpan.toString(), String.valueOf(pointsWanted));
 		}
 	}
 

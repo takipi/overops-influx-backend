@@ -178,14 +178,14 @@ public class GroupByFunction extends BaseVolumeFunction {
 	protected class AsyncResult {
 	}
 
-	protected class EventAsyncTask extends BaseGroupByAsyncTask {
+	protected class GroupByEventAsyncTask extends BaseGroupByAsyncTask {
 
 		protected String serviceId;
 		protected GroupByInput input;
 		protected Pair<DateTime, DateTime> timeSpan;
 		protected String viewId;
 
-		protected EventAsyncTask(Map<GroupByKey, GroupByVolume> map, String serviceId, GroupByInput input,
+		protected GroupByEventAsyncTask(Map<GroupByKey, GroupByVolume> map, String serviceId, GroupByInput input,
 				String viewId, Pair<DateTime, DateTime> timeSpan) {
 			super(map);
 			this.serviceId = serviceId;
@@ -196,7 +196,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 		@Override
 		public String toString() {
-			return String.join(" ", "Event GroupBy", serviceId, input.toString(), timeSpan.toString(), viewId);
+			return String.join(" ", "Event GroupBy", serviceId, timeSpan.toString(), viewId);
 		}
 
 		private void executeEventsGraph(Map<String, EventResult> eventsMap, EventFilter eventFilter,
@@ -281,7 +281,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 		}
 	}
 
-	protected class FilterAsyncTask extends BaseGroupByAsyncTask {
+	protected class GroupByFilterAsyncTask extends BaseGroupByAsyncTask {
 
 		protected String groupKey;
 		protected GroupByInput input;
@@ -292,7 +292,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 		protected Collection<String> servers;
 		protected Collection<String> deployments;
 
-		protected FilterAsyncTask(Map<GroupByKey, GroupByVolume> map, String key, GroupByInput input, String serviceId,
+		protected GroupByFilterAsyncTask(Map<GroupByKey, GroupByVolume> map, String key, GroupByInput input, String serviceId,
 				String viewId, Pair<DateTime, DateTime> timeSpan, Collection<String> applications,
 				Collection<String> servers, Collection<String> deployments) {
 
@@ -317,7 +317,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 		@Override
 		public String toString() {
-			return String.join(" = ", "GroupBy Interval", input.toString(), serviceId, viewId, timeSpan.toString(),
+			return String.join(" = ", "GroupBy Interval", serviceId, viewId, timeSpan.toString(),
 					toArray(applications), toArray(servers), toArray(deployments));
 		}
 
@@ -445,7 +445,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 	private List<BaseGroupByAsyncTask> processEventsGroupBy(Map<GroupByKey, GroupByVolume> map, GroupByInput input,
 			String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan) {
 
-		return Collections.singletonList(new EventAsyncTask(map, serviceId, input, viewId, timeSpan));
+		return Collections.singletonList(new GroupByEventAsyncTask(map, serviceId, input, viewId, timeSpan));
 	}
 
 	private List<BaseGroupByAsyncTask> processApplicationsGroupBy(Map<GroupByKey, GroupByVolume> map,
@@ -463,7 +463,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 		for (String application : applications) {
 
-			result.add(new FilterAsyncTask(map, application, input, serviceId, viewId, timeSpan,
+			result.add(new GroupByFilterAsyncTask(map, application, input, serviceId, viewId, timeSpan,
 					Collections.singleton(application), input.getServers(serviceId), input.getDeployments(serviceId)));
 
 		}
@@ -486,7 +486,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 		for (String server : servers) {
 
-			result.add(new FilterAsyncTask(map, server, input, serviceId, viewId, timeSpan,
+			result.add(new GroupByFilterAsyncTask(map, server, input, serviceId, viewId, timeSpan,
 					input.getApplications(serviceId), Collections.singleton(server), input.getDeployments(serviceId)));
 		}
 
@@ -615,7 +615,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 		for (String deployment : deployments) {
 
-			result.add(new FilterAsyncTask(map, deployment, request, serviceId, viewId, timeSpan,
+			result.add(new GroupByFilterAsyncTask(map, deployment, request, serviceId, viewId, timeSpan,
 					request.getApplications(serviceId), request.getServers(serviceId),
 					Collections.singleton(deployment)));
 		}
