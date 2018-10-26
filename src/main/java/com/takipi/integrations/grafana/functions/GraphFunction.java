@@ -10,14 +10,14 @@ import java.util.Map;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 
-import com.takipi.common.api.ApiClient;
-import com.takipi.common.api.data.metrics.Graph;
-import com.takipi.common.api.data.metrics.Graph.GraphPoint;
-import com.takipi.common.api.data.metrics.Graph.GraphPointContributor;
-import com.takipi.common.api.result.event.EventResult;
-import com.takipi.common.api.util.Pair;
-import com.takipi.common.api.util.ValidationUtil.VolumeType;
-import com.takipi.common.udf.util.ApiViewUtil;
+import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.data.metrics.Graph;
+import com.takipi.api.client.data.metrics.Graph.GraphPoint;
+import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
+import com.takipi.api.client.result.event.EventResult;
+import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
+import com.takipi.api.client.util.view.ViewUtil;
+import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.GraphInput;
@@ -63,7 +63,7 @@ public class GraphFunction extends BaseGraphFunction {
 	private Map<String, EventResult> getEventMap(String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan) {
 		
 		Map<String, EventResult> result = new HashMap<String, EventResult>();
-		List<EventResult> events = ApiViewUtil.getEvents(apiClient, serviceId, viewId, timeSpan.getFirst(), timeSpan.getSecond());
+		List<EventResult> events = ViewUtil.getEvents(apiClient, serviceId, viewId, timeSpan.getFirst(), timeSpan.getSecond());
 
 		if (events == null) {
 			return Collections.emptyMap();

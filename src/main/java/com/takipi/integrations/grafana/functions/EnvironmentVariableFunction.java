@@ -1,6 +1,6 @@
 package com.takipi.integrations.grafana.functions;
 
-import com.takipi.common.api.ApiClient;
+import com.takipi.api.client.ApiClient;
 import com.takipi.integrations.grafana.input.EnvironmentsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 

@@ -16,21 +16,21 @@ import java.util.regex.Pattern;
 
 import org.joda.time.DateTime;
 
-import com.takipi.common.api.ApiClient;
-import com.takipi.common.api.data.event.Stats;
-import com.takipi.common.api.data.metrics.Graph;
-import com.takipi.common.api.data.metrics.Graph.GraphPoint;
-import com.takipi.common.api.data.metrics.Graph.GraphPointContributor;
-import com.takipi.common.api.request.event.EventsVolumeRequest;
-import com.takipi.common.api.request.metrics.GraphRequest;
-import com.takipi.common.api.result.event.EventResult;
-import com.takipi.common.api.result.event.EventsVolumeResult;
-import com.takipi.common.api.result.metrics.GraphResult;
-import com.takipi.common.api.url.UrlClient.Response;
-import com.takipi.common.api.util.Pair;
-import com.takipi.common.api.util.ValidationUtil.GraphType;
-import com.takipi.common.api.util.ValidationUtil.VolumeType;
-import com.takipi.common.udf.util.ApiFilterUtil;
+import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.data.event.Stats;
+import com.takipi.api.client.data.metrics.Graph;
+import com.takipi.api.client.data.metrics.Graph.GraphPoint;
+import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
+import com.takipi.api.client.request.event.EventsVolumeRequest;
+import com.takipi.api.client.request.metrics.GraphRequest;
+import com.takipi.api.client.result.event.EventResult;
+import com.takipi.api.client.result.event.EventsVolumeResult;
+import com.takipi.api.client.result.metrics.GraphResult;
+import com.takipi.api.client.util.client.ClientUtil;
+import com.takipi.api.client.util.validation.ValidationUtil.GraphType;
+import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
+import com.takipi.api.core.url.UrlClient.Response;
+import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseVolumeInput.AggregationType;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.GroupByInput;
@@ -458,7 +458,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 		if (input.hasApplications()) {
 			applications = input.getApplications(serviceId);
 		} else {
-			applications = ApiFilterUtil.getApplications(apiClient, serviceId);
+			applications = ClientUtil.getApplications(apiClient, serviceId);
 		}
 
 		for (String application : applications) {
@@ -481,7 +481,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 		if (input.hasServers()) {
 			servers = input.getServers(serviceId);
 		} else {
-			servers = ApiFilterUtil.getSevers(apiClient, serviceId);
+			servers = ClientUtil.getServers(apiClient, serviceId);
 		}
 
 		for (String server : servers) {
@@ -610,7 +610,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 		if (request.hasDeployments()) {
 			deployments = request.getDeployments(serviceId);
 		} else {
-			deployments = ApiFilterUtil.getDeployments(apiClient, serviceId);
+			deployments = ClientUtil.getDeployments(apiClient, serviceId);
 		}
 
 		for (String deployment : deployments) {

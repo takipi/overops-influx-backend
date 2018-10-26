@@ -2,8 +2,8 @@ package com.takipi.integrations.grafana.functions;
 
 import java.util.List;
 
-import com.takipi.common.api.ApiClient;
-import com.takipi.common.udf.util.ApiFilterUtil;
+import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.util.client.ClientUtil;
 import com.takipi.integrations.grafana.input.EnvironmentsInput;
 
 public class DeploymentsFunction extends EnvironmentVariableFunction {
@@ -34,7 +34,7 @@ public class DeploymentsFunction extends EnvironmentVariableFunction {
 	protected void populateServiceValues(EnvironmentsInput input, String[] serviceIds, String serviceId,
 			VariableAppender appender) {
 
-		List<String> serviceDeps = ApiFilterUtil.getDeployments(apiClient, serviceId);
+		List<String> serviceDeps = ClientUtil.getDeployments(apiClient, serviceId);
 
 		for (String dep : serviceDeps) {
 

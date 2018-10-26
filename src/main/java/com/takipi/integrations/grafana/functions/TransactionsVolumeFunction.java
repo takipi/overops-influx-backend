@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.takipi.common.api.ApiClient;
-import com.takipi.common.api.data.transaction.Transaction;
-import com.takipi.common.api.util.Pair;
+import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.data.transaction.Transaction;
+import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseVolumeInput.AggregationType;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.TransactionsVolumeInput;

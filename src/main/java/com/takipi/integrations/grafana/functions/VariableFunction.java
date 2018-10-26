@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import com.takipi.common.api.ApiClient;
+import com.takipi.api.client.ApiClient;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.VariableInput;
 import com.takipi.integrations.grafana.output.Series;

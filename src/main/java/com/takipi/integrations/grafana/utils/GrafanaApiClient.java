@@ -1,6 +1,6 @@
 package com.takipi.integrations.grafana.utils;
 
-import com.takipi.common.api.ApiClient;
+import com.takipi.api.client.ApiClient;
 import com.takipi.integrations.grafana.servlet.ServletUtil.Auth;
 
 public class GrafanaApiClient {

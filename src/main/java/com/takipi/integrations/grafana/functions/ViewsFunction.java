@@ -2,12 +2,12 @@ package com.takipi.integrations.grafana.functions;
 
 import java.util.Map;
 
-import com.takipi.common.api.ApiClient;
-import com.takipi.common.api.data.category.Category;
-import com.takipi.common.api.data.view.SummarizedView;
-import com.takipi.common.api.data.view.ViewInfo;
-import com.takipi.common.udf.util.ApiCategoryUtil;
-import com.takipi.common.udf.util.ApiViewUtil;
+import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.data.category.Category;
+import com.takipi.api.client.data.view.SummarizedView;
+import com.takipi.api.client.data.view.ViewInfo;
+import com.takipi.api.client.util.category.CategoryUtil;
+import com.takipi.api.client.util.view.ViewUtil;
 import com.takipi.integrations.grafana.input.EnvironmentsInput;
 import com.takipi.integrations.grafana.input.ViewsInput;
 
@@ -47,7 +47,7 @@ public class ViewsFunction extends EnvironmentVariableFunction {
 		
 		if (viewsInput.category != null) {
 			
-			Category category = ApiCategoryUtil.getServiceCategoryByName(apiClient, serviceId, viewsInput.category);
+			Category category = CategoryUtil.getServiceCategoryByName(apiClient, serviceId, viewsInput.category);
 			
 			if ((category == null) || (category.views == null)) {
 				return;
@@ -59,7 +59,7 @@ public class ViewsFunction extends EnvironmentVariableFunction {
 			}
 		} else {
 			
-			Map<String, SummarizedView> serviceViews = ApiViewUtil.getServiceViewsByName(apiClient, serviceId);
+			Map<String, SummarizedView> serviceViews = ViewUtil.getServiceViewsByName(apiClient, serviceId);
 			
 			for (SummarizedView view : serviceViews.values()) {
 				String viewName = getServiceValue(view.name, serviceId, serviceIds);	

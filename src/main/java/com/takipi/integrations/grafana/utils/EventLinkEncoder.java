@@ -4,12 +4,12 @@ import java.util.regex.Pattern;
 
 import org.joda.time.DateTime;
 
-import com.takipi.common.api.ApiClient;
-import com.takipi.common.api.request.event.EventSnapshotRequest;
-import com.takipi.common.api.result.event.EventResult;
-import com.takipi.common.api.result.event.EventSnapshotResult;
-import com.takipi.common.api.url.UrlClient.Response;
-import com.takipi.common.api.util.Pair;
+import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.request.event.EventSnapshotRequest;
+import com.takipi.api.client.result.event.EventResult;
+import com.takipi.api.client.result.event.EventSnapshotResult;
+import com.takipi.api.core.url.UrlClient.Response;
+import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.GrafanaFunction;
 import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FilterInput;
