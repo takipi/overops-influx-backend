@@ -76,6 +76,7 @@ public class GraphFunction extends BaseGraphFunction {
 		return result;
 	}
 
+	@Override
 	protected List<GraphSeries> processServiceGraph(String serviceId, String viewId, String viewName,
 			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, String[] serviceIds, int pointsWanted) {
 
@@ -95,10 +96,74 @@ public class GraphFunction extends BaseGraphFunction {
 
 		series.name = EMPTY_NAME;
 		series.columns = Arrays.asList(new String[] { TIME_COLUMN, tagName });
-		series.values = seriesData.values;
+		
+		if ((graphInput.condense) && (seriesData.values.size() > pointsWanted)) {
+			series.values = condensePoints(seriesData.values, pointsWanted);
+		} else {
+			series.values = seriesData.values;
+		}
 
 		return Collections.singletonList(GraphSeries.of(series, seriesData.volume));
 
+	}
+	
+	private static long getPointTime(List<List<Object>> points, int index) {
+		return ((Long)(points.get(index).get(0))).longValue();
+	}
+	
+	private static long getPointValue(List<List<Object>> points, int index) {
+		return ((Long)(points.get(index).get(1))).longValue();
+	}
+	
+	private List<List<Object>> condensePoints(List<List<Object>> points, int pointsWanted) {
+		
+		double groupSize = (double)(points.size() - 2) / ((double)pointsWanted - 2);
+		double currSize = groupSize;
+
+		long[] values = new long[pointsWanted - 2];
+
+		int index = 0;
+		
+		for (int i = 1; i < points.size() - 1; i++) {
+			
+			long pointValue = getPointValue(points, i);
+			
+			if (currSize >= 1) {
+				values[index] += pointValue;	
+				currSize--;
+			} else {
+				
+				values[index] += pointValue * currSize;
+				index++;
+				values[index] += pointValue * (1 - currSize);
+				currSize = groupSize - (1 - currSize);
+			}
+		}
+		
+		List<List<Object>> result = new ArrayList<List<Object>>(pointsWanted);
+		
+		long start = getPointTime(points, 0);
+		long end = getPointTime(points, points.size() - 1);
+	
+		long timeDelta = (end - start) / (pointsWanted -1);
+		
+		result.add(points.get(0));
+		
+		System.out.println(new DateTime(start));
+
+		for (int i = 0; i < values.length; i++) {
+			
+			long time = start + timeDelta * (i + 1);
+			long value = (long)values[i] / (long)groupSize;
+			System.out.println(new DateTime(time) + " " + value);
+			result.add(Arrays.asList(new Object[] {Long.valueOf(time), Long.valueOf(value) }));
+		}
+		System.out.println(new DateTime(end));
+
+		result.add(points.get(points.size() - 1));
+
+		
+		return result;
 	}
 
 	private SeriesVolume processGraphPoints(String serviceId, String viewId, 
@@ -139,9 +204,9 @@ public class GraphFunction extends BaseGraphFunction {
 			}
 
 			volume += value;
-			values.add(Arrays.asList(new Object[] { Long.valueOf(gpTime.getMillis()), value }));
+			values.add(Arrays.asList(new Object[] { Long.valueOf(gpTime.getMillis()), Long.valueOf(value) }));
 		}
-
+		
 		return SeriesVolume.of(values,volume);
 	}
 

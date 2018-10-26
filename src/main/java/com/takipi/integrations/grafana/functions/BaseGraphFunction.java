@@ -35,7 +35,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		}
 	}
 	
-	protected class AsyncTask extends BaseAsyncTask implements Callable<AsyncResult> {
+	protected class GraphAsyncTask extends BaseAsyncTask implements Callable<AsyncResult> {
 		String serviceId;
 		String viewId;
 		String viewName;
@@ -44,7 +44,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		String[] serviceIds;
 		int pointsWanted;
 
-		protected AsyncTask(String serviceId, String viewId, String viewName,
+		protected GraphAsyncTask(String serviceId, String viewId, String viewName,
 				BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, String[] serviceIds, int pointsWanted) {
 
 			this.serviceId = serviceId;
@@ -122,7 +122,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 				String viewName = entry.getValue();
 
 				tasks++;
-				completionService.submit(new AsyncTask(serviceId, viewId, viewName, request,
+				completionService.submit(new GraphAsyncTask(serviceId, viewId, viewName, request,
 						timeSpan, serviceIds, pointsWanted));
 			}
 		}

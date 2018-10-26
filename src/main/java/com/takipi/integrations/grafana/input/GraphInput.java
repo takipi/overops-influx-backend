@@ -4,4 +4,5 @@ import com.takipi.common.api.util.ValidationUtil.VolumeType;
 
 public class GraphInput extends BaseGraphInput {
 	public VolumeType volumeType;
+	public boolean condense;
 }

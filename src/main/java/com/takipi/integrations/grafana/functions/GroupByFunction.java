@@ -292,8 +292,8 @@ public class GroupByFunction extends BaseVolumeFunction {
 		protected Collection<String> servers;
 		protected Collection<String> deployments;
 
-		protected GroupByFilterAsyncTask(Map<GroupByKey, GroupByVolume> map, String key, GroupByInput input, String serviceId,
-				String viewId, Pair<DateTime, DateTime> timeSpan, Collection<String> applications,
+		protected GroupByFilterAsyncTask(Map<GroupByKey, GroupByVolume> map, String key, GroupByInput input,
+				String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan, Collection<String> applications,
 				Collection<String> servers, Collection<String> deployments) {
 
 			super(map);
@@ -317,8 +317,8 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 		@Override
 		public String toString() {
-			return String.join(" = ", "GroupBy Interval", serviceId, viewId, timeSpan.toString(),
-					toArray(applications), toArray(servers), toArray(deployments));
+			return String.join(" = ", "GroupBy Interval", serviceId, viewId, timeSpan.toString(), toArray(applications),
+					toArray(servers), toArray(deployments));
 		}
 
 		@Override

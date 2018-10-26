@@ -96,20 +96,34 @@ public class FunctionParser {
 		return function.process(input);
 	}
 		
+	private static List<String> getQueries(String query) {
+		
+		String trimmedQuery = query.trim();
+		String[] splitQueries = trimmedQuery.split(QUERY_SEPERATOR);
+		
+		List<String> result = new ArrayList<String>(splitQueries.length);
+		
+		for (String splitQuery : splitQueries) {
+			if (!splitQuery.trim().isEmpty()) {
+				result.add(splitQuery);
+			}
+		}
+		
+		return result;
+	}
 	public static QueryResult processQuery(ApiClient apiClient, String query) {
+		
 		if ((query == null) || (query.length() == 0)) {
 			throw new IllegalArgumentException("Missing query");
 		}
 
-		String trimmedQuery = query.trim();
-
-		String[] singleQueries = trimmedQuery.split(QUERY_SEPERATOR);
+		List<String> singleQueries = getQueries(query);
 		
 		QueryResult result = new QueryResult();
 
-		if (singleQueries.length == 1) {
+		if (singleQueries.size() == 1) {
 			ResultContent resultContent = new ResultContent();
-			resultContent.series = processSingleQuery(apiClient, singleQueries[0]);
+			resultContent.series = processSingleQuery(apiClient, singleQueries.get(0));
 			result.results = Collections.singletonList(resultContent);
 			return result;
 		}
@@ -119,14 +133,13 @@ public class FunctionParser {
 		int index = 0;
 		
 		for (String singleQuery : singleQueries) {	
-			completionService.submit(new FunctionAsyncTask(apiClient, singleQuery, index));	
-			index++;
+			completionService.submit(new FunctionAsyncTask(apiClient, singleQuery, index++));	
 		}
 		
 		int received = 0;
 		result.results = new ArrayList<ResultContent>();
 			
-		while (received < singleQueries.length) {			
+		while (received < singleQueries.size()) {			
 			try {
 				Future<FunctionResult> future = completionService.take();
 				FunctionResult asynResult = future.get();
@@ -143,15 +156,19 @@ public class FunctionParser {
 			} 
 		}
 		
-		result.results.sort(new Comparator<ResultContent>() {
+		sortStatements(result.results);
+		
+		return result;
+	}
+	
+	private static void sortStatements(List<ResultContent> results) {
+		results.sort(new Comparator<ResultContent>() {
 
 			@Override 
 			public int compare(ResultContent o1, ResultContent o2) {
 				return o1.statement_id - o2.statement_id;
 			}
 		});
-		
-		return result;
 	}
 	
 	public static void registerFunction(FunctionFactory factory) {
