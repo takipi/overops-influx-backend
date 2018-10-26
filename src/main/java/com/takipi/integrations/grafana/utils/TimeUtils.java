@@ -10,7 +10,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.ocpsoft.prettytime.PrettyTime;
 
-import com.takipi.common.api.util.Pair;
+import com.takipi.common.util.Pair;
 
 public class TimeUtils {
 

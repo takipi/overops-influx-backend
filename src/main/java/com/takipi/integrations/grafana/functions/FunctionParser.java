@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
 
 import com.google.gson.Gson;
-import com.takipi.common.api.ApiClient;
+import com.takipi.api.client.ApiClient;
 import com.takipi.integrations.grafana.functions.GrafanaFunction.FunctionFactory;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.QueryResult;

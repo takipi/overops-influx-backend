@@ -7,12 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.takipi.common.api.ApiClient;
-import com.takipi.common.api.data.category.Category;
-import com.takipi.common.api.data.view.ViewInfo;
-import com.takipi.common.api.request.category.CategoriesRequest;
-import com.takipi.common.api.result.category.CategoriesResult;
-import com.takipi.common.api.url.UrlClient.Response;
+import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.data.category.Category;
+import com.takipi.api.client.data.view.ViewInfo;
+import com.takipi.api.client.request.category.CategoriesRequest;
+import com.takipi.api.client.result.category.CategoriesResult;
+import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.CategoryInput;
 import com.takipi.integrations.grafana.input.FunctionInput;

@@ -1,8 +1,8 @@
 package com.takipi.integrations.grafana.functions;
 
-import com.takipi.common.api.ApiClient;
-import com.takipi.common.api.util.Pair;
-import com.takipi.common.api.util.ValidationUtil.VolumeType;
+import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
+import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.TransactionsVolumeInput;
 
 public class TransactionsRateFunction extends TransactionsVolumeFunction {

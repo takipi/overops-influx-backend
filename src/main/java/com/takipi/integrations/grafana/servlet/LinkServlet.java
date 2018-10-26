@@ -8,9 +8,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.takipi.integrations.grafana.utils.GrafanaApiClient;
 import com.takipi.integrations.grafana.servlet.ServletUtil.Auth;
 import com.takipi.integrations.grafana.utils.EventLinkEncoder;
+import com.takipi.integrations.grafana.utils.GrafanaApiClient;
 
 @WebServlet("/link")
 public class LinkServlet extends HttpServlet {

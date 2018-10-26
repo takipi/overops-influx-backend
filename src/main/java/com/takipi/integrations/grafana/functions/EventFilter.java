@@ -6,8 +6,8 @@ import java.util.regex.Pattern;
 
 import org.joda.time.DateTime;
 
-import com.takipi.common.api.result.event.EventResult;
-import com.takipi.common.api.util.Pair;
+import com.takipi.api.client.result.event.EventResult;
+import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.utils.TimeUtils;
 
 public class EventFilter {

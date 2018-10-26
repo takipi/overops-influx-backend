@@ -2,11 +2,11 @@ package com.takipi.integrations.grafana.functions;
 
 import java.util.regex.Pattern;
 
-import com.takipi.common.api.ApiClient;
-import com.takipi.common.api.data.label.Label;
-import com.takipi.common.api.request.label.LabelsRequest;
-import com.takipi.common.api.result.label.LabelsResult;
-import com.takipi.common.api.url.UrlClient.Response;
+import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.data.label.Label;
+import com.takipi.api.client.request.label.LabelsRequest;
+import com.takipi.api.client.result.label.LabelsResult;
+import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.integrations.grafana.input.EnvironmentsInput;
 import com.takipi.integrations.grafana.input.LabelsInput;
 

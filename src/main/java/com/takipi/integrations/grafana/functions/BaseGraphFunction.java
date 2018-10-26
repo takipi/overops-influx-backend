@@ -12,8 +12,8 @@ import java.util.concurrent.Future;
 
 import org.joda.time.DateTime;
 
-import com.takipi.common.api.ApiClient;
-import com.takipi.common.api.util.Pair;
+import com.takipi.api.client.ApiClient;
+import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.Series;

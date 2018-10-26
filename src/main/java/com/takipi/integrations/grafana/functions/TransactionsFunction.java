@@ -2,11 +2,11 @@ package com.takipi.integrations.grafana.functions;
 
 import java.util.Collection;
 
-import com.takipi.common.api.ApiClient;
-import com.takipi.common.api.data.transaction.Transaction;
-import com.takipi.common.api.data.view.SummarizedView;
-import com.takipi.common.api.util.Pair;
-import com.takipi.common.udf.util.ApiViewUtil;
+import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.data.transaction.Transaction;
+import com.takipi.api.client.data.view.SummarizedView;
+import com.takipi.api.client.util.view.ViewUtil;
+import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.EnvironmentsInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.utils.TimeUtils;
@@ -42,7 +42,7 @@ public class TransactionsFunction extends EnvironmentVariableFunction {
 		ViewInput viewInput = (ViewInput)input;
 		Pair<String, String> timespan = TimeUtils.parseTimeFilter(viewInput.timeFilter);
 
-		SummarizedView view = ApiViewUtil.getServiceViewByName(apiClient, serviceId, viewInput.view);
+		SummarizedView view = ViewUtil.getServiceViewByName(apiClient, serviceId, viewInput.view);
 		
 		if (view == null) {
 			return;

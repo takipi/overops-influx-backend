@@ -8,11 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.takipi.common.api.ApiClient;
-import com.takipi.common.api.data.transaction.Transaction;
-import com.takipi.common.api.result.event.EventResult;
-import com.takipi.common.api.util.Pair;
-import com.takipi.common.api.util.ValidationUtil.VolumeType;
+import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.data.transaction.Transaction;
+import com.takipi.api.client.result.event.EventResult;
+import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
+import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.TransactionsListIput;
 import com.takipi.integrations.grafana.output.Series;

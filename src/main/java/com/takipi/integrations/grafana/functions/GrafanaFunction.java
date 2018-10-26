@@ -11,30 +11,30 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
-import com.takipi.common.api.ApiClient;
-import com.takipi.common.api.data.event.Location;
-import com.takipi.common.api.data.metrics.Graph;
-import com.takipi.common.api.data.service.SummarizedService;
-import com.takipi.common.api.data.transaction.Transaction;
-import com.takipi.common.api.data.view.SummarizedView;
-import com.takipi.common.api.request.TimeframeRequest;
-import com.takipi.common.api.request.ViewTimeframeRequest;
-import com.takipi.common.api.request.event.EventsRequest;
-import com.takipi.common.api.request.event.EventsVolumeRequest;
-import com.takipi.common.api.request.metrics.GraphRequest;
-import com.takipi.common.api.request.transaction.TransactionsVolumeRequest;
-import com.takipi.common.api.result.event.EventResult;
-import com.takipi.common.api.result.event.EventsResult;
-import com.takipi.common.api.result.event.EventsVolumeResult;
-import com.takipi.common.api.result.metrics.GraphResult;
-import com.takipi.common.api.result.transaction.TransactionsVolumeResult;
-import com.takipi.common.api.url.UrlClient.Response;
-import com.takipi.common.api.util.CollectionUtil;
-import com.takipi.common.api.util.Pair;
-import com.takipi.common.api.util.ValidationUtil.GraphType;
-import com.takipi.common.api.util.ValidationUtil.VolumeType;
-import com.takipi.common.udf.util.ApiFilterUtil;
-import com.takipi.common.udf.util.ApiViewUtil;
+import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.data.event.Location;
+import com.takipi.api.client.data.metrics.Graph;
+import com.takipi.api.client.data.service.SummarizedService;
+import com.takipi.api.client.data.transaction.Transaction;
+import com.takipi.api.client.data.view.SummarizedView;
+import com.takipi.api.client.request.TimeframeRequest;
+import com.takipi.api.client.request.ViewTimeframeRequest;
+import com.takipi.api.client.request.event.EventsRequest;
+import com.takipi.api.client.request.event.EventsVolumeRequest;
+import com.takipi.api.client.request.metrics.GraphRequest;
+import com.takipi.api.client.request.transaction.TransactionsVolumeRequest;
+import com.takipi.api.client.result.event.EventResult;
+import com.takipi.api.client.result.event.EventsResult;
+import com.takipi.api.client.result.event.EventsVolumeResult;
+import com.takipi.api.client.result.metrics.GraphResult;
+import com.takipi.api.client.result.transaction.TransactionsVolumeResult;
+import com.takipi.api.client.util.client.ClientUtil;
+import com.takipi.api.client.util.validation.ValidationUtil.GraphType;
+import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
+import com.takipi.api.client.util.view.ViewUtil;
+import com.takipi.api.core.url.UrlClient.Response;
+import com.takipi.common.util.CollectionUtil;
+import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.EnvironmentsInput;
 import com.takipi.integrations.grafana.input.FilterInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
@@ -99,7 +99,7 @@ public abstract class GrafanaFunction {
 			return serviceIds;
 		}
 
-		List<SummarizedService> services = ApiFilterUtil.getEnvironments(apiClient);
+		List<SummarizedService> services = ClientUtil.getEnvironments(apiClient);
 
 		String[] result = new String[services.size()];
 
@@ -266,7 +266,7 @@ public abstract class GrafanaFunction {
 	}
 
 	protected SummarizedView getView(String serviceId, String viewName) {
-		SummarizedView view = ApiViewUtil.getServiceViewByName(apiClient, serviceId, viewName);
+		SummarizedView view = ViewUtil.getServiceViewByName(apiClient, serviceId, viewName);
 		return view;
 	}
 	
