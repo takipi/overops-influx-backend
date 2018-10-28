@@ -112,11 +112,15 @@ public class DeploymentsGraph extends GraphFunction {
 			String deployment = getDeployment(dgInput, serviceId, serviceDeployments);
 				
 			if (deployment == null) {
-				return result;
+				continue;
 			}
 			
 			result.add(new GraphAsyncTask(serviceId, viewId, input.view, 
 				getInput(dgInput, deployment), timeSpan, serviceIds, pointsWanted));
+		
+			if (dgInput.graphCount == 0) {
+				continue;
+			}
 			
 			int index = serviceDeployments.indexOf(deployment);
 			
