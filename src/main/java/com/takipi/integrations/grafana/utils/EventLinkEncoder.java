@@ -9,10 +9,9 @@ import com.takipi.api.client.request.event.EventSnapshotRequest;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventSnapshotResult;
 import com.takipi.api.core.url.UrlClient.Response;
-import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.GrafanaFunction;
-import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FilterInput;
+import com.takipi.integrations.grafana.input.ViewInput;
 
 public class EventLinkEncoder {
 	private static String encodeSafe(String value) {
@@ -91,7 +90,7 @@ public class EventLinkEncoder {
 
 	}
 
-	public static String encodeLink(String serviceId, EventsInput request, EventResult event, Pair<String, String> timeSpan) {
+	public static String encodeLink(String serviceId, ViewInput input, EventResult event, DateTime from, DateTime to) {
 
 		StringBuilder builder = new StringBuilder();
 
@@ -99,17 +98,17 @@ public class EventLinkEncoder {
 		builder.append("#");
 		builder.append(TimeUtils.encodeBase64(Long.valueOf(event.id)));
 		builder.append("#");
-		builder.append(TimeUtils.encodeBase64(TimeUtils.getLongTime(timeSpan.getFirst())));
+		builder.append(TimeUtils.encodeBase64(from.getMillis()));
 		builder.append("#");
-		builder.append(TimeUtils.encodeBase64(TimeUtils.getDateTimeDelta(timeSpan)));
+		builder.append(TimeUtils.encodeBase64(TimeUtils.getDateTimeDelta(from, to)));
 		
-		if ((request.hasApplications())|| (request.hasServers()) || (request.hasDeployments())) {
+		if ((input.hasApplications())|| (input.hasServers()) || (input.hasDeployments())) {
 			builder.append("#");
-			builder.append(encodeSafe(request.applications));
+			builder.append(encodeSafe(input.applications));
 			builder.append("#");
-			builder.append(encodeSafe(request.servers));
+			builder.append(encodeSafe(input.servers));
 			builder.append("#");
-			builder.append(encodeSafe(request.deployments));
+			builder.append(encodeSafe(input.deployments));
 		}
 
 		String result = builder.toString();

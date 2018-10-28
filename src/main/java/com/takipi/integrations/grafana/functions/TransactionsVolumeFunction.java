@@ -81,6 +81,11 @@ public class TransactionsVolumeFunction extends BaseVolumeFunction {
 		for (String serviceId : serviceIds) {
 
 			String viewId = getViewId(serviceId, input.view);
+			
+			if (viewId == null) {
+				continue;
+			}
+			
 			TransactionVolume serviceVolume = getTransactionVolumes(serviceId, timeSpan, viewId, input);
 
 			if (serviceVolume != null) {

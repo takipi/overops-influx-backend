@@ -1,6 +1,7 @@
 package com.takipi.integrations.grafana.functions;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -91,7 +92,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		super(apiClient);
 	}
 
-	protected String getSeriesName(String seriesName, Object volumeType, String serviceId, String[] serviceIds) {
+	protected String getSeriesName(BaseGraphInput input, String seriesName, Object volumeType, String serviceId, String[] serviceIds) {
 		String tagName;
 		
 		if (seriesName != null) {
@@ -105,13 +106,11 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		return result;
 	}
 	
-	protected List<GraphSeries> processAsync(String[] serviceIds, BaseGraphInput request,
+	protected Collection<GraphAsyncTask> getTasks(String[] serviceIds, BaseGraphInput request,
 			Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
-
-		CompletionService<AsyncResult> completionService = new ExecutorCompletionService<AsyncResult>(GrafanaThreadPool.executor);
-
-		int tasks = 0;
-
+		
+		List<GraphAsyncTask> result = new ArrayList<GraphAsyncTask>();
+		
 		for (String serviceId : serviceIds) {
 
 			Map<String, String> views = getViews(serviceId, request);
@@ -121,17 +120,30 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 				String viewId = entry.getKey();
 				String viewName = entry.getValue();
 
-				tasks++;
-				completionService.submit(new GraphAsyncTask(serviceId, viewId, viewName, request,
+				result.add(new GraphAsyncTask(serviceId, viewId, viewName, request,
 						timeSpan, serviceIds, pointsWanted));
 			}
+		}
+		
+		return result;
+	}
+	
+	protected List<GraphSeries> processAsync(String[] serviceIds, BaseGraphInput request,
+			Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
+
+		CompletionService<AsyncResult> completionService = new ExecutorCompletionService<AsyncResult>(GrafanaThreadPool.executor);
+
+		Collection<GraphAsyncTask> tasks = getTasks(serviceIds, request, timeSpan, pointsWanted);
+		
+		for (GraphAsyncTask task : tasks) {
+			completionService.submit(task);
 		}
 
 		List<GraphSeries> result = new ArrayList<GraphSeries>();
 
 		int received = 0;
 
-		while (received < tasks) {			
+		while (received < tasks.size()) {			
 			try {
 				Future<AsyncResult> future = completionService.take();
 				received++;
@@ -208,23 +220,17 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 			Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
 		
 		List<GraphSeries> series = new ArrayList<GraphSeries>();
-
-		for (String serviceId : serviceIds) {
+		
+		Collection<GraphAsyncTask> tasks = getTasks(serviceIds, request, timeSpan, pointsWanted);
+		
+		for (GraphAsyncTask task : tasks) {
+			List<GraphSeries> taksData = task.call().data;
 			
-			Map<String, String> views = getViews(serviceId, request);
-
-			for (Map.Entry<String, String> entry : views.entrySet()) {
-
-				String viewId = entry.getKey();
-				String viewName = entry.getValue();
-
-				List<GraphSeries> serviceSeries = processServiceGraph(serviceId, viewId, viewName, request,
-						timeSpan, serviceIds, pointsWanted);
-
-				series.addAll(serviceSeries);
+			if (taksData != null) {
+				series.addAll(taksData);
 			}
 		}
-
+		
 		return series;
 	}
 	

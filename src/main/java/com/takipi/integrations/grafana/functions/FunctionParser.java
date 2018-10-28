@@ -111,23 +111,22 @@ public class FunctionParser {
 		
 		return result;
 	}
-	public static QueryResult processQuery(ApiClient apiClient, String query) {
-		
-		if ((query == null) || (query.length() == 0)) {
-			throw new IllegalArgumentException("Missing query");
-		}
-
-		List<String> singleQueries = getQueries(query);
+	
+	public static QueryResult processSync(ApiClient apiClient, String query) {
 		
 		QueryResult result = new QueryResult();
 
-		if (singleQueries.size() == 1) {
-			ResultContent resultContent = new ResultContent();
-			resultContent.series = processSingleQuery(apiClient, singleQueries.get(0));
-			result.results = Collections.singletonList(resultContent);
-			return result;
-		}
-				
+		ResultContent resultContent = new ResultContent();
+		resultContent.series = processSingleQuery(apiClient, query);
+		result.results = Collections.singletonList(resultContent);
+		
+		return result;	
+	}
+	
+	public static QueryResult processAsync(ApiClient apiClient, List<String> singleQueries ) {
+		
+		QueryResult result = new QueryResult();
+
 		CompletionService<FunctionResult> completionService = new ExecutorCompletionService<FunctionResult>(GrafanaThreadPool.executor);
 
 		int index = 0;
@@ -161,6 +160,21 @@ public class FunctionParser {
 		return result;
 	}
 	
+	public static QueryResult processQuery(ApiClient apiClient, String query) {
+		
+		if ((query == null) || (query.length() == 0)) {
+			throw new IllegalArgumentException("Missing query");
+		}
+
+		List<String> singleQueries = getQueries(query);
+		
+		if (singleQueries.size() == 1) {
+			return processSync(apiClient, singleQueries.get(0));
+		} else {
+			return processAsync(apiClient, singleQueries);
+		}		
+	}
+	
 	private static void sortStatements(List<ResultContent> results) {
 		results.sort(new Comparator<ResultContent>() {
 
@@ -184,6 +198,8 @@ public class FunctionParser {
 		registerFunction(new GroupByFunction.Factory());
 		registerFunction(new VolumeFunction.Factory());
 		registerFunction(new CategoryFunction.Factory());
+		registerFunction(new RegressionFunction.Factory());
+		registerFunction(new DeploymentsGraph.Factory());
 		
 		//transaction functions
 		registerFunction(new TransactionsVolumeFunction.Factory());

@@ -59,6 +59,10 @@ public class TransactionsListFunction extends GrafanaFunction {
 			TransactionsListIput input) {
 
 		String viewId = getViewId(serviceId, input.view);
+		
+		if (viewId == null) {
+			return Collections.emptyList();
+		}
 
 		Map<String, TransactionData> transactions = getTransactions(serviceId, timeSpan, viewId, input);
 		updateTransactionEvents(serviceId, timeSpan, viewId, input, transactions);

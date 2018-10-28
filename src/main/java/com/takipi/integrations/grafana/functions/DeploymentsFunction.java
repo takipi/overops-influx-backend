@@ -45,10 +45,14 @@ public class DeploymentsFunction extends EnvironmentVariableFunction {
 
 	@Override
 	protected int compareValues(Object o1, Object o2) {
+		return compare(o1, o2);
+	}
+
+	public static int compare(Object o1, Object o2) {
 		double i1 = getDeplyomentNumber(o1.toString());
 		double i2 = getDeplyomentNumber(o2.toString());
 
-		double d = i1 - i2;
+		double d = i2 - i1;
 
 		if (d == 0) {
 			return 0;
@@ -61,8 +65,8 @@ public class DeploymentsFunction extends EnvironmentVariableFunction {
 		return 1;
 
 	}
-
-	private static double getDeplyomentNumber(String value) {
+	
+	public static double getDeplyomentNumber(String value) {
 
 		boolean hasDot = false;
 		boolean hasNums = false;

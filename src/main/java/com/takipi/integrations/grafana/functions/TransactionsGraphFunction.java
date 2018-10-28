@@ -259,7 +259,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 
 		Series series = new Series();
 		
-		String tagName = getSeriesName(input.seriesName, input.volumeType, serviceId, serviceIds);
+		String tagName = getSeriesName(input, input.seriesName, input.volumeType, serviceId, serviceIds);
 	
 		SeriesVolume seriesValues;
 

@@ -62,6 +62,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 	}
 
 	protected static class GroupByKey {
+		
 		protected String key;
 		protected DateTime time;
 
@@ -95,6 +96,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 	}
 
 	protected static class GroupByVolume {
+		
 		protected long sum;
 		protected long count;
 		protected Comparable<Object> compareBy;
@@ -110,6 +112,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 	}
 
 	protected static class GroupByValue {
+		
 		protected Object sum;
 		protected Object avg;
 		protected Object count;
@@ -128,6 +131,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 	}
 
 	protected static class GroupResult {
+		
 		private List<GroupByVolume> volumes;
 		private String serviceId;
 		private Comparable<Object> compareBy;

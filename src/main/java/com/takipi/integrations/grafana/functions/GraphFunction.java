@@ -91,7 +91,7 @@ public class GraphFunction extends BaseGraphFunction {
 		
 		Series series = new Series();
 
-		String tagName = getSeriesName(input.seriesName, viewName, serviceId, serviceIds);
+		String tagName = getSeriesName(input, input.seriesName, viewName, serviceId, serviceIds);
 		SeriesVolume seriesData = processGraphPoints(serviceId, viewId, timeSpan, graph, graphInput);
 
 		series.name = EMPTY_NAME;
@@ -149,20 +149,15 @@ public class GraphFunction extends BaseGraphFunction {
 		
 		result.add(points.get(0));
 		
-		System.out.println(new DateTime(start));
-
 		for (int i = 0; i < values.length; i++) {
 			
 			long time = start + timeDelta * (i + 1);
 			long value = (long)values[i] / (long)groupSize;
-			System.out.println(new DateTime(time) + " " + value);
 			result.add(Arrays.asList(new Object[] {Long.valueOf(time), Long.valueOf(value) }));
 		}
-		System.out.println(new DateTime(end));
 
 		result.add(points.get(points.size() - 1));
 
-		
 		return result;
 	}
 

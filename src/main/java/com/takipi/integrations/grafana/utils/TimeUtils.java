@@ -57,11 +57,15 @@ public class TimeUtils {
 		return new DateTime(epoch).toString(fmt);
 	}
 
+	public static long getDateTimeDelta(DateTime from, DateTime to) {
+		return to.getMillis() - from.getMillis();
+	}
+	
 	public static long getDateTimeDelta(Pair<String, String> timespan) {
-		long to = fmt.parseDateTime(timespan.getSecond()).getMillis();
-		long from = fmt.parseDateTime(timespan.getFirst()).getMillis();
+		DateTime from = fmt.parseDateTime(timespan.getFirst());
+		DateTime to = fmt.parseDateTime(timespan.getSecond());
 
-		return to - from;
+		return getDateTimeDelta(from, to);
 	}
 
 	public static String getDateTimeFromEpoch(String epoch) {
@@ -138,8 +142,9 @@ public class TimeUtils {
 	}
 
 	public static Pair<DateTime, DateTime> getTimeFilter(String timeFilter) {
+		
 		if ((timeFilter == null) || (timeFilter.isEmpty())) {
-			throw new IllegalArgumentException("time cannot be empty");
+			throw new IllegalArgumentException("timeFilter cannot be empty");
 		}
 
 		DateTime from;
@@ -184,5 +189,9 @@ public class TimeUtils {
 		DateTime dateTime = fmt.parseDateTime(value);
 		String result = prettyTime.format(new Date(dateTime.getMillis()));
 		return result;
+	}
+	
+	public static int toMinutes(long milli) {
+		return (int) (milli / 1000 / 60);
 	}
 }

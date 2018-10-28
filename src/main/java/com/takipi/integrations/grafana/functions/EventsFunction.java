@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.joda.time.DateTime;
+
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.Location;
 import com.takipi.api.client.data.event.Stats;
@@ -27,6 +29,14 @@ public class EventsFunction extends GrafanaFunction {
 	private static final String FIRST_SEEN = "first_seen";
 	private static final String LAST_SEEN = "last_seen";
 
+	protected class EventData {
+		protected EventResult event;
+		
+		protected EventData(EventResult event) {
+			this.event = event;
+		}
+	}
+	
 	protected abstract static class FieldFormatter {
 
 		private static String formatList(Object value) {
@@ -77,12 +87,12 @@ public class EventsFunction extends GrafanaFunction {
 			return value;
 		}
 
-		protected abstract Object getValue(EventResult event, String serviceId, EventsInput input,
-				Pair<String, String> timeSpan);
+		protected abstract Object getValue(EventData eventData, String serviceId, EventsInput input,
+				Pair<DateTime, DateTime> timeSpan);
 
-		protected Object format(EventResult event, String serviceId, EventsInput input, Pair<String, String> timeSpan) {
+		protected Object format(EventData eventData, String serviceId, EventsInput input, Pair<DateTime, DateTime> timeSpan) {
 
-			Object fieldValue = getValue(event, serviceId, input, timeSpan);
+			Object fieldValue = getValue(eventData, serviceId, input, timeSpan);
 			return formatValue(fieldValue, input);
 		}
 	}
@@ -95,15 +105,15 @@ public class EventsFunction extends GrafanaFunction {
 			this.field = field;
 		}
 		
-		protected Object getTarget(EventResult event) {
-			return event;
+		protected Object getTarget(EventData eventData) {
+			return eventData.event;
 		}
 
 		@Override
-		protected Object getValue(EventResult event, String serviceId, EventsInput input,
-				Pair<String, String> timeSpan) {
+		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
+				Pair<DateTime, DateTime> timeSpan) {
 			try {
-				Object target = getTarget(event);
+				Object target = getTarget(eventData);
 				return field.get(target);
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
@@ -117,8 +127,9 @@ public class EventsFunction extends GrafanaFunction {
 			super(field);
 		}
 		
-		protected Object getTarget(EventResult event) {
-			return event.stats;
+		@Override
+		protected Object getTarget(EventData eventData) {
+			return eventData.event.stats;
 		}	
 	}
 
@@ -137,10 +148,11 @@ public class EventsFunction extends GrafanaFunction {
 	protected static class LinkFormatter extends FieldFormatter {
 
 		@Override
-		protected Object getValue(EventResult event, String serviceId, EventsInput input,
-				Pair<String, String> timeSpan) {
+		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
+				Pair<DateTime, DateTime> timeSpan) {
 
-			return EventLinkEncoder.encodeLink(serviceId, input, event, timeSpan);
+			return EventLinkEncoder.encodeLink(serviceId, input, eventData.event, 
+				timeSpan.getFirst(), timeSpan.getSecond());
 		}
 
 	}
@@ -148,11 +160,11 @@ public class EventsFunction extends GrafanaFunction {
 	protected static class RateFormatter extends FieldFormatter {
 
 		@Override
-		protected Object getValue(EventResult event, String serviceId, EventsInput input,
-				Pair<String, String> timeSpan) {
+		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
+				Pair<DateTime, DateTime> timeSpan) {
 
-			if (event.stats.invocations > 0) {
-				double rate = (double) event.stats.hits / (double) event.stats.invocations;
+			if (eventData.event.stats.invocations > 0) {
+				double rate = (double) eventData.event.stats.hits / (double) eventData.event.stats.invocations;
 				return rate;
 			} else {
 				return "NA";
@@ -161,7 +173,7 @@ public class EventsFunction extends GrafanaFunction {
 
 	}
 
-	private static FieldFormatter getFormatter(String column) {
+	protected FieldFormatter getFormatter(String column) {
 		
 		if (column.equals(LINK)) {
 			return new LinkFormatter();
@@ -185,7 +197,7 @@ public class EventsFunction extends GrafanaFunction {
 
 	}
 
-	private static Collection<FieldFormatter> getFieldFormatters(String columns) {
+	private Collection<FieldFormatter> getFieldFormatters(String columns) {
 
 		if ((columns == null) || (columns.isEmpty())) {
 			throw new IllegalArgumentException("columns cannot be empty");
@@ -224,31 +236,45 @@ public class EventsFunction extends GrafanaFunction {
 	public EventsFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
-
-	private List<List<Object>> processServiceEvents(String serviceId, EventsInput input, Pair<String, String> timeSpan,
-			Collection<FieldFormatter> formatters) {
-
-		Collection<EventResult> events = getEventList(serviceId, input, timeSpan, input.volumeType);
-
+	
+	protected Collection<EventData> getEventData(String serviceId, EventsInput input, 
+			Pair<DateTime, DateTime> timeSpan) {
+		
+		Collection<EventResult> events = getEventList(serviceId, input, TimeUtils.toTimespan(timeSpan), input.volumeType);
+		
 		if (events == null) {
 			return Collections.emptyList();
 		}
+		
+		List<EventData> result = new ArrayList<EventData>(events.size());
+		
+		for (EventResult event : events) {
+			result.add(new EventData(event));
+		}
+		
+		return result;
+	}
 
+	private List<List<Object>> processServiceEvents(String serviceId, EventsInput input, Pair<DateTime, DateTime> timeSpan,
+			Collection<FieldFormatter> formatters) {
+
+		Collection<EventData> eventDatas = getEventData(serviceId, input, timeSpan);
+		
 		EventFilter eventFilter = input.getEventFilter(serviceId);
 
-		List<List<Object>> result = new ArrayList<List<Object>>(events.size());
+		List<List<Object>> result = new ArrayList<List<Object>>(eventDatas.size());
 
-		for (EventResult event : events) {
+		for (EventData eventData : eventDatas) {
 
-			if (eventFilter.filter(event)) {
+			if (eventFilter.filter(eventData.event)) {
 				continue;
 			}
 
-			if (event.stats.hits == 0) {
+			if (eventData.event.stats.hits == 0) {
 				continue;
 			}
 
-			List<Object> outputObject = processEvent(serviceId, input, event, formatters, timeSpan);
+			List<Object> outputObject = processEvent(serviceId, input, eventData, formatters, timeSpan);
 			result.add(outputObject);
 		}
 
@@ -282,14 +308,14 @@ public class EventsFunction extends GrafanaFunction {
 		return result;
 	}
 
-	private List<Object> processEvent(String serviceId, EventsInput input, EventResult event,
-			Collection<FieldFormatter> formatters, Pair<String, String> timeSpan) {
+	private List<Object> processEvent(String serviceId, EventsInput input, EventData eventData,
+			Collection<FieldFormatter> formatters, Pair<DateTime, DateTime> timeSpan) {
 
 		List<Object> result = new ArrayList<Object>(formatters.size());
 
 		for (FieldFormatter formatter : formatters) {
 
-			Object objectValue = formatter.format(event, serviceId, input, timeSpan);
+			Object objectValue = formatter.format(eventData, serviceId, input, timeSpan);
 			result.add(objectValue);
 		}
 
@@ -329,7 +355,7 @@ public class EventsFunction extends GrafanaFunction {
 
 		EventsInput input = (EventsInput) functionInput;
 
-		Pair<String, String> timeSpan = TimeUtils.parseTimeFilter(input.timeFilter);
+		Pair<DateTime, DateTime> timeSpan = TimeUtils.getTimeFilter(input.timeFilter);
 		Collection<FieldFormatter> formatters = getFieldFormatters(input.fields);
 
 		Series series = new Series();

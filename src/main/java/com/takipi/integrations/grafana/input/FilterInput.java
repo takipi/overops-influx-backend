@@ -1,8 +1,10 @@
 package com.takipi.integrations.grafana.input;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.takipi.integrations.grafana.functions.EventFilter;
@@ -22,10 +24,10 @@ public class FilterInput extends EnvironmentsInput {
 	public String labelsRegex;
 	public String firstSeen;
 
-	protected Collection<String> getServiceFilters(String value, String serviceId, boolean matchCase) {
+	protected List<String> getServiceFilters(String value, String serviceId, boolean matchCase) {
 
 		if (GrafanaFunction.VAR_ALL.equals(value)) {
-			return Collections.emptySet();
+			return Collections.emptyList();
 		}
 
 		String[] values = ArrayUtils.safeSplitArray(value, GrafanaFunction.GRAFANA_SEPERATOR, false);
@@ -52,7 +54,7 @@ public class FilterInput extends EnvironmentsInput {
 			}
 		}
 
-		return result;
+		return new ArrayList<String>(result);
 	}
 
 	private boolean hasFilter(String value) {
@@ -79,15 +81,15 @@ public class FilterInput extends EnvironmentsInput {
 		return ((types != null) && (types.length() > 0));
 	}
 
-	public Collection<String> getApplications(String serviceId) {
+	public List<String> getApplications(String serviceId) {
 		return getServiceFilters(applications, serviceId, true);
 	}
 
-	public Collection<String> getDeployments(String serviceId) {
+	public List<String> getDeployments(String serviceId) {
 		return getServiceFilters(deployments, serviceId, true);
 	}
 
-	public Collection<String> getServers(String serviceId) {
+	public List<String> getServers(String serviceId) {
 		return getServiceFilters(servers, serviceId, true);
 	}
 
