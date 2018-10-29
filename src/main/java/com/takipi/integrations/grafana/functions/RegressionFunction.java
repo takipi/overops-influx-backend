@@ -13,7 +13,7 @@ import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.util.regression.RateRegression;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionResult;
-import com.takipi.api.client.util.regression.RegressionStringUtils;
+import com.takipi.api.client.util.regression.RegressionStringUtil;
 import com.takipi.api.client.util.regression.RegressionUtil;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.Pair;
@@ -70,9 +70,9 @@ public class RegressionFunction extends EventsFunction {
 			RegressionData regData = (RegressionData)eventData;
 			
 			if (regData.regression != null) {
-				return RegressionStringUtils.getRegressedEventRate(regData.regression);
+				return RegressionStringUtil.getRegressedEventRate(regData.regression);
 			} else {
-				return RegressionStringUtils.getEventRate(regData.event);
+				return RegressionStringUtil.getEventRate(regData.event);
 			}
 		}
 	}
@@ -98,11 +98,11 @@ public class RegressionFunction extends EventsFunction {
 		List<EventData> result = new ArrayList<EventData>();
 
 		for (EventResult event : rateRegression.getExceededNewEvents().values()) {
-			result.add(new RegressionData(event, RegressionStringUtils.SEVERE_NEW));
+			result.add(new RegressionData(event, RegressionStringUtil.SEVERE_NEW));
 		}
 
 		for (EventResult event : rateRegression.getCriticalNewEvents().values()) {
-			result.add(new RegressionData(event, RegressionStringUtils.SEVERE_NEW));
+			result.add(new RegressionData(event, RegressionStringUtil.SEVERE_NEW));
 		}
 
 		for (EventResult event : rateRegression.getAllNewEvents().values()) {
@@ -115,12 +115,12 @@ public class RegressionFunction extends EventsFunction {
 				continue;
 			}
 
-			result.add(new RegressionData(event, RegressionStringUtils.NEW_ISSUE));
+			result.add(new RegressionData(event, RegressionStringUtil.NEW_ISSUE));
 
 		}
 
 		for (RegressionResult regressionResult : rateRegression.getCriticalRegressions().values()) {
-			result.add(new RegressionData(regressionResult, RegressionStringUtils.SEVERE_REGRESSION));
+			result.add(new RegressionData(regressionResult, RegressionStringUtil.SEVERE_REGRESSION));
 		}
 
 		for (RegressionResult regressionResult : rateRegression.getAllRegressions().values()) {
@@ -129,7 +129,7 @@ public class RegressionFunction extends EventsFunction {
 				continue;
 			}
 
-			result.add(new RegressionData(regressionResult, RegressionStringUtils.REGRESSION));
+			result.add(new RegressionData(regressionResult, RegressionStringUtil.REGRESSION));
 		}
 
 		return result;
