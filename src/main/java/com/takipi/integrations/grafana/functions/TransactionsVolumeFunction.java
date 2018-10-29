@@ -2,7 +2,6 @@ package com.takipi.integrations.grafana.functions;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import com.takipi.api.client.ApiClient;

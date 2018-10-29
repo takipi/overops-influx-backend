@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 
-import com.sun.corba.se.spi.orbutil.fsm.Guard.Result;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.Location;
 import com.takipi.api.client.data.event.Stats;
