@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 
+import com.sun.corba.se.spi.orbutil.fsm.Guard.Result;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.Location;
 import com.takipi.api.client.data.event.Stats;
@@ -28,6 +29,7 @@ public class EventsFunction extends GrafanaFunction {
 	private static final String RATE = "rate";
 	private static final String FIRST_SEEN = "first_seen";
 	private static final String LAST_SEEN = "last_seen";
+	private static final String MESSAGE = "message";
 
 	protected class EventData {
 		protected EventResult event;
@@ -156,6 +158,38 @@ public class EventsFunction extends GrafanaFunction {
 		}
 
 	}
+	
+	protected static class MessageFormatter extends FieldFormatter {
+
+		@Override
+		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
+				Pair<DateTime, DateTime> timeSpan) {
+
+			boolean hasMessage = (eventData.event.message !=  null) 
+				&& (!eventData.event.message.trim().isEmpty());
+
+			if (eventData.event.type.toLowerCase().contains("exception")) {
+				
+				StringBuilder result = new StringBuilder();
+				result.append(eventData.event.name);
+				
+				if (hasMessage) {
+					result.append(": ");
+					result.append(eventData.event.message);
+				}	
+				
+				return result.toString();
+			} else {
+				
+				if (hasMessage) {
+					return eventData.event.message;
+				} else {
+					return eventData.event.type;
+				}		
+			}			
+		}
+
+	}
 
 	protected static class RateFormatter extends FieldFormatter {
 
@@ -182,7 +216,11 @@ public class EventsFunction extends GrafanaFunction {
 		if (column.equals(RATE)) {
 			return new RateFormatter();
 		}
-
+		
+		if (column.equals(MESSAGE)) {
+			return new MessageFormatter();
+		}
+		
 		Field field = getReflectField(column);
 
 		if ((column.equals(FIRST_SEEN)) || (column.equals(LAST_SEEN))) {

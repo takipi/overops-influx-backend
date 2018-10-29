@@ -128,5 +128,4 @@ public abstract class BaseVolumeFunction extends GrafanaFunction {
 
 		return volume;
 	}
-
 }

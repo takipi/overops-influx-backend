@@ -64,6 +64,10 @@ public class FilterInput extends EnvironmentsInput {
 	public boolean hasApplications() {
 		return hasFilter(applications);
 	}
+	
+	public boolean hasTransactions() {
+		return hasFilter(transactions);
+	}
 
 	public boolean hasServers() {
 		return hasFilter(servers);

@@ -21,7 +21,7 @@ public class EventLinkEncoder {
 
 		return value;
 	}
-	
+
 	private static String decodeSafe(String value) {
 		if (value.equals("*")) {
 			return "";
@@ -30,36 +30,40 @@ public class EventLinkEncoder {
 		return value;
 	}
 
-	public static String getSnapshotLink(ApiClient apiClient, String value) {
+	public static String getSnapshotLink(ApiClient apiClient, String link) {
 
-		String[] parts = value.split(Pattern.quote("#"));
+		if ((link == null) || (link.isEmpty())) {
+			throw new IllegalArgumentException("link");
+		}
+
+		String[] parts = link.split(Pattern.quote("#"));
 
 		if (parts.length < 4) {
-			throw new IllegalArgumentException("Cannot decode " + value);
+			throw new IllegalArgumentException("Cannot decode " + link);
 		}
 
 		String serviceId = parts[0];
 		String eventId = String.valueOf(TimeUtils.decodeBase64(parts[1]));
-		
+
 		long fromValue = TimeUtils.decodeBase64(parts[2]);
 		long toDelta = TimeUtils.decodeBase64(parts[3]);
 
 		String from = TimeUtils.getDateTimeFromEpoch(fromValue);
 		String to = TimeUtils.getDateTimeFromEpoch(fromValue + toDelta);
-		
+
 		EventSnapshotRequest.Builder builder = EventSnapshotRequest.newBuilder().setFrom(from).setTo(to)
 				.setServiceId(serviceId).setEventId(eventId);
-		
+
 		if (parts.length > 4) {
-		
+
 			if (parts.length < 7) {
-				throw new IllegalArgumentException("Cannot decode " + value);
+				throw new IllegalArgumentException("Cannot decode " + link);
 			}
-			
+
 			String apps = decodeSafe(parts[4]);
 			String servers = decodeSafe(parts[5]);
 			String deployments = decodeSafe(parts[6]);
-			
+
 			FilterInput request = new FilterInput();
 			request.applications = apps;
 			request.servers = servers;
@@ -69,24 +73,36 @@ public class EventLinkEncoder {
 
 		}
 
+		Response<String> testConResponse = apiClient.testConnection();
+
+		if (!testConResponse.isOK()) {
+			throw new IllegalStateException("Could not validate connection for " + apiClient.getHostname() + " code: "
+					+ testConResponse.responseCode);
+		}
+
 		Response<EventSnapshotResult> response = apiClient.get(builder.build());
 
 		if ((response.isOK()) && (response.data != null)) {
 			return response.data.link;
 		}
-		
-		DateTime now = DateTime.now();
-		
-		builder.setFrom(TimeUtils.toString(now.minusMonths(1)));
-		builder.setTo(TimeUtils.toString(now));
 
-		response = apiClient.get(builder.build());
+		DateTime now = DateTime.now();
+
+		EventSnapshotRequest.Builder defaultBuilder = EventSnapshotRequest.newBuilder().setServiceId(serviceId)
+				.setEventId(eventId);
+
+		defaultBuilder.setFrom(TimeUtils.toString(now.minusMonths(1)));
+		defaultBuilder.setTo(TimeUtils.toString(now));
+
+		response = apiClient.get(defaultBuilder.build());
 
 		if ((response.isOK()) && (response.data != null)) {
 			return response.data.link;
 		}
-		
-		throw new IllegalStateException("Could not provide link for " + value);
+
+		throw new IllegalStateException("Could not provide link for for event " + eventId + 
+			" in " + serviceId + " Code: " + response.responseCode + " from "
+				+ apiClient.getHostname());
 
 	}
 
@@ -101,8 +117,8 @@ public class EventLinkEncoder {
 		builder.append(TimeUtils.encodeBase64(from.getMillis()));
 		builder.append("#");
 		builder.append(TimeUtils.encodeBase64(TimeUtils.getDateTimeDelta(from, to)));
-		
-		if ((input.hasApplications())|| (input.hasServers()) || (input.hasDeployments())) {
+
+		if ((input.hasApplications()) || (input.hasServers()) || (input.hasDeployments())) {
 			builder.append("#");
 			builder.append(encodeSafe(input.applications));
 			builder.append("#");
@@ -112,8 +128,8 @@ public class EventLinkEncoder {
 		}
 
 		String result = builder.toString();
-		
+
 		return result;
 	}
-	
+
 }

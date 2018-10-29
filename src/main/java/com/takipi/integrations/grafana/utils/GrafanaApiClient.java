@@ -26,8 +26,8 @@ public class GrafanaApiClient {
 				throw new IllegalArgumentException(authProp);
 			}
 			
-			host = authProp.substring(1, index);
-			token = authProp.substring(index + 1, authProp.length() - 1);
+			host = authProp.substring(0, index);
+			token = authProp.substring(index + 1, authProp.length());
 		}
 		
 		return getApiClient(host, token);

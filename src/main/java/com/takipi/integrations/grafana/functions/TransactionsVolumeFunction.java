@@ -2,6 +2,7 @@ package com.takipi.integrations.grafana.functions;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.takipi.api.client.ApiClient;
@@ -50,7 +51,11 @@ public class TransactionsVolumeFunction extends BaseVolumeFunction {
 
 		long transactionTotal = 0;
 
-		 Collection<Transaction> transactions = getTransactions(serviceId, viewId, timeSpan, input);
+		Collection<Transaction> transactions = getTransactions(serviceId, viewId, timeSpan, input);
+		
+		if (transactions == null) {
+			return result;
+		}
 		
 		if ((input.volumeType.equals(TransactionVolumeType.avg)) 
 		|| (input.volumeType.equals(TransactionVolumeType.invocations))) {
@@ -63,8 +68,11 @@ public class TransactionsVolumeFunction extends BaseVolumeFunction {
 
 			if (input.volumeType.equals(TransactionVolumeType.avg)) {
 				for (Transaction transaction : transactions) {
-					double rate = (double) transaction.stats.invocations / (double) (transactionTotal);
-					result.avgTime += transaction.stats.avg_time * rate;
+					
+					if (transactionTotal > 0) {
+						double rate = (double) transaction.stats.invocations / (double) (transactionTotal);
+						result.avgTime += transaction.stats.avg_time * rate;
+					}
 				}
 			}
 		}
@@ -104,7 +112,10 @@ public class TransactionsVolumeFunction extends BaseVolumeFunction {
 				break;
 
 			case avg:
-				volume.sum += serviceVolume.avgTime * (double) serviceVolume.invocations / (double) totalInvocations;
+				
+				if (totalInvocations > 0) {
+					volume.sum += serviceVolume.avgTime * (double) serviceVolume.invocations / (double) totalInvocations;
+				}
 				break;
 
 			case count:

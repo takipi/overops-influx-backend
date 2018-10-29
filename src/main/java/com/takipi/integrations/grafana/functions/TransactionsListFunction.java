@@ -145,8 +145,18 @@ public class TransactionsListFunction extends GrafanaFunction {
 				
 		Collection<Transaction> transactions = getTransactions(serviceId, viewId, timeSpan, input);
 
-		Collection<String> transactionsFilter = input.getTransactions(serviceId);
+		if (transactions == null) {
+			return Collections.emptyMap();
+		}
 		
+		Collection<String> transactionsFilter;
+		
+		if (input.hasTransactions()) {
+			transactionsFilter = input.getTransactions(serviceId);
+		} else {
+			transactionsFilter = null;
+		}
+				
 		Map<String, TransactionData> result = new HashMap<String, TransactionData>();
 
 		for (Transaction transaction :transactions) {

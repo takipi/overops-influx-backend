@@ -139,7 +139,7 @@ public abstract class GrafanaFunction {
 
 		Collection<Transaction> result;
 
-		if (input.transactions != null) {
+		if (input.hasTransactions()) {
 
 			result = new ArrayList<Transaction>(response.data.transactions.size());
 			Collection<String> transactions = input.getTransactions(serviceId);

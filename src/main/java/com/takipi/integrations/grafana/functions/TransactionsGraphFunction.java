@@ -77,14 +77,14 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		
 		validateResponse(response);
 		
-		if (response.data == null) {
+		if ((response.data == null) || (response.data.graphs == null)) { 
 
 			return Collections.emptyList();
 		}
 
 		Collection<String> transactions;
 
-		if (input.transactions != null) {
+		if (input.hasTransactions()) {
 			transactions = input.getTransactions(serviceId);
 		} else {
 			transactions = null;
