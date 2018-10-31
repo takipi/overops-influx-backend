@@ -12,15 +12,29 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+apply plugin: 'maven'
+
+group = 'com.takipi'
+version =  '0.2.2'
+//rootProject.name = 'overops-as-influx'
+
+// bootJar {
+//   baseName = 'overops-as-influx'
+// }
+
+jar {
+	enabled = true
+}
 
 bootJar {
-    baseName = 'overops-as-influx'
-    version =  '0.2.1'
+	classifier = 'boot'
 }
 
 repositories {
-    mavenCentral()
     mavenLocal()
+    mavenCentral()
 }
 
 sourceCompatibility = 1.8
@@ -30,10 +44,60 @@ dependencies {
     compile(
       "org.springframework.boot:spring-boot-starter-web",
       "org.apache.commons:commons-lang3:3.7",
-      "com.takipi:api-client:2.1.0",
-      "com.takipi:api-client-util:2.1.0",
+      "com.takipi:api-client:2.1.2",
+      "com.takipi:api-client-util:2.1.2",
       "org.ocpsoft.prettytime:prettytime:4.0.2.Final"
     )
     
     testCompile("junit:junit")
 }
+// 
+// task javadocJar(type: Jar) {
+//     classifier = 'javadoc'
+//     from javadoc
+// }
+// task sourcesJar(type: Jar) {
+//     classifier = 'sources'
+//     from sourceSets.main.allSource
+// }
+// artifacts {
+//     archives javadocJar, sourcesJar
+// }
+// signing {
+//     required { gradle.taskGraph.hasTask("uploadArchives") }
+//     sign configurations.archives
+// }
+// uploadArchives {
+//   repositories {
+//     mavenDeployer {
+//       beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+// 
+//       repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+//         authentication(userName: findProperty('ossrhUsername'), password: findProperty('ossrhPassword'))
+//       }
+// 
+//       snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+//         authentication(userName: findProperty('ossrhUsername'), password: findProperty('ossrhPassword'))
+//       }
+//       pom.project {
+//         packaging 'jar'
+//         url 'https://github.com/takipi-field/overops-as-influx'
+// 
+//         licenses {
+//           license {
+//             name 'MIT License'
+//             url 'http://www.opensource.org/licenses/mit-license.php'
+//           }
+//         }
+// 
+//         developers {
+//           developer {
+//             id 'chook'
+//             name 'Chen Harel'
+//             email 'chen.harel@takipi.com'
+//           }
+//         }
+//       }
+//     }
+//   }
+// }
