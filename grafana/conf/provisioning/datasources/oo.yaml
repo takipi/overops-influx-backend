@@ -1,0 +1,12 @@
+apiVersion: 1
+
+datasources:
+- name: OO
+  type: influxdb
+  access: proxy
+  database: telegraf
+  user: grafana
+  password: grafana
+  url: http://localhost:8186 # assuming OverOps-as-influx
+# url: http://localhost:8080 # assuming OverOps Server 
+
