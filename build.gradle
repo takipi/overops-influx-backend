@@ -30,8 +30,8 @@ dependencies {
     compile(
       "org.springframework.boot:spring-boot-starter-web",
       "org.apache.commons:commons-lang3:3.7",
-      "com.takipi:api-client:2.1.0",
-      "com.takipi:api-client-util:2.1.0",
+      "com.takipi:api-client:2.1.3",
+      "com.takipi:api-client-util:2.1.3",
       "org.ocpsoft.prettytime:prettytime:4.0.2.Final"
     )
     

@@ -1,6 +1,7 @@
 package com.takipi.integrations.grafana.functions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +15,6 @@ import org.joda.time.format.ISODateTimeFormat;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.Location;
 import com.takipi.api.client.data.metrics.Graph;
-import com.takipi.api.client.data.service.SummarizedService;
 import com.takipi.api.client.data.transaction.Transaction;
 import com.takipi.api.client.data.view.SummarizedView;
 import com.takipi.api.client.request.TimeframeRequest;
@@ -28,21 +28,22 @@ import com.takipi.api.client.result.event.EventsResult;
 import com.takipi.api.client.result.event.EventsVolumeResult;
 import com.takipi.api.client.result.metrics.GraphResult;
 import com.takipi.api.client.result.transaction.TransactionsVolumeResult;
-import com.takipi.api.client.util.client.ClientUtil;
 import com.takipi.api.client.util.validation.ValidationUtil.GraphType;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.client.util.view.ViewUtil;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
+import com.takipi.integrations.grafana.input.EnvironmentsFilterInput;
 import com.takipi.integrations.grafana.input.EnvironmentsInput;
-import com.takipi.integrations.grafana.input.FilterInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
 
 public abstract class GrafanaFunction {
 
+	private static int MAX_COMBINE_SERVICES = 3;
+	
 	public interface FunctionFactory {
 		public GrafanaFunction create(ApiClient apiClient);
 		public Class<?> getInputClass();
@@ -91,22 +92,12 @@ public abstract class GrafanaFunction {
 	protected static String formatLocation(Location location) {
 		return getSimpleClassName(location.class_name) + "." + location.method_name;
 	}
-
+	
 	protected String[] getServiceIds(EnvironmentsInput input) {
+		
 		String[] serviceIds = input.getServiceIds();
-
-		if (serviceIds.length != 0) {
-			return serviceIds;
-		}
-
-		List<SummarizedService> services = ClientUtil.getEnvironments(apiClient);
-
-		String[] result = new String[services.size()];
-
-		for (int i = 0; i < services.size(); i++) {
-			result[i] = services.get(i).id;
-		}
-
+		String[] result =  Arrays.copyOf(serviceIds, Math.min(MAX_COMBINE_SERVICES, serviceIds.length));	
+		
 		return result;
 	}
 
@@ -119,7 +110,7 @@ public abstract class GrafanaFunction {
 	}
 
 	protected Collection<Transaction> getTransactions(String serviceId, String viewId, Pair<String, String> timeSpan,
-			FilterInput input) {
+			ViewInput input) {
 		
 		TransactionsVolumeRequest.Builder builder = TransactionsVolumeRequest.newBuilder().setServiceId(serviceId)
 				.setViewId(viewId).setFrom(timeSpan.getFirst()).setTo(timeSpan.getSecond());
@@ -160,6 +151,57 @@ public abstract class GrafanaFunction {
 		}
 
 		return result;
+	}
+	
+	public static int compareDeployments(Object o1, Object o2) {
+		
+		double i1 = getDeplyomentNumber(o1.toString());
+		double i2 = getDeplyomentNumber(o2.toString());
+
+		double d = i2 - i1;
+
+		if (d == 0) {
+			return 0;
+		}
+
+		if (d < 0) {
+			return -1;
+		}
+
+		return 1;
+
+	}
+	
+	private static double getDeplyomentNumber(String value) {
+
+		boolean hasDot = false;
+		boolean hasNums = false;
+
+		StringBuilder number = new StringBuilder();
+
+		for (int i = 0; i < value.length(); i++) {
+			char c = value.charAt(i);
+
+			if (c == '.') {
+				if (!hasDot) {
+					number.append(c);
+					hasDot = true;
+				}
+				continue;
+			}
+
+			if ((c >= '0') && (c <= '9')) {
+				number.append(c);
+				hasNums = true;
+			}
+		}
+
+		if (hasNums) {
+			double result = Double.parseDouble(number.toString());
+			return result;
+		} else {
+			return -1;
+		}
 	}
 	
 	protected static Graph getEventsGraph(ApiClient apiClient, String serviceId, String viewId, int pointsCount,
@@ -250,17 +292,17 @@ public abstract class GrafanaFunction {
 		return result;
 	}
 
-	public static void applyFilters(FilterInput request, String serviceId, TimeframeRequest.Builder builder) {
+	public static void applyFilters(EnvironmentsFilterInput input, String serviceId, TimeframeRequest.Builder builder) {
 
-		for (String app : request.getApplications(serviceId)) {
+		for (String app : input.getApplications(serviceId)) {
 			builder.addApp(app);
 		}
 
-		for (String dep : request.getDeployments(serviceId)) {
+		for (String dep : input.getDeployments(serviceId)) {
 			builder.addDeployment(dep);
 		}
 
-		for (String server : request.getServers(serviceId)) {
+		for (String server : input.getServers(serviceId)) {
 			builder.addServer(server);
 		}
 	}

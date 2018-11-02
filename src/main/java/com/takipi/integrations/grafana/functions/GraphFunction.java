@@ -167,9 +167,18 @@ public class GraphFunction extends BaseGraphFunction {
 		long volume = 0;
 	
 		List<List<Object>> values = new ArrayList<List<Object>>(graph.points.size());
-		EventFilter eventFilter = input.getEventFilter(serviceId);
+		
+		EventFilter eventFilter;
+		Map<String, EventResult> eventMap;
+		
+		if (input.hasEventFilter()) {
+			eventMap = getEventMap(serviceId, viewId, timeSpan);
+			eventFilter = input.getEventFilter(serviceId);
 
-		Map<String, EventResult> eventMap = getEventMap(serviceId, viewId, timeSpan);
+		} else {
+			eventMap= null;
+			eventFilter = null;
+		}
 		
 		for (GraphPoint gp : graph.points) {
 
