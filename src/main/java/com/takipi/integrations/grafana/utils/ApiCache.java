@@ -30,7 +30,7 @@ public class ApiCache {
 	private static final int CACHE_SIZE = 1000;
 	private static final int CACHE_RETENTION = 2;
 
-	protected static class CacheKey {
+	protected abstract static class CacheKey {
 
 		protected ApiClient apiClient;
 		protected ApiGetRequest<?> request;
@@ -62,7 +62,7 @@ public class ApiCache {
 		}
 	}
 
-	protected static class ServiceCacheKey extends CacheKey {
+	protected abstract static class ServiceCacheKey extends CacheKey {
 
 		protected String serviceId;
 
@@ -93,7 +93,7 @@ public class ApiCache {
 
 		@Override
 		public int hashCode() {
-			return apiClient.getHostname().hashCode();
+			return super.hashCode() ^ serviceId.hashCode();
 		}
 	}
 
@@ -160,7 +160,7 @@ public class ApiCache {
 
 		@Override
 		public int hashCode() {
-			return serviceId.hashCode() ^ input.view.hashCode();
+			return super.hashCode() ^ serviceId.hashCode();
 		}
 		
 		@Override
@@ -171,7 +171,7 @@ public class ApiCache {
 		}
 	}
 	
-	protected static class VolumeKey extends ViewCacheKey {
+	protected abstract static class VolumeKey extends ViewCacheKey {
 
 		protected VolumeType volumeType;
 
@@ -327,7 +327,6 @@ public class ApiCache {
 			throw new IllegalStateException(e);
 		}
 	}
-
 	
 	@SuppressWarnings("unchecked")
 	public static Response<TransactionsVolumeResult> getTransactionsVolume(ApiClient apiClient, String serviceId, 
