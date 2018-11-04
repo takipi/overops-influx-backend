@@ -39,10 +39,10 @@ import com.takipi.integrations.grafana.input.EnvironmentsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.utils.ApiCache;
-import com.takipi.integrations.grafana.utils.ApiCache.EventKey;
-import com.takipi.integrations.grafana.utils.ApiCache.GraphKey;
-import com.takipi.integrations.grafana.utils.ApiCache.TransactionsCacheKey;
+import com.takipi.integrations.grafana.util.ApiCache;
+import com.takipi.integrations.grafana.util.ApiCache.EventKey;
+import com.takipi.integrations.grafana.util.ApiCache.GraphKey;
+import com.takipi.integrations.grafana.util.ApiCache.TransactionsCacheKey;
 
 public abstract class GrafanaFunction {
 

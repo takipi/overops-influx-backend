@@ -20,10 +20,9 @@ import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.utils.TimeUtils;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class GraphFunction extends BaseGraphFunction {
-
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -75,7 +74,7 @@ public class GraphFunction extends BaseGraphFunction {
 		Series series = new Series();
 
 		String tagName = getSeriesName(input, input.seriesName, viewName, serviceId, serviceIds);
-		SeriesVolume seriesData = processGraphPoints(serviceId, viewId, timeSpan, graph, graphInput);
+		SeriesVolume seriesData = processGraphPoints(serviceId, timeSpan, graph, graphInput);
 
 		series.name = EMPTY_NAME;
 		series.columns = Arrays.asList(new String[] { TIME_COLUMN, tagName });
@@ -144,7 +143,7 @@ public class GraphFunction extends BaseGraphFunction {
 		return result;
 	}
 
-	private SeriesVolume processGraphPoints(String serviceId, String viewId, 
+	private SeriesVolume processGraphPoints(String serviceId, 
 			Pair<DateTime, DateTime> timeSpan, Graph graph, GraphInput input) {
 
 		long volume = 0;
@@ -155,16 +154,14 @@ public class GraphFunction extends BaseGraphFunction {
 		Map<String, EventResult> eventMap;
 		
 		if (input.hasEventFilter()) {
-			eventMap = getEventMap(serviceId, input, TimeUtils.toTimespan(timeSpan), null);
+			eventMap = getEventMap(serviceId, input, TimeUtil.toTimespan(timeSpan), null);
 			eventFilter = input.getEventFilter(serviceId);
-
 		} else {
-			eventMap= null;
+			eventMap = null;
 			eventFilter = null;
 		}
 		
 		for (GraphPoint gp : graph.points) {
-
 			if (gp.contributors == null) {
 				continue;
 			}
@@ -178,7 +175,7 @@ public class GraphFunction extends BaseGraphFunction {
 					EventResult event = eventMap.get(gpc.id);
 
 					//if the event wasn't found we err on the side of adding its stats.
-					if ((event != null) && (eventFilter.filter(event))) {
+					if ((event != null) && (eventFilter != null) && (eventFilter.filter(event))) {
 						continue;
 					}
 				}

@@ -24,9 +24,9 @@ import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.utils.ApiCache;
-import com.takipi.integrations.grafana.utils.TimeUtil;
-import com.takipi.integrations.grafana.utils.ApiCache.TransactionsGraphCacheKey;
+import com.takipi.integrations.grafana.util.ApiCache;
+import com.takipi.integrations.grafana.util.ApiCache.TransactionsGraphCacheKey;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionsGraphFunction extends BaseGraphFunction {
 

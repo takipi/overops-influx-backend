@@ -19,7 +19,7 @@ import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.RegressionsInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.utils.EventLinkEncoder;
+import com.takipi.integrations.grafana.util.EventLinkEncoder;
 
 public class RegressionFunction extends EventsFunction {
 
@@ -208,7 +208,7 @@ public class RegressionFunction extends EventsFunction {
 		RateRegression rateRegression = RegressionUtil.calculateRateRegressions(apiClient, regressionInput, System.out,
 				false);
 
-		return processRegressionData(serviceId, rateRegression, regInput, timeSpan);
+		return processRegressionData(rateRegression);
 	}
 
 	@Override

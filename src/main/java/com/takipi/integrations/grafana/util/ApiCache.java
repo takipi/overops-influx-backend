@@ -1,4 +1,4 @@
-package com.takipi.integrations.grafana.utils;
+package com.takipi.integrations.grafana.util;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
@@ -15,12 +15,10 @@ import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.integrations.grafana.input.ViewInput;
 
 public class ApiCache {
-
 	private static final int CACHE_SIZE = 1000;
 	private static final int CACHE_RETENTION = 2;
 
-	public static class CacheKey {
-
+	public static abstract class CacheKey {
 		protected ApiClient apiClient;
 		protected ApiGetRequest<?> request;
 
@@ -31,7 +29,6 @@ public class ApiCache {
 
 		@Override
 		public boolean equals(Object obj) {
-
 			if (!(obj instanceof CacheKey)) {
 				return false;
 			}
@@ -52,17 +49,16 @@ public class ApiCache {
 	}
 
 	public static class ServiceCacheKey extends CacheKey {
-
 		protected String serviceId;
 
 		public ServiceCacheKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId) {
 			super(apiClient, request);
+			
 			this.serviceId = serviceId;
 		}
 
 		@Override
 		public boolean equals(Object obj) {
-
 			if (!(obj instanceof ServiceCacheKey)) {
 				return false;
 			}
@@ -87,17 +83,15 @@ public class ApiCache {
 	}
 
 	public static class ViewCacheKey extends ServiceCacheKey {
-
 		protected ViewInput input;
 
 		public ViewCacheKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input) {
-
 			super(apiClient, request, serviceId);
+			
 			this.input = input;
 		}
 		
 		private static boolean compare(Collection<String> a, Collection<String> b) {
-			
 			if (a.size() != b.size()) {
 				return false;
 			}
@@ -113,7 +107,6 @@ public class ApiCache {
 
 		@Override
 		public boolean equals(Object obj) {
-
 			if (!(obj instanceof ViewCacheKey)) {
 				return false;
 			}
@@ -161,19 +154,17 @@ public class ApiCache {
 	}
 	
 	public static class EventKey extends ViewCacheKey {
-
 		protected VolumeType volumeType;
 
 		public EventKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
 				VolumeType volumeType) {
-
 			super(apiClient, request, serviceId, input);
+			
 			this.volumeType = volumeType;
 		}
 		
 		@Override
 		public boolean equals(Object obj) {
-
 			if (!(obj instanceof EventKey)) {
 				return false;
 			}
@@ -203,7 +194,6 @@ public class ApiCache {
 
 		@Override
 		public boolean equals(Object obj) {
-
 			if (!(obj instanceof GraphKey)) {
 				return false;
 			}
@@ -223,8 +213,8 @@ public class ApiCache {
 
 		public GraphKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
 				VolumeType volumeType, int pointsWanted) {
-
 			super(apiClient, request, serviceId, input, volumeType);
+			
 			this.pointsWanted = pointsWanted;
 		}
 	}
@@ -233,7 +223,6 @@ public class ApiCache {
 
 		@Override
 		public boolean equals(Object obj) {
-
 			if (!(obj instanceof TransactionsCacheKey)) {
 				return false;
 			}
@@ -247,7 +236,6 @@ public class ApiCache {
 
 		public TransactionsCacheKey(ApiClient apiClient, ApiGetRequest<?> request, 
 			String serviceId, ViewInput input) {
-
 			super(apiClient, request, serviceId, input);
 		}
 	}
@@ -258,7 +246,6 @@ public class ApiCache {
 
 		@Override
 		public boolean equals(Object obj) {
-
 			if (!(obj instanceof TransactionsCacheKey)) {
 				return false;
 			}
@@ -278,8 +265,8 @@ public class ApiCache {
 
 		public TransactionsGraphCacheKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
 				int pointsWanted) {
-			
 			super(apiClient, request, serviceId, input);
+			
 			this.pointsWanted = pointsWanted;
 		}
 	}
@@ -292,12 +279,15 @@ public class ApiCache {
 		}
 	}
 
-	private static final LoadingCache<CacheKey, Response<?>> cache = CacheBuilder.newBuilder().maximumSize(CACHE_SIZE)
-			.expireAfterWrite(CACHE_RETENTION, TimeUnit.MINUTES).build(new CacheLoader<CacheKey, Response<?>>() {
+	private static final LoadingCache<CacheKey, Response<?>> cache = CacheBuilder.newBuilder()
+			.maximumSize(CACHE_SIZE)
+			.expireAfterWrite(CACHE_RETENTION, TimeUnit.MINUTES)
+			.build(new CacheLoader<CacheKey, Response<?>>() {
+				
+				@Override
 				public Response<?> load(CacheKey key) {
 					Response<?> result = key.apiClient.get(key.request);
 					return result;
 				}
 			});
-
 }
