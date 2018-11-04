@@ -36,19 +36,15 @@ public class EventLinkEncoder {
 		GrafanaFunction.applyFilters(input, serviceId, builder);
 		EventSnapshotRequest request = builder.build();
 
-		String json = String.format(TEMPLATE, serviceId, toEpoch(from), toEpoch(to),
+		String json = String.format(TEMPLATE, serviceId, TimeUtil.getMillisAsString(from), TimeUtil.getMillisAsString(to),
 				toList(request.servers), toList(request.apps), toList(request.deployments),
-				event.id, toEpoch(to));
+				event.id, TimeUtil.getMillisAsString(to));
 
 		String encoded = Base64.getUrlEncoder().encodeToString(json.getBytes());
 
 		return Link.newLink(encoded);
 	}
-
-	private static String toEpoch(DateTime date) {
-		return String.valueOf(date.getMillis());
-	}
-
+	
 	private static String toList(Collection<String> col) {
 		List<String> lst = Lists.newArrayList(col);
 
