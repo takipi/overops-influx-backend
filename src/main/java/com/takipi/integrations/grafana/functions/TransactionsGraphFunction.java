@@ -26,7 +26,6 @@ import com.takipi.integrations.grafana.input.TransactionsGraphInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.utils.ApiCache;
 import com.takipi.integrations.grafana.utils.TimeUtils;
-import com.takipi.integrations.grafana.utils.ApiCache.TransactionsGraphCacheKey;
 
 public class TransactionsGraphFunction extends BaseGraphFunction {
 
@@ -62,7 +61,6 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		super(apiClient);
 	}
 
-	@SuppressWarnings("unchecked")
 	protected List<GraphSeries> processServiceGraph(String serviceId, String viewId, String viewName,
 			BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, String[] serviceIds, int pointsWanted) {
 
@@ -76,9 +74,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 				
 		applyFilters(request, serviceId, builder);
 
-		TransactionsGraphCacheKey cacheKey = new TransactionsGraphCacheKey(apiClient, builder.build(), serviceId, input, pointsWanted);
-
-		Response<TransactionsGraphResult> response = (Response<TransactionsGraphResult>)ApiCache.getItem(cacheKey);
+		Response<TransactionsGraphResult> response = ApiCache.getTransactionsGraph(apiClient, serviceId, viewId, input, pointsWanted, builder.build());
 				
 		validateResponse(response);
 		
