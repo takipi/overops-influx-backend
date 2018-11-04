@@ -1,9 +1,7 @@
 package com.takipi.integrations.grafana.utils;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -21,37 +19,6 @@ public class TimeUtils {
 
 	private static final DateTimeFormatter fmt = ISODateTimeFormat.dateTime().withZoneUTC();
 	private static final PrettyTime prettyTime = new PrettyTime();
-
-
-	private static final String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-";
-
-	public static String encodeBase64(long v) {
-		char[] a = alphabet.toCharArray();
-		v = Math.abs(v);
-		String s = "";
-		for (int i = 0; i < 11; i++) {
-			long val = v & 63;
-			s = a[(int) val] + s;
-			v >>= 6;
-		}
-		while (s.startsWith("A") && s.length() > 1)
-			s = s.substring(1, s.length());
-		return s;
-	}
-
-	public static long decodeBase64(String s) {
-		char[] a = alphabet.toCharArray();
-		Map<Character, Integer> map = new HashMap<>();
-		for (int i = 0; i < a.length; i++)
-			map.put(a[i], i);
-		char[] chars = s.toCharArray();
-		long v = 0;
-		for (char c : chars) {
-			v <<= 6;
-			v = v | map.get(c);
-		}
-		return v;
-	}
 
 	public static String getDateTimeFromEpoch(long epoch) {
 		return new DateTime(epoch).toString(fmt);

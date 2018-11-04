@@ -19,6 +19,7 @@ import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.utils.ArrayUtils;
 import com.takipi.integrations.grafana.utils.EventLinkEncoder;
 import com.takipi.integrations.grafana.utils.TimeUtils;
+import com.takipi.integrations.grafana.utils.EventLinkEncoder.Link;
 
 public class EventsFunction extends GrafanaFunction {
 
@@ -73,7 +74,6 @@ public class EventsFunction extends GrafanaFunction {
 			}
 
 			if ((value instanceof String) && (input.maxColumnLength > 0)) {
-
 				String str = (String) value;
 
 				if (str.length() > input.maxColumnLength) {
@@ -82,7 +82,10 @@ public class EventsFunction extends GrafanaFunction {
 				} else {
 					return str;
 				}
-
+			}
+			
+			if (value instanceof Link) {
+				return ((Link)value).link;
 			}
 
 			return value;
@@ -155,7 +158,6 @@ public class EventsFunction extends GrafanaFunction {
 			return EventLinkEncoder.encodeLink(serviceId, input, eventData.event, 
 				timeSpan.getFirst(), timeSpan.getSecond());
 		}
-
 	}
 	
 	protected static class MessageFormatter extends FieldFormatter {
@@ -203,7 +205,6 @@ public class EventsFunction extends GrafanaFunction {
 				return "NA";
 			}
 		}
-
 	}
 
 	protected FieldFormatter getFormatter(String column) {
@@ -231,7 +232,6 @@ public class EventsFunction extends GrafanaFunction {
 		}
 
 		return new ReflectFormatter(field);
-
 	}
 
 	private Collection<FieldFormatter> getFieldFormatters(String columns) {
@@ -316,7 +316,6 @@ public class EventsFunction extends GrafanaFunction {
 		}
 
 		return result;
-
 	}
 
 	private static List<String> getColumns(String fields) {
