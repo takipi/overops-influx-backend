@@ -16,7 +16,7 @@ import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.TransactionsListIput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.utils.TimeUtils;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionsListFunction extends GrafanaFunction {
 
@@ -189,7 +189,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 
 		TransactionsListIput input = (TransactionsListIput) functionInput;
 
-		Pair<String, String> timeSpan = TimeUtils.parseTimeFilter(input.timeFilter);
+		Pair<String, String> timeSpan = TimeUtil.parseTimeFilter(input.timeFilter);
 		String[] serviceIds = getServiceIds(input);
 
 		Series series = new Series();

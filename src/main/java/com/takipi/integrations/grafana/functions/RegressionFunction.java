@@ -21,7 +21,7 @@ import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.RegressionsInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.utils.TimeUtils;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class RegressionFunction extends EventsFunction {
 
@@ -142,7 +142,7 @@ public class RegressionFunction extends EventsFunction {
 			return null;
 		}
 
-		DateTime result = TimeUtils.getDateTime(graph.points.get(0).time);
+		DateTime result = TimeUtil.getDateTime(graph.points.get(0).time);
 
 		return result;
 	}
@@ -197,7 +197,7 @@ public class RegressionFunction extends EventsFunction {
 
 			if (depStartTime != null) {
 				DateTime timeDelta = DateTime.now().minus(depStartTime.getMillis());
-				activeTimespan = TimeUtils.toMinutes(timeDelta.getMillis());
+				activeTimespan = TimeUtil.toMinutes(timeDelta.getMillis());
 			} else {
 				activeTimespan = regInput.activeTimespan;
 			}

@@ -1,4 +1,4 @@
-package com.takipi.integrations.grafana.utils;
+package com.takipi.integrations.grafana.util;
 
 import java.util.Date;
 import java.util.List;
@@ -10,8 +10,7 @@ import org.ocpsoft.prettytime.PrettyTime;
 
 import com.takipi.common.util.Pair;
 
-public class TimeUtils {
-
+public class TimeUtil {
 	private static final String LAST_TIME_WINDOW = "time >= now() - ";
 	private static final String SO_FAR_WINDOW = "time >= ";
 	private static final String RANGE_WINDOW = "and time <= ";
@@ -90,7 +89,7 @@ public class TimeUtils {
 
 	public static int getStartDateTimeIndex(List<Pair<DateTime, DateTime>> intervals, String value) {
 
-		DateTime dateTime = TimeUtils.getDateTime(value);
+		DateTime dateTime = TimeUtil.getDateTime(value);
 
 		for (int i = 0; i < intervals.size(); i++) {
 			

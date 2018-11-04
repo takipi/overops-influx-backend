@@ -13,7 +13,7 @@ import com.takipi.integrations.grafana.input.BaseVolumeInput;
 import com.takipi.integrations.grafana.input.BaseVolumeInput.AggregationType;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.utils.TimeUtils;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public abstract class BaseVolumeFunction extends GrafanaFunction {
 
@@ -68,7 +68,7 @@ public abstract class BaseVolumeFunction extends GrafanaFunction {
 			throw new IllegalStateException(input.type);
 		}
 
-		Long time = Long.valueOf(TimeUtils.getLongTime(timeSpan.getSecond()));
+		Long time = Long.valueOf(TimeUtil.getLongTime(timeSpan.getSecond()));
 
 		series.values = Collections.singletonList(Arrays.asList(new Object[] { time, value }));
 

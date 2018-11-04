@@ -8,7 +8,7 @@ import org.joda.time.DateTime;
 
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.common.util.Pair;
-import com.takipi.integrations.grafana.utils.TimeUtils;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class EventFilter {
 	
@@ -34,7 +34,7 @@ public class EventFilter {
 		}
 		
 		if (firstSeen != null) {
-			result.firstSeen = TimeUtils.getTimeFilter(firstSeen);
+			result.firstSeen = TimeUtil.getTimeFilter(firstSeen);
 		}
 
 		return result;
@@ -113,7 +113,7 @@ public class EventFilter {
 		}
 		
 		if (firstSeen != null) {
-			DateTime eventFirstSeen = TimeUtils.getDateTime(event.first_seen);
+			DateTime eventFirstSeen = TimeUtil.getDateTime(event.first_seen);
 			
 			boolean inRange = (eventFirstSeen.isAfter(firstSeen.getFirst())) 
 				&& (eventFirstSeen.isBefore(firstSeen.getSecond()));

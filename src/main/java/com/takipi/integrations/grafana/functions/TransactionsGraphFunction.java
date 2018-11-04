@@ -24,7 +24,7 @@ import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.utils.TimeUtils;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionsGraphFunction extends BaseGraphFunction {
 
@@ -66,7 +66,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 
 		TransactionsGraphInput input = (TransactionsGraphInput) request;
 
-		Pair<String, String> fromTo = TimeUtils.toTimespan(timeSpan);
+		Pair<String, String> fromTo = TimeUtil.toTimespan(timeSpan);
 				
 		TransactionsGraphRequest.Builder builder = TransactionsGraphRequest.newBuilder().setServiceId(serviceId)
 				.setViewId(viewId).setFrom(fromTo.getFirst()).setTo(fromTo.getSecond())

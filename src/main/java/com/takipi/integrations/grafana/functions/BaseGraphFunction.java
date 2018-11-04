@@ -18,7 +18,7 @@ import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.utils.TimeUtils;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public abstract class BaseGraphFunction extends GrafanaFunction {
 
@@ -241,7 +241,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 
 		BaseGraphInput input = (BaseGraphInput) functionInput;
 
-		Pair<DateTime, DateTime> timeSpan = TimeUtils.getTimeFilter(input.timeFilter);
+		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
 
 		int pointsWanted = getPointsWanted(input, timeSpan);
 

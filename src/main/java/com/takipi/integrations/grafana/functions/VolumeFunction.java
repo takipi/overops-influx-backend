@@ -8,7 +8,7 @@ import com.takipi.integrations.grafana.input.BaseVolumeInput.AggregationType;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.VolumeInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.utils.TimeUtils;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class VolumeFunction extends BaseVolumeFunction {
 
@@ -49,7 +49,7 @@ public class VolumeFunction extends BaseVolumeFunction {
 			throw new IllegalArgumentException("VolumeType");
 		}
 
-		Pair<String, String> timeSpan = TimeUtils.parseTimeFilter(request.timeFilter);
+		Pair<String, String> timeSpan = TimeUtil.parseTimeFilter(request.timeFilter);
 		EventVolume volume = getEventVolume(request, request.volumeType, timeSpan);
 
 		return createSeries(request, timeSpan, volume, AggregationType.valueOf(request.type));

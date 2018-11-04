@@ -1,7 +1,7 @@
 package com.takipi.integrations.grafana.input;
 
 import com.takipi.integrations.grafana.functions.GrafanaFunction;
-import com.takipi.integrations.grafana.utils.ArrayUtils;
+import com.takipi.integrations.grafana.util.ArrayUtil;
 
 public class EnvironmentsInput extends VariableInput {
 	
@@ -13,7 +13,7 @@ public class EnvironmentsInput extends VariableInput {
 			return new String[0];
 		}
 
-		String[] serviceIds = ArrayUtils.safeSplitArray(environments, GrafanaFunction.GRAFANA_SEPERATOR, false);
+		String[] serviceIds = ArrayUtil.safeSplitArray(environments, GrafanaFunction.GRAFANA_SEPERATOR, false);
 		String[] result = new String[serviceIds.length];
 
 		for (int i = 0; i < serviceIds.length; i++) {

@@ -16,7 +16,7 @@ import com.google.gson.Gson;
 import com.takipi.integrations.grafana.functions.FunctionParser;
 import com.takipi.integrations.grafana.output.QueryResult;
 import com.takipi.integrations.grafana.servlet.ServletUtil.Auth;
-import com.takipi.integrations.grafana.utils.GrafanaApiClient;
+import com.takipi.integrations.grafana.util.GrafanaApiClient;
 
 @WebServlet(name="QueryServlet", urlPatterns="/query") // May be override by web.xml!
 public class QueryServlet extends HttpServlet {

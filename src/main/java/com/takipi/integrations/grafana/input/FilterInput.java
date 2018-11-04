@@ -9,7 +9,7 @@ import java.util.Set;
 
 import com.takipi.integrations.grafana.functions.EventFilter;
 import com.takipi.integrations.grafana.functions.GrafanaFunction;
-import com.takipi.integrations.grafana.utils.ArrayUtils;
+import com.takipi.integrations.grafana.util.ArrayUtil;
 
 public class FilterInput extends EnvironmentsInput {
 
@@ -30,7 +30,7 @@ public class FilterInput extends EnvironmentsInput {
 			return Collections.emptyList();
 		}
 
-		String[] values = ArrayUtils.safeSplitArray(value, GrafanaFunction.GRAFANA_SEPERATOR, false);
+		String[] values = ArrayUtil.safeSplitArray(value, GrafanaFunction.GRAFANA_SEPERATOR, false);
 		Set<String> result = new HashSet<String>();
 
 		for (int i = 0; i < values.length; i++) {

@@ -1,7 +1,6 @@
-package com.takipi.integrations.grafana.utils;
+package com.takipi.integrations.grafana.util;
 
-public class ArrayUtils {
-	
+public class ArrayUtil {
 	public static String[] safeSplitArray(String value, String seperator, boolean removeWhitespace) {
 		if ((value == null) || (value.isEmpty())) {
 			return new String[0];

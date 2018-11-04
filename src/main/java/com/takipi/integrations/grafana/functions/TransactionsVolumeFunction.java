@@ -12,7 +12,7 @@ import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.TransactionsVolumeInput;
 import com.takipi.integrations.grafana.input.TransactionsVolumeInput.TransactionVolumeType;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.utils.TimeUtils;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionsVolumeFunction extends BaseVolumeFunction {
 
@@ -141,7 +141,7 @@ public class TransactionsVolumeFunction extends BaseVolumeFunction {
 			throw new IllegalArgumentException("volumeType");
 		}
 
-		Pair<String, String> timeSpan = TimeUtils.parseTimeFilter(input.timeFilter);
+		Pair<String, String> timeSpan = TimeUtil.parseTimeFilter(input.timeFilter);
 		
 		EventVolume volume = getTransactionVolume(input, timeSpan);
 		

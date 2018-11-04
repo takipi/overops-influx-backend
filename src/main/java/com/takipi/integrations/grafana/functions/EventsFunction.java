@@ -16,10 +16,10 @@ import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.utils.ArrayUtils;
-import com.takipi.integrations.grafana.utils.EventLinkEncoder;
-import com.takipi.integrations.grafana.utils.TimeUtils;
-import com.takipi.integrations.grafana.utils.EventLinkEncoder.Link;
+import com.takipi.integrations.grafana.util.ArrayUtil;
+import com.takipi.integrations.grafana.util.EventLinkEncoder;
+import com.takipi.integrations.grafana.util.TimeUtil;
+import com.takipi.integrations.grafana.util.EventLinkEncoder.Link;
 
 public class EventsFunction extends GrafanaFunction {
 
@@ -145,7 +145,7 @@ public class EventsFunction extends GrafanaFunction {
 
 		@Override
 		protected Object formatValue(Object value, EventsInput input) {
-			return TimeUtils.prettifyTime((String) value);
+			return TimeUtil.prettifyTime((String) value);
 		}
 	}
 
@@ -240,7 +240,7 @@ public class EventsFunction extends GrafanaFunction {
 			throw new IllegalArgumentException("columns cannot be empty");
 		}
 
-		String[] columnsArray = ArrayUtils.safeSplitArray(columns, ARRAY_SEPERATOR, true);
+		String[] columnsArray = ArrayUtil.safeSplitArray(columns, ARRAY_SEPERATOR, true);
 		List<FieldFormatter> result = new ArrayList<FieldFormatter>(columnsArray.length);
 
 		for (int i = 0; i < columnsArray.length; i++) {
@@ -277,7 +277,7 @@ public class EventsFunction extends GrafanaFunction {
 	protected Collection<EventData> getEventData(String serviceId, EventsInput input, 
 			Pair<DateTime, DateTime> timeSpan) {
 		
-		Collection<EventResult> events = getEventList(serviceId, input, TimeUtils.toTimespan(timeSpan), input.volumeType);
+		Collection<EventResult> events = getEventList(serviceId, input, TimeUtil.toTimespan(timeSpan), input.volumeType);
 		
 		if (events == null) {
 			return Collections.emptyList();
@@ -320,7 +320,7 @@ public class EventsFunction extends GrafanaFunction {
 
 	private static List<String> getColumns(String fields) {
 
-		String[] fieldArray = ArrayUtils.safeSplitArray(fields, ARRAY_SEPERATOR, true);
+		String[] fieldArray = ArrayUtil.safeSplitArray(fields, ARRAY_SEPERATOR, true);
 		List<String> result = new ArrayList<String>(fieldArray.length);
 
 		for (String field : fieldArray) {
@@ -391,7 +391,7 @@ public class EventsFunction extends GrafanaFunction {
 
 		EventsInput input = (EventsInput) functionInput;
 
-		Pair<DateTime, DateTime> timeSpan = TimeUtils.getTimeFilter(input.timeFilter);
+		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
 		Collection<FieldFormatter> formatters = getFieldFormatters(input.fields);
 
 		Series series = new Series();

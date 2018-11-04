@@ -36,7 +36,7 @@ import com.takipi.integrations.grafana.input.BaseVolumeInput.AggregationType;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.GroupByInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.utils.TimeUtils;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class GroupByFunction extends BaseVolumeFunction {
 
@@ -228,7 +228,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 						continue;
 					}
 
-					int index = TimeUtils.getStartDateTimeIndex(intervals, gp.time);
+					int index = TimeUtil.getStartDateTimeIndex(intervals, gp.time);
 
 					if (index == -1) {
 						continue;
@@ -262,7 +262,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 			try {
 
-				Map<String, EventResult> eventsMap = getEventMap(serviceId, input, TimeUtils.toTimespan(timeSpan),
+				Map<String, EventResult> eventsMap = getEventMap(serviceId, input, TimeUtil.toTimespan(timeSpan),
 						input.volumeType);
 
 				EventFilter eventFilter = input.getEventFilter(serviceId);
@@ -439,7 +439,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 			break;
 
 		case introduced_by:
-			Comparable compareBy = TimeUtils.getDateTime(event.first_seen);
+			Comparable compareBy = TimeUtil.getDateTime(event.first_seen);
 			updateMap(map, request, event.introduced_by, time, value, compareBy);
 			break;
 
@@ -505,7 +505,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 			List<Pair<DateTime, DateTime>> intervals, Collection<String> applications, Collection<String> servers,
 			Collection<String> deployments) {
 
-		Pair<String, String> span = TimeUtils.toTimespan(timespan);
+		Pair<String, String> span = TimeUtil.toTimespan(timespan);
 
 		GraphRequest.Builder builder = GraphRequest.newBuilder().setServiceId(serviceId).setViewId(viewId)
 				.setGraphType(GraphType.view).setFrom(span.getFirst()).setTo(span.getSecond())
@@ -536,7 +536,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 			return;
 		}
 
-		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, TimeUtils.toTimespan(timespan),
+		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, TimeUtil.toTimespan(timespan),
 				input.volumeType);
 
 		EventFilter eventFilter = input.getEventFilter(serviceId);
@@ -561,7 +561,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 					continue;
 				}
 
-				int index = TimeUtils.getStartDateTimeIndex(intervals, gp.time);
+				int index = TimeUtil.getStartDateTimeIndex(intervals, gp.time);
 
 				if (index == -1) {
 					continue;
@@ -578,7 +578,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 			String serviceId, String viewId, Pair<DateTime, DateTime> timespan, Collection<String> applications,
 			Collection<String> servers, Collection<String> deployments) {
 
-		Pair<String, String> span = TimeUtils.toTimespan(timespan);
+		Pair<String, String> span = TimeUtil.toTimespan(timespan);
 
 		EventsVolumeRequest.Builder builder = EventsVolumeRequest.newBuilder().setServiceId(serviceId)
 				.setFrom(span.getFirst()).setTo(span.getSecond()).setViewId(viewId).setVolumeType(input.volumeType);
@@ -752,13 +752,13 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 	private List<Pair<DateTime, DateTime>> getTimeSpans(GroupByInput input) {
 
-		Pair<DateTime, DateTime> timeSpan = TimeUtils.getTimeFilter(input.timeFilter);
+		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
 
 		if ((input.interval == null) || (input.interval.length() == 0)) {
 			return Collections.singletonList(timeSpan);
 		}
 
-		long milliInterval = TimeUtils.parseInterval(input.interval) * 1000 * 60;
+		long milliInterval = TimeUtil.parseInterval(input.interval) * 1000 * 60;
 
 		List<Pair<DateTime, DateTime>> result = new ArrayList<Pair<DateTime, DateTime>>();
 
@@ -936,7 +936,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 		String[] serviceIds = getServiceIds(input);
 
-		Pair<DateTime, DateTime> timespan = TimeUtils.getTimeFilter(input.timeFilter);
+		Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(input.timeFilter);
 		List<SeriesResult> output = process(input, serviceIds, timespan);
 
 		int limit;

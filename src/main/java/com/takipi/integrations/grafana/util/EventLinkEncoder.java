@@ -1,4 +1,4 @@
-package com.takipi.integrations.grafana.utils;
+package com.takipi.integrations.grafana.util;
 
 import java.util.Base64;
 import java.util.Collection;
@@ -22,10 +22,10 @@ public class EventLinkEncoder {
 		public String link;
 
 		public static Link newLink(String link) {
-			Link l = new Link();
-			l.link = link;
+			Link lnk = new Link();
+			lnk.link = link;
 
-			return l;
+			return lnk;
 		}
 	}
 	
