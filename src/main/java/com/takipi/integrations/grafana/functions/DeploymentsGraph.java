@@ -2,14 +2,20 @@ package com.takipi.integrations.grafana.functions;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import org.joda.time.DateTime;
 
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.data.deployment.SummarizedDeployment;
+import com.takipi.api.client.request.deployment.DeploymentsRequest;
+import com.takipi.api.client.result.deployment.DeploymentsResult;
 import com.takipi.api.client.util.client.ClientUtil;
+import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.DeploymentsGraphInput;
@@ -92,6 +98,30 @@ public class DeploymentsGraph extends GraphFunction {
 		return true;
 	}
 	
+	private List<String> getActiveDeployments(String serviceId) {
+		
+		DeploymentsRequest request = DeploymentsRequest.newBuilder().setServiceId(serviceId).setActive(true).build();
+
+		Response<DeploymentsResult> response = apiClient.get(request);
+
+		if ((response.isBadResponse()) || (response.data == null)) {
+			throw new IllegalStateException(
+					"Could not acquire deployments for service " + serviceId + " . Error " + response.responseCode);
+		}
+
+		if (response.data.deployments == null) {
+			return Collections.emptyList();
+		}
+
+		List<String> result = Lists.newArrayListWithCapacity(response.data.deployments.size());
+
+		for (SummarizedDeployment deployment : response.data.deployments) {
+			result.add(deployment.name);
+		}
+
+		return result;
+	}
+	
 	@Override
 	protected Collection<GraphAsyncTask> getTasks(String[] serviceIds, BaseGraphInput input,
 			Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
@@ -107,15 +137,17 @@ public class DeploymentsGraph extends GraphFunction {
 			if (viewId == null) {
 				continue;
 			}
-	
-			List<String> serviceDeployments = getServiceDeps(serviceId);	
+
+			List<String> activeDeployments = getActiveDeployments(serviceId);
 			
-			if (serviceDeployments == null) {
+			String deployment = getDeployment(dgInput, serviceId, activeDeployments);
+				
+			List<String> allDeployments = getServiceDeps(serviceId);	
+			
+			if (allDeployments == null) {
 				continue;
 			}
 			
-			String deployment = getDeployment(dgInput, serviceId, serviceDeployments);
-				
 			if (deployment == null) {
 				continue;
 			}
@@ -127,21 +159,21 @@ public class DeploymentsGraph extends GraphFunction {
 				continue;
 			}
 			
-			int index = serviceDeployments.indexOf(deployment);
+			int index = allDeployments.indexOf(deployment);
 			
-			if ((index != -1) && (index < serviceDeployments.size() - 1)) {
+			if ((index != -1) && (index < allDeployments.size() - 1)) {
 				
 				int seriesCount;
 				
-				if (index + dgInput.graphCount >= serviceDeployments.size()) {
-					seriesCount = serviceDeployments.size() - index - 1;
+				if (index + dgInput.graphCount >= allDeployments.size()) {
+					seriesCount = allDeployments.size() - index - 1;
 				} else {
 					seriesCount = dgInput.graphCount;
 				}
 							
 				for (int i = 0; i < seriesCount; i++) {
 					
-					String prevDeployment = serviceDeployments.get(index + 1 + i);
+					String prevDeployment = allDeployments.get(index + 1 + i);
 					
 					result.add(new GraphAsyncTask(serviceId, viewId, input.view, 
 							getInput(dgInput, prevDeployment), timeSpan, serviceIds, pointsWanted));
