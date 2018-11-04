@@ -1,16 +1,14 @@
 package com.takipi.integrations.grafana.utils;
 
+import java.util.Collection;
 import java.util.regex.Pattern;
 
 import org.joda.time.DateTime;
 
 import com.takipi.api.client.ApiClient;
-import com.takipi.api.client.request.event.EventSnapshotRequest;
 import com.takipi.api.client.result.event.EventResult;
-import com.takipi.api.client.result.event.EventSnapshotResult;
-import com.takipi.api.core.url.UrlClient.Response;
-import com.takipi.integrations.grafana.functions.GrafanaFunction;
-import com.takipi.integrations.grafana.input.FilterInput;
+import com.takipi.api.client.util.event.EventUtil;
+import com.takipi.integrations.grafana.input.EventFilterInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 
 public class EventLinkEncoder {
@@ -48,61 +46,41 @@ public class EventLinkEncoder {
 		long fromValue = TimeUtils.decodeBase64(parts[2]);
 		long toDelta = TimeUtils.decodeBase64(parts[3]);
 
-		String from = TimeUtils.getDateTimeFromEpoch(fromValue);
-		String to = TimeUtils.getDateTimeFromEpoch(fromValue + toDelta);
+		DateTime from = new DateTime(fromValue);
+		DateTime to = new DateTime(fromValue + toDelta);
 
-		EventSnapshotRequest.Builder builder = EventSnapshotRequest.newBuilder().setFrom(from).setTo(to)
-				.setServiceId(serviceId).setEventId(eventId);
-
+		Collection<String> applications;
+		Collection<String> deployments;
+		Collection<String> servers;
+		
 		if (parts.length > 4) {
 
 			if (parts.length < 7) {
 				throw new IllegalArgumentException("Cannot decode " + link);
 			}
 
-			String apps = decodeSafe(parts[4]);
-			String servers = decodeSafe(parts[5]);
-			String deployments = decodeSafe(parts[6]);
-
-			FilterInput request = new FilterInput();
-			request.applications = apps;
-			request.servers = servers;
-			request.deployments = deployments;
-
-			GrafanaFunction.applyFilters(request, serviceId, builder);
-
+			String appStr = decodeSafe(parts[4]);
+			String serverStr = decodeSafe(parts[5]);
+			String depStr = decodeSafe(parts[6]);			
+			
+			EventFilterInput input = new EventFilterInput();
+			input.applications = appStr;
+			input.servers = serverStr;
+			input.deployments = depStr;
+			
+			applications = input.getServers(serviceId);
+			deployments = input.getDeployments(serviceId);
+			servers = input.getApplications(serviceId);
+		} else {
+			applications = null;
+			servers = null;
+			deployments = null;
 		}
-
-		Response<String> testConResponse = apiClient.testConnection();
-
-		if (!testConResponse.isOK()) {
-			throw new IllegalStateException("Could not validate connection for " + apiClient.getHostname() + " code: "
-					+ testConResponse.responseCode);
-		}
-
-		Response<EventSnapshotResult> response = apiClient.get(builder.build());
-
-		if ((response.isOK()) && (response.data != null)) {
-			return response.data.link;
-		}
-
-		DateTime now = DateTime.now();
-
-		EventSnapshotRequest.Builder defaultBuilder = EventSnapshotRequest.newBuilder().setServiceId(serviceId)
-				.setEventId(eventId);
-
-		defaultBuilder.setFrom(TimeUtils.toString(now.minusMonths(1)));
-		defaultBuilder.setTo(TimeUtils.toString(now));
-
-		response = apiClient.get(defaultBuilder.build());
-
-		if ((response.isOK()) && (response.data != null)) {
-			return response.data.link;
-		}
-
-		throw new IllegalStateException("Could not provide link for for event " + eventId + 
-			" in " + serviceId + " Code: " + response.responseCode + " from "
-				+ apiClient.getHostname());
+				
+		String result = EventUtil.getEventRecentLinkDefault(apiClient, serviceId, eventId,
+			from, to, applications, servers, deployments, EventUtil.DEFAULT_PERIOD);
+		
+		return result;
 
 	}
 

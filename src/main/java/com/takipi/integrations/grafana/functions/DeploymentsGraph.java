@@ -75,7 +75,7 @@ public class DeploymentsGraph extends GraphFunction {
 
 			@Override
 			public int compare(String o1, String o2) {
-				return DeploymentsFunction.compare(o1, o2);
+				return compareDeployments(o1, o2);
 			}
 		});
 		
@@ -109,6 +109,11 @@ public class DeploymentsGraph extends GraphFunction {
 			}
 	
 			List<String> serviceDeployments = getServiceDeps(serviceId);	
+			
+			if (serviceDeployments == null) {
+				continue;
+			}
+			
 			String deployment = getDeployment(dgInput, serviceId, serviceDeployments);
 				
 			if (deployment == null) {

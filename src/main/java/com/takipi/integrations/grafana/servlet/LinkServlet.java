@@ -26,7 +26,7 @@ public class LinkServlet extends HttpServlet {
 		builder.append("<!DOCTYPE html>\\\n<html>\n<head>\n<!-- HTML meta refresh URL redirection -->\n<meta http-equiv=\"refresh\"");
 		builder.append("content=\"0; url=");
 		builder.append(url);
-		builder.append("\">\n</head>\n<body></body>\n</html>\";\"");
+		builder.append("\">\n</head>\n<body></body>\n</html>Opening Analysis");
 		
 		String output = builder.toString();
 		

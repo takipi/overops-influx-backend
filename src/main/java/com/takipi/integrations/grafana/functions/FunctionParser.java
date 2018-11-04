@@ -198,9 +198,12 @@ public class FunctionParser {
 		registerFunction(new GroupByFunction.Factory());
 		registerFunction(new VolumeFunction.Factory());
 		registerFunction(new CategoryFunction.Factory());
+		
+		//regression functions
 		registerFunction(new RegressionFunction.Factory());
 		registerFunction(new DeploymentsGraph.Factory());
-		
+		registerFunction(new RegressionNameFunction.Factory());
+				
 		//transaction functions
 		registerFunction(new TransactionsVolumeFunction.Factory());
 		registerFunction(new TransactionsGraphFunction.Factory());
