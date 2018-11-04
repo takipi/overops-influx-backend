@@ -25,11 +25,11 @@ public class EventsFunction extends GrafanaFunction {
 
 	private static final String STATS = Stats.class.getSimpleName().toLowerCase();
 
-	private static final String LINK = "link";
-	private static final String RATE = "rate";
-	private static final String FIRST_SEEN = "first_seen";
-	private static final String LAST_SEEN = "last_seen";
-	private static final String MESSAGE = "message";
+	protected static final String LINK = "link";
+	protected static final String RATE = "rate";
+	protected static final String FIRST_SEEN = "first_seen";
+	protected static final String LAST_SEEN = "last_seen";
+	protected static final String MESSAGE = "message";
 
 	protected class EventData {
 		protected EventResult event;
@@ -157,6 +157,11 @@ public class EventsFunction extends GrafanaFunction {
 
 			return EventLinkEncoder.encodeLink(serviceId, input, eventData.event, 
 				timeSpan.getFirst(), timeSpan.getSecond());
+		}
+		
+		@Override
+		protected Object formatValue(Object value, EventsInput input) {
+			return value;
 		}
 	}
 	

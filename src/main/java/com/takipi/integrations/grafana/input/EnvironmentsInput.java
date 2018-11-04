@@ -1,5 +1,6 @@
 package com.takipi.integrations.grafana.input;
 
+import com.google.common.base.Objects;
 import com.takipi.integrations.grafana.functions.GrafanaFunction;
 import com.takipi.integrations.grafana.util.ArrayUtil;
 
@@ -30,5 +31,25 @@ public class EnvironmentsInput extends VariableInput {
 		}
 
 		return result;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		
+		if (!(obj instanceof EnvironmentsInput)) {
+			return false;
+		}
+		
+		return Objects.equal(this.environments, ((EnvironmentsInput)obj).environments);
+	}
+	
+	@Override
+	public int hashCode() {
+		
+		if (environments == null) {
+			return super.hashCode();
+		}
+		
+		return environments.hashCode();
 	}
 }

@@ -460,7 +460,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 		List<BaseGroupByAsyncTask> result = new ArrayList<BaseGroupByAsyncTask>();
 
-		Collection<String> applications;
+		List<String> applications;
 
 		if (input.hasApplications()) {
 			applications = input.getApplications(serviceId);
@@ -468,8 +468,27 @@ public class GroupByFunction extends BaseVolumeFunction {
 			applications = ClientUtil.getApplications(apiClient, serviceId);
 		}
 
-		for (String application : applications) {
+		int size;
+		
+		if (input.limit > 0) {
+			
+			applications.sort(new Comparator<String>() {
 
+				@Override
+				public int compare(String o1, String o2) {
+					return o1.compareTo(o2);
+				}	
+			});
+			
+			size = Math.min(applications.size(), input.limit);
+		} else {
+			size = applications.size();
+		}
+		
+		for (int i = 0; i < size; i++) {
+
+			String application = applications.get(i);
+			
 			result.add(new GroupByFilterAsyncTask(map, application, input, serviceId, viewId, timeSpan,
 					Collections.singleton(application), input.getServers(serviceId), input.getDeployments(serviceId)));
 
@@ -483,16 +502,35 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 		List<BaseGroupByAsyncTask> result = new ArrayList<BaseGroupByAsyncTask>();
 
-		Collection<String> servers;
+		List<String> servers;
 
 		if (input.hasServers()) {
 			servers = input.getServers(serviceId);
 		} else {
 			servers = ClientUtil.getServers(apiClient, serviceId);
 		}
+		
+		int size;
+		
+		if (input.limit > 0) {
+			
+			servers.sort(new Comparator<String>() {
 
-		for (String server : servers) {
+				@Override
+				public int compare(String o1, String o2) {
+					return o2.compareTo(o1);
+				}	
+			});
+			
+			size = Math.min(servers.size(), input.limit);
+		} else {
+			size = servers.size();
+		}
 
+		for (int i = 0; i < size; i++) {
+
+			String server = servers.get(i);
+			
 			result.add(new GroupByFilterAsyncTask(map, server, input, serviceId, viewId, timeSpan,
 					input.getApplications(serviceId), Collections.singleton(server), input.getDeployments(serviceId)));
 		}
@@ -608,22 +646,41 @@ public class GroupByFunction extends BaseVolumeFunction {
 	}
 
 	private List<BaseGroupByAsyncTask> processDeploymentsGroupBy(Map<GroupByKey, GroupByVolume> map,
-			GroupByInput request, String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan) {
+			GroupByInput input, String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan) {
 
 		List<BaseGroupByAsyncTask> result = new ArrayList<BaseGroupByAsyncTask>();
 
-		Collection<String> deployments;
+		List<String> deployments;
 
-		if (request.hasDeployments()) {
-			deployments = request.getDeployments(serviceId);
+		if (input.hasDeployments()) {
+			deployments = input.getDeployments(serviceId);
 		} else {
 			deployments = ClientUtil.getDeployments(apiClient, serviceId);
 		}
+		
+			
+		int size;
+		
+		if (input.limit > 0) {
+			deployments.sort(new Comparator<String>() {
 
-		for (String deployment : deployments) {
+				@Override
+				public int compare(String o1, String o2) {
+					return compareDeployments(o1, o2);
+				}
+			});
+			
+			size = Math.min(deployments.size(), input.limit);
+		} else {
+			size = deployments.size();
+		}
 
-			result.add(new GroupByFilterAsyncTask(map, deployment, request, serviceId, viewId, timeSpan,
-					request.getApplications(serviceId), request.getServers(serviceId),
+		for (int i = 0; i < size; i++) {
+
+			String deployment = deployments.get(i);
+			
+			result.add(new GroupByFilterAsyncTask(map, deployment, input, serviceId, viewId, timeSpan,
+					input.getApplications(serviceId), input.getServers(serviceId),
 					Collections.singleton(deployment)));
 		}
 
@@ -697,13 +754,23 @@ public class GroupByFunction extends BaseVolumeFunction {
 				throw new IllegalStateException(e);
 			}
 		} else {
-			for (BaseGroupByAsyncTask task : serviceTasks) {
+			
+			int taskCount;
+			
+			if (input.limit > 0) {
+				taskCount = Math.min(input.limit, serviceTasks.size());
+			} else {
+				taskCount = serviceTasks.size();
+			}
+			
+			for (int i = 0; i < taskCount; i++) {
+				BaseGroupByAsyncTask task = serviceTasks.get(i);
 				completionService.submit(task);
 			}
 
 			int received = 0;
 
-			while (received < serviceTasks.size()) {
+			while (received < taskCount) {
 				try {
 					completionService.take();
 					received++;

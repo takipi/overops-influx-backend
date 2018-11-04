@@ -1,5 +1,5 @@
 package com.takipi.integrations.grafana.input;
 
-public class TransactionsListIput extends ViewInput {
+public class TransactionsListIput extends EventFilterInput {
 	
 }
