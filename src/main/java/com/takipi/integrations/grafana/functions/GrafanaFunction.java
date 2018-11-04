@@ -40,9 +40,6 @@ import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.util.ApiCache;
-import com.takipi.integrations.grafana.util.ApiCache.EventKey;
-import com.takipi.integrations.grafana.util.ApiCache.GraphKey;
-import com.takipi.integrations.grafana.util.ApiCache.TransactionsCacheKey;
 
 public abstract class GrafanaFunction {
 
@@ -122,9 +119,8 @@ public abstract class GrafanaFunction {
 
 		applyFilters(input, serviceId, builder);
 
-		TransactionsCacheKey cacheKey = new TransactionsCacheKey(apiClient, builder.build(), serviceId, input);
-
-		Response<TransactionsVolumeResult> response = (Response<TransactionsVolumeResult>)ApiCache.getItem(cacheKey);
+		Response<TransactionsVolumeResult> response = ApiCache.getTransactionsVolume(apiClient, serviceId, viewId, input, builder.build());
+				
 		
 		if (response.isBadResponse()) {
 			throw new IllegalStateException(
@@ -223,10 +219,9 @@ public abstract class GrafanaFunction {
 
 		applyFilters(input, serviceId, builder);
 		
-		GraphKey graphKey = new GraphKey(apiClient, builder.build(), serviceId, input, volumeType, pointsCount);
-
-		Response<GraphResult> graphResponse = (Response<GraphResult>)ApiCache.getItem(graphKey);
-
+		Response<GraphResult> graphResponse = ApiCache.getEventGraph(apiClient, serviceId, viewId,
+			input, volumeType, builder.build(), pointsCount);
+				
 		if (graphResponse.isBadResponse()) {
 			return null;
 		}
@@ -284,15 +279,13 @@ public abstract class GrafanaFunction {
 			
 			EventsVolumeRequest.Builder builder = EventsVolumeRequest.newBuilder().setVolumeType(volumeType);
 			applyBuilder(builder, serviceId, viewId, timeSpan, input);
-			EventKey eventsKey = new EventKey(apiClient, builder.build(), serviceId, input, volumeType);
-			Response<EventsVolumeResult> volumeResponse = (Response<EventsVolumeResult>) ApiCache.getItem(eventsKey);
+			Response<EventsVolumeResult> volumeResponse = ApiCache.getEventVolume(apiClient, serviceId, viewId, input, volumeType, builder.build());
 			validateResponse(volumeResponse);
 			events = volumeResponse.data.events;
 		} else {
 			EventsRequest.Builder builder = EventsRequest.newBuilder();
 			applyBuilder(builder, serviceId, viewId, timeSpan, input);		
-			EventKey eventsKey = new EventKey(apiClient, builder.build(), serviceId, input, volumeType);
-			Response<EventsResult> eventResponse = (Response<EventsResult>) ApiCache.getItem(eventsKey);		
+			Response<EventsResult> eventResponse = ApiCache.getEventVolume(apiClient, serviceId, viewId, input, builder.build());
 			validateResponse(eventResponse);
 			events = eventResponse.data.events;
 		}
