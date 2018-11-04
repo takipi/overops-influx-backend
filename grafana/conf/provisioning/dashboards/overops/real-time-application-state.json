@@ -65,7 +65,7 @@
           "targetBlank": true,
           "title": "Event Details",
           "type": "absolute",
-          "url": "/d/9xDUUwxmk/new-events?orgId=1"
+          "url": "/grafana/d/9xDUUwxmk/new-events"
         }
       ],
       "mappingType": 1,
@@ -187,7 +187,7 @@
           "targetBlank": true,
           "title": "Event Details",
           "type": "absolute",
-          "url": "/d/3iu8dMbik/event-details?orgId=1&var-type=Uncaught%20Exception"
+          "url": "/grafana/d/3iu8dMbik/event-details?orgId=1&var-type=Uncaught%20Exception"
         }
       ],
       "mappingType": 1,
@@ -309,7 +309,7 @@
           "targetBlank": true,
           "title": "Event Details",
           "type": "absolute",
-          "url": "/d/3iu8dMbik/event-details?orgId=1&var-type=Logged%20Error"
+          "url": "/grafana/d/3iu8dMbik/event-details?orgId=1&var-type=Logged%20Error"
         }
       ],
       "mappingType": 1,
@@ -431,7 +431,7 @@
           "targetBlank": true,
           "title": "Event Details",
           "type": "absolute",
-          "url": "/d/3iu8dMbik/event-details?orgId=1&var-type=HTTP%20Error"
+          "url": "/grafana/d/3iu8dMbik/event-details?orgId=1&var-type=HTTP%20Error"
         }
       ],
       "mappingType": 1,
@@ -552,7 +552,7 @@
           "targetBlank": true,
           "title": "Event Details",
           "type": "absolute",
-          "url": "/d/3iu8dMbik/event-details?orgId=1&var-type=Swallowed%20Exception"
+          "url": "/grafana/d/3iu8dMbik/event-details?orgId=1&var-type=Swallowed%20Exception"
         }
       ],
       "mappingType": 1,
@@ -673,7 +673,7 @@
           "targetBlank": true,
           "title": "Event Details",
           "type": "absolute",
-          "url": "/d/3iu8dMbik/event-details?orgId=1&var-type=Logged%20Warning"
+          "url": "/grafana/d/3iu8dMbik/event-details?orgId=1&var-type=Logged%20Warning"
         }
       ],
       "mappingType": 1,
@@ -906,7 +906,7 @@
           "targetBlank": true,
           "title": "Event Details",
           "type": "absolute",
-          "url": "/d/3iu8dMbik/event-details?orgId=1&var-type=Timer"
+          "url": "/grafana/d/3iu8dMbik/event-details?orgId=1&var-type=Timer"
         }
       ],
       "mappingType": 1,
@@ -2446,7 +2446,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "View details",
-          "linkUrl": "/d/-BNYsx1ik/application-drill-down?orgId=1&var-applications=${__cell_1}",
+          "linkUrl": "/grafana/d/-BNYsx1ik/application-drill-down?orgId=1&var-applications=${__cell_1}",
           "mappingType": 1,
           "pattern": "0",
           "preserveFormat": false,
@@ -2468,7 +2468,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "https://grafana.overops-samples.com/d/-BNYsx1ik/application-drill-down?orgId=1&var-applications=${__cell_1}",
+          "linkUrl": "/grafana/d/-BNYsx1ik/application-drill-down?orgId=1&var-applications=${__cell_1}",
           "mappingType": 1,
           "pattern": "sum",
           "thresholds": [],
@@ -2488,7 +2488,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "https://grafana.overops-samples.com/d/-BNYsx1ik/application-drill-down?orgId=1&var-applications=${__cell_1}",
+          "linkUrl": "https://grafana.overops-samples.com/grafana/d/-BNYsx1ik/application-drill-down?orgId=1&var-applications=${__cell_1}",
           "mappingType": 1,
           "pattern": "count",
           "thresholds": [],
@@ -2572,7 +2572,7 @@
           "targetBlank": true,
           "title": "Continuous Reliability",
           "type": "dashboard",
-          "url": "/d/7AKPDbJiz/continuous-reliability"
+          "url": "/grafana/d/7AKPDbJiz/continuous-reliability"
         }
       ],
       "pageSize": 10,
@@ -2602,7 +2602,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "https://grafana.overops-samples.com/d/7AKPDbJiz/continuous-reliability?orgId=1&var-deployments=${__cell_1}",
+          "linkUrl": "/grafana/d/7AKPDbJiz/continuous-reliability?orgId=1&var-deployments=${__cell_1}",
           "mappingType": 1,
           "pattern": "sum",
           "thresholds": [],
@@ -2622,7 +2622,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "View details",
-          "linkUrl": "/d/7AKPDbJiz/continuous-reliability?orgId=1&var-deployments=${__cell_1}",
+          "linkUrl": "/grafana/d/7AKPDbJiz/continuous-reliability?orgId=1&var-deployments=${__cell_1}",
           "mappingType": 1,
           "pattern": "0",
           "thresholds": [],
@@ -2642,7 +2642,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "https://grafana.overops-samples.com/d/7AKPDbJiz/continuous-reliability?orgId=1&var-deployments=${__cell_1}",
+          "linkUrl": "/grafana/d/7AKPDbJiz/continuous-reliability?orgId=1&var-deployments=${__cell_1}",
           "mappingType": 1,
           "pattern": "count",
           "thresholds": [],
