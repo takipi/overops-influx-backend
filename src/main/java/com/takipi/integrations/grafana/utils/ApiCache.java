@@ -160,7 +160,7 @@ public class ApiCache {
 
 		@Override
 		public int hashCode() {
-			return super.hashCode() ^ serviceId.hashCode();
+			return super.hashCode() ^ input.view.hashCode();
 		}
 		
 		@Override
@@ -357,7 +357,7 @@ public class ApiCache {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Response<EventsResult> getEventVolume(ApiClient apiClient, String serviceId, 
+	public static Response<EventsResult> getEventList(ApiClient apiClient, String serviceId, 
 			String viewId, ViewInput input, EventsRequest  request) {
 		
 		EventKey cacheKey = new EventKey(apiClient, request, serviceId, input, null);
