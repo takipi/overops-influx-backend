@@ -113,7 +113,7 @@ public class TransactionsVolumeFunction extends BaseVolumeFunction {
 			case avg:
 				
 				if (totalInvocations > 0) {
-					volume.sum += serviceVolume.avgTime * (double) serviceVolume.invocations / (double) totalInvocations;
+					volume.sum += serviceVolume.avgTime * serviceVolume.invocations / totalInvocations;
 				}
 				break;
 
@@ -126,11 +126,9 @@ public class TransactionsVolumeFunction extends BaseVolumeFunction {
 
 		return volume;
 	}
-	
 
 	@Override
 	public List<Series> process(FunctionInput functionInput) {
-
 		super.process(functionInput);
 
 		if (!(functionInput instanceof TransactionsVolumeInput)) {

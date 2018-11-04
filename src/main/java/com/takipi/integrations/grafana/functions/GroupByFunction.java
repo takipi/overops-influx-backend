@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 
 import org.joda.time.DateTime;
 
+import com.google.common.collect.Lists;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.Stats;
 import com.takipi.api.client.data.metrics.Graph;
@@ -341,7 +342,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 					executeFilteredVolume(map, groupKey, input, serviceId, viewId, timeSpan, applications, servers,
 							deployments);
 				} else {
-					executeFilteredGraph(map, groupKey, input, serviceId, viewId, timeSpan, intervals, applications,
+					executeFilteredGraph(map, input, serviceId, viewId, timeSpan, intervals, applications,
 							servers, deployments);
 				}
 
@@ -361,6 +362,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 		updateMap(map, input, key, time, value, null);
 	}
 
+	@SuppressWarnings("unused")
 	private static void updateMap(Map<GroupByKey, GroupByVolume> map, GroupByInput input, String key, DateTime time,
 			long value, Comparable<Object> compareBy) {
 
@@ -449,7 +451,8 @@ public class GroupByFunction extends BaseVolumeFunction {
 	private List<BaseGroupByAsyncTask> processEventsGroupBy(Map<GroupByKey, GroupByVolume> map, GroupByInput input,
 			String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan) {
 
-		return Collections.singletonList(new GroupByEventAsyncTask(map, serviceId, input, viewId, timeSpan));
+		BaseGroupByAsyncTask obj = new GroupByEventAsyncTask(map, serviceId, input, viewId, timeSpan);
+		return Collections.singletonList(obj);
 	}
 
 	private List<BaseGroupByAsyncTask> processApplicationsGroupBy(Map<GroupByKey, GroupByVolume> map,
@@ -497,7 +500,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 		return result;
 	}
 
-	private void executeFilteredGraph(Map<GroupByKey, GroupByVolume> map, String key, GroupByInput input,
+	private void executeFilteredGraph(Map<GroupByKey, GroupByVolume> map, GroupByInput input,
 			String serviceId, String viewId, Pair<DateTime, DateTime> timespan,
 			List<Pair<DateTime, DateTime>> intervals, Collection<String> applications, Collection<String> servers,
 			Collection<String> deployments) {
@@ -773,7 +776,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 		return result;
 	}
 
-	private static GroupByValue getGroupByValue(GroupByInput input, GroupByVolume eventVolume) {
+	private static GroupByValue getGroupByValue(@SuppressWarnings("unused") GroupByInput input, GroupByVolume eventVolume) {
 
 		GroupByValue result = new GroupByValue();
 
@@ -854,7 +857,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 	private static Collection<AggregationType> getColumnTypes(GroupByInput input) {
 
-		List<AggregationType> result = new ArrayList<>();
+		List<AggregationType> result = Lists.newArrayList();
 		String[] types = input.type.split(ARRAY_SEPERATOR);
 
 		for (String type : types) {
@@ -964,10 +967,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 		output.sort(new Comparator<SeriesResult>() {
 
 			@Override
-			public int compare(SeriesResult o1, SeriesResult o2) {
-				SeriesResult p1 = (SeriesResult) o1;
-				SeriesResult p2 = (SeriesResult) o2;
-
+			public int compare(SeriesResult p1, SeriesResult p2) {
 				if ((p1.maxValue == null) || (p2.maxValue == null)) {
 					return 0;
 				}
@@ -980,14 +980,10 @@ public class GroupByFunction extends BaseVolumeFunction {
 	}
 
 	private void sortOutputByTag(List<SeriesResult> output) {
-
 		output.sort(new Comparator<SeriesResult>() {
-
+			
 			@Override
-			public int compare(SeriesResult o1, SeriesResult o2) {
-				SeriesResult p1 = (SeriesResult) o1;
-				SeriesResult p2 = (SeriesResult) o2;
-
+			public int compare(SeriesResult p1, SeriesResult p2) {
 				if ((p1.series.tags == null) || (p2.series.tags == null)) {
 					return 0;
 				}

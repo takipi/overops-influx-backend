@@ -117,7 +117,7 @@ public class GraphFunction extends BaseGraphFunction {
 	
 	private List<List<Object>> condensePoints(List<List<Object>> points, int pointsWanted) {
 		
-		double groupSize = (double)(points.size() - 2) / ((double)pointsWanted - 2);
+		double groupSize = (points.size() - 2) / ((double)pointsWanted - 2);
 		double currSize = groupSize;
 
 		long[] values = new long[pointsWanted - 2];
@@ -144,15 +144,15 @@ public class GraphFunction extends BaseGraphFunction {
 		
 		long start = getPointTime(points, 0);
 		long end = getPointTime(points, points.size() - 1);
-	
+		
 		long timeDelta = (end - start) / (pointsWanted -1);
 		
 		result.add(points.get(0));
 		
 		for (int i = 0; i < values.length; i++) {
-			
 			long time = start + timeDelta * (i + 1);
-			long value = (long)values[i] / (long)groupSize;
+			long value = values[i] / (long)groupSize;
+			
 			result.add(Arrays.asList(new Object[] {Long.valueOf(time), Long.valueOf(value) }));
 		}
 

@@ -60,6 +60,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		super(apiClient);
 	}
 
+	@Override
 	protected List<GraphSeries> processServiceGraph(String serviceId, String viewId, String viewName,
 			BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, String[] serviceIds, int pointsWanted) {
 

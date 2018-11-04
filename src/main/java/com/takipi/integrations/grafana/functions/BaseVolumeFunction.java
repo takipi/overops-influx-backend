@@ -57,7 +57,7 @@ public abstract class BaseVolumeFunction extends GrafanaFunction {
 			break;
 
 		case avg:
-			value = Double.valueOf((double) volume.sum / (double) volume.count);
+			value = Double.valueOf(volume.sum / volume.count);
 			break;
 
 		case count:

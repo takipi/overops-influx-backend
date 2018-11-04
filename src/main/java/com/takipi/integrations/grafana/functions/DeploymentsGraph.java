@@ -41,7 +41,9 @@ public class DeploymentsGraph extends GraphFunction {
 	private DeploymentsGraphInput getInput(DeploymentsGraphInput input, String depName) {
 		Gson gson = new Gson();
 		String json = gson.toJson(input);
-		DeploymentsGraphInput result = (DeploymentsGraphInput)gson.fromJson(json, DeploymentsGraphInput.class);
+		
+		DeploymentsGraphInput result = gson.fromJson(json, DeploymentsGraphInput.class);
+		
 		result.deployments = depName;
 		return result;
 	}
@@ -82,8 +84,8 @@ public class DeploymentsGraph extends GraphFunction {
 		return result;
 	}
 	
+	@Override
 	protected String getSeriesName(BaseGraphInput input, String seriesName, Object volumeType, String serviceId, String[] serviceIds) {
-	
 		return getServiceValue(input.deployments, serviceId, serviceIds);
 	}
 	

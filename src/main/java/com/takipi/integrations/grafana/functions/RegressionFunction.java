@@ -92,9 +92,7 @@ public class RegressionFunction extends EventsFunction {
 		super(apiClient);
 	}
 
-	private List<EventData> processRegressionData(String serviceId, RateRegression rateRegression,
-			RegressionsInput input, Pair<DateTime, DateTime> timespan) {
-
+	private List<EventData> processRegressionData(RateRegression rateRegression) {
 		List<EventData> result = new ArrayList<EventData>();
 
 		for (EventResult event : rateRegression.getExceededNewEvents().values()) {
@@ -106,7 +104,6 @@ public class RegressionFunction extends EventsFunction {
 		}
 
 		for (EventResult event : rateRegression.getAllNewEvents().values()) {
-
 			if (rateRegression.getExceededNewEvents().containsKey(event.id)) {
 				continue;
 			}
@@ -212,10 +209,10 @@ public class RegressionFunction extends EventsFunction {
 
 		regressionInput.validate();
 
-		RateRegression rateRegression = RegressionUtil.calculateRateRegressions(apiClient, regressionInput, System.out,
-				false);
+		RateRegression rateRegression = 
+				RegressionUtil.calculateRateRegressions(apiClient, regressionInput, System.out, false);
 
-		return processRegressionData(serviceId, rateRegression, regInput, timeSpan);
+		return processRegressionData(rateRegression);
 	}
 
 	@Override
