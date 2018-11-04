@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.base.Objects;
 import com.takipi.integrations.grafana.functions.GrafanaFunction;
 import com.takipi.integrations.grafana.utils.ArrayUtils;
 
@@ -75,4 +76,23 @@ public class EnvironmentsFilterInput extends EnvironmentsInput {
 	public List<String> getServers(String serviceId) {
 		return getServiceFilters(servers, serviceId, true);
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		
+		if (!super.equals(obj)) {
+			return false;
+		}
+		
+		if (!(obj instanceof EnvironmentsFilterInput)) {
+			return false;
+		}
+		
+		EnvironmentsFilterInput other = (EnvironmentsFilterInput)obj;
+		
+		return Objects.equal(other.applications, other.applications) 
+				&& Objects.equal(other.deployments, other.deployments)
+				&& Objects.equal(other.servers, other.servers);
+	}
+	
 }

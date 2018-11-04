@@ -3,7 +3,6 @@ package com.takipi.integrations.grafana.functions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,12 +15,12 @@ import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
-import com.takipi.api.client.util.view.ViewUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.output.Series;
+import com.takipi.integrations.grafana.utils.TimeUtils;
 
 public class GraphFunction extends BaseGraphFunction {
 
@@ -58,22 +57,6 @@ public class GraphFunction extends BaseGraphFunction {
 	
 	public GraphFunction(ApiClient apiClient) {
 		super(apiClient);
-	}
-
-	private Map<String, EventResult> getEventMap(String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan) {
-		
-		Map<String, EventResult> result = new HashMap<String, EventResult>();
-		List<EventResult> events = ViewUtil.getEvents(apiClient, serviceId, viewId, timeSpan.getFirst(), timeSpan.getSecond());
-
-		if (events == null) {
-			return Collections.emptyMap();
-		}
-		
-		for (EventResult event : events) {
-			result.put(event.id, event);
-		}
-
-		return result;
 	}
 
 	@Override
@@ -172,7 +155,7 @@ public class GraphFunction extends BaseGraphFunction {
 		Map<String, EventResult> eventMap;
 		
 		if (input.hasEventFilter()) {
-			eventMap = getEventMap(serviceId, viewId, timeSpan);
+			eventMap = getEventMap(serviceId, input, TimeUtils.toTimespan(timeSpan), null);
 			eventFilter = input.getEventFilter(serviceId);
 
 		} else {
