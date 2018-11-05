@@ -42,7 +42,6 @@ public class GraphFunction extends BaseGraphFunction {
 	}
 	
 	protected static class SeriesVolume {
-		
 		protected List<List<Object>> values;
 		protected long volume;
 		
@@ -107,7 +106,6 @@ public class GraphFunction extends BaseGraphFunction {
 		int index = 0;
 		
 		for (int i = 1; i < points.size() - 1; i++) {
-			
 			long pointValue = getPointValue(points, i);
 			
 			if (currSize >= 1) {
@@ -145,7 +143,6 @@ public class GraphFunction extends BaseGraphFunction {
 
 	private SeriesVolume processGraphPoints(String serviceId, 
 			Pair<DateTime, DateTime> timeSpan, Graph graph, GraphInput input) {
-
 		long volume = 0;
 	
 		List<List<Object>> values = new ArrayList<List<Object>>(graph.points.size());

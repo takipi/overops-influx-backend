@@ -110,7 +110,6 @@ public abstract class GrafanaFunction {
 		applyFilters(request, serviceId, builder);
 	}
 
-	@SuppressWarnings("unchecked")
 	protected Collection<Transaction> getTransactions(String serviceId, String viewId, Pair<String, String> timeSpan,
 			ViewInput input) {
 		
@@ -119,7 +118,7 @@ public abstract class GrafanaFunction {
 
 		applyFilters(input, serviceId, builder);
 
-		Response<TransactionsVolumeResult> response = ApiCache.getTransactionsVolume(apiClient, serviceId, viewId, input, builder.build());
+		Response<TransactionsVolumeResult> response = ApiCache.getTransactionsVolume(apiClient, serviceId, input, builder.build());
 				
 		
 		if (response.isBadResponse()) {
@@ -207,8 +206,6 @@ public abstract class GrafanaFunction {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
-
 	protected static Graph getEventsGraph(ApiClient apiClient, String serviceId, String viewId, int pointsCount,
 			ViewInput input, VolumeType volumeType, DateTime from, DateTime to) {
 		
@@ -219,7 +216,7 @@ public abstract class GrafanaFunction {
 
 		applyFilters(input, serviceId, builder);
 		
-		Response<GraphResult> graphResponse = ApiCache.getEventGraph(apiClient, serviceId, viewId,
+		Response<GraphResult> graphResponse = ApiCache.getEventGraph(apiClient, serviceId, 
 			input, volumeType, builder.build(), pointsCount);
 				
 		if (graphResponse.isBadResponse()) {
@@ -261,7 +258,6 @@ public abstract class GrafanaFunction {
 		}
 	}
 		
-	@SuppressWarnings("unchecked")
 	protected Map<String, EventResult> getEventMap(String serviceId, ViewInput input, Pair<String, String> timeSpan,
 			VolumeType volumeType) {
 	
@@ -279,13 +275,17 @@ public abstract class GrafanaFunction {
 			
 			EventsVolumeRequest.Builder builder = EventsVolumeRequest.newBuilder().setVolumeType(volumeType);
 			applyBuilder(builder, serviceId, viewId, timeSpan, input);
-			Response<EventsVolumeResult> volumeResponse = ApiCache.getEventVolume(apiClient, serviceId, viewId, input, volumeType, builder.build());
+			
+			Response<EventsVolumeResult> volumeResponse = ApiCache.getEventVolume(apiClient, serviceId, input, volumeType, builder.build());
+			
 			validateResponse(volumeResponse);
 			events = volumeResponse.data.events;
 		} else {
 			EventsRequest.Builder builder = EventsRequest.newBuilder();
-			applyBuilder(builder, serviceId, viewId, timeSpan, input);		
-			Response<EventsResult> eventResponse = ApiCache.getEventVolume(apiClient, serviceId, viewId, input, builder.build());
+			applyBuilder(builder, serviceId, viewId, timeSpan, input);
+			
+			Response<EventsResult> eventResponse = ApiCache.getEventVolume(apiClient, serviceId, input, builder.build());
+			
 			validateResponse(eventResponse);
 			events = eventResponse.data.events;
 		}

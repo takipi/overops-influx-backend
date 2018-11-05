@@ -323,47 +323,47 @@ public class ApiCache {
 	
 	@SuppressWarnings("unchecked")
 	public static Response<TransactionsVolumeResult> getTransactionsVolume(ApiClient apiClient, String serviceId, 
-			String viewId, ViewInput input,TransactionsVolumeRequest request) {
-		
+			ViewInput input,TransactionsVolumeRequest request) {
 		TransactionsCacheKey cacheKey = new TransactionsCacheKey(apiClient, request, serviceId, input);
 		Response<TransactionsVolumeResult> response = (Response<TransactionsVolumeResult>)ApiCache.getItem(cacheKey);
+		
 		return response;
 	}
 	
 	
 	@SuppressWarnings("unchecked")
 	public static Response<GraphResult> getEventGraph(ApiClient apiClient, String serviceId, 
-			String viewId, ViewInput input, VolumeType volumeType, GraphRequest request, int pointsWanted) {
-		
+			ViewInput input, VolumeType volumeType, GraphRequest request, int pointsWanted) {
 		GraphKey cacheKey = new GraphKey(apiClient, request, serviceId, input, volumeType, pointsWanted);
 		Response<GraphResult> response = (Response<GraphResult>)ApiCache.getItem(cacheKey);
+		
 		return response;
 	}
 	
 	@SuppressWarnings("unchecked")
 	public static Response<EventsVolumeResult> getEventVolume(ApiClient apiClient, String serviceId, 
-			String viewId, ViewInput input, VolumeType volumeType, EventsVolumeRequest request) {
-		
+			ViewInput input, VolumeType volumeType, EventsVolumeRequest request) {
 		EventKey cacheKey = new EventKey(apiClient, request, serviceId, input, volumeType);
 		Response<EventsVolumeResult> response = (Response<EventsVolumeResult>)ApiCache.getItem(cacheKey);
+		
 		return response;
 	}
 	
 	@SuppressWarnings("unchecked")
 	public static Response<EventsResult> getEventVolume(ApiClient apiClient, String serviceId, 
-			String viewId, ViewInput input, EventsRequest  request) {
-		
+			ViewInput input, EventsRequest  request) {
 		EventKey cacheKey = new EventKey(apiClient, request, serviceId, input, null);
 		Response<EventsResult> response = (Response<EventsResult>)ApiCache.getItem(cacheKey);
+		
 		return response;
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Response<TransactionsGraphResult> getTransactionsGraph(ApiClient apiClient, String serviceId, String viewId, 
+	public static Response<TransactionsGraphResult> getTransactionsGraph(ApiClient apiClient, String serviceId,  
 			BaseGraphInput input, int pointsWanted, TransactionsGraphRequest request) {
-		
 		TransactionsGraphCacheKey cacheKey = new TransactionsGraphCacheKey(apiClient, request, serviceId, input, pointsWanted);
 		Response<TransactionsGraphResult> response = (Response<TransactionsGraphResult>)ApiCache.getItem(cacheKey);
+		
 		return response;
 	}
 

@@ -19,7 +19,6 @@ import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.util.ArrayUtil;
 import com.takipi.integrations.grafana.util.EventLinkEncoder;
 import com.takipi.integrations.grafana.util.TimeUtil;
-import com.takipi.integrations.grafana.util.EventLinkEncoder.Link;
 
 public class EventsFunction extends GrafanaFunction {
 
@@ -84,10 +83,6 @@ public class EventsFunction extends GrafanaFunction {
 				}
 			}
 			
-			if (value instanceof Link) {
-				return ((Link)value).link;
-			}
-
 			return value;
 		}
 
@@ -102,7 +97,6 @@ public class EventsFunction extends GrafanaFunction {
 	}
 
 	protected static class ReflectFormatter extends FieldFormatter {
-
 		private Field field;
 
 		protected ReflectFormatter(Field field) {
@@ -126,7 +120,6 @@ public class EventsFunction extends GrafanaFunction {
 	}
 	
 	protected static class StatsFormatter extends ReflectFormatter {
-
 		protected StatsFormatter(Field field) {
 			super(field);
 		}
@@ -138,7 +131,6 @@ public class EventsFunction extends GrafanaFunction {
 	}
 
 	protected static class DateFormatter extends ReflectFormatter {
-
 		protected DateFormatter(Field field) {
 			super(field);
 		}
@@ -150,7 +142,6 @@ public class EventsFunction extends GrafanaFunction {
 	}
 
 	protected static class LinkFormatter extends FieldFormatter {
-
 		@Override
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
 				Pair<DateTime, DateTime> timeSpan) {

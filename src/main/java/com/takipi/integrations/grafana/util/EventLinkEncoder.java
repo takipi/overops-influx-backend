@@ -18,18 +18,7 @@ public class EventLinkEncoder {
 				"\"machine_names\":[%s],\"agent_names\":[%s],\"deployment_names\":[%s],"+
 				"\"request_ids\":[%s]},\"timestamp\":\"%s\"}";
 
-	public static class Link {
-		public String link;
-
-		public static Link newLink(String link) {
-			Link lnk = new Link();
-			lnk.link = link;
-
-			return lnk;
-		}
-	}
-	
-	public static Link encodeLink(String serviceId, ViewInput input, EventResult event, DateTime from, DateTime to) {
+	public static String encodeLink(String serviceId, ViewInput input, EventResult event, DateTime from, DateTime to) {
 		EventSnapshotRequest.Builder builder = EventSnapshotRequest.newBuilder().setServiceId(serviceId)
 				.setFrom(from.toString()).setTo(to.toString()).setEventId(event.id);
 
@@ -42,7 +31,7 @@ public class EventLinkEncoder {
 
 		String encoded = Base64.getUrlEncoder().encodeToString(json.getBytes());
 
-		return Link.newLink(encoded);
+		return encoded;
 	}
 	
 	private static String toList(Collection<String> col) {
