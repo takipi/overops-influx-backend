@@ -114,7 +114,6 @@ public abstract class BaseVolumeFunction extends GrafanaFunction {
 			}
 			
 			if (!smiliarIds.contains(event.id)) {		
-				System.out.println(event);
 				result.count++;
 			}
 			

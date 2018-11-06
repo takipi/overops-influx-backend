@@ -376,7 +376,7 @@ public class ApiCache {
 
 	private static final LoadingCache<CacheKey, Response<?>> cache = CacheBuilder.newBuilder().maximumSize(CACHE_SIZE)
 			.expireAfterWrite(CACHE_RETENTION, TimeUnit.MINUTES).build(new CacheLoader<CacheKey, Response<?>>() {
-				public Response<?> load(CacheKey key) {
+				public Response<?> load(CacheKey key) {					
 					Response<?> result = key.apiClient.get(key.request);
 					return result;
 				}

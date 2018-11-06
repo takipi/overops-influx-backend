@@ -221,13 +221,26 @@ public class RegressionFunction extends EventsFunction {
 		regressionInput.deployments = input.getDeployments(serviceId);
 					
 		Map<String, EventResult> eventsMap = getEventMap(serviceId, regInput, timeSpan.getFirst(), 
-			timeSpan.getSecond(), VolumeType.hits, input.pointsWanted);
+			timeSpan.getSecond(), VolumeType.all, input.pointsWanted);
 		
 		if (eventsMap == null) {
 			return Collections.emptyList();
 		}
 		
-		regressionInput.events = eventsMap.values();
+		EventFilter filter = input.getEventFilter(serviceId);
+		
+		List<EventResult> events = new ArrayList<EventResult>();
+		
+		for (EventResult event : eventsMap.values()) {
+			
+			if (filter.filter(event)) {
+				continue;
+			}				
+				
+			events.add(event);
+		}
+		
+		regressionInput.events = events;
 
 		regressionInput.validate();
 
