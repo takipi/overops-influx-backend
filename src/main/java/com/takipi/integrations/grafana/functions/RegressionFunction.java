@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.joda.time.DateTime;
 
@@ -14,6 +16,7 @@ import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionResult;
 import com.takipi.api.client.util.regression.RegressionStringUtil;
 import com.takipi.api.client.util.regression.RegressionUtil;
+import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
@@ -184,6 +187,7 @@ public class RegressionFunction extends EventsFunction {
 			return Collections.emptyList();
 		}
 
+		
 		RegressionsInput regInput = (RegressionsInput) input;
 
 		RegressionInput regressionInput = new RegressionInput();
@@ -191,7 +195,17 @@ public class RegressionFunction extends EventsFunction {
 		regressionInput.serviceId = serviceId;
 		regressionInput.viewId = viewId;
 
-		regressionInput.activeTimespan = regInput.activeTimespan;
+		Collection<String> deployments = input.getDeployments(serviceId);
+		
+		if ((deployments != null) && (deployments.size() > 0)) {
+			regressionInput.activeTimespan = regInput.activeTimespan;
+		} else {
+			long delta = timeSpan.getSecond().minus(timeSpan.getFirst().getMillis()).getMillis();
+			
+			regressionInput.activeWindowStart = timeSpan.getFirst();			
+			regressionInput.activeTimespan = (int)TimeUnit.MILLISECONDS.toMinutes(delta);
+		}
+		
 		regressionInput.baselineTimespan = regInput.baselineTimespan;
 
 		regressionInput.criticalExceptionTypes = regInput.getCriticalExceptionTypes();
@@ -205,6 +219,15 @@ public class RegressionFunction extends EventsFunction {
 		regressionInput.applictations = input.getApplications(serviceId);
 		regressionInput.servers = input.getServers(serviceId);
 		regressionInput.deployments = input.getDeployments(serviceId);
+					
+		Map<String, EventResult> eventsMap = getEventMap(serviceId, regInput, timeSpan.getFirst(), 
+			timeSpan.getSecond(), VolumeType.hits, input.pointsWanted);
+		
+		if (eventsMap == null) {
+			return Collections.emptyList();
+		}
+		
+		regressionInput.events = eventsMap.values();
 
 		regressionInput.validate();
 

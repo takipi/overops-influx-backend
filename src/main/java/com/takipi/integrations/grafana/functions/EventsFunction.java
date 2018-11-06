@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.joda.time.DateTime;
 
@@ -281,15 +282,16 @@ public class EventsFunction extends GrafanaFunction {
 	protected Collection<EventData> getEventData(String serviceId, EventsInput input, 
 			Pair<DateTime, DateTime> timeSpan) {
 		
-		Collection<EventResult> events = getEventList(serviceId, input, TimeUtils.toTimespan(timeSpan), input.volumeType);
+		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, timeSpan.getFirst(), 
+			timeSpan.getSecond(), input.volumeType, input.pointsWanted);
 		
-		if (events == null) {
+		if (eventsMap == null) {
 			return Collections.emptyList();
 		}
 		
-		List<EventData> result = new ArrayList<EventData>(events.size());
+		List<EventData> result = new ArrayList<EventData>(eventsMap.size());
 		
-		for (EventResult event : events) {
+		for (EventResult event : eventsMap.values()) {
 			result.add(new EventData(event));
 		}
 		

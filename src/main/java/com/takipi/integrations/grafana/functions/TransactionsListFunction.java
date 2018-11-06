@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.joda.time.DateTime;
+
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.transaction.Transaction;
 import com.takipi.api.client.result.event.EventResult;
@@ -55,7 +57,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 		protected double avgTime;
 	}
 
-	private List<List<Object>> processServiceTransactions(String serviceId, Pair<String, String> timeSpan,
+	private List<List<Object>> processServiceTransactions(String serviceId, Pair<DateTime, DateTime> timeSpan,
 			TransactionsListIput input) {
 
 		String viewId = getViewId(serviceId, input.view);
@@ -109,18 +111,19 @@ public class TransactionsListFunction extends GrafanaFunction {
 		return result;
 	}
 	
-	private void updateTransactionEvents(String serviceId, Pair<String, String> timeSpan,
+	private void updateTransactionEvents(String serviceId, Pair<DateTime, DateTime> timeSpan,
 			String viewId, TransactionsListIput input, Map<String, TransactionData> transactions) 
 	{
-		Collection<EventResult> events = getEventList(serviceId, input, timeSpan, VolumeType.all);
+		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, timeSpan.getFirst(),
+			timeSpan.getSecond(), VolumeType.all, input.pointsWanted);
 		
-		if (events == null) {
+		if (eventsMap == null) {
 			throw new IllegalStateException("Could not aquire transaction events for " + serviceId);
 		}
 
 		EventFilter eventFilter = input.getEventFilter(serviceId);
 		
-		for (EventResult event : events) {
+		for (EventResult event : eventsMap.values()) {
 
 			TransactionData transaction = transactions.get(event.entry_point.class_name);
 
@@ -140,7 +143,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 		}
 	}
 	
-	private Map<String, TransactionData> getTransactions(String serviceId, Pair<String, String> timeSpan,
+	private Map<String, TransactionData> getTransactions(String serviceId, Pair<DateTime, DateTime> timeSpan,
 			String viewId, TransactionsListIput input) {
 				
 		Collection<Transaction> transactions = getTransactions(serviceId, viewId, timeSpan, input);
@@ -189,7 +192,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 
 		TransactionsListIput input = (TransactionsListIput) functionInput;
 
-		Pair<String, String> timeSpan = TimeUtils.parseTimeFilter(input.timeFilter);
+		Pair<DateTime, DateTime> timeSpan = TimeUtils.getTimeFilter(input.timeFilter);
 		String[] serviceIds = getServiceIds(input);
 
 		Series series = new Series();

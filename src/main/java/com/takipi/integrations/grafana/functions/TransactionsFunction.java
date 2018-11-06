@@ -2,6 +2,8 @@ package com.takipi.integrations.grafana.functions;
 
 import java.util.Collection;
 
+import org.joda.time.DateTime;
+
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.transaction.Transaction;
 import com.takipi.api.client.data.view.SummarizedView;
@@ -40,7 +42,7 @@ public class TransactionsFunction extends EnvironmentVariableFunction {
 			VariableAppender appender) {
 		
 		ViewInput viewInput = (ViewInput)input;
-		Pair<String, String> timespan = TimeUtils.parseTimeFilter(viewInput.timeFilter);
+		Pair<DateTime, DateTime> timespan = TimeUtils.getTimeFilter(viewInput.timeFilter);
 
 		SummarizedView view = ViewUtil.getServiceViewByName(apiClient, serviceId, viewInput.view);
 		

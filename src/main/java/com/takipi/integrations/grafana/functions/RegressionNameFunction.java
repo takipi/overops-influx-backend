@@ -1,8 +1,13 @@
 package com.takipi.integrations.grafana.functions;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+
+import org.joda.time.DateTime;
+import org.ocpsoft.prettytime.PrettyTime;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.regression.RegressionInput;
@@ -46,14 +51,28 @@ public class RegressionNameFunction extends GrafanaFunction {
 			return null;
 		}
 
-		regressionInput.activeTimespan = input.activeTimespan;
-		regressionInput.baselineTimespan = input.baselineTimespan;
-
-		regressionInput.applictations = input.getApplications(serviceId);
-		regressionInput.servers = input.getServers(serviceId);
-		regressionInput.deployments = input.getDeployments(serviceId);
+		String result;
+		Collection<String> deployments = input.getDeployments(serviceId);
 		
-		return RegressionStringUtil.getRegressionName(apiClient, regressionInput);
+		if ((deployments != null) && (deployments.size() > 0)) {
+			regressionInput.activeTimespan = input.activeTimespan;
+			regressionInput.baselineTimespan = input.baselineTimespan;
+
+			regressionInput.applictations = input.getApplications(serviceId);
+			regressionInput.servers = input.getServers(serviceId);
+			regressionInput.deployments = deployments;
+			
+			result = RegressionStringUtil.getRegressionName(apiClient, regressionInput);
+		} else {
+			
+			long duration = new DateTime().minusMinutes(input.baselineTimespan).getMillis();
+			PrettyTime prettyTime = new PrettyTime();
+	
+			String activeWindowDuration = prettyTime.formatDuration(new Date(duration));
+			result = "Comparing against the last " + activeWindowDuration;
+		}
+
+		return result;
 	}
 	
 	@Override

@@ -20,7 +20,6 @@ import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.utils.TimeUtils;
 
 public class GraphFunction extends BaseGraphFunction {
 
@@ -155,7 +154,8 @@ public class GraphFunction extends BaseGraphFunction {
 		Map<String, EventResult> eventMap;
 		
 		if (input.hasEventFilter()) {
-			eventMap = getEventMap(serviceId, input, TimeUtils.toTimespan(timeSpan), null);
+			eventMap = getEventMap(serviceId, input, timeSpan.getFirst(), timeSpan.getSecond(),
+				input.volumeType, input.pointsWanted);
 			eventFilter = input.getEventFilter(serviceId);
 
 		} else {

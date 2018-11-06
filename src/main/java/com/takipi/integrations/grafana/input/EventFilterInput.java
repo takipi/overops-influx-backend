@@ -12,6 +12,7 @@ public class EventFilterInput extends ViewInput {
 	public String labels;
 	public String labelsRegex;
 	public String firstSeen;
+	public int pointsWanted;
 
 	public boolean hasEventFilter() {
 		
