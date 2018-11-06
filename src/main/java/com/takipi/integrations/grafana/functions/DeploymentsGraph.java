@@ -44,6 +44,11 @@ public class DeploymentsGraph extends GraphFunction {
 		result.deployments = depName;
 		return result;
 	}
+	
+	@Override
+	protected String getSeriesName(BaseGraphInput input, String seriesName, Object volumeType, String serviceId, String[] serviceIds) {
+		return getServiceValue(input.deployments, serviceId, serviceIds);	
+	}
 
 	@Override
 	protected boolean isAsync(String[] serviceIds) {
