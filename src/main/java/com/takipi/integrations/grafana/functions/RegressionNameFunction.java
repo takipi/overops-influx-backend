@@ -1,10 +1,7 @@
 package com.takipi.integrations.grafana.functions;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 import org.joda.time.DateTime;
 import org.ocpsoft.prettytime.PrettyTime;
@@ -12,11 +9,10 @@ import org.ocpsoft.prettytime.PrettyTime;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionStringUtil;
-import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.RegressionsNameInput;
-import com.takipi.integrations.grafana.output.Series;
+import com.takipi.integrations.grafana.input.ViewInput;
 
-public class RegressionNameFunction extends GrafanaFunction {
+public class RegressionNameFunction extends BaseNameFunction {
 	
 	public static class Factory implements FunctionFactory {
 
@@ -40,8 +36,11 @@ public class RegressionNameFunction extends GrafanaFunction {
 		super(apiClient);
 	}
 	
-	private String getRegressionName(RegressionsNameInput input, String serviceId) {
-				
+	@Override
+	protected String getName(ViewInput input, String serviceId) {
+		
+		RegressionsNameInput regNameInput = (RegressionsNameInput)input;
+		
 		RegressionInput regressionInput = new RegressionInput();
 		
 		regressionInput.serviceId = serviceId;
@@ -55,8 +54,8 @@ public class RegressionNameFunction extends GrafanaFunction {
 		Collection<String> deployments = input.getDeployments(serviceId);
 		
 		if ((deployments != null) && (deployments.size() > 0)) {
-			regressionInput.activeTimespan = input.activeTimespan;
-			regressionInput.baselineTimespan = input.baselineTimespan;
+			regressionInput.activeTimespan = regNameInput.activeTimespan;
+			regressionInput.baselineTimespan = regNameInput.baselineTimespan;
 
 			regressionInput.applictations = input.getApplications(serviceId);
 			regressionInput.servers = input.getServers(serviceId);
@@ -65,7 +64,7 @@ public class RegressionNameFunction extends GrafanaFunction {
 			result = RegressionStringUtil.getRegressionName(apiClient, regressionInput);
 		} else {
 			
-			long duration = new DateTime().minusMinutes(input.baselineTimespan).getMillis();
+			long duration = new DateTime().minusMinutes(regNameInput.baselineTimespan).getMillis();
 			PrettyTime prettyTime = new PrettyTime();
 	
 			String activeWindowDuration = prettyTime.formatDuration(new Date(duration));
@@ -74,35 +73,4 @@ public class RegressionNameFunction extends GrafanaFunction {
 
 		return result;
 	}
-	
-	@Override
-	public List<Series> process(FunctionInput functionInput) {
-		
-		if (!(functionInput instanceof RegressionsNameInput)) {
-			throw new IllegalArgumentException("functionInput");
-		}
-		
-		RegressionsNameInput input = (RegressionsNameInput)functionInput;
-		
-		String[] serviceIds = getServiceIds(input);
-		
-		if (serviceIds.length == 0) {
-			return null;
-		}
-		
-		String name = getRegressionName(input, serviceIds[0]);
-		
-		if (name == null) {
-			return null;
-		}
-		
-		Series series = new Series();
-		
-		series.name = SERIES_NAME;
-		series.columns = Arrays.asList(new String[] { KEY_COLUMN, VALUE_COLUMN });
-		series.values = Collections.singletonList(Arrays.asList(new Object[] {KEY_COLUMN, name}));
-		
-		return Collections.singletonList(series);	
-	}
-
 }

@@ -203,6 +203,7 @@ public class FunctionParser {
 		registerFunction(new RegressionFunction.Factory());
 		registerFunction(new DeploymentsGraph.Factory());
 		registerFunction(new RegressionNameFunction.Factory());
+		registerFunction(new DeploymentNameFunction.Factory());
 				
 		//transaction functions
 		registerFunction(new TransactionsVolumeFunction.Factory());

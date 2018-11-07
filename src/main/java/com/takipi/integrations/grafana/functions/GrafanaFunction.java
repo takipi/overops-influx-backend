@@ -26,14 +26,15 @@ import com.takipi.api.client.request.event.EventsRequest;
 import com.takipi.api.client.request.event.EventsVolumeRequest;
 import com.takipi.api.client.request.metrics.GraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsVolumeRequest;
+import com.takipi.api.client.request.view.ViewsRequest;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventsResult;
 import com.takipi.api.client.result.event.EventsVolumeResult;
 import com.takipi.api.client.result.metrics.GraphResult;
 import com.takipi.api.client.result.transaction.TransactionsVolumeResult;
+import com.takipi.api.client.result.view.ViewsResult;
 import com.takipi.api.client.util.validation.ValidationUtil.GraphType;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
-import com.takipi.api.client.util.view.ViewUtil;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
@@ -340,8 +341,19 @@ public abstract class GrafanaFunction {
 	}
 
 	protected SummarizedView getView(String serviceId, String viewName) {
-		SummarizedView view = ViewUtil.getServiceViewByName(apiClient, serviceId, viewName);
-		return view;
+		
+		ViewsRequest request = ViewsRequest.newBuilder().setServiceId(serviceId).setViewName(viewName).build();
+
+		Response<ViewsResult> response = ApiCache.getView(apiClient, serviceId, viewName, request);
+
+		if ((response.isBadResponse()) || (response.data == null) || (response.data.views == null)
+				|| (response.data.views.size() == 0)) {
+			return null;
+		}
+
+		SummarizedView result = response.data.views.get(0);
+
+		return result;
 	}
 
 	protected static String getServiceValue(String value, String serviceId) {

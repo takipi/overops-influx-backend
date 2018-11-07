@@ -41,7 +41,7 @@ public class DeploymentUtil {
 		return result;
 	}
 	
-	private static String getStartDeployment(ApiClient apiClient, EnvironmentsFilterInput input, String serviceId) {
+	public static String getActiveDeployment(ApiClient apiClient, EnvironmentsFilterInput input, String serviceId) {
 		
 		List<String> inputDeployments = input.getDeployments(serviceId);
 		
@@ -86,7 +86,7 @@ public class DeploymentUtil {
 	public static Pair<String, List<String>> getActiveDeployment(ApiClient apiClient,
 			EnvironmentsFilterInput input, String serviceId, int depCount) 
 	{		
-		String deployment = getStartDeployment(apiClient, input, serviceId);
+		String deployment = getActiveDeployment(apiClient, input, serviceId);
 			
 		List<String> allDeployments = getAllDeployments(apiClient, serviceId);	
 		
