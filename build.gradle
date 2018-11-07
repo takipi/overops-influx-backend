@@ -20,6 +20,11 @@ jar {
 	enabled = true
 }
 
+compileJava {
+  sourceCompatibility = 1.8
+  targetCompatibility = 1.8
+}
+
 bootJar {
 	classifier = 'uber'
 }
