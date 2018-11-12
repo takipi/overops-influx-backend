@@ -40,5 +40,11 @@ public class ServletUtil {
 	public static class Auth {
 		public String hostname;
 		public String token;
+		
+		@Override
+		public String toString()
+		{
+			return hostname + ", token size: " + token.length();
+		}
 	}
 }

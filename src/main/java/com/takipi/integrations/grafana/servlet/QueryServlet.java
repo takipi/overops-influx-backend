@@ -62,9 +62,10 @@ public class QueryServlet extends HttpServlet {
 		}
 
 		Auth auth = ServletUtil.getAuthentication(request);
-
+		logger.debug("OO-AS-INFLUX | Auth: {}", auth);
+		
 		if (logQuery) {
-			logger.debug("Query: {}", query);
+			logger.debug("OO-AS-INFLUX | Query: {}", query);
 		}
 
 		long t1 = System.currentTimeMillis();
@@ -78,7 +79,7 @@ public class QueryServlet extends HttpServlet {
 		double secs = (double) (t2 - t1) / 1000;
 
 		if (logResponse) {
-			logger.debug("Query ended {}",
+			logger.debug("OO-AS-INFLUX | Query ended {}",
 					df.format(secs) + " secs: " + json.substring(0, Math.min(1000, json.length())));
 		}
 
