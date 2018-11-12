@@ -269,6 +269,10 @@ public class GroupByFunction extends BaseVolumeFunction {
 				Map<String, EventResult> eventsMap = getEventMap(serviceId, input, timeSpan.getFirst(),
 						timeSpan.getSecond(), input.volumeType, input.pointsWanted);
 
+				if (eventsMap == null) {
+					return null;
+				}
+				
 				EventFilter eventFilter = input.getEventFilter(serviceId);
 
 				List<Pair<DateTime, DateTime>> intervals = getTimeSpans(input);

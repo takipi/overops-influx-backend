@@ -15,6 +15,11 @@ public class EnvironmentsInput extends VariableInput {
 		}
 
 		String[] serviceIds = ArrayUtils.safeSplitArray(environments, GrafanaFunction.GRAFANA_SEPERATOR, false);
+	
+		if ((serviceIds.length == 1) && (serviceIds[0].equals("()"))) {
+			return new String[0];
+		}
+		
 		String[] result = new String[serviceIds.length];
 
 		for (int i = 0; i < serviceIds.length; i++) {

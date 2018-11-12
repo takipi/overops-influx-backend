@@ -8,11 +8,11 @@ import org.joda.time.DateTime;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.result.event.EventResult;
+import com.takipi.api.client.util.categories.Categories;
 import com.takipi.integrations.grafana.input.EnvironmentsInput;
 import com.takipi.integrations.grafana.input.EventTypesInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.ViewInput;
-import com.takipi.udf.infra.Categories;
 
 public class EventTypesFunction extends EnvironmentVariableFunction {
 

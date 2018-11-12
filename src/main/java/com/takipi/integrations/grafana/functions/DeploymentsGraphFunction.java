@@ -74,6 +74,10 @@ public class DeploymentsGraphFunction extends GraphFunction {
 			Pair<String, List<String>> deploymentResult = DeploymentUtil.getActiveDeployment(apiClient, dgInput, serviceId,
 					dgInput.graphCount);
 
+			if (deploymentResult == null) {
+				continue;
+			}
+			
 			result.add(new GraphAsyncTask(serviceId, viewId, input.view, getInput(dgInput, deploymentResult.getFirst()),
 					timeSpan, serviceIds, pointsWanted));
 

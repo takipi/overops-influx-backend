@@ -289,7 +289,7 @@ public class RegressionFunction extends EventsFunction {
 		List<EventResult> events = new ArrayList<EventResult>();
 
 		for (EventResult event : eventListMap.values()) {
-
+			
 			if (eventFilter.filter(event)) {
 				continue;
 			}
