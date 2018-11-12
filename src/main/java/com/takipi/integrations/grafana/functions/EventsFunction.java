@@ -298,9 +298,10 @@ public class EventsFunction extends GrafanaFunction {
 		return result;
 	}
 
-	private List<List<Object>> processServiceEvents(String serviceId, EventsInput input, Pair<DateTime, DateTime> timeSpan,
-			Collection<FieldFormatter> formatters) {
+	protected List<List<Object>> processServiceEvents(String serviceId, EventsInput input, Pair<DateTime, DateTime> timeSpan) {
 
+		Collection<FieldFormatter> formatters = getFieldFormatters(input.fields);
+		
 		Collection<EventData> eventDatas = getEventData(serviceId, input, timeSpan);
 		
 		EventFilter eventFilter = input.getEventFilter(serviceId);
@@ -325,7 +326,7 @@ public class EventsFunction extends GrafanaFunction {
 
 	}
 
-	private static List<String> getColumns(String fields) {
+	protected List<String> getColumns(String fields) {
 
 		String[] fieldArray = ArrayUtils.safeSplitArray(fields, ARRAY_SEPERATOR, true);
 		List<String> result = new ArrayList<String>(fieldArray.length);
@@ -399,7 +400,6 @@ public class EventsFunction extends GrafanaFunction {
 		EventsInput input = (EventsInput) functionInput;
 
 		Pair<DateTime, DateTime> timeSpan = TimeUtils.getTimeFilter(input.timeFilter);
-		Collection<FieldFormatter> formatters = getFieldFormatters(input.fields);
 
 		Series series = new Series();
 
@@ -410,7 +410,7 @@ public class EventsFunction extends GrafanaFunction {
 		String[] serviceIds = getServiceIds(input);
 
 		for (String serviceId : serviceIds) {
-			List<List<Object>> serviceEvents = processServiceEvents(serviceId, input, timeSpan, formatters);
+			List<List<Object>> serviceEvents = processServiceEvents(serviceId, input, timeSpan);
 			series.values.addAll(serviceEvents);
 		}
 

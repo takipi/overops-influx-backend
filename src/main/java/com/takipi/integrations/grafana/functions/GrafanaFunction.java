@@ -70,7 +70,13 @@ public abstract class GrafanaFunction {
 	public static final String GRAFANA_SEPERATOR = Pattern.quote("|");
 	public static final String ARRAY_SEPERATOR = Pattern.quote(",");
 	public static final String SERVICE_SEPERATOR = ": ";
-	public static final String VAR_ALL = "*";
+	
+	public static final String ALL = "all";
+	public static final List<String> VAR_ALL = Arrays.asList(new String[] {"*", ALL});
+	
+	protected static final char QUALIFIED_DELIM = '.';
+	protected static final char INTERNAL_DELIM = '/';
+
 
 	private static final DateTimeFormatter fmt = ISODateTimeFormat.dateTime().withZoneUTC();
 
@@ -81,12 +87,12 @@ public abstract class GrafanaFunction {
 	}
 
 	public static String toQualified(String value) {
-		return value.replace('/', '.');
+		return value.replace(INTERNAL_DELIM, QUALIFIED_DELIM);
 	}
 
 	public static String getSimpleClassName(String className) {
 		String qualified = toQualified(className);
-		int sepIdex = Math.max(qualified.lastIndexOf('.') + 1, 0);
+		int sepIdex = Math.max(qualified.lastIndexOf(QUALIFIED_DELIM) + 1, 0);
 		String result = qualified.substring(sepIdex, qualified.length());
 		return result;
 	}
@@ -99,7 +105,7 @@ public abstract class GrafanaFunction {
 	}
 
 	protected static String formatLocation(Location location) {
-		return getSimpleClassName(location.class_name) + "." + location.method_name;
+		return getSimpleClassName(location.class_name) + QUALIFIED_DELIM + location.method_name;
 	}
 
 	protected String[] getServiceIds(EnvironmentsInput input) {
@@ -238,15 +244,9 @@ public abstract class GrafanaFunction {
 	
 	private Collection<EventResult> getEventListFromGraph(String serviceId, String viewId, ViewInput input, DateTime from, DateTime to,
 			VolumeType volumeType, int pointsCount) {
-		
-		GraphRequest.Builder builder = GraphRequest.newBuilder().setServiceId(serviceId).setViewId(viewId)
-				.setGraphType(GraphType.view).setFrom(from.toString(fmt)).setTo(to.toString(fmt))
-				.setVolumeType(volumeType).setWantedPointCount(pointsCount);
-
-		applyFilters(input, serviceId, builder);
-		
+				
 		Graph graph = getEventsGraph(apiClient, serviceId, viewId, pointsCount, input, volumeType, from, to);
-		Collection<EventResult> events = getEventList(serviceId, viewId, input, from, to, volumeType);
+		Collection<EventResult> events = getEventList(serviceId, viewId, input, from, to);
 		
 		if (events == null) {
 			return null;
@@ -269,15 +269,31 @@ public abstract class GrafanaFunction {
 		return volumeResponse.data.events;
 	}
 	
-	private Collection<EventResult> getEventList(String serviceId, String viewId, ViewInput input, DateTime from, DateTime to,
-			VolumeType volumeType) {
+	protected Collection<EventResult> getEventList(String serviceId, String viewId, ViewInput input, DateTime from, DateTime to) {
 		
 		EventsRequest.Builder builder = EventsRequest.newBuilder();
 		applyBuilder(builder, serviceId, viewId, TimeUtils.toTimespan(from, to), input);		
 		Response<EventsResult> eventResponse = ApiCache.getEventList(apiClient, serviceId, viewId, input, builder.build());
 		validateResponse(eventResponse);	
+	
+		if (eventResponse.data.events == null) {
+			return null;
+		}
+		
+		List<EventResult> eventsCopy = new ArrayList<EventResult>(eventResponse.data.events.size());
+		
+		try {
+			for (EventResult event : eventResponse.data.events) {
+				EventResult clone = (EventResult)event.clone();
+				clone.stats = new Stats();
+				eventsCopy.add(clone);
+			}
+		} catch (CloneNotSupportedException e) {
+			throw new IllegalStateException(e);
+			
+		}	
 
-		return eventResponse.data.events;
+		return eventsCopy;
 	}
 	
 	private static Map<String, EventResult> getEventsMap(Collection< EventResult> events) {
@@ -312,7 +328,7 @@ public abstract class GrafanaFunction {
 				events = getEventListFromVolume(serviceId, viewId, input, from, to, volumeType, pointsCount);
 			}		
 		} else {
-			events = getEventList(serviceId, viewId, input, from, to, volumeType);
+			events = getEventList(serviceId, viewId, input, from, to);
 		}
 		
 		if (events == null) {

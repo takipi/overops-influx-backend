@@ -13,13 +13,13 @@ import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.DeploymentsGraphInput;
 import com.takipi.integrations.grafana.utils.DeploymentUtil;
 
-public class DeploymentsGraph extends GraphFunction {
+public class DeploymentsGraphFunction extends GraphFunction {
 
 	public static class Factory implements FunctionFactory {
 
 		@Override
 		public GrafanaFunction create(ApiClient apiClient) {
-			return new DeploymentsGraph(apiClient);
+			return new DeploymentsGraphFunction(apiClient);
 		}
 
 		@Override
@@ -33,7 +33,7 @@ public class DeploymentsGraph extends GraphFunction {
 		}
 	}
 
-	public DeploymentsGraph(ApiClient apiClient) {
+	public DeploymentsGraphFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
 

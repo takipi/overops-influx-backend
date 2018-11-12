@@ -197,7 +197,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		return result;
 	}
 
-	private int getPointsWanted(BaseGraphInput input, Pair<DateTime, DateTime> timePair) {
+	protected int getPointsWanted(BaseGraphInput input, Pair<DateTime, DateTime> timespan) {
 
 		if (input.pointsWanted > 0) {
 			return input.pointsWanted;
@@ -206,8 +206,8 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		int result;
 
 		if (input.interval > 0) {
-			long to = timePair.getSecond().getMillis();
-			long from = timePair.getFirst().getMillis();
+			long to = timespan.getSecond().getMillis();
+			long from = timespan.getFirst().getMillis();
 			result = (int) ((to - from) / input.interval);
 		} else {
 			result = DEFAULT_POINTS;

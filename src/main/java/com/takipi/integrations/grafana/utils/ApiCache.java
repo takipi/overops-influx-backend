@@ -203,6 +203,11 @@ public class ApiCache {
 
 		@Override
 		public int hashCode() {
+			
+			if (input.view == null) {
+				return super.hashCode();
+			}
+			
 			return super.hashCode() ^ input.view.hashCode();
 		}
 		
@@ -377,6 +382,7 @@ public class ApiCache {
 		
 		ViewNameCacheKey cacheKey = new ViewNameCacheKey(apiClient, viewsRequest, serviceId, viewName);
 		Response<ViewsResult> response = (Response<ViewsResult>)ApiCache.getItem(cacheKey);
+		
 		return response;
 	}
 	
@@ -386,6 +392,7 @@ public class ApiCache {
 		
 		TransactionsCacheKey cacheKey = new TransactionsCacheKey(apiClient, request, serviceId, input);
 		Response<TransactionsVolumeResult> response = (Response<TransactionsVolumeResult>)ApiCache.getItem(cacheKey);
+		
 		return response;
 	}
 	
@@ -396,6 +403,7 @@ public class ApiCache {
 		
 		GraphKey cacheKey = new GraphKey(apiClient, request, serviceId, input, volumeType, pointsWanted);
 		Response<GraphResult> response = (Response<GraphResult>)ApiCache.getItem(cacheKey);
+		
 		return response;
 	}
 	
@@ -414,6 +422,7 @@ public class ApiCache {
 		
 		EventKey cacheKey = new EventKey(apiClient, request, serviceId, input, null);
 		Response<EventsResult> response = (Response<EventsResult>)ApiCache.getItem(cacheKey);
+		
 		return response;
 	}
 	
@@ -423,6 +432,7 @@ public class ApiCache {
 		
 		TransactionsGraphCacheKey cacheKey = new TransactionsGraphCacheKey(apiClient, request, serviceId, input, pointsWanted);
 		Response<TransactionsGraphResult> response = (Response<TransactionsGraphResult>)ApiCache.getItem(cacheKey);
+		
 		return response;
 	}
 

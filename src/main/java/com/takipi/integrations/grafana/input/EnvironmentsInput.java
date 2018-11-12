@@ -10,7 +10,7 @@ public class EnvironmentsInput extends VariableInput {
 
 	public String[] getServiceIds() {
 
-		if (GrafanaFunction.VAR_ALL.equals(environments)) {
+		if (GrafanaFunction.VAR_ALL.contains(environments)) {
 			return new String[0];
 		}
 

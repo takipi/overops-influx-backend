@@ -32,6 +32,7 @@ dependencies {
       "org.apache.commons:commons-lang3:3.7",
       "com.takipi:api-client:2.1.3",
       "com.takipi:api-client-util:2.1.3",
+      "com.takipi:overops-functions:2.0.0",
       "org.ocpsoft.prettytime:prettytime:4.0.2.Final"
       "com.google.guava:guava:20.0",
     )

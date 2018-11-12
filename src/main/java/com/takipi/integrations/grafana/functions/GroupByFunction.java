@@ -209,6 +209,10 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 			Graph graph = getEventsGraph(apiClient, serviceId, viewId, intervals.size() * 5, input, input.volumeType,
 					timeSpan.getFirst(), timeSpan.getSecond());
+			
+			if (graph == null) {
+				return;
+			}
 
 			for (GraphPoint gp : graph.points) {
 

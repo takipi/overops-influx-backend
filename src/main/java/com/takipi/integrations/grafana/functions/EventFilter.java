@@ -1,6 +1,7 @@
 package com.takipi.integrations.grafana.functions;
 
 import java.util.Collection;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -9,19 +10,24 @@ import org.joda.time.DateTime;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.utils.TimeUtils;
+import com.takipi.udf.infra.Categories;
 
 public class EventFilter {
-	
+
+	public static final String CATEGORY_PREFIX = "-";
+	public static final String TYPE_PREFIX = "--";
+
 	private Collection<String> types;
 	private Collection<String> introducedBy;
 	private Collection<String> transactions;
 	private Collection<String> labels;
 	private Pattern labelsPattern;
 	private Pair<DateTime, DateTime> firstSeen;
+	private boolean hasExceptionTypes;
+	private boolean hasCategoryTypes;
 
 	public static EventFilter of(Collection<String> types, Collection<String> introducedBy,
-			Collection<String> transactions, Collection<String> labels, String labelsRegex,
-			String firstSeen) {
+			Collection<String> transactions, Collection<String> labels, String labelsRegex, String firstSeen) {
 
 		EventFilter result = new EventFilter();
 		result.types = types;
@@ -32,7 +38,21 @@ public class EventFilter {
 		if (labelsRegex != null) {
 			result.labelsPattern = Pattern.compile(labelsRegex);
 		}
-		
+
+		if (types != null) {
+
+			for (String type : types) {
+
+				if (type.startsWith(TYPE_PREFIX)) {
+					result.hasExceptionTypes = true;
+				}
+
+				if (type.startsWith(CATEGORY_PREFIX)) {
+					result.hasCategoryTypes = true;
+				}
+			}
+		}
+
 		if (firstSeen != null) {
 			result.firstSeen = TimeUtils.getTimeFilter(firstSeen);
 		}
@@ -66,19 +86,55 @@ public class EventFilter {
 
 		return false;
 	}
-	
+
 	public boolean labelMatches(String label) {
 		return (labelsPattern == null) || (labelsPattern.matcher(label).find());
 	}
+	
+	static {
+		Categories.defaultCategories();
+	}
 
 	public boolean filter(EventResult event) {
+
+		Categories categories = Categories.defaultCategories();
 		
-		if ((types != null) && (!types.isEmpty()) && (!types.contains(event.type.toLowerCase()))) {
-			return true;
+		if ((types != null) && (!types.isEmpty())) {
+
+			if (event.type.toLowerCase().contains(TYPE_PREFIX)) {
+
+				if (!types.contains(event.type)) {
+					return true;
+				}
+
+				if ((hasExceptionTypes) && (!types.contains(event.name))) {
+					return true;
+				}
+				
+			} else if ((hasCategoryTypes) && (event.error_origin != null)) {
+
+				Set<String> labels = categories.getCategories(event.error_origin.class_name);
+
+				if (labels != null) {
+				
+					for (String label : labels) {
+						for (String type : types) {
+							if (type.contains(label)) {
+								return false;
+							}
+						}
+					}
+				}
+				
+				return true;
+			} else if (!types.contains(event.type)) {
+				return true;
+			}
 		}
 
-		if ((introducedBy != null) && (!introducedBy.isEmpty()) 
-		&& (!introducedBy.contains(event.introduced_by))) {
+		if ((introducedBy != null) && (!introducedBy.isEmpty()) && (!introducedBy.contains(event.introduced_by)))
+
+		{
 			return true;
 		}
 
@@ -111,13 +167,13 @@ public class EventFilter {
 				return true;
 			}
 		}
-		
+
 		if (firstSeen != null) {
 			DateTime eventFirstSeen = TimeUtils.getDateTime(event.first_seen);
-			
-			boolean inRange = (eventFirstSeen.isAfter(firstSeen.getFirst())) 
-				&& (eventFirstSeen.isBefore(firstSeen.getSecond()));
-			
+
+			boolean inRange = (eventFirstSeen.isAfter(firstSeen.getFirst()))
+					&& (eventFirstSeen.isBefore(firstSeen.getSecond()));
+
 			if (!inRange) {
 				return true;
 			}

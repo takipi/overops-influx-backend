@@ -10,6 +10,9 @@ import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTime;
 
 import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.data.metrics.Graph;
+import com.takipi.api.client.data.metrics.Graph.GraphPoint;
+import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.util.regression.RateRegression;
 import com.takipi.api.client.util.regression.RegressionInput;
@@ -51,15 +54,19 @@ public class RegressionFunction extends EventsFunction {
 		protected String type;
 		protected RegressionResult regression;
 		protected RateRegression regResult;
+		protected RegressionInput input;
 
-		protected RegressionData(RateRegression regResult, EventResult event, String type) {
+		protected RegressionData(RateRegression regResult, RegressionInput input, EventResult event, String type) {
 			super(event);
 			this.type = type;
 			this.regResult = regResult;
+			this.input = input;
+			this.regression = null;
 		}
 
-		protected RegressionData(RateRegression regResult, RegressionResult regression, String type) {
-			this(regResult, regression.getEvent(), type);
+		protected RegressionData(RateRegression regResult, RegressionInput input,
+			RegressionResult regression, String type) {
+			this(regResult, input, regression.getEvent(), type);
 			this.regression = regression;
 		}
 	}
@@ -91,6 +98,21 @@ public class RegressionFunction extends EventsFunction {
 		}
 	}
 
+	public static int expandBaselineTimespan(int baselineTimespanFactor, int minBaselineTimespan,
+			Pair<DateTime, Integer> activeWindow) {
+		
+		int result;
+		double factor = (double)minBaselineTimespan / (double)activeWindow.getSecond().intValue();
+		
+		if (factor > baselineTimespanFactor) {
+			result = minBaselineTimespan;
+		} else {
+			result = activeWindow.getSecond().intValue() * baselineTimespanFactor;
+		}
+		
+		return result;
+		
+	}
 	protected static class RegressionLinkFormatter extends FieldFormatter {
 
 		@Override
@@ -98,9 +120,8 @@ public class RegressionFunction extends EventsFunction {
 				Pair<DateTime, DateTime> timeSpan) {
 
 			RegressionData regData = (RegressionData) eventData;
-			RegressionsInput regInput = (RegressionsInput)input;
-
-			DateTime from = regData.regResult.getActiveWndowStart().minusMinutes(regInput.baselineTimespan);
+			
+			DateTime from = regData.regResult.getActiveWndowStart().minusMinutes(regData.input.baselineTimespan);
 			DateTime to = DateTime.now();
 
 			return EventLinkEncoder.encodeLink(serviceId, input, eventData.event, from, to);
@@ -116,20 +137,20 @@ public class RegressionFunction extends EventsFunction {
 		super(apiClient);
 	}
 
-	private List<EventData> processRegressionData(String serviceId, RateRegression rateRegression,
-			RegressionsInput input, Pair<DateTime, DateTime> timespan) {
+	private List<EventData> processRegressionData(String serviceId, RegressionInput input,
+		RateRegression rateRegression, Pair<DateTime, DateTime> timespan) {
 
 		List<EventData> result = new ArrayList<EventData>();
 
-		for (EventResult event : rateRegression.getExceededNewEvents().values()) {
-			result.add(new RegressionData(rateRegression, event, RegressionStringUtil.SEVERE_NEW));
+		for (EventResult event : rateRegression.getSortedCriticalNewEvents()) {
+			result.add(new RegressionData(rateRegression, input, event, RegressionStringUtil.SEVERE_NEW));
+		}
+		
+		for (EventResult event : rateRegression.getSortedExceededNewEvents()) {
+			result.add(new RegressionData(rateRegression, input, event, RegressionStringUtil.SEVERE_NEW));
 		}
 
-		for (EventResult event : rateRegression.getCriticalNewEvents().values()) {
-			result.add(new RegressionData(rateRegression, event, RegressionStringUtil.SEVERE_NEW));
-		}
-
-		for (EventResult event : rateRegression.getAllNewEvents().values()) {
+		for (EventResult event : rateRegression.getSortedAllNewEvents()) {
 
 			if (rateRegression.getExceededNewEvents().containsKey(event.id)) {
 				continue;
@@ -139,21 +160,21 @@ public class RegressionFunction extends EventsFunction {
 				continue;
 			}
 
-			result.add(new RegressionData(rateRegression, event, RegressionStringUtil.NEW_ISSUE));
+			result.add(new RegressionData(rateRegression, input, event, RegressionStringUtil.NEW_ISSUE));
 
 		}
 
-		for (RegressionResult regressionResult : rateRegression.getCriticalRegressions().values()) {
-			result.add(new RegressionData(rateRegression, regressionResult, RegressionStringUtil.SEVERE_REGRESSION));
+		for (RegressionResult regressionResult : rateRegression.getSortedCriticalRegressions()) {
+			result.add(new RegressionData(rateRegression, input, regressionResult, RegressionStringUtil.SEVERE_REGRESSION));
 		}
 
-		for (RegressionResult regressionResult : rateRegression.getAllRegressions().values()) {
+		for (RegressionResult regressionResult : rateRegression.getSortedAllRegressions()) {
 
 			if (rateRegression.getCriticalRegressions().containsKey(regressionResult.getEvent().id)) {
 				continue;
 			}
 
-			result.add(new RegressionData(rateRegression, regressionResult, RegressionStringUtil.REGRESSION));
+			result.add(new RegressionData(rateRegression, input, regressionResult, RegressionStringUtil.REGRESSION));
 		}
 
 		return result;
@@ -177,36 +198,47 @@ public class RegressionFunction extends EventsFunction {
 		return super.getFormatter(column);
 	}
 
-	@Override
-	protected Collection<EventData> getEventData(String serviceId, EventsInput input,
+	protected static class RegressionOutput {
+		
+		protected RegressionInput regressionInput;
+		protected RateRegression rateRegression;
+		long volume;
+		
+	}
+	
+	protected RegressionOutput executeRegerssion(String serviceId, EventsInput input,
 			Pair<DateTime, DateTime> timeSpan) {
-
+		
 		String viewId = getViewId(serviceId, input.view);
 
 		if (viewId == null) {
-			return Collections.emptyList();
+			return null;
 		}
 
-		
 		RegressionsInput regInput = (RegressionsInput) input;
-
+		
 		RegressionInput regressionInput = new RegressionInput();
 
 		regressionInput.serviceId = serviceId;
 		regressionInput.viewId = viewId;
+		regressionInput.deployments = input.getDeployments(serviceId);
 
-		Collection<String> deployments = input.getDeployments(serviceId);
+		regressionInput.activeTimespan = (int)TimeUnit.MILLISECONDS.toMinutes(timeSpan.getSecond().getMillis() -
+			timeSpan.getFirst().getMillis());
 		
-		if ((deployments != null) && (deployments.size() > 0)) {
-			regressionInput.activeTimespan = regInput.activeTimespan;
-		} else {
-			long delta = timeSpan.getSecond().minus(timeSpan.getFirst().getMillis()).getMillis();
-			
-			regressionInput.activeWindowStart = timeSpan.getFirst();			
-			regressionInput.activeTimespan = (int)TimeUnit.MILLISECONDS.toMinutes(delta);
-		}
+		regressionInput.baselineTimespan = regInput.minBaselineTimespan;
+
+		Pair<DateTime, Integer> activeWindow = RegressionUtil.getActiveWindow(apiClient, regressionInput, System.out);
 		
-		regressionInput.baselineTimespan = regInput.baselineTimespan;
+		int expandedBaselineTimespan = expandBaselineTimespan(regInput.baselineTimespanFactor, 
+			regInput.minBaselineTimespan, activeWindow);
+
+		regressionInput.activeWindowStart = activeWindow.getFirst();
+		regressionInput.activeTimespan = activeWindow.getSecond().intValue();
+		regressionInput.baselineTimespan = expandedBaselineTimespan;
+
+		regressionInput.applictations = input.getApplications(serviceId);
+		regressionInput.servers = input.getServers(serviceId);
 
 		regressionInput.criticalExceptionTypes = regInput.getCriticalExceptionTypes();
 		regressionInput.minVolumeThreshold = regInput.minVolumeThreshold;
@@ -216,38 +248,84 @@ public class RegressionFunction extends EventsFunction {
 		regressionInput.criticalRegressionDelta = regInput.criticalRegressionDelta;
 		regressionInput.applySeasonality = regInput.applySeasonality;
 
-		regressionInput.applictations = input.getApplications(serviceId);
-		regressionInput.servers = input.getServers(serviceId);
-		regressionInput.deployments = input.getDeployments(serviceId);
-					
-		Map<String, EventResult> eventsMap = getEventMap(serviceId, regInput, timeSpan.getFirst(), 
-			timeSpan.getSecond(), VolumeType.all, input.pointsWanted);
+		Map<String, EventResult> eventListMap = getEventMap(serviceId, regInput, timeSpan.getFirst(),
+				timeSpan.getSecond(), null, input.pointsWanted);
+
+		int baselinePoints = regressionInput.baselineTimespan / activeWindow.getSecond().intValue() * 2;
 		
-		if (eventsMap == null) {
-			return Collections.emptyList();
+		Graph baselineGraph = getEventsGraph(apiClient, serviceId, viewId, baselinePoints, regInput, 
+				VolumeType.all, activeWindow.getFirst().minusMinutes(expandedBaselineTimespan), activeWindow.getFirst());
+
+		Graph activeWindowGraph = getEventsGraph(apiClient, serviceId, viewId, input.pointsWanted, regInput,
+				VolumeType.all, activeWindow.getFirst(), DateTime.now());
+
+		if ((eventListMap == null) || (baselineGraph == null) || (activeWindowGraph == null)
+				|| (baselineGraph.points == null) || (activeWindowGraph.points == null)) {
+			return null;
 		}
 		
-		EventFilter filter = input.getEventFilter(serviceId);
-		
-		List<EventResult> events = new ArrayList<EventResult>();
-		
-		for (EventResult event : eventsMap.values()) {
+		long volume = 0;
 			
-			if (filter.filter(event)) {
+		for (GraphPoint gp : activeWindowGraph.points) {
+
+			if (gp.contributors == null) {
 				continue;
-			}				
-				
+			}
+			
+			for (GraphPointContributor gpc : gp.contributors) {
+
+				EventResult event = eventListMap.get(gpc.id);
+
+				if (event != null) {
+					event.stats.invocations += gpc.stats.invocations;
+					event.stats.hits += gpc.stats.hits;
+					volume += gpc.stats.hits;
+				}
+			}
+		}
+
+		EventFilter eventFilter = input.getEventFilter(serviceId);
+
+		List<EventResult> events = new ArrayList<EventResult>();
+
+		for (EventResult event : eventListMap.values()) {
+
+			if (eventFilter.filter(event)) {
+				continue;
+			}
+
 			events.add(event);
 		}
-		
+
 		regressionInput.events = events;
+		regressionInput.baselineGraph = baselineGraph;
 
 		regressionInput.validate();
 
 		RateRegression rateRegression = RegressionUtil.calculateRateRegressions(apiClient, regressionInput, System.out,
 				false);
+		
+		RegressionOutput result = new RegressionOutput();
+		
+		result.rateRegression = rateRegression;
+		result.regressionInput = regressionInput;
+		result.volume = volume;
+		
+		return result;
+	}
+	
+	@Override
+	protected Collection<EventData> getEventData(String serviceId, EventsInput input,
+			Pair<DateTime, DateTime> timeSpan) {
 
-		return processRegressionData(serviceId, rateRegression, regInput, timeSpan);
+		RegressionOutput regressionOutput = executeRegerssion(serviceId, input, timeSpan);
+
+		if (regressionOutput == null) {
+			return Collections.emptySet();
+		}
+		
+		return processRegressionData(serviceId, regressionOutput.regressionInput, 
+				regressionOutput.rateRegression, timeSpan);
 	}
 
 	@Override

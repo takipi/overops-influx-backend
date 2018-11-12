@@ -5,7 +5,8 @@ import java.util.Collections;
 
 public class RegressionsInput extends EventsInput {
 	public int activeTimespan;
-	public int baselineTimespan;
+	public int minBaselineTimespan;
+	public int baselineTimespanFactor;
 	public int minVolumeThreshold;
 	public double minErrorRateThreshold;
 	public double regressionDelta;

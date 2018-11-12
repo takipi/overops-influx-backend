@@ -1,8 +1,6 @@
 package com.takipi.integrations.grafana.functions;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,32 +89,11 @@ public class CategoryFunction extends GraphFunction {
 			return output;
 		}
 		
-		sortSeriesByVolume(series);
-		
-		List<Series> result = new ArrayList<Series>();
-		
-		for (int i = 0; i < Math.min(categoryInput.limit, series.size()); i++) {
-			
-			GraphSeries graphSeries = series.get(i);
-			
-			if (graphSeries.volume > 0) {
-				result.add(graphSeries.series);
-			}
-		}
+		List<Series> result = limitGraphSeries(series, categoryInput.limit);
 		
 		sortByName(result);
 		
 		return result;
-	}
-	
-	private void sortSeriesByVolume(List<GraphSeries> series) {
-		series.sort(new Comparator<GraphSeries>() {
-
-			@Override
-			public int compare(GraphSeries o1, GraphSeries o2) {
-				return (int)(o2.volume - o1.volume);
-			}
-		});
 	}
 	
 	@Override
