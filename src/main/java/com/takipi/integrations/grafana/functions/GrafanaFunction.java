@@ -208,8 +208,6 @@ public abstract class GrafanaFunction {
 	
 	protected static Graph getEventsGraph(ApiClient apiClient, String serviceId, String viewId, int pointsCount,
 			ViewInput input, VolumeType volumeType, DateTime from, DateTime to) {
-		
-						
 		GraphRequest.Builder builder = GraphRequest.newBuilder().setServiceId(serviceId).setViewId(viewId)
 				.setGraphType(GraphType.view).setFrom(from.toString(fmt)).setTo(to.toString(fmt))
 				.setVolumeType(volumeType).setWantedPointCount(pointsCount);

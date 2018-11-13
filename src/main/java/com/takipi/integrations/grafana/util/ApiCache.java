@@ -30,7 +30,6 @@ public class ApiCache {
 	private static final int CACHE_RETENTION = 2;
 
 	protected abstract static class CacheKey {
-
 		protected ApiClient apiClient;
 		protected ApiGetRequest<?> request;
 
@@ -61,7 +60,6 @@ public class ApiCache {
 	}
 
 	protected abstract static class ServiceCacheKey extends CacheKey {
-
 		protected String serviceId;
 
 		public ServiceCacheKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId) {
@@ -96,7 +94,6 @@ public class ApiCache {
 	}
 
 	protected abstract static class ViewCacheKey extends ServiceCacheKey {
-
 		protected ViewInput input;
 
 		public ViewCacheKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input) {
@@ -168,7 +165,6 @@ public class ApiCache {
 	}
 	
 	protected abstract static class VolumeKey extends ViewCacheKey {
-
 		protected VolumeType volumeType;
 
 		public VolumeKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
@@ -205,7 +201,6 @@ public class ApiCache {
 	}
 	
 	protected static class EventKey extends VolumeKey {
-
 		public EventKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
 				VolumeType volumeType) {
 
@@ -229,7 +224,6 @@ public class ApiCache {
 	}
 
 	protected static class GraphKey extends VolumeKey {
-
 		protected int pointsWanted;
 
 		@Override
@@ -281,12 +275,10 @@ public class ApiCache {
 	}
 	
 	protected static class TransactionsGraphCacheKey extends ViewCacheKey {
-
 		protected int pointsWanted;
 
 		@Override
 		public boolean equals(Object obj) {
-
 			if (!(obj instanceof TransactionsGraphCacheKey)) {
 				return false;
 			}
@@ -329,7 +321,6 @@ public class ApiCache {
 		
 		return response;
 	}
-	
 	
 	@SuppressWarnings("unchecked")
 	public static Response<GraphResult> getEventGraph(ApiClient apiClient, String serviceId, 

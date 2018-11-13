@@ -97,7 +97,6 @@ public class GroupByFunction extends BaseVolumeFunction {
 	}
 
 	protected static class GroupByVolume {
-		
 		protected long sum;
 		protected long count;
 		protected Comparable<Object> compareBy;
@@ -113,7 +112,6 @@ public class GroupByFunction extends BaseVolumeFunction {
 	}
 
 	protected static class GroupByValue {
-		
 		protected Object sum;
 		protected Object avg;
 		protected Object count;
@@ -180,11 +178,9 @@ public class GroupByFunction extends BaseVolumeFunction {
 		}
 	}
 
-	protected class AsyncResult {
-	}
+	protected class AsyncResult {}
 
 	protected class GroupByEventAsyncTask extends BaseGroupByAsyncTask {
-
 		protected String serviceId;
 		protected GroupByInput input;
 		protected Pair<DateTime, DateTime> timeSpan;
@@ -193,6 +189,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 		protected GroupByEventAsyncTask(Map<GroupByKey, GroupByVolume> map, String serviceId, GroupByInput input,
 				String viewId, Pair<DateTime, DateTime> timeSpan) {
 			super(map);
+			
 			this.serviceId = serviceId;
 			this.input = input;
 			this.timeSpan = timeSpan;
@@ -206,18 +203,19 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 		private void executeEventsGraph(Map<String, EventResult> eventsMap, EventFilter eventFilter,
 				List<Pair<DateTime, DateTime>> intervals) {
-
 			Graph graph = getEventsGraph(apiClient, serviceId, viewId, intervals.size() * 5, input, input.volumeType,
 					timeSpan.getFirst(), timeSpan.getSecond());
 
+			if (graph == null) {
+				return;
+			}
+			
 			for (GraphPoint gp : graph.points) {
-
 				if (gp.contributors == null) {
 					continue;
 				}
 
 				for (GraphPointContributor gpc : gp.contributors) {
-
 					EventResult event = eventsMap.get(gpc.id);
 
 					if (event == null) {
@@ -243,7 +241,6 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 		private void executeEventsVolume(Map<String, EventResult> eventsMap, EventFilter eventFilter,
 				Pair<DateTime, DateTime> timespan) {
-
 			for (EventResult event : eventsMap.values()) {
 
 				if (eventFilter.filter(event)) {
@@ -257,11 +254,9 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 		@Override
 		public AsyncResult call() throws Exception {
-
 			beforeCall();
 
 			try {
-
 				Map<String, EventResult> eventsMap = getEventMap(serviceId, input, TimeUtil.toTimespan(timeSpan),
 						input.volumeType);
 
