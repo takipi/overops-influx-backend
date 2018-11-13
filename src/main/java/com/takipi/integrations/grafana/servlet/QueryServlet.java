@@ -62,9 +62,9 @@ public class QueryServlet extends HttpServlet {
 		}
 
 		Auth auth = ServletUtil.getAuthentication(request);
-		logger.debug("OO-AS-INFLUX | Auth: {}", auth);
-		
+
 		if (logQuery) {
+			logger.debug("OO-AS-INFLUX | Auth: {}", auth);
 			logger.debug("OO-AS-INFLUX | Query: {}", query);
 		}
 

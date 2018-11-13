@@ -13,6 +13,10 @@ import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class EventFilter {
+	static {
+		Categories.defaultCategories();
+	}
+
 	public static final String CATEGORY_PREFIX = "-";
 	public static final String TYPE_PREFIX = "--";
 
@@ -88,10 +92,6 @@ public class EventFilter {
 		return (labelsPattern == null) || (labelsPattern.matcher(label).find());
 	}
 	
-	static {
-		Categories.defaultCategories();
-	}
-
 	public boolean filter(EventResult event) {
 
 		Categories categories = Categories.defaultCategories();

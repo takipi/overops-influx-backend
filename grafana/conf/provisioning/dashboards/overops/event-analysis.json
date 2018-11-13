@@ -459,7 +459,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "Go to root cause",
-          "linkUrl": "http://grafana.overops-samples.com:8186/link?link=${__cell_0}",
+          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Error location",
           "thresholds": [],

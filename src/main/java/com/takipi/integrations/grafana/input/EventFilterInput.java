@@ -14,7 +14,6 @@ public class EventFilterInput extends ViewInput {
 	public int pointsWanted;
 
 	public boolean hasEventFilter() {
-		
 		if ((introducedBy != null) && (introducedBy.length() > 0)) {
 			return true;
 		}
@@ -47,7 +46,6 @@ public class EventFilterInput extends ViewInput {
 	}
 
 	public Collection<String> getIntroducedBy(String serviceId) {
-
 		if (introducedBy == null) {
 			return Collections.emptySet();
 		}
@@ -56,7 +54,6 @@ public class EventFilterInput extends ViewInput {
 	}
 
 	public Collection<String> getTypes() {
-
 		if (!hasFilter(types)) {
 			return null;
 		}
@@ -65,7 +62,6 @@ public class EventFilterInput extends ViewInput {
 	}
 
 	public Collection<String> geLabels(String serviceId) {
-
 		if (labels == null) {
 			return Collections.emptySet();
 		}
@@ -77,5 +73,4 @@ public class EventFilterInput extends ViewInput {
 		return EventFilter.of(getTypes(), getIntroducedBy(serviceId), getTransactions(serviceId), geLabels(serviceId),
 				labelsRegex, firstSeen);
 	}
-
 }

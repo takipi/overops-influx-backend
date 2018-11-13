@@ -43,7 +43,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_OVEROPS-SAMPLES-AS-INFLUX}",
+      "datasource": "OO",
       "decimals": 2,
       "format": "percentunit",
       "gauge": {
@@ -156,7 +156,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_OVEROPS-SAMPLES-AS-INFLUX}",
+      "datasource": "OO",
       "decimals": 2,
       "format": "percentunit",
       "gauge": {
@@ -1373,7 +1373,7 @@
       {
         "allValue": "*",
         "current": {},
-        "datasource": "${DS_OVEROPS-SAMPLES-AS-INFLUX}",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Environments",
@@ -1394,7 +1394,7 @@
       {
         "allValue": "*",
         "current": {},
-        "datasource": "${DS_OVEROPS-SAMPLES-AS-INFLUX}",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Applications",
@@ -1415,7 +1415,7 @@
       {
         "allValue": "*",
         "current": {},
-        "datasource": "${DS_OVEROPS-SAMPLES-AS-INFLUX}",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Servers",
@@ -1436,7 +1436,7 @@
       {
         "allValue": "*",
         "current": {},
-        "datasource": "${DS_OVEROPS-SAMPLES-AS-INFLUX}",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Transaction",
