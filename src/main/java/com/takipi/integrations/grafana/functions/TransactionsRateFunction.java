@@ -1,5 +1,7 @@
 package com.takipi.integrations.grafana.functions;
 
+import org.joda.time.DateTime;
+
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.Pair;
@@ -31,7 +33,7 @@ public class TransactionsRateFunction extends TransactionsVolumeFunction {
 	
 	@Override
 	protected EventVolume getTransactionVolume(TransactionsVolumeInput input, 
-		Pair<String, String> timeSpan ) {
+		Pair<DateTime, DateTime> timeSpan ) {
 			
 		EventVolume eventVolume = getEventVolume(input, VolumeType.hits, timeSpan);
 		EventVolume transactionVolume = super.getTransactionVolume(input, timeSpan);

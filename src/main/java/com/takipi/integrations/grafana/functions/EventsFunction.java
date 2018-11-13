@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.joda.time.DateTime;
 
@@ -273,24 +274,26 @@ public class EventsFunction extends GrafanaFunction {
 	protected Collection<EventData> getEventData(String serviceId, EventsInput input, 
 			Pair<DateTime, DateTime> timeSpan) {
 		
-		Collection<EventResult> events = getEventList(serviceId, input, TimeUtil.toTimespan(timeSpan), input.volumeType);
+		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, timeSpan.getFirst(), 
+			timeSpan.getSecond(), input.volumeType, input.pointsWanted);
 		
-		if (events == null) {
+		if (eventsMap == null) {
 			return Collections.emptyList();
 		}
 		
-		List<EventData> result = new ArrayList<EventData>(events.size());
+		List<EventData> result = new ArrayList<EventData>(eventsMap.size());
 		
-		for (EventResult event : events) {
+		for (EventResult event : eventsMap.values()) {
 			result.add(new EventData(event));
 		}
 		
 		return result;
 	}
 
-	private List<List<Object>> processServiceEvents(String serviceId, EventsInput input, Pair<DateTime, DateTime> timeSpan,
-			Collection<FieldFormatter> formatters) {
+	protected List<List<Object>> processServiceEvents(String serviceId, EventsInput input, Pair<DateTime, DateTime> timeSpan) {
 
+		Collection<FieldFormatter> formatters = getFieldFormatters(input.fields);
+		
 		Collection<EventData> eventDatas = getEventData(serviceId, input, timeSpan);
 		
 		EventFilter eventFilter = input.getEventFilter(serviceId);
@@ -314,7 +317,7 @@ public class EventsFunction extends GrafanaFunction {
 		return result;
 	}
 
-	private static List<String> getColumns(String fields) {
+	protected List<String> getColumns(String fields) {
 
 		String[] fieldArray = ArrayUtil.safeSplitArray(fields, ARRAY_SEPERATOR, true);
 		List<String> result = new ArrayList<String>(fieldArray.length);
@@ -388,7 +391,6 @@ public class EventsFunction extends GrafanaFunction {
 		EventsInput input = (EventsInput) functionInput;
 
 		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
-		Collection<FieldFormatter> formatters = getFieldFormatters(input.fields);
 
 		Series series = new Series();
 
@@ -399,7 +401,7 @@ public class EventsFunction extends GrafanaFunction {
 		String[] serviceIds = getServiceIds(input);
 
 		for (String serviceId : serviceIds) {
-			List<List<Object>> serviceEvents = processServiceEvents(serviceId, input, timeSpan, formatters);
+			List<List<Object>> serviceEvents = processServiceEvents(serviceId, input, timeSpan);
 			series.values.addAll(serviceEvents);
 		}
 

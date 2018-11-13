@@ -14,7 +14,10 @@ import org.joda.time.format.ISODateTimeFormat;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.Location;
+import com.takipi.api.client.data.event.Stats;
 import com.takipi.api.client.data.metrics.Graph;
+import com.takipi.api.client.data.metrics.Graph.GraphPoint;
+import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
 import com.takipi.api.client.data.transaction.Transaction;
 import com.takipi.api.client.data.view.SummarizedView;
 import com.takipi.api.client.request.TimeframeRequest;
@@ -23,31 +26,36 @@ import com.takipi.api.client.request.event.EventsRequest;
 import com.takipi.api.client.request.event.EventsVolumeRequest;
 import com.takipi.api.client.request.metrics.GraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsVolumeRequest;
+import com.takipi.api.client.request.view.ViewsRequest;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventsResult;
 import com.takipi.api.client.result.event.EventsVolumeResult;
 import com.takipi.api.client.result.metrics.GraphResult;
 import com.takipi.api.client.result.transaction.TransactionsVolumeResult;
+import com.takipi.api.client.result.view.ViewsResult;
 import com.takipi.api.client.util.validation.ValidationUtil.GraphType;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
-import com.takipi.api.client.util.view.ViewUtil;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
+import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.EnvironmentsFilterInput;
 import com.takipi.integrations.grafana.input.EnvironmentsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.util.ApiCache;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public abstract class GrafanaFunction {
 
 	private static int MAX_COMBINE_SERVICES = 3;
-	
+
 	public interface FunctionFactory {
 		public GrafanaFunction create(ApiClient apiClient);
+
 		public Class<?> getInputClass();
+
 		public String getName();
 	}
 
@@ -62,10 +70,16 @@ public abstract class GrafanaFunction {
 	public static final String GRAFANA_SEPERATOR = Pattern.quote("|");
 	public static final String ARRAY_SEPERATOR = Pattern.quote(",");
 	public static final String SERVICE_SEPERATOR = ": ";
-	public static final String VAR_ALL = "*";
+	
+	public static final String ALL = "all";
+	public static final List<String> VAR_ALL = Arrays.asList(new String[] {"*", ALL});
+	
+	protected static final char QUALIFIED_DELIM = '.';
+	protected static final char INTERNAL_DELIM = '/';
+
 
 	private static final DateTimeFormatter fmt = ISODateTimeFormat.dateTime().withZoneUTC();
-	
+
 	protected final ApiClient apiClient;
 
 	public GrafanaFunction(ApiClient apiClient) {
@@ -73,12 +87,12 @@ public abstract class GrafanaFunction {
 	}
 
 	public static String toQualified(String value) {
-		return value.replace('/', '.');
+		return value.replace(INTERNAL_DELIM, QUALIFIED_DELIM);
 	}
 
 	public static String getSimpleClassName(String className) {
 		String qualified = toQualified(className);
-		int sepIdex = Math.max(qualified.lastIndexOf('.') + 1, 0);
+		int sepIdex = Math.max(qualified.lastIndexOf(QUALIFIED_DELIM) + 1, 0);
 		String result = qualified.substring(sepIdex, qualified.length());
 		return result;
 	}
@@ -91,14 +105,14 @@ public abstract class GrafanaFunction {
 	}
 
 	protected static String formatLocation(Location location) {
-		return getSimpleClassName(location.class_name) + "." + location.method_name;
+		return getSimpleClassName(location.class_name) + QUALIFIED_DELIM + location.method_name;
 	}
-	
+
 	protected String[] getServiceIds(EnvironmentsInput input) {
-		
+
 		String[] serviceIds = input.getServiceIds();
-		String[] result =  Arrays.copyOf(serviceIds, Math.min(MAX_COMBINE_SERVICES, serviceIds.length));	
-		
+		String[] result = Arrays.copyOf(serviceIds, Math.min(MAX_COMBINE_SERVICES, serviceIds.length));
+
 		return result;
 	}
 
@@ -110,17 +124,19 @@ public abstract class GrafanaFunction {
 		applyFilters(request, serviceId, builder);
 	}
 
-	protected Collection<Transaction> getTransactions(String serviceId, String viewId, Pair<String, String> timeSpan,
+	protected Collection<Transaction> getTransactions(String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
 			ViewInput input) {
+
+		Pair<String, String> fromTo = TimeUtil.toTimespan(timeSpan);
 		
 		TransactionsVolumeRequest.Builder builder = TransactionsVolumeRequest.newBuilder().setServiceId(serviceId)
-				.setViewId(viewId).setFrom(timeSpan.getFirst()).setTo(timeSpan.getSecond());
+				.setViewId(viewId).setFrom(fromTo.getFirst()).setTo(fromTo.getSecond());
 
 		applyFilters(input, serviceId, builder);
 
-		Response<TransactionsVolumeResult> response = ApiCache.getTransactionsVolume(apiClient, serviceId, input, builder.build());
-				
-		
+		Response<TransactionsVolumeResult> response = ApiCache.getTransactionsVolume(apiClient, serviceId,
+				input, builder.build());
+
 		if (response.isBadResponse()) {
 			throw new IllegalStateException(
 					"Transnaction volume for service " + serviceId + " code: " + response.responseCode);
@@ -154,69 +170,25 @@ public abstract class GrafanaFunction {
 
 		return result;
 	}
-	
-	public static int compareDeployments(Object o1, Object o2) {
-		
-		double i1 = getDeplyomentNumber(o1.toString());
-		double i2 = getDeplyomentNumber(o2.toString());
 
-		double d = i2 - i1;
+	protected String getSeriesName(BaseGraphInput input, String seriesName, Object volumeType, String serviceId,
+			String[] serviceIds) {
 
-		if (d == 0) {
-			return 0;
-		}
-
-		if (d < 0) {
-			return -1;
-		}
-
-		return 1;
-
+		return getServiceValue(input.deployments, serviceId, serviceIds);
 	}
-	
-	private static double getDeplyomentNumber(String value) {
 
-		boolean hasDot = false;
-		boolean hasNums = false;
-
-		StringBuilder number = new StringBuilder();
-
-		for (int i = 0; i < value.length(); i++) {
-			char c = value.charAt(i);
-
-			if (c == '.') {
-				if (!hasDot) {
-					number.append(c);
-					hasDot = true;
-				}
-				continue;
-			}
-
-			if ((c >= '0') && (c <= '9')) {
-				number.append(c);
-				hasNums = true;
-			}
-		}
-
-		if (hasNums) {
-			double result = Double.parseDouble(number.toString());
-			return result;
-		} else {
-			return -1;
-		}
-	}
-	
 	protected static Graph getEventsGraph(ApiClient apiClient, String serviceId, String viewId, int pointsCount,
 			ViewInput input, VolumeType volumeType, DateTime from, DateTime to) {
+
 		GraphRequest.Builder builder = GraphRequest.newBuilder().setServiceId(serviceId).setViewId(viewId)
 				.setGraphType(GraphType.view).setFrom(from.toString(fmt)).setTo(to.toString(fmt))
 				.setVolumeType(volumeType).setWantedPointCount(pointsCount);
 
 		applyFilters(input, serviceId, builder);
-		
-		Response<GraphResult> graphResponse = ApiCache.getEventGraph(apiClient, serviceId, 
-			input, volumeType, builder.build(), pointsCount);
-				
+
+		Response<GraphResult> graphResponse = ApiCache.getEventGraph(apiClient, serviceId, input, volumeType,
+				builder.build(), pointsCount);
+
 		if (graphResponse.isBadResponse()) {
 			return null;
 		}
@@ -240,24 +212,103 @@ public abstract class GrafanaFunction {
 		if (CollectionUtil.safeIsEmpty(result.points)) {
 			return null;
 		}
+
+		return result;
+	}
+
+	private static void appendGraphStats(Map<String, EventResult> eventMap, Graph graph) {
+
+		for (GraphPoint gp : graph.points) {
+
+			if (gp.contributors == null) {
+				continue;
+			}
+
+			for (GraphPointContributor gpc : gp.contributors) {
+
+				EventResult event = eventMap.get(gpc.id);
+
+				if (event == null) {
+					continue;
+				}
+
+				if (event.stats == null) {
+					event.stats = new Stats();
+				}
+
+				event.stats.hits += gpc.stats.hits;
+				event.stats.invocations += gpc.stats.invocations;
+			}
+		}
+	}
+	
+	private Collection<EventResult> getEventListFromGraph(String serviceId, String viewId, ViewInput input, DateTime from, DateTime to,
+			VolumeType volumeType, int pointsCount) {
+				
+		Graph graph = getEventsGraph(apiClient, serviceId, viewId, pointsCount, input, volumeType, from, to);
+		Collection<EventResult> events = getEventList(serviceId, viewId, input, from, to);
+		
+		if (events == null) {
+			return null;
+		}
+		
+		Map<String, EventResult> eventsMap = getEventsMap(events);
+		appendGraphStats(eventsMap, graph);
+	
+		return eventsMap.values();			
+	}
+	
+	private Collection<EventResult> getEventListFromVolume(String serviceId, String viewId, ViewInput input, DateTime from, DateTime to,
+			VolumeType volumeType, int pointsCount) {
+		
+		EventsVolumeRequest.Builder builder = EventsVolumeRequest.newBuilder().setVolumeType(volumeType);
+		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);				
+		Response<EventsVolumeResult> volumeResponse = ApiCache.getEventVolume(apiClient, serviceId, input, volumeType, builder.build());
+		validateResponse(volumeResponse);
+		
+		return volumeResponse.data.events;
+	}
+	
+	protected Collection<EventResult> getEventList(String serviceId, String viewId, ViewInput input, DateTime from, DateTime to) {
+		
+		EventsRequest.Builder builder = EventsRequest.newBuilder();
+		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);		
+		Response<EventsResult> eventResponse = ApiCache.getEventList(apiClient, serviceId, input, builder.build());
+		validateResponse(eventResponse);	
+	
+		if (eventResponse.data.events == null) {
+			return null;
+		}
+		
+		List<EventResult> eventsCopy = new ArrayList<EventResult>(eventResponse.data.events.size());
+		
+		try {
+			for (EventResult event : eventResponse.data.events) {
+				EventResult clone = (EventResult)event.clone();
+				clone.stats = new Stats();
+				eventsCopy.add(clone);
+			}
+		} catch (CloneNotSupportedException e) {
+			throw new IllegalStateException(e);
+			
+		}	
+
+		return eventsCopy;
+	}
+	
+	private static Map<String, EventResult> getEventsMap(Collection< EventResult> events) {
+		
+		 Map<String, EventResult> result = new HashMap<String, EventResult>();
+		
+		for (EventResult event: events) {
+			result.put(event.id, event);
+		}
 		
 		return result;
 	}
-	
-	protected Collection<EventResult> getEventList(String serviceId, ViewInput input, Pair<String, String> timeSpan,
-			VolumeType volumeType) {
-		 
-		Map<String, EventResult> result = getEventMap(serviceId, input, timeSpan, volumeType);
-		 
-		if (result != null) {
-			return result.values();
-		} else {
-			return null;
-		}
-	}
-		
-	protected Map<String, EventResult> getEventMap(String serviceId, ViewInput input, Pair<String, String> timeSpan,
-			VolumeType volumeType) {
+
+	protected Map<String, EventResult> getEventMap(String serviceId, ViewInput input, DateTime from, DateTime to,
+			VolumeType volumeType, int pointsCount) {
 	
 		String viewId = getViewId(serviceId, input.view);
 
@@ -265,27 +316,19 @@ public abstract class GrafanaFunction {
 			return null;
 		}
 
-		List<EventResult> events;
+		Collection<EventResult> events;
 		
 		Map<String, EventResult> result = new HashMap<String, EventResult>();
 
-		if (volumeType != null) {
-			
-			EventsVolumeRequest.Builder builder = EventsVolumeRequest.newBuilder().setVolumeType(volumeType);
-			applyBuilder(builder, serviceId, viewId, timeSpan, input);
-			
-			Response<EventsVolumeResult> volumeResponse = ApiCache.getEventVolume(apiClient, serviceId, input, volumeType, builder.build());
-			
-			validateResponse(volumeResponse);
-			events = volumeResponse.data.events;
+		if (volumeType != null) {	
+			if (pointsCount > 0) {
+				events = getEventListFromGraph(serviceId, viewId, input, from, to, volumeType, pointsCount);
+								
+			} else { 
+				events = getEventListFromVolume(serviceId, viewId, input, from, to, volumeType, pointsCount);
+			}		
 		} else {
-			EventsRequest.Builder builder = EventsRequest.newBuilder();
-			applyBuilder(builder, serviceId, viewId, timeSpan, input);
-			
-			Response<EventsResult> eventResponse = ApiCache.getEventVolume(apiClient, serviceId, input, builder.build());
-			
-			validateResponse(eventResponse);
-			events = eventResponse.data.events;
+			events = getEventList(serviceId, viewId, input, from, to);
 		}
 		
 		if (events == null) {
@@ -293,9 +336,7 @@ public abstract class GrafanaFunction {
 
 		}
 
-		for (EventResult event: events) {
-			result.put(event.id, event);
-		}
+		result = getEventsMap(events);
 				
 		return result;
 	}
@@ -316,16 +357,27 @@ public abstract class GrafanaFunction {
 	}
 
 	protected SummarizedView getView(String serviceId, String viewName) {
-		SummarizedView view = ViewUtil.getServiceViewByName(apiClient, serviceId, viewName);
-		return view;
+		
+		ViewsRequest request = ViewsRequest.newBuilder().setServiceId(serviceId).setViewName(viewName).build();
+
+		Response<ViewsResult> response = ApiCache.getView(apiClient, serviceId, viewName, request);
+
+		if ((response.isBadResponse()) || (response.data == null) || (response.data.views == null)
+				|| (response.data.views.size() == 0)) {
+			return null;
+		}
+
+		SummarizedView result = response.data.views.get(0);
+
+		return result;
 	}
-	
+
 	protected static String getServiceValue(String value, String serviceId) {
 		return value + SERVICE_SEPERATOR + serviceId;
 	}
-	
+
 	protected static String getServiceValue(String value, String serviceId, String[] serviceIds) {
-		
+
 		if (serviceIds.length == 1) {
 			return value;
 		} else {

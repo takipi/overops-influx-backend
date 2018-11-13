@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.joda.time.DateTime;
+
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.transaction.Transaction;
 import com.takipi.common.util.Pair;
@@ -43,7 +45,7 @@ public class TransactionsVolumeFunction extends BaseVolumeFunction {
 		protected long invocations;
 	}
 	
-	private TransactionVolume getTransactionVolumes(String serviceId, Pair<String, String> timeSpan, String viewId,
+	private TransactionVolume getTransactionVolumes(String serviceId, Pair<DateTime, DateTime> timeSpan, String viewId,
 			TransactionsVolumeInput input) {
 
 		TransactionVolume result = new TransactionVolume();
@@ -79,7 +81,7 @@ public class TransactionsVolumeFunction extends BaseVolumeFunction {
 		return result;
 	}
 	
-	protected EventVolume getTransactionVolume(TransactionsVolumeInput input, Pair<String, String> timeSpan ) {
+	protected EventVolume getTransactionVolume(TransactionsVolumeInput input, Pair<DateTime, DateTime> timeSpan ) {
 		String[] serviceIds = getServiceIds(input);
 
 		long totalInvocations = 0;
@@ -141,7 +143,7 @@ public class TransactionsVolumeFunction extends BaseVolumeFunction {
 			throw new IllegalArgumentException("volumeType");
 		}
 
-		Pair<String, String> timeSpan = TimeUtil.parseTimeFilter(input.timeFilter);
+		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
 		
 		EventVolume volume = getTransactionVolume(input, timeSpan);
 		

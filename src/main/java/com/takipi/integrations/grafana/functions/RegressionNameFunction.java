@@ -1,18 +1,16 @@
 package com.takipi.integrations.grafana.functions;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import org.joda.time.DateTime;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionStringUtil;
-import com.takipi.integrations.grafana.input.FunctionInput;
+import com.takipi.api.client.util.regression.RegressionUtil;
+import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.RegressionsNameInput;
-import com.takipi.integrations.grafana.output.Series;
+import com.takipi.integrations.grafana.input.ViewInput;
 
-public class RegressionNameFunction extends GrafanaFunction {
-	
+public class RegressionNameFunction extends BaseNameFunction {
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -24,66 +22,45 @@ public class RegressionNameFunction extends GrafanaFunction {
 		public Class<?> getInputClass() {
 			return RegressionsNameInput.class;
 		}
-		
+
 		@Override
 		public String getName() {
 			return "regressionName";
 		}
 	}
-	
+
 	public RegressionNameFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
-	
-	private String getRegressionName(RegressionsNameInput input, String serviceId) {
-				
+
+	@Override
+	protected String getName(ViewInput input, String serviceId) {
+		RegressionsNameInput regNameInput = (RegressionsNameInput) input;
+
 		RegressionInput regressionInput = new RegressionInput();
-		
+
 		regressionInput.serviceId = serviceId;
 		regressionInput.viewId = getViewId(serviceId, input.view);
-		
+
 		if (regressionInput.viewId == null) {
 			return null;
 		}
-
-		regressionInput.activeTimespan = input.activeTimespan;
-		regressionInput.baselineTimespan = input.baselineTimespan;
+		
+		regressionInput.baselineTimespan = regNameInput.minBaselineTimespan;
 
 		regressionInput.applictations = input.getApplications(serviceId);
 		regressionInput.servers = input.getServers(serviceId);
 		regressionInput.deployments = input.getDeployments(serviceId);
 		
-		return RegressionStringUtil.getRegressionName(apiClient, regressionInput);
-	}
-	
-	@Override
-	public List<Series> process(FunctionInput functionInput) {
-		
-		if (!(functionInput instanceof RegressionsNameInput)) {
-			throw new IllegalArgumentException("functionInput");
-		}
-		
-		RegressionsNameInput input = (RegressionsNameInput)functionInput;
-		
-		String[] serviceIds = getServiceIds(input);
-		
-		if (serviceIds.length == 0) {
-			return null;
-		}
-		
-		String name = getRegressionName(input, serviceIds[0]);
-		
-		if (name == null) {
-			return null;
-		}
-		
-		Series series = new Series();
-		
-		series.name = SERIES_NAME;
-		series.columns = Arrays.asList(new String[] { KEY_COLUMN, VALUE_COLUMN });
-		series.values = Collections.singletonList(Arrays.asList(new Object[] {KEY_COLUMN, name}));
-		
-		return Collections.singletonList(series);	
-	}
+		Pair<DateTime, Integer> activeWindow = RegressionUtil.getActiveWindow(apiClient, regressionInput, System.out);
 
+		int expandedBaselineTimespan = RegressionFunction.expandBaselineTimespan(regNameInput.baselineTimespanFactor,
+				regNameInput.minBaselineTimespan, activeWindow);
+
+		regressionInput.baselineTimespan = expandedBaselineTimespan;
+
+		String result = RegressionStringUtil.getRegressionName(apiClient, regressionInput);
+
+		return result;
+	}
 }

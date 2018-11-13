@@ -13,9 +13,9 @@ import com.takipi.api.client.util.client.ClientUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.DeploymentsGraphInput;
+import com.takipi.integrations.grafana.util.DeploymentUtil;
 
 public class DeploymentsGraph extends GraphFunction {
-
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -58,7 +58,6 @@ public class DeploymentsGraph extends GraphFunction {
 		if (inputDeployments.size() == 1) {
 			result = inputDeployments.get(0);
 		} else {
-			
 			if (serviceDeployments.size() == 0) {
 				return null;
 			}
@@ -70,14 +69,13 @@ public class DeploymentsGraph extends GraphFunction {
 	}
 	
 	private List<String> getServiceDeps(String serviceId) {
-		
 		List<String> result = ClientUtil.getDeployments(apiClient, serviceId);
 		
 		result.sort(new Comparator<String>() {
 
 			@Override
 			public int compare(String o1, String o2) {
-				return compareDeployments(o1, o2);
+				return DeploymentUtil.compareDeployments(o1, o2);
 			}
 		});
 		

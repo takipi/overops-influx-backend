@@ -6,12 +6,12 @@ import java.util.Collections;
 import com.takipi.integrations.grafana.functions.EventFilter;
 
 public class EventFilterInput extends ViewInput {
-
 	public String introducedBy;
 	public String types;
 	public String labels;
 	public String labelsRegex;
 	public String firstSeen;
+	public int pointsWanted;
 
 	public boolean hasEventFilter() {
 		
@@ -46,10 +46,6 @@ public class EventFilterInput extends ViewInput {
 		return hasFilter(introducedBy);
 	}
 
-	public boolean hasTypes() {
-		return ((types != null) && (types.length() > 0));
-	}
-
 	public Collection<String> getIntroducedBy(String serviceId) {
 
 		if (introducedBy == null) {
@@ -61,11 +57,11 @@ public class EventFilterInput extends ViewInput {
 
 	public Collection<String> getTypes() {
 
-		if (types == null) {
-			return Collections.emptySet();
+		if (!hasFilter(types)) {
+			return null;
 		}
 
-		return getServiceFilters(types, null, false);
+		return getServiceFilters(types, null, true);
 	}
 
 	public Collection<String> geLabels(String serviceId) {

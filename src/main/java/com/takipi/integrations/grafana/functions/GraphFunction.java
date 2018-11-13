@@ -3,11 +3,11 @@ package com.takipi.integrations.grafana.functions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 import org.joda.time.DateTime;
-import org.joda.time.format.ISODateTimeFormat;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.metrics.Graph;
@@ -57,6 +57,35 @@ public class GraphFunction extends BaseGraphFunction {
 		super(apiClient);
 	}
 
+	protected List<Series> limitGraphSeries(List<GraphSeries> series, int limit) {
+		
+		List<GraphSeries> sorted = new ArrayList<GraphSeries>(series);
+		
+		sortSeriesByVolume(sorted);
+		
+		List<Series> result = new ArrayList<Series>();
+		
+		for (int i = 0; i < Math.min(limit, sorted.size()); i++) {
+			
+			GraphSeries graphSeries = sorted.get(i);
+			
+			if (graphSeries.volume > 0) {
+				result.add(graphSeries.series);
+			}
+		}
+		return result;
+	}
+	
+	protected void sortSeriesByVolume(List<GraphSeries> series) {
+		series.sort(new Comparator<GraphSeries>() {
+
+			@Override
+			public int compare(GraphSeries o1, GraphSeries o2) {
+				return (int)(o2.volume - o1.volume);
+			}
+		});
+	}
+	
 	@Override
 	protected List<GraphSeries> processServiceGraph(String serviceId, String viewId, String viewName,
 			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, String[] serviceIds, int pointsWanted) {
@@ -141,7 +170,7 @@ public class GraphFunction extends BaseGraphFunction {
 		return result;
 	}
 
-	private SeriesVolume processGraphPoints(String serviceId, 
+	protected SeriesVolume processGraphPoints(String serviceId, 
 			Pair<DateTime, DateTime> timeSpan, Graph graph, GraphInput input) {
 		long volume = 0;
 	
@@ -151,7 +180,8 @@ public class GraphFunction extends BaseGraphFunction {
 		Map<String, EventResult> eventMap;
 		
 		if (input.hasEventFilter()) {
-			eventMap = getEventMap(serviceId, input, TimeUtil.toTimespan(timeSpan), null);
+			eventMap = getEventMap(serviceId, input, timeSpan.getFirst(), timeSpan.getSecond(),
+				input.volumeType, input.pointsWanted);
 			eventFilter = input.getEventFilter(serviceId);
 		} else {
 			eventMap = null;
@@ -164,7 +194,7 @@ public class GraphFunction extends BaseGraphFunction {
 			}
 			
 			long value = 0;
-			DateTime gpTime = ISODateTimeFormat.dateTimeParser().parseDateTime(gp.time);
+			DateTime gpTime = TimeUtil.getDateTime(gp.time);
 
 			for (GraphPointContributor gpc : gp.contributors) {
 

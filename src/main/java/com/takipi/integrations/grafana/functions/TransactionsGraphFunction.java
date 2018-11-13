@@ -94,7 +94,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 
 		List<GraphSeries> result;
 
-		if (input.aggregate) {
+		if ((input.aggregate) || (!input.hasTransactions())) { 
 			result = Collections.singletonList(createAggregateGraphSeries(serviceId, response.data.graphs, transactions,
 					input, serviceIds));
 		} else {
@@ -285,8 +285,10 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 
 		Series series = new Series();
 		
-		series.name = getServiceValue(getSimpleClassName(graph.name), serviceId, serviceIds);
-		series.columns = Arrays.asList(new String[] { TIME_COLUMN, volumeType.toString() });
+		String tagName = getServiceValue(getSimpleClassName(graph.name), serviceId, serviceIds);
+		
+		series.name = EMPTY_NAME;
+		series.columns = Arrays.asList(new String[] { TIME_COLUMN, tagName });
 
 		SeriesVolume seriesData = processGraphPoints(graph, volumeType);
 
@@ -294,7 +296,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 
 		return GraphSeries.of(series, seriesData.volume);
 	}
-
+	
 	private SeriesVolume processGraphPoints(TransactionGraph graph, VolumeType volumeType) {
 
 		long volume = 0;

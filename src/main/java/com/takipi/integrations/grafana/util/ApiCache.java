@@ -14,11 +14,13 @@ import com.takipi.api.client.request.event.EventsVolumeRequest;
 import com.takipi.api.client.request.metrics.GraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsGraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsVolumeRequest;
+import com.takipi.api.client.request.view.ViewsRequest;
 import com.takipi.api.client.result.event.EventsResult;
 import com.takipi.api.client.result.event.EventsVolumeResult;
 import com.takipi.api.client.result.metrics.GraphResult;
 import com.takipi.api.client.result.transaction.TransactionsGraphResult;
 import com.takipi.api.client.result.transaction.TransactionsVolumeResult;
+import com.takipi.api.client.result.view.ViewsResult;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.request.intf.ApiGetRequest;
 import com.takipi.api.core.url.UrlClient.Response;
@@ -93,6 +95,46 @@ public class ApiCache {
 		}
 	}
 
+	protected static class ViewNameCacheKey extends ServiceCacheKey {
+		protected String viewName;
+
+		public ViewNameCacheKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, String viewName) {
+
+			super(apiClient, request, serviceId);
+			this.viewName = viewName;
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+
+			if (!(obj instanceof ViewNameCacheKey)) {
+				return false;
+			}
+
+			if (!super.equals(obj)) {
+				return false;
+			}
+
+			ViewNameCacheKey other = (ViewNameCacheKey) obj;
+
+			if (!Objects.equal(viewName, other.viewName)) {
+				return false;
+			}
+			
+			return true;
+		}
+		
+		@Override
+		public int hashCode() {
+			
+			if (viewName == null) {
+				return super.hashCode();
+			}
+			
+			return super.hashCode() ^ viewName.hashCode();
+		}
+	}
+	
 	protected abstract static class ViewCacheKey extends ServiceCacheKey {
 		protected ViewInput input;
 
@@ -153,7 +195,12 @@ public class ApiCache {
 
 		@Override
 		public int hashCode() {
-			return super.hashCode() ^ serviceId.hashCode();
+			
+			if (input.view == null) {
+				return super.hashCode();
+			}
+			
+			return super.hashCode() ^ input.view.hashCode();
 		}
 		
 		@Override
@@ -314,6 +361,16 @@ public class ApiCache {
 	}
 	
 	@SuppressWarnings("unchecked")
+	public static Response<ViewsResult> getView(ApiClient apiClient, String serviceId, 
+			String viewName, ViewsRequest viewsRequest) {
+		
+		ViewNameCacheKey cacheKey = new ViewNameCacheKey(apiClient, viewsRequest, serviceId, viewName);
+		Response<ViewsResult> response = (Response<ViewsResult>)ApiCache.getItem(cacheKey);
+		
+		return response;
+	}
+	
+	@SuppressWarnings("unchecked")
 	public static Response<TransactionsVolumeResult> getTransactionsVolume(ApiClient apiClient, String serviceId, 
 			ViewInput input,TransactionsVolumeRequest request) {
 		TransactionsCacheKey cacheKey = new TransactionsCacheKey(apiClient, request, serviceId, input);
@@ -341,8 +398,9 @@ public class ApiCache {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Response<EventsResult> getEventVolume(ApiClient apiClient, String serviceId, 
+	public static Response<EventsResult> getEventList(ApiClient apiClient, String serviceId, 
 			ViewInput input, EventsRequest  request) {
+		
 		EventKey cacheKey = new EventKey(apiClient, request, serviceId, input, null);
 		Response<EventsResult> response = (Response<EventsResult>)ApiCache.getItem(cacheKey);
 		
@@ -364,7 +422,7 @@ public class ApiCache {
 			.build(new CacheLoader<CacheKey, Response<?>>() {
 				
 				@Override
-				public Response<?> load(CacheKey key) {
+				public Response<?> load(CacheKey key) {					
 					Response<?> result = key.apiClient.get(key.request);
 					return result;
 				}

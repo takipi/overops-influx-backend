@@ -124,6 +124,10 @@ public class TimeUtil {
 		return Pair.of(pair.getFirst().toString(fmt), pair.getSecond().toString(fmt));
 	}
 	
+	public static Pair<String, String> toTimespan(DateTime from, DateTime to) {
+		return Pair.of(from.toString(fmt), to.toString(fmt));
+	}
+	
 	public static Pair<String, String> parseTimeFilter(String timeFilter) {
 		Pair<DateTime, DateTime> pair = getTimeFilter(timeFilter);
 		return toTimespan(pair);

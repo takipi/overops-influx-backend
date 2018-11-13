@@ -36,6 +36,7 @@ import com.takipi.integrations.grafana.input.BaseVolumeInput.AggregationType;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.GroupByInput;
 import com.takipi.integrations.grafana.output.Series;
+import com.takipi.integrations.grafana.util.DeploymentUtil;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class GroupByFunction extends BaseVolumeFunction {
@@ -231,7 +232,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 					if (index == -1) {
 						continue;
 					}
-
+					
 					Pair<DateTime, DateTime> interval = intervals.get(index);
 
 					processEventGroupBy(input, map, event, eventFilter, gpc.stats, interval.getFirst());
@@ -257,8 +258,12 @@ public class GroupByFunction extends BaseVolumeFunction {
 			beforeCall();
 
 			try {
-				Map<String, EventResult> eventsMap = getEventMap(serviceId, input, TimeUtil.toTimespan(timeSpan),
-						input.volumeType);
+				Map<String, EventResult> eventsMap = getEventMap(serviceId, input, timeSpan.getFirst(),
+						timeSpan.getSecond(), input.volumeType, input.pointsWanted);
+
+				if (eventsMap == null) {
+					return null;
+				}
 
 				EventFilter eventFilter = input.getEventFilter(serviceId);
 
@@ -569,8 +574,8 @@ public class GroupByFunction extends BaseVolumeFunction {
 			return;
 		}
 
-		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, TimeUtil.toTimespan(timespan),
-				input.volumeType);
+		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, timespan.getFirst(),
+				timespan.getSecond(), input.volumeType, input.pointsWanted);
 
 		EventFilter eventFilter = input.getEventFilter(serviceId);
 
@@ -650,21 +655,19 @@ public class GroupByFunction extends BaseVolumeFunction {
 		if (input.hasDeployments()) {
 			deployments = input.getDeployments(serviceId);
 		} else {
-			deployments = ClientUtil.getDeployments(apiClient, serviceId);
+			Pair<String, List<String>> depResult = DeploymentUtil.getActiveDeployment(apiClient, input,
+				serviceId, input.limit);
+			
+			deployments = new ArrayList<String>(depResult.getSecond().size() + 1);
+			
+			deployments.add(depResult.getFirst());
+			deployments.addAll(depResult.getSecond());
 		}
-		
 			
 		int size;
 		
 		if (input.limit > 0) {
-			deployments.sort(new Comparator<String>() {
-
-				@Override
-				public int compare(String o1, String o2) {
-					return compareDeployments(o1, o2);
-				}
-			});
-			
+			DeploymentUtil.sortDeployments(deployments);
 			size = Math.min(deployments.size(), input.limit);
 		} else {
 			size = deployments.size();

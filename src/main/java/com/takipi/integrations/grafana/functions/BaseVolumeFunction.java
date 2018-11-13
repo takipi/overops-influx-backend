@@ -1,9 +1,13 @@
 package com.takipi.integrations.grafana.functions;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.joda.time.DateTime;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.result.event.EventResult;
@@ -13,7 +17,6 @@ import com.takipi.integrations.grafana.input.BaseVolumeInput;
 import com.takipi.integrations.grafana.input.BaseVolumeInput.AggregationType;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.util.TimeUtil;
 
 public abstract class BaseVolumeFunction extends GrafanaFunction {
 
@@ -42,7 +45,7 @@ public abstract class BaseVolumeFunction extends GrafanaFunction {
 		return null;
 	}
 
-	protected List<Series> createSeries(BaseVolumeInput input, Pair<String, String> timeSpan, EventVolume volume,
+	protected List<Series> createSeries(BaseVolumeInput input, Pair<DateTime, DateTime> timeSpan, EventVolume volume,
 			AggregationType type) {
 		Series series = new Series();
 
@@ -68,7 +71,7 @@ public abstract class BaseVolumeFunction extends GrafanaFunction {
 			throw new IllegalStateException(input.type);
 		}
 
-		Long time = Long.valueOf(TimeUtil.getLongTime(timeSpan.getSecond()));
+		Long time = Long.valueOf(timeSpan.getSecond().getMillis());
 
 		series.values = Collections.singletonList(Arrays.asList(new Object[] { time, value }));
 
@@ -76,24 +79,27 @@ public abstract class BaseVolumeFunction extends GrafanaFunction {
 	}
 
 	private EventVolume processServiceVolume(String serviceId, BaseVolumeInput input, VolumeType volumeType,
-			Pair<String, String> timeSpan) {
+			Pair<DateTime, DateTime> timeSpan) {
 
 		EventVolume result = new EventVolume();
 
-		Collection<EventResult> events = getEventList(serviceId, input, timeSpan, volumeType);
+		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, 
+			timeSpan.getFirst(), timeSpan.getSecond(), volumeType, input.pointsWanted);
 
-		if (events == null) {
+		if (eventsMap == null) {
 			return result;
 		}
 
 		EventFilter eventFilter = input.getEventFilter(serviceId);
 
-		for (EventResult event : events) {
+		Set<String> smiliarIds = new HashSet<String>();
+		
+		for (EventResult event : eventsMap.values()) {
 
 			if (eventFilter.filter(event)) {
 				continue;
 			}
-
+			
 			if (event.stats != null) {
 				switch (volumeType) {
 				case invocations:
@@ -106,14 +112,21 @@ public abstract class BaseVolumeFunction extends GrafanaFunction {
 					break;
 				}
 			}
-			result.count++;
+			
+			if (!smiliarIds.contains(event.id)) {		
+				result.count++;
+			}
+			
+			if (event.similar_event_ids != null) {
+				smiliarIds.addAll(event.similar_event_ids);
+			}
 		}
 
 		return result;
 	}
 
 	protected EventVolume getEventVolume(BaseVolumeInput input, VolumeType volumeType,
-			Pair<String, String> timeSpan) {
+			Pair<DateTime, DateTime> timeSpan) {
 
 		String[] serviceIds = getServiceIds(input);
 

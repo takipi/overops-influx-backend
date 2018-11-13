@@ -11,14 +11,12 @@ import com.takipi.integrations.grafana.functions.GrafanaFunction;
 import com.takipi.integrations.grafana.util.ArrayUtil;
 
 public class EnvironmentsFilterInput extends EnvironmentsInput {
-	
 	public String applications;
 	public String servers;
 	public String deployments;
 	
 	protected List<String> getServiceFilters(String value, String serviceId, boolean matchCase) {
-
-		if (GrafanaFunction.VAR_ALL.equals(value)) {
+		if (GrafanaFunction.VAR_ALL.contains(value)) {
 			return Collections.emptyList();
 		}
 
@@ -50,7 +48,7 @@ public class EnvironmentsFilterInput extends EnvironmentsInput {
 	}
 
 	protected boolean hasFilter(String value) {
-		return (value != null) && (value.length() != 0) && (!value.equals(GrafanaFunction.VAR_ALL));
+		return (value != null) && (value.length() != 0) && (!GrafanaFunction.VAR_ALL.contains(value));
 	}
 
 	public boolean hasApplications() {
