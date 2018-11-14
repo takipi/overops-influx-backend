@@ -7,6 +7,6 @@ datasources:
   database: telegraf
   user: grafana
   password: grafana
-  url: http://localhost:8186 # assuming OverOps-as-influx
-# url: http://localhost:8080 # assuming OverOps Server 
-
+  is_default: true
+  #url: http://localhost:8186 # assuming OverOps-as-influx standalone
+  url: ${TAKIPI_HOST_URL}/oo-as-influx # assuming OverOps Server 

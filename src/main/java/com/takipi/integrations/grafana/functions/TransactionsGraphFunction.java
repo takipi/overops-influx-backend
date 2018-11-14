@@ -24,8 +24,8 @@ import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.utils.ApiCache;
-import com.takipi.integrations.grafana.utils.TimeUtils;
+import com.takipi.integrations.grafana.util.ApiCache;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionsGraphFunction extends BaseGraphFunction {
 
@@ -61,12 +61,13 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		super(apiClient);
 	}
 
+    @Override
 	protected List<GraphSeries> processServiceGraph(String serviceId, String viewId, String viewName,
 			BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, String[] serviceIds, int pointsWanted) {
 
 		TransactionsGraphInput input = (TransactionsGraphInput) request;
 
-		Pair<String, String> fromTo = TimeUtils.toTimespan(timeSpan);
+		Pair<String, String> fromTo = TimeUtil.toTimespan(timeSpan);
 				
 		TransactionsGraphRequest.Builder builder = TransactionsGraphRequest.newBuilder().setServiceId(serviceId)
 				.setViewId(viewId).setFrom(fromTo.getFirst()).setTo(fromTo.getSecond())
@@ -74,7 +75,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 				
 		applyFilters(request, serviceId, builder);
 
-		Response<TransactionsGraphResult> response = ApiCache.getTransactionsGraph(apiClient, serviceId, viewId, input, pointsWanted, builder.build());
+		Response<TransactionsGraphResult> response = ApiCache.getTransactionsGraph(apiClient, serviceId, input, pointsWanted, builder.build());
 				
 		validateResponse(response);
 		

@@ -50,7 +50,8 @@ public class RegressionReportFunction extends RegressionFunction {
 	private RegressionsInput getInput(RegressionsInput input, String appName) {
 		Gson gson = new Gson();
 		String json = gson.toJson(input);
-		RegressionsInput result = (RegressionsInput) gson.fromJson(json, RegressionsInput.class);
+		RegressionsInput result = gson.fromJson(json, RegressionsInput.class);
+		
 		result.applications = appName;
 		return result;
 	}

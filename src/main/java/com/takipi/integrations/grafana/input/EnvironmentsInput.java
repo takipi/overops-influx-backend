@@ -2,10 +2,9 @@ package com.takipi.integrations.grafana.input;
 
 import com.google.common.base.Objects;
 import com.takipi.integrations.grafana.functions.GrafanaFunction;
-import com.takipi.integrations.grafana.utils.ArrayUtils;
+import com.takipi.integrations.grafana.util.ArrayUtil;
 
 public class EnvironmentsInput extends VariableInput {
-	
 	public String environments;
 
 	public String[] getServiceIds() {
@@ -14,7 +13,7 @@ public class EnvironmentsInput extends VariableInput {
 			return new String[0];
 		}
 
-		String[] serviceIds = ArrayUtils.safeSplitArray(environments, GrafanaFunction.GRAFANA_SEPERATOR, false);
+		String[] serviceIds = ArrayUtil.safeSplitArray(environments, GrafanaFunction.GRAFANA_SEPERATOR, false);
 	
 		if ((serviceIds.length == 1) && (serviceIds[0].equals("()"))) {
 			return new String[0];

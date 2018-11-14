@@ -1,12 +1,10 @@
-
 package com.takipi.integrations.grafana.functions;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.integrations.grafana.input.ViewInput;
-import com.takipi.integrations.grafana.utils.DeploymentUtil;
+import com.takipi.integrations.grafana.util.DeploymentUtil;
 
 public class DeploymentNameFunction extends BaseNameFunction {
-
 	public static class Factory implements FunctionFactory {
 
 		@Override

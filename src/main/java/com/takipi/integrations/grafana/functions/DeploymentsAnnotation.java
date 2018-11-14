@@ -1,4 +1,3 @@
-
 package com.takipi.integrations.grafana.functions;
 
 import java.util.ArrayList;
@@ -15,10 +14,9 @@ import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.DeploymentsGraphInput;
 import com.takipi.integrations.grafana.input.GraphInput;
-import com.takipi.integrations.grafana.utils.TimeUtils;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class DeploymentsAnnotation extends DeploymentsGraphFunction {
-
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -55,7 +53,7 @@ public class DeploymentsAnnotation extends DeploymentsGraphFunction {
 	}
 
 	@Override
-	protected SeriesVolume processGraphPoints(String serviceId, String viewId, 
+	protected SeriesVolume processGraphPoints(String serviceId, 
 			Pair<DateTime, DateTime> timeSpan, Graph graph, GraphInput input) {
 	
 		List<List<Object>> values = new ArrayList<List<Object>>(graph.points.size());
@@ -63,7 +61,7 @@ public class DeploymentsAnnotation extends DeploymentsGraphFunction {
 		for (GraphPoint gp : graph.points) {
 			
 			if ((gp.stats.hits > 0) || (gp.stats.invocations > 0)) {
-				DateTime gpTime = TimeUtils.getDateTime(gp.time);
+				DateTime gpTime = TimeUtil.getDateTime(gp.time);
 				values.add(Arrays.asList(new Object[] { Long.valueOf(gpTime.getMillis()), input.deployments }));
 				
 				break;

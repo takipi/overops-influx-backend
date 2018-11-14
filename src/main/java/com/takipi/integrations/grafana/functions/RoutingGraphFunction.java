@@ -1,4 +1,3 @@
-
 package com.takipi.integrations.grafana.functions;
 
 import java.util.ArrayList;
@@ -16,15 +15,14 @@ import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
 import com.takipi.api.client.result.event.EventResult;
-import com.takipi.api.client.util.categories.Categories;
+import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.input.GraphLimitInput;
-import com.takipi.integrations.grafana.utils.TimeUtils;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class RoutingGraphFunction extends LimitGraphFunction {
-
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -70,7 +68,7 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 				continue;
 			}
 
-			DateTime gpTime = TimeUtils.getDateTime(gp.time);
+			DateTime gpTime = TimeUtil.getDateTime(gp.time);
 			
 			lastKey = key;
 			key = Long.valueOf(gpTime.getMillis());

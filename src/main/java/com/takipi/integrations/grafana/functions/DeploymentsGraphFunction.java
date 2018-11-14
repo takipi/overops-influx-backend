@@ -11,7 +11,7 @@ import com.takipi.api.client.ApiClient;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.DeploymentsGraphInput;
-import com.takipi.integrations.grafana.utils.DeploymentUtil;
+import com.takipi.integrations.grafana.util.DeploymentUtil;
 
 public class DeploymentsGraphFunction extends GraphFunction {
 
@@ -40,7 +40,8 @@ public class DeploymentsGraphFunction extends GraphFunction {
 	private DeploymentsGraphInput getInput(DeploymentsGraphInput input, String depName) {
 		Gson gson = new Gson();
 		String json = gson.toJson(input);
-		DeploymentsGraphInput result = (DeploymentsGraphInput) gson.fromJson(json, DeploymentsGraphInput.class);
+		
+		DeploymentsGraphInput result = gson.fromJson(json, DeploymentsGraphInput.class);
 		result.deployments = depName;
 		return result;
 	}
@@ -64,7 +65,6 @@ public class DeploymentsGraphFunction extends GraphFunction {
 		List<GraphAsyncTask> result = new ArrayList<GraphAsyncTask>();
 
 		for (String serviceId : serviceIds) {
-
 			String viewId = getViewId(serviceId, input.view);
 
 			if (viewId == null) {

@@ -8,21 +8,19 @@ import java.util.Set;
 
 import com.google.common.base.Objects;
 import com.takipi.integrations.grafana.functions.GrafanaFunction;
-import com.takipi.integrations.grafana.utils.ArrayUtils;
+import com.takipi.integrations.grafana.util.ArrayUtil;
 
 public class EnvironmentsFilterInput extends EnvironmentsInput {
-	
 	public String applications;
 	public String servers;
 	public String deployments;
 	
 	protected List<String> getServiceFilters(String value, String serviceId, boolean matchCase) {
-
 		if (GrafanaFunction.VAR_ALL.contains(value)) {
 			return Collections.emptyList();
 		}
 
-		String[] values = ArrayUtils.safeSplitArray(value, GrafanaFunction.GRAFANA_SEPERATOR, false);
+		String[] values = ArrayUtil.safeSplitArray(value, GrafanaFunction.GRAFANA_SEPERATOR, false);
 		Set<String> result = new HashSet<String>();
 
 		for (int i = 0; i < values.length; i++) {

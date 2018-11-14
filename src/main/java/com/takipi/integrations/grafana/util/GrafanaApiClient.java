@@ -1,10 +1,9 @@
-package com.takipi.integrations.grafana.utils;
+package com.takipi.integrations.grafana.util;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.integrations.grafana.servlet.ServletUtil.Auth;
 
 public class GrafanaApiClient {
-
 	private static final int TIMEOUT = 60000;
 
 	public static ApiClient getApiClient(Auth auth) {
@@ -36,6 +35,10 @@ public class GrafanaApiClient {
 	}
 
 	public static ApiClient getApiClient(String hostname, String token) {
-		return ApiClient.newBuilder().setHostname(hostname).setApiKey(token).setConnectTimeout(TIMEOUT).build();
+		return ApiClient.newBuilder()
+            .setHostname(hostname)
+            .setApiKey(token)
+            .setConnectTimeout(TIMEOUT)
+            .build();
 	}
 }

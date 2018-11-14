@@ -11,7 +11,7 @@ import com.takipi.api.client.util.view.ViewUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.EnvironmentsInput;
 import com.takipi.integrations.grafana.input.ViewInput;
-import com.takipi.integrations.grafana.utils.TimeUtils;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionsFunction extends EnvironmentVariableFunction {
 
@@ -42,7 +42,7 @@ public class TransactionsFunction extends EnvironmentVariableFunction {
 			VariableAppender appender) {
 		
 		ViewInput viewInput = (ViewInput)input;
-		Pair<DateTime, DateTime> timespan = TimeUtils.getTimeFilter(viewInput.timeFilter);
+		Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(viewInput.timeFilter);
 
 		SummarizedView view = ViewUtil.getServiceViewByName(apiClient, serviceId, viewInput.view);
 		

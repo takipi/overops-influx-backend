@@ -25,7 +25,7 @@ import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.RegressionsInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.utils.EventLinkEncoder;
+import com.takipi.integrations.grafana.util.EventLinkEncoder;
 
 public class RegressionFunction extends EventsFunction {
 
@@ -137,9 +137,8 @@ public class RegressionFunction extends EventsFunction {
 		super(apiClient);
 	}
 
-	private List<EventData> processRegressionData(String serviceId, RegressionInput input,
-		RateRegression rateRegression, Pair<DateTime, DateTime> timespan) {
-
+	private List<EventData> processRegressionData(RegressionInput input,
+		RateRegression rateRegression) {
 		List<EventData> result = new ArrayList<EventData>();
 
 		for (EventResult event : rateRegression.getSortedCriticalNewEvents()) {
@@ -324,13 +323,11 @@ public class RegressionFunction extends EventsFunction {
 			return Collections.emptySet();
 		}
 		
-		return processRegressionData(serviceId, regressionOutput.regressionInput, 
-				regressionOutput.rateRegression, timeSpan);
+		return processRegressionData(regressionOutput.regressionInput, regressionOutput.rateRegression);
 	}
 
 	@Override
 	public List<Series> process(FunctionInput functionInput) {
-
 		if (!(functionInput instanceof RegressionsInput)) {
 			throw new IllegalArgumentException("functionInput");
 		}

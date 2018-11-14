@@ -44,8 +44,8 @@ import com.takipi.integrations.grafana.input.EnvironmentsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.utils.ApiCache;
-import com.takipi.integrations.grafana.utils.TimeUtils;
+import com.takipi.integrations.grafana.util.ApiCache;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public abstract class GrafanaFunction {
 
@@ -127,14 +127,14 @@ public abstract class GrafanaFunction {
 	protected Collection<Transaction> getTransactions(String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
 			ViewInput input) {
 
-		Pair<String, String> fromTo = TimeUtils.toTimespan(timeSpan);
+		Pair<String, String> fromTo = TimeUtil.toTimespan(timeSpan);
 		
 		TransactionsVolumeRequest.Builder builder = TransactionsVolumeRequest.newBuilder().setServiceId(serviceId)
 				.setViewId(viewId).setFrom(fromTo.getFirst()).setTo(fromTo.getSecond());
 
 		applyFilters(input, serviceId, builder);
 
-		Response<TransactionsVolumeResult> response = ApiCache.getTransactionsVolume(apiClient, serviceId, viewId,
+		Response<TransactionsVolumeResult> response = ApiCache.getTransactionsVolume(apiClient, serviceId,
 				input, builder.build());
 
 		if (response.isBadResponse()) {
@@ -186,7 +186,7 @@ public abstract class GrafanaFunction {
 
 		applyFilters(input, serviceId, builder);
 
-		Response<GraphResult> graphResponse = ApiCache.getEventGraph(apiClient, serviceId, viewId, input, volumeType,
+		Response<GraphResult> graphResponse = ApiCache.getEventGraph(apiClient, serviceId, input, volumeType,
 				builder.build(), pointsCount);
 
 		if (graphResponse.isBadResponse()) {
@@ -262,8 +262,8 @@ public abstract class GrafanaFunction {
 			VolumeType volumeType, int pointsCount) {
 		
 		EventsVolumeRequest.Builder builder = EventsVolumeRequest.newBuilder().setVolumeType(volumeType);
-		applyBuilder(builder, serviceId, viewId, TimeUtils.toTimespan(from, to), input);				
-		Response<EventsVolumeResult> volumeResponse = ApiCache.getEventVolume(apiClient, serviceId, viewId, input, volumeType, builder.build());
+		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);				
+		Response<EventsVolumeResult> volumeResponse = ApiCache.getEventVolume(apiClient, serviceId, input, volumeType, builder.build());
 		validateResponse(volumeResponse);
 		
 		return volumeResponse.data.events;
@@ -272,8 +272,8 @@ public abstract class GrafanaFunction {
 	protected Collection<EventResult> getEventList(String serviceId, String viewId, ViewInput input, DateTime from, DateTime to) {
 		
 		EventsRequest.Builder builder = EventsRequest.newBuilder();
-		applyBuilder(builder, serviceId, viewId, TimeUtils.toTimespan(from, to), input);		
-		Response<EventsResult> eventResponse = ApiCache.getEventList(apiClient, serviceId, viewId, input, builder.build());
+		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);		
+		Response<EventsResult> eventResponse = ApiCache.getEventList(apiClient, serviceId, input, builder.build());
 		validateResponse(eventResponse);	
 	
 		if (eventResponse.data.events == null) {

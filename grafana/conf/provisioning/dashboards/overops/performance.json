@@ -16,18 +16,18 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1540977438275,
+  "iteration": 1542024380086,
   "links": [
     {
       "asDropdown": true,
       "icon": "dashboard",
-      "includeVars": false,
-      "keepTime": false,
+      "includeVars": true,
+      "keepTime": true,
       "tags": [
         "OverOps"
       ],
       "targetBlank": true,
-      "title": "OverOps Dashboards",
+      "title": "",
       "tooltip": "",
       "type": "dashboards",
       "url": ""
@@ -113,7 +113,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsRate({\"type\":\"sum\",\"volumeType\":\"invocations\",\"view\":\"All Events\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"Timer\",\"transactions\":\"$transaction\"})",
+          "query": "transactionsRate({\"type\":\"sum\",\"volumeType\":\"invocations\",\"view\":\"All Events\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"Timer\",\"transactions\":\"$transaction\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -227,7 +227,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsRate({\"type\":\"sum\",\"volumeType\":\"invocations\",\"view\":\"All Events\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"Uncaught Exception|HTTP Error|Logged Error\",\"transactions\":\"$transaction\"})",
+          "query": "transactionsRate({\"type\":\"sum\",\"volumeType\":\"invocations\",\"view\":\"All Events\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"Uncaught Exception|HTTP Error|Logged Error\",\"transactions\":\"$transaction\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -341,7 +341,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsVolume({\"type\":\"sum\",\"volumeType\":\"invocations\",\"view\":\"All Events\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"transactions\":\"$transaction\"})",
+          "query": "transactionsVolume({\"type\":\"sum\",\"volumeType\":\"invocations\",\"view\":\"All Events\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"transactions\":\"$transaction\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -456,7 +456,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsVolume({\"type\":\"avg\",\"volumeType\":\"avg\",\"view\":\"All Events\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"transactions\":\"$transaction\"})",
+          "query": "transactionsVolume({\"type\":\"avg\",\"volumeType\":\"avg\",\"view\":\"All Events\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"transactions\":\"$transaction\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -569,7 +569,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "volume({\"type\":\"sum\",\"volumeType\":\"hits\",\"view\":\"All Events\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"Timer\",\"transactions\":\"$transaction\"})",
+          "query": "volume({\"type\":\"sum\",\"volumeType\":\"hits\",\"view\":\"All Events\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"Timer\",\"transactions\":\"$transaction\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -682,7 +682,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "volume({\"type\":\"sum\",\"volumeType\":\"hits\",\"view\":\"All Events\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"Uncaught Exception|HTTP Error|Logged Error\",\"transactions\":\"$transaction\"})",
+          "query": "volume({\"type\":\"sum\",\"volumeType\":\"hits\",\"view\":\"All Events\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"Uncaught Exception|HTTP Error|Logged Error\",\"transactions\":\"$transaction\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -755,7 +755,7 @@
       "seriesOverrides": [
         {
           "alias": "Throughput",
-          "color": "rgb(109, 111, 178)",
+          "color": "#9ac48a",
           "fill": 2,
           "linewidth": 0,
           "yaxis": 2
@@ -788,7 +788,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"All Events\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"aggregate\":true,\"transactions\":\"$transaction\",\"seriesName\":\"Throughput\",\"pointsWanted\":24})",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"All Events\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"aggregate\":true,\"transactions\":\"$transaction\",\"seriesName\":\"Throughput\",\"pointsWanted\":24})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -827,7 +827,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"All Events\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"S4\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"aggregate\":\"true\",\"transactions\":\"$transaction\",\"seriesName\":\"Avg Response (ms)\",\"pointsWanted\":24})",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"All Events\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"aggregate\":\"true\",\"transactions\":\"$transaction\",\"seriesName\":\"Avg Response (ms)\",\"pointsWanted\":24})",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -849,7 +849,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": "$timeRange",
+      "timeFrom": null,
       "timeShift": null,
       "title": "Average Response",
       "tooltip": {
@@ -927,7 +927,7 @@
       "seriesOverrides": [
         {
           "alias": "Throughput",
-          "color": "rgb(109, 111, 178)",
+          "color": "#9ac48a",
           "fill": 2,
           "linewidth": 0,
           "yaxis": 2
@@ -968,7 +968,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"All Events\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"aggregate\":true,\"transactions\":\"$transaction\",\"seriesName\":\"Throughput\",\"pointsWanted\":24})\n",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"All Events\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"aggregate\":true,\"transactions\":\"$transaction\",\"seriesName\":\"Throughput\",\"pointsWanted\":24})\n",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -1007,7 +1007,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "graph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"hits\",\"view\":\"Logged Errors\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"pointsWanted\":24})\n",
+          "query": "graph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"hits\",\"view\":\"Logged Errors\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"pointsWanted\":24})\n",
           "rawQuery": true,
           "refId": "C",
           "resultFormat": "time_series",
@@ -1046,7 +1046,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "graph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"hits\",\"view\":\"HTTP Errors\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"pointsWanted\":24})\n",
+          "query": "graph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"hits\",\"view\":\"HTTP Errors\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"pointsWanted\":24})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1085,7 +1085,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "graph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"hits\",\"view\":\"Uncaught Exceptions\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"pointsWanted\":24})\n",
+          "query": "graph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"hits\",\"view\":\"Uncaught Exceptions\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"pointsWanted\":24})\n",
           "rawQuery": true,
           "refId": "D",
           "resultFormat": "time_series",
@@ -1107,7 +1107,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": "$timeRange",
+      "timeFrom": null,
       "timeShift": null,
       "title": "Error Volume",
       "tooltip": {
@@ -1186,7 +1186,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "https://grafana.overops-samples.com/d/KsF5KIbik/performance-drill-down?orgId=1&var-transaction=${__cell_0}",
+          "linkUrl": "/d/KsF5KIbik/performance-drill-down?orgId=1&var-transaction=${__cell_0}",
           "mappingType": 1,
           "pattern": "Total",
           "thresholds": [],
@@ -1206,7 +1206,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "https://grafana.overops-samples.com/d/KsF5KIbik/performance-drill-down?orgId=1&var-transaction=${__cell_0}",
+          "linkUrl": "/d/KsF5KIbik/performance-drill-down?orgId=1&var-transaction=${__cell_0}",
           "mappingType": 1,
           "pattern": "Slow Transactions",
           "thresholds": [],
@@ -1226,7 +1226,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "https://grafana.overops-samples.com/d/KsF5KIbik/performance-drill-down?orgId=1&var-transaction=${__cell_0}",
+          "linkUrl": "/d/KsF5KIbik/performance-drill-down?orgId=1&var-transaction=${__cell_0}",
           "mappingType": 1,
           "pattern": "Failed Requests",
           "thresholds": [],
@@ -1246,7 +1246,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "https://grafana.overops-samples.com/d/KsF5KIbik/performance-drill-down?orgId=1&var-transaction=${__cell_0}",
+          "linkUrl": "/d/KsF5KIbik/performance-drill-down?orgId=1&var-transaction=${__cell_0}",
           "mappingType": 1,
           "pattern": "Slow %",
           "thresholds": [
@@ -1269,7 +1269,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "https://grafana.overops-samples.com/d/KsF5KIbik/performance-drill-down?orgId=1&var-transaction=${__cell_0}",
+          "linkUrl": "/d/KsF5KIbik/performance-drill-down?orgId=1&var-transaction=${__cell_0}",
           "mappingType": 1,
           "pattern": "Error %",
           "thresholds": [
@@ -1291,7 +1291,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "https://grafana.overops-samples.com/d/KsF5KIbik/performance-drill-down?orgId=1&var-transaction=${__cell_0}",
+          "linkUrl": "/d/KsF5KIbik/performance-drill-down?orgId=1&var-transaction=${__cell_0}",
           "pattern": "/.*ms/",
           "thresholds": [],
           "type": "number",
@@ -1336,7 +1336,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsList({\"view\":\"All Events\", \"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"types\":\"Timer|Uncaught Exception|HTTP Error|Logged Error\",\"transactions\":\"$transaction\"})",
+          "query": "transactionsList({\"view\":\"All Events\", \"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"types\":\"Timer|Uncaught Exception|HTTP Error|Logged Error\",\"transactions\":\"$transaction\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1370,60 +1370,6 @@
   ],
   "templating": {
     "list": [
-      {
-        "allValue": null,
-        "current": {
-          "selected": false,
-          "tags": [],
-          "text": "4h",
-          "value": "4h"
-        },
-        "hide": 0,
-        "includeAll": false,
-        "label": "Select a Time Range",
-        "multi": false,
-        "name": "timeRange",
-        "options": [
-          {
-            "selected": false,
-            "text": "4h",
-            "value": "4h"
-          },
-          {
-            "selected": false,
-            "text": "12h",
-            "value": "12h"
-          },
-          {
-            "selected": false,
-            "text": "24h",
-            "value": "24h"
-          },
-          {
-            "selected": false,
-            "text": "2d",
-            "value": "2d"
-          },
-          {
-            "selected": true,
-            "text": "7d",
-            "value": "7d"
-          },
-          {
-            "selected": false,
-            "text": "14d",
-            "value": "14d"
-          },
-          {
-            "selected": false,
-            "text": "30d",
-            "value": "30d"
-          }
-        ],
-        "query": "4h,12h,24h,2d,7d,14d,30d",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
       {
         "allValue": "*",
         "current": {},
@@ -1511,11 +1457,11 @@
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-2d",
     "to": "now"
   },
   "timepicker": {
-    "hidden": true,
+    "hidden": false,
     "refresh_intervals": [
       "5s",
       "10s",
@@ -1543,5 +1489,5 @@
   "timezone": "",
   "title": "Performance",
   "uid": "Z40SpeJmz",
-  "version": 36
+  "version": 42
 }

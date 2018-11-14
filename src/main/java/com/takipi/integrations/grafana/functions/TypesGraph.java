@@ -1,4 +1,3 @@
-
 package com.takipi.integrations.grafana.functions;
 
 import java.util.ArrayList;
@@ -15,7 +14,6 @@ import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.input.TypesGraphInput;
 
 public class TypesGraph extends GraphFunction {
-
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -41,7 +39,8 @@ public class TypesGraph extends GraphFunction {
 	private GraphInput getInput(GraphInput input, String type) {
 		Gson gson = new Gson();
 		String json = gson.toJson(input);
-		GraphInput result = (GraphInput) gson.fromJson(json, GraphInput.class);
+		GraphInput result = gson.fromJson(json, GraphInput.class);
+		
 		result.types = type;
 		return result;
 	}

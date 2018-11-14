@@ -20,10 +20,9 @@ import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.utils.TimeUtils;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class GraphFunction extends BaseGraphFunction {
-
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -43,7 +42,6 @@ public class GraphFunction extends BaseGraphFunction {
 	}
 	
 	protected static class SeriesVolume {
-		
 		protected List<List<Object>> values;
 		protected long volume;
 		
@@ -104,7 +102,7 @@ public class GraphFunction extends BaseGraphFunction {
 		Series series = new Series();
 
 		String tagName = getSeriesName(input, input.seriesName, viewName, serviceId, serviceIds);
-		SeriesVolume seriesData = processGraphPoints(serviceId, viewId, timeSpan, graph, graphInput);
+		SeriesVolume seriesData = processGraphPoints(serviceId, timeSpan, graph, graphInput);
 
 		series.name = EMPTY_NAME;
 		series.columns = Arrays.asList(new String[] { TIME_COLUMN, tagName });
@@ -129,7 +127,7 @@ public class GraphFunction extends BaseGraphFunction {
 	
 	private List<List<Object>> condensePoints(List<List<Object>> points, int pointsWanted) {
 		
-		double groupSize = (double)(points.size() - 2) / ((double)pointsWanted - 2);
+		double groupSize = (points.size() - 2) / ((double)pointsWanted - 2);
 		double currSize = groupSize;
 
 		long[] values = new long[pointsWanted - 2];
@@ -137,7 +135,6 @@ public class GraphFunction extends BaseGraphFunction {
 		int index = 0;
 		
 		for (int i = 1; i < points.size() - 1; i++) {
-			
 			long pointValue = getPointValue(points, i);
 			
 			if (currSize >= 1) {
@@ -156,15 +153,15 @@ public class GraphFunction extends BaseGraphFunction {
 		
 		long start = getPointTime(points, 0);
 		long end = getPointTime(points, points.size() - 1);
-	
+		
 		long timeDelta = (end - start) / (pointsWanted -1);
 		
 		result.add(points.get(0));
 		
 		for (int i = 0; i < values.length; i++) {
-			
 			long time = start + timeDelta * (i + 1);
-			long value = (long)values[i] / (long)groupSize;
+			long value = values[i] / (long)groupSize;
+			
 			result.add(Arrays.asList(new Object[] {Long.valueOf(time), Long.valueOf(value) }));
 		}
 
@@ -173,9 +170,8 @@ public class GraphFunction extends BaseGraphFunction {
 		return result;
 	}
 
-	protected SeriesVolume processGraphPoints(String serviceId, String viewId, 
+	protected SeriesVolume processGraphPoints(String serviceId, 
 			Pair<DateTime, DateTime> timeSpan, Graph graph, GraphInput input) {
-
 		long volume = 0;
 	
 		List<List<Object>> values = new ArrayList<List<Object>>(graph.points.size());
@@ -187,20 +183,18 @@ public class GraphFunction extends BaseGraphFunction {
 			eventMap = getEventMap(serviceId, input, timeSpan.getFirst(), timeSpan.getSecond(),
 				input.volumeType, input.pointsWanted);
 			eventFilter = input.getEventFilter(serviceId);
-
 		} else {
-			eventMap= null;
+			eventMap = null;
 			eventFilter = null;
 		}
 		
 		for (GraphPoint gp : graph.points) {
-
 			if (gp.contributors == null) {
 				continue;
 			}
 			
 			long value = 0;
-			DateTime gpTime = TimeUtils.getDateTime(gp.time);
+			DateTime gpTime = TimeUtil.getDateTime(gp.time);
 
 			for (GraphPointContributor gpc : gp.contributors) {
 
@@ -208,7 +202,7 @@ public class GraphFunction extends BaseGraphFunction {
 					EventResult event = eventMap.get(gpc.id);
 
 					//if the event wasn't found we err on the side of adding its stats.
-					if ((event != null) && (eventFilter.filter(event))) {
+					if ((event != null) && (eventFilter != null) && (eventFilter.filter(event))) {
 						continue;
 					}
 				}

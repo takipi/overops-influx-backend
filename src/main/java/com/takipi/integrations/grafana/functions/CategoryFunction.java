@@ -81,9 +81,9 @@ public class CategoryFunction extends GraphFunction {
 	
 	@Override
 	protected List<Series> processSeries(List<GraphSeries> series, BaseGraphInput input) {
+		List<Series> output = super.processSeries(series, input);
 		
 		CategoryInput categoryInput = (CategoryInput)input;
-		List<Series> output = super.processSeries(series, input);
 		
 		if (categoryInput.limit == 0) {
 			return output;

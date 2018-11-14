@@ -7,6 +7,18 @@ import javax.servlet.http.HttpServletRequest;
 
 public class ServletUtil {
 	public static Auth getAuthentication(HttpServletRequest request) {
+		
+		// Proxy by OverOps Server
+		String hiddenToken = request.getHeader("X-OO-KEY");
+		if ((hiddenToken != null) && (!hiddenToken.isEmpty())) {
+			Auth auth = new Auth();
+			
+			auth.hostname = request.getHeader("X-OO-API");
+			auth.token = hiddenToken;
+			return auth;
+		}
+		
+		// Datasource authorization
 		String authorization = request.getHeader("Authorization");
 
 		if (authorization != null && authorization.toLowerCase().startsWith("basic")) {
@@ -28,5 +40,11 @@ public class ServletUtil {
 	public static class Auth {
 		public String hostname;
 		public String token;
+		
+		@Override
+		public String toString()
+		{
+			return hostname + ", token size: " + token.length();
+		}
 	}
 }

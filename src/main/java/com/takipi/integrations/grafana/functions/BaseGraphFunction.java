@@ -18,7 +18,7 @@ import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.utils.TimeUtils;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public abstract class BaseGraphFunction extends GrafanaFunction {
 
@@ -57,8 +57,8 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 			this.pointsWanted = pointsWanted;
 		}
 
+		@Override
 		public AsyncResult call() {
-			
 			beforeCall();
 			
 			try {
@@ -70,7 +70,6 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 			finally {
 				afterCall();
 			}
-		
 		}
 		
 		@Override
@@ -92,7 +91,9 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		super(apiClient);
 	}
 
-	protected String getSeriesName(BaseGraphInput input, String seriesName, Object volumeType, String serviceId, String[] serviceIds) {
+	@Override
+	protected String getSeriesName(BaseGraphInput input, String seriesName,
+			Object volumeType, String serviceId, String[] serviceIds) {
 		String tagName;
 		
 		if (seriesName != null) {
@@ -100,7 +101,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		} else {
 			tagName = volumeType.toString();	
 		}
-				
+		
 		String result = getServiceValue(tagName, serviceId, serviceIds);
 		
 		return result;
@@ -171,21 +172,16 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 	}
 
 	protected void sortByName(List<Series> seriesList) {
-
 		seriesList.sort(new Comparator<Series>() {
-
 			@Override
 			public int compare(Series o1, Series o2) {
-				Series s1 = (Series) o1;
-				Series s2 = (Series) o2;
-
-				return s1.name.compareTo(s2.name);
+				return o1.name.compareTo(o2.name);
 			}
 		});
 	}
 
-	protected List<Series> processSeries(List<GraphSeries> series, BaseGraphInput input) {
-
+	protected List<Series> processSeries(List<GraphSeries> series,
+			@SuppressWarnings("unused") BaseGraphInput input) {
 		List<Series> result = new ArrayList<Series>();
 
 		for (GraphSeries entry : series) {
@@ -246,7 +242,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 
 		BaseGraphInput input = (BaseGraphInput) functionInput;
 
-		Pair<DateTime, DateTime> timeSpan = TimeUtils.getTimeFilter(input.timeFilter);
+		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
 
 		int pointsWanted = getPointsWanted(input, timeSpan);
 

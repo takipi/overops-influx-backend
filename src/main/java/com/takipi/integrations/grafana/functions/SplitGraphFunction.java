@@ -17,7 +17,7 @@ import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.input.GraphLimitInput;
-import com.takipi.integrations.grafana.utils.TimeUtils;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class SplitGraphFunction extends LimitGraphFunction {
 
@@ -62,7 +62,7 @@ public class SplitGraphFunction extends LimitGraphFunction {
 				continue;
 			}
 
-			DateTime gpTime = TimeUtils.getDateTime(gp.time);
+			DateTime gpTime = TimeUtil.getDateTime(gp.time);
 			Long epochTime = Long.valueOf(gpTime.getMillis());
 
 			for (GraphPointContributor gpc : gp.contributors) {

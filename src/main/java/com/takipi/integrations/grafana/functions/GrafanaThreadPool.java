@@ -5,5 +5,5 @@ import java.util.concurrent.Executors;
 
 public class GrafanaThreadPool {
 	//needs to be combined into containing server thread pooling
-	public static final Executor executor = Executors.newCachedThreadPool();
+	public static final Executor executor = Executors.newFixedThreadPool(10);
 }

@@ -11,6 +11,9 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.integrations.grafana.functions.GrafanaFunction.FunctionFactory;
@@ -20,13 +23,13 @@ import com.takipi.integrations.grafana.output.ResultContent;
 import com.takipi.integrations.grafana.output.Series;
 
 public class FunctionParser {
+	private static final Logger logger = LoggerFactory.getLogger(FunctionParser.class);
 	
 	private static final String QUERY_SEPERATOR = ";";
 	
 	private static final Map<String, FunctionFactory> factories;
 
 	protected static class FunctionAsyncTask extends BaseAsyncTask implements Callable<FunctionResult> {
-
 		protected ApiClient apiClient; 
 		protected String query;
 		protected int index;
@@ -39,7 +42,6 @@ public class FunctionParser {
 		
 		@Override
 		public FunctionResult call() throws Exception {
-			
 			beforeCall();
 			
 			try {
@@ -66,7 +68,6 @@ public class FunctionParser {
 	}
 	
 	public static List<Series> processSingleQuery(ApiClient apiClient, String query) {
-		
 		String trimmedQuery = query.trim();
 		int parenthesisIndex = trimmedQuery.indexOf('(');
 
@@ -93,11 +94,12 @@ public class FunctionParser {
 		FunctionInput input = (FunctionInput)(new Gson().fromJson(json, factory.getInputClass()));
 		GrafanaFunction function = factory.create(apiClient);
 		
+		logger.debug("OO-AS-INFLUX | About to process {} with input {}", function, input);
+		
 		return function.process(input);
 	}
 		
 	private static List<String> getQueries(String query) {
-		
 		String trimmedQuery = query.trim();
 		String[] splitQueries = trimmedQuery.split(QUERY_SEPERATOR);
 		
@@ -113,7 +115,6 @@ public class FunctionParser {
 	}
 	
 	public static QueryResult processSync(ApiClient apiClient, String query) {
-		
 		QueryResult result = new QueryResult();
 
 		ResultContent resultContent = new ResultContent();
@@ -124,7 +125,6 @@ public class FunctionParser {
 	}
 	
 	public static QueryResult processAsync(ApiClient apiClient, List<String> singleQueries ) {
-		
 		QueryResult result = new QueryResult();
 
 		CompletionService<FunctionResult> completionService = new ExecutorCompletionService<FunctionResult>(GrafanaThreadPool.executor);
@@ -149,7 +149,6 @@ public class FunctionParser {
 				result.results.add(resultContent);
 				
 				received++;
-
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
 			} 
@@ -161,7 +160,6 @@ public class FunctionParser {
 	}
 	
 	public static QueryResult processQuery(ApiClient apiClient, String query) {
-		
 		if ((query == null) || (query.length() == 0)) {
 			throw new IllegalArgumentException("Missing query");
 		}
@@ -231,5 +229,4 @@ public class FunctionParser {
 		registerFunction(new EventTypesFunction.Factory());
 		
 	}
-	
 }

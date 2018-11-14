@@ -5,7 +5,7 @@ import java.util.List;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.client.ClientUtil;
 import com.takipi.integrations.grafana.input.EnvironmentsInput;
-import com.takipi.integrations.grafana.utils.DeploymentUtil;
+import com.takipi.integrations.grafana.util.DeploymentUtil;
 
 public class DeploymentsFunction extends EnvironmentVariableFunction {
 

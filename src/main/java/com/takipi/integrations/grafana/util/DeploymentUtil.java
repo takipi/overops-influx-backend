@@ -1,4 +1,4 @@
-package com.takipi.integrations.grafana.utils;
+package com.takipi.integrations.grafana.util;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,9 +16,7 @@ import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.EnvironmentsFilterInput;
 
 public class DeploymentUtil {
-	
 	private static List<String> getActiveDeployments(ApiClient apiClient, String serviceId) {
-		
 		DeploymentsRequest request = DeploymentsRequest.newBuilder().setServiceId(serviceId).setActive(true).build();
 
 		Response<DeploymentsResult> response = apiClient.get(request);
@@ -64,7 +62,6 @@ public class DeploymentUtil {
 	}
 	
 	public static void sortDeployments(List<String> deployments) {
-		
 		deployments.sort(new Comparator<String>() {
 
 			@Override
@@ -127,7 +124,6 @@ public class DeploymentUtil {
 	}
 	
 	public static int compareDeployments(Object o1, Object o2) {
-		
 		double i1 = getDeplyomentNumber(o1.toString());
 		double i2 = getDeplyomentNumber(o2.toString());
 
@@ -142,11 +138,9 @@ public class DeploymentUtil {
 		}
 
 		return 1;
-
 	}
 	
 	private static double getDeplyomentNumber(String value) {
-
 		boolean hasDot = false;
 		boolean hasNums = false;
 

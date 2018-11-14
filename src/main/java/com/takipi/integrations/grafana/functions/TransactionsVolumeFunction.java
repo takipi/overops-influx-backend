@@ -14,7 +14,7 @@ import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.TransactionsVolumeInput;
 import com.takipi.integrations.grafana.input.TransactionsVolumeInput.TransactionVolumeType;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.utils.TimeUtils;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionsVolumeFunction extends BaseVolumeFunction {
 
@@ -115,7 +115,7 @@ public class TransactionsVolumeFunction extends BaseVolumeFunction {
 			case avg:
 				
 				if (totalInvocations > 0) {
-					volume.sum += serviceVolume.avgTime * (double) serviceVolume.invocations / (double) totalInvocations;
+					volume.sum += serviceVolume.avgTime * serviceVolume.invocations / totalInvocations;
 				}
 				break;
 
@@ -128,11 +128,9 @@ public class TransactionsVolumeFunction extends BaseVolumeFunction {
 
 		return volume;
 	}
-	
 
 	@Override
 	public List<Series> process(FunctionInput functionInput) {
-
 		super.process(functionInput);
 
 		if (!(functionInput instanceof TransactionsVolumeInput)) {
@@ -145,7 +143,7 @@ public class TransactionsVolumeFunction extends BaseVolumeFunction {
 			throw new IllegalArgumentException("volumeType");
 		}
 
-		Pair<DateTime, DateTime> timeSpan = TimeUtils.getTimeFilter(input.timeFilter);
+		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
 		
 		EventVolume volume = getTransactionVolume(input, timeSpan);
 		

@@ -1,4 +1,4 @@
-package com.takipi.integrations.grafana.utils;
+package com.takipi.integrations.grafana.util;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
@@ -28,12 +28,10 @@ import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 
 public class ApiCache {
-
 	private static final int CACHE_SIZE = 1000;
 	private static final int CACHE_RETENTION = 2;
 
 	protected abstract static class CacheKey {
-
 		protected ApiClient apiClient;
 		protected ApiGetRequest<?> request;
 
@@ -44,7 +42,6 @@ public class ApiCache {
 
 		@Override
 		public boolean equals(Object obj) {
-
 			if (!(obj instanceof CacheKey)) {
 				return false;
 			}
@@ -65,17 +62,16 @@ public class ApiCache {
 	}
 
 	protected abstract static class ServiceCacheKey extends CacheKey {
-
 		protected String serviceId;
 
 		public ServiceCacheKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId) {
 			super(apiClient, request);
+			
 			this.serviceId = serviceId;
 		}
 
 		@Override
 		public boolean equals(Object obj) {
-
 			if (!(obj instanceof ServiceCacheKey)) {
 				return false;
 			}
@@ -100,7 +96,6 @@ public class ApiCache {
 	}
 
 	protected static class ViewNameCacheKey extends ServiceCacheKey {
-
 		protected String viewName;
 
 		public ViewNameCacheKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, String viewName) {
@@ -141,17 +136,15 @@ public class ApiCache {
 	}
 	
 	protected abstract static class ViewCacheKey extends ServiceCacheKey {
-
 		protected ViewInput input;
 
 		public ViewCacheKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input) {
-
 			super(apiClient, request, serviceId);
+			
 			this.input = input;
 		}
 		
 		private static boolean compare(Collection<String> a, Collection<String> b) {
-			
 			if (a.size() != b.size()) {
 				return false;
 			}
@@ -167,7 +160,6 @@ public class ApiCache {
 
 		@Override
 		public boolean equals(Object obj) {
-
 			if (!(obj instanceof ViewCacheKey)) {
 				return false;
 			}
@@ -220,13 +212,12 @@ public class ApiCache {
 	}
 	
 	protected abstract static class VolumeKey extends ViewCacheKey {
-
 		protected VolumeType volumeType;
 
 		public VolumeKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
 				VolumeType volumeType) {
-
 			super(apiClient, request, serviceId, input);
+			
 			this.volumeType = volumeType;
 		}
 		
@@ -257,7 +248,6 @@ public class ApiCache {
 	}
 	
 	protected static class EventKey extends VolumeKey {
-
 		public EventKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
 				VolumeType volumeType) {
 
@@ -281,12 +271,10 @@ public class ApiCache {
 	}
 
 	protected static class GraphKey extends VolumeKey {
-
 		protected int pointsWanted;
 
 		@Override
 		public boolean equals(Object obj) {
-
 			if (!(obj instanceof GraphKey)) {
 				return false;
 			}
@@ -306,8 +294,8 @@ public class ApiCache {
 
 		public GraphKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
 				VolumeType volumeType, int pointsWanted) {
-
 			super(apiClient, request, serviceId, input, volumeType);
+			
 			this.pointsWanted = pointsWanted;
 		}
 	}
@@ -316,7 +304,6 @@ public class ApiCache {
 
 		@Override
 		public boolean equals(Object obj) {
-
 			if (!(obj instanceof TransactionsCacheKey)) {
 				return false;
 			}
@@ -330,18 +317,15 @@ public class ApiCache {
 
 		public TransactionsCacheKey(ApiClient apiClient, ApiGetRequest<?> request, 
 			String serviceId, ViewInput input) {
-
 			super(apiClient, request, serviceId, input);
 		}
 	}
 	
 	protected static class TransactionsGraphCacheKey extends ViewCacheKey {
-
 		protected int pointsWanted;
 
 		@Override
 		public boolean equals(Object obj) {
-
 			if (!(obj instanceof TransactionsGraphCacheKey)) {
 				return false;
 			}
@@ -361,8 +345,8 @@ public class ApiCache {
 
 		public TransactionsGraphCacheKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
 				int pointsWanted) {
-			
 			super(apiClient, request, serviceId, input);
+			
 			this.pointsWanted = pointsWanted;
 		}
 	}
@@ -388,19 +372,16 @@ public class ApiCache {
 	
 	@SuppressWarnings("unchecked")
 	public static Response<TransactionsVolumeResult> getTransactionsVolume(ApiClient apiClient, String serviceId, 
-			String viewId, ViewInput input,TransactionsVolumeRequest request) {
-		
+			ViewInput input,TransactionsVolumeRequest request) {
 		TransactionsCacheKey cacheKey = new TransactionsCacheKey(apiClient, request, serviceId, input);
 		Response<TransactionsVolumeResult> response = (Response<TransactionsVolumeResult>)ApiCache.getItem(cacheKey);
 		
 		return response;
 	}
 	
-	
 	@SuppressWarnings("unchecked")
 	public static Response<GraphResult> getEventGraph(ApiClient apiClient, String serviceId, 
-			String viewId, ViewInput input, VolumeType volumeType, GraphRequest request, int pointsWanted) {
-		
+			ViewInput input, VolumeType volumeType, GraphRequest request, int pointsWanted) {
 		GraphKey cacheKey = new GraphKey(apiClient, request, serviceId, input, volumeType, pointsWanted);
 		Response<GraphResult> response = (Response<GraphResult>)ApiCache.getItem(cacheKey);
 		
@@ -409,16 +390,16 @@ public class ApiCache {
 	
 	@SuppressWarnings("unchecked")
 	public static Response<EventsVolumeResult> getEventVolume(ApiClient apiClient, String serviceId, 
-			String viewId, ViewInput input, VolumeType volumeType, EventsVolumeRequest request) {
-		
+			ViewInput input, VolumeType volumeType, EventsVolumeRequest request) {
 		EventKey cacheKey = new EventKey(apiClient, request, serviceId, input, volumeType);
 		Response<EventsVolumeResult> response = (Response<EventsVolumeResult>)ApiCache.getItem(cacheKey);
+		
 		return response;
 	}
 	
 	@SuppressWarnings("unchecked")
 	public static Response<EventsResult> getEventList(ApiClient apiClient, String serviceId, 
-			String viewId, ViewInput input, EventsRequest  request) {
+			ViewInput input, EventsRequest  request) {
 		
 		EventKey cacheKey = new EventKey(apiClient, request, serviceId, input, null);
 		Response<EventsResult> response = (Response<EventsResult>)ApiCache.getItem(cacheKey);
@@ -427,21 +408,23 @@ public class ApiCache {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Response<TransactionsGraphResult> getTransactionsGraph(ApiClient apiClient, String serviceId, String viewId, 
+	public static Response<TransactionsGraphResult> getTransactionsGraph(ApiClient apiClient, String serviceId,  
 			BaseGraphInput input, int pointsWanted, TransactionsGraphRequest request) {
-		
 		TransactionsGraphCacheKey cacheKey = new TransactionsGraphCacheKey(apiClient, request, serviceId, input, pointsWanted);
 		Response<TransactionsGraphResult> response = (Response<TransactionsGraphResult>)ApiCache.getItem(cacheKey);
 		
 		return response;
 	}
 
-	private static final LoadingCache<CacheKey, Response<?>> cache = CacheBuilder.newBuilder().maximumSize(CACHE_SIZE)
-			.expireAfterWrite(CACHE_RETENTION, TimeUnit.MINUTES).build(new CacheLoader<CacheKey, Response<?>>() {
+	private static final LoadingCache<CacheKey, Response<?>> cache = CacheBuilder.newBuilder()
+			.maximumSize(CACHE_SIZE)
+			.expireAfterWrite(CACHE_RETENTION, TimeUnit.MINUTES)
+			.build(new CacheLoader<CacheKey, Response<?>>() {
+				
+				@Override
 				public Response<?> load(CacheKey key) {					
 					Response<?> result = key.apiClient.get(key.request);
 					return result;
 				}
 			});
-
 }

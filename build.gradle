@@ -12,15 +12,32 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+// 
+// group = 'com.takipi'
+// version =  '0.2.3'
+// 
+jar {
+	enabled = true
+}
+
+if (project.ext.has("backendJavac")) {
+  compileJava {
+    options.forkOptions.executable = project.ext.get("backendJavac")
+  }
+}
+
+compileJava {
+  sourceCompatibility = 1.8
+  targetCompatibility = 1.8
+}
 
 bootJar {
-    baseName = 'overops-as-influx'
-    version =  '0.2.1'
+	classifier = 'uber'
 }
 
 repositories {
-    mavenCentral()
     mavenLocal()
+    mavenCentral()
 }
 
 sourceCompatibility = 1.8
@@ -30,10 +47,11 @@ dependencies {
     compile(
       "org.springframework.boot:spring-boot-starter-web",
       "org.apache.commons:commons-lang3:3.7",
-      "com.takipi:api-client:2.1.6",
-      "com.takipi:api-client-util:2.1.6",
-      "org.ocpsoft.prettytime:prettytime:4.0.2.Final"
+      "com.takipi:api-client:2.2.0",
+      "com.takipi:api-client-util:2.2.0",
+      "org.ocpsoft.prettytime:prettytime:4.0.2.Final",
       "com.google.guava:guava:20.0",
+      "org.slf4j:slf4j-api:1.7.25"
     )
     
     testCompile("junit:junit")

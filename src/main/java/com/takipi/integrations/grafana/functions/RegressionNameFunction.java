@@ -11,7 +11,6 @@ import com.takipi.integrations.grafana.input.RegressionsNameInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 
 public class RegressionNameFunction extends BaseNameFunction {
-
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -36,7 +35,6 @@ public class RegressionNameFunction extends BaseNameFunction {
 
 	@Override
 	protected String getName(ViewInput input, String serviceId) {
-
 		RegressionsNameInput regNameInput = (RegressionsNameInput) input;
 
 		RegressionInput regressionInput = new RegressionInput();
@@ -52,7 +50,7 @@ public class RegressionNameFunction extends BaseNameFunction {
 
 		regressionInput.applictations = input.getApplications(serviceId);
 		regressionInput.servers = input.getServers(serviceId);
-		regressionInput.deployments = input.getDeployments(serviceId);;
+		regressionInput.deployments = input.getDeployments(serviceId);
 		
 		Pair<DateTime, Integer> activeWindow = RegressionUtil.getActiveWindow(apiClient, regressionInput, System.out);
 

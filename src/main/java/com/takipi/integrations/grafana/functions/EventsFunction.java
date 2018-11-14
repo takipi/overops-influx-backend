@@ -17,9 +17,9 @@ import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.utils.ArrayUtils;
-import com.takipi.integrations.grafana.utils.EventLinkEncoder;
-import com.takipi.integrations.grafana.utils.TimeUtils;
+import com.takipi.integrations.grafana.util.ArrayUtil;
+import com.takipi.integrations.grafana.util.EventLinkEncoder;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class EventsFunction extends GrafanaFunction {
 
@@ -74,7 +74,6 @@ public class EventsFunction extends GrafanaFunction {
 			}
 
 			if ((value instanceof String) && (input.maxColumnLength > 0)) {
-
 				String str = (String) value;
 
 				if (str.length() > input.maxColumnLength) {
@@ -83,9 +82,8 @@ public class EventsFunction extends GrafanaFunction {
 				} else {
 					return str;
 				}
-
 			}
-
+			
 			return value;
 		}
 
@@ -100,7 +98,6 @@ public class EventsFunction extends GrafanaFunction {
 	}
 
 	protected static class ReflectFormatter extends FieldFormatter {
-
 		private Field field;
 
 		protected ReflectFormatter(Field field) {
@@ -124,7 +121,6 @@ public class EventsFunction extends GrafanaFunction {
 	}
 	
 	protected static class StatsFormatter extends ReflectFormatter {
-
 		protected StatsFormatter(Field field) {
 			super(field);
 		}
@@ -136,19 +132,17 @@ public class EventsFunction extends GrafanaFunction {
 	}
 
 	protected static class DateFormatter extends ReflectFormatter {
-
 		protected DateFormatter(Field field) {
 			super(field);
 		}
 
 		@Override
 		protected Object formatValue(Object value, EventsInput input) {
-			return TimeUtils.prettifyTime((String) value);
+			return TimeUtil.prettifyTime((String) value);
 		}
 	}
 
 	protected static class LinkFormatter extends FieldFormatter {
-
 		@Override
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
 				Pair<DateTime, DateTime> timeSpan) {
@@ -208,7 +202,6 @@ public class EventsFunction extends GrafanaFunction {
 				return "NA";
 			}
 		}
-
 	}
 
 	protected FieldFormatter getFormatter(String column) {
@@ -236,7 +229,6 @@ public class EventsFunction extends GrafanaFunction {
 		}
 
 		return new ReflectFormatter(field);
-
 	}
 
 	private Collection<FieldFormatter> getFieldFormatters(String columns) {
@@ -245,7 +237,7 @@ public class EventsFunction extends GrafanaFunction {
 			throw new IllegalArgumentException("columns cannot be empty");
 		}
 
-		String[] columnsArray = ArrayUtils.safeSplitArray(columns, ARRAY_SEPERATOR, true);
+		String[] columnsArray = ArrayUtil.safeSplitArray(columns, ARRAY_SEPERATOR, true);
 		List<FieldFormatter> result = new ArrayList<FieldFormatter>(columnsArray.length);
 
 		for (int i = 0; i < columnsArray.length; i++) {
@@ -323,12 +315,11 @@ public class EventsFunction extends GrafanaFunction {
 		}
 
 		return result;
-
 	}
 
 	protected List<String> getColumns(String fields) {
 
-		String[] fieldArray = ArrayUtils.safeSplitArray(fields, ARRAY_SEPERATOR, true);
+		String[] fieldArray = ArrayUtil.safeSplitArray(fields, ARRAY_SEPERATOR, true);
 		List<String> result = new ArrayList<String>(fieldArray.length);
 
 		for (String field : fieldArray) {
@@ -399,7 +390,7 @@ public class EventsFunction extends GrafanaFunction {
 
 		EventsInput input = (EventsInput) functionInput;
 
-		Pair<DateTime, DateTime> timeSpan = TimeUtils.getTimeFilter(input.timeFilter);
+		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
 
 		Series series = new Series();
 

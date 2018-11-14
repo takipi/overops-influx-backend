@@ -18,7 +18,7 @@ import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.TransactionsListIput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.utils.TimeUtils;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionsListFunction extends GrafanaFunction {
 
@@ -67,7 +67,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 		}
 
 		Map<String, TransactionData> transactions = getTransactions(serviceId, timeSpan, viewId, input);
-		updateTransactionEvents(serviceId, timeSpan, viewId, input, transactions);
+		updateTransactionEvents(serviceId, timeSpan, input, transactions);
 
 		if (transactions == null) {
 			return Collections.emptyList();
@@ -112,7 +112,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 	}
 	
 	private void updateTransactionEvents(String serviceId, Pair<DateTime, DateTime> timeSpan,
-			String viewId, TransactionsListIput input, Map<String, TransactionData> transactions) 
+			TransactionsListIput input, Map<String, TransactionData> transactions) 
 	{
 		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, timeSpan.getFirst(),
 			timeSpan.getSecond(), VolumeType.all, input.pointsWanted);
@@ -192,7 +192,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 
 		TransactionsListIput input = (TransactionsListIput) functionInput;
 
-		Pair<DateTime, DateTime> timeSpan = TimeUtils.getTimeFilter(input.timeFilter);
+		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
 		String[] serviceIds = getServiceIds(input);
 
 		Series series = new Series();
