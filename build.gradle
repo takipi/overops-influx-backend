@@ -20,6 +20,10 @@ jar {
 	enabled = true
 }
 
+ext {
+  disableIDEWarnings = true
+}
+
 if (project.ext.has("backendJavac")) {
   compileJava {
     options.forkOptions.executable = project.ext.get("backendJavac")
