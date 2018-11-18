@@ -9,8 +9,6 @@ import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
 
-import com.takipi.api.client.ApiClient;
-
 public abstract class BaseSettingsStorage implements SettingsStorage {
 	
 	protected abstract InputStream getInputStream(String key);

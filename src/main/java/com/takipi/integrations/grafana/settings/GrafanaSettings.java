@@ -137,7 +137,7 @@ public class GrafanaSettings {
 						}
 						
 						Gson gson = new Gson();
-						ServiceSettings result = (ServiceSettings)gson.fromJson(json, ServiceSettings.class);
+						ServiceSettings result = gson.fromJson(json, ServiceSettings.class);
 
 						return result;
 					}
@@ -165,7 +165,7 @@ public class GrafanaSettings {
 	}
 
 	public static void saveServiceSettings(ApiClient apiClient, String serviceId, String json) {
-		ServiceSettings serviceSettings = (ServiceSettings)(new Gson().fromJson(json, ServiceSettings.class));
+		ServiceSettings serviceSettings = (new Gson().fromJson(json, ServiceSettings.class));
 		saveServiceSettings(apiClient, serviceId, serviceSettings);
 	}
 	

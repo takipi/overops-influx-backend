@@ -24,16 +24,17 @@ public class GrafanaApiClient {
 			if (authProp == null) {
 				host = "null";
 				token = "null";
+			} else {
+
+				int index = authProp.indexOf('=');
+	
+				if (index == -1) {
+					throw new IllegalArgumentException(authProp);
+				}
+	
+				host = authProp.substring(0, index);
+				token = authProp.substring(index + 1, authProp.length());
 			}
-
-			int index = authProp.indexOf('=');
-
-			if (index == -1) {
-				throw new IllegalArgumentException(authProp);
-			}
-
-			host = authProp.substring(0, index);
-			token = authProp.substring(index + 1, authProp.length());
 		}
 
 		return getApiClient(host, token);

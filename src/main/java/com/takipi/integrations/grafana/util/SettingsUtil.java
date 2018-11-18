@@ -5,9 +5,7 @@ import java.util.regex.Pattern;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.integrations.grafana.input.EnvironmentsInput;
-import com.takipi.integrations.grafana.servlet.SettingsServlet;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
-import com.takipi.integrations.grafana.settings.SettingsStorage;
 
 public class SettingsUtil {
 
