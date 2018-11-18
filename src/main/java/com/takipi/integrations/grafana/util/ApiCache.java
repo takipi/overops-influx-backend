@@ -15,7 +15,6 @@ import com.takipi.api.client.request.metrics.GraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsGraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsVolumeRequest;
 import com.takipi.api.client.request.view.ViewsRequest;
-import com.takipi.api.client.result.event.EventsResult;
 import com.takipi.api.client.result.event.EventsVolumeResult;
 import com.takipi.api.client.result.metrics.GraphResult;
 import com.takipi.api.client.result.transaction.TransactionsGraphResult;
@@ -464,7 +463,7 @@ public class ApiCache {
 
 	@SuppressWarnings("unchecked")
 	public static Response<TransactionsVolumeResult> getTransactionsVolume(ApiClient apiClient, String serviceId,
-			String viewId, ViewInput input, TransactionsVolumeRequest request) {
+			ViewInput input, TransactionsVolumeRequest request) {
 
 		TransactionsCacheKey cacheKey = new TransactionsCacheKey(apiClient, request, serviceId, input);
 		Response<TransactionsVolumeResult> response = (Response<TransactionsVolumeResult>)getItem(cacheKey);
@@ -473,7 +472,7 @@ public class ApiCache {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Response<GraphResult> getEventGraph(ApiClient apiClient, String serviceId, String viewId,
+	public static Response<GraphResult> getEventGraph(ApiClient apiClient, String serviceId,
 			ViewInput input, VolumeType volumeType, GraphRequest request, int pointsWanted) {
 
 		GraphKey cacheKey = new GraphKey(apiClient, request, serviceId, input, volumeType, pointsWanted);
@@ -483,7 +482,7 @@ public class ApiCache {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Response<EventsVolumeResult> getEventVolume(ApiClient apiClient, String serviceId, String viewId,
+	public static Response<EventsVolumeResult> getEventVolume(ApiClient apiClient, String serviceId, 
 			ViewInput input, VolumeType volumeType, EventsVolumeRequest request) {
 
 		EventKey cacheKey = new EventKey(apiClient, request, serviceId, input, volumeType);
@@ -491,15 +490,14 @@ public class ApiCache {
 		return response;
 	}
 
-	@SuppressWarnings("unchecked")
-	private static Response<?> getEventList(ApiClient apiClient, String serviceId, String viewId,
+	private static Response<?> getEventList(ApiClient apiClient, String serviceId, 
 			ViewInput input, EventsRequest request, VolumeType volumeType, boolean load) {
 		
 		EventKey cacheKey = new EventKey(apiClient, request, serviceId, input, volumeType);		
 		Response<?> response;
 		
 		if (load) {
-			response = (Response<EventsResult>)getItem(cacheKey);
+			response = getItem(cacheKey);
 		} else {
 			response = queryCache.getIfPresent(cacheKey);
 		}
@@ -507,15 +505,14 @@ public class ApiCache {
 		return response;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static Response<?> getEventList(ApiClient apiClient, String serviceId, String viewId,
+	public static Response<?> getEventList(ApiClient apiClient, String serviceId, 
 			ViewInput input, EventsRequest request) {
 		
 		Response<?> response;
 		
 		for (VolumeType volumeType : VolumeType.values()) {
 			
-			response = (Response<EventsResult>)getEventList(apiClient, serviceId, viewId, 
+			response = getEventList(apiClient, serviceId, 
 					input, request,volumeType, false);
 			
 			if (response != null) {
@@ -523,7 +520,7 @@ public class ApiCache {
 			}
 		}
 		
-		response = (Response<EventsResult>)getEventList(apiClient, serviceId, viewId, 
+		response = getEventList(apiClient, serviceId, 
 				input, request,null, true);
 		
 		return response;
@@ -531,7 +528,7 @@ public class ApiCache {
 
 	@SuppressWarnings("unchecked")
 	public static Response<TransactionsGraphResult> getTransactionsGraph(ApiClient apiClient, String serviceId,
-			String viewId, BaseGraphInput input, int pointsWanted, TransactionsGraphRequest request) {
+			BaseGraphInput input, int pointsWanted, TransactionsGraphRequest request) {
 
 		TransactionsGraphCacheKey cacheKey = new TransactionsGraphCacheKey(apiClient, request, serviceId, input,
 				pointsWanted);
@@ -554,6 +551,7 @@ public class ApiCache {
 			.newBuilder().maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_RETENTION, TimeUnit.MINUTES)
 			.build(new CacheLoader<RegresionWindowKey, RegressionWindow>() {
 				
+				@Override
 				public RegressionWindow load(RegresionWindowKey key) {
 					RegressionWindow result = RegressionUtil.getActiveWindow(key.apiClient, key.input,
 							System.out);
@@ -565,6 +563,7 @@ public class ApiCache {
 			.maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_RETENTION, TimeUnit.MINUTES)
 			.build(new CacheLoader<CacheKey, Response<?>>() {
 				
+				@Override
 				public Response<?> load(CacheKey key) {
 					Response<?> result = key.apiClient.get(key.request);
 					return result;

@@ -67,7 +67,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 		}
 
 		Map<String, TransactionData> transactions = getTransactions(serviceId, timeSpan, viewId, input);
-		updateTransactionEvents(serviceId, timeSpan, viewId, input, transactions);
+		updateTransactionEvents(serviceId, timeSpan, input, transactions);
 
 		if (transactions == null) {
 			return Collections.emptyList();
@@ -112,7 +112,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 	}
 	
 	private void updateTransactionEvents(String serviceId, Pair<DateTime, DateTime> timeSpan,
-			String viewId, TransactionsListIput input, Map<String, TransactionData> transactions) 
+			TransactionsListIput input, Map<String, TransactionData> transactions) 
 	{
 		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, timeSpan.getFirst(),
 			timeSpan.getSecond(), VolumeType.all, input.pointsWanted);

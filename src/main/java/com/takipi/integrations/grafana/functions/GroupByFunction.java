@@ -351,7 +351,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 					executeFilteredVolume(map, groupKey, input, serviceId, viewId, timeSpan, applications, servers,
 							deployments);
 				} else {
-					executeFilteredGraph(map, groupKey, input, serviceId, viewId, timeSpan, intervals, applications,
+					executeFilteredGraph(map, input, serviceId, viewId, timeSpan, intervals, applications,
 							servers, deployments);
 				}
 
@@ -546,7 +546,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 		return result;
 	}
 
-	private void executeFilteredGraph(Map<GroupByKey, GroupByVolume> map, String key, GroupByInput input,
+	private void executeFilteredGraph(Map<GroupByKey, GroupByVolume> map, GroupByInput input,
 			String serviceId, String viewId, Pair<DateTime, DateTime> timespan,
 			List<Pair<DateTime, DateTime>> intervals, Collection<String> applications, Collection<String> servers,
 			Collection<String> deployments) {

@@ -165,7 +165,7 @@ public class GraphFunction extends BaseGraphFunction {
 		for (int i = 0; i < values.length; i++) {
 			
 			long time = start + timeDelta * (i + 1);
-			long value = (long)values[i] / (long)groupSize;
+			long value = values[i] / (long)groupSize;
 			result.add(Arrays.asList(new Object[] {Long.valueOf(time), Long.valueOf(value) }));
 		}
 
@@ -174,6 +174,9 @@ public class GraphFunction extends BaseGraphFunction {
 		return result;
 	}
 
+	/**
+	 * @param viewId - needed by children 
+	 */
 	protected SeriesVolume processGraphPoints(String serviceId, String viewId, 
 			Pair<DateTime, DateTime> timeSpan, Graph graph, GraphInput input) {
 

@@ -170,11 +170,11 @@ public class RegressionReportFunction extends RegressionFunction {
 		super(apiClient);
 	}
 
-	private RegressionsInput getInput(RegressionReportInput reportInput, String name, Mode mode) {
+	private RegressionsInput getInput(RegressionReportInput reportInput, String name) {
 
 		Gson gson = new Gson();
 		String json = gson.toJson(reportInput);
-		RegressionsInput result = (RegressionsInput) gson.fromJson(json, RegressionsInput.class);
+		RegressionsInput result = gson.fromJson(json, RegressionsInput.class);
 
 		switch (reportInput.mode) {
 		
@@ -274,7 +274,7 @@ public class RegressionReportFunction extends RegressionFunction {
 		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
 
 		for (String app : apps) {
-			tasks.add(new AppVolumeAsyncTask(getInput(input, app, Mode.Applications), serviceId, app, timeSpan));
+			tasks.add(new AppVolumeAsyncTask(getInput(input, app), serviceId, app, timeSpan));
 		}
 
 		List<VolumeOutput> result = new ArrayList<VolumeOutput>();
@@ -336,7 +336,7 @@ public class RegressionReportFunction extends RegressionFunction {
 		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
 
 		for (String key : keys) {
-			RegressionsInput keyInput = getInput(input, key, input.mode);
+			RegressionsInput keyInput = getInput(input, key);
 			tasks.add(new RegressionAsyncTask(key, serviceId, keyInput, timeSpan));
 		}
 
@@ -400,8 +400,7 @@ public class RegressionReportFunction extends RegressionFunction {
 
 	}
 
-	private Collection<String> getActiveDeployments(String serviceId, RegressionReportInput input,
-			Pair<DateTime, DateTime> timeSpan) {
+	private Collection<String> getActiveDeployments(String serviceId, RegressionReportInput input) {
 
 		List<String> activeDeps = ClientUtil.getDeployments(apiClient, serviceId, true);
 
@@ -435,7 +434,7 @@ public class RegressionReportFunction extends RegressionFunction {
 		switch (regInput.mode) {
 			
 			case Deployments:
-				keys = getActiveDeployments(serviceId, regInput, timeSpan);
+				keys = getActiveDeployments(serviceId, regInput);
 				break;
 				
 			case Tiers: 
@@ -492,7 +491,7 @@ public class RegressionReportFunction extends RegressionFunction {
 			int criticalRegressionsScore = criticalRegressions * reportSettings.criticalRegressionScore;
 			int regressionsScore = regressions * reportSettings.regressionScore;
 
-			double score = (double) (newEventsScore + severeNewEventScore + criticalRegressionsScore + regressionsScore)
+			double score = (newEventsScore + severeNewEventScore + criticalRegressionsScore + regressionsScore)
 					* factor;
 
 			RegressionScore regressionScore = new RegressionScore(asyncResult.key, newIssues, severeIssues, regressions,

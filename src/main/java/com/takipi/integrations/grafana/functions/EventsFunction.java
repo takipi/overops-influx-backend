@@ -387,6 +387,10 @@ public class EventsFunction extends GrafanaFunction {
 			}
 		}
 		
+		if (event == null) {
+			throw new IllegalStateException();
+		}
+		
 		EventResult clone;
 		
 		try {

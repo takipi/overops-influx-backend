@@ -75,7 +75,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 				
 		applyFilters(request, serviceId, builder);
 
-		Response<TransactionsGraphResult> response = ApiCache.getTransactionsGraph(apiClient, serviceId, viewId, input, pointsWanted, builder.build());
+		Response<TransactionsGraphResult> response = ApiCache.getTransactionsGraph(apiClient, serviceId, input, pointsWanted, builder.build());
 				
 		validateResponse(response);
 		

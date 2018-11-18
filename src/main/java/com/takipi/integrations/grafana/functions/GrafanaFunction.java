@@ -145,7 +145,7 @@ public abstract class GrafanaFunction {
 
 		applyFilters(input, serviceId, builder);
 
-		Response<TransactionsVolumeResult> response = ApiCache.getTransactionsVolume(apiClient, serviceId, viewId,
+		Response<TransactionsVolumeResult> response = ApiCache.getTransactionsVolume(apiClient, serviceId,
 				input, builder.build());
 
 		if (response.isBadResponse()) {
@@ -181,6 +181,10 @@ public abstract class GrafanaFunction {
 		return result;
 	}
 
+	/**
+	 * @param seriesName - needed by child classes  
+	 * @param volumeType 
+	 */
 	protected String getSeriesName(BaseGraphInput input, String seriesName, Object volumeType, String serviceId,
 			Collection<String> serviceIds) {
 
@@ -200,7 +204,7 @@ public abstract class GrafanaFunction {
 
 		applyFilters(input, serviceId, builder);
 
-		Response<GraphResult> graphResponse = ApiCache.getEventGraph(apiClient, serviceId, viewId, input, volumeType,
+		Response<GraphResult> graphResponse = ApiCache.getEventGraph(apiClient, serviceId, input, volumeType,
 				builder.build(), pointsCount);
 
 		if (graphResponse.isBadResponse()) {
@@ -282,7 +286,7 @@ public abstract class GrafanaFunction {
 		
 		EventsVolumeRequest.Builder builder = EventsVolumeRequest.newBuilder().setVolumeType(volumeType);
 		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);				
-		Response<EventsVolumeResult> response = ApiCache.getEventVolume(apiClient, serviceId, viewId, input, volumeType, builder.build());
+		Response<EventsVolumeResult> response = ApiCache.getEventVolume(apiClient, serviceId, input, volumeType, builder.build());
 		validateResponse(response);
 		
 		if ((response.data == null) || (response.data.events == null)) {
@@ -296,7 +300,7 @@ public abstract class GrafanaFunction {
 		
 		EventsRequest.Builder builder = EventsRequest.newBuilder();
 		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);		
-		Response<?> response = ApiCache.getEventList(apiClient, serviceId, viewId, input, builder.build());
+		Response<?> response = ApiCache.getEventList(apiClient, serviceId, input, builder.build());
 		validateResponse(response);	
 		
 		List<EventResult> events;

@@ -105,6 +105,7 @@ public class GrafanaSettings {
 			.maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_RETENTION, TimeUnit.MINUTES)
 			.build(new CacheLoader<SettingsCacheKey, ServiceSettings>() {
 				
+				@Override
 				public ServiceSettings load(SettingsCacheKey key) {
 					
 					authService(key.apiClient, key.serviceId);
@@ -126,7 +127,7 @@ public class GrafanaSettings {
 					}
 					
 					Gson gson = new Gson();
-					ServiceSettings result = (ServiceSettings)gson.fromJson(json, ServiceSettings.class);
+					ServiceSettings result = gson.fromJson(json, ServiceSettings.class);
 
 					return result;
 				}
@@ -155,7 +156,7 @@ public class GrafanaSettings {
 
 	public static void saveServiceSettings(ApiClient apiClient, String serviceId, String json) {
 		
-		ServiceSettings serviceSettings = (ServiceSettings)(new Gson().fromJson(json, ServiceSettings.class));
+		ServiceSettings serviceSettings = (new Gson().fromJson(json, ServiceSettings.class));
 		saveServiceSettings(apiClient, serviceId, serviceSettings);
 	}
 	

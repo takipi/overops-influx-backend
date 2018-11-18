@@ -17,6 +17,7 @@ public class SettingsServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -8423366031016047591L;
 
+	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
