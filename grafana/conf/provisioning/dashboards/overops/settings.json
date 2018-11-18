@@ -1,0 +1,137 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "limit": 100,
+        "name": "Annotations & Alerts",
+        "showIn": 0,
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true, 
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "iteration": 1542553177990,
+  "links": [
+    {
+      "asDropdown": true,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [
+        "OverOps"
+      ],
+      "targetBlank": true,
+      "type": "dashboards"
+    }
+  ],
+  "panels": [
+    {
+      "content": "<script>\n\n\nvar internalTakipiAjax = function(type, url, contentType, data, onSuccess, onFailure, retryLimit, async, onProgress, isReadOnly, crossDomain, forceAjaxRequest)\n{\n   \n    var requestData = {\n        \"type\": type,\n        \"url\": url,\n        \"contentType\": contentType,\n        \"async\": async,\n        \"crossDomain\": !!crossDomain,\n        \"retryCount\": 0,\n        \"retryLimit\": ((retryLimit != undefined) ? retryLimit : 0),\n        \"success\": function(data) {\n            if (onSuccess)\n            {\n                onSuccess(data);\n            }\n        },\n        \"error\": function(data) {\n            this.retryCount++;\n            \n            if (this.retryCount <= this.retryLimit)\n            {\n                $.ajax(this);\n                return;\n            }\n            \n            if (onFailure)\n            {\n                onFailure(data);\n            }\n        }\n    };\n    \n    console.log(data);\n    \n    if (data)\n    {\n      requestData[\"data\"] = JSON.stringify(data);\n    }\n\n    return $.ajax(requestData);\n};\n\nfunction HideLabel() {\n  $(\"saved\").style.display = \"none\";\n}\n\nfunction applySettings() {\n    var value = $(\"textarea.env\").val() + \"=\" + $(\"textarea.area\").val();\n    internalTakipiAjax(\"POST\", \"/oo-as-influx/settings\", \"text/plain;charset=UTF-8\", value, \n    \n    function(data) {\n      alert(data);\n      \n    }, \n    function(data) {alert(\"Unexpected error saving settings\");},\n    0, true, null, false)\n}\n</script>\n\n<style type=\"text/css\">\n    .area {\n        diplay: block;\n        width:100%;\n        height:90%;\n        font-size: 15px;\n        background-color: black;\n    }\n    \n    .button {\n        text-align:right;\n        padding-top:10px;\n        float:right;\n        color: black;\n    }\n    \n    .saved {\n        text-align:left;\n        float:left;\n    }\n    \n    .button {\n        padding:10px 20px;\n    }\n    \n    .env {\n        display: none;\n    }\n</style>\n\n<textarea class=\"area\">$settings</textarea>\n<textarea class=\"env\">$environments</textarea>\n\n<div class=\"button\">\n<button class=\"button\" onclick=\"applySettings()\">Apply</button>\n</div>\n\n\n\n  </div>\n</div>\n</div>",
+      "gridPos": {
+        "h": 16,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 54,
+      "links": [],
+      "mode": "html",
+      "title": "",
+      "type": "text"
+    }
+  ],
+  "refresh": false,
+  "schemaVersion": 16,
+  "style": "dark",
+  "tags": [
+    "OverOps"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": "*",
+        "current": {},
+        "datasource": "OO",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Env",
+        "multi": false,
+        "name": "environments",
+        "options": [],
+        "query": "environments({\"sorted\":\"true\"})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Settings",
+        "multi": false,
+        "name": "settings",
+        "options": [],
+        "query": "environmentSettings({\"environments\":\"$environments\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
+  },
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "timepicker": {
+    "hidden": true,
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
+  },
+  "timezone": "",
+  "title": "Settings",
+  "uid": "mTGNNTfiz",
+  "version": 6
+}

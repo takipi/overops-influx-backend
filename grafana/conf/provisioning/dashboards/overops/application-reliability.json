@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1542024209640,
+  "iteration": 1542572451545,
   "links": [
     {
       "asDropdown": true,
@@ -405,7 +405,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "typesGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\", \"types\":\"$type\", \"transactions\":\"$transactions\", \"defaultTypes\":\"$defaultTypes\"})\n\n",
+          "query": "typesGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\", \"types\":\"$type\", \"transactions\":\"$transactions\"})\n\n",
           "rawQuery": true,
           "refId": "I",
           "resultFormat": "time_series",
@@ -429,7 +429,7 @@
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Reliability",
+      "title": "Error Volume: $type",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -469,272 +469,86 @@
       }
     },
     {
-      "columns": [],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
       "datasource": "OO",
       "description": "",
-      "fontSize": "100%",
+      "fill": 0,
       "gridPos": {
         "h": 9,
-        "w": 24,
+        "w": 12,
         "x": 0,
         "y": 9
       },
-      "id": 41,
-      "links": [],
-      "pageSize": 10,
-      "scroll": true,
-      "showHeader": true,
-      "sort": {
-        "col": 2,
-        "desc": true
+      "hideTimeOverride": false,
+      "id": 50,
+      "interval": "",
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
       },
-      "styles": [
+      "lines": true,
+      "linewidth": 1,
+      "links": [
         {
-          "alias": "Root Cause",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": false,
-          "linkTargetBlank": true,
-          "linkTooltip": "Go to Root Cause",
-          "linkUrl": "../tale.html?source=45&snapshot=${__cell}",
-          "mappingType": 1,
-          "pattern": "Link",
-          "thresholds": [],
-          "type": "hidden",
-          "unit": "short",
-          "valueMaps": []
-        },
-        {
-          "alias": "Times",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 0,
-          "link": false,
-          "linkTargetBlank": true,
-          "linkTooltip": "",
-          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
-          "mappingType": 1,
-          "pattern": "Hits",
-          "thresholds": [],
-          "type": "number",
-          "unit": "short"
-        },
-        {
-          "alias": "Entry Point",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": false,
-          "linkTargetBlank": true,
-          "linkTooltip": "",
-          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
-          "mappingType": 1,
-          "pattern": "Entry point",
-          "thresholds": [],
-          "type": "hidden",
-          "unit": "short"
-        },
-        {
-          "alias": "Introduced By",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": false,
-          "linkTargetBlank": true,
-          "linkTooltip": "",
-          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
-          "mappingType": 1,
-          "pattern": "Introduced by",
-          "thresholds": [],
-          "type": "number",
-          "unit": "short"
-        },
-        {
-          "alias": "First Seen",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": false,
-          "linkTargetBlank": true,
-          "linkTooltip": "",
-          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
-          "mappingType": 1,
-          "pattern": "First seen",
-          "thresholds": [],
-          "type": "number",
-          "unit": "short"
-        },
-        {
-          "alias": "",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": false,
-          "linkTargetBlank": true,
-          "linkTooltip": "",
-          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
-          "mappingType": 1,
-          "pattern": "Type",
-          "preserveFormat": false,
-          "sanitize": false,
-          "thresholds": [],
-          "type": "string",
-          "unit": "short",
-          "valueMaps": [
-            {
-              "text": "CEX",
-              "value": "Caught Exception"
-            },
-            {
-              "text": "SWL",
-              "value": "Swallowed Exception"
-            },
-            {
-              "text": "HTT",
-              "value": "HTTP Error"
-            },
-            {
-              "text": "WRN",
-              "value": "Logged Warning"
-            },
-            {
-              "text": "TMR",
-              "value": "Timer"
-            },
-            {
-              "text": "UNC",
-              "value": "Uncaught Exception"
-            },
-            {
-              "text": "ERR",
-              "value": "Logged Error"
-            }
-          ]
-        },
-        {
-          "alias": "",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": false,
-          "linkTargetBlank": true,
-          "linkTooltip": "",
-          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
-          "mappingType": 1,
-          "pattern": "Name",
-          "thresholds": [],
-          "type": "number",
-          "unit": "short"
-        },
-        {
-          "alias": "Code Location",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": true,
-          "linkTargetBlank": true,
-          "linkTooltip": "Go to root cause",
-          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
-          "mappingType": 1,
-          "pattern": "Error location",
-          "thresholds": [],
-          "type": "number",
-          "unit": "short"
-        },
-        {
-          "alias": "",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": false,
-          "linkTargetBlank": true,
-          "linkTooltip": "",
-          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
-          "mappingType": 1,
-          "pattern": "Rate",
-          "thresholds": [],
-          "type": "number",
-          "unit": "percentunit"
-        },
-        {
-          "alias": "Type",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "mappingType": 1,
-          "pattern": "IssueType",
-          "thresholds": [],
-          "type": "string",
-          "unit": "short",
-          "valueMaps": [
-            {
-              "text": "Reg",
-              "value": "Regression"
-            },
-            {
-              "text": "Sev New",
-              "value": "Severe New"
-            },
-            {
-              "text": "Sev Reg",
-              "value": "Severe Regression"
-            }
-          ]
+          "dashUri": "db/event-analysis",
+          "dashboard": "Event Analysis",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": true,
+          "title": "Event Analysis",
+          "type": "dashboard"
         }
       ],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "Throughput",
+          "color": "#9ac48a",
+          "fill": 2,
+          "linewidth": 0,
+          "yaxis": 2
+        },
+        {
+          "alias": "/^.Selected/",
+          "color": "#3f6833",
+          "dashLength": 3,
+          "dashes": true
+        },
+        {
+          "alias": "/^.Logged Error/",
+          "color": "#ea6460"
+        },
+        {
+          "alias": "/^.Logged Warning/",
+          "color": "#eab839"
+        },
+        {
+          "alias": "/^.HTTP Error/",
+          "color": "#1f78c1"
+        },
+        {
+          "alias": "/^.Uncaught Exception/",
+          "color": "#ba43a9"
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
       "targets": [
         {
+          "alias": "Throughput",
           "groupBy": [
             {
               "params": [
@@ -751,10 +565,10 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressions({\"fields\":\"link,type,issueType,message,error_location,entry_point,regression\", \"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\", \"activeTimespan\":\"$active_timespan\",\"minBaselineTimespan\":\"$minBaselineTimespan\",\"baselineTimespanFactor\":\"$baselineTimespanFactor\",\"minVolumeThreshold\":\"$minVolumeThreshold\",\"minErrorRateThreshold\":\"$minErrorRateThreshold\",\"regressionDelta\":\"$regressionDelta\",\"criticalRegressionDelta\":\"$criticalRegressionDelta\",\"applySeasonality\": \"$applySeasonality\",\"criticalExceptionTypes\":\"$criticalExceptionTypes\",\"maxColumnLength\":60, \"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\"})",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"aggregate\":true,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\"})\n",
           "rawQuery": true,
           "refId": "A",
-          "resultFormat": "table",
+          "resultFormat": "time_series",
           "select": [
             [
               {
@@ -770,58 +584,8 @@
             ]
           ],
           "tags": []
-        }
-      ],
-      "title": "$regressionName",
-      "transform": "table",
-      "type": "table"
-    },
-    {
-      "aliasColors": {},
-      "bars": true,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "OO",
-      "fill": 1,
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 0,
-        "y": 18
-      },
-      "id": 47,
-      "interval": "1h",
-      "legend": {
-        "alignAsTable": false,
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "rightSide": false,
-        "show": false,
-        "total": false,
-        "values": false
-      },
-      "lines": false,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null as zero",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [
+        },
         {
-          "alias": "/.*[0-9]/",
-          "color": "#7eb26d"
-        }
-      ],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "alias": "",
           "groupBy": [
             {
               "params": [
@@ -836,12 +600,11 @@
               "type": "fill"
             }
           ],
-          "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "groupBy({\"type\":\"count\",\"field\":\"introduced_by\",\"limit\":5,\"volumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"types\":\"$type\", \"pointsWanted\":24})",
+          "query": "splitGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\", \"types\":\"Timer\", \"transactions\":\"$transactions\", \"defaultTypes\":\"$defaultTypes\", \"limit\":3})\n\n",
           "rawQuery": true,
-          "refId": "A",
+          "refId": "I",
           "resultFormat": "time_series",
           "select": [
             [
@@ -863,39 +626,38 @@
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "New $type in last 5 deployments",
+      "title": "Slowdowns",
       "tooltip": {
-        "shared": false,
-        "sort": 0,
+        "shared": true,
+        "sort": 2,
         "value_type": "individual"
       },
       "type": "graph",
       "xaxis": {
         "buckets": null,
-        "mode": "series",
+        "mode": "time",
         "name": null,
         "show": true,
-        "values": [
-          "total"
-        ]
+        "values": []
       },
       "yaxes": [
         {
           "decimals": null,
           "format": "short",
-          "label": null,
+          "label": "",
           "logBase": 10,
-          "max": "0",
+          "max": null,
           "min": "0",
           "show": true
         },
         {
-          "format": "locale",
-          "label": null,
+          "decimals": 0,
+          "format": "short",
+          "label": "",
           "logBase": 10,
           "max": null,
           "min": null,
-          "show": false
+          "show": true
         }
       ],
       "yaxis": {
@@ -915,7 +677,7 @@
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 18
+        "y": 9
       },
       "hideTimeOverride": true,
       "id": 45,
@@ -1013,7 +775,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "routingGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\", \"types\":\"$type\", \"transactions\":\"$transactions\", \"defaultTypes\":\"$defaultTypes\",\"limit\":5})\n\n",
+          "query": "routingGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\", \"types\":\"$type\", \"transactions\":\"$transactions\", \"defaultTypes\":\"$defaultTypes\",\"limit\":3})\n\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1055,7 +817,7 @@
         {
           "format": "short",
           "label": "",
-          "logBase": 1,
+          "logBase": 10,
           "max": null,
           "min": "0",
           "show": true
@@ -1064,7 +826,7 @@
           "decimals": null,
           "format": "short",
           "label": "",
-          "logBase": 1,
+          "logBase": 10,
           "max": null,
           "min": null,
           "show": true
@@ -1074,6 +836,321 @@
         "align": false,
         "alignLevel": null
       }
+    },
+    {
+      "columns": [],
+      "datasource": "OO",
+      "description": "",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 16,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "id": 41,
+      "links": [],
+      "pageSize": null,
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": null,
+        "desc": false
+      },
+      "styles": [
+        {
+          "alias": "Root Cause",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "linkTargetBlank": true,
+          "linkTooltip": "Go to Root Cause",
+          "linkUrl": "../tale.html?source=45&snapshot==${__cell}",
+          "mappingType": 1,
+          "pattern": "Link",
+          "rangeMaps": [
+            {
+              "from": "S6295#45721#1538336116202#604800000",
+              "text": "moo",
+              "to": "S6295#45721#1538336116202#604800000"
+            }
+          ],
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short",
+          "valueMaps": []
+        },
+        {
+          "alias": "Times",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 0,
+          "link": false,
+          "linkTargetBlank": true,
+          "linkTooltip": "",
+          "linkUrl": "../tale.html?source=45&snapshot==${__cell_0}",
+          "mappingType": 1,
+          "pattern": "Hits",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "Entry Point",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "linkTargetBlank": true,
+          "linkTooltip": "",
+          "linkUrl": "../tale.html?source=45&snapshot==${__cell_0}",
+          "mappingType": 1,
+          "pattern": "Entry point",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "Introduced By",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "linkTargetBlank": true,
+          "linkTooltip": "",
+          "linkUrl": "../tale.html?source=45&snapshot==${__cell_0}",
+          "mappingType": 1,
+          "pattern": "Introduced by",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "First Seen",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "linkTargetBlank": true,
+          "linkTooltip": "",
+          "linkUrl": "../tale.html?source=45&snapshot==${__cell_0}",
+          "mappingType": 1,
+          "pattern": "First seen",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "linkTargetBlank": true,
+          "linkTooltip": "",
+          "linkUrl": "../tale.html?source=45&snapshot==${__cell_0}",
+          "mappingType": 1,
+          "pattern": "Type",
+          "preserveFormat": false,
+          "sanitize": false,
+          "thresholds": [],
+          "type": "string",
+          "unit": "short",
+          "valueMaps": [
+            {
+              "text": "CEX",
+              "value": "Caught Exception"
+            },
+            {
+              "text": "SWL",
+              "value": "Swallowed Exception"
+            },
+            {
+              "text": "HTT",
+              "value": "HTTP Error"
+            },
+            {
+              "text": "WRN",
+              "value": "Logged Warning"
+            },
+            {
+              "text": "TMR",
+              "value": "Timer"
+            },
+            {
+              "text": "UNC",
+              "value": "Uncaught Exception"
+            },
+            {
+              "text": "ERR",
+              "value": "Logged Error"
+            }
+          ]
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "linkTargetBlank": true,
+          "linkTooltip": "",
+          "linkUrl": "../tale.html?source=45&snapshot==${__cell_0}",
+          "mappingType": 1,
+          "pattern": "Name",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "Code Location",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": true,
+          "linkTargetBlank": true,
+          "linkTooltip": "Go to root cause",
+          "linkUrl": "http://grafana.overops-samples.com:8186/link?link=${__cell_0}",
+          "mappingType": 1,
+          "pattern": "Error location",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "linkTargetBlank": true,
+          "linkTooltip": "",
+          "linkUrl": "../tale.html?source=45&snapshot==${__cell_0}",
+          "mappingType": 1,
+          "pattern": "Rate",
+          "thresholds": [],
+          "type": "number",
+          "unit": "percentunit"
+        },
+        {
+          "alias": "Type",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "IssueType",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short",
+          "valueMaps": [
+            {
+              "text": "Reg",
+              "value": "Regression"
+            },
+            {
+              "text": "Sev New",
+              "value": "Severe New"
+            },
+            {
+              "text": "Sev Reg",
+              "value": "Severe Regression"
+            }
+          ]
+        }
+      ],
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "regressions({\"fields\":\"link,type,issueType,message,error_location,entry_point,regression\", \"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\", \"activeTimespan\":\"$active_timespan\",\"minBaselineTimespan\":\"$minBaselineTimespan\",\"baselineTimespanFactor\":\"$baselineTimespanFactor\",\"minVolumeThreshold\":\"$minVolumeThreshold\",\"minErrorRateThreshold\":\"$minErrorRateThreshold\",\"regressionDelta\":\"$regressionDelta\",\"criticalRegressionDelta\":\"$criticalRegressionDelta\",\"applySeasonality\": \"$applySeasonality\",\"criticalExceptionTypes\":\"$criticalExceptionTypes\",\"maxColumnLength\":60, \"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",\"labelsRegex\":\"^((?!IgnoreReg).)*$\"})",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "title": "High Priority",
+      "transform": "table",
+      "type": "table"
     }
   ],
   "refresh": false,
@@ -1235,26 +1312,24 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "AppPeriodicPushTask|GracefulTask",
-          "value": "AppPeriodicPushTask|GracefulTask"
-        },
+        "current": {},
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": "Key Transactions",
         "multi": false,
         "name": "keyTransactions",
-        "options": [
-          {
-            "selected": true,
-            "text": "AppPeriodicPushTask|GracefulTask",
-            "value": "AppPeriodicPushTask|GracefulTask"
-          }
-        ],
-        "query": "AppPeriodicPushTask|GracefulTask",
+        "options": [],
+        "query": "keyTransactions({\"environments\":\"$environments\",\"sorted\":\"true\"})",
+        "refresh": 1,
+        "regex": "",
         "skipUrlSync": false,
-        "type": "custom"
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       },
       {
         "allValue": null,
@@ -1299,269 +1374,11 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "20160",
-          "value": "20160"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Min Baseline Timespan",
-        "multi": false,
-        "name": "minBaselineTimespan",
-        "options": [
-          {
-            "selected": true,
-            "text": "20160",
-            "value": "20160"
-          }
-        ],
-        "query": "20160",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "4",
-          "value": "4"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Baseline Timespan Factor",
-        "multi": false,
-        "name": "baselineTimespanFactor",
-        "options": [
-          {
-            "selected": true,
-            "text": "4",
-            "value": "4"
-          }
-        ],
-        "query": "4",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "50",
-          "value": "50"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Min Volume Threshold",
-        "multi": false,
-        "name": "minVolumeThreshold",
-        "options": [
-          {
-            "selected": true,
-            "text": "50",
-            "value": "50"
-          }
-        ],
-        "query": "50",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "0.1",
-          "value": "0.1"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Min Error Rate Threshold",
-        "multi": false,
-        "name": "minErrorRateThreshold",
-        "options": [
-          {
-            "selected": true,
-            "text": "0.1",
-            "value": "0.1"
-          }
-        ],
-        "query": "0.1",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "1",
-          "value": "1"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Critical Regression Delta",
-        "multi": false,
-        "name": "criticalRegressionDelta",
-        "options": [
-          {
-            "selected": true,
-            "text": "1",
-            "value": "1"
-          }
-        ],
-        "query": "1",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "0.5",
-          "value": "0.5"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Regression Delta",
-        "multi": false,
-        "name": "regressionDelta",
-        "options": [
-          {
-            "selected": true,
-            "text": "0.5",
-            "value": "0.5"
-          }
-        ],
-        "query": "0.5",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "text": "NullPointerException",
-          "value": "NullPointerException"
-        },
-        "hide": 2,
-        "includeAll": true,
-        "label": "Critical Types",
-        "multi": true,
-        "name": "criticalExceptionTypes",
-        "options": [
-          {
-            "selected": false,
-            "text": "All",
-            "value": "$__all"
-          },
-          {
-            "selected": false,
-            "text": "NullPointerException|IndexOutOfBoundsException|InvalidCastException|AssertionError",
-            "value": "NullPointerException|IndexOutOfBoundsException|InvalidCastException|AssertionError"
-          }
-        ],
-        "query": "NullPointerException|IndexOutOfBoundsException|InvalidCastException|AssertionError",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "text": "Logged Error|Logged Warning|HTTP Error|Uncaught Exception|Timer",
-          "value": "Logged Error|Logged Warning|HTTP Error|Uncaught Exception|Timer"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Defaut Types",
-        "multi": false,
-        "name": "defaultTypes",
-        "options": [
-          {
-            "selected": false,
-            "text": "Logged Error|Logged Warning|HTTP Error|Timer",
-            "value": "Logged Error|Logged Warning|HTTP Error|Timer"
-          }
-        ],
-        "query": "Logged Error|Logged Warning|HTTP Error|Timer",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {},
-        "datasource": "OO",
-        "hide": 2,
-        "includeAll": false,
-        "label": "regressionName",
-        "multi": false,
-        "name": "regressionName",
-        "options": [],
-        "query": "regressionName({\"environments\":\"$environments\",\"deployments\":\"$deployments\",\"activeTimespan\":0, \"minBaselineTimespan\":\"$minBaselineTimespan\",\"baselineTimespanFactor\":\"$baselineTimespanFactor\", \"view\":\"All Events\"})",
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "text": "1440",
-          "value": "1440"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": null,
-        "multi": false,
-        "name": "active_timespan",
-        "options": [
-          {
-            "selected": true,
-            "text": "1440",
-            "value": "1440"
-          }
-        ],
-        "query": "1440",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "true",
-          "value": "true"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "applySeasonality",
-        "multi": false,
-        "name": "applySeasonality",
-        "options": [
-          {
-            "selected": true,
-            "text": "true",
-            "value": "true"
-          },
-          {
-            "selected": false,
-            "text": "false",
-            "value": "false"
-          }
-        ],
-        "query": "true,false",
-        "skipUrlSync": false,
-        "type": "custom"
       }
     ]
   },
   "time": {
-    "from": "now-2d",
+    "from": "now-7d",
     "to": "now"
   },
   "timepicker": {
@@ -1593,5 +1410,5 @@
   "timezone": "",
   "title": "Application Reliability",
   "uid": "4DHQ63-ik",
-  "version": 8
+  "version": 12
 }
