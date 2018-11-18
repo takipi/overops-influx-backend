@@ -118,13 +118,17 @@ public class TransactionsListFunction extends GrafanaFunction {
 			timeSpan.getSecond(), VolumeType.all, input.pointsWanted);
 		
 		if (eventsMap == null) {
-			throw new IllegalStateException("Could not aquire transaction events for " + serviceId);
+			return;
 		}
 
-		EventFilter eventFilter = input.getEventFilter(serviceId);
+		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
 		
 		for (EventResult event : eventsMap.values()) {
 
+			if (event.entry_point == null) {
+				continue;
+			}
+			
 			TransactionData transaction = transactions.get(event.entry_point.class_name);
 
 			if (transaction == null) {
@@ -193,7 +197,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 		TransactionsListIput input = (TransactionsListIput) functionInput;
 
 		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
-		String[] serviceIds = getServiceIds(input);
+		Collection<String> serviceIds = getServiceIds(input);
 
 		Series series = new Series();
 		

@@ -82,10 +82,10 @@ public class TransactionsVolumeFunction extends BaseVolumeFunction {
 	}
 	
 	protected EventVolume getTransactionVolume(TransactionsVolumeInput input, Pair<DateTime, DateTime> timeSpan ) {
-		String[] serviceIds = getServiceIds(input);
+		Collection<String> serviceIds = getServiceIds(input);
 
 		long totalInvocations = 0;
-		List<TransactionVolume> servicesVolumes = new ArrayList<TransactionVolume>(serviceIds.length);
+		List<TransactionVolume> servicesVolumes = new ArrayList<TransactionVolume>(serviceIds.size());
 
 		for (String serviceId : serviceIds) {
 
@@ -128,9 +128,11 @@ public class TransactionsVolumeFunction extends BaseVolumeFunction {
 
 		return volume;
 	}
+	
 
 	@Override
 	public List<Series> process(FunctionInput functionInput) {
+
 		super.process(functionInput);
 
 		if (!(functionInput instanceof TransactionsVolumeInput)) {

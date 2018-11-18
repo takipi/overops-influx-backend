@@ -29,7 +29,8 @@ public class FunctionParser {
 	
 	private static final Map<String, FunctionFactory> factories;
 
-	protected static class FunctionAsyncTask extends BaseAsyncTask implements Callable<FunctionResult> {
+	protected static class FunctionAsyncTask extends BaseAsyncTask implements Callable<Object>  {
+
 		protected ApiClient apiClient; 
 		protected String query;
 		protected int index;
@@ -41,7 +42,8 @@ public class FunctionParser {
 		}
 		
 		@Override
-		public FunctionResult call() throws Exception {
+		public Object call() throws Exception {
+			
 			beforeCall();
 			
 			try {
@@ -68,6 +70,7 @@ public class FunctionParser {
 	}
 	
 	public static List<Series> processSingleQuery(ApiClient apiClient, String query) {
+		
 		String trimmedQuery = query.trim();
 		int parenthesisIndex = trimmedQuery.indexOf('(');
 
@@ -115,6 +118,7 @@ public class FunctionParser {
 	}
 	
 	public static QueryResult processSync(ApiClient apiClient, String query) {
+		
 		QueryResult result = new QueryResult();
 
 		ResultContent resultContent = new ResultContent();
@@ -125,9 +129,10 @@ public class FunctionParser {
 	}
 	
 	public static QueryResult processAsync(ApiClient apiClient, List<String> singleQueries ) {
+		
 		QueryResult result = new QueryResult();
 
-		CompletionService<FunctionResult> completionService = new ExecutorCompletionService<FunctionResult>(GrafanaThreadPool.executor);
+		CompletionService<Object> completionService = new ExecutorCompletionService<Object>(GrafanaThreadPool.executor);
 
 		int index = 0;
 		
@@ -140,8 +145,8 @@ public class FunctionParser {
 			
 		while (received < singleQueries.size()) {			
 			try {
-				Future<FunctionResult> future = completionService.take();
-				FunctionResult asynResult = future.get();
+				Future<Object> future = completionService.take();
+				FunctionResult asynResult = (FunctionResult)(future.get());
 				
 				ResultContent resultContent = new ResultContent();
 				resultContent.series = asynResult.data;
@@ -149,6 +154,7 @@ public class FunctionParser {
 				result.results.add(resultContent);
 				
 				received++;
+
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
 			} 
@@ -160,6 +166,7 @@ public class FunctionParser {
 	}
 	
 	public static QueryResult processQuery(ApiClient apiClient, String query) {
+		
 		if ((query == null) || (query.length() == 0)) {
 			throw new IllegalArgumentException("Missing query");
 		}
@@ -227,6 +234,8 @@ public class FunctionParser {
 		registerFunction(new TransactionsFunction.Factory());
 		registerFunction(new LabelsFunction.Factory());
 		registerFunction(new EventTypesFunction.Factory());
+		registerFunction(new EnvironmentSettingsFunction.Factory());
+		registerFunction(new KeyTransactionsFunction.Factory());
 		
 	}
 }

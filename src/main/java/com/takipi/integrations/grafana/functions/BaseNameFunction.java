@@ -2,6 +2,7 @@
 package com.takipi.integrations.grafana.functions;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -27,13 +28,13 @@ public abstract class BaseNameFunction extends GrafanaFunction {
 
 		ViewInput input = (ViewInput)functionInput;
 		
-		String[] serviceIds = getServiceIds(input);
+		Collection<String> serviceIds = getServiceIds(input);
 
-		if (serviceIds.length == 0) {
+		if (serviceIds.size() == 0) {
 			return null;
 		}
 
-		String name = getName(input, serviceIds[0]);
+		String name = getName(input, serviceIds.iterator().next());
 
 		if (name == null) {
 			return null;

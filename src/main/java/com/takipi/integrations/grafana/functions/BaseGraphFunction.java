@@ -7,9 +7,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.Future;
 
 import org.joda.time.DateTime;
 
@@ -36,17 +33,17 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		}
 	}
 	
-	protected class GraphAsyncTask extends BaseAsyncTask implements Callable<AsyncResult> {
+	protected class GraphAsyncTask extends BaseAsyncTask implements Callable<Object>{
 		String serviceId;
 		String viewId;
 		String viewName;
 		BaseGraphInput request;
 		Pair<DateTime, DateTime> timeSpan;
-		String[] serviceIds;
+		Collection<String> serviceIds;
 		int pointsWanted;
 
 		protected GraphAsyncTask(String serviceId, String viewId, String viewName,
-				BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, String[] serviceIds, int pointsWanted) {
+				BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds, int pointsWanted) {
 
 			this.serviceId = serviceId;
 			this.viewId = viewId;
@@ -58,7 +55,8 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		}
 
 		@Override
-		public AsyncResult call() {
+		public Object call() {
+			
 			beforeCall();
 			
 			try {
@@ -70,6 +68,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 			finally {
 				afterCall();
 			}
+		
 		}
 		
 		@Override
@@ -92,8 +91,8 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 	}
 
 	@Override
-	protected String getSeriesName(BaseGraphInput input, String seriesName,
-			Object volumeType, String serviceId, String[] serviceIds) {
+	protected String getSeriesName(BaseGraphInput input, String seriesName, 
+		Object volumeType, String serviceId, Collection<String> serviceIds) {
 		String tagName;
 		
 		if (seriesName != null) {
@@ -101,16 +100,16 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		} else {
 			tagName = volumeType.toString();	
 		}
-		
+				
 		String result = getServiceValue(tagName, serviceId, serviceIds);
 		
 		return result;
 	}
 	
-	protected Collection<GraphAsyncTask> getTasks(String[] serviceIds, BaseGraphInput input,
+	protected Collection<Callable<Object>> getTasks(Collection<String> serviceIds, BaseGraphInput input,
 			Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
 		
-		List<GraphAsyncTask> result = new ArrayList<GraphAsyncTask>();
+		List<Callable<Object>> result = new ArrayList<Callable<Object>>();
 		
 		for (String serviceId : serviceIds) {
 
@@ -129,37 +128,30 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		return result;
 	}
 	
-	protected List<GraphSeries> processAsync(String[] serviceIds, BaseGraphInput request,
+	protected List<GraphSeries> processAsync(Collection<String> serviceIds, BaseGraphInput request,
 			Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
-
-		CompletionService<AsyncResult> completionService = new ExecutorCompletionService<AsyncResult>(GrafanaThreadPool.executor);
-
-		Collection<GraphAsyncTask> tasks = getTasks(serviceIds, request, timeSpan, pointsWanted);
+ 
+		Collection<Callable<Object>> tasks = getTasks(serviceIds, request, timeSpan, pointsWanted);
+		List<Object> taskResults = executeTasks(tasks);
 		
-		for (GraphAsyncTask task : tasks) {
-			completionService.submit(task);
-		}
-
 		List<GraphSeries> result = new ArrayList<GraphSeries>();
-
-		int received = 0;
-
-		while (received < tasks.size()) {			
-			try {
-				Future<AsyncResult> future = completionService.take();
-				received++;
-				AsyncResult asynResult = future.get();
-				result.addAll(asynResult.data);
-			} catch (Exception e) {
-				throw new IllegalStateException(e);
-			} 
+		
+		for (Object taskResult : taskResults) {
+			
+			if (taskResult instanceof AsyncResult) {
+				AsyncResult asyncResult = (AsyncResult)taskResult;
+				
+				if (asyncResult.data != null) {
+					result.addAll(asyncResult.data);
+				}
+			}
 		}
-
+		
 		return result;
 	}
 
 	protected abstract List<GraphSeries> processServiceGraph(String serviceId, String viewId, String viewName,
-			BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, String[] serviceIds, int pointsWanted);
+			BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds, int pointsWanted);
 
 	protected Map<String, String> getViews(String serviceId, BaseGraphInput input) {
 		String viewId = getViewId(serviceId, input.view);
@@ -172,7 +164,9 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 	}
 
 	protected void sortByName(List<Series> seriesList) {
+
 		seriesList.sort(new Comparator<Series>() {
+
 			@Override
 			public int compare(Series o1, Series o2) {
 				return o1.name.compareTo(o2.name);
@@ -180,8 +174,11 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		});
 	}
 
-	protected List<Series> processSeries(List<GraphSeries> series,
-			@SuppressWarnings("unused") BaseGraphInput input) {
+	/**
+	 * @param input - needed by child classes 
+	 */
+	protected List<Series> processSeries(List<GraphSeries> series, BaseGraphInput input) {
+
 		List<Series> result = new ArrayList<Series>();
 
 		for (GraphSeries entry : series) {
@@ -192,7 +189,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 
 		return result;
 	}
-
+	
 	protected int getPointsWanted(BaseGraphInput input, Pair<DateTime, DateTime> timespan) {
 
 		if (input.pointsWanted > 0) {
@@ -212,26 +209,32 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		return result;
 	}
 
-	protected List<GraphSeries> processSync(String[] serviceIds, BaseGraphInput input,
+	protected List<GraphSeries> processSync(Collection<String> serviceIds, BaseGraphInput input,
 			Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
 		
 		List<GraphSeries> series = new ArrayList<GraphSeries>();
 		
-		Collection<GraphAsyncTask> tasks = getTasks(serviceIds, input, timeSpan, pointsWanted);
+		Collection<Callable<Object>> tasks = getTasks(serviceIds, input, timeSpan, pointsWanted);
 		
-		for (GraphAsyncTask task : tasks) {
-			List<GraphSeries> taksData = task.call().data;
+		for (Callable<Object> task : tasks) {
 			
-			if (taksData != null) {
-				series.addAll(taksData);
+			AsyncResult taskResult;
+			try {
+				taskResult = (AsyncResult)(task.call());
+			} catch (Exception e) {
+				throw new IllegalStateException(e);
+			}
+			
+			if (taskResult.data != null) {
+				series.addAll(taskResult.data);
 			}
 		}
 		
 		return series;
 	}
 	
-	protected boolean isAsync(String[] serviceIds) {
-		return serviceIds.length > 1;
+	protected boolean isAsync(Collection<String> serviceIds) {
+		return serviceIds.size() > 1;
 	}
 
 	@Override
@@ -246,7 +249,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 
 		int pointsWanted = getPointsWanted(input, timeSpan);
 
-		String[] serviceIds = getServiceIds(input);
+		Collection<String> serviceIds = getServiceIds(input);
 
 		List<GraphSeries> series;
 		

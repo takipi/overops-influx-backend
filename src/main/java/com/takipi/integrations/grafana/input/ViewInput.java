@@ -5,6 +5,7 @@ import java.util.Collection;
 import com.google.common.base.Objects;
 
 public class ViewInput extends EnvironmentsFilterInput {
+	
 	public String view;
 	public String transactions;
 	public String timeFilter;
@@ -14,6 +15,7 @@ public class ViewInput extends EnvironmentsFilterInput {
 	}
 	
 	public Collection<String> getTransactions(String serviceId) {
+
 		if ((transactions == null) || (transactions.length() == 0)) {
 			return null;
 		}
@@ -23,6 +25,7 @@ public class ViewInput extends EnvironmentsFilterInput {
 	
 	@Override
 	public boolean equals(Object obj) {
+		
 		if (!super.equals(obj)) {
 			return false;
 		}

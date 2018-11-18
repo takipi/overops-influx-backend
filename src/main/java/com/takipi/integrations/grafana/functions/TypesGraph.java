@@ -1,8 +1,10 @@
+
 package com.takipi.integrations.grafana.functions;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.joda.time.DateTime;
 
@@ -12,8 +14,11 @@ import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.input.TypesGraphInput;
+import com.takipi.integrations.grafana.settings.GrafanaSettings;
+import com.takipi.integrations.grafana.settings.GraphSettings;
 
 public class TypesGraph extends GraphFunction {
+
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -40,29 +45,28 @@ public class TypesGraph extends GraphFunction {
 		Gson gson = new Gson();
 		String json = gson.toJson(input);
 		GraphInput result = gson.fromJson(json, GraphInput.class);
-		
 		result.types = type;
 		return result;
 	}
 
 	@Override
 	protected String getSeriesName(BaseGraphInput input, String seriesName, Object volumeType, String serviceId,
-			String[] serviceIds) {
+			Collection<String> serviceIds) {
 		return getServiceValue(input.types, serviceId, serviceIds);
 	}
 
 	@Override
-	protected boolean isAsync(String[] serviceIds) {
+	protected boolean isAsync(Collection<String> serviceIds) {
 		return true;
 	}
 	
 	@Override
-	protected Collection<GraphAsyncTask> getTasks(String[] serviceIds, BaseGraphInput input,
+	protected Collection<Callable<Object>> getTasks(Collection<String> serviceIds, BaseGraphInput input,
 			Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
 
 		TypesGraphInput graphInput = (TypesGraphInput) input;
 
-		List<GraphAsyncTask> result = new ArrayList<GraphAsyncTask>();
+		List<Callable<Object>> result = new ArrayList<Callable<Object>>();
 
 		for (String serviceId : serviceIds) {
 
@@ -83,7 +87,15 @@ public class TypesGraph extends GraphFunction {
 				
 				Collection<String> defaultTypes = graphInput.getDefaultTypes();
 				
-				if (graphInput.defaultTypes != null) {
+				if (defaultTypes == null) {
+					GraphSettings graphSettings = GrafanaSettings.getServiceSettings(apiClient, serviceId).graphSettings;
+					
+					if (graphSettings != null) {
+						defaultTypes = graphSettings.getDefaultTypes();
+					}
+				}
+				
+				if (defaultTypes != null) {
 					for (String type : defaultTypes) {
 						result.add(new GraphAsyncTask(serviceId, viewId, input.view, getInput(graphInput , type), timeSpan,
 								serviceIds, pointsWanted));

@@ -3,13 +3,18 @@ package com.takipi.integrations.grafana.servlet;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 
 public class ServletUtil {
+	public static String getConfigParam(HttpServlet servlet, String key) {
+		return servlet.getServletConfig().getInitParameter(key);
+	}
+	
 	public static Auth getAuthentication(HttpServletRequest request) {
 		
 		// Proxy by OverOps Server
-		String hiddenToken = request.getHeader("X-OO-KEY");
+		String hiddenToken = request.getHeader("X-API-KEY");
 		if ((hiddenToken != null) && (!hiddenToken.isEmpty())) {
 			Auth auth = new Auth();
 			

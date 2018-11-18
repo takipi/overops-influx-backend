@@ -22,7 +22,7 @@ public class EventLinkEncoder {
 		EventSnapshotRequest.Builder builder = EventSnapshotRequest.newBuilder().setServiceId(serviceId)
 				.setFrom(from.toString()).setTo(to.toString()).setEventId(event.id);
 
-		GrafanaFunction.applyFilters(input, serviceId, builder);
+		GrafanaFunction.applyFilters(null, input, serviceId, builder);
 		EventSnapshotRequest request = builder.build();
 
 		String json = String.format(TEMPLATE, serviceId, TimeUtil.getMillisAsString(from), TimeUtil.getMillisAsString(to),

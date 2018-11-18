@@ -1,6 +1,7 @@
 package com.takipi.integrations.grafana.functions;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -90,7 +91,7 @@ public abstract class BaseVolumeFunction extends GrafanaFunction {
 			return result;
 		}
 
-		EventFilter eventFilter = input.getEventFilter(serviceId);
+		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
 
 		Set<String> smiliarIds = new HashSet<String>();
 		
@@ -128,7 +129,7 @@ public abstract class BaseVolumeFunction extends GrafanaFunction {
 	protected EventVolume getEventVolume(BaseVolumeInput input, VolumeType volumeType,
 			Pair<DateTime, DateTime> timeSpan) {
 
-		String[] serviceIds = getServiceIds(input);
+		Collection<String> serviceIds = getServiceIds(input);
 
 		EventVolume volume = new EventVolume();
 

@@ -15,11 +15,12 @@ import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
 import com.takipi.api.client.result.event.EventResult;
-import com.takipi.api.client.util.infra.Categories;
+import com.takipi.api.client.util.categories.Categories;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.input.GraphLimitInput;
+import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class RoutingGraphFunction extends LimitGraphFunction {
@@ -54,7 +55,7 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 		Map<String, EventResult> eventMap = getEventMap(serviceId, input, timeSpan.getFirst(), timeSpan.getSecond(), input.volumeType,
 					input.pointsWanted);
 		
-		EventFilter eventFilter = input.getEventFilter(serviceId);
+		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
 
 		Set<GraphData> graphsInPoint = new HashSet<GraphData>();
 		Map<String, GraphData> graphsData = new HashMap<String, GraphData>();
@@ -62,6 +63,8 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 		Long key = null;
 		Long lastKey = null;
 		
+		Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();
+
 		for (GraphPoint gp : graph.points) {
 
 			if (gp.contributors == null) {
@@ -81,8 +84,7 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 					continue;
 				}
 
-				Set<String> labels = Categories.defaultCategories()
-						.getCategories(event.error_origin.class_name);
+				Set<String> labels = categories.getCategories(event.error_origin.class_name);
 				
 				if (labels == null) {
 					continue;

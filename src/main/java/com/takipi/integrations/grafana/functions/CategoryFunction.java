@@ -1,5 +1,6 @@
 package com.takipi.integrations.grafana.functions;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +49,7 @@ public class CategoryFunction extends GraphFunction {
 		
 		validateResponse(response);
 		
-		if (response.data.categories == null) {
+		if ((response.data == null) || (response.data.categories == null)) {
 			return Collections.emptyMap();
 		}
 		
@@ -75,15 +76,15 @@ public class CategoryFunction extends GraphFunction {
 	}
 	
 	@Override
-	protected boolean isAsync(String[] serviceIds) {
+	protected boolean isAsync(Collection<String> serviceIds) {
 		return true;
 	}
 	
 	@Override
 	protected List<Series> processSeries(List<GraphSeries> series, BaseGraphInput input) {
-		List<Series> output = super.processSeries(series, input);
 		
 		CategoryInput categoryInput = (CategoryInput)input;
+		List<Series> output = super.processSeries(series, input);
 		
 		if (categoryInput.limit == 0) {
 			return output;

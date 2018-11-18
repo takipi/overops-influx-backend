@@ -1,5 +1,6 @@
 package com.takipi.integrations.grafana.functions;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.takipi.api.client.ApiClient;
@@ -31,7 +32,7 @@ public class ServersFunction extends EnvironmentVariableFunction {
 	}
 
 	@Override
-	protected void populateServiceValues(EnvironmentsInput input, String[] serviceIds, String serviceId,
+	protected void populateServiceValues(EnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender) {
 
 		List<String> serviceServers = ClientUtil.getServers(apiClient, serviceId);

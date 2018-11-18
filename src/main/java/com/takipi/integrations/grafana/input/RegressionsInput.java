@@ -3,23 +3,21 @@ package com.takipi.integrations.grafana.input;
 import java.util.Collection;
 import java.util.Collections;
 
+import com.takipi.api.client.ApiClient;
+import com.takipi.integrations.grafana.settings.GrafanaSettings;
+
 public class RegressionsInput extends EventsInput {
-	public int activeTimespan;
-	public int minBaselineTimespan;
-	public int baselineTimespanFactor;
-	public int minVolumeThreshold;
-	public double minErrorRateThreshold;
-	public double regressionDelta;
-	public double criticalRegressionDelta;
-	public boolean applySeasonality;
-	public String criticalExceptionTypes;
 	
-	public Collection<String> getCriticalExceptionTypes() {
+	
+	public Collection<String> getCriticalExceptionTypes(ApiClient apiClient, String serviceId) {
 
 		if (types == null) {
 			return Collections.emptySet();
 		}
 
+		String criticalExceptionTypes = GrafanaSettings.
+			getServiceSettings(apiClient, serviceId).regressionSettings.criticalExceptionTypes;
+		
 		return getServiceFilters(criticalExceptionTypes, null, false);
 	}
 }

@@ -1,5 +1,6 @@
 package com.takipi.integrations.grafana.functions;
 
+import java.util.Collection;
 import java.util.regex.Pattern;
 
 import com.takipi.api.client.ApiClient;
@@ -35,7 +36,7 @@ public class LabelsFunction extends EnvironmentVariableFunction {
 	}
 
 	@Override
-	protected void populateServiceValues(EnvironmentsInput input, String[] serviceIds, String serviceId,
+	protected void populateServiceValues(EnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender) {
 		
 		if (!(input instanceof LabelsInput)) {

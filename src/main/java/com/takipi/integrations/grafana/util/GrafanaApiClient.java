@@ -4,10 +4,14 @@ import com.takipi.api.client.ApiClient;
 import com.takipi.integrations.grafana.servlet.ServletUtil.Auth;
 
 public class GrafanaApiClient {
+
 	private static final int TIMEOUT = 60000;
 
+	public static ApiClient getApiClient() {
+		return getApiClient(null); 
+	}
+	
 	public static ApiClient getApiClient(Auth auth) {
-
 		String host;
 		String token;
 
@@ -18,7 +22,8 @@ public class GrafanaApiClient {
 			String authProp = System.getProperty("auth");
 
 			if (authProp == null) {
-				throw new IllegalArgumentException();
+				host = "null";
+				token = "null";
 			}
 
 			int index = authProp.indexOf('=');

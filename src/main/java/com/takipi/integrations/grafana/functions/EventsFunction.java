@@ -4,11 +4,13 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.joda.time.DateTime;
 
+import com.google.common.base.Objects;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.Location;
 import com.takipi.api.client.data.event.Stats;
@@ -17,6 +19,8 @@ import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.Series;
+import com.takipi.integrations.grafana.settings.EventSettings;
+import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.util.ArrayUtil;
 import com.takipi.integrations.grafana.util.EventLinkEncoder;
 import com.takipi.integrations.grafana.util.TimeUtil;
@@ -36,6 +40,36 @@ public class EventsFunction extends GrafanaFunction {
 		
 		protected EventData(EventResult event) {
 			this.event = event;
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			
+			EventData other = (EventData)obj;
+			
+			if (!Objects.equal(event.type, other.event.type)) {
+				return false;
+			}
+			
+			if (!Objects.equal(event.error_origin, other.event.error_origin)) {
+				return false;
+			}
+			
+			if (!Objects.equal(event.error_location, other.event.error_location)) {
+				return false;
+			}
+			
+			return true;	
+		}
+		
+		@Override
+		public int hashCode() {
+			
+			if (event.error_location == null) {
+				return super.hashCode();
+			}
+			
+			return event.error_location.hashCode();
 		}
 	}
 	
@@ -74,6 +108,7 @@ public class EventsFunction extends GrafanaFunction {
 			}
 
 			if ((value instanceof String) && (input.maxColumnLength > 0)) {
+
 				String str = (String) value;
 
 				if (str.length() > input.maxColumnLength) {
@@ -82,8 +117,9 @@ public class EventsFunction extends GrafanaFunction {
 				} else {
 					return str;
 				}
+
 			}
-			
+
 			return value;
 		}
 
@@ -98,6 +134,7 @@ public class EventsFunction extends GrafanaFunction {
 	}
 
 	protected static class ReflectFormatter extends FieldFormatter {
+
 		private Field field;
 
 		protected ReflectFormatter(Field field) {
@@ -121,6 +158,7 @@ public class EventsFunction extends GrafanaFunction {
 	}
 	
 	protected static class StatsFormatter extends ReflectFormatter {
+
 		protected StatsFormatter(Field field) {
 			super(field);
 		}
@@ -132,6 +170,7 @@ public class EventsFunction extends GrafanaFunction {
 	}
 
 	protected static class DateFormatter extends ReflectFormatter {
+
 		protected DateFormatter(Field field) {
 			super(field);
 		}
@@ -143,6 +182,7 @@ public class EventsFunction extends GrafanaFunction {
 	}
 
 	protected static class LinkFormatter extends FieldFormatter {
+
 		@Override
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
 				Pair<DateTime, DateTime> timeSpan) {
@@ -202,6 +242,7 @@ public class EventsFunction extends GrafanaFunction {
 				return "NA";
 			}
 		}
+
 	}
 
 	protected FieldFormatter getFormatter(String column) {
@@ -229,6 +270,7 @@ public class EventsFunction extends GrafanaFunction {
 		}
 
 		return new ReflectFormatter(field);
+
 	}
 
 	private Collection<FieldFormatter> getFieldFormatters(String columns) {
@@ -289,19 +331,91 @@ public class EventsFunction extends GrafanaFunction {
 		
 		return result;
 	}
+	
+	protected Collection<EventData> mergeSimilarEvents(String serviceId, Collection<EventData> eventDatas) {
+		
+		EventSettings settings = GrafanaSettings.getServiceSettings(apiClient, serviceId).gridSettings;
+		
+		if ((settings == null) || (!settings.collapseEventsByEntryPoint)) {
+			return eventDatas;
+		}
+		
+		Map<EventData, List<EventData>> eventDataMap = new HashMap<EventData, List<EventData>>(eventDatas.size());
+		
+		for (EventData eventData : eventDatas) {
+			
+			List<EventData> eventDataMatches = eventDataMap.get(eventData);
+			
+			if (eventDataMatches == null) {
+				eventDataMatches = new ArrayList<EventData>();
+				eventDataMap.put(eventData, eventDataMatches);		
+			}
+			
+			eventDataMatches.add(eventData);
+		}
+		
+		List<EventData> result = new ArrayList<EventData>();
+		
+		for (List<EventData> similarEventDatas : eventDataMap.values()) {
+			
+			if (similarEventDatas.size() > 1) {
+				result.add(mergeEventDatas(similarEventDatas));
+			} else {
+				result.add(similarEventDatas.get(0));
+			}
+		}
+		
+		return result;
+	}
+	
+	protected EventData mergeEventDatas(List<EventData> eventDatas) {
+		
+		Stats stats = new Stats();
+		EventResult event = null;
+		
+		for (EventData eventData : eventDatas) {
+			
+			if (eventData.event.error_location.class_name.contains("DiskBac")) {
+				System.out.println();
+			}
+			
+			stats.hits += eventData.event.stats.hits;
+			stats.invocations += eventData.event.stats.invocations;	
+			
+			if ((event == null) || (eventData.event.stats.hits > event.stats.hits)) {
+				event = 	eventData.event;
+			}
+		}
+		
+		if (event == null) {
+			throw new IllegalStateException();
+		}
+		
+		EventResult clone;
+		
+		try {
+			clone = (EventResult)event.clone();
+		} catch (CloneNotSupportedException e) {
+			throw new IllegalStateException(e);
+		}
+		
+		clone.stats = stats;
+		return new EventData(event);
+	}
 
 	protected List<List<Object>> processServiceEvents(String serviceId, EventsInput input, Pair<DateTime, DateTime> timeSpan) {
 
 		Collection<FieldFormatter> formatters = getFieldFormatters(input.fields);
 		
 		Collection<EventData> eventDatas = getEventData(serviceId, input, timeSpan);
+		Collection<EventData> mergedDatas = mergeSimilarEvents(serviceId, eventDatas);
 		
-		EventFilter eventFilter = input.getEventFilter(serviceId);
+		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
 
-		List<List<Object>> result = new ArrayList<List<Object>>(eventDatas.size());
-
-		for (EventData eventData : eventDatas) {
-
+		List<List<Object>> result = new ArrayList<List<Object>>(mergedDatas.size());
+		
+		for (EventData eventData : mergedDatas) {
+			
 			if (eventFilter.filter(eventData.event)) {
 				continue;
 			}
@@ -315,6 +429,7 @@ public class EventsFunction extends GrafanaFunction {
 		}
 
 		return result;
+
 	}
 
 	protected List<String> getColumns(String fields) {
@@ -398,7 +513,7 @@ public class EventsFunction extends GrafanaFunction {
 		series.values = new ArrayList<List<Object>>();
 		series.columns = getColumns(input.fields);
 
-		String[] serviceIds = getServiceIds(input);
+		Collection<String> serviceIds = getServiceIds(input);
 
 		for (String serviceId : serviceIds) {
 			List<List<Object>> serviceEvents = processServiceEvents(serviceId, input, timeSpan);

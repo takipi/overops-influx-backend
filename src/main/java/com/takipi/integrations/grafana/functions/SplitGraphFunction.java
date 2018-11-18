@@ -52,7 +52,7 @@ public class SplitGraphFunction extends LimitGraphFunction {
 		Map<String, EventResult> eventMap = getEventMap(serviceId, input, timeSpan.getFirst(), timeSpan.getSecond(),
 				input.volumeType, input.pointsWanted);
 
-		EventFilter eventFilter = input.getEventFilter(serviceId);
+		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
 
 		Map<String, GraphData> graphsData = new HashMap<String, GraphData>();
 
@@ -80,12 +80,14 @@ public class SplitGraphFunction extends LimitGraphFunction {
 				} else {
 					pointValue = gpc.stats.hits;
 				}
+				
+				String key = getSimpleClassName(event.error_location.class_name);
 
-				GraphData graphData = graphsData.get(event.id);
+				GraphData graphData = graphsData.get(key);
 
 				if (graphData == null) {
-					graphData = new GraphData(event.id);
-					graphsData.put(event.id, graphData);
+					graphData = new GraphData(key);
+					graphsData.put(key, graphData);
 				}
 				
 				graphData.volume += pointValue;
@@ -98,9 +100,7 @@ public class SplitGraphFunction extends LimitGraphFunction {
 		List<GraphSeries> result = new ArrayList<GraphSeries>();
 		
 		for (GraphData graphData : limitedGraphs) {
-			EventResult event = eventMap.get(graphData.key);
-			String location =  formatLocation(event.error_location);
-			result.add(getGraphSeries(graphData, location));	
+			result.add(getGraphSeries(graphData, graphData.key));	
 		}
 				
 		return result;
