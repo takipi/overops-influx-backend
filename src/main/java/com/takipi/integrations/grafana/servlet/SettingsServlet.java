@@ -18,8 +18,7 @@ import com.takipi.integrations.grafana.settings.FolderSettingsStorage;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.util.SettingsUtil;
 
-@WebServlet("/settings")
-public class SettingsServlet extends HttpServlet {
+@WebServlet(name="SettingsServlet", urlPatterns="/settings", loadOnStartup = 0)public class SettingsServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -8423366031016047591L;
 
