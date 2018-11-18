@@ -48,7 +48,7 @@ public class RegressionNameFunction extends BaseNameFunction {
 
 		regressionInput.applictations = input.getApplications(apiClient, serviceId);
 		regressionInput.servers = input.getServers(serviceId);
-		regressionInput.deployments = input.getDeployments(serviceId);;
+		regressionInput.deployments = input.getDeployments(serviceId);
 		
 		/*
 		RegressionWindow activeWindow = ApiCache.getRegressionWindow(apiClient, regressionInput);

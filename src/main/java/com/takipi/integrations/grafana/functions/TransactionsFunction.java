@@ -42,6 +42,7 @@ public class TransactionsFunction extends EnvironmentVariableFunction {
 		super(apiClient);
 	}
 	
+	@Override
 	@SuppressWarnings("unchecked")
 	protected int compareValues(Object o1, Object o2) {
 		Object a = ((List<Object>) o1).get(1);

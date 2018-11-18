@@ -166,7 +166,6 @@ public class GrafanaSettings {
 
 	public static void saveServiceSettings(ApiClient apiClient, String serviceId, String json) {
 		ServiceSettings serviceSettings = (ServiceSettings)(new Gson().fromJson(json, ServiceSettings.class));
-		
 		saveServiceSettings(apiClient, serviceId, serviceSettings);
 	}
 	

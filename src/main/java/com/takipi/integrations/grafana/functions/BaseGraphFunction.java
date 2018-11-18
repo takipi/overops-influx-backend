@@ -90,6 +90,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		super(apiClient);
 	}
 
+	@Override
 	protected String getSeriesName(BaseGraphInput input, String seriesName, 
 		Object volumeType, String serviceId, Collection<String> serviceIds) {
 		String tagName;
@@ -168,14 +169,14 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 
 			@Override
 			public int compare(Series o1, Series o2) {
-				Series s1 = (Series) o1;
-				Series s2 = (Series) o2;
-
-				return s1.name.compareTo(s2.name);
+				return o1.name.compareTo(o2.name);
 			}
 		});
 	}
 
+	/**
+	 * @param input - needed by child classes 
+	 */
 	protected List<Series> processSeries(List<GraphSeries> series, BaseGraphInput input) {
 
 		List<Series> result = new ArrayList<Series>();

@@ -44,7 +44,7 @@ public class TypesGraph extends GraphFunction {
 	private GraphInput getInput(GraphInput input, String type) {
 		Gson gson = new Gson();
 		String json = gson.toJson(input);
-		GraphInput result = (GraphInput) gson.fromJson(json, GraphInput.class);
+		GraphInput result = gson.fromJson(json, GraphInput.class);
 		result.types = type;
 		return result;
 	}

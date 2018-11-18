@@ -202,8 +202,8 @@ public class RegressionFunction extends EventsFunction {
 		});
 	}
 
-	private List<EventData> processRegressionData(String serviceId, RegressionInput input,
-			RateRegression rateRegression, Pair<DateTime, DateTime> timespan) {
+	private List<EventData> processRegressionData(RegressionInput input,
+			RateRegression rateRegression) {
 
 		List<EventData> result = new ArrayList<EventData>();
 
@@ -332,7 +332,7 @@ public class RegressionFunction extends EventsFunction {
 		int ratioBaselinePoints = (regressionInput.baselineTimespan / regressionWindow.activeTimespan) * 2;
 		int baselineDays = (int) TimeUnit.MINUTES.toDays(regressionInput.baselineTimespan);
 
-		int baselinePoints = Math.min(ratioBaselinePoints, (int) (baselineDays / 3));
+		int baselinePoints = Math.min(ratioBaselinePoints, baselineDays / 3);
 
 		if (baselinePoints <= 0) {
 			throw new IllegalStateException("Negative points for dep " + Arrays.toString(regressionInput.deployments.toArray()) + " "
@@ -450,8 +450,7 @@ public class RegressionFunction extends EventsFunction {
 			return Collections.emptySet();
 		}
 
-		return processRegressionData(serviceId, regressionOutput.regressionInput, regressionOutput.rateRegression,
-				timeSpan);
+		return processRegressionData(regressionOutput.regressionInput, regressionOutput.rateRegression);
 	}
 
 	@Override

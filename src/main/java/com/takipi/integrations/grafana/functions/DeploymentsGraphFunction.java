@@ -41,7 +41,7 @@ public class DeploymentsGraphFunction extends GraphFunction {
 	private DeploymentsGraphInput getInput(DeploymentsGraphInput input, String depName) {
 		Gson gson = new Gson();
 		String json = gson.toJson(input);
-		DeploymentsGraphInput result = (DeploymentsGraphInput) gson.fromJson(json, DeploymentsGraphInput.class);
+		DeploymentsGraphInput result = gson.fromJson(json, DeploymentsGraphInput.class);
 		result.deployments = depName;
 		return result;
 	}
