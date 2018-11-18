@@ -28,8 +28,10 @@ public class GrafanaSettings {
 	private static final int CACHE_SIZE = 1000;
 	private static final int CACHE_RETENTION = 1;
 	
+	private static LoadingCache<SettingsCacheKey, ServiceSettings> settingsCache = null;
+	private static SettingsStorage settingsStorage = null;
+	
 	protected static class SettingsCacheKey {
-		
 		protected ApiClient apiClient;
 		protected String serviceId;
 		
@@ -64,9 +66,10 @@ public class GrafanaSettings {
 		}
 	}
 	
-	private static SettingsStorage settingsStorage = new FolderSettingsStorage();
-	
 	private static void authService(ApiClient apiClient, String serviceId) {
+		if (apiClient.getHostname() == "null") { // TODO: this is ugly, but it means we are authenticated elsewhere
+			return;
+		}
 		
 		List<SummarizedService> summarizedServices = ClientUtil.getEnvironments(apiClient);
 		
@@ -84,7 +87,6 @@ public class GrafanaSettings {
 	}
 	
 	private static String getBundledDefaultSettings() {
-		
 		try {
 			InputStream stream = GrafanaSettings.class.getResourceAsStream(SETTINGS + DEFAULT);
 
@@ -101,40 +103,48 @@ public class GrafanaSettings {
 		}
 	}
 	
-	private static final LoadingCache<SettingsCacheKey, ServiceSettings> settingsCache = CacheBuilder.newBuilder()
-			.maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_RETENTION, TimeUnit.MINUTES)
-			.build(new CacheLoader<SettingsCacheKey, ServiceSettings>() {
-				
-				public ServiceSettings load(SettingsCacheKey key) {
+	public static void init(SettingsStorage newSettingsStorage)
+	{
+		settingsStorage = newSettingsStorage;
+		
+		initCache();
+	}
+	
+	private static void initCache()
+	{
+		settingsCache = CacheBuilder.newBuilder()
+				.maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_RETENTION, TimeUnit.MINUTES)
+				.build(new CacheLoader<SettingsCacheKey, ServiceSettings>() {
 					
-					authService(key.apiClient, key.serviceId);
-					
-					String name = getServiceJsonName(key.serviceId);
-					
-					String json = settingsStorage.getServiceSettings(key.apiClient, name);
-					
-					if (json == null) {
-						json = settingsStorage.getDefaultServiceSettings();
-					}
-					
-					if (json == null) {
-						json = getBundledDefaultSettings();
-					}
-					
-					if (json == null) {
-						throw new IllegalStateException("Could not acquire settings for " + key.serviceId);
-					}
-					
-					Gson gson = new Gson();
-					ServiceSettings result = (ServiceSettings)gson.fromJson(json, ServiceSettings.class);
+					@Override
+					public ServiceSettings load(SettingsCacheKey key) {
+						authService(key.apiClient, key.serviceId);
+						
+						String name = getServiceJsonName(key.serviceId);
+						
+						String json = settingsStorage.getServiceSettings(name);
+						
+						if (json == null) {
+							json = settingsStorage.getDefaultServiceSettings();
+						}
+						
+						if (json == null) {
+							json = getBundledDefaultSettings();
+						}
+						
+						if (json == null) {
+							throw new IllegalStateException("Could not acquire settings for " + key.serviceId);
+						}
+						
+						Gson gson = new Gson();
+						ServiceSettings result = (ServiceSettings)gson.fromJson(json, ServiceSettings.class);
 
-					return result;
-				}
-			});
-
+						return result;
+					}
+				});
+	}
 	
 	public static ServiceSettings getServiceSettings(ApiClient apiClient, String serviceId) {
-		
 		ServiceSettings result;
 		
 		try {
@@ -142,25 +152,25 @@ public class GrafanaSettings {
 		} catch (ExecutionException e) {
 			throw new IllegalStateException(e);
 		}		
-		return result;
 		
+		return result;
 	}
 	
 	public static String getServiceSettingsJson(ApiClient apiClient, String serviceId) {
 		ServiceSettings settings = getServiceSettings(apiClient, serviceId);
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		String result = gson.toJson(settings);
+		
 		return result;
 	}
 
 	public static void saveServiceSettings(ApiClient apiClient, String serviceId, String json) {
-		
 		ServiceSettings serviceSettings = (ServiceSettings)(new Gson().fromJson(json, ServiceSettings.class));
+		
 		saveServiceSettings(apiClient, serviceId, serviceSettings);
 	}
 	
 	public static void saveServiceSettings(ApiClient apiClient, String serviceId, ServiceSettings serviceSettings) {
-		
 		authService(apiClient, serviceId);
 		
 		Gson gson = new Gson();
@@ -169,11 +179,10 @@ public class GrafanaSettings {
 		SettingsCacheKey key = new SettingsCacheKey(apiClient, serviceId);
 		
 		settingsCache.put(key, serviceSettings);
-		settingsStorage.saveServiceSettings(apiClient, getServiceJsonName(serviceId), json);
+		settingsStorage.saveServiceSettings(getServiceJsonName(serviceId), json);
 	}
 	
 	public void setSettingsStorage(SettingsStorage settingsStorage) {
-		
 		if (settingsStorage == null) {
 			throw new IllegalArgumentException("settingsStorage");
 		}

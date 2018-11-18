@@ -5,6 +5,6 @@ import com.takipi.api.client.ApiClient;
 public interface SettingsStorage {
 
 	public String getDefaultServiceSettings();
-	public String getServiceSettings(ApiClient apiClient, String name);
-	public void saveServiceSettings(ApiClient apiClient, String name, String settings);
+	public String getServiceSettings(String name);
+	public void saveServiceSettings(String name, String settings);
 }

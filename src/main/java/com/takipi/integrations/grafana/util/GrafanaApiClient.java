@@ -12,7 +12,6 @@ public class GrafanaApiClient {
 	}
 	
 	public static ApiClient getApiClient(Auth auth) {
-
 		String host;
 		String token;
 
@@ -23,7 +22,8 @@ public class GrafanaApiClient {
 			String authProp = System.getProperty("auth");
 
 			if (authProp == null) {
-				throw new IllegalArgumentException();
+				host = "null";
+				token = "null";
 			}
 
 			int index = authProp.indexOf('=');
