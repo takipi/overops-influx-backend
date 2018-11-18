@@ -1,0 +1,55 @@
+{
+	"gridSettings": {
+		"collapseEventsByEntryPoint": true,
+		"regressionSortOrder": "Severe New,Severe Regression,New,Regression",
+		"regressionTypeOrder": "Logged Error,Uncaught Exception,Logged Warning,HTTP Error,Timer,Swallowed Exception,Caught Exception"
+	},
+	
+	"graphSettings": {
+		"defaultTypes": "Logged Error,Logged Warning,HTTP Error"
+	},
+	
+	"transactions": {
+		"keyTransactions": "AppPeriodicPushTask,GracefulTask"
+	},
+	
+	"applicationGroups": {
+		"groups": [{
+			"name": "prod-app",
+			"applications": ["prod-app1", "prod-app2"]
+		}]
+	},
+	
+	"categories": {
+		"categories": [
+			{
+				"names": [
+					"org.apache.catalina",
+					"org.apache.jasper",
+					"org.apache.coyote",
+					"org.apache.tomcat"
+				],
+				"labels": ["MyTomcat"]
+			}
+		]
+	},
+	
+	"regressionSettings": {
+		"activeTimespan": 1440,
+		"minBaselineTimespan": 20160,
+		"baselineTimespanFactor": 4,
+		"minVolumeThreshold": 50,
+		"minErrorRateThreshold": 0.1,
+		"regressionDelta": 0.5,
+		"criticalRegressionDelta": 1,
+		"applySeasonality": true,
+		"criticalExceptionTypes": "NullPointerException|IndexOutOfBoundsException|InvalidCastException|AssertionError"
+	},
+	
+	"regressionReport": {
+		"newEventScore": 1,
+		"regressionScore": 1,
+		"severeNewEventScore": 2,
+		"criticalRegressionScore": 2
+	}
+}
