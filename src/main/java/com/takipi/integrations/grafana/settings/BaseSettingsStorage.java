@@ -12,10 +12,10 @@ import org.apache.commons.io.IOUtils;
 import com.takipi.api.client.ApiClient;
 
 public abstract class BaseSettingsStorage implements SettingsStorage {
-
+	
 	protected abstract InputStream getInputStream(String key);
 	protected abstract OutputStream getOutputStream(String key);
-
+	
 	private String getSettings(String key) {
 
 		try {
@@ -42,12 +42,12 @@ public abstract class BaseSettingsStorage implements SettingsStorage {
 	}
 
 	@Override
-	public String getServiceSettings(ApiClient apiClient, String name) {
+	public String getServiceSettings(String name) {
 		return getSettings(name);
 	}
 
 	@Override
-	public void saveServiceSettings(ApiClient apiClient, String name, String settings) {
+	public void saveServiceSettings(String name, String settings) {
 
 		try {
 			OutputStream outputStream = getOutputStream(name);

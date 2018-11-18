@@ -12,11 +12,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.Gson;
-import com.takipi.integrations.grafana.functions.FunctionParser;
-import com.takipi.integrations.grafana.output.QueryResult;
 import com.takipi.integrations.grafana.servlet.ServletUtil.Auth;
-import com.takipi.integrations.grafana.util.GrafanaApiClient;
+import com.takipi.integrations.grafana.util.QueryUtil;
 
 @WebServlet(name="QueryServlet", urlPatterns="/query") // May be override by web.xml!
 public class QueryServlet extends HttpServlet {
@@ -28,51 +25,51 @@ public class QueryServlet extends HttpServlet {
 
 	private boolean logQuery = false;
 	private boolean logResponse = false;
+	private boolean disabled = false;
 
 	@Override
 	public void init() throws ServletException {
 		super.init();
 
-		String logQueryStr = getConfigParam("logQuery");
+		String logQueryStr = ServletUtil.getConfigParam(this, "logQuery");
 
 		if (logQueryStr != null) {
 			logQuery = Boolean.parseBoolean(logQueryStr);
 		}
 
-		String logResponseStr = getConfigParam("logResponse");
+		String logResponseStr = ServletUtil.getConfigParam(this, "logResponse");
 
 		if (logResponseStr != null) {
 			logResponse = Boolean.parseBoolean(logResponseStr);
+		}
+		
+		String disabledStr = ServletUtil.getConfigParam(this, "disabled");
+
+		if (disabledStr != null) {
+			disabled = Boolean.parseBoolean(disabledStr);
 		}
 	}
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		String query = request.getParameter("q");
-
-		if (query.startsWith("SHOW RETENTION POLICIES")) {
-			response.getWriter().append(
-					"{\"results\":[{\"statement_id\":0,\"series\":[{\"columns\":[\"name\",\"duration\",\"shardGroupDuration\",\"replicaN\",\"default\"],\"values\":[[\"autogen\",\"0s\",\"168h0m0s\",1,true]]}]}]}");
-			return;
-		} else if (query.startsWith("SHOW DATABASES")) {
-			response.getWriter().append(
-					"{\"results\":[{\"statement_id\":0,\"series\":[{\"name\":\"databases\",\"columns\":[\"name\"],\"values\":[[\"_internal\"],[\"telegraf\"]]}]}]}");
+		if (disabled) {
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
+		
+		String query = request.getParameter("q");
 
 		Auth auth = ServletUtil.getAuthentication(request);
-
+		
 		if (logQuery) {
 			logger.debug("OO-AS-INFLUX | Auth: {}", auth);
 			logger.debug("OO-AS-INFLUX | Query: {}", query);
 		}
-
+		
 		long t1 = System.currentTimeMillis();
-
-		Object output = executeQuery(query, auth);
-
-		String json = new Gson().toJson(output);
+		
+		String json = QueryUtil.query(auth, query);
 
 		long t2 = System.currentTimeMillis();
 		
@@ -90,13 +87,5 @@ public class QueryServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		doGet(request, response);
-	}
-
-	private static QueryResult executeQuery(String query, Auth auth) {
-		return FunctionParser.processQuery(GrafanaApiClient.getApiClient(auth), query);
-	}
-
-	private String getConfigParam(String key) {
-		return getServletConfig().getInitParameter(key);
 	}
 }

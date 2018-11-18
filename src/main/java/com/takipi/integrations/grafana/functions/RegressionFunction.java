@@ -287,7 +287,7 @@ public class RegressionFunction extends EventsFunction {
 		RegressionSettings regressionSettings = GrafanaSettings.getServiceSettings(apiClient, serviceId).regressionSettings;
 		
 		if (regressionSettings == null) {
-			throw new IllegalStateException("Missing ergression settings for " + serviceId);
+			throw new IllegalStateException("Missing regression settings for " + serviceId);
 		}
 			
 		RegressionInput regressionInput = new RegressionInput();
