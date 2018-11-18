@@ -1,25 +1,30 @@
 package com.takipi.integrations.grafana.input;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import com.google.common.base.Objects;
 import com.takipi.integrations.grafana.functions.GrafanaFunction;
 import com.takipi.integrations.grafana.util.ArrayUtil;
 
 public class EnvironmentsInput extends VariableInput {
+	
 	public String environments;
 
-	public String[] getServiceIds() {
+	public List<String> getServiceIds() {
 
 		if (GrafanaFunction.VAR_ALL.contains(environments)) {
-			return new String[0];
+			return Collections.emptyList();
 		}
 
 		String[] serviceIds = ArrayUtil.safeSplitArray(environments, GrafanaFunction.GRAFANA_SEPERATOR, false);
 	
 		if ((serviceIds.length == 1) && (serviceIds[0].equals("()"))) {
-			return new String[0];
+			return Collections.emptyList();
 		}
 		
-		String[] result = new String[serviceIds.length];
+		List<String> result = new ArrayList<String>();
 
 		for (int i = 0; i < serviceIds.length; i++) {
 			
@@ -27,11 +32,19 @@ public class EnvironmentsInput extends VariableInput {
 			String value = service.replace("(", "").replace(")", "");
 			String[] parts = value.split(GrafanaFunction.SERVICE_SEPERATOR);
 
+			String serviceId;
+			
 			if (parts.length > 1) {
-				result[i] = parts[1];
+				serviceId = parts[1];
 			} else {
-				result[i] = value;
+				serviceId = value;
 			}
+			
+			if (service.startsWith(GrafanaFunction.GRAFANA_VAR_PREFIX)) {
+				continue;
+			}
+			
+			result.add(serviceId);
 		}
 
 		return result;

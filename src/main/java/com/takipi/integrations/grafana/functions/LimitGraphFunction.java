@@ -75,7 +75,7 @@ public abstract class LimitGraphFunction extends GraphFunction {
 
 	@Override
 	protected List<GraphSeries> processServiceGraph(String serviceId, String viewId, String viewName,
-			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, String[] serviceIds, int pointsWanted) {
+			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds, int pointsWanted) {
 
 		GraphInput graphInput = (GraphInput) input;
 

@@ -3,6 +3,7 @@ package com.takipi.integrations.grafana.functions;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.joda.time.DateTime;
 
@@ -40,31 +41,31 @@ public class DeploymentsGraphFunction extends GraphFunction {
 	private DeploymentsGraphInput getInput(DeploymentsGraphInput input, String depName) {
 		Gson gson = new Gson();
 		String json = gson.toJson(input);
-		
-		DeploymentsGraphInput result = gson.fromJson(json, DeploymentsGraphInput.class);
+		DeploymentsGraphInput result = (DeploymentsGraphInput) gson.fromJson(json, DeploymentsGraphInput.class);
 		result.deployments = depName;
 		return result;
 	}
 	
 	@Override
-	protected String getSeriesName(BaseGraphInput input, String seriesName, Object volumeType, String serviceId, String[] serviceIds) {
+	protected String getSeriesName(BaseGraphInput input, String seriesName, Object volumeType, String serviceId, Collection<String> serviceIds) {
 		return getServiceValue(input.deployments, serviceId, serviceIds);	
 	}
 
 	@Override
-	protected boolean isAsync(String[] serviceIds) {
+	protected boolean isAsync(Collection<String> serviceIds) {
 		return true;
 	}
 
 	@Override
-	protected Collection<GraphAsyncTask> getTasks(String[] serviceIds, BaseGraphInput input,
+	protected Collection<Callable<Object>> getTasks(Collection<String> serviceIds, BaseGraphInput input,
 			Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
 
 		DeploymentsGraphInput dgInput = (DeploymentsGraphInput) input;
 
-		List<GraphAsyncTask> result = new ArrayList<GraphAsyncTask>();
+		List<Callable<Object>> result = new ArrayList<Callable<Object>>();
 
 		for (String serviceId : serviceIds) {
+
 			String viewId = getViewId(serviceId, input.view);
 
 			if (viewId == null) {

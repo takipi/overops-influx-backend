@@ -63,7 +63,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 
     @Override
 	protected List<GraphSeries> processServiceGraph(String serviceId, String viewId, String viewName,
-			BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, String[] serviceIds, int pointsWanted) {
+			BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds, int pointsWanted) {
 
 		TransactionsGraphInput input = (TransactionsGraphInput) request;
 
@@ -75,7 +75,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 				
 		applyFilters(request, serviceId, builder);
 
-		Response<TransactionsGraphResult> response = ApiCache.getTransactionsGraph(apiClient, serviceId, input, pointsWanted, builder.build());
+		Response<TransactionsGraphResult> response = ApiCache.getTransactionsGraph(apiClient, serviceId, viewId, input, pointsWanted, builder.build());
 				
 		validateResponse(response);
 		
@@ -106,7 +106,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 	}
 
 	private List<GraphSeries> createMultiGraphSeries(String serviceId, List<TransactionGraph> graphs,
-			VolumeType volumeType, String[] serviceIds, Collection<String> transactions) {
+			VolumeType volumeType, Collection<String> serviceIds, Collection<String> transactions) {
 
 		List<GraphSeries> result = new ArrayList<GraphSeries>();
 
@@ -257,7 +257,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 	}
 
 	private GraphSeries createAggregateGraphSeries(String serviceId, List<TransactionGraph> graphs,
-			Collection<String> transactions, TransactionsGraphInput input, String[] serviceIds) {
+			Collection<String> transactions, TransactionsGraphInput input, Collection<String> serviceIds) {
 
 		Series series = new Series();
 		
@@ -281,7 +281,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 	}
 
 	private GraphSeries createTransactionGraphSeries(String serviceId, TransactionGraph graph, VolumeType volumeType,
-			String[] serviceIds) {
+			Collection<String> serviceIds) {
 
 		Series series = new Series();
 		

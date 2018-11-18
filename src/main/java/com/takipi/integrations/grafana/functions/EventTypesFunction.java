@@ -8,11 +8,13 @@ import org.joda.time.DateTime;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.result.event.EventResult;
-import com.takipi.api.client.util.infra.Categories;
+import com.takipi.api.client.util.categories.Categories;
+import com.takipi.common.util.CollectionUtil;
 import com.takipi.integrations.grafana.input.EnvironmentsInput;
 import com.takipi.integrations.grafana.input.EventTypesInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.ViewInput;
+import com.takipi.integrations.grafana.settings.GrafanaSettings;
 
 public class EventTypesFunction extends EnvironmentVariableFunction {
 
@@ -55,7 +57,7 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 	}
 
 	@Override
-	protected void populateServiceValues(EnvironmentsInput input, String[] serviceIds, String serviceId,
+	protected void populateServiceValues(EnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender) {
 
 		EventTypesInput eventInput = (EventTypesInput) input;
@@ -75,6 +77,8 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 		
 		Set<String> exceptionTypes = new TreeSet<String>();
 		Set<String> labelTypes = new TreeSet<String>();
+		
+		Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();
 
 		for (EventResult event : events) {
 			
@@ -82,12 +86,11 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 				exceptionTypes.add(event.name);
 			}
 			
-			if (event.error_origin != null) {
+			if ((categories != null) && (event.error_origin != null)) {
 			
-				Set<String> labels = Categories.defaultCategories()
-						.getCategories(event.error_origin.class_name);
+				Set<String> labels = categories.getCategories(event.error_origin.class_name);
 				
-				if (labels != null) {
+				if (!CollectionUtil.safeIsEmpty(labels))  {
 					labelTypes.addAll(labels);
 				}
 			}

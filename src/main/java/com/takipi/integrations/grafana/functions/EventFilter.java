@@ -7,15 +7,13 @@ import java.util.regex.Pattern;
 
 import org.joda.time.DateTime;
 
+import com.takipi.api.client.data.event.Location;
 import com.takipi.api.client.result.event.EventResult;
-import com.takipi.api.client.util.infra.Categories;
+import com.takipi.api.client.util.categories.Categories;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class EventFilter {
-	static {
-		Categories.defaultCategories();
-	}
 
 	public static final String CATEGORY_PREFIX = "-";
 	public static final String TYPE_PREFIX = "--";
@@ -28,22 +26,27 @@ public class EventFilter {
 	private Pair<DateTime, DateTime> firstSeen;
 	private boolean hasExceptionTypes;
 	private boolean hasCategoryTypes;
+	private Categories categories;
 
 	public static EventFilter of(Collection<String> types, Collection<String> introducedBy,
-			Collection<String> transactions, Collection<String> labels, String labelsRegex, String firstSeen) {
+			Collection<String> transactions, Collection<String> labels, 
+			String labelsRegex, String firstSeen, Categories categories) {
 
 		EventFilter result = new EventFilter();
 		result.types = types;
 		result.introducedBy = introducedBy;
 		result.transactions = transactions;
 		result.labels = labels;
+		result.categories = categories;
 
 		if (labelsRegex != null) {
 			result.labelsPattern = Pattern.compile(labelsRegex);
 		}
 
 		if (types != null) {
+
 			for (String type : types) {
+
 				if (type.startsWith(TYPE_PREFIX)) {
 					result.hasExceptionTypes = true;
 				}
@@ -93,8 +96,6 @@ public class EventFilter {
 	}
 	
 	public boolean filter(EventResult event) {
-
-		Categories categories = Categories.defaultCategories();
 		
 		if ((types != null) && (!types.isEmpty())) {
 
@@ -129,16 +130,24 @@ public class EventFilter {
 			}
 		}
 
-		if ((introducedBy != null) && (!introducedBy.isEmpty()) && (!introducedBy.contains(event.introduced_by)))
+		if ((introducedBy != null) && (!introducedBy.isEmpty()) 
+		&& (!introducedBy.contains(event.introduced_by)))
 
 		{
 			return true;
 		}
 
 		if ((transactions != null) && (!transactions.isEmpty())) {
-			String entryPoint = GrafanaFunction.getSimpleClassName(event.entry_point.class_name);
+			
+			Location entryPoint = event.entry_point;
+			
+			if ((entryPoint == null) || (entryPoint.class_name == null)) {
+				return true;
+			}
+			
+			String entryPointName = GrafanaFunction.getSimpleClassName(entryPoint.class_name);
 
-			if (!transactions.contains(entryPoint)) {
+			if (!transactions.contains(entryPointName)) {
 				return true;
 			}
 		}

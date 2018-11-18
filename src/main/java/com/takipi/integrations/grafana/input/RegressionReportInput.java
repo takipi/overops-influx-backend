@@ -1,8 +1,12 @@
 package com.takipi.integrations.grafana.input;
 
 public class RegressionReportInput  extends RegressionsInput {
-	public int newEventScore;
-	public int regressionScore;
-	public int severeNewEventScore;
-	public int criticalRegressionScore;
+	
+	public enum Mode {
+		Applications, Deployments, Tiers;
+	}
+	
+	public Mode mode;
+	public boolean graph;
+	public int limit;
 }

@@ -12,11 +12,13 @@ public class EventTypesInput extends ViewInput {
 	public String types; 
 
 	public Collection<String> getTypes() {
+		
 		if (types == null) {
 			return Collections.emptyList();
 		}
 
 		return Arrays.asList(ArrayUtil.safeSplitArray(types, GrafanaFunction.GRAFANA_SEPERATOR, false));
+
 	}
 }
 

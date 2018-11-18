@@ -53,7 +53,7 @@ public class DeploymentsAnnotation extends DeploymentsGraphFunction {
 	}
 
 	@Override
-	protected SeriesVolume processGraphPoints(String serviceId, 
+	protected SeriesVolume processGraphPoints(String serviceId, String viewId, 
 			Pair<DateTime, DateTime> timeSpan, Graph graph, GraphInput input) {
 	
 		List<List<Object>> values = new ArrayList<List<Object>>(graph.points.size());

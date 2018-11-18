@@ -1,16 +1,12 @@
 package com.takipi.integrations.grafana.functions;
 
-import org.joda.time.DateTime;
-
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.regression.RegressionInput;
-import com.takipi.api.client.util.regression.RegressionStringUtil;
-import com.takipi.api.client.util.regression.RegressionUtil;
-import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.RegressionsNameInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 
 public class RegressionNameFunction extends BaseNameFunction {
+
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -35,6 +31,7 @@ public class RegressionNameFunction extends BaseNameFunction {
 
 	@Override
 	protected String getName(ViewInput input, String serviceId) {
+
 		RegressionsNameInput regNameInput = (RegressionsNameInput) input;
 
 		RegressionInput regressionInput = new RegressionInput();
@@ -46,21 +43,27 @@ public class RegressionNameFunction extends BaseNameFunction {
 			return null;
 		}
 		
+		regressionInput.activeTimespan = regNameInput.activeTimespan;
 		regressionInput.baselineTimespan = regNameInput.minBaselineTimespan;
 
-		regressionInput.applictations = input.getApplications(serviceId);
+		regressionInput.applictations = input.getApplications(apiClient, serviceId);
 		regressionInput.servers = input.getServers(serviceId);
-		regressionInput.deployments = input.getDeployments(serviceId);
+		regressionInput.deployments = input.getDeployments(serviceId);;
 		
-		Pair<DateTime, Integer> activeWindow = RegressionUtil.getActiveWindow(apiClient, regressionInput, System.out);
+		/*
+		RegressionWindow activeWindow = ApiCache.getRegressionWindow(apiClient, regressionInput);
 
 		int expandedBaselineTimespan = RegressionFunction.expandBaselineTimespan(regNameInput.baselineTimespanFactor,
 				regNameInput.minBaselineTimespan, activeWindow);
 
+		regressionInput.activeWindowStart = activeWindow.activeWindowStart;
+		regressionInput.activeTimespan = activeWindow.activeTimespan;
 		regressionInput.baselineTimespan = expandedBaselineTimespan;
 
 		String result = RegressionStringUtil.getRegressionName(apiClient, regressionInput);
-
+		*/
+		
+		String result = "";
 		return result;
 	}
 }
