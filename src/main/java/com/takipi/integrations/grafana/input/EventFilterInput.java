@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.takipi.api.client.ApiClient;
-import com.takipi.api.client.util.categories.Categories;
+import com.takipi.api.client.util.infra.Categories;
 import com.takipi.integrations.grafana.functions.EventFilter;
 import com.takipi.integrations.grafana.functions.TransactionsFunction;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
