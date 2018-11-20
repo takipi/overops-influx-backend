@@ -5,8 +5,6 @@ datasources:
   type: influxdb
   access: proxy
   database: telegraf
-  user: grafana
-  password: grafana
   is_default: true
   #url: http://localhost:8186 # assuming OverOps-as-influx standalone
-  url: ${TAKIPI_HOST_URL}/oo-as-influx # assuming OverOps Server 
+  url: ${TAKIPI_API_URL}/api/v1/oo-as-influx # assuming OverOps Server 

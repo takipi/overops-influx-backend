@@ -6,4 +6,4 @@ providers:
   folder: 'OverOps'
   type: file
   options:
-    path: overops
+    path: /opt/grafana-5.3.4/conf/provisioning/dashboards/overops
