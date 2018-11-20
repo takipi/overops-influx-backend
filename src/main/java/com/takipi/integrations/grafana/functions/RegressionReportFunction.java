@@ -18,7 +18,7 @@ import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.result.event.EventResult;
-import com.takipi.api.client.util.categories.Categories;
+import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.client.ClientUtil;
 import com.takipi.api.client.util.regression.RateRegression;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;

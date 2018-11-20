@@ -9,7 +9,7 @@ import org.joda.time.DateTime;
 
 import com.takipi.api.client.data.event.Location;
 import com.takipi.api.client.result.event.EventResult;
-import com.takipi.api.client.util.categories.Categories;
+import com.takipi.api.client.util.infra.Categories;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
