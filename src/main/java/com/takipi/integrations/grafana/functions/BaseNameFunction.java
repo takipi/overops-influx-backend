@@ -17,7 +17,7 @@ public abstract class BaseNameFunction extends GrafanaFunction {
 		super(apiClient);
 	}
 
-	protected abstract String getName(ViewInput input, String serviceId);
+	protected abstract String getName(ViewInput input, Collection<String> serviceIds);
 
 	@Override
 	public List<Series> process(FunctionInput functionInput) {
@@ -34,7 +34,7 @@ public abstract class BaseNameFunction extends GrafanaFunction {
 			return null;
 		}
 
-		String name = getName(input, serviceIds.iterator().next());
+		String name = getName(input, serviceIds);
 
 		if (name == null) {
 			return null;

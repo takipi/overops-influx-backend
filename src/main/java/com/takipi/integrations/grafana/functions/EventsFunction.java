@@ -19,7 +19,7 @@ import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.settings.EventSettings;
+import com.takipi.integrations.grafana.settings.GeneralSettings;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.util.ArrayUtil;
 import com.takipi.integrations.grafana.util.EventLinkEncoder;
@@ -34,6 +34,8 @@ public class EventsFunction extends GrafanaFunction {
 	protected static final String FIRST_SEEN = "first_seen";
 	protected static final String LAST_SEEN = "last_seen";
 	protected static final String MESSAGE = "message";
+	protected static final String TYPE_MESSAGE = "typeMessage";
+
 
 	protected class EventData {
 		protected EventResult event;
@@ -70,6 +72,16 @@ public class EventsFunction extends GrafanaFunction {
 			}
 			
 			return event.error_location.hashCode();
+		}
+		
+		@Override
+		public String toString()
+		{
+			if (event.entry_point != null) {
+				return event.entry_point.class_name;
+			}
+			
+			return super.toString();
 		}
 	}
 	
@@ -181,13 +193,13 @@ public class EventsFunction extends GrafanaFunction {
 		}
 	}
 
-	protected static class LinkFormatter extends FieldFormatter {
+	protected class LinkFormatter extends FieldFormatter {
 
 		@Override
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
 				Pair<DateTime, DateTime> timeSpan) {
 
-			return EventLinkEncoder.encodeLink(serviceId, input, eventData.event, 
+			return EventLinkEncoder.encodeLink(apiClient, serviceId, input, eventData.event, 
 				timeSpan.getFirst(), timeSpan.getSecond());
 		}
 		
@@ -228,6 +240,34 @@ public class EventsFunction extends GrafanaFunction {
 		}
 
 	}
+	
+	protected static class TypeMessageFormatter extends MessageFormatter {
+		
+		@Override
+		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
+				Pair<DateTime, DateTime> timeSpan)
+		{
+			String type = TYPES_MAP.get(eventData.event.type);
+			Object value = super.getValue(eventData, serviceId, input, timeSpan);
+
+			String result;
+		
+			if (type != null) {
+				result = type + ": " + value;
+			} else {
+				result = value.toString();
+			}
+			
+			String location = formatLocation(eventData.event.error_location);
+			
+			if (result.length() + location.length() < input.maxColumnLength) {
+				result += " in " + location;
+			}
+			
+			return result;
+		}
+	}
+
 
 	protected static class RateFormatter extends FieldFormatter {
 
@@ -257,6 +297,10 @@ public class EventsFunction extends GrafanaFunction {
 		
 		if (column.equals(MESSAGE)) {
 			return new MessageFormatter();
+		}
+		
+		if (column.equals(TYPE_MESSAGE)) {
+			return new TypeMessageFormatter();
 		}
 		
 		Field field = getReflectField(column);
@@ -313,7 +357,7 @@ public class EventsFunction extends GrafanaFunction {
 		super(apiClient);
 	}
 	
-	protected Collection<EventData> getEventData(String serviceId, EventsInput input, 
+	protected List<EventData> getEventData(String serviceId, EventsInput input, 
 			Pair<DateTime, DateTime> timeSpan) {
 		
 		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, timeSpan.getFirst(), 
@@ -332,11 +376,11 @@ public class EventsFunction extends GrafanaFunction {
 		return result;
 	}
 	
-	protected Collection<EventData> mergeSimilarEvents(String serviceId, Collection<EventData> eventDatas) {
+	protected List<EventData> mergeSimilarEvents(String serviceId, List<EventData> eventDatas) {
 		
-		EventSettings settings = GrafanaSettings.getServiceSettings(apiClient, serviceId).gridSettings;
+		GeneralSettings settings = GrafanaSettings.getData(apiClient, serviceId).general;
 		
-		if ((settings == null) || (!settings.collapseEventsByEntryPoint)) {
+		if ((settings == null) || (!settings.groupByEntryPoint)) {
 			return eventDatas;
 		}
 		
@@ -374,11 +418,7 @@ public class EventsFunction extends GrafanaFunction {
 		EventResult event = null;
 		
 		for (EventData eventData : eventDatas) {
-			
-			if (eventData.event.error_location.class_name.contains("DiskBac")) {
-				System.out.println();
-			}
-			
+		
 			stats.hits += eventData.event.stats.hits;
 			stats.invocations += eventData.event.stats.invocations;	
 			
@@ -400,22 +440,22 @@ public class EventsFunction extends GrafanaFunction {
 		}
 		
 		clone.stats = stats;
-		return new EventData(event);
+		return new EventData(clone);
 	}
 
 	protected List<List<Object>> processServiceEvents(String serviceId, EventsInput input, Pair<DateTime, DateTime> timeSpan) {
 
 		Collection<FieldFormatter> formatters = getFieldFormatters(input.fields);
 		
-		Collection<EventData> eventDatas = getEventData(serviceId, input, timeSpan);
+		List<EventData> eventDatas = getEventData(serviceId, input, timeSpan);
 		Collection<EventData> mergedDatas = mergeSimilarEvents(serviceId, eventDatas);
 		
 		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
 
 		List<List<Object>> result = new ArrayList<List<Object>>(mergedDatas.size());
 		
-		for (EventData eventData : mergedDatas) {
-			
+		for (EventData eventData : mergedDatas) {	 
+	
 			if (eventFilter.filter(eventData.event)) {
 				continue;
 			}
@@ -425,7 +465,10 @@ public class EventsFunction extends GrafanaFunction {
 			}
 
 			List<Object> outputObject = processEvent(serviceId, input, eventData, formatters, timeSpan);
-			result.add(outputObject);
+			
+			if (outputObject != null) {
+				result.add(outputObject);
+			}
 		}
 
 		return result;

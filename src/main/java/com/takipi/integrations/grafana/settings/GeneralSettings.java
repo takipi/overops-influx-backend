@@ -6,16 +6,18 @@ import java.util.Collections;
 
 import com.takipi.integrations.grafana.functions.GrafanaFunction;
 
-public class TransactionSettings {
-	public String keyTransactions;
+public class GeneralSettings {
 	
-	public Collection<String> getKeyTransactions() {
+	public boolean groupByEntryPoint;
+	public String eventTypes;
+
+	public Collection<String> getDefaultTypes() {
 		
-		if (keyTransactions == null) {
+		if (eventTypes == null) {
 			return Collections.emptyList();
 		}
 
-		String[] types = keyTransactions.split(GrafanaFunction.ARRAY_SEPERATOR);
+		String[] types = eventTypes.split(GrafanaFunction.ARRAY_SEPERATOR);
 		return Arrays.asList(types);
 	}
 }

@@ -1,27 +1,35 @@
 {
-	"gridSettings": {
-		"collapseEventsByEntryPoint": true,
-		"regressionSortOrder": "Severe New,Severe Regression,New,Regression",
-		"regressionTypeOrder": "Logged Error,Uncaught Exception,Logged Warning,HTTP Error,Timer,Swallowed Exception,Caught Exception"
-	},
-	
-	"graphSettings": {
-		"defaultTypes": "Logged Error,Logged Warning,HTTP Error"
+	"general": {
+		"groupByEntryPoint": true,
+		"eventTypes": "Logged Error,Uncaught Exception,Logged Warning,Swallowed Exception,HTTP Error,Caught Exception"
 	},
 	
 	"transactions": {
-		"keyTransactions": "AppPeriodicPushTask,GracefulTask"
+		"groups": [
+			{
+				"name": "My Transactions",
+				"values": [
+					"AppPeriodicPushTask",
+					"GracefulTask"
+				]
+			}
+		]
 	},
 	
-	"applicationGroups": {
-		"groups": [{
-			"name": "prod-app",
-			"applications": ["prod-app1", "prod-app2"]
-		}]
+	"applications": {
+		"groups": [
+			{
+				"name": "prod-app",
+				"values": [
+					"prod-app1",
+					"prod-app2"
+				]
+			}
+		]
 	},
 	
-	"categories": {
-		"categories": [
+	"tiers": 
+		[
 			{
 				"names": [
 					"org.apache.catalina",
@@ -32,9 +40,9 @@
 				"labels": ["MyTomcat"]
 			}
 		]
-	},
+	,
 	
-	"regressionSettings": {
+	"regression": {
 		"activeTimespan": 1440,
 		"minBaselineTimespan": 20160,
 		"baselineTimespanFactor": 4,
@@ -43,13 +51,17 @@
 		"regressionDelta": 0.5,
 		"criticalRegressionDelta": 1,
 		"applySeasonality": true,
-		"criticalExceptionTypes": "NullPointerException|IndexOutOfBoundsException|InvalidCastException|AssertionError"
+		"criticalExceptionTypes": "NullPointerException|IndexOutOfBoundsException|InvalidCastException|AssertionError",
+		
+		"sortOrder": "Severe New,Severe Regression,New,Regression",
+		"typeOrder": "Logged Error,Uncaught Exception,Logged Warning,HTTP Error,Timer,Swallowed Exception,Caught Exception"
 	},
 	
 	"regressionReport": {
 		"newEventScore": 1,
 		"regressionScore": 1,
 		"severeNewEventScore": 2,
-		"criticalRegressionScore": 2
+		"criticalRegressionScore": 2,
+		"scoreWeight": 2.5
 	}
 }

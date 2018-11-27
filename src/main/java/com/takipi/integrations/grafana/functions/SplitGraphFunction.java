@@ -2,6 +2,7 @@ package com.takipi.integrations.grafana.functions;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,13 +46,24 @@ public class SplitGraphFunction extends LimitGraphFunction {
 
 	@Override
 	protected List<GraphSeries> processGraphSeries(String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
-			Graph graph, GraphInput input) {
+			GraphInput input) {
 
 		GraphLimitInput limitInput = (GraphLimitInput)input;
 
 		Map<String, EventResult> eventMap = getEventMap(serviceId, input, timeSpan.getFirst(), timeSpan.getSecond(),
-				input.volumeType, input.pointsWanted);
+				null, 0);
 
+		if (eventMap == null) {
+			return Collections.emptyList();
+		}
+		
+		Graph graph = getEventsGraph(apiClient, serviceId, viewId, input.pointsWanted, input, input.volumeType,
+				timeSpan.getFirst(), timeSpan.getSecond());
+		
+		if (graph == null) {
+			return Collections.emptyList();		
+		}
+		
 		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
 
 		Map<String, GraphData> graphsData = new HashMap<String, GraphData>();

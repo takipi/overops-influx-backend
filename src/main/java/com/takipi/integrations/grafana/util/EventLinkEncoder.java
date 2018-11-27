@@ -7,31 +7,48 @@ import java.util.List;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.Lists;
-import com.takipi.api.client.request.event.EventSnapshotRequest;
+import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.result.event.EventResult;
-import com.takipi.integrations.grafana.functions.GrafanaFunction;
 import com.takipi.integrations.grafana.input.ViewInput;
 
 public class EventLinkEncoder {
+	
+	/*
+	private static final String SAAS_API = "api.overops.com";
+	private static final String SAAS_APP = "app.overops.com";
+	
+	private static final String HTTP = "http://";
+	private static final String HTTPS = "https://";
+	
+	private static final String URL = "%s/tale.html?snapshot=%s";
+
+	*/
+	
 	private static final String TEMPLATE = "{\"service_id\":\"%s\",\"viewport_strings\":{\"from_timestamp\":\"%s\"," +
 				"\"to_timestamp\":\"%s\",\"until_now\":false,"+
 				"\"machine_names\":[%s],\"agent_names\":[%s],\"deployment_names\":[%s],"+
 				"\"request_ids\":[%s]},\"timestamp\":\"%s\"}";
+	
 
-	public static String encodeLink(String serviceId, ViewInput input, EventResult event, DateTime from, DateTime to) {
-		EventSnapshotRequest.Builder builder = EventSnapshotRequest.newBuilder().setServiceId(serviceId)
-				.setFrom(from.toString()).setTo(to.toString()).setEventId(event.id);
-
-		GrafanaFunction.applyFilters(null, input, serviceId, builder);
-		EventSnapshotRequest request = builder.build();
+	public static String encodeLink(ApiClient apiClient, String serviceId, ViewInput input, EventResult event, DateTime from, DateTime to) {
+			
+		Collection<String> apps = input.getApplications(apiClient, serviceId);
+		Collection<String> deployments = input.getDeployments(serviceId);
+		Collection<String> servers = input.getServers(serviceId);
 
 		String json = String.format(TEMPLATE, serviceId, TimeUtil.getMillisAsString(from), TimeUtil.getMillisAsString(to),
-				toList(request.servers), toList(request.apps), toList(request.deployments),
+				toList(servers), toList(apps), toList(deployments),
 				event.id, TimeUtil.getMillisAsString(to));
 
-		String encoded = Base64.getUrlEncoder().encodeToString(json.getBytes());
+		String snapshot = Base64.getUrlEncoder().encodeToString(json.getBytes());
+		
+		//we need to remove the http prefix so grafana will recognize this as a link. a https:// will be add in the dahs.
+		//if an on-prm does not use https, then this will be a problem XXX
+		
+		//String appUrl = apiClient.getHostname().replace(SAAS_API, SAAS_APP).replaceAll(HTTP, "").replaceAll(HTTPS, "");
+		//String result = String.format(URL, appUrl, snapshot);
 
-		return encoded;
+		return snapshot;
 	}
 	
 	private static String toList(Collection<String> col) {

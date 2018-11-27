@@ -39,11 +39,11 @@ public class TimeUtil {
 	}
 
 	public static int parseInterval(String timeWindowWithUnit) {
-		String timwWindow = timeWindowWithUnit.substring(0, timeWindowWithUnit.length() - 1);
-
+		
+		String timeWindow = timeWindowWithUnit.substring(0, timeWindowWithUnit.length() - 1);
 		char timeUnit = timeWindowWithUnit.charAt(timeWindowWithUnit.length() - 1);
 
-		int delta = Integer.valueOf(timwWindow);
+		int delta = Integer.valueOf(timeWindow);
 		if (timeUnit == 'd') {
 			return delta * 24 * 60;
 		} else if (timeUnit == 'h') {

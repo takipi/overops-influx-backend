@@ -15,7 +15,7 @@ import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.input.TypesGraphInput;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
-import com.takipi.integrations.grafana.settings.GraphSettings;
+import com.takipi.integrations.grafana.settings.GeneralSettings;
 
 public class TypesGraph extends GraphFunction {
 
@@ -88,10 +88,10 @@ public class TypesGraph extends GraphFunction {
 				Collection<String> defaultTypes = graphInput.getDefaultTypes();
 				
 				if (defaultTypes == null) {
-					GraphSettings graphSettings = GrafanaSettings.getServiceSettings(apiClient, serviceId).graphSettings;
+					GeneralSettings generalSettings = GrafanaSettings.getData(apiClient, serviceId).general;
 					
-					if (graphSettings != null) {
-						defaultTypes = graphSettings.getDefaultTypes();
+					if (generalSettings != null) {
+						defaultTypes = generalSettings.getDefaultTypes();
 					}
 				}
 				

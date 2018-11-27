@@ -22,8 +22,10 @@ public class DeploymentUtil {
 		Response<DeploymentsResult> response = apiClient.get(request);
 
 		if ((response.isBadResponse()) || (response.data == null)) {
-			throw new IllegalStateException(
-					"Could not acquire deployments for service " + serviceId + " . Error " + response.responseCode);
+			System.err.println("Could not acquire deployments for service " + 
+					serviceId + " . Error " + response.responseCode);
+			
+			return Collections.emptyList();
 		}
 
 		if (response.data.deployments == null) {

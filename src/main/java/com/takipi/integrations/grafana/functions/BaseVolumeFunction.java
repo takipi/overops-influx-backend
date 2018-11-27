@@ -1,8 +1,6 @@
 package com.takipi.integrations.grafana.functions;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -48,10 +46,6 @@ public abstract class BaseVolumeFunction extends GrafanaFunction {
 
 	protected List<Series> createSeries(BaseVolumeInput input, Pair<DateTime, DateTime> timeSpan, EventVolume volume,
 			AggregationType type) {
-		Series series = new Series();
-
-		series.name = SERIES_NAME;
-		series.columns = Arrays.asList(new String[] { TIME_COLUMN, SUM_COLUMN });
 
 		Object value;
 
@@ -72,11 +66,7 @@ public abstract class BaseVolumeFunction extends GrafanaFunction {
 			throw new IllegalStateException(input.type);
 		}
 
-		Long time = Long.valueOf(timeSpan.getSecond().getMillis());
-
-		series.values = Collections.singletonList(Arrays.asList(new Object[] { time, value }));
-
-		return Collections.singletonList(series);
+		return createSingleStatSeries(timeSpan, value);
 	}
 
 	private EventVolume processServiceVolume(String serviceId, BaseVolumeInput input, VolumeType volumeType,

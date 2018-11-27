@@ -203,16 +203,16 @@ public class GraphFunction extends BaseGraphFunction {
 				continue;
 			}
 			
+			EventResult event = null;
 			long value = 0;
 			DateTime gpTime = TimeUtil.getDateTime(gp.time);
 
 			for (GraphPointContributor gpc : gp.contributors) {
 
 				if (eventMap != null) {
-					EventResult event = eventMap.get(gpc.id);
+					event = eventMap.get(gpc.id);
 
-					//if the event wasn't found we err on the side of adding its stats.
-					if ((event != null) && (eventFilter != null) && (eventFilter.filter(event))) {
+					if ((event == null) || ((eventFilter != null) && (eventFilter.filter(event)))) {
 						continue;
 					}
 				}

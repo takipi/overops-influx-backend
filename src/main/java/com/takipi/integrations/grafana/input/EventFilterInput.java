@@ -1,16 +1,14 @@
 package com.takipi.integrations.grafana.input;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.infra.Categories;
 import com.takipi.integrations.grafana.functions.EventFilter;
-import com.takipi.integrations.grafana.functions.TransactionsFunction;
+import com.takipi.integrations.grafana.settings.GeneralSettings;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
-import com.takipi.integrations.grafana.settings.TransactionSettings;
+import com.takipi.integrations.grafana.settings.GroupSettings;
 
 public class EventFilterInput extends ViewInput {
 
@@ -20,6 +18,7 @@ public class EventFilterInput extends ViewInput {
 	public String labelsRegex;
 	public String firstSeen;
 	public int pointsWanted;
+	public String searchText;
 
 	public boolean hasEventFilter() {
 		
@@ -85,25 +84,33 @@ public class EventFilterInput extends ViewInput {
 		
 		Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();
 		
+		Collection<String> expandedTrasnactions;
 		Collection<String> transactions = getTransactions(serviceId);
 		
-		if ((transactions != null) && transactions.contains(TransactionsFunction.KEY_TRANSACTIONS)) {
+		if (transactions != null) {
 			
-			List<String> expandedTx = new ArrayList<String>(transactions);
-			expandedTx.remove(TransactionsFunction.KEY_TRANSACTIONS);
+			GroupSettings transactionGroups = GrafanaSettings.getData(apiClient, serviceId).transactions;
 			
-			TransactionSettings txSettings = GrafanaSettings.getServiceSettings(apiClient, serviceId).transactions;
-			
-			if ((txSettings != null) && (txSettings.keyTransactions != null)) {
-				expandedTx.addAll(txSettings.getKeyTransactions());
+			if (transactionGroups != null) {
+				expandedTrasnactions = transactionGroups.expandList(transactions);
+			} else {
+				expandedTrasnactions = transactions;
 			}
-			
-			transactions = expandedTx;		
+		} else {
+			expandedTrasnactions = null;
 		}
 		
+		Collection<String> allowedTypes;
+		GeneralSettings generalSettings = GrafanaSettings.getData(apiClient, serviceId).general;
+				
+		if (generalSettings != null) {
+			allowedTypes = generalSettings.getDefaultTypes();
+		} else {
+			allowedTypes = Collections.emptyList();
+		}
 		
-		return EventFilter.of(getTypes(), getIntroducedBy(serviceId), transactions, geLabels(serviceId),
-				labelsRegex, firstSeen, categories);
+		return EventFilter.of(getTypes(), allowedTypes, getIntroducedBy(serviceId), expandedTrasnactions, 
+				geLabels(serviceId), labelsRegex, firstSeen, categories, searchText);
 	}
 
 }

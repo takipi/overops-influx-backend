@@ -5,7 +5,7 @@ import com.takipi.integrations.grafana.servlet.ServletUtil.Auth;
 
 public class GrafanaApiClient {
 
-	private static final int TIMEOUT = 60000;
+	private static final int TIMEOUT = 120000;
 
 	public static ApiClient getApiClient() {
 		return getApiClient(null); 

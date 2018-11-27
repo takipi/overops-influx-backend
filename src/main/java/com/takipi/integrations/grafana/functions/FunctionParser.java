@@ -203,7 +203,7 @@ public class FunctionParser {
 		registerFunction(new GroupByFunction.Factory());
 		registerFunction(new VolumeFunction.Factory());
 		
-		//advanced graphs
+		//Routing graphs
 		registerFunction(new CategoryFunction.Factory());
 		registerFunction(new TypesGraph.Factory());
 		registerFunction(new RoutingGraphFunction.Factory());
@@ -211,8 +211,8 @@ public class FunctionParser {
 		
 		//regression functions
 		registerFunction(new RegressionFunction.Factory());
-		registerFunction(new RegressionNameFunction.Factory());
 		registerFunction(new RegressionReportFunction.Factory());
+		registerFunction(new RegressionGraphFunction.Factory());
 
 		//deployment functions
 		registerFunction(new DeploymentsGraphFunction.Factory());
@@ -224,6 +224,9 @@ public class FunctionParser {
 		registerFunction(new TransactionsGraphFunction.Factory());
 		registerFunction(new TransactionsListFunction.Factory());
 		registerFunction(new TransactionsRateFunction.Factory());
+		registerFunction(new SlowTransactionGraphFunction.Factory());
+		registerFunction(new KeyTransactionsGraphFunction.Factory());
+		registerFunction(new SlowTransactionsFunction.Factory());
 
 		//variable functions
 		registerFunction(new EnvironmentsFunction.Factory());
@@ -235,7 +238,6 @@ public class FunctionParser {
 		registerFunction(new LabelsFunction.Factory());
 		registerFunction(new EventTypesFunction.Factory());
 		registerFunction(new EnvironmentSettingsFunction.Factory());
-		registerFunction(new KeyTransactionsFunction.Factory());
-		
+		registerFunction(new VariableRedirectFunction.Factory());		
 	}
 }

@@ -35,7 +35,14 @@ public class ServersFunction extends EnvironmentVariableFunction {
 	protected void populateServiceValues(EnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender) {
 
-		List<String> serviceServers = ClientUtil.getServers(apiClient, serviceId);
+		List<String> serviceServers;
+		
+		try {
+			serviceServers = ClientUtil.getServers(apiClient, serviceId);
+		} catch (Exception e) {
+			System.err.println(e);
+			return;
+		}
 
 		for (String server : serviceServers) {
 

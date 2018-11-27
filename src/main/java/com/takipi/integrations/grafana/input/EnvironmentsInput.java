@@ -14,7 +14,7 @@ public class EnvironmentsInput extends VariableInput {
 
 	public List<String> getServiceIds() {
 
-		if (GrafanaFunction.VAR_ALL.contains(environments)) {
+		if (!EnvironmentsFilterInput.hasFilter(environments)) {
 			return Collections.emptyList();
 		}
 
