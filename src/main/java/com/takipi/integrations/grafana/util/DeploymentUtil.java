@@ -76,8 +76,15 @@ public class DeploymentUtil {
 	
 	private static List<String> getAllDeployments(ApiClient apiClient, String serviceId) {
 		
-		List<String> result = ClientUtil.getDeployments(apiClient, serviceId);
-		sortDeployments(result);
+		List<String> result;
+		
+		try {
+			result = ClientUtil.getDeployments(apiClient, serviceId);
+			sortDeployments(result);
+		} catch (Exception e) {
+			System.err.println(e);
+			return Collections.emptyList();
+		}
 		
 		return result;
 	}

@@ -13,6 +13,7 @@ import com.takipi.api.client.util.infra.Categories;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.settings.GroupSettings;
+import com.takipi.integrations.grafana.settings.GroupSettings.GroupFilter;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class EventFilter
@@ -25,7 +26,7 @@ public class EventFilter
 	private Collection<String> allowedTypes;
 	private Collection<String> types;
 	private Collection<String> introducedBy;
-	private Collection<String> transactions;
+	private GroupFilter transactionsFilter;
 	private Collection<String> labels;
 	private Pattern labelsPattern;
 	private Pair<DateTime, DateTime> firstSeen;
@@ -35,7 +36,7 @@ public class EventFilter
 	private String searchText;
 	
 	public static EventFilter of(Collection<String> types, Collection<String> allowedTypes,
-			Collection<String> introducedBy, Collection<String> transactions,
+			Collection<String> introducedBy, GroupFilter transactionsFilter,
 			Collection<String> labels, String labelsRegex, String firstSeen, Categories categories,
 			String searchText)
 	{
@@ -44,11 +45,12 @@ public class EventFilter
 		result.types = types;
 		result.allowedTypes = allowedTypes;
 		result.introducedBy = introducedBy;
-		result.transactions = transactions;
+		result.transactionsFilter = transactionsFilter;
 		result.labels = labels;
 		result.categories = categories;
 		
-		if (!TERM.equals(searchText)) {
+		if (!TERM.equals(searchText))
+		{
 			result.searchText = searchText;
 		}
 		
@@ -58,7 +60,7 @@ public class EventFilter
 		}
 		
 		if (types != null)
-		{		
+		{
 			for (String type : types)
 			{
 				
@@ -94,8 +96,7 @@ public class EventFilter
 					return true;
 				}
 				
-				if ((label.equals(GrafanaFunction.HIDDEN)) 
-				|| (label.equals(GrafanaFunction.RESOVED)))
+				if ((label.equals(GrafanaFunction.HIDDEN)) || (label.equals(GrafanaFunction.RESOVED)))
 				{
 					return false;
 				}
@@ -171,63 +172,49 @@ public class EventFilter
 		return false;
 	}
 	
-	private boolean searchLocation(Location location, String s) {
+	private boolean searchLocation(Location location, String s)
+	{
 		
-		if (location == null) {
+		if (location == null)
+		{
 			return false;
 		}
 		
-		if (location.prettified_name.toLowerCase().contains(s)) {
+		if (location.prettified_name.toLowerCase().contains(s))
+		{
 			return true;
 		}
 		
 		return false;
 	}
 	
-	private boolean searchText(EventResult event) {
+	private boolean searchText(EventResult event)
+	{
 		
 		String s = searchText.toLowerCase();
 		
-		if (searchLocation(event.error_location, s)) {
+		if (searchLocation(event.error_location, s))
+		{
 			return true;
 		}
 		
-		if (searchLocation(event.entry_point, s)) {
+		if (searchLocation(event.entry_point, s))
+		{
 			return true;
 		}
 		
-		if ((event.message != null) && (event.message.contains(s))) {
+		if ((event.message != null) && (event.message.toLowerCase().contains(s)))
+		{
 			return true;
 		}
 		
 		return false;
 	}
 	
-	public boolean filter(EventResult event)
-	{
-		if (event.is_rethrow) {
-			return true;
-		}
+	public boolean filterTransaction(EventResult event) {
 		
-		if ((!CollectionUtil.safeIsEmpty(allowedTypes)) && (!allowedTypes.contains(event.type))) {
-			return true;
-		}
-		
-		if ((types != null) && (!types.isEmpty()))
+		if (transactionsFilter != null)
 		{
-			if (filterType(event)) {
-				return true;
-			}
-		}
-		
-		if ((introducedBy != null) && (!introducedBy.isEmpty()) && (!introducedBy.contains(event.introduced_by)))
-		{
-			return true;
-		}
-		
-		if ((transactions != null) && (!transactions.isEmpty()))
-		{
-			
 			Location entryPoint = event.entry_point;
 			
 			if ((entryPoint == null) || (entryPoint.class_name == null))
@@ -235,12 +222,42 @@ public class EventFilter
 				return true;
 			}
 			
-			String entryPointName = GrafanaFunction.getSimpleClassName(entryPoint.class_name);
+			if (GrafanaFunction.filterTransaction(transactionsFilter, 
+					entryPoint.class_name, entryPoint.method_name)) {
+				return true;
+			}			
+		}
+		
+		return false;
+	}
+	
+	public boolean filter(EventResult event)
+	{
+		if (event.is_rethrow)
+		{
+			return true;
+		}
+		
+		if ((!CollectionUtil.safeIsEmpty(allowedTypes)) && (!allowedTypes.contains(event.type)))
+		{
+			return true;
+		}
+		
+		if (filterTransaction(event)) {
+			return true;
+		}
 			
-			if (!transactions.contains(entryPointName))
+		if ((types != null) && (!types.isEmpty()))
+		{
+			if (filterType(event))
 			{
 				return true;
 			}
+		}
+		
+		if ((introducedBy != null) && (!introducedBy.isEmpty()) && (!introducedBy.contains(event.introduced_by)))
+		{
+			return true;
 		}
 		
 		if ((labels != null) && (!labels.isEmpty()))
@@ -284,7 +301,8 @@ public class EventFilter
 			}
 		}
 		
-		if ((searchText != null) && (!searchText(event))) {
+		if ((searchText != null) && (!searchText(event)))
+		{
 			return true;
 		}
 		

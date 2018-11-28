@@ -51,6 +51,8 @@ import com.takipi.integrations.grafana.input.EnvironmentsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
+import com.takipi.integrations.grafana.settings.GrafanaSettings;
+import com.takipi.integrations.grafana.settings.GroupSettings.GroupFilter;
 import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
@@ -145,6 +147,21 @@ public abstract class GrafanaFunction
 		}
 	}
 	
+	protected static Pair<String, String> getFullNameAndMethod(String name)
+	{
+		
+		String[] parts = name.split(TRANS_DELIM);
+		
+		if (parts.length == 1)
+		{
+			return Pair.of(toQualified(name), null);
+		}
+		else
+		{
+			return Pair.of(toQualified((parts[0])), parts[1]);
+		}
+	}
+	
 	protected static String getTransactionName(String name, boolean includeMethod)
 	{
 		
@@ -206,19 +223,38 @@ public abstract class GrafanaFunction
 		applyFilters(request, serviceId, builder);
 	}
 	
-	protected boolean filterTransaction(Collection<String> transactions, String name)
-	{
+	public static boolean filterTransaction(GroupFilter filter, String className, String methodName) {
 		
-		if (transactions == null)
-		{
+		if ((filter == null) || ((filter.values.size() == 0) && (filter.patterns.size() == 0))) {
 			return false;
 		}
 		
-		String transactionName = getTransactionName(name, true);
+		String simpleClassName = getSimpleClassName(className);
+		String simpleClassAndMethod;
 		
-		for (String transaction : transactions)
+		if (methodName != null) {
+			simpleClassAndMethod = simpleClassName + QUALIFIED_DELIM + methodName;
+		} else {
+			simpleClassAndMethod = null;
+		}
+				
+		for (String value : filter.values)
 		{
-			if (transactionName.contains(transaction))
+			if ((simpleClassAndMethod != null) && (value.equals(simpleClassAndMethod))) {
+				return false;
+			}
+			
+			if (value.equals(simpleClassName)) {
+				return false;
+			}
+			
+		}
+		
+		String fullName = className + QUALIFIED_DELIM + methodName;
+		
+		for (Pattern pattern : filter.patterns)
+		{
+			if (pattern.matcher(fullName).find())
 			{
 				return false;
 			}
@@ -260,10 +296,13 @@ public abstract class GrafanaFunction
 			result = new ArrayList<Transaction>(response.data.transactions.size());
 			Collection<String> transactions = input.getTransactions(serviceId);
 			
+			GroupFilter transactionsFilter = GrafanaSettings.getServiceSettings(apiClient, serviceId).getTransactionsFilter(transactions);
+
 			for (Transaction transaction : response.data.transactions)
 			{
+				Pair<String, String> nameAndMethod = getFullNameAndMethod(transaction.name);
 				
-				if (filterTransaction(transactions, transaction.name))
+				if (filterTransaction(transactionsFilter, nameAndMethod.getFirst(), nameAndMethod.getSecond()))
 				{
 					continue;
 				}
@@ -534,7 +573,11 @@ public abstract class GrafanaFunction
 			else
 			{
 				events = getEventList(serviceId, viewId, input, from, to);
-				applyVolumeToEvents(serviceId, viewId, input, from, to, volumeType, getEventsMap(events));
+				
+				if (events != null) {
+					applyVolumeToEvents(serviceId, viewId, input, from, to, 
+						volumeType, getEventsMap(events));
+				}
 			}
 		}
 		else

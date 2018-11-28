@@ -23,6 +23,8 @@ import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionsListFunction extends GrafanaFunction {
 
+	private static final String TIMER_MESSAGE = "Method took more than ";
+	
 	private static final List<String> FIELDS = Arrays.asList(new String[] { 
 			"Link", "Transaction", "Total", "Avg Response(ms)", "Slow %", "Slow Transactions",
 			"Error %", "Failed Requests" });
@@ -77,6 +79,31 @@ public class TransactionsListFunction extends GrafanaFunction {
 		return result;	
 	}
 	
+	private String getTransactionMessage(TransactionData transaction) {
+		
+		String result;
+		String transactionName = getTransactionName(transaction.transaction.name, true);
+		
+		if (transaction.currTimer != null) {
+						
+			if (transaction.currTimer.message != null) {
+				int index = transaction.currTimer.message.indexOf(TIMER_MESSAGE);
+				
+				if (index != -1) {
+					result = transactionName + " > " + transaction.currTimer.message.substring(index + TIMER_MESSAGE.length());
+				} else {
+					result = transactionName + ": " + transaction.currTimer.message;	
+				}	
+			} else {
+				result = transactionName;
+			}
+		} else {
+			result = transactionName;
+		}
+		
+		return result;
+	}
+	
 	private List<List<Object>> formatResultObjects(Map<String, TransactionData> transactions, 
 			String serviceId, Pair<DateTime, DateTime> timeSpan,
 			TransactionsListIput input) {
@@ -85,8 +112,8 @@ public class TransactionsListFunction extends GrafanaFunction {
 
 		for (TransactionData transaction : transactions.values()) {
 
-			String name = getTransactionName(transaction.transaction.name, true);
-			
+			String name = getTransactionMessage(transaction);
+					
 			double errorRate;
 			long invocations = transaction.transaction.stats.invocations;
 			
@@ -124,6 +151,22 @@ public class TransactionsListFunction extends GrafanaFunction {
 		return result;
 	}
 	
+	private TransactionData getTransactionData(Map<String, TransactionData> transactions, EventResult event) {
+		
+		TransactionData result = transactions.get(event.entry_point.class_name);
+
+		if (result == null) {
+			
+			result = transactions.get(toTransactionName(event.entry_point));
+			
+			if (result == null) {
+				return null;
+			}
+		}
+		
+		return result;
+	}
+	
 	private void updateTransactionEvents(String serviceId, Pair<DateTime, DateTime> timeSpan,
 			TransactionsListIput input, Map<String, TransactionData> transactions) 
 	{
@@ -142,29 +185,21 @@ public class TransactionsListFunction extends GrafanaFunction {
 				continue;
 			}
 				
-			TransactionData transaction = transactions.get(event.entry_point.class_name);
-
+			TransactionData transaction = getTransactionData(transactions, event);
+			
 			if (transaction == null) {
-				
-				transaction = transactions.get(toTransactionName(event.entry_point));
-				
-				if (transaction == null) {
-					continue;
-				}
-			}
-			if (eventFilter.filter(event)) {
 				continue;
 			}
 
 			if (event.type.equals(TIMER)) {
-				transaction.timersHits += event.stats.hits;
 				
+				transaction.timersHits += event.stats.hits;
+
 				if (transaction.currTimer == null) {
 					transaction.currTimer = event;
 				} else {
 					DateTime evrntFirstSeen = TimeUtil.getDateTime(event.first_seen);
 					DateTime timerFirstSeen = TimeUtil.getDateTime(transaction.currTimer.first_seen);
-
 					
 					long eventDelta = timeSpan.getSecond().getMillis() - evrntFirstSeen.getMillis();
 					long timerDelta = timeSpan.getSecond().getMillis() - timerFirstSeen.getMillis();
@@ -174,6 +209,11 @@ public class TransactionsListFunction extends GrafanaFunction {
 					}				
 				}	
 			} else {
+
+				if (eventFilter.filter(event)) {
+					continue;
+				}
+				
 				transaction.errorsHits += event.stats.hits;
 			}
 		}

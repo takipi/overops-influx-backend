@@ -447,14 +447,21 @@ public class EventsFunction extends GrafanaFunction {
 
 		Collection<FieldFormatter> formatters = getFieldFormatters(input.fields);
 		
+		List<EventData> mergedDatas;
 		List<EventData> eventDatas = getEventData(serviceId, input, timeSpan);
-		Collection<EventData> mergedDatas = mergeSimilarEvents(serviceId, eventDatas);
-		
+
+		if (input.hasTransactions()) {
+			mergedDatas = eventDatas;
+		} else {
+			mergedDatas = mergeSimilarEvents(serviceId, eventDatas);
+
+		}
+			
 		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
 
 		List<List<Object>> result = new ArrayList<List<Object>>(mergedDatas.size());
 		
-		for (EventData eventData : mergedDatas) {	 
+		for (EventData eventData : eventDatas) {	 
 	
 			if (eventFilter.filter(eventData.event)) {
 				continue;

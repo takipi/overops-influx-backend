@@ -136,16 +136,16 @@ public class GrafanaSettings {
 							throw new IllegalStateException("Could not acquire settings for " + key.serviceId);
 						}
 						
-						ServiceSettings result = getServiceSettings(json);
+						ServiceSettings result = getServiceSettings(key.serviceId, key.apiClient, json);
 
 						return result;
 					}
 				});
 	}
 	
-	private static ServiceSettings getServiceSettings(String json) {
+	private static ServiceSettings getServiceSettings(String serviceId, ApiClient apiClient, String json) {
 		ServiceSettingsData data = new Gson().fromJson(json, ServiceSettingsData.class);
-		return new ServiceSettings(data);
+		return new ServiceSettings(serviceId, apiClient, data);
 	}
 	
 	public static ServiceSettingsData getData(ApiClient apiClient, String serviceId) {
@@ -173,7 +173,7 @@ public class GrafanaSettings {
 	}
 
 	public static void saveServiceSettings(ApiClient apiClient, String serviceId, String json) {
-		ServiceSettings settings =  getServiceSettings(json);
+		ServiceSettings settings =  getServiceSettings(serviceId, apiClient, json);
 		saveServiceSettings(apiClient, serviceId, settings);
 	}
 	

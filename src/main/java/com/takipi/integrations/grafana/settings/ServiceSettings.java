@@ -5,18 +5,24 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.infra.Categories.Category;
 import com.takipi.common.util.CollectionUtil;
+import com.takipi.integrations.grafana.settings.GroupSettings.GroupFilter;
 
 public class ServiceSettings {
 	
 	private ServiceSettingsData data;
 	private boolean initialized;
 	private volatile Categories instance = null;
+	private String serviceId;
+	private ApiClient apiClient;
 	
-	public ServiceSettings(ServiceSettingsData data) {
+	public ServiceSettings(String serviceId, ApiClient apiClient, ServiceSettingsData data) {
 		this.data = data;
+		this.serviceId = serviceId;
+		this.apiClient = apiClient;
 	}
 	
 	public ServiceSettingsData getData() {
@@ -26,6 +32,32 @@ public class ServiceSettings {
 		}
 		
 		return data;
+	}
+	
+	public GroupFilter getTransactionsFilter(Collection<String> transactions) {
+		
+		GroupFilter result;
+		
+		if (transactions != null)
+		{
+			
+			GroupSettings transactionGroups = GrafanaSettings.getData(apiClient, serviceId).transactions;
+			
+			if (transactionGroups != null)
+			{
+				result = transactionGroups.getExpandedFilter(transactions);
+			}
+			else
+			{
+				result = GroupFilter.from(transactions);
+			}
+		}
+		else
+		{
+			result = null;
+		}
+		
+		return result;
 	}
 	
 	public Categories getCategories() {

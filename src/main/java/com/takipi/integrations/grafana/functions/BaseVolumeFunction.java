@@ -68,6 +68,14 @@ public abstract class BaseVolumeFunction extends GrafanaFunction {
 
 		return createSingleStatSeries(timeSpan, value);
 	}
+	
+	/**
+	 * @param input - needed for children 
+	 */
+	protected boolean filterEvent(EventResult event, BaseVolumeInput input,
+		EventFilter eventFilter) {
+		return eventFilter.filter(event);
+	}
 
 	private EventVolume processServiceVolume(String serviceId, BaseVolumeInput input, VolumeType volumeType,
 			Pair<DateTime, DateTime> timeSpan) {
@@ -87,7 +95,7 @@ public abstract class BaseVolumeFunction extends GrafanaFunction {
 		
 		for (EventResult event : eventsMap.values()) {
 
-			if (eventFilter.filter(event)) {
+			if (filterEvent(event, input, eventFilter)) {
 				continue;
 			}
 			

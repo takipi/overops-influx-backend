@@ -5,17 +5,72 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import com.google.common.base.Objects;
 import com.takipi.integrations.grafana.functions.EventFilter;
 import com.takipi.integrations.grafana.functions.GrafanaFunction;
 
 public class GroupSettings
-{	
+{
+	public static final String REGEX_ESCAPE = "/";
+	
+	public static class GroupFilter {
+		
+		public Collection<String> values;
+		public Collection<Pattern> patterns;
+		
+		public static GroupFilter from(Collection<String> values) {
+			
+			GroupFilter result = new GroupFilter();
+			
+			result.values = new ArrayList<String>();
+			result.patterns = new ArrayList<Pattern>();
+						
+			for (String value : values) {
+				
+				if ((value.length() > 2) && (value.startsWith(REGEX_ESCAPE)) 
+					&& (value.endsWith(REGEX_ESCAPE))) {
+					String regex = value.substring(1, value.length() - 1); 
+					result.patterns.add(Pattern.compile(regex));
+				} else {
+					result.values.add(value);
+				}
+			}
+			
+			return result;
+		}
+		
+		public boolean filter(String s) {
+						
+			for (String value : values)
+			{
+				if (s.contains(value))
+				{
+					return false;
+				}
+			}
+			
+			for (Pattern pattern : patterns)
+			{
+				if (pattern.matcher(s).find())
+				{
+					return false;
+				}
+			}
+			
+			return true;
+		}
+	}
+	
 	public static class Group {
 		
 		public String name;
 		public List<String> values;
+		
+		public GroupFilter getFilter() {
+			return GroupFilter.from(this.getValues());
+		}
 		
 		public Collection<String> getValues() {
 			
@@ -59,6 +114,10 @@ public class GroupSettings
 		return name.startsWith(EventFilter.CATEGORY_PREFIX);
 	}
 	
+	public GroupFilter getExpandedFilter(Collection<String> values) {
+		return GroupFilter.from(expandList(values));
+	}
+	
 	public Collection<String> expandList(Collection<String> values) {
 		
 		List<String> result = new ArrayList<String>();
@@ -72,6 +131,10 @@ public class GroupSettings
 		}
 		
 		return result;
+	}
+	
+	public GroupFilter getAllGroupFilter() {
+		return GroupFilter.from(expandList(getAllGroupValues()));
 	}
 	
 	public Collection<String>getAllGroupValues() {
@@ -99,7 +162,7 @@ public class GroupSettings
 		int index = groupName.indexOf(EventFilter.CATEGORY_PREFIX);
 		
 		if (index >= 0) {
-			value = groupName.substring(0, index);
+			value = groupName.substring(index + 1);
 		} else {
 			value = groupName;	
 		}
@@ -112,5 +175,4 @@ public class GroupSettings
 		
 		return Collections.emptyList();
 	}
-	
 }

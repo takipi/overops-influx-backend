@@ -119,11 +119,24 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 			return Collections.emptyList();
 		}
 		
-		List<EventData> eventData = regressionFunction.processRegression(regressionOutput.regressionInput,
+		List<EventData> eventDatas = regressionFunction.processRegression(regressionOutput.regressionInput,
 			regressionOutput.rateRegression, false);
 		
+		
+		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
+		
+		List<EventData> filteredEventData = new ArrayList<EventData>(eventDatas.size());
+		
+		for (EventData eventData : eventDatas) {	 
+			
+			if (eventFilter.filter(eventData.event)) {
+				continue;
+			}
+			
+			filteredEventData.add(eventData);
+		}
 
-		List<EventData> limitEventData = eventData.subList(0, Math.min(eventData.size(), rgInput.limit));
+		List<EventData> limitEventData = filteredEventData.subList(0, Math.min(filteredEventData.size(), rgInput.limit));
 		
 		Map<String, GraphData> graphsData = new HashMap<String, GraphData>();
 

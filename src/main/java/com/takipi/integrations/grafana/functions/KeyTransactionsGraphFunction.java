@@ -55,13 +55,13 @@ public class KeyTransactionsGraphFunction extends TransactionsGraphFunction
 			result = new ArrayList<GraphSeries>();
 			
 			for (Group group : transactionGroups.getGroups()) {
-				GraphSeries groupSeries = createAggregateGraphSeries(serviceId, graphs, group.getValues(),
+				GraphSeries groupSeries = createAggregateGraphSeries(serviceId, graphs, group.getFilter(),
 						input, serviceIds, group.name);
 				result.add(groupSeries);
 			}
 		} else {
 			result = createMultiGraphSeries(serviceId, graphs, input.volumeType, serviceIds,
-					transactionGroups.getAllGroupValues());
+					transactionGroups.getAllGroupFilter());
 		}
 		
 		return result;

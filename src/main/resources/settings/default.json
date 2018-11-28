@@ -1,18 +1,34 @@
 {
 	"general": {
 		"groupByEntryPoint": true,
-		"eventTypes": "Logged Error,Uncaught Exception,Logged Warning,Swallowed Exception,HTTP Error,Caught Exception"
+		"eventTypes": "Logged Error,Uncaught Exception,Logged Warning,Swallowed Exception,HTTP Error,Caught Exception",
+		"pointsWanted": 24,
+		"splitLimit": 3
 	},
 	
 	"transactions": {
 		"groups": [
 			{
-				"name": "My Transactions",
+				"name": " Servlets",
 				"values": [
-					"AppPeriodicPushTask",
-					"GracefulTask"
+					"/^.*Servlet.*$/"
+				]
+			},
+			
+			{
+				"name": " Tasks",
+				"values": [
+					"/^.*Task.*$/"
+				]
+			},
+			
+			{
+				"name": " Messages",
+				"values": [
+					"/^.*Message.*$/"
 				]
 			}
+			
 		]
 	},
 	

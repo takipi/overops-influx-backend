@@ -6,5 +6,10 @@ public class TransactionsVolumeInput extends BaseVolumeInput {
 		invocations, avg, count;
 	}
 	
+	public enum TransactionFilterType {
+		events, timers;
+	}
+	
 	public TransactionVolumeType volumeType;
+	public TransactionFilterType filter;
 }

@@ -94,12 +94,28 @@ public class FunctionParser {
 		}
 	
 		String json = params.replace("\\", "");
-		FunctionInput input = (FunctionInput)(new Gson().fromJson(json, factory.getInputClass()));
-		GrafanaFunction function = factory.create(apiClient);
+		
+		FunctionInput input;
+		GrafanaFunction function;
+		
+		try {
+			input = (FunctionInput)(new Gson().fromJson(json, factory.getInputClass()));
+			function = factory.create(apiClient);
+		} catch (Exception e) {
+			throw new IllegalStateException("Could not parse json " + json, e);
+		}
 		
 		logger.debug("OO-AS-INFLUX | About to process {} with input {}", function, input);
 		
-		return function.process(input);
+		List<Series> result;
+		
+		try {
+			result = function.process(input);
+		} catch (Exception e) {
+			throw new IllegalStateException("Could not parse json " + json, e);
+		}
+		
+		return result;
 	}
 		
 	private static List<String> getQueries(String query) {
@@ -224,20 +240,24 @@ public class FunctionParser {
 		registerFunction(new TransactionsGraphFunction.Factory());
 		registerFunction(new TransactionsListFunction.Factory());
 		registerFunction(new TransactionsRateFunction.Factory());
-		registerFunction(new SlowTransactionGraphFunction.Factory());
 		registerFunction(new KeyTransactionsGraphFunction.Factory());
 		registerFunction(new SlowTransactionsFunction.Factory());
 
-		//variable functions
+		//variable filter functions
 		registerFunction(new EnvironmentsFunction.Factory());
 		registerFunction(new ApplicationsFunction.Factory());
 		registerFunction(new ServersFunction.Factory());
 		registerFunction(new DeploymentsFunction.Factory());
-		registerFunction(new ViewsFunction.Factory());
-		registerFunction(new TransactionsFunction.Factory());
-		registerFunction(new LabelsFunction.Factory());
 		registerFunction(new EventTypesFunction.Factory());
+		registerFunction(new TransactionsFunction.Factory());
+		
+		//variable metadata functions
+		registerFunction(new ViewsFunction.Factory());
+		registerFunction(new LabelsFunction.Factory());
+		
+		//variable settings functions
 		registerFunction(new EnvironmentSettingsFunction.Factory());
-		registerFunction(new VariableRedirectFunction.Factory());		
+		registerFunction(new VariableRedirectFunction.Factory());
+		registerFunction(new SettingsVarFunction.Factory());
 	}
 }
