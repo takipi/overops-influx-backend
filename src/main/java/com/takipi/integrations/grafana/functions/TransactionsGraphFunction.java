@@ -110,7 +110,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			result = Collections.singletonList(createAggregateGraphSeries(serviceId, graphs, transactionsFilter,
 					input, serviceIds, seriesName));
 		} else {
-			result = createMultiGraphSeries(serviceId, graphs, input.volumeType, serviceIds,
+			result = createMultiGraphSeries(serviceId, graphs, input, serviceIds,
 					transactionsFilter);
 		}
 		
@@ -135,7 +135,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
     }
 
 	protected List<GraphSeries> createMultiGraphSeries(String serviceId, Collection<TransactionGraph> graphs,
-			GraphType volumeType, Collection<String> serviceIds, GroupFilter transactionFilter) {
+			TransactionsGraphInput input, Collection<String> serviceIds, GroupFilter transactionFilter) {
 
 		List<GraphSeries> result = new ArrayList<GraphSeries>();
 
@@ -148,15 +148,14 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 				continue;
 			}
 
-			if (volumeType.equals(GraphType.all)) {
+			if (input.volumeType.equals(GraphType.all)) {
 				result.add(createTransactionGraphSeries(serviceId, graph, GraphType.avg_time, serviceIds));
 				result.add(createTransactionGraphSeries(serviceId, graph, GraphType.invocations, serviceIds));
 			} else {
-				result.add(createTransactionGraphSeries(serviceId, graph, volumeType, serviceIds));
-
+				result.add(createTransactionGraphSeries(serviceId, graph, input.volumeType, serviceIds));
 			}
 		}
-
+		
 		return result;
 	}
 	
@@ -355,6 +354,19 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 
 		return SeriesVolume.of(values, Long.valueOf(volume));
 	}
+	
+	@Override
+	protected List<Series> processSeries(List<GraphSeries> series, BaseGraphInput input)
+	{
+		TransactionsGraphInput tgInput = (TransactionsGraphInput)input; 
+		
+		if (tgInput.limit == 0) {
+			return super.processSeries(series, input);
+		}
+		
+		return limitGraphSeries(series, tgInput.limit);
+	}
+	
 
 	@Override
 	public List<Series> process(FunctionInput functionInput) {

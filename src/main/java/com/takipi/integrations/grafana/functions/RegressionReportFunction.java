@@ -213,17 +213,18 @@ public class RegressionReportFunction extends RegressionFunction {
  		
 		Collection<String> tiers = GrafanaSettings.getServiceSettings(apiClient, serviceId).getTierNames();
 		
-		List<String> result = new ArrayList<String>();
-
-		if (tiers != null) {
-			result.addAll(tiers);
-		}
-		
-		if (result.size() >= input.limit) {
-			return result;
-		}
-
 		Map<String, VolumeOutput> volumeMap = new HashMap<String, VolumeOutput>();
+		
+		if (tiers != null) {
+
+			if (tiers.size() >= input.limit) {
+				return tiers;
+			}
+			
+			for (String tier : tiers) {
+				volumeMap.put(tier, new VolumeOutput(tier));
+			}	
+		} 
 		
 		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, timeSpan.getFirst(), 
 			timeSpan.getSecond(), VolumeType.hits);
@@ -258,8 +259,8 @@ public class RegressionReportFunction extends RegressionFunction {
 			}		
 		}
 		
-		result.addAll(limitVolumes(new ArrayList<VolumeOutput>(volumeMap.values()), 
-			input.limit - result.size()));
+		Collection<String> result = limitVolumes(new ArrayList<VolumeOutput>(volumeMap.values()), 
+			input.limit);
 
 		return result;
 	}

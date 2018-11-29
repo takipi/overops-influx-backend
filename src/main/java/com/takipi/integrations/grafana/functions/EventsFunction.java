@@ -403,7 +403,7 @@ public class EventsFunction extends GrafanaFunction {
 		for (List<EventData> similarEventDatas : eventDataMap.values()) {
 			
 			if (similarEventDatas.size() > 1) {
-				result.add(mergeEventDatas(similarEventDatas));
+				result.addAll(mergeEventDatas(similarEventDatas));
 			} else {
 				result.add(similarEventDatas.get(0));
 			}
@@ -412,7 +412,7 @@ public class EventsFunction extends GrafanaFunction {
 		return result;
 	}
 	
-	protected EventData mergeEventDatas(List<EventData> eventDatas) {
+	protected List<EventData> mergeEventDatas(List<EventData> eventDatas) {
 		
 		Stats stats = new Stats();
 		EventResult event = null;
@@ -440,7 +440,7 @@ public class EventsFunction extends GrafanaFunction {
 		}
 		
 		clone.stats = stats;
-		return new EventData(clone);
+		return Collections.singletonList(new EventData(clone));
 	}
 
 	protected List<List<Object>> processServiceEvents(String serviceId, EventsInput input, Pair<DateTime, DateTime> timeSpan) {
@@ -454,7 +454,6 @@ public class EventsFunction extends GrafanaFunction {
 			mergedDatas = eventDatas;
 		} else {
 			mergedDatas = mergeSimilarEvents(serviceId, eventDatas);
-
 		}
 			
 		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);

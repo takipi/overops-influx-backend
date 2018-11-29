@@ -5,4 +5,5 @@ import com.takipi.integrations.grafana.functions.TransactionsGraphFunction.Graph
 public class TransactionsGraphInput extends BaseGraphInput {
 	public GraphType volumeType;
 	public boolean aggregate;
+	public int limit;
 }

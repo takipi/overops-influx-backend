@@ -60,7 +60,7 @@ public class KeyTransactionsGraphFunction extends TransactionsGraphFunction
 				result.add(groupSeries);
 			}
 		} else {
-			result = createMultiGraphSeries(serviceId, graphs, input.volumeType, serviceIds,
+			result = createMultiGraphSeries(serviceId, graphs, input, serviceIds,
 					transactionGroups.getAllGroupFilter());
 		}
 		

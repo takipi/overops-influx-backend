@@ -307,11 +307,18 @@ public class RegressionFunction extends EventsFunction
 		});
 	}
 	
-	public List<EventData> processRegression(RegressionInput input,
+	public List<EventData> processRegression(EventFilterInput functionInput, RegressionInput input,
 			RateRegression rateRegression, boolean includeNew)
 	{
+		List<EventData> result;
 		List<EventData> eventDatas = processRegressionData(input, rateRegression, includeNew);
-		List<EventData> result = mergeSimilarEvents(input.serviceId, eventDatas);
+				
+		if (functionInput.hasTransactions()) {
+			result = eventDatas;
+		} else {
+			result = doMergeSimilarEvents(input.serviceId, eventDatas);
+		}
+		
 		return result;
 	}
 	
@@ -427,6 +434,7 @@ public class RegressionFunction extends EventsFunction
 		public Graph baseVolumeGraph;
 		public Graph activeVolumeGraph;
 		public Map<String, EventResult> eventListMap;
+		public List<EventData> eventDatas;
 		
 		protected double score;
 		long volume;
@@ -635,8 +643,8 @@ public class RegressionFunction extends EventsFunction
 		return Pair.of(filteredEvents.values(), Long.valueOf(volume));
 	}
 		
-	protected RegressionOutput createRegressionOutput(RegressionInput regressionInput,
-			RateRegression rateRegression, Map<String, EventResult> eventListMap,
+	protected RegressionOutput createRegressionOutput(EventFilterInput input,
+			RegressionInput regressionInput,RateRegression rateRegression, Map<String, EventResult> eventListMap,
 			Graph baseVolumeGraph, Graph activeVolumeGraph, long volume)
 	{
 		
@@ -651,12 +659,15 @@ public class RegressionFunction extends EventsFunction
 		
 		if ((regressionInput != null) && (rateRegression != null)) {
 			
-			List<EventData> eventDatas = processRegression(regressionInput, rateRegression, true);
+			result.eventDatas = processRegression(input, regressionInput, rateRegression, true);
 			
-			for (EventData eventData : eventDatas)
+			for (EventData eventData : result.eventDatas)
 			{
 				
 				RegressionData regData = (RegressionData)eventData;
+				
+				if (regData.event.stats.hits == 0) 
+					continue;
 				
 				switch (regData.type)
 				{
@@ -746,24 +757,45 @@ public class RegressionFunction extends EventsFunction
 		RateRegression rateRegression = RegressionUtil.calculateRateRegressions(apiClient, regressionInput, null,
 				false);
 		
-		RegressionOutput result = createRegressionOutput(regressionInput, rateRegression, eventListMap,
+		RegressionOutput result = createRegressionOutput(input, regressionInput, rateRegression, eventListMap,
 				baselineGraph, activeWindowGraph, volume);
 				
 		return result;
 	}
 	
-	@Override
-	protected EventData mergeEventDatas(List<EventData> eventDatas)
+	private Map<RegressionType, List<EventData>> getRegressionMap(List<EventData> eventDatas) {
+		
+		Map<RegressionType, List<EventData>> result = new HashMap<RegressionType, List<EventData>>();
+		
+		for (EventData eventData : eventDatas) {
+			RegressionData regData = (RegressionData)eventData;
+			List<EventData> typeEvents = result.get(regData.type);
+			
+			if (typeEvents == null) {
+				typeEvents = new ArrayList<EventData>();
+				result.put(regData.type, typeEvents);
+			}
+			
+			typeEvents.add(regData);
+		}
+		
+		if (result.size() > 1) {
+			System.out.println();
+		}
+		
+		return result;
+	}
+	
+	private EventData mergeRegressionsOfType(List<EventData> eventDatas)
 	{
 		
 		RegressionData first = (RegressionData)(eventDatas.get(0));
-		EventData merged = super.mergeEventDatas(eventDatas);
+		List<EventData> merged = super.mergeEventDatas(eventDatas);
 		
-		RegressionData result = new RegressionData(first.regResult, first.input, merged.event, first.type);
+		RegressionData result = new RegressionData(first.regResult, first.input, merged.get(0).event, first.type);
 		
 		if (first.regression != null)
-		{
-			
+		{	
 			long baselineHits = 0;
 			long baselineInvocations = 0;
 			
@@ -786,11 +818,29 @@ public class RegressionFunction extends EventsFunction
 	}
 	
 	@Override
-	protected List<EventData> mergeSimilarEvents(String serviceId, List<EventData> eventDatas)
+	protected List<EventData> mergeEventDatas(List<EventData> eventDatas)
+	{
+		List<EventData> result = new ArrayList<EventData>();
+		Map<RegressionType, List<EventData>> regressionMap = getRegressionMap(eventDatas);
+		
+		for (List<EventData> typeEvents : regressionMap.values()) {
+			result.add(mergeRegressionsOfType(typeEvents));
+		}
+		
+		return result;
+	}
+	
+	private List<EventData> doMergeSimilarEvents(String serviceId, List<EventData> eventDatas)
 	{
 		List<EventData> result = new ArrayList<EventData>(super.mergeSimilarEvents(serviceId, eventDatas));
 		sortRegressions(serviceId, result);
 		return result;
+	}
+	
+	@Override
+	protected List<EventData> mergeSimilarEvents(String serviceId, List<EventData> eventDatas)
+	{
+		return eventDatas;
 	}
 	
 	public RegressionOutput runRegression(String serviceId, EventFilterInput regInput)
@@ -814,16 +864,14 @@ public class RegressionFunction extends EventsFunction
 		}
 		
 		List<EventData> result;
-		List<EventData> eventDatas = processRegressionData(regressionOutput.regressionInput,
-				regressionOutput.rateRegression, true);
 		
 		if (regInput.regressionTypes != null) {
 			
 			Collection<RegressionType> types = regInput.getRegressionTypes();
 			
-			result = new ArrayList<EventData>(eventDatas.size());
+			result = new ArrayList<EventData>(regressionOutput.eventDatas.size());
 			
-			for (EventData eventData : eventDatas) {
+			for (EventData eventData : regressionOutput.eventDatas) {
 				RegressionData regData = (RegressionData)eventData;
 				
 				if (types.contains(regData.type)) {
@@ -831,7 +879,7 @@ public class RegressionFunction extends EventsFunction
 				}
 			}
 		} else {
-			result = eventDatas;
+			result = regressionOutput.eventDatas;
 		}
 		
 		return result;

@@ -119,7 +119,7 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 			return Collections.emptyList();
 		}
 		
-		List<EventData> eventDatas = regressionFunction.processRegression(regressionOutput.regressionInput,
+		List<EventData> eventDatas = regressionFunction.processRegression(input, regressionOutput.regressionInput,
 			regressionOutput.rateRegression, false);
 		
 		

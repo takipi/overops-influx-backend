@@ -1,6 +1,7 @@
 package com.takipi.integrations.grafana.functions;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.takipi.api.client.ApiClient;
@@ -48,8 +49,15 @@ public class ApplicationsFunction extends EnvironmentVariableFunction {
 			}
 		}
 		
-		List<String> serviceApps = ClientUtil.getApplications(apiClient, serviceId);
-
+		List<String> serviceApps;
+		
+		try {
+			serviceApps	= ClientUtil.getApplications(apiClient, serviceId);	
+		} catch (Exception e) {
+			System.err.println(e);
+			serviceApps = Collections.emptyList();
+		}
+		
 		for (String app : serviceApps) {
 
 			String serviceApp = getServiceValue(app, serviceId, serviceIds);
