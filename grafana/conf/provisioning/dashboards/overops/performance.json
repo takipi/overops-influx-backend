@@ -195,7 +195,8 @@
           "params": "var-type=$failureTypes",
           "targetBlank": true,
           "title": "Errors",
-          "type": "dashboard"
+          "type": "dashboard",
+          "url": "/dashboard/d/HYBPMdYik/errors"
         }
       ],
       "mappingType": 1,
@@ -662,7 +663,8 @@
           "params": "var-type=$failureTypes",
           "targetBlank": true,
           "title": "Errors",
-          "type": "dashboard"
+          "type": "absolute",
+          "url": "/dashboard/d/HYBPMdYik/errors"
         }
       ],
       "mappingType": 1,
@@ -999,7 +1001,8 @@
           "params": "var-type=$failureTypes",
           "targetBlank": true,
           "title": "Errors",
-          "type": "dashboard"
+          "type": "absolute",
+          "url": "/dashboard/d/HYBPMdYik/errors"
         }
       ],
       "nullPointMode": "connected",

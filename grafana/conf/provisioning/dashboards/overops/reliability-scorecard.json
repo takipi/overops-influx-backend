@@ -556,9 +556,9 @@
           "pattern": "Name",
           "rangeMaps": [
             {
-              "from": "S6295#45721#1538336116202#604800000",
-              "text": "moo",
-              "to": "S6295#45721#1538336116202#604800000"
+              "from": "null",
+              "text": "N/A",
+              "to": ""
             }
           ],
           "thresholds": [],
@@ -954,11 +954,11 @@
           },
           {
             "selected": false,
-            "text": "1m",
-            "value": "1m"
+            "text": "30d",
+            "value": "30d"
           }
         ],
-        "query": "30m,1h,4h,8h,24h,2d,7d,14d,1m",
+        "query": "30m,1h,4h,8h,24h,2d,7d,14d,30d",
         "skipUrlSync": false,
         "type": "custom"
       },

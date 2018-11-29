@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1543487742603,
+  "iteration": 1543515233007,
   "links": [
     {
       "asDropdown": true,
@@ -81,7 +81,8 @@
           "keepTime": true,
           "targetBlank": true,
           "title": "Performance",
-          "type": "dashboard"
+          "type": "absolute",
+          "url": "/dashboard/d/Z40SpeJmz/performance"
         }
       ],
       "mappingType": 1,
@@ -205,7 +206,8 @@
           "keepTime": true,
           "targetBlank": true,
           "title": "Performance",
-          "type": "dashboard"
+          "type": "absolute",
+          "url": "/dashboard/d/Z40SpeJmz/performance"
         }
       ],
       "mappingType": 1,
@@ -328,7 +330,8 @@
           "keepTime": true,
           "targetBlank": true,
           "title": "Performance",
-          "type": "dashboard"
+          "type": "absolute",
+          "url": "/dashboard/d/Z40SpeJmz/performance"
         }
       ],
       "mappingType": 1,
@@ -451,7 +454,8 @@
           "keepTime": true,
           "targetBlank": true,
           "title": "New Errors",
-          "type": "dashboard"
+          "type": "absolute",
+          "url": "/dashboard/d/3NZ83NLik/new-errors"
         }
       ],
       "mappingType": 1,
@@ -572,7 +576,8 @@
           "keepTime": true,
           "targetBlank": true,
           "title": "Increasing Errors",
-          "type": "dashboard"
+          "type": "absolute",
+          "url": "/dashboard/d/WZ739NYmk/increasing-errors"
         }
       ],
       "mappingType": 1,
@@ -808,7 +813,8 @@
           "keepTime": true,
           "targetBlank": true,
           "title": "Performance",
-          "type": "dashboard"
+          "type": "absolute",
+          "url": "/dashboard/d/Z40SpeJmz/performance"
         }
       ],
       "nullPointMode": "null as zero",
@@ -1036,7 +1042,8 @@
           "keepTime": true,
           "targetBlank": true,
           "title": "Errors",
-          "type": "dashboard"
+          "type": "absolute",
+          "url": "/dashboard/d/HYBPMdYik/errors"
         }
       ],
       "nullPointMode": "null",
@@ -1215,7 +1222,8 @@
           "keepTime": true,
           "targetBlank": true,
           "title": "Increasing Errors",
-          "type": "dashboard"
+          "type": "absolute",
+          "url": "/dashboard/d/WZ739NYmk/increasing-errors"
         }
       ],
       "nullPointMode": "null",
@@ -1334,7 +1342,8 @@
           "keepTime": true,
           "targetBlank": true,
           "title": "New Errors",
-          "type": "dashboard"
+          "type": "absolute",
+          "url": "/dashboard/d/3NZ83NLik/new-errors"
         }
       ],
       "pageSize": null,
@@ -1358,7 +1367,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "Go to Root Cause",
-          "linkUrl": "../tale.html?source=45&snapshot==${__cell}",
+          "linkUrl": "../tale.html?source=45&snapshot=${__cell}",
           "mappingType": 1,
           "pattern": "Link",
           "rangeMaps": [
@@ -1386,7 +1395,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "../tale.html?source=45&snapshot==${__cell_0}",
+          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Hits",
           "thresholds": [],
@@ -1406,7 +1415,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "../tale.html?source=45&snapshot==${__cell_0}",
+          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Entry point",
           "thresholds": [],
@@ -1426,7 +1435,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "../tale.html?source=45&snapshot==${__cell_0}",
+          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "First seen",
           "thresholds": [],
@@ -1446,7 +1455,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "../tale.html?source=45&snapshot==${__cell_0}",
+          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Type",
           "preserveFormat": false,
@@ -1498,7 +1507,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "../tale.html?source=45&snapshot==${__cell_0}",
+          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Name",
           "thresholds": [],
@@ -1518,7 +1527,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_1} in ${__cell_2}, introduced by ${__cell_3}: Click for root cause",
-          "linkUrl": "http://grafana.overops-samples.com:8186/link?link=${__cell_0}",
+          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Error location",
           "thresholds": [],
@@ -1538,7 +1547,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "../tale.html?source=45&snapshot==${__cell_0}",
+          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Rate",
           "thresholds": [],
@@ -1558,7 +1567,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_1} in ${__cell_2}, introduced by ${__cell_3}: Click for root cause",
-          "linkUrl": "../tale.html?snapshot=${__cell_0}&source=45",
+          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "TypeMessage",
           "thresholds": [],
@@ -1884,8 +1893,9 @@
         "allValue": null,
         "current": {
           "selected": false,
-          "text": "7d",
-          "value": "7d"
+          "tags": [],
+          "text": "2d",
+          "value": "2d"
         },
         "hide": 0,
         "includeAll": false,
@@ -1919,12 +1929,12 @@
             "value": "24h"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "2d",
             "value": "2d"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "7d",
             "value": "7d"
           },
