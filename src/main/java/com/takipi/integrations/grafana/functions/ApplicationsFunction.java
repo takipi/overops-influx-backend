@@ -1,14 +1,15 @@
 package com.takipi.integrations.grafana.functions;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.client.ClientUtil;
 import com.takipi.integrations.grafana.input.EnvironmentsInput;
-import com.takipi.integrations.grafana.settings.ApplicationGroupSettings;
-import com.takipi.integrations.grafana.settings.ApplicationGroupSettings.AppGroup;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
+import com.takipi.integrations.grafana.settings.GroupSettings;
+import com.takipi.integrations.grafana.settings.GroupSettings.Group;
 
 public class ApplicationsFunction extends EnvironmentVariableFunction {
 
@@ -38,18 +39,25 @@ public class ApplicationsFunction extends EnvironmentVariableFunction {
 	protected void populateServiceValues(EnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender) {
 	
-		ApplicationGroupSettings appGroupSettings = GrafanaSettings.getServiceSettings(apiClient, serviceId).applicationGroups;
+		GroupSettings appGroupSettings = GrafanaSettings.getData(apiClient, serviceId).applications;
 		
-		if ((appGroupSettings != null) && (appGroupSettings.groups != null)) {
+		if (appGroupSettings != null) {
 			
-			for (AppGroup appGroup : appGroupSettings.groups) {	
-				String appGroupName = getServiceValue(EventFilter.CATEGORY_PREFIX + appGroup.name, serviceId, serviceIds);
+			for (Group appGroup : appGroupSettings.getGroups()) {	
+				String appGroupName = getServiceValue(appGroup.toGroupName(), serviceId, serviceIds);
 				appender.append(appGroupName);
 			}
 		}
 		
-		List<String> serviceApps = ClientUtil.getApplications(apiClient, serviceId);
-
+		List<String> serviceApps;
+		
+		try {
+			serviceApps	= ClientUtil.getApplications(apiClient, serviceId);	
+		} catch (Exception e) {
+			System.err.println(e);
+			serviceApps = Collections.emptyList();
+		}
+		
 		for (String app : serviceApps) {
 
 			String serviceApp = getServiceValue(app, serviceId, serviceIds);

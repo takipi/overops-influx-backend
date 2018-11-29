@@ -32,6 +32,7 @@ public class GrafanaSettings {
 	private static SettingsStorage settingsStorage = null;
 	
 	protected static class SettingsCacheKey {
+		
 		protected ApiClient apiClient;
 		protected String serviceId;
 		
@@ -121,7 +122,6 @@ public class GrafanaSettings {
 						authService(key.apiClient, key.serviceId);
 						
 						String name = getServiceJsonName(key.serviceId);
-						
 						String json = settingsStorage.getServiceSettings(name);
 						
 						if (json == null) {
@@ -136,12 +136,20 @@ public class GrafanaSettings {
 							throw new IllegalStateException("Could not acquire settings for " + key.serviceId);
 						}
 						
-						Gson gson = new Gson();
-						ServiceSettings result = gson.fromJson(json, ServiceSettings.class);
+						ServiceSettings result = getServiceSettings(key.serviceId, key.apiClient, json);
 
 						return result;
 					}
 				});
+	}
+	
+	private static ServiceSettings getServiceSettings(String serviceId, ApiClient apiClient, String json) {
+		ServiceSettingsData data = new Gson().fromJson(json, ServiceSettingsData.class);
+		return new ServiceSettings(serviceId, apiClient, data);
+	}
+	
+	public static ServiceSettingsData getData(ApiClient apiClient, String serviceId) {
+		return getServiceSettings(apiClient, serviceId).getData(); 
 	}
 	
 	public static ServiceSettings getServiceSettings(ApiClient apiClient, String serviceId) {
@@ -159,21 +167,21 @@ public class GrafanaSettings {
 	public static String getServiceSettingsJson(ApiClient apiClient, String serviceId) {
 		ServiceSettings settings = getServiceSettings(apiClient, serviceId);
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		String result = gson.toJson(settings);
+		String result = gson.toJson(settings.getData());
 		
 		return result;
 	}
 
 	public static void saveServiceSettings(ApiClient apiClient, String serviceId, String json) {
-		ServiceSettings serviceSettings = (new Gson().fromJson(json, ServiceSettings.class));
-		saveServiceSettings(apiClient, serviceId, serviceSettings);
+		ServiceSettings settings =  getServiceSettings(serviceId, apiClient, json);
+		saveServiceSettings(apiClient, serviceId, settings);
 	}
 	
 	public static void saveServiceSettings(ApiClient apiClient, String serviceId, ServiceSettings serviceSettings) {
 		authService(apiClient, serviceId);
 		
 		Gson gson = new Gson();
-		String json = gson.toJson(serviceSettings);
+		String json = gson.toJson(serviceSettings.getData());
 		
 		SettingsCacheKey key = new SettingsCacheKey(apiClient, serviceId);
 		

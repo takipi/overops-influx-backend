@@ -1,6 +1,8 @@
 package com.takipi.integrations.grafana.functions;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -13,8 +15,9 @@ import com.takipi.common.util.CollectionUtil;
 import com.takipi.integrations.grafana.input.EnvironmentsInput;
 import com.takipi.integrations.grafana.input.EventTypesInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
-import com.takipi.integrations.grafana.input.ViewInput;
+import com.takipi.integrations.grafana.settings.GeneralSettings;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
+import com.takipi.integrations.grafana.settings.GroupSettings;
 
 public class EventTypesFunction extends EnvironmentVariableFunction {
 
@@ -43,14 +46,8 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 	@Override
 	protected void populateValues(FunctionInput input, VariableAppender appender) {
 
-		if (!(input instanceof ViewInput)) {
+		if (!(input instanceof EventTypesInput)) {
 			throw new IllegalArgumentException("input");
-		}
-
-		EventTypesInput eventInput = (EventTypesInput) input;
-
-		for (String type : eventInput.getTypes()) {
-			appender.append(type);
 		}
 
 		super.populateValues(input, appender);
@@ -62,25 +59,42 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 
 		EventTypesInput eventInput = (EventTypesInput) input;
 
+		Collection<String> types;
+		
+		if (eventInput.types != null) {
+			types = eventInput.getTypes();
+		} else {
+			GeneralSettings settings =  GrafanaSettings.getData(apiClient, serviceId).general;
+			
+			if (settings != null) {
+				types = settings.getDefaultTypes();
+			} else {
+				types = Collections.emptyList();
+			}
+		}
+		
+		for (String type : types) {
+			appender.append(type);
+		}
+		
 		String viewId = getViewId(serviceId, eventInput.view);
 
 		if (viewId == null) {
 			return;
 		}
 
-		Collection<EventResult> events = getEventList(serviceId, viewId, eventInput, DateTime.now().minusDays(14),
-				DateTime.now());
-
+		Map<String, EventResult> events = getEventMap(serviceId, eventInput, DateTime.now().minusDays(14), DateTime.now(), null);
+				
 		if (events == null) {
 			return;
 		}
 		
 		Set<String> exceptionTypes = new TreeSet<String>();
-		Set<String> labelTypes = new TreeSet<String>();
+		Set<String> categoryNames = new TreeSet<String>();
 		
 		Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();
 
-		for (EventResult event : events) {
+		for (EventResult event : events.values()) {
 			
 			if (event.name != null) {
 				exceptionTypes.add(event.name);
@@ -91,17 +105,17 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 				Set<String> labels = categories.getCategories(event.error_origin.class_name);
 				
 				if (!CollectionUtil.safeIsEmpty(labels))  {
-					labelTypes.addAll(labels);
+					categoryNames.addAll(labels);
 				}
 			}
 		}
 		
-		for (String label : labelTypes) {
-			appender.append(EventFilter.CATEGORY_PREFIX + label);
+		for (String categoryName : categoryNames) {
+			appender.append(GroupSettings.toGroupName(categoryName));
 		}
 
 		for (String exceptionType : exceptionTypes) {
-			appender.append(EventFilter.TYPE_PREFIX + exceptionType);
+			appender.append(EventFilter.EXCEPTION_PREFIX + exceptionType);
 		}
 	}
 }

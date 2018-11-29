@@ -15,54 +15,63 @@ import org.joda.time.DateTime;
 
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
-import com.takipi.api.client.data.metrics.Graph;
-import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.result.event.EventResult;
-import com.takipi.api.client.util.infra.Categories;
+import com.takipi.api.client.result.event.EventSlimResult;
+import com.takipi.api.client.result.event.EventsSlimVolumeResult;
 import com.takipi.api.client.util.client.ClientUtil;
+import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.regression.RateRegression;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.RegressionReportInput;
-import com.takipi.integrations.grafana.input.RegressionReportInput.Mode;
+import com.takipi.integrations.grafana.input.RegressionReportInput.ReportMode;
 import com.takipi.integrations.grafana.input.RegressionsInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.RegressionReportSettings;
+import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.DeploymentUtil;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class RegressionReportFunction extends RegressionFunction {
-
+	
 	private static final List<String> FIELDS = Arrays.asList(
-			new String[] { "App Name", "New Issues", "Severe New", "Regressions", "Severe Regressions", "Score" });
-
+			new String[] { "Name", "New Issues", "Regressions", "Slowdowns", "Score" });
+	
 	public static class Factory implements FunctionFactory {
-
+		
 		@Override
-		public GrafanaFunction create(ApiClient apiClient) {
+		public GrafanaFunction create(ApiClient apiClient)
+		{
 			return new RegressionReportFunction(apiClient);
 		}
-
+		
 		@Override
-		public Class<?> getInputClass() {
+		public Class<?> getInputClass()
+		{
 			return RegressionReportInput.class;
 		}
-
+		
 		@Override
-		public String getName() {
+		public String getName()
+		{
 			return "regressionReport";
 		}
 	}
-
+	
 	protected static class AsyncResult {
 		RegressionOutput output;
 		String key;
+		
+		protected AsyncResult( String key, RegressionOutput output) {
+			this.output = output;
+			this.key = key;
+		}
 	}
 
-	protected class RegressionAsyncTask extends BaseAsyncTask implements Callable<Object> {
+	public class RegressionAsyncTask extends BaseAsyncTask implements Callable<Object> {
 
 		protected String key;
 		protected String serviceId;
@@ -85,12 +94,9 @@ public class RegressionReportFunction extends RegressionFunction {
 
 			try {
 
-				RegressionOutput output = executeRegression(serviceId, input, timeSpan);
-				AsyncResult result = new AsyncResult();
-
-				result.output = output;
-				result.key = key;
-
+				RegressionOutput output = runRegression(serviceId, input); 
+				AsyncResult result = new AsyncResult(key, output);
+				
 				return result;
 			} finally {
 				afterCall();
@@ -102,7 +108,6 @@ public class RegressionReportFunction extends RegressionFunction {
 		public String toString() {
 			return String.join(" ", "Regression", serviceId, key);
 		}
-
 	}
 
 	protected static class VolumeOutput {
@@ -137,17 +142,21 @@ public class RegressionReportFunction extends RegressionFunction {
 			beforeCall();
 
 			try {
-
-				Map<String, EventResult> appEventsMap = getEventMap(serviceId, input, timeSpan.getFirst(),
-						timeSpan.getSecond(), VolumeType.hits, 0);
-
+				
 				long volume = 0;
+				String viewId = getViewId(serviceId, input.view);
+				
+				if (viewId != null)
+				{
+					EventsSlimVolumeResult eventsVolume = getEventsVolume(serviceId, viewId, input, timeSpan.getFirst(),
+							timeSpan.getSecond(), VolumeType.hits);
 
-				if (appEventsMap != null) {
-					for (EventResult eventResult : appEventsMap.values()) {
-						volume += eventResult.stats.hits;
+					if (eventsVolume != null) {
+						for (EventSlimResult eventResult : eventsVolume.events) {
+							volume += eventResult.stats.hits;
+						}
 					}
-				}
+				}		
 
 				VolumeOutput result = new VolumeOutput(app);
 				result.volume = volume;
@@ -199,35 +208,23 @@ public class RegressionReportFunction extends RegressionFunction {
 		return FIELDS;
 	}
 
-	private Pair<Long, Long> getGraphMinMaxEpochs(Graph graph) {
-
-		if (graph.points == null) {
-			return null;
-		}
-
-		long min = -1;
-		long max = -1;
-
-		for (GraphPoint gp : graph.points) {
-
-			long epoch = TimeUtil.getLongTime(gp.time);
-
-			if ((max == -1) || (max < epoch)) {
-				max = epoch;
-			}
-
-			if ((min == -1) || (min > epoch)) {
-				min = epoch;
-			}
-		}
-
-		return Pair.of(Long.valueOf(min), Long.valueOf(max));
-	}
-
 	private Collection<String> getRoutingVolumes(String serviceId, RegressionReportInput input,
 			Pair<DateTime, DateTime> timeSpan) {
  		
+		Collection<String> tiers = GrafanaSettings.getServiceSettings(apiClient, serviceId).getTierNames();
+		
 		Map<String, VolumeOutput> volumeMap = new HashMap<String, VolumeOutput>();
+		
+		if (tiers != null) {
+
+			if (tiers.size() >= input.limit) {
+				return tiers;
+			}
+			
+			for (String tier : tiers) {
+				volumeMap.put(tier, new VolumeOutput(tier));
+			}	
+		} 
 		
 		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, timeSpan.getFirst(), 
 			timeSpan.getSecond(), VolumeType.hits);
@@ -237,7 +234,7 @@ public class RegressionReportFunction extends RegressionFunction {
 		}
 		
 		Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();
-		
+				
 		for (EventResult event : eventsMap.values()) {
 			
 			if (event.error_origin == null) {
@@ -293,60 +290,53 @@ public class RegressionReportFunction extends RegressionFunction {
 	protected static class RegressionScore {
 
 		protected String key;
-		protected int newIssues;
-		protected int severeNewEvent;
-		protected int criticalRegressions;
-		protected int regressions;
 		protected double score;
+		RateRegression regression;
+		RegressionOutput regressionOutput;
 
-		protected RegressionScore(String key, int newIssues, int severeNewEvent, int regressions,
-				int criticalRegressions, double score) {
+		protected RegressionScore(RateRegression regression, String key,
+				RegressionOutput regressionOutput,
+				double score) {
 
 			this.key = key;
-			this.newIssues = newIssues;
-			this.severeNewEvent = severeNewEvent;
-			this.criticalRegressions = criticalRegressions;
-			this.regressions = regressions;
+			this.regression = regression;
+			this.regressionOutput = regressionOutput;
 			this.score = score;
 		}
-	}
-
-	@Override
-	protected List<List<Object>> processServiceEvents(String serviceId, EventsInput input,
-			Pair<DateTime, DateTime> timeSpan) {
-
-		List<List<Object>> result = new ArrayList<List<Object>>();
-		List<RegressionScore> regressionScores = executeReport(serviceId, (RegressionReportInput) input, timeSpan);
-
-		for (RegressionScore regressionScore : regressionScores) {
-
-			Object[] row = new Object[] { regressionScore.key, regressionScore.newIssues,
-					regressionScore.severeNewEvent, regressionScore.regressions, regressionScore.criticalRegressions,
-					regressionScore.score };
-
-			result.add(Arrays.asList(row));
-		}
-
-		return result;
 	}
 
 	protected List<AsyncResult> processAsync(String serviceId, RegressionReportInput input,
 			Pair<DateTime, DateTime> timeSpan, Collection<String> keys) {
 
 		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
+		List<AsyncResult> result = new ArrayList<AsyncResult>();
 
 		for (String key : keys) {
 			RegressionsInput keyInput = getInput(input, key);
-			tasks.add(new RegressionAsyncTask(key, serviceId, keyInput, timeSpan));
+			
+			RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient, serviceId, keyInput, this, false);
+			
+			if (regressionOutput != null) {
+				result.add(new AsyncResult(key, regressionOutput));
+			} else {
+				tasks.add(new RegressionAsyncTask(key, serviceId, keyInput, timeSpan));
+			}			
 		}
-
-		List<AsyncResult> result = new ArrayList<AsyncResult>();
-		List<Object> taskResults = executeTasks(tasks);
-
-		for (Object taskResult : taskResults) {
-
-			if (taskResult instanceof AsyncResult) {
-				result.add((AsyncResult) taskResult);
+		
+		if (tasks.size() == 1) {
+			try {
+				result.add((AsyncResult)(tasks.get(0).call()));
+			} catch (Exception e) {
+				throw new IllegalStateException(e);
+			}
+		} else {
+			List<Object> taskResults = executeTasks(tasks);
+	
+			for (Object taskResult : taskResults) {
+	
+				if (taskResult instanceof AsyncResult) {
+					result.add((AsyncResult) taskResult);
+				}
 			}
 		}
 
@@ -412,25 +402,33 @@ public class RegressionReportFunction extends RegressionFunction {
 			result.add(activeDeps.get(i));
 		}
 
-		int remainder = input.limit - result.size();
-
-		if (remainder > 0) {
+		if (input.limit - result.size() > 0) {
 			List<String> nonActiveDeps = ClientUtil.getDeployments(apiClient, serviceId, false);
 			sortDeployments(nonActiveDeps);
 
-			for (int i = 0; i < Math.min(remainder, nonActiveDeps.size()); i++) {
-				result.add(nonActiveDeps.get(i));
+			for (int i = 0; i < nonActiveDeps.size(); i++) {
+				String dep = nonActiveDeps.get(i);
+				
+				if (!result.contains(dep)) {
+					result.add(dep);
+				}
+				
+				if (result.size() >= input.limit) {
+					break;
+				}
 			}
 		}
 
 		return result;
 	}
+	
+	
 
-	protected List<RegressionScore> executeReport(String serviceId, RegressionReportInput regInput,
+	private Collection<String> getActiveKeys(String serviceId, RegressionReportInput regInput,
 			Pair<DateTime, DateTime> timeSpan) {
-
+		
 		Collection<String> keys;
-
+		
 		switch (regInput.mode) {
 			
 			case Deployments:
@@ -449,7 +447,17 @@ public class RegressionReportFunction extends RegressionFunction {
 		if (keys == null) {
 			return Collections.emptyList();
 		}
+		
+		return keys;
+	}
+	
+	protected List<RegressionScore> executeReport(String serviceId, RegressionReportInput regInput,
+			Pair<DateTime, DateTime> timeSpan) {
 
+		RegressionReportSettings regressionReportSettings = getRegressionReportSettings(serviceId);
+		
+		Collection<String> keys = getActiveKeys(serviceId, regInput, timeSpan);
+		
 		System.out.println("Executing report " + regInput.mode + " keys: " + Arrays.toString(keys.toArray()));
 
 		List<RegressionScore> result = new ArrayList<RegressionScore>();
@@ -460,53 +468,25 @@ public class RegressionReportFunction extends RegressionFunction {
 
 			RegressionOutput regressionOutput = asyncResult.output;
 
-			if (regressionOutput == null) {
+			if ((regressionOutput == null) || (regressionOutput.rateRegression == null)) {
 				continue;
 			}
 			
-			RegressionReportSettings reportSettings = GrafanaSettings.getServiceSettings(apiClient, serviceId).regressionReport;
-
-			if (reportSettings == null) {
-				throw new IllegalStateException("Unable to acquire regression report settings for " + serviceId);
-			}
+			double score = regressionOutput.getScore(regressionReportSettings);	
 			
-			Pair<Long, Long> activeMinMax = getGraphMinMaxEpochs(regressionOutput.activeVolumeGraph);
-			Pair<Long, Long> baselineMinMax = getGraphMinMaxEpochs(regressionOutput.baseVolumeGraph);
-
-			double activeDelta = (activeMinMax.getSecond().doubleValue() - activeMinMax.getFirst().doubleValue());
-			double baseDelta = (baselineMinMax.getSecond().doubleValue() - baselineMinMax.getFirst().doubleValue());
-
-			double factor = activeDelta / baseDelta;
-
-			RateRegression rateRegression = regressionOutput.rateRegression;
-
-			int severeIssues = rateRegression.getExceededNewEvents().size()
-					+ rateRegression.getSortedCriticalNewEvents().size();
-			int newIssues = rateRegression.getAllNewEvents().size() - severeIssues;
-			int criticalRegressions = rateRegression.getCriticalRegressions().size();
-			int regressions = rateRegression.getAllRegressions().size() - criticalRegressions;
-
-			int newEventsScore = newIssues * reportSettings.newEventScore;
-			int severeNewEventScore = severeIssues * reportSettings.severeNewEventScore;
-			int criticalRegressionsScore = criticalRegressions * reportSettings.criticalRegressionScore;
-			int regressionsScore = regressions * reportSettings.regressionScore;
-
-			double score = (newEventsScore + severeNewEventScore + criticalRegressionsScore + regressionsScore)
-					* factor;
-
-			RegressionScore regressionScore = new RegressionScore(asyncResult.key, newIssues, severeIssues, regressions,
-					criticalRegressions, score);
+			RegressionScore regressionScore = new RegressionScore(regressionOutput.rateRegression, asyncResult.key, 
+					regressionOutput, score);
 
 			result.add(regressionScore);
 		}
 
-		if (Mode.Deployments.equals(regInput.mode)) {
+		if (ReportMode.Deployments.equals(regInput.mode)) {
 			sortDeployments(result, true);
 		}
 
 		return result;
 	}
-
+	
 	private void sortDeployments(List<RegressionScore> scores, boolean asc) {
 		scores.sort(new Comparator<RegressionScore>() {
 
@@ -531,10 +511,88 @@ public class RegressionReportFunction extends RegressionFunction {
 
 		RegressionReportInput input = (RegressionReportInput) functionInput;
 
-		if (input.graph) {
-			return processGraph(input);
-		} else {
-			return super.process(functionInput);
+		if (input.render == null) {
+			throw new IllegalStateException("Missing render mode");
+		}
+		
+		switch (input.render) {
+			
+			case Graph:
+				return processGraph(input);
+			case Grid:
+				return super.process(functionInput);	
+			default:
+				throw new IllegalStateException("Illegal render mode " + input.render.toString());	
+		}
+	}
+
+	@Override
+	protected List<List<Object>> processServiceEvents(String serviceId, EventsInput input,
+			Pair<DateTime, DateTime> timeSpan) {
+
+		List<List<Object>> result = new ArrayList<List<Object>>();
+		List<RegressionScore> regressionScores = executeReport(serviceId, (RegressionReportInput) input, timeSpan);
+
+		for (RegressionScore regressionScore : regressionScores) {			
+			
+			Object newIssues = formatIssueType(regressionScore.regressionOutput.newIssues, regressionScore.regressionOutput.severeNewIssues);
+			Object regressions = formatIssueType(regressionScore.regressionOutput.regressions, regressionScore.regressionOutput.criticalRegressions);
+			Object slowdowns = formatIssueType(regressionScore.regressionOutput.slowsdowns, regressionScore.regressionOutput.severeSlowsdowns);
+			
+			Object[] row = new Object[] { regressionScore.key, newIssues, regressions, slowdowns,
+					regressionScore.score };
+
+			result.add(Arrays.asList(row));
+		}
+
+		return result;
+	}
+	
+	private String getPostfix(RegressionReportInput input, double score) {
+		
+		if (input.thresholds == null) {
+			return null;
+		}
+		
+		if (input.postfixes == null) {
+			return null;
+		}
+		
+		String[] thresholds = input.thresholds.split(ARRAY_SEPERATOR);
+		
+		if (thresholds.length != 2) {
+			return null;
+		}
+		
+		String[] postfixes = input.postfixes.split(ARRAY_SEPERATOR);
+		
+		if (postfixes.length != 3) {
+			return null;
+		}
+		
+		int min = convert(thresholds[0]);
+		int max = convert(thresholds[1]);
+		
+		if ((min < 0) || (max < 0)) {
+			return null;
+		}
+
+		if (score < min) {
+			return postfixes[0];
+		}
+		
+		if (score < max) {
+			return postfixes[1];
+		}
+		
+		return postfixes[2];
+	}
+	
+	private static int convert(String s) {
+		try {
+			return Integer.parseInt(s);
+		} catch (Exception e) {
+			return -1;
 		}
 	}
 
@@ -549,7 +607,7 @@ public class RegressionReportFunction extends RegressionFunction {
 
 			List<RegressionScore> regressionScores = executeReport(serviceId, input, timeSpan);
 
-			if (Mode.Deployments.equals(input.mode)) {
+			if (ReportMode.Deployments.equals(input.mode)) {
 				sortDeployments(regressionScores, false);
 			}
 
@@ -559,11 +617,20 @@ public class RegressionReportFunction extends RegressionFunction {
 					continue;
 				}
 
+				String seriesName;
+				String postfix = getPostfix(input, regressionScore.score);
+				
+				if (postfix != null) {
+					seriesName = regressionScore.key + postfix;
+				} else {
+					seriesName = regressionScore.key;
+				}
+				
 				Series series = new Series();
 				series.values = new ArrayList<List<Object>>();
 
 				series.name = EMPTY_NAME;
-				series.columns = Arrays.asList(new String[] { TIME_COLUMN, regressionScore.key });
+				series.columns = Arrays.asList(new String[] { TIME_COLUMN, seriesName });
 				series.values
 						.add(Arrays.asList(new Object[] { timeSpan.getFirst().getMillis(), regressionScore.score }));
 

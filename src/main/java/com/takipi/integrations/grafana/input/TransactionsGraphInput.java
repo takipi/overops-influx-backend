@@ -1,8 +1,9 @@
 package com.takipi.integrations.grafana.input;
 
-import com.takipi.integrations.grafana.functions.TransactionsGraphFunction.VolumeType;
+import com.takipi.integrations.grafana.functions.TransactionsGraphFunction.GraphType;
 
 public class TransactionsGraphInput extends BaseGraphInput {
-	public VolumeType volumeType;
+	public GraphType volumeType;
 	public boolean aggregate;
+	public int limit;
 }

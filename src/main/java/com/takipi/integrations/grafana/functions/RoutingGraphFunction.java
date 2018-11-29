@@ -2,6 +2,7 @@ package com.takipi.integrations.grafana.functions;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -48,12 +49,23 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 
 	@Override
 	protected List<GraphSeries> processGraphSeries(String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
-			Graph graph, GraphInput input) {
+			GraphInput input) {
 		
 		GraphLimitInput limitInput = (GraphLimitInput)input;
 		
 		Map<String, EventResult> eventMap = getEventMap(serviceId, input, timeSpan.getFirst(), timeSpan.getSecond(), input.volumeType,
 					input.pointsWanted);
+		
+		if (eventMap == null) {
+			return Collections.emptyList();
+		}
+		
+		Graph graph = getEventsGraph(apiClient, serviceId, viewId, input.pointsWanted, input, input.volumeType,
+				timeSpan.getFirst(), timeSpan.getSecond());
+		
+		if (graph == null) {
+			return Collections.emptyList();		
+		}
 		
 		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
 
@@ -63,8 +75,7 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 		Long key = null;
 		Long lastKey = null;
 		
-		Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();
-
+		Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();		
 		for (GraphPoint gp : graph.points) {
 
 			if (gp.contributors == null) {
@@ -137,7 +148,22 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 			graphsInPoint.clear();	
 		}
 		
-		Collection<GraphData> limitedGraphs = getLimitedGraphData(graphsData.values(), limitInput.limit);
+		Collection<String> tiers = GrafanaSettings.getServiceSettings(apiClient, serviceId).getTierNames();
+		
+		List<GraphData> limitedGraphs = null;
+		
+		if (tiers != null) {
+			limitedGraphs = getKeysTiersGraphData(graphsData, tiers);
+			
+			if (limitedGraphs.size() < limitInput.limit) {
+				Collection<GraphData> additionalGraphs = getLimitedGraphData(graphsData.values(),
+					limitInput.limit - limitedGraphs.size());
+				
+				limitedGraphs.addAll(additionalGraphs);
+			}
+		}  else {
+			limitedGraphs = getLimitedGraphData(graphsData.values(), limitInput.limit);
+		}
 		
 		List<GraphSeries> result = new ArrayList<GraphSeries>();
 		
@@ -146,6 +172,22 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 		}
 				
 		return result;
+	}
+	
+	private List<GraphData> getKeysTiersGraphData(Map<String, GraphData> graphsData, Collection<String> tiers) {
+		
+		List<GraphData> result = new ArrayList<GraphData>();
+		
+		for (String keyTier : tiers) {
+			GraphData graphData = graphsData.get(keyTier);
+			
+			if (graphData != null) {
+				result.add(graphData);
+			}
+		} 
+		
+		sortGraphData(result);
 
+		return result;
 	}
 }

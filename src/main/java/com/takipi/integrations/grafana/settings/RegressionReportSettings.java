@@ -5,4 +5,5 @@ public class RegressionReportSettings {
 	public int regressionScore;
 	public int severeNewEventScore;
 	public int criticalRegressionScore;
+	public double scoreWeight;
 }

@@ -10,12 +10,12 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.request.event.EventsRequest;
-import com.takipi.api.client.request.event.EventsVolumeRequest;
+import com.takipi.api.client.request.event.EventsSlimVolumeRequest;
 import com.takipi.api.client.request.metrics.GraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsGraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsVolumeRequest;
 import com.takipi.api.client.request.view.ViewsRequest;
-import com.takipi.api.client.result.event.EventsVolumeResult;
+import com.takipi.api.client.result.event.EventsSlimVolumeResult;
 import com.takipi.api.client.result.metrics.GraphResult;
 import com.takipi.api.client.result.transaction.TransactionsGraphResult;
 import com.takipi.api.client.result.transaction.TransactionsVolumeResult;
@@ -26,7 +26,10 @@ import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.request.intf.ApiGetRequest;
 import com.takipi.api.core.url.UrlClient.Response;
+import com.takipi.integrations.grafana.functions.RegressionFunction;
+import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOutput;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
+import com.takipi.integrations.grafana.input.EventFilterInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 
 public class ApiCache {
@@ -257,6 +260,30 @@ public class ApiCache {
 			return super.toString() + " " + volumeType;
 		}
 	}
+	
+	protected static class SlimEventKey extends VolumeKey {
+		
+		public SlimEventKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
+				VolumeType volumeType) {
+
+			super(apiClient, request, serviceId, input, volumeType);
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+
+			if (!(obj instanceof SlimEventKey)) {
+				return false;
+			}
+
+			if (!super.equals(obj)) {
+				return false;
+			}
+
+			return true;
+		}
+	}
+
 
 	protected static class EventKey extends VolumeKey {
 		
@@ -284,6 +311,8 @@ public class ApiCache {
 	protected static class GraphKey extends VolumeKey {
 
 		protected int pointsWanted;
+		protected int activeWindow;
+		protected int baselineWindow;
 
 		@Override
 		public boolean equals(Object obj) {
@@ -292,7 +321,7 @@ public class ApiCache {
 				return false;
 			}
 
-			if (!super.equals(obj)) {
+			if (!super.equals( obj)) {
 				return false;
 			}
 
@@ -301,15 +330,25 @@ public class ApiCache {
 			if (pointsWanted != other.pointsWanted) {
 				return false;
 			}
+			
+			if (activeWindow != other.activeWindow) {
+				return false;
+			}
+			
+			if (baselineWindow != other.baselineWindow) {
+				return false;
+			}
 
 			return true;
 		}
 
 		public GraphKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
-				VolumeType volumeType, int pointsWanted) {
+				VolumeType volumeType, int pointsWanted, int baselineWindow, int activeWindow) {
 
 			super(apiClient, request, serviceId, input, volumeType);
 			this.pointsWanted = pointsWanted;
+			this.activeWindow = activeWindow;
+			this.baselineWindow = baselineWindow;
 		}
 	}
 
@@ -393,11 +432,11 @@ public class ApiCache {
 				return false;
 			}
 
-			if (input.activeTimespan != input.activeTimespan) {
+			if (input.activeTimespan != other.input.activeTimespan) {
 				return false;
 			}
 
-			if (input.baselineTimespan != input.baselineTimespan) {
+			if (input.baselineTimespan != other.input.baselineTimespan) {
 				return false;
 			}
 
@@ -434,6 +473,38 @@ public class ApiCache {
 			}
 
 			return result.toString().hashCode();
+		}
+	}
+	
+	protected static class RegressionKey extends EventKey {
+
+		protected RegressionFunction function;
+
+		@Override
+		public boolean equals(Object obj) {
+
+			if (!(obj instanceof RegressionKey)) {
+				return false;
+			}
+
+			if (!super.equals(obj)) {
+				return false;
+			}
+
+			RegressionKey other = (RegressionKey) obj;
+
+			if (!Objects.equal(((EventFilterInput)input).types, ((EventFilterInput)other.input).types)) {
+				return false;
+			}
+
+			return true;
+		}
+
+		public RegressionKey(ApiClient apiClient, String serviceId, ViewInput input,
+				RegressionFunction function) {
+
+			super(apiClient, null, serviceId, input, null);
+			this.function = function;
 		}
 	}
 
@@ -473,20 +544,22 @@ public class ApiCache {
 
 	@SuppressWarnings("unchecked")
 	public static Response<GraphResult> getEventGraph(ApiClient apiClient, String serviceId,
-			ViewInput input, VolumeType volumeType, GraphRequest request, int pointsWanted) {
+			ViewInput input, VolumeType volumeType, GraphRequest request, int pointsWanted,
+			int baselineWindow, int activeWindow) {
 
-		GraphKey cacheKey = new GraphKey(apiClient, request, serviceId, input, volumeType, pointsWanted);
+		GraphKey cacheKey = new GraphKey(apiClient, request, serviceId, input, volumeType, 
+			pointsWanted, baselineWindow, activeWindow);
 		Response<GraphResult> response = (Response<GraphResult>) getItem(cacheKey);
 
 		return response;
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Response<EventsVolumeResult> getEventVolume(ApiClient apiClient, String serviceId, 
-			ViewInput input, VolumeType volumeType, EventsVolumeRequest request) {
+	public static Response<EventsSlimVolumeResult> getEventVolume(ApiClient apiClient, String serviceId, 
+			ViewInput input, VolumeType volumeType, EventsSlimVolumeRequest request) {
 
-		EventKey cacheKey = new EventKey(apiClient, request, serviceId, input, volumeType);
-		Response<EventsVolumeResult> response = (Response<EventsVolumeResult>)getItem(cacheKey);
+		SlimEventKey cacheKey = new SlimEventKey(apiClient, request, serviceId, input, volumeType);
+		Response<EventsSlimVolumeResult> response = (Response<EventsSlimVolumeResult>)getItem(cacheKey);
 		return response;
 	}
 
@@ -546,6 +619,41 @@ public class ApiCache {
 			throw new IllegalStateException(e);
 		}
 	}
+	
+	public static RegressionOutput getRegressionOutput(ApiClient apiClient, String serviceId, 
+		EventFilterInput input, RegressionFunction function, boolean load) {
+		
+		RegressionKey key = new RegressionKey(apiClient, serviceId, input, function);
+		
+		if (load) {
+			try
+			{
+				RegressionOutput result = rgressionReportRache.get(key);
+				
+				if (result.empty) {
+					rgressionReportRache.invalidate(key);
+				}
+				
+				return result;
+			}
+			catch (ExecutionException e)
+			{
+				throw new IllegalStateException(e);
+			}
+		} else {
+			return rgressionReportRache.getIfPresent(key);
+		}
+	}
+	
+	private static final LoadingCache<RegressionKey, RegressionOutput> rgressionReportRache = CacheBuilder
+			.newBuilder().maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_RETENTION, TimeUnit.MINUTES)
+			.build(new CacheLoader<RegressionKey, RegressionOutput>() {
+				
+				@Override
+				public RegressionOutput load(RegressionKey key) {
+					return key.function.executeRegression(key.serviceId, (EventFilterInput)key.input);
+				}
+			});
 
 	private static final LoadingCache<RegresionWindowKey, RegressionWindow> regressionWindowCache = CacheBuilder
 			.newBuilder().maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_RETENTION, TimeUnit.MINUTES)

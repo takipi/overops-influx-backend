@@ -468,13 +468,15 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 		List<BaseGroupByAsyncTask> result = new ArrayList<BaseGroupByAsyncTask>();
 
-		List<String> applications;
+		Collection<String> apps;
 
 		if (input.hasApplications()) {
-			applications = input.getApplications(apiClient, serviceId);
+			apps = input.getApplications(apiClient, serviceId);
 		} else {
-			applications = ClientUtil.getApplications(apiClient, serviceId);
+			apps = ClientUtil.getApplications(apiClient, serviceId);
 		}
+		
+		List<String> applications = new ArrayList<String>(apps);
 
 		int size;
 		

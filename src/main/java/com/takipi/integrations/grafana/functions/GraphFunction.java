@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -60,35 +59,6 @@ public class GraphFunction extends BaseGraphFunction {
 		super(apiClient);
 	}
 
-	protected List<Series> limitGraphSeries(List<GraphSeries> series, int limit) {
-		
-		List<GraphSeries> sorted = new ArrayList<GraphSeries>(series);
-		
-		sortSeriesByVolume(sorted);
-		
-		List<Series> result = new ArrayList<Series>();
-		
-		for (int i = 0; i < Math.min(limit, sorted.size()); i++) {
-			
-			GraphSeries graphSeries = sorted.get(i);
-			
-			if (graphSeries.volume > 0) {
-				result.add(graphSeries.series);
-			}
-		}
-		return result;
-	}
-	
-	protected void sortSeriesByVolume(List<GraphSeries> series) {
-		series.sort(new Comparator<GraphSeries>() {
-
-			@Override
-			public int compare(GraphSeries o1, GraphSeries o2) {
-				return (int)(o2.volume - o1.volume);
-			}
-		});
-	}
-	
 	@Override
 	protected List<GraphSeries> processServiceGraph(String serviceId, String viewId, String viewName,
 			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds, int pointsWanted) {
@@ -203,16 +173,16 @@ public class GraphFunction extends BaseGraphFunction {
 				continue;
 			}
 			
+			EventResult event = null;
 			long value = 0;
 			DateTime gpTime = TimeUtil.getDateTime(gp.time);
 
 			for (GraphPointContributor gpc : gp.contributors) {
 
 				if (eventMap != null) {
-					EventResult event = eventMap.get(gpc.id);
+					event = eventMap.get(gpc.id);
 
-					//if the event wasn't found we err on the side of adding its stats.
-					if ((event != null) && (eventFilter != null) && (eventFilter.filter(event))) {
+					if ((event == null) || ((eventFilter != null) && (eventFilter.filter(event)))) {
 						continue;
 					}
 				}

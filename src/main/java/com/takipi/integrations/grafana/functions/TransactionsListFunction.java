@@ -18,12 +18,15 @@ import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.TransactionsListIput;
 import com.takipi.integrations.grafana.output.Series;
+import com.takipi.integrations.grafana.util.EventLinkEncoder;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionsListFunction extends GrafanaFunction {
 
+	private static final String TIMER_MESSAGE = "Method took more than ";
+	
 	private static final List<String> FIELDS = Arrays.asList(new String[] { 
-			"Transaction", "Total", "Avg Response(ms)", "Slow %", "Slow Transactions",
+			"Link", "Transaction", "Total", "Avg Response(ms)", "Slow %", "Slow Transactions",
 			"Error %", "Failed Requests" });
 
 	public static class Factory implements FunctionFactory {
@@ -48,13 +51,11 @@ public class TransactionsListFunction extends GrafanaFunction {
 		super(apiClient);
 	}
 
-	private class TransactionData {
-
-		protected String entryPoint;
+	protected class TransactionData {
+		protected Transaction transaction;
 		protected long timersHits;
 		protected long errorsHits;
-		protected long invocations;
-		protected double avgTime;
+		protected EventResult currTimer;
 	}
 
 	private List<List<Object>> processServiceTransactions(String serviceId, Pair<DateTime, DateTime> timeSpan,
@@ -73,37 +74,76 @@ public class TransactionsListFunction extends GrafanaFunction {
 			return Collections.emptyList();
 		}
 		 
-		List<List<Object>> result = formatResultObjects(transactions);
+		List<List<Object>> result = formatResultObjects(transactions, serviceId, timeSpan, input);
 		
 		return result;	
 	}
 	
-	private List<List<Object>> formatResultObjects(Map<String, TransactionData> transactions) {
+	private String getTransactionMessage(TransactionData transaction) {
+		
+		String result;
+		String transactionName = getTransactionName(transaction.transaction.name, true);
+		
+		if (transaction.currTimer != null) {
+						
+			if (transaction.currTimer.message != null) {
+				int index = transaction.currTimer.message.indexOf(TIMER_MESSAGE);
+				
+				if (index != -1) {
+					result = transactionName + " > " + transaction.currTimer.message.substring(index + TIMER_MESSAGE.length());
+				} else {
+					result = transactionName + ": " + transaction.currTimer.message;	
+				}	
+			} else {
+				result = transactionName;
+			}
+		} else {
+			result = transactionName;
+		}
+		
+		return result;
+	}
+	
+	private List<List<Object>> formatResultObjects(Map<String, TransactionData> transactions, 
+			String serviceId, Pair<DateTime, DateTime> timeSpan,
+			TransactionsListIput input) {
 		
 		List<List<Object>> result = new ArrayList<List<Object>>(transactions.size());
 
 		for (TransactionData transaction : transactions.values()) {
 
-			String name = getSimpleClassName(transaction.entryPoint);
-			
+			String name = getTransactionMessage(transaction);
+					
 			double errorRate;
+			long invocations = transaction.transaction.stats.invocations;
 			
-			if ( transaction.invocations > 0) {
-				errorRate = (double)transaction.errorsHits / (double)transaction.invocations;
+			if (invocations > 0) {
+				errorRate = (double)transaction.errorsHits / (double)invocations;
 			} else {
 				errorRate = 0;
 			}
 			
 			double timerRate;
-			
-			if (transaction.invocations > 0) {
-				timerRate = (double)transaction.timersHits / (double)transaction.invocations;
+						
+			if (invocations > 0) {
+				timerRate = (double)transaction.timersHits / (double)invocations;
 			} else {
 				timerRate = 0;	
 			}
 
-			Object[] object = new Object[] { name, transaction.invocations,
-					Long.valueOf((long)transaction.avgTime), timerRate, transaction.timersHits, errorRate, transaction.errorsHits };
+			
+			String link;
+			
+			if (transaction.currTimer != null) {
+				link = EventLinkEncoder.encodeLink(apiClient, serviceId, input, transaction.currTimer, 
+					timeSpan.getFirst(), timeSpan.getSecond());
+			} else {
+				link = null;
+			}
+			
+			Object[] object = new Object[] { link, name, invocations,
+					Long.valueOf((long)transaction.transaction.stats.avg_time), timerRate, 
+					transaction.timersHits, errorRate, transaction.errorsHits };
 			
 			result.add(Arrays.asList(object));
 		}
@@ -111,11 +151,27 @@ public class TransactionsListFunction extends GrafanaFunction {
 		return result;
 	}
 	
+	private TransactionData getTransactionData(Map<String, TransactionData> transactions, EventResult event) {
+		
+		TransactionData result = transactions.get(event.entry_point.class_name);
+
+		if (result == null) {
+			
+			result = transactions.get(toTransactionName(event.entry_point));
+			
+			if (result == null) {
+				return null;
+			}
+		}
+		
+		return result;
+	}
+	
 	private void updateTransactionEvents(String serviceId, Pair<DateTime, DateTime> timeSpan,
 			TransactionsListIput input, Map<String, TransactionData> transactions) 
 	{
 		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, timeSpan.getFirst(),
-			timeSpan.getSecond(), VolumeType.all, input.pointsWanted);
+			timeSpan.getSecond(), VolumeType.hits, input.pointsWanted);
 		
 		if (eventsMap == null) {
 			return;
@@ -128,20 +184,36 @@ public class TransactionsListFunction extends GrafanaFunction {
 			if (event.entry_point == null) {
 				continue;
 			}
+				
+			TransactionData transaction = getTransactionData(transactions, event);
 			
-			TransactionData transaction = transactions.get(event.entry_point.class_name);
-
 			if (transaction == null) {
 				continue;
 			}
-			
-			if (eventFilter.filter(event)) {
-				continue;
-			}
 
-			if (event.type.equals("Timer")) {
+			if (event.type.equals(TIMER)) {
+				
 				transaction.timersHits += event.stats.hits;
+
+				if (transaction.currTimer == null) {
+					transaction.currTimer = event;
+				} else {
+					DateTime evrntFirstSeen = TimeUtil.getDateTime(event.first_seen);
+					DateTime timerFirstSeen = TimeUtil.getDateTime(transaction.currTimer.first_seen);
+					
+					long eventDelta = timeSpan.getSecond().getMillis() - evrntFirstSeen.getMillis();
+					long timerDelta = timeSpan.getSecond().getMillis() - timerFirstSeen.getMillis();
+
+					if (eventDelta < timerDelta) {
+						transaction.currTimer = event;
+					}				
+				}	
 			} else {
+
+				if (eventFilter.filter(event)) {
+					continue;
+				}
+				
 				transaction.errorsHits += event.stats.hits;
 			}
 		}
@@ -155,31 +227,12 @@ public class TransactionsListFunction extends GrafanaFunction {
 		if (transactions == null) {
 			return Collections.emptyMap();
 		}
-		
-		Collection<String> transactionsFilter;
-		
-		if (input.hasTransactions()) {
-			transactionsFilter = input.getTransactions(serviceId);
-		} else {
-			transactionsFilter = null;
-		}
 				
 		Map<String, TransactionData> result = new HashMap<String, TransactionData>();
 
-		for (Transaction transaction :transactions) {
-			
-			String simpleName = getSimpleClassName(transaction.name);
-				
-			if ((transactionsFilter != null) && (!transactionsFilter.contains(simpleName))) {
-				continue;
-			}
-			
-			TransactionData transactionData = new TransactionData();
-			
-			transactionData.invocations = transaction.stats.invocations;
-			transactionData.avgTime = transaction.stats.avg_time;
-			transactionData.entryPoint = transaction.name;
-			
+		for (Transaction transaction :transactions) {	
+			TransactionData transactionData = new TransactionData();	
+			transactionData.transaction = transaction;
 			result.put(toQualified(transaction.name), transactionData);
 		}
 		

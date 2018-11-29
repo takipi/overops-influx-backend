@@ -22,8 +22,10 @@ public class DeploymentUtil {
 		Response<DeploymentsResult> response = apiClient.get(request);
 
 		if ((response.isBadResponse()) || (response.data == null)) {
-			throw new IllegalStateException(
-					"Could not acquire deployments for service " + serviceId + " . Error " + response.responseCode);
+			System.err.println("Could not acquire deployments for service " + 
+					serviceId + " . Error " + response.responseCode);
+			
+			return Collections.emptyList();
 		}
 
 		if (response.data.deployments == null) {
@@ -74,8 +76,15 @@ public class DeploymentUtil {
 	
 	private static List<String> getAllDeployments(ApiClient apiClient, String serviceId) {
 		
-		List<String> result = ClientUtil.getDeployments(apiClient, serviceId);
-		sortDeployments(result);
+		List<String> result;
+		
+		try {
+			result = ClientUtil.getDeployments(apiClient, serviceId);
+			sortDeployments(result);
+		} catch (Exception e) {
+			System.err.println(e);
+			return Collections.emptyList();
+		}
 		
 		return result;
 	}

@@ -106,6 +106,35 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		return result;
 	}
 	
+	protected List<Series> limitGraphSeries(List<GraphSeries> series, int limit) {
+		
+		List<GraphSeries> sorted = new ArrayList<GraphSeries>(series);
+		
+		sortSeriesByVolume(sorted);
+		
+		List<Series> result = new ArrayList<Series>();
+		
+		for (int i = 0; i < Math.min(limit, sorted.size()); i++) {
+			
+			GraphSeries graphSeries = sorted.get(i);
+			
+			if (graphSeries.volume > 0) {
+				result.add(graphSeries.series);
+			}
+		}
+		return result;
+	}
+	
+	protected void sortSeriesByVolume(List<GraphSeries> series) {
+		series.sort(new Comparator<GraphSeries>() {
+
+			@Override
+			public int compare(GraphSeries o1, GraphSeries o2) {
+				return (int)(o2.volume - o1.volume);
+			}
+		});
+	}
+	
 	protected Collection<Callable<Object>> getTasks(Collection<String> serviceIds, BaseGraphInput input,
 			Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
 		

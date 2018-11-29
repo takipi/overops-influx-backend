@@ -36,7 +36,14 @@ public class DeploymentsFunction extends EnvironmentVariableFunction {
 	protected void populateServiceValues(EnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender) {
 
-		List<String> serviceDeps = ClientUtil.getDeployments(apiClient, serviceId);
+		List<String> serviceDeps;
+		
+		try {
+			serviceDeps = ClientUtil.getDeployments(apiClient, serviceId);
+		} catch (Exception e) {
+			System.err.println(e);
+			return;
+		}
 
 		for (String dep : serviceDeps) {
 
