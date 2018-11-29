@@ -1,30 +1,4 @@
 {
-  "__requires": [
-    {
-      "type": "grafana",
-      "id": "grafana",
-      "name": "Grafana",
-      "version": "5.3.2"
-    },
-    {
-      "type": "panel",
-      "id": "graph",
-      "name": "Graph",
-      "version": "5.0.0"
-    },
-    {
-      "type": "datasource",
-      "id": "influxdb",
-      "name": "InfluxDB",
-      "version": "5.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "table",
-      "name": "Table",
-      "version": "5.0.0"
-    }
-  ],
   "annotations": {
     "list": [
       {
@@ -44,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1542572826781,
+  "iteration": 1543495429488,
   "links": [
     {
       "asDropdown": true,
@@ -68,11 +42,12 @@
       "fill": 1,
       "gridPos": {
         "h": 9,
-        "w": 12,
+        "w": 8,
         "x": 0,
         "y": 0
       },
-      "id": 47,
+      "hideTimeOverride": true,
+      "id": 51,
       "interval": "1h",
       "legend": {
         "alignAsTable": false,
@@ -95,8 +70,16 @@
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "/.*[0-9]/",
+          "alias": "/ o$/",
           "color": "#7eb26d"
+        },
+        {
+          "alias": "/ w$/",
+          "color": "#f2c96d"
+        },
+        {
+          "alias": "/ x$/",
+          "color": "#f9ba8f"
         }
       ],
       "spaceLength": 10,
@@ -122,7 +105,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "groupBy({\"type\":\"count\",\"field\":\"introduced_by\",\"limit\":5,\"volumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"types\":\"$type\", \"pointsWanted\":24})",
+          "query": "regressionReport({\"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"render\":\"Graph\", \"mode\":\"Applications\", \"limit\":5,\"thresholds\":\"70,85\", \"postfixes\":\" c, w, o\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -148,8 +131,8 @@
           "colorMode": "critical",
           "fill": true,
           "line": true,
-          "op": "gt",
-          "value": 4,
+          "op": "lt",
+          "value": 70,
           "yaxis": "left"
         },
         {
@@ -157,21 +140,21 @@
           "fill": true,
           "line": true,
           "op": "gt",
-          "value": 2,
+          "value": 70,
           "yaxis": "left"
         },
         {
           "colorMode": "ok",
           "fill": true,
           "line": true,
-          "op": "lt",
-          "value": 2,
+          "op": "gt",
+          "value": 85,
           "yaxis": "left"
         }
       ],
-      "timeFrom": null,
+      "timeFrom": "$timeRange",
       "timeShift": null,
-      "title": "New $type in last 5 deployments",
+      "title": "Application Score",
       "tooltip": {
         "shared": false,
         "sort": 0,
@@ -182,7 +165,7 @@
         "buckets": null,
         "mode": "series",
         "name": null,
-        "show": true,
+        "show": false,
         "values": [
           "total"
         ]
@@ -192,8 +175,169 @@
           "decimals": null,
           "format": "short",
           "label": null,
-          "logBase": 10,
-          "max": "0",
+          "logBase": 1,
+          "max": "100",
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "locale",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": true,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "OO",
+      "fill": 1,
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 8,
+        "y": 0
+      },
+      "hideTimeOverride": true,
+      "id": 52,
+      "interval": "1h",
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": false,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null as zero",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "/ o$/",
+          "color": "#7eb26d"
+        },
+        {
+          "alias": "/ w$/",
+          "color": "#f2c96d"
+        },
+        {
+          "alias": "/ c$/",
+          "color": "#f9ba8f"
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "regressionReport({\"timeFilter\":\"time >= now() - $timeRange\" ,\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"render\":\"Graph\", \"mode\":\"Deployments\", \"limit\":5, \"thresholds\":\"70,85\", \"postfixes\":\" c, w, o\"})",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": [
+        {
+          "colorMode": "ok",
+          "fill": true,
+          "line": true,
+          "op": "lt",
+          "value": 101,
+          "yaxis": "left"
+        },
+        {
+          "colorMode": "warning",
+          "fill": true,
+          "line": true,
+          "op": "lt",
+          "value": 85,
+          "yaxis": "left"
+        },
+        {
+          "colorMode": "critical",
+          "fill": true,
+          "line": true,
+          "op": "lt",
+          "value": 70,
+          "yaxis": "left"
+        }
+      ],
+      "timeFrom": "$timeRange",
+      "timeShift": null,
+      "title": "Deployment Score",
+      "tooltip": {
+        "shared": false,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "series",
+        "name": null,
+        "show": false,
+        "values": [
+          "total"
+        ]
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": "100",
           "min": "0",
           "show": true
         },
@@ -220,10 +364,11 @@
       "fill": 1,
       "gridPos": {
         "h": 9,
-        "w": 12,
-        "x": 12,
+        "w": 8,
+        "x": 16,
         "y": 0
       },
+      "hideTimeOverride": true,
       "id": 50,
       "interval": "1h",
       "legend": {
@@ -247,8 +392,16 @@
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "/.*[0-9]/",
+          "alias": "/ o$/",
           "color": "#7eb26d"
+        },
+        {
+          "alias": "/ w$/",
+          "color": "#f2c96d"
+        },
+        {
+          "alias": "/ c$/",
+          "color": "#f9ba8f"
         }
       ],
       "spaceLength": 10,
@@ -274,7 +427,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"fields\":\"link,type,issueType,message,error_location,entry_point,regression\", \"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\", \"activeTimespan\":\"$activeTimespan\",\"minBaselineTimespan\":\"$minBaselineTimespan\",\"baselineTimespanFactor\":\"$baselineTimespanFactor\",\"minVolumeThreshold\":\"$minVolumeThreshold\",\"minErrorRateThreshold\":\"$minErrorRateThreshold\",\"regressionDelta\":\"$regressionDelta\",\"criticalRegressionDelta\":\"$criticalRegressionDelta\",\"applySeasonality\": \"$applySeasonality\",\"criticalExceptionTypes\":\"$criticalExceptionTypes\",\"maxColumnLength\":60, \"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"newEventScore\":\"$newEventScore\", \"severeNewEventScore\":\"$severeNewEventScore\",\"regressionScore\":\"$regressionScore\",\"criticalRegressionScore\":\"$criticalRegressionScore\", \"mode\":\"$regressionMode\", \"graph\":true, \"mode\":\"Deployments\", \"limit\":10})",
+          "query": "regressionReport({\"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"render\":\"Graph\", \"mode\":\"Tiers\", \"limit\":5,\"thresholds\":\"70,85\", \"postfixes\":\" c, w, o\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -297,11 +450,11 @@
       ],
       "thresholds": [
         {
-          "colorMode": "critical",
+          "colorMode": "ok",
           "fill": true,
           "line": true,
-          "op": "gt",
-          "value": 4,
+          "op": "lt",
+          "value": 101,
           "yaxis": "left"
         },
         {
@@ -309,21 +462,21 @@
           "fill": true,
           "line": true,
           "op": "lt",
-          "value": 4,
+          "value": 85,
           "yaxis": "left"
         },
         {
-          "colorMode": "ok",
+          "colorMode": "critical",
           "fill": true,
           "line": true,
           "op": "lt",
-          "value": 2,
+          "value": 70,
           "yaxis": "left"
         }
       ],
-      "timeFrom": null,
+      "timeFrom": "$timeRange",
       "timeShift": null,
-      "title": "Deployment Score",
+      "title": "Tier Score",
       "tooltip": {
         "shared": false,
         "sort": 0,
@@ -334,7 +487,7 @@
         "buckets": null,
         "mode": "series",
         "name": null,
-        "show": true,
+        "show": false,
         "values": [
           "total"
         ]
@@ -344,8 +497,8 @@
           "decimals": null,
           "format": "short",
           "label": null,
-          "logBase": 10,
-          "max": "0",
+          "logBase": 1,
+          "max": "100",
           "min": "0",
           "show": true
         },
@@ -374,18 +527,19 @@
         "x": 0,
         "y": 9
       },
+      "hideTimeOverride": true,
       "id": 41,
       "links": [],
       "pageSize": 10,
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 5,
-        "desc": true
+        "col": 4,
+        "desc": false
       },
       "styles": [
         {
-          "alias": "",
+          "alias": "Name",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -396,10 +550,10 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "$regressionName",
-          "linkUrl": "/dashboard/d/4DHQ63-ik/application-reliability?orgId=1&var-applications=${__cell}&var-environments=$environments",
+          "linkTooltip": "Open ${__cell}",
+          "linkUrl": "/d/4DHQ63-ik/application-reliability?orgId=1&var-environments=$environments&var-$varRedirect=$postfixRedirect${__cell}&$type&var-transactions=$transactions&var-timeRange=$timeRange",
           "mappingType": 1,
-          "pattern": "App Name",
+          "pattern": "Name",
           "rangeMaps": [
             {
               "from": "S6295#45721#1538336116202#604800000",
@@ -416,12 +570,12 @@
           "alias": "Score",
           "colorMode": "cell",
           "colors": [
-            "rgba(50, 172, 45, 0.97)",
+            "rgba(245, 54, 54, 0.9)",
             "rgba(237, 129, 40, 0.89)",
-            "rgba(245, 54, 54, 0.9)"
+            "rgba(50, 172, 45, 0.97)"
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
+          "decimals": 0,
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "",
@@ -429,8 +583,8 @@
           "mappingType": 1,
           "pattern": "Score",
           "thresholds": [
-            "2",
-            "4"
+            "70",
+            "85"
           ],
           "type": "number",
           "unit": "short"
@@ -448,7 +602,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "Compare the numbers of events who have regressed between $regressionName  ",
-          "linkUrl": "/dashboard/d/4DHQ63-ik/application-reliability?orgId=1&var-applications=${__cell}&var-environments=$environments",
+          "linkUrl": "/d/4DHQ63-ik/application-reliability?orgId=1&var-applications=${__cell}&var-environments=$environments",
           "mappingType": 1,
           "pattern": "Regressions",
           "thresholds": [],
@@ -467,7 +621,7 @@
           "decimals": 0,
           "link": true,
           "linkTooltip": "Compare the numbers of events who have critically regressed between $regressionName  ",
-          "linkUrl": "/dashboard/d/4DHQ63-ik/application-reliability?orgId=1&var-applications=${__cell}&var-environments=$environments",
+          "linkUrl": "/d/4DHQ63-ik/application-reliability?orgId=1&var-applications=${__cell}&var-environments=$environments",
           "mappingType": 1,
           "pattern": "Severe Regressions",
           "thresholds": [],
@@ -493,7 +647,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"fields\":\"link,type,issueType,message,error_location,entry_point,regression\", \"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\", \"activeTimespan\":\"$activeTimespan\",\"minBaselineTimespan\":\"$minBaselineTimespan\",\"baselineTimespanFactor\":\"$baselineTimespanFactor\",\"minVolumeThreshold\":\"$minVolumeThreshold\",\"minErrorRateThreshold\":\"$minErrorRateThreshold\",\"regressionDelta\":\"$regressionDelta\",\"criticalRegressionDelta\":\"$criticalRegressionDelta\",\"applySeasonality\": \"$applySeasonality\",\"criticalExceptionTypes\":\"$criticalExceptionTypes\",\"maxColumnLength\":60, \"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"newEventScore\":\"$newEventScore\", \"severeNewEventScore\":\"$severeNewEventScore\",\"regressionScore\":\"$regressionScore\",\"criticalRegressionScore\":\"$criticalRegressionScore\", \"mode\":\"$regressionMode\", \"limit\":10})",
+          "query": "regressionReport({\"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"render\":\"Grid\", \"mode\":\"$regressionMode\", \"limit\":10})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -514,9 +668,24 @@
           "tags": []
         }
       ],
-      "title": "",
+      "timeFrom": "$timeRange",
+      "title": "$regressionMode",
       "transform": "table",
       "type": "table"
+    },
+    {
+      "content": "<script>\n\nfunction hide(name) {\n  var element = document.getElementsByClassName(name);\n  \n  if ((element) && (element.length == 1)) {\n    element[0].style.display = 'none';\n  }\n\n}\n\nfunction hideButtons() {\n  hide(\"btn navbar-button gf-timepicker-nav-btn\");\n  hide(\"navbar-buttons navbar-buttons--zoom\");\n}\n\nhideButtons();\n\n</script>\n\n\n",
+      "gridPos": {
+        "h": 1,
+        "w": 1,
+        "x": 0,
+        "y": 18
+      },
+      "id": 54,
+      "links": [],
+      "mode": "html",
+      "title": "",
+      "type": "text"
     }
   ],
   "refresh": false,
@@ -528,7 +697,7 @@
   "templating": {
     "list": [
       {
-        "allValue": "*",
+        "allValue": "all",
         "current": {},
         "datasource": "OO",
         "hide": 0,
@@ -549,7 +718,7 @@
         "useTags": false
       },
       {
-        "allValue": "*",
+        "allValue": "all",
         "current": {},
         "datasource": "OO",
         "hide": 0,
@@ -559,7 +728,7 @@
         "name": "applications",
         "options": [],
         "query": "applications({\"environments\":\"$environments\",\"sorted\":\"true\"})",
-        "refresh": 1,
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -570,7 +739,7 @@
         "useTags": false
       },
       {
-        "allValue": "*",
+        "allValue": "all",
         "current": {},
         "datasource": "OO",
         "hide": 0,
@@ -580,7 +749,7 @@
         "name": "servers",
         "options": [],
         "query": "servers({\"environments\":\"$environments\",\"sorted\":\"true\"})",
-        "refresh": 1,
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -591,7 +760,7 @@
         "useTags": false
       },
       {
-        "allValue": "*",
+        "allValue": "all",
         "current": {},
         "datasource": "OO",
         "hide": 0,
@@ -638,13 +807,55 @@
         "allValue": "all",
         "current": {},
         "datasource": "OO",
-        "hide": 0,
+        "hide": 2,
+        "includeAll": true,
+        "label": "Transactions",
+        "multi": true,
+        "name": "transactions",
+        "options": [],
+        "query": "transactions({\"environments\":\"$environments\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - 7d\",\"sorted\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": "all",
+        "current": {},
+        "datasource": "OO",
+        "hide": 2,
         "includeAll": true,
         "label": "Type",
         "multi": true,
         "name": "type",
         "options": [],
-        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"All Events\", \"types\":\"Logged Error|Uncaught Exception|Logged Warning|Swallowed Exception|HTTP Error|Timer|Caught Exception\"})",
+        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Points Wanted",
+        "multi": false,
+        "name": "pointsWanted",
+        "options": [],
+        "query": "settingsVar({\"environments\":\"$environments\", \"name\":\"pointsWanted\", \"defaultValue\":24})",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -656,465 +867,11 @@
         "useTags": false
       },
       {
-        "allValue": "*",
-        "current": {},
-        "datasource": "OO",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Transactions",
-        "multi": true,
-        "name": "transactions",
-        "options": [],
-        "query": "transactions({\"environments\":\"$environments\",\"view\":\"All Events\",\"timeFilter\":\"time >= now() - 7d\",\"sorted\":\"true\"})",
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "text": "AppPeriodicPushTask",
-          "value": "AppPeriodicPushTask"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Key Transactions",
-        "multi": false,
-        "name": "keyTransactions",
-        "options": [
-          {
-            "selected": false,
-            "text": "AppPeriodicPushTask|GracefulTask",
-            "value": "AppPeriodicPushTask|GracefulTask"
-          }
-        ],
-        "query": "AppPeriodicPushTask|GracefulTask",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "24",
-          "value": "24"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Points Wanted",
-        "multi": false,
-        "name": "pointsWanted",
-        "options": [
-          {
-            "selected": true,
-            "text": "24",
-            "value": "24"
-          }
-        ],
-        "query": "24",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {},
-        "datasource": "OO",
-        "hide": 2,
-        "includeAll": false,
-        "label": "regressionName",
-        "multi": false,
-        "name": "regressionName",
-        "options": [],
-        "query": "regressionName({\"environments\":\"$environments\",\"deployments\":\"$deployments\",\"activeTimespan\":\"$activeTimespan\", \"minBaselineTimespan\":\"$minBaselineTimespan\",\"baselineTimespanFactor\":\"$baselineTimespanFactor\", \"view\":\"All Events\"})",
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {},
-        "datasource": "OO",
-        "hide": 2,
-        "includeAll": false,
-        "label": "DeploymentName",
-        "multi": false,
-        "name": "deploymentName",
-        "options": [],
-        "query": "deploymentName({\"environments\":\"$environments\",\"deployments\":\"$deployments\",\"activeTimespan\":\"$activeTimespan\", \"baselineTimespan\":\"$baselineTimespan\", \"view\":\"All Events\"})",
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "20160",
-          "value": "20160"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Min Baseline Timespan",
-        "multi": false,
-        "name": "minBaselineTimespan",
-        "options": [
-          {
-            "selected": true,
-            "text": "20160",
-            "value": "20160"
-          }
-        ],
-        "query": "20160",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "4",
-          "value": "4"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Baseline Timespan Factor",
-        "multi": false,
-        "name": "baselineTimespanFactor",
-        "options": [
-          {
-            "selected": true,
-            "text": "4",
-            "value": "4"
-          }
-        ],
-        "query": "4",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "1440",
-          "value": "1440"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Active Timespan",
-        "multi": false,
-        "name": "activeTimespan",
-        "options": [
-          {
-            "selected": true,
-            "text": "1440",
-            "value": "1440"
-          }
-        ],
-        "query": "1440",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "true",
-          "value": "true"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Apply Seasonality",
-        "multi": false,
-        "name": "applySeasonality",
-        "options": [
-          {
-            "selected": true,
-            "text": "true",
-            "value": "true"
-          },
-          {
-            "selected": false,
-            "text": "false",
-            "value": "false"
-          }
-        ],
-        "query": "true,false",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "50",
-          "value": "50"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Min Volume Threshold",
-        "multi": false,
-        "name": "minVolumeThreshold",
-        "options": [
-          {
-            "selected": true,
-            "text": "50",
-            "value": "50"
-          }
-        ],
-        "query": "50",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "0.1",
-          "value": "0.1"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Min Error Rate Threshold",
-        "multi": false,
-        "name": "minErrorRateThreshold",
-        "options": [
-          {
-            "selected": true,
-            "text": "0.1",
-            "value": "0.1"
-          }
-        ],
-        "query": "0.1",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "1",
-          "value": "1"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Critical Regression Delta",
-        "multi": false,
-        "name": "criticalRegressionDelta",
-        "options": [
-          {
-            "selected": true,
-            "text": "1",
-            "value": "1"
-          }
-        ],
-        "query": "1",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "0.5",
-          "value": "0.5"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Regression Delta",
-        "multi": false,
-        "name": "regressionDelta",
-        "options": [
-          {
-            "selected": true,
-            "text": "0.5",
-            "value": "0.5"
-          }
-        ],
-        "query": "0.5",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "NullPointerException",
-          "value": "NullPointerException"
-        },
-        "hide": 2,
-        "includeAll": true,
-        "label": "Critical Types",
-        "multi": true,
-        "name": "criticalExceptionTypes",
-        "options": [
-          {
-            "selected": false,
-            "text": "All",
-            "value": "$__all"
-          },
-          {
-            "selected": true,
-            "text": "NullPointerException",
-            "value": "NullPointerException"
-          },
-          {
-            "selected": false,
-            "text": "IndexOutOfBoundsException",
-            "value": "IndexOutOfBoundsException"
-          },
-          {
-            "selected": false,
-            "text": "InvalidCastException",
-            "value": "InvalidCastException"
-          },
-          {
-            "selected": false,
-            "text": "AssertionError",
-            "value": "AssertionError"
-          }
-        ],
-        "query": "NullPointerException,IndexOutOfBoundsException,InvalidCastException,AssertionError",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "text": "Logged Error|Logged Warning|HTTP Error|Uncaught Exception|Timer",
-          "value": "Logged Error|Logged Warning|HTTP Error|Uncaught Exception|Timer"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Defaut Types",
-        "multi": false,
-        "name": "defaultTypes",
-        "options": [
-          {
-            "selected": false,
-            "text": "Logged Error|Logged Warning|HTTP Error|Timer",
-            "value": "Logged Error|Logged Warning|HTTP Error|Timer"
-          }
-        ],
-        "query": "Logged Error|Logged Warning|HTTP Error|Timer",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "1",
-          "value": "1"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "New Event Score",
-        "multi": false,
-        "name": "newEventScore",
-        "options": [
-          {
-            "selected": true,
-            "text": "1",
-            "value": "1"
-          }
-        ],
-        "query": "1",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "2",
-          "value": "2"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Severe NewE vent Score",
-        "multi": false,
-        "name": "severeNewEventScore",
-        "options": [
-          {
-            "selected": true,
-            "text": "2",
-            "value": "2"
-          }
-        ],
-        "query": "2",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "2",
-          "value": "2"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Critical Regressions Score",
-        "multi": false,
-        "name": "criticalRegressionScore",
-        "options": [
-          {
-            "selected": true,
-            "text": "2",
-            "value": "2"
-          }
-        ],
-        "query": "2",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "1",
-          "value": "1"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Regressions Score",
-        "multi": false,
-        "name": "regressionScore",
-        "options": [
-          {
-            "selected": true,
-            "text": "1",
-            "value": "1"
-          }
-        ],
-        "query": "1",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
         "allValue": null,
         "current": {
           "tags": [],
-          "text": "Deployments",
-          "value": "Deployments"
+          "text": "Tiers",
+          "value": "Tiers"
         },
         "hide": 0,
         "includeAll": false,
@@ -1141,11 +898,116 @@
         "query": "Applications,Deployments,Tiers",
         "skipUrlSync": false,
         "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "7d",
+          "value": "7d"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Last",
+        "multi": false,
+        "name": "timeRange",
+        "options": [
+          {
+            "selected": false,
+            "text": "30m",
+            "value": "30m"
+          },
+          {
+            "selected": false,
+            "text": "1h",
+            "value": "1h"
+          },
+          {
+            "selected": false,
+            "text": "4h",
+            "value": "4h"
+          },
+          {
+            "selected": false,
+            "text": "8h",
+            "value": "8h"
+          },
+          {
+            "selected": false,
+            "text": "24h",
+            "value": "24h"
+          },
+          {
+            "selected": false,
+            "text": "2d",
+            "value": "2d"
+          },
+          {
+            "selected": true,
+            "text": "7d",
+            "value": "7d"
+          },
+          {
+            "selected": false,
+            "text": "14d",
+            "value": "14d"
+          },
+          {
+            "selected": false,
+            "text": "1m",
+            "value": "1m"
+          }
+        ],
+        "query": "30m,1h,4h,8h,24h,2d,7d,14d,1m",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "varRedirect",
+        "options": [],
+        "query": "variableRedirect({\"dictionary\":\"Applications:applications,Deployments:deployments,Tiers:type\", \"variable\":\"$regressionMode\"})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "postfixRedirect",
+        "options": [],
+        "query": "variableRedirect({\"dictionary\":\"Tiers:-\", \"variable\":\"$regressionMode\"})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-2d",
     "to": "now"
   },
   "timepicker": {
@@ -1175,7 +1037,7 @@
     ]
   },
   "timezone": "",
-  "title": "Reliability Report",
+  "title": "Reliability Scorecard",
   "uid": "lfqKXMfmz",
-  "version": 3
+  "version": 16
 }

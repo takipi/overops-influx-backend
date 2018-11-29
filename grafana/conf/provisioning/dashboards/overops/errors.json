@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1542572278013,
+  "iteration": 1543495161189,
   "links": [
     {
       "asDropdown": true,
@@ -96,44 +96,6 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "Times",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",seriesName\":\"Times\", \"transactions\":\"$transactions\"})\n",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        },
-        {
           "alias": "Throughput",
           "groupBy": [
             {
@@ -173,6 +135,7 @@
           "tags": []
         },
         {
+          "alias": "Times",
           "groupBy": [
             {
               "params": [
@@ -187,9 +150,48 @@
               "type": "fill"
             }
           ],
+          "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "splitGraph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"introducedBy\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",seriesName\":\"Times\", \"transactions\":\"$transactions\", \"limit\":\"$splitLimit\"})\n",
+          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",seriesName\":\"Times\", \"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "splitGraph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",\"transactions\":\"$transactions\", \"limit\":\"$splitLimit\", \"searchText\":\"$search\"})\n",
           "rawQuery": true,
           "refId": "C",
           "resultFormat": "time_series",
@@ -268,8 +270,8 @@
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 4,
-        "desc": false
+        "col": 6,
+        "desc": true
       },
       "styles": [
         {
@@ -285,14 +287,14 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "Go to Root Cause",
-          "linkUrl": "../tale.html?snapshot==${__cell}&source=45",
+          "linkUrl": "../tale.html?source=45&snapshot==${__cell}",
           "mappingType": 1,
           "pattern": "Link",
           "rangeMaps": [
             {
-              "from": "S6295#45721#1538336116202#604800000",
-              "text": "moo",
-              "to": "S6295#45721#1538336116202#604800000"
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
             }
           ],
           "thresholds": [],
@@ -313,7 +315,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "../tale.html?snapshot==${__cell_0}&source=45",
+          "linkUrl": "../tale.html?source=45&snapshot==${__cell_0}",
           "mappingType": 1,
           "pattern": "Hits",
           "thresholds": [],
@@ -333,31 +335,11 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "../tale.html?snapshot==${__cell_0}&source=45",
+          "linkUrl": "../tale.html?source=45&snapshot==${__cell_0}",
           "mappingType": 1,
           "pattern": "Entry point",
           "thresholds": [],
           "type": "hidden",
-          "unit": "short"
-        },
-        {
-          "alias": "Introduced By",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": false,
-          "linkTargetBlank": true,
-          "linkTooltip": "",
-          "linkUrl": "../tale.html?snapshot==${__cell_0}&source=45",
-          "mappingType": 1,
-          "pattern": "Introduced by",
-          "thresholds": [],
-          "type": "number",
           "unit": "short"
         },
         {
@@ -373,7 +355,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "../tale.html?snapshot==${__cell_0}&source=45",
+          "linkUrl": "../tale.html?source=45&snapshot==${__cell_0}",
           "mappingType": 1,
           "pattern": "First seen",
           "thresholds": [],
@@ -393,7 +375,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "../tale.html?snapshot==${__cell_0}&source=45",
+          "linkUrl": "../tale.html?source=45&snapshot==${__cell_0}",
           "mappingType": 1,
           "pattern": "Type",
           "preserveFormat": false,
@@ -445,7 +427,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "../tale.html?snapshot==${__cell_0}&source=45",
+          "linkUrl": "../tale.html?source=45&snapshot==${__cell_0}",
           "mappingType": 1,
           "pattern": "Name",
           "thresholds": [],
@@ -453,7 +435,7 @@
           "unit": "short"
         },
         {
-          "alias": "Code Location",
+          "alias": "Location",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -464,8 +446,8 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "Go to root cause",
-          "linkUrl": "../tale.html?snapshot=${__cell_0}&source=45",
+          "linkTooltip": "${__cell_1} in ${__cell_2}, introduced by ${__cell_3}: Click for root cause",
+          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Error location",
           "thresholds": [],
@@ -485,12 +467,48 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "../tale.html?snapshot==${__cell_0}&source=45",
+          "linkUrl": "../tale.html?source=45&snapshot==${__cell_0}",
           "mappingType": 1,
           "pattern": "Rate",
           "thresholds": [],
           "type": "number",
           "unit": "percentunit"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": true,
+          "linkTargetBlank": true,
+          "linkTooltip": "${__cell_1} in ${__cell_2}, introduced by ${__cell_3}: Click for root cause",
+          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
+          "mappingType": 1,
+          "pattern": "Message",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Introduced by",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
         }
       ],
       "targets": [
@@ -511,7 +529,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "events({\"fields\":\"link,type,message,error_location,first_seen,stats.hits,rate\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":80, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\"})\n",
+          "query": "events({\"fields\":\"link,type,entry_point,introduced_by, message,error_location,stats.hits,rate,first_seen\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":80, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -618,7 +636,7 @@
         "multi": true,
         "name": "type",
         "options": [],
-        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"All Events\", \"types\":\"Logged Error|Uncaught Exception|Logged Warning|Swallowed Exception|HTTP Error|Timer|Caught Exception\"})",
+        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"All Events\"})",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -673,31 +691,52 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "24",
-          "value": "24"
-        },
+        "current": {},
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": "Points Wanted",
         "multi": false,
         "name": "pointsWanted",
+        "options": [],
+        "query": "settingsVar({\"environments\":\"$environments\", \"name\":\"pointsWanted\", \"defaultValue\":24})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "tags": [],
+          "text": "<term>",
+          "value": "<term>"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Find",
+        "multi": false,
+        "name": "search",
         "options": [
           {
             "selected": true,
-            "text": "24",
-            "value": "24"
+            "text": "<term>",
+            "value": "<term>"
           }
         ],
-        "query": "24",
+        "query": "<term>",
         "skipUrlSync": false,
         "type": "custom"
       },
       {
         "allValue": null,
         "current": {
-          "tags": [],
+          "selected": true,
           "text": "3",
           "value": "3"
         },
@@ -708,12 +747,22 @@
         "name": "splitLimit",
         "options": [
           {
+            "selected": false,
+            "text": "0",
+            "value": "0"
+          },
+          {
             "selected": true,
             "text": "3",
             "value": "3"
+          },
+          {
+            "selected": false,
+            "text": "5",
+            "value": "5"
           }
         ],
-        "query": "3",
+        "query": "0,3,5",
         "skipUrlSync": false,
         "type": "custom"
       },
@@ -743,7 +792,7 @@
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-2d",
     "to": "now"
   },
   "timepicker": {
@@ -773,7 +822,7 @@
     ]
   },
   "timezone": "",
-  "title": "Event Analysis",
-  "uid": "3iu8dMbik",
-  "version": 40
+  "title": "Errors",
+  "uid": "HYBPMdYik",
+  "version": 6
 }
