@@ -749,7 +749,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 			Pair<DateTime, DateTime> timespan) {
 
 		CompletionService<Object> completionService = new ExecutorCompletionService<Object>(
-				GrafanaThreadPool.executor);
+				GrafanaThreadPool.getExecutor(apiClient));
 
 		Map<GroupByKey, GroupByVolume> outputMap = new HashMap<GroupByKey, GroupByVolume>();
 

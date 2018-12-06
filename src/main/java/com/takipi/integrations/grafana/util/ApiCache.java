@@ -492,8 +492,16 @@ public class ApiCache {
 			}
 
 			RegressionKey other = (RegressionKey) obj;
-
-			if (!Objects.equal(((EventFilterInput)input).types, ((EventFilterInput)other.input).types)) {
+			
+			EventFilterInput eventInput = (EventFilterInput)input;
+			EventFilterInput otherInput = (EventFilterInput)(other.input);
+			
+			
+			if (!Objects.equal(eventInput.types, otherInput.types)) {
+				return false;
+			}
+			
+			if (!Objects.equal(eventInput.transactions, otherInput.transactions)) {
 				return false;
 			}
 

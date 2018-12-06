@@ -599,7 +599,7 @@ public abstract class GrafanaFunction
 	protected List<Object> executeTasks(Collection<Callable<Object>> tasks)
 	{
 		
-		CompletionService<Object> completionService = new ExecutorCompletionService<Object>(GrafanaThreadPool.executor);
+		CompletionService<Object> completionService = new ExecutorCompletionService<Object>(GrafanaThreadPool.getExecutor(apiClient));
 		
 		for (Callable<Object> task : tasks)
 		{

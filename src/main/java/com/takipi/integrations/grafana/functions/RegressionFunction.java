@@ -43,11 +43,12 @@ import com.takipi.integrations.grafana.util.TimeUtil;
 public class RegressionFunction extends EventsFunction
 {
 	
+	private static String REG_DELTA = "regDelta";
 	private static String REGRESSION = "regression";
 	private static String SEVERITY = "severity";
 	
-	private static final String SEV_AND_NONSEV = "%d (%d sev)";
-	private static final String SEVERE_ONLY = "%d sev";
+	private static final String SEV_AND_NONSEV = "%d (%d p1)";
+	private static final String SEVERE_ONLY = "%d p1";
 	private static final String EMPTY_POSTFIX = ".";
 	
 	public static enum RegressionType
@@ -157,7 +158,7 @@ public class RegressionFunction extends EventsFunction
 		}
 	}
 	
-	protected static class RegressionRateFormatter extends FieldFormatter
+	protected static class RegressionFullRateFormatter  extends FieldFormatter
 	{
 		
 		@Override
@@ -170,6 +171,35 @@ public class RegressionFunction extends EventsFunction
 			if (regData.regression != null)
 			{
 				return RegressionStringUtil.getRegressedEventRate(regData.regression);
+			}
+			else
+			{
+				return RegressionStringUtil.getEventRate(regData.event);
+			}
+		}
+	}
+	
+	protected static class RegressionRateFormatter extends FieldFormatter
+	{
+		@Override
+		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
+				Pair<DateTime, DateTime> timeSpan)
+		{
+			
+			RegressionData regData = (RegressionData)eventData;
+			
+			if (regData.regression != null)
+			{
+				double baselineRate = (double) regData.regression.getBaselineHits() 
+					/ (double) regData.regression.getBaselineInvocations()  * 100;
+				
+				double activeRate = (double) regData.event.stats.hits
+						/ (double) regData.event.stats.invocations  * 100;
+				
+				double delta = activeRate - baselineRate;
+					
+				return (int)(delta);
+				
 			}
 			else
 			{
@@ -405,9 +435,14 @@ public class RegressionFunction extends EventsFunction
 	protected FieldFormatter getFormatter(String column)
 	{
 		
-		if (column.equals(REGRESSION))
+		if (column.equals(REG_DELTA))
 		{
 			return new RegressionRateFormatter();
+		}
+		
+		if (column.equals(REGRESSION))
+		{
+			return new RegressionFullRateFormatter();
 		}
 		
 		if (column.equals(SEVERITY))

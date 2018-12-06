@@ -148,7 +148,7 @@ public class FunctionParser {
 		
 		QueryResult result = new QueryResult();
 
-		CompletionService<Object> completionService = new ExecutorCompletionService<Object>(GrafanaThreadPool.executor);
+		CompletionService<Object> completionService = new ExecutorCompletionService<Object>(GrafanaThreadPool.getExecutor(apiClient));
 
 		int index = 0;
 		
