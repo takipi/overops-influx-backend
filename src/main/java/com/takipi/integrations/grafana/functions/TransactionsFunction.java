@@ -83,7 +83,7 @@ public class TransactionsFunction extends EnvironmentVariableFunction {
 			}
 		}
 		
-		Collection<Transaction> transactions = getTransactions(serviceId, viewId, timespan, viewInput);
+		Collection<Transaction> transactions = getTransactions(serviceId, viewId, timespan, viewInput, null);
 		
 		if (transactions == null) {
 			return;

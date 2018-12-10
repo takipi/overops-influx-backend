@@ -6,12 +6,12 @@ import com.takipi.integrations.grafana.input.EventFilterInput;
 
 public class GeneralSettings {
 	
-	public boolean groupByEntryPoint;
-	public String eventTypes;
-	public int pointsWanted;
+	public boolean group_by_entryPoint;
+	public String event_types;
+	public int points_wanted;
 
 	public Collection<String> getDefaultTypes() {
 		
-		return EventFilterInput.toArray(eventTypes);
+		return EventFilterInput.toArray(event_types);
 	}
 }

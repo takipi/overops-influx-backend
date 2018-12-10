@@ -19,13 +19,16 @@ import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
 import com.takipi.api.client.result.event.EventResult;
+import com.takipi.api.client.result.metrics.GraphResult;
 import com.takipi.api.client.util.regression.RateRegression;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionResult;
 import com.takipi.api.client.util.regression.RegressionStringUtil;
 import com.takipi.api.client.util.regression.RegressionUtil;
+import com.takipi.api.client.util.regression.RegressionInput.TypeThresholds;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
+import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.EventFilterInput;
@@ -216,7 +219,7 @@ public class RegressionFunction extends EventsFunction
 				Pair<DateTime, DateTime> timeSpan)
 		{
 			
-			RegressionReportSettings settings = GrafanaSettings.getData(apiClient, serviceId).regressionReport;
+			RegressionReportSettings settings = GrafanaSettings.getData(apiClient, serviceId).regression_report;
 			
 			if (settings == null) {
 				return Integer.valueOf(0);
@@ -227,18 +230,18 @@ public class RegressionFunction extends EventsFunction
 			switch (regData.type) {
 				
 				case NewIssues:
-					return Integer.valueOf(settings.newEventScore);
+					return Integer.valueOf(settings.new_event_score);
 					
 				case SevereNewIssues:
-					return Integer.valueOf(settings.severeNewEventScore);
+					return Integer.valueOf(settings.severe_new_event_score);
 					
 				case Regressions:
 				case Slowdowns:
-					return Integer.valueOf(settings.regressionScore);
+					return Integer.valueOf(settings.regression_score);
 					
 				case SevereRegressions:
 				case SevereSlowdowns:
-					return Integer.valueOf(settings.criticalRegressionScore);
+					return Integer.valueOf(settings.critical_regression_score);
 				default:
 					break;
 			}
@@ -300,13 +303,13 @@ public class RegressionFunction extends EventsFunction
 		
 		RegressionSettings regressionSettings = GrafanaSettings.getData(apiClient, serviceId).regression;
 		
-		if ((regressionSettings == null) || (regressionSettings.sortOrder == null))
+		if ((regressionSettings == null) || (regressionSettings.sort_order == null))
 		{
 			return;
 		}
 		
-		List<String> order = Arrays.asList(regressionSettings.sortOrder.split(GrafanaFunction.ARRAY_SEPERATOR));
-		List<String> types = Arrays.asList(regressionSettings.typeOrder.split(GrafanaFunction.ARRAY_SEPERATOR));
+		List<String> order = Arrays.asList(regressionSettings.sort_order.split(GrafanaFunction.ARRAY_SEPERATOR));
+		List<String> types = Arrays.asList(regressionSettings.type_order.split(GrafanaFunction.ARRAY_SEPERATOR));
 		
 		eventData.sort(new Comparator<EventData>()
 		{
@@ -490,14 +493,14 @@ public class RegressionFunction extends EventsFunction
 		public double getScore(RegressionReportSettings reportSettings)
 		{
 			
-			int newEventsScore = newIssues * reportSettings.newEventScore;
-			int severeNewEventScore = severeNewIssues * reportSettings.severeNewEventScore;
-			int criticalRegressionsScore = criticalRegressions * reportSettings.criticalRegressionScore;
-			int regressionsScore = regressions * reportSettings.regressionScore;
+			int newEventsScore = newIssues * reportSettings.new_event_score;
+			int severeNewEventScore = severeNewIssues * reportSettings.severe_new_event_score;
+			int criticalRegressionsScore = criticalRegressions * reportSettings.critical_regression_score;
+			int regressionsScore = regressions * reportSettings.regression_score;
 			
 			long days = Math.max(1, TimeUnit.MINUTES.toDays(regressionInput.activeTimespan));			
 			double score = (newEventsScore + severeNewEventScore + criticalRegressionsScore + regressionsScore) / days;
-			double weightedScore = Math.max(100 - (reportSettings.scoreWeight * score), 0);
+			double weightedScore = Math.max(100 - (reportSettings.score_weight * score), 0);
 			
 			return weightedScore;
 		}
@@ -561,7 +564,7 @@ public class RegressionFunction extends EventsFunction
 		regressionInput.activeTimespan = (int)TimeUnit.MILLISECONDS
 				.toMinutes(timeSpan.getSecond().getMillis() - timeSpan.getFirst().getMillis());
 		
-		regressionInput.baselineTimespan = regressionSettings.minBaselineTimespan;
+		regressionInput.baselineTimespan = regressionSettings.min_baseline_timespan;
 		
 		RegressionWindow regressionWindow = ApiCache.getRegressionWindow(apiClient, regressionInput);
 		
@@ -570,8 +573,8 @@ public class RegressionFunction extends EventsFunction
 			return null;
 		}
 		
-		int expandedBaselineTimespan = expandBaselineTimespan(regressionSettings.baselineTimespanFactor,
-				regressionSettings.minBaselineTimespan,
+		int expandedBaselineTimespan = expandBaselineTimespan(regressionSettings.baseline_timespan_factor,
+				regressionSettings.min_baseline_timespan,
 				regressionWindow);
 		
 		regressionInput.activeWindowStart = regressionWindow.activeWindowStart;
@@ -585,12 +588,21 @@ public class RegressionFunction extends EventsFunction
 		
 		regressionInput.criticalExceptionTypes = criticalExceptionTypes;
 		
-		regressionInput.minVolumeThreshold = regressionSettings.minVolumeThreshold;
-		regressionInput.minErrorRateThreshold = regressionSettings.minErrorRateThreshold;
+		regressionInput.minVolumeThreshold = regressionSettings.error_min_volume_threshold;
+		regressionInput.minErrorRateThreshold = regressionSettings.error_min_rate_threshold;
 		
-		regressionInput.regressionDelta = regressionSettings.regressionDelta;
-		regressionInput.criticalRegressionDelta = regressionSettings.criticalRegressionDelta;
-		regressionInput.applySeasonality = regressionSettings.applySeasonality;
+		regressionInput.regressionDelta = regressionSettings.error_regression_delta;
+		regressionInput.criticalRegressionDelta = regressionSettings.error_critical_regression_delta;
+		regressionInput.applySeasonality = regressionSettings.apply_seasonality;
+		
+		TypeThresholds timerThresholds = new TypeThresholds();
+		
+		timerThresholds.regressionDelta = regressionSettings.timer_regression_delta;
+		timerThresholds.criticalRegressionDelta = regressionSettings.timer_critical_regression_delta;
+		timerThresholds.minVolumeThreshold = regressionSettings.timer_min_volume_threshold;
+		timerThresholds.minErrorRateThreshold = regressionSettings.timer_min_rate_threshold;
+	
+		regressionInput.typeThresholdsMap = Collections.singletonMap(TIMER, timerThresholds);
 		
 		return Pair.of(regressionInput, regressionWindow);
 		
@@ -623,16 +635,70 @@ public class RegressionFunction extends EventsFunction
 		} else {
 			baselineInput = input;
 		}
-		
-		Graph baselineGraph = getEventsGraph(apiClient, serviceId, viewId, baselinePoints, 
+				
+		/*
+		Graph baselineGraph = getEventsGraph(serviceId, viewId, baselinePoints, 
 				input, VolumeType.all,
 				regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan),
 				regressionWindow.activeWindowStart, 0, regressionInput.baselineTimespan);
-				
-		Graph activeWindowGraph = getEventsGraph(apiClient, serviceId, viewId, input.pointsWanted, input,
+	
+		Graph activeWindowGraph = getEventsGraph(serviceId, viewId, input.pointsWanted, input,
 				VolumeType.all, regressionWindow.activeWindowStart, DateTime.now(), regressionWindow.activeTimespan, 0);
+		*/
+		
+		Collection<GraphSliceTask> baselineGraphTasks = getGraphTasks(serviceId, viewId, baselinePoints, baselineInput, 
+				VolumeType.all, regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan),
+			regressionWindow.activeWindowStart, regressionInput.baselineTimespan, 0, false);
+		
+		int graphActiveTimespan;
+		
+		if (input.hasDeployments()) {
+			graphActiveTimespan = regressionWindow.activeTimespan;
+		} else {
+			graphActiveTimespan = 0;
+		}
+		
+		Collection<GraphSliceTask> activeGraphTasks = getGraphTasks(serviceId, viewId, input.pointsWanted, 
+			input, VolumeType.all, regressionWindow.activeWindowStart, DateTime.now(), 0, graphActiveTimespan, false);
+		
+		List<GraphSliceTask> graphTasks = new ArrayList<GraphSliceTask>(); 
+		
+		graphTasks.addAll(baselineGraphTasks);
+		graphTasks.addAll(activeGraphTasks);
+		
+		Collection<GraphSliceTaskResult> graphSliceTaskResults = executeGraphTasks(graphTasks, false);
+		
+		List<GraphSliceTaskResult> baseLineGraphResults = new ArrayList<GraphSliceTaskResult>();
+		List<GraphSliceTaskResult> activeGraphResults = new ArrayList<GraphSliceTaskResult>();
+	
+		for (GraphSliceTaskResult graphSliceTaskResult : graphSliceTaskResults) {
+			
+			if (baselineGraphTasks.contains(graphSliceTaskResult.task)) {
+				baseLineGraphResults.add(graphSliceTaskResult);
+			}
+			
+			if (activeGraphTasks.contains(graphSliceTaskResult.task)) {
+				activeGraphResults.add(graphSliceTaskResult);
+			}
+		}
+		
+		Graph baselineGraph = mergeGraphs(baseLineGraphResults);
+		Graph activeWindowGraph = mergeGraphs(activeGraphResults);		
+		
+		GraphResult activeGraphResult = new GraphResult();
+		activeGraphResult.graphs = Collections.singletonList(activeWindowGraph);		
+		
+		GraphResult baselineGraphResult = new GraphResult();
+		activeGraphResult.graphs = Collections.singletonList(baselineGraph);		
+		
+		ApiCache.putEventGraph(apiClient, serviceId, input, VolumeType.all, null,
+				input.pointsWanted, 0, graphActiveTimespan, 0, Response.of(200, activeGraphResult));
+		
+		ApiCache.putEventGraph(apiClient, serviceId, baselineInput, VolumeType.all, null,
+				input.pointsWanted, regressionInput.baselineTimespan, 0, 0, Response.of(200, baselineGraphResult));
 		
 		return Pair.of(baselineGraph, activeWindowGraph);
+		
 	}
 	
 	private Pair<Collection<EventResult>, Long> getEventList(String serviceId, Map<String, EventResult> eventListMap,
@@ -923,7 +989,7 @@ public class RegressionFunction extends EventsFunction
 	protected RegressionReportSettings getRegressionReportSettings(String serviceId)
 	{
 		
-		RegressionReportSettings reportSettings = GrafanaSettings.getData(apiClient, serviceId).regressionReport;
+		RegressionReportSettings reportSettings = GrafanaSettings.getData(apiClient, serviceId).regression_report;
 		
 		if (reportSettings == null)
 		{

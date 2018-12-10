@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -237,14 +238,24 @@ public class RegressionReportFunction extends RegressionFunction {
 				
 		for (EventResult event : eventsMap.values()) {
 			
-			if (event.error_origin == null) {
-				continue;
+			Set<String> labels = new HashSet<String>();
+			
+			if (event.error_origin != null) {
+				
+				Set<String> originlabels = categories.getCategories(event.error_origin.class_name);
+				
+				if (originlabels != null) {
+					labels.addAll(originlabels);
+				}
 			}
 			
-			Set<String> labels = categories.getCategories(event.error_origin.class_name);
-
-			if (labels == null) {
-				continue;
+			if (event.error_location != null) {
+				
+				Set<String> locationLabels = categories.getCategories(event.error_location.class_name);
+				
+				if (locationLabels != null) {
+					labels.addAll(locationLabels);
+				}
 			}
 			
 			for (String label : labels) {

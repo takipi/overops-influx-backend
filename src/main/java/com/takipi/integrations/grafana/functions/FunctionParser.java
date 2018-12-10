@@ -148,7 +148,7 @@ public class FunctionParser {
 		
 		QueryResult result = new QueryResult();
 
-		CompletionService<Object> completionService = new ExecutorCompletionService<Object>(GrafanaThreadPool.getExecutor(apiClient));
+		CompletionService<Object> completionService = new ExecutorCompletionService<Object>(GrafanaThreadPool.getFunctionExecutor(apiClient));
 
 		int index = 0;
 		
@@ -241,7 +241,8 @@ public class FunctionParser {
 		registerFunction(new TransactionsListFunction.Factory());
 		registerFunction(new TransactionsRateFunction.Factory());
 		registerFunction(new KeyTransactionsGraphFunction.Factory());
-		registerFunction(new SlowTransactionsFunction.Factory());
+		registerFunction(new TransactionAvgGraphFunction.Factory());
+		
 
 		//variable filter functions
 		registerFunction(new EnvironmentsFunction.Factory());

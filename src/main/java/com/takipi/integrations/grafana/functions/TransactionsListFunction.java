@@ -23,7 +23,10 @@ import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionsListFunction extends GrafanaFunction {
 
+	/*
 	private static final String TIMER_MESSAGE = "Method took more than ";
+	private static final String PARALLAX_TIMER_POSTFIX = "at this point";
+	*/
 	
 	private static final List<String> FIELDS = Arrays.asList(new String[] { 
 			"Link", "Transaction", "Total", "Avg Response(ms)", "Slow %", "Slow Transactions",
@@ -86,17 +89,24 @@ public class TransactionsListFunction extends GrafanaFunction {
 		
 		if (transaction.currTimer != null) {
 						
+			/*
 			if (transaction.currTimer.message != null) {
 				int index = transaction.currTimer.message.indexOf(TIMER_MESSAGE);
 				
 				if (index != -1) {
 					result = transactionName + " > " + transaction.currTimer.message.substring(index + TIMER_MESSAGE.length());
 				} else {
-					result = transactionName + ": " + transaction.currTimer.message;	
+					if (!transaction.currTimer.message.contains(transactionName)) {
+						result = transactionName + ": " + transaction.currTimer.message;	
+					} else {
+						result = transaction.currTimer.message.replace(PARALLAX_TIMER_POSTFIX, "");
+					}
 				}	
-			} else {
-				result = transactionName;
 			}
+			 else {
+			*/
+				result = transactionName;
+			//}
 		} else {
 			result = transactionName;
 		}
@@ -142,7 +152,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 			}
 			
 			Object[] object = new Object[] { link, name, invocations,
-					Long.valueOf((long)transaction.transaction.stats.avg_time), timerRate, 
+					Double.valueOf(transaction.transaction.stats.avg_time), timerRate, 
 					transaction.timersHits, errorRate, transaction.errorsHits };
 			
 			result.add(Arrays.asList(object));
@@ -222,7 +232,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 	private Map<String, TransactionData> getTransactions(String serviceId, Pair<DateTime, DateTime> timeSpan,
 			String viewId, TransactionsListIput input) {
 				
-		Collection<Transaction> transactions = getTransactions(serviceId, viewId, timeSpan, input);
+		Collection<Transaction> transactions = getTransactions(serviceId, viewId, timeSpan, input, input.getSearchText());
 
 		if (transactions == null) {
 			return Collections.emptyMap();

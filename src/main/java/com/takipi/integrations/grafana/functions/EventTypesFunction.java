@@ -100,12 +100,22 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 				exceptionTypes.add(event.name);
 			}
 			
-			if ((categories != null) && (event.error_origin != null)) {
+			if (categories != null) {
 			
-				Set<String> labels = categories.getCategories(event.error_origin.class_name);
+				if (event.error_origin != null) {
+					Set<String> originLabels = categories.getCategories(event.error_origin.class_name);
+					
+					if (!CollectionUtil.safeIsEmpty(originLabels))  {
+						categoryNames.addAll(originLabels);
+					}
+				}
 				
-				if (!CollectionUtil.safeIsEmpty(labels))  {
-					categoryNames.addAll(labels);
+				if (event.error_location != null) {
+					Set<String> locationLabels = categories.getCategories(event.error_location.class_name);
+					
+					if (!CollectionUtil.safeIsEmpty(locationLabels))  {
+						categoryNames.addAll(locationLabels);
+					}
 				}
 			}
 		}

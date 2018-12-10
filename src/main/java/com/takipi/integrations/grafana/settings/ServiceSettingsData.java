@@ -13,5 +13,5 @@ public class ServiceSettingsData
 	public List<Category> tiers;	
 	
 	public RegressionSettings regression;
-	public RegressionReportSettings regressionReport;
+	public RegressionReportSettings regression_report;
 }

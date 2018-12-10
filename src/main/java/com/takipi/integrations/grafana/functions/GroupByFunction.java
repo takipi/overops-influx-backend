@@ -9,8 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -208,7 +206,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 		private void executeEventsGraph(Map<String, EventResult> eventsMap, EventFilter eventFilter,
 				List<Pair<DateTime, DateTime>> intervals) {
 
-			Graph graph = getEventsGraph(apiClient, serviceId, viewId, intervals.size() * 5, input, input.volumeType,
+			Graph graph = getEventsGraph(serviceId, viewId, intervals.size() * 5, input, input.volumeType,
 					timeSpan.getFirst(), timeSpan.getSecond());
 			
 			if (graph == null) {
@@ -748,9 +746,6 @@ public class GroupByFunction extends BaseVolumeFunction {
 	private Map<String, GroupResult> processServiceGroupBy(String serviceId, GroupByInput input,
 			Pair<DateTime, DateTime> timespan) {
 
-		CompletionService<Object> completionService = new ExecutorCompletionService<Object>(
-				GrafanaThreadPool.getExecutor(apiClient));
-
 		Map<GroupByKey, GroupByVolume> outputMap = new HashMap<GroupByKey, GroupByVolume>();
 
 		List<BaseGroupByAsyncTask> serviceTasks = processServiceGroupBy(outputMap, serviceId, input, timespan);
@@ -771,21 +766,14 @@ public class GroupByFunction extends BaseVolumeFunction {
 				taskCount = serviceTasks.size();
 			}
 			
+			Collection<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
+			
 			for (int i = 0; i < taskCount; i++) {
 				BaseGroupByAsyncTask task = serviceTasks.get(i);
-				completionService.submit(task);
+				tasks.add(task);
 			}
-
-			int received = 0;
-
-			while (received < taskCount) {
-				try {
-					completionService.take();
-					received++;
-				} catch (Exception e) {
-					throw new IllegalStateException(e);
-				}
-			}
+			
+			executeTasks(tasks);
 		}
 
 		Map<String, GroupResult> result = new HashMap<String, GroupResult>();

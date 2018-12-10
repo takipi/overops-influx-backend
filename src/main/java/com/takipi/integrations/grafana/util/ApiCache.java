@@ -37,6 +37,8 @@ public class ApiCache {
 	private static final int CACHE_SIZE = 1000;
 	private static final int CACHE_RETENTION = 2;
 
+	public static boolean PRINT_DURATIONS = true;
+	
 	protected abstract static class CacheKey {
 
 		protected ApiClient apiClient;
@@ -143,6 +145,11 @@ public class ApiCache {
 
 			return super.hashCode() ^ viewName.hashCode();
 		}
+		
+		@Override
+		public String toString() {
+			return this.getClass().getSimpleName() + ": " + viewName + " " + viewName;
+		}
 	}
 
 	protected abstract static class ViewCacheKey extends ServiceCacheKey {
@@ -199,8 +206,10 @@ public class ApiCache {
 				return false;
 			}
 
-			if (!compare(input.getApplications(apiClient, serviceId), 
-				other.input.getApplications(other.apiClient, serviceId))) {
+			Collection<String> apps = input.getApplications(apiClient, serviceId);
+			Collection<String> otherApps = other.input.getApplications(apiClient, serviceId);
+			
+			if (!compare(apps, otherApps)) {
 				return false;
 			}
 
@@ -248,6 +257,28 @@ public class ApiCache {
 
 			VolumeKey other = (VolumeKey) obj;
 			
+			if (volumeType != null) {
+				
+				switch (volumeType) {
+					case hits: 
+						if ((other.volumeType == null) || (other.volumeType.equals(VolumeType.invocations))) {
+							return false;
+						}
+						break;
+					
+					case invocations: 
+						if ((other.volumeType == null) || (other.volumeType.equals(VolumeType.hits))) {
+							return false;
+						}
+						break;
+					case all: 
+						if ((other.volumeType == null) || (!other.volumeType.equals(VolumeType.all))) {
+							return false;
+						}
+						break;
+				}
+			}
+			
 			if (!Objects.equal(volumeType, other.volumeType)) {
 				return false;
 			}
@@ -257,7 +288,7 @@ public class ApiCache {
 
 		@Override
 		public String toString() {
-			return super.toString() + " " + volumeType;
+			return super.toString() + " vt: " + volumeType;
 		}
 	}
 	
@@ -313,6 +344,7 @@ public class ApiCache {
 		protected int pointsWanted;
 		protected int activeWindow;
 		protected int baselineWindow;
+		protected int windowSlice;
 
 		@Override
 		public boolean equals(Object obj) {
@@ -338,17 +370,36 @@ public class ApiCache {
 			if (baselineWindow != other.baselineWindow) {
 				return false;
 			}
+			
+
+			if (windowSlice != other.windowSlice) {
+				return false;
+			}
 
 			return true;
 		}
 
 		public GraphKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
-				VolumeType volumeType, int pointsWanted, int baselineWindow, int activeWindow) {
+				VolumeType volumeType, int pointsWanted, int baselineWindow, int activeWindow, int windowSlice) {
 
 			super(apiClient, request, serviceId, input, volumeType);
 			this.pointsWanted = pointsWanted;
 			this.activeWindow = activeWindow;
 			this.baselineWindow = baselineWindow;
+			this.windowSlice = windowSlice;
+			
+			if (pointsWanted == 0) {
+				System.out.println();
+			}
+		}
+		
+		@Override
+		public String toString()
+		{
+			String result = super.toString() + " pw: " + pointsWanted + " aw: " 
+				+ activeWindow + " bw: " + baselineWindow + " slc: " + windowSlice;
+			
+			return result;
 		}
 	}
 
@@ -500,8 +551,13 @@ public class ApiCache {
 			if (!Objects.equal(eventInput.types, otherInput.types)) {
 				return false;
 			}
+						
+			if (!Objects.equal(eventInput.hasTransactions(), otherInput.hasTransactions())) {
+				return false;
+			}
 			
-			if (!Objects.equal(eventInput.transactions, otherInput.transactions)) {
+			if ((eventInput.hasTransactions()) && (!Objects.equal(eventInput.transactions, 
+				otherInput.transactions))) {
 				return false;
 			}
 
@@ -553,13 +609,23 @@ public class ApiCache {
 	@SuppressWarnings("unchecked")
 	public static Response<GraphResult> getEventGraph(ApiClient apiClient, String serviceId,
 			ViewInput input, VolumeType volumeType, GraphRequest request, int pointsWanted,
-			int baselineWindow, int activeWindow) {
+			int baselineWindow, int activeWindow, int windowSlice) {
 
 		GraphKey cacheKey = new GraphKey(apiClient, request, serviceId, input, volumeType, 
-			pointsWanted, baselineWindow, activeWindow);
+			pointsWanted, baselineWindow, activeWindow, windowSlice);
 		Response<GraphResult> response = (Response<GraphResult>) getItem(cacheKey);
 
 		return response;
+	}
+	
+	public static void putEventGraph(ApiClient apiClient, String serviceId,
+			ViewInput input, VolumeType volumeType, GraphRequest request, int pointsWanted,
+			int baselineWindow, int activeWindow, int windowSlice, Response<GraphResult> graphResult) {
+
+		GraphKey cacheKey = new GraphKey(apiClient, request, serviceId, input, volumeType, 
+			pointsWanted, baselineWindow, activeWindow, windowSlice);
+		
+		queryCache.put(cacheKey, graphResult);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -681,7 +747,23 @@ public class ApiCache {
 				
 				@Override
 				public Response<?> load(CacheKey key) {
-					Response<?> result = key.apiClient.get(key.request);
+					
+					Response<?> result;
+					long t1 = System.currentTimeMillis();
+					
+					try {
+						result = key.apiClient.get(key.request);
+ 					} catch (Throwable e) {
+ 						long t2 = System.currentTimeMillis();
+ 						throw new IllegalStateException("Error executing after " + ((double)(t2-t1) / 1000) + " sec: " + key, e);
+ 					}
+					long t2 = System.currentTimeMillis();
+					
+					if (PRINT_DURATIONS) {
+						double sec = (t2-t1) / 1000;
+						System.out.println(sec + " sec: " + key);
+					}
+					
 					return result;
 				}
 			});

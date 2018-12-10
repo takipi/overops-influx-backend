@@ -57,7 +57,7 @@ public class SplitGraphFunction extends LimitGraphFunction {
 			return Collections.emptyList();
 		}
 		
-		Graph graph = getEventsGraph(apiClient, serviceId, viewId, input.pointsWanted, input, input.volumeType,
+		Graph graph = getEventsGraph(serviceId, viewId, input.pointsWanted, input, input.volumeType,
 				timeSpan.getFirst(), timeSpan.getSecond());
 		
 		if (graph == null) {

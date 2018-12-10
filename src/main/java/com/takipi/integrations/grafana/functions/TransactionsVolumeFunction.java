@@ -52,7 +52,7 @@ public class TransactionsVolumeFunction extends BaseVolumeFunction {
 
 		long transactionTotal = 0;
 
-		Collection<Transaction> transactions = getTransactions(serviceId, viewId, timeSpan, input);
+		Collection<Transaction> transactions = getTransactions(serviceId, viewId, timeSpan, input, input.getSearchText());
 		
 		if (transactions == null) {
 			return result;

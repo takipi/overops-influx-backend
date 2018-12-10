@@ -72,11 +72,10 @@ public class ServiceSettings {
 			
 			synchronized (Categories.class) {
 				if ((instance == null) && (!initialized)) {
-					initialized = true;
 					instance = new Categories();
-					
 					instance.categories = new ArrayList<Categories.Category>(data.tiers);
 					instance.categories.addAll(defaultCategories.categories);
+					initialized = true;
 				}
 			}
 		}

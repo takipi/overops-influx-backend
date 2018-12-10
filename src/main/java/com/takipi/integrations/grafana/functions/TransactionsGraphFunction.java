@@ -64,14 +64,11 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		super(apiClient);
 	}
 
-    @Override
-	protected List<GraphSeries> processServiceGraph(String serviceId, String viewId, String viewName,
-			BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds, int pointsWanted) {
-
-		TransactionsGraphInput input = (TransactionsGraphInput) request;
-
+	protected Collection<TransactionGraph> getTransactionGraphs(TransactionsGraphInput input, String serviceId, String viewId, 
+			BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
+		
 		Pair<String, String> fromTo = TimeUtil.toTimespan(timeSpan);
-				
+		
 		TransactionsGraphRequest.Builder builder = TransactionsGraphRequest.newBuilder().setServiceId(serviceId)
 				.setViewId(viewId).setFrom(fromTo.getFirst()).setTo(fromTo.getSecond())
 				.setWantedPointCount(pointsWanted);
@@ -86,11 +83,23 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 
 			return Collections.emptyList();
 		}
+		
+		return response.data.graphs;
+	}
+	
+    @Override
+	protected List<GraphSeries> processServiceGraph(String serviceId, String viewId, String viewName,
+			BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds, int pointsWanted) {
 
+		TransactionsGraphInput input = (TransactionsGraphInput) request;
+
+		Collection<TransactionGraph> transactionGraphs = getTransactionGraphs(input, serviceId, 
+				viewId, request, timeSpan, pointsWanted);
+				
 		Collection<String> transactions = getTransactions(serviceId, input, timeSpan);
 		
 		List<GraphSeries> result = processServiceGraph(serviceId, input, 
-				serviceIds, transactions, response.data.graphs);
+				serviceIds, transactions, transactionGraphs);
 		
 
 		return result;
@@ -138,12 +147,13 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			TransactionsGraphInput input, Collection<String> serviceIds, GroupFilter transactionFilter) {
 
 		List<GraphSeries> result = new ArrayList<GraphSeries>();
-
+		String searchText = input.getSearchText();
+		
 		for (TransactionGraph graph : graphs) {
 
 			Pair<String, String> nameAndMethod = getFullNameAndMethod(graph.name);
 			
-			if (filterTransaction(transactionFilter, nameAndMethod.getFirst(), nameAndMethod.getSecond()))
+			if (filterTransaction(transactionFilter, searchText, nameAndMethod.getFirst(), nameAndMethod.getSecond()))
 			{
 				continue;
 			}
@@ -160,11 +170,12 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 	}
 	
 	private SeriesVolume getAvgSeriesValues(Collection<TransactionGraph> graphs,
-			GroupFilter transactionsFilter) {
+			GroupFilter transactionsFilter, TransactionsGraphInput input) {
 		
 		Collection<TransactionGraph>  targetGraphs;
-		
-		if (transactionsFilter != null) {
+		String searchText = input.getSearchText();
+
+		if ((transactionsFilter != null) || (searchText != null)) {
 			
 			targetGraphs = new ArrayList<TransactionGraph>(graphs.size());
 			
@@ -172,7 +183,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		
 				Pair<String, String> nameAndMethod = getFullNameAndMethod(graph.name);
 				
-				if (filterTransaction(transactionsFilter, nameAndMethod.getFirst(), nameAndMethod.getSecond()))
+				if (filterTransaction(transactionsFilter, searchText, nameAndMethod.getFirst(), nameAndMethod.getSecond()))
 				{
 					continue;
 				}
@@ -229,28 +240,42 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			
 			sortedAvgMap.put(epochTime, timeAvg);
 		}
-				
+			
+		double avgVolume = 0;
+		
 		for (Map.Entry<Long, TimeAvg> entry : sortedAvgMap.entrySet()) {
 			
 			Long time = entry.getKey();
 			TimeAvg timeAvg = entry.getValue();
+			
+			avgVolume += timeAvg.avgTime;
 	
 			result.add(Arrays.asList(new Object[] { time, Double.valueOf(timeAvg.avgTime) }));
 		}
 
-		return SeriesVolume.of(result, 0L);
+		double volume;
+		
+		if (sortedAvgMap.size() > 0) {
+			volume = avgVolume / sortedAvgMap.size();
+		} else {
+			volume = 0;
+		}
+		
+		return SeriesVolume.of(result, (long)volume);
 	}
 
 	private SeriesVolume getInvSeriesValues(Collection<TransactionGraph> graphs,
-			GroupFilter transactionFilter) {
+			GroupFilter transactionFilter, TransactionsGraphInput input) {
 
 		Map<Long, Long> values = new TreeMap<Long, Long>();
+		
+		String searchText = input.getSearchText();
 		
 		for (TransactionGraph graph : graphs) {
 			
 			Pair<String, String> nameAndMethod = getFullNameAndMethod(graph.name);
 			
-			if (filterTransaction(transactionFilter, nameAndMethod.getFirst(), nameAndMethod.getSecond()))
+			if (filterTransaction(transactionFilter, searchText, nameAndMethod.getFirst(), nameAndMethod.getSecond()))
 			{
 				continue;
 			}
@@ -300,10 +325,10 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		SeriesVolume seriesValues;
 
 		if ((input.volumeType == null) || (input.volumeType.equals(GraphType.avg_time))) {
-			seriesValues = getAvgSeriesValues(graphs, transactionFilter);
+			seriesValues = getAvgSeriesValues(graphs, transactionFilter, input);
 
 		} else {
-			seriesValues = getInvSeriesValues(graphs, transactionFilter);
+			seriesValues = getInvSeriesValues(graphs, transactionFilter, input);
 		}
 
 		series.name = EMPTY_NAME;

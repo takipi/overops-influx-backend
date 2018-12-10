@@ -380,7 +380,7 @@ public class EventsFunction extends GrafanaFunction {
 		
 		GeneralSettings settings = GrafanaSettings.getData(apiClient, serviceId).general;
 		
-		if ((settings == null) || (!settings.groupByEntryPoint)) {
+		if ((settings == null) || (!settings.group_by_entryPoint)) {
 			return eventDatas;
 		}
 		

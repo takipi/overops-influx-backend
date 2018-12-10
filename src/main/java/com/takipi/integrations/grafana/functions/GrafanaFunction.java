@@ -7,16 +7,20 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
+import com.google.common.collect.Lists;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.Location;
 import com.takipi.api.client.data.event.Stats;
@@ -113,7 +117,102 @@ public abstract class GrafanaFunction
 		
 	}
 	
+	private static final int END_SLICE_POINT_COUNT = 2;
+	private static final int NO_GRAPH_SLICE = -1;
+	
 	protected final ApiClient apiClient;
+	
+	protected class GraphSliceTaskResult {
+		GraphSliceTask task;
+		Graph graph;
+		
+		protected GraphSliceTaskResult(GraphSliceTask task, Graph graph) {
+			this.task = task;
+			this.graph = graph;
+		}
+	}
+	
+	protected class GraphSliceTask extends BaseAsyncTask implements Callable<Object> {
+
+		protected String serviceId;
+		protected String viewId;
+		protected ViewInput input;
+		protected VolumeType volumeType;
+		protected DateTime from;
+		protected DateTime to;
+		protected int baselineWindow;
+		protected int activeWindow;
+		protected int pointsWanted;
+		protected int windowSlice;
+		protected GraphRequest.Builder builder;
+		
+		protected GraphSliceTask(GraphRequest.Builder builder, String serviceId, String viewId, int pointsWanted,
+				ViewInput input, VolumeType volumeType, DateTime from, DateTime to,
+				int baselineWindow, int activeWindow, int windowSlice) {
+			
+			this.builder = builder;
+			this.serviceId = serviceId;
+			this.viewId = viewId;
+			this.pointsWanted = pointsWanted;
+			this.input = input;
+			this.volumeType = volumeType;
+			this.from = from;
+			this.to = to;
+			this.baselineWindow = baselineWindow;
+			this.activeWindow = activeWindow;
+			this.windowSlice = windowSlice;
+		}
+		
+		@Override
+		public Object call() throws Exception
+		{			
+			Response<GraphResult> response = ApiCache.getEventGraph(apiClient, serviceId, input, volumeType,
+					builder.build(), pointsWanted, baselineWindow, activeWindow, windowSlice);
+			
+			if (response.isBadResponse())
+			{
+				return null;
+			}
+			
+			GraphResult graphResult = response.data;
+			
+			if (graphResult == null)
+			{
+				return null;
+			}
+			
+			if (CollectionUtil.safeIsEmpty(graphResult.graphs))
+			{
+				return null;
+			}
+			
+			Graph graph = graphResult.graphs.get(0);
+			
+			if (!viewId.equals(graph.id))
+			{
+				return null;
+			}
+			
+			if (CollectionUtil.safeIsEmpty(graph.points))
+			{
+				return null;
+			}
+			
+			return new GraphSliceTaskResult(this, graph)	;
+		}
+	}
+	
+	protected class SliceRequest {
+		protected DateTime from;
+		protected DateTime to;
+		int pointCount;
+		
+		protected SliceRequest(DateTime from, DateTime to, int pointCount) {
+			this.from = from;
+			this.to = to;
+			this.pointCount = pointCount;
+		}
+	}
 	
 	public GrafanaFunction(ApiClient apiClient)
 	{
@@ -223,10 +322,15 @@ public abstract class GrafanaFunction
 		applyFilters(request, serviceId, builder);
 	}
 	
-	public static boolean filterTransaction(GroupFilter filter, String className, String methodName) {
+	public static boolean filterTransaction(GroupFilter filter, String searchText,
+		String className, String methodName) {
 		
-		if ((filter == null) || ((filter.values.size() == 0) && (filter.patterns.size() == 0))) {
-			return false;
+		String searchTextLower;
+		
+		if (searchText != null) {
+			searchTextLower = searchText.toLowerCase();
+		} else {
+			searchTextLower = null;
 		}
 		
 		String simpleClassName = getSimpleClassName(className);
@@ -234,17 +338,29 @@ public abstract class GrafanaFunction
 		
 		if (methodName != null) {
 			simpleClassAndMethod = simpleClassName + QUALIFIED_DELIM + methodName;
+			
+			if ((searchText != null) && (!simpleClassAndMethod.toLowerCase().contains(searchTextLower))) {
+				return true;
+			}
 		} else {
 			simpleClassAndMethod = null;
+			
+			if ((searchText != null) && (!simpleClassName.toLowerCase().contains(searchTextLower))) {
+				return true;
+			}
+		}
+	
+		if ((filter == null) || ((filter.values.size() == 0) && (filter.patterns.size() == 0))) {		
+			return false;
 		}
 				
 		for (String value : filter.values)
 		{
-			if ((simpleClassAndMethod != null) && (value.equals(simpleClassAndMethod))) {
+			if ((simpleClassAndMethod != null) && (value.equals(simpleClassAndMethod))) {				
 				return false;
 			}
 			
-			if (value.equals(simpleClassName)) {
+			if (value.equals(simpleClassName)) {				
 				return false;
 			}
 			
@@ -265,13 +381,13 @@ public abstract class GrafanaFunction
 	
 	protected Collection<Transaction> getTransactions(String serviceId, String viewId,
 			Pair<DateTime, DateTime> timeSpan,
-			ViewInput input)
+			ViewInput input, String searchText)
 	{
 		
 		Pair<String, String> fromTo = TimeUtil.toTimespan(timeSpan);
 		
 		TransactionsVolumeRequest.Builder builder = TransactionsVolumeRequest.newBuilder().setServiceId(serviceId)
-				.setViewId(viewId).setFrom(fromTo.getFirst()).setTo(fromTo.getSecond());
+				.setViewId(viewId).setFrom(fromTo.getFirst()).setTo(fromTo.getSecond()).setRaw(true);
 		
 		applyFilters(input, serviceId, builder);
 		
@@ -290,7 +406,7 @@ public abstract class GrafanaFunction
 		
 		Collection<Transaction> result;
 		
-		if (input.hasTransactions())
+		if ((input.hasTransactions() || (searchText != null)))
 		{
 			
 			result = new ArrayList<Transaction>(response.data.transactions.size());
@@ -302,7 +418,7 @@ public abstract class GrafanaFunction
 			{
 				Pair<String, String> nameAndMethod = getFullNameAndMethod(transaction.name);
 				
-				if (filterTransaction(transactionsFilter, nameAndMethod.getFirst(), nameAndMethod.getSecond()))
+				if (filterTransaction(transactionsFilter, searchText, nameAndMethod.getFirst(), nameAndMethod.getSecond()))
 				{
 					continue;
 				}
@@ -331,52 +447,184 @@ public abstract class GrafanaFunction
 		return getServiceValue(input.deployments, serviceId, serviceIds);
 	}
 	
-	protected Graph getEventsGraph(ApiClient apiClient, String serviceId, String viewId, int pointsCount,
+	protected Graph getEventsGraph(String serviceId, String viewId, int pointsCount,
 			ViewInput input, VolumeType volumeType, DateTime from, DateTime to) {
-		return getEventsGraph(apiClient, serviceId, viewId, pointsCount, input, volumeType, from, to, 0, 0);
+		return getEventsGraph(serviceId, viewId, pointsCount, input, volumeType, from, to, 0, 0);
 	}
 	
-	protected Graph getEventsGraph(ApiClient apiClient, String serviceId, String viewId, int pointsCount,
-			ViewInput input, VolumeType volumeType, DateTime from, DateTime to, int baselineWindow, int activeWindow)
-	{
+	protected Graph getEventsGraph(String serviceId, String viewId, int pointsCount,
+			ViewInput input, VolumeType volumeType, DateTime from, DateTime to, int baselineWindow, int activeWindow) {
+		return getEventsGraph(serviceId, viewId, pointsCount, input, volumeType, from, to, baselineWindow, activeWindow, true);
+	}
+	
+	protected GraphSliceTask createGraphAsyncTask(String serviceId, String viewId, int pointsCount,
+			ViewInput input, VolumeType volumeType, DateTime from, DateTime to, int baselineWindow, int activeWindow, int windowSlice) {
+		
 		GraphRequest.Builder builder = GraphRequest.newBuilder().setServiceId(serviceId).setViewId(viewId)
 				.setGraphType(GraphType.view).setFrom(from.toString(fmt)).setTo(to.toString(fmt))
 				.setVolumeType(volumeType).setWantedPointCount(pointsCount).setRaw(true);
 		
 		applyFilters(input, serviceId, builder);
 		
-		Response<GraphResult> graphResponse = ApiCache.getEventGraph(apiClient, serviceId, input, volumeType,
-				builder.build(), pointsCount, activeWindow, baselineWindow);
+		GraphSliceTask task = new GraphSliceTask(builder, serviceId, viewId, pointsCount, 
+			input, volumeType, from, to, baselineWindow, activeWindow, windowSlice);
 		
-		if (graphResponse.isBadResponse())
+		return task;
+	}
+	
+	protected Graph getEventsGraph(String serviceId, String viewId, int pointsCount,
+			ViewInput input, VolumeType volumeType, DateTime from, DateTime to, int baselineWindow, int activeWindow, boolean sync) {		
+		
+		Collection<GraphSliceTask> tasks = getGraphTasks(serviceId, viewId, 
+				pointsCount, input, volumeType, from, to, baselineWindow, activeWindow, sync);
+
+		Collection<GraphSliceTaskResult> graphTasks = executeGraphTasks(tasks, sync);
+			
+		Graph result = mergeGraphs(graphTasks);
+		
+		return result;
+	}
+	
+	protected Collection<GraphSliceTask> getGraphTasks(String serviceId, String viewId, int pointsCount,
+			ViewInput input, VolumeType volumeType, DateTime from, DateTime to, 
+			int baselineWindow, int activeWindow, boolean sync)
+	{
+		int days = Math.abs(Days.daysBetween(from, to).getDays());
+		
+		int effectivePoints;
+		List<SliceRequest> sliceRequests;
+		
+		if ((sync) || ((days < 3) || (days > 14))) // This is just a starting point
 		{
+			effectivePoints = pointsCount;
+			sliceRequests = Collections.singletonList(new SliceRequest(from, to, pointsCount));
+		}
+		else
+		{
+			effectivePoints = (pointsCount / days) + 1;
+			sliceRequests = getTimeSlices(from, to, days, effectivePoints);	
+		}
+		
+		List<GraphSliceTask> tasks = Lists.newArrayList();
+		
+		int index = 0;
+		
+		for (SliceRequest sliceRequest : sliceRequests)
+		{
+			int sliceIndex;
+			
+			if (sync) {
+				sliceIndex = NO_GRAPH_SLICE;
+			} else {
+				sliceIndex = index;
+			}
+				
+			GraphSliceTask task = createGraphAsyncTask(serviceId, viewId, sliceRequest.pointCount, input, volumeType, 
+					sliceRequest.from, sliceRequest.to, baselineWindow, activeWindow, sliceIndex);
+				
+			index++;
+			
+			tasks.add(task);
+		}
+		
+		return tasks;
+	}
+	
+	private List<SliceRequest> getTimeSlices(DateTime from, DateTime to, int days, int pointCount) {
+		
+		List<SliceRequest> result = Lists.newArrayList();
+		
+		// First partial day (<2018-11-22T12:23:38.418+02:00, 2018-11-22T23:59:00.000+02:00>)
+		
+		result.add(new SliceRequest(from, from.plusDays(1).withTimeAtStartOfDay().minusMinutes(1), END_SLICE_POINT_COUNT));
+
+		// Only full days (<2018-11-23T00:00:00.000+02:00, 2018-11-23T23:59:00.000+02:00>)
+		for (int i = 1; i < days; i++)
+		{
+			DateTime fullDayStart = from.plusDays(i).withTimeAtStartOfDay(); 
+			DateTime fullDayEnd = fullDayStart.plusDays(1).withTimeAtStartOfDay().minusMinutes(1);
+			
+			result.add(new SliceRequest(fullDayStart, fullDayEnd, pointCount));
+		}
+		
+		// Last partial day (<2018-11-29T00:00:00.000+02:00, 2018-11-29T12:23:38.418+02:00>)
+		
+		result.add(new SliceRequest(to.withTimeAtStartOfDay(), to, END_SLICE_POINT_COUNT));
+		
+		return result;
+	}
+	
+	protected Graph mergeGraphs(Collection<GraphSliceTaskResult> graphTasks ) {
+		
+		if (graphTasks.size() == 0) {
 			return null;
 		}
 		
-		GraphResult graphResult = graphResponse.data;
-		
-		if (graphResult == null)
-		{
-			return null;
+		if (graphTasks.size() == 1) {
+			return graphTasks.iterator().next().graph;
 		}
 		
-		if (CollectionUtil.safeIsEmpty(graphResult.graphs))
-		{
-			return null;
+		Graph result = new Graph();		
+		Map<Long, GraphPoint> graphPoints = new TreeMap<Long, GraphPoint>();
+		
+		for (Object taskResult : graphTasks) {
+			
+			if (taskResult == null) {
+				continue;
+			}
+			
+			GraphSliceTaskResult graphSliceTaskResult = (GraphSliceTaskResult)taskResult;
+			
+			if (result.id == null) {
+				result.id = graphSliceTaskResult.graph.id;
+				result.type = graphSliceTaskResult.graph.type;
+			}
+			
+			for (GraphPoint gp : graphSliceTaskResult.graph.points) {
+				long epoch = TimeUtil.getLongTime(gp.time);
+				graphPoints.put(Long.valueOf(epoch), gp);
+			}			
 		}
 		
-		Graph result = graphResult.graphs.get(0);
+		result.points = new ArrayList<GraphPoint>(graphPoints.values());
 		
-		if (!viewId.equals(result.id))
-		{
-			return null;
+		return result;
+	}
+	
+	protected Collection<GraphSliceTaskResult> executeGraphTasks(Collection<GraphSliceTask> slices, boolean sync) {
+		
+		List<Callable<Object>> tasks = Lists.newArrayList(slices);
+		
+		Collection<Object> taskResults;
+		
+		if (sync) {
+			taskResults = Lists.newArrayList();
+			
+			for (Callable<Object> task : tasks) {
+				try
+				{
+					taskResults.add(task.call());
+				}
+				catch (Exception e)
+				{
+					throw new IllegalStateException(e);
+				}
+			}
+		} else {	
+			taskResults = executeTasks(tasks);	
 		}
 		
-		if (CollectionUtil.safeIsEmpty(result.points))
-		{
-			return null;
-		}
+		List<GraphSliceTaskResult> result = Lists.newArrayList();
 		
+		for (Object taskResult : taskResults) {
+			
+			if (taskResult == null) {
+				continue;
+			}
+			
+			result.add((GraphSliceTaskResult)taskResult);
+		}
+			
 		return result;
 	}
 	
@@ -417,7 +665,7 @@ public abstract class GrafanaFunction
 			VolumeType volumeType, int pointsCount)
 	{
 		
-		Graph graph = getEventsGraph(apiClient, serviceId, viewId, pointsCount, input, volumeType, from, to);
+		Graph graph = getEventsGraph(serviceId, viewId, pointsCount, input, volumeType, from, to);
 		
 		if (graph == null)
 		{
@@ -597,9 +845,8 @@ public abstract class GrafanaFunction
 	}
 	
 	protected List<Object> executeTasks(Collection<Callable<Object>> tasks)
-	{
-		
-		CompletionService<Object> completionService = new ExecutorCompletionService<Object>(GrafanaThreadPool.getExecutor(apiClient));
+	{	
+		CompletionService<Object> completionService = new ExecutorCompletionService<Object>(GrafanaThreadPool.getQueryExecutor(apiClient));
 		
 		for (Callable<Object> task : tasks)
 		{
@@ -614,7 +861,12 @@ public abstract class GrafanaFunction
 		{
 			try
 			{
-				Future<Object> future = completionService.take();
+				Future<Object> future = null;
+				
+				while (future == null) {
+					future = completionService.poll(2, TimeUnit.SECONDS);
+				}
+				
 				received++;
 				Object asynResult = future.get();
 				result.add(asynResult);

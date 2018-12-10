@@ -65,7 +65,7 @@ public class GraphFunction extends BaseGraphFunction {
 
 		GraphInput graphInput = (GraphInput) input;
 
-		Graph graph = getEventsGraph(apiClient, serviceId, viewId, pointsWanted, graphInput, 
+		Graph graph = getEventsGraph(serviceId, viewId, pointsWanted, graphInput, 
 			graphInput.volumeType, timeSpan.getFirst(), timeSpan.getSecond());
 		
 		if (graph == null) {
