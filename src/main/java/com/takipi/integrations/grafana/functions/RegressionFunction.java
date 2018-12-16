@@ -25,7 +25,6 @@ import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionResult;
 import com.takipi.api.client.util.regression.RegressionStringUtil;
 import com.takipi.api.client.util.regression.RegressionUtil;
-import com.takipi.api.client.util.regression.RegressionInput.TypeThresholds;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.url.UrlClient.Response;
@@ -50,19 +49,12 @@ public class RegressionFunction extends EventsFunction
 	private static String REGRESSION = "regression";
 	private static String SEVERITY = "severity";
 	
-	private static final String SEV_AND_NONSEV = "%d (%d p1)";
-	private static final String SEVERE_ONLY = "%d p1";
-	private static final String EMPTY_POSTFIX = ".";
-	
 	public static enum RegressionType
 	{
 		NewIssues,
 		SevereNewIssues,
 		Regressions,
-		SevereRegressions,
-		Slowdowns,
-		SevereSlowdowns,
-		Score;
+		SevereRegressions
 	}
 	
 	public static class Factory implements FunctionFactory
@@ -143,12 +135,7 @@ public class RegressionFunction extends EventsFunction
 					return RegressionStringUtil.REGRESSION;
 				case SevereRegressions:
 					return RegressionStringUtil.SEVERE_REGRESSION;
-				case Slowdowns:
-					return RegressionStringUtil.REGRESSION;
-				case SevereSlowdowns:
-					return RegressionStringUtil.SEVERE_REGRESSION;
-				case Score:
-					return String.valueOf(RegressionType.Score);
+			
 				default:
 					return null;
 			}
@@ -236,11 +223,9 @@ public class RegressionFunction extends EventsFunction
 					return Integer.valueOf(settings.severe_new_event_score);
 					
 				case Regressions:
-				case Slowdowns:
 					return Integer.valueOf(settings.regression_score);
 					
 				case SevereRegressions:
-				case SevereSlowdowns:
 					return Integer.valueOf(settings.critical_regression_score);
 				default:
 					break;
@@ -250,7 +235,7 @@ public class RegressionFunction extends EventsFunction
 		}
 	}
 	
-	public static int expandBaselineTimespan(int baselineTimespanFactor, int minBaselineTimespan,
+	private int expandBaselineTimespan(int baselineTimespanFactor, int minBaselineTimespan,
 			RegressionWindow activeWindow)
 	{
 		
@@ -394,19 +379,7 @@ public class RegressionFunction extends EventsFunction
 		
 		for (RegressionResult regressionResult : rateRegression.getSortedCriticalRegressions())
 		{
-			
-			RegressionType type;
-			
-			if (regressionResult.getEvent().type.equals(TIMER))
-			{
-				type = RegressionType.SevereSlowdowns;
-			}
-			else
-			{
-				type = RegressionType.SevereRegressions;
-			}
-			
-			result.add(new RegressionData(rateRegression, input, regressionResult, type));
+			result.add(new RegressionData(rateRegression, input, regressionResult, RegressionType.SevereRegressions));
 		}
 		
 		for (RegressionResult regressionResult : rateRegression.getSortedAllRegressions())
@@ -417,18 +390,7 @@ public class RegressionFunction extends EventsFunction
 				continue;
 			}
 			
-			RegressionType type;
-			
-			if (regressionResult.getEvent().type.equals(TIMER))
-			{
-				type = RegressionType.Slowdowns;
-			}
-			else
-			{
-				type = RegressionType.Regressions;
-			}
-			
-			result.add(new RegressionData(rateRegression, input, regressionResult, type));
+			result.add(new RegressionData(rateRegression, input, regressionResult, RegressionType.Regressions));
 		}
 		
 		return result;
@@ -490,22 +452,7 @@ public class RegressionFunction extends EventsFunction
 			this.empty = empty;
 		}
 		
-		public double getScore(RegressionReportSettings reportSettings)
-		{
-			
-			int newEventsScore = newIssues * reportSettings.new_event_score;
-			int severeNewEventScore = severeNewIssues * reportSettings.severe_new_event_score;
-			int criticalRegressionsScore = criticalRegressions * reportSettings.critical_regression_score;
-			int regressionsScore = regressions * reportSettings.regression_score;
-			
-			long days = Math.max(1, TimeUnit.MINUTES.toDays(regressionInput.activeTimespan));			
-			double score = (newEventsScore + severeNewEventScore + criticalRegressionsScore + regressionsScore) / days;
-			double weightedScore = Math.max(100 - (reportSettings.score_weight * score), 0);
-			
-			return weightedScore;
-		}
-		
-		public double getStat(RegressionType type, RegressionReportSettings settings) {
+		public double getStat(RegressionType type) {
 			
 			switch (type) {	
 				case NewIssues:
@@ -519,15 +466,6 @@ public class RegressionFunction extends EventsFunction
 				
 				case SevereRegressions:
 					return criticalRegressions;
-				
-				case Slowdowns:
-					return slowsdowns;
-				
-				case SevereSlowdowns:
-					return severeSlowsdowns;
-				
-				case Score:
-					return getScore(settings);
 					
 				default:
 					return 0;
@@ -548,7 +486,7 @@ public class RegressionFunction extends EventsFunction
 		return regressionSettings;
 	}
 	
-	private Pair<RegressionInput, RegressionWindow> getRegressionInput(String serviceId, String viewId,
+	public Pair<RegressionInput, RegressionWindow> getRegressionInput(String serviceId, String viewId,
 			EventFilterInput input,
 			Pair<DateTime, DateTime> timeSpan)
 	{
@@ -594,15 +532,6 @@ public class RegressionFunction extends EventsFunction
 		regressionInput.regressionDelta = regressionSettings.error_regression_delta;
 		regressionInput.criticalRegressionDelta = regressionSettings.error_critical_regression_delta;
 		regressionInput.applySeasonality = regressionSettings.apply_seasonality;
-		
-		TypeThresholds timerThresholds = new TypeThresholds();
-		
-		timerThresholds.regressionDelta = regressionSettings.timer_regression_delta;
-		timerThresholds.criticalRegressionDelta = regressionSettings.timer_critical_regression_delta;
-		timerThresholds.minVolumeThreshold = regressionSettings.timer_min_volume_threshold;
-		timerThresholds.minErrorRateThreshold = regressionSettings.timer_min_rate_threshold;
-	
-		regressionInput.typeThresholdsMap = Collections.singletonMap(TIMER, timerThresholds);
 		
 		return Pair.of(regressionInput, regressionWindow);
 		
@@ -784,12 +713,7 @@ public class RegressionFunction extends EventsFunction
 					case SevereRegressions:
 						result.criticalRegressions++;
 						break;
-					case Slowdowns:
-						result.slowsdowns++;
-						break;
-					case SevereSlowdowns:
-						result.severeSlowsdowns++;
-						break;
+					
 					default:
 				}
 			}
@@ -800,7 +724,6 @@ public class RegressionFunction extends EventsFunction
 		
 	public RegressionOutput executeRegression(String serviceId, EventFilterInput input)
 	{
-		
 		String viewId = getViewId(serviceId, input.view);
 		
 		if (viewId == null)
@@ -985,25 +908,10 @@ public class RegressionFunction extends EventsFunction
 		
 		return result;
 	}
-	
-	protected RegressionReportSettings getRegressionReportSettings(String serviceId)
-	{
-		
-		RegressionReportSettings reportSettings = GrafanaSettings.getData(apiClient, serviceId).regression_report;
-		
-		if (reportSettings == null)
-		{
-			throw new IllegalStateException("Unable to acquire regression report settings for " + serviceId);
-		}
-		
-		return reportSettings;
-	}
 		
 	private double getServiceSingleStat(String serviceId, RegressionsInput input)
 	{
-		
 		RegressionOutput regressionOutput = runRegression(serviceId, input);
-		RegressionReportSettings regressionReportSettings = getRegressionReportSettings(serviceId);
 		
 		if ((regressionOutput == null) || (regressionOutput.empty))
 		{
@@ -1014,7 +922,7 @@ public class RegressionFunction extends EventsFunction
 		Collection<RegressionType> regressionTypes = input.getRegressionTypes();
 		
 		for (RegressionType regressionType : regressionTypes) {
-			result += regressionOutput.getStat(regressionType, regressionReportSettings);
+			result += regressionOutput.getStat(regressionType);
 		}
 		
 		return result;
@@ -1028,30 +936,6 @@ public class RegressionFunction extends EventsFunction
 		for (String serviceId : serviceIds)
 		{
 			result += getServiceSingleStat(serviceId, input);
-		}
-		
-		return result;
-	}
-	
-	protected static Object formatIssueType(int nonSevere, int severe)
-	{
-		
-		Object result;
-		
-		if (severe > 0)
-		{
-			if ((nonSevere == 0) || (nonSevere == severe))
-			{
-				result = String.format(SEVERE_ONLY, severe);
-			}
-			else
-			{
-				result = String.format(SEV_AND_NONSEV, nonSevere + severe, severe);
-			}
-		}
-		else
-		{
-			result = Integer.valueOf(nonSevere);
 		}
 		
 		return result;
@@ -1078,28 +962,23 @@ public class RegressionFunction extends EventsFunction
 			return Collections.emptyList();
 		}
 		
-		if (regressionTypes.contains(RegressionType.Score))
+		
+		if (input.singleStatFormat != null)
 		{
-			singleStatText = Double.valueOf(singleStatValue / serviceIds.size());
-		}
-		else
-		{
-			if (input.singleStatFormat != null)
+			if (singleStatValue > 0)
 			{
-				if (singleStatValue > 0)
-				{
-					singleStatText = String.format(input.singleStatFormat, String.valueOf((int)singleStatValue));
-				}
-				else
-				{
-					singleStatText = EMPTY_POSTFIX;
-				}
+				singleStatText = String.format(input.singleStatFormat, String.valueOf((int)singleStatValue));
 			}
 			else
 			{
-				singleStatText = Integer.valueOf((int)singleStatValue);
+				singleStatText = EMPTY_POSTFIX;
 			}
 		}
+		else
+		{
+			singleStatText = Integer.valueOf((int)singleStatValue);
+		}
+		
 		
 		return createSingleStatSeries(timeSpan, singleStatText);
 	}

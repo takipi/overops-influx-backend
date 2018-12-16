@@ -405,6 +405,9 @@ public class ApiCache {
 
 	protected static class TransactionsCacheKey extends ViewCacheKey {
 
+		protected int baselineTimespan;
+		protected int activeTimespan;
+		
 		@Override
 		public boolean equals(Object obj) {
 
@@ -415,19 +418,38 @@ public class ApiCache {
 			if (!super.equals(obj)) {
 				return false;
 			}
+			
+			TransactionsCacheKey other = (TransactionsCacheKey)obj;
+			
+			if (activeTimespan != other.activeTimespan) {
+				return false;
+			}
+			
+			if (baselineTimespan != other.baselineTimespan) {
+				return false;
+			}
 
 			return true;
 		}
 
 		public TransactionsCacheKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input) {
 
+			this(apiClient, request, serviceId, input, 0, 0);
+		}
+		
+		public TransactionsCacheKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input, int baselineTimespan, int activeTimespan) {
 			super(apiClient, request, serviceId, input);
+			
+			this.baselineTimespan = baselineTimespan;
+			this.activeTimespan = activeTimespan;
 		}
 	}
 
 	protected static class TransactionsGraphCacheKey extends ViewCacheKey {
 
 		protected int pointsWanted;
+		protected int baselineTimespan;
+		protected int activeTimespan;
 
 		@Override
 		public boolean equals(Object obj) {
@@ -445,15 +467,38 @@ public class ApiCache {
 			if (pointsWanted != other.pointsWanted) {
 				return false;
 			}
+			
+			if (baselineTimespan != other.baselineTimespan) {
+				return false;
+			}
+			
+			if (activeTimespan != other.activeTimespan) {
+				return false;
+			}
 
 			return true;
+		}
+		
+		@Override
+		public String toString()
+		{
+			return super.toString() + " aw = " + activeTimespan + " bw = " + baselineTimespan;
 		}
 
 		public TransactionsGraphCacheKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId,
 				ViewInput input, int pointsWanted) {
+			this(apiClient, request, serviceId, input, pointsWanted, 0, 0);
+
+		}
+
+		
+		public TransactionsGraphCacheKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId,
+				ViewInput input, int pointsWanted, int baselineTimespan, int activeTimespan) {
 
 			super(apiClient, request, serviceId, input);
 			this.pointsWanted = pointsWanted;
+			this.activeTimespan = activeTimespan;
+			this.baselineTimespan = baselineTimespan;
 		}
 	}
 	
@@ -495,13 +540,16 @@ public class ApiCache {
 				return false;
 			}
 
-			if (input.deployments.size() != other.input.deployments.size()) {
-				return false;
-			}
-
-			for (String dep : input.deployments) {
-				if (!other.input.deployments.contains(dep)) {
+			if (input.deployments != null) {
+				
+				if (input.deployments.size() != other.input.deployments.size()) {
 					return false;
+				}
+	
+				for (String dep : input.deployments) {
+					if (!other.input.deployments.contains(dep)) {
+						return false;
+					}
 				}
 			}
 
@@ -595,12 +643,17 @@ public class ApiCache {
 
 		return response;
 	}
+	
+	public static Response<TransactionsVolumeResult> getTransactionsVolume(ApiClient apiClient, String serviceId,
+			ViewInput input, TransactionsVolumeRequest request) {
+		return getTransactionsVolume(apiClient, serviceId, input, 0, 0, request);
+	}
 
 	@SuppressWarnings("unchecked")
 	public static Response<TransactionsVolumeResult> getTransactionsVolume(ApiClient apiClient, String serviceId,
-			ViewInput input, TransactionsVolumeRequest request) {
+			ViewInput input, int activeTimespan, int baselineTimespan, TransactionsVolumeRequest request) {
 
-		TransactionsCacheKey cacheKey = new TransactionsCacheKey(apiClient, request, serviceId, input);
+		TransactionsCacheKey cacheKey = new TransactionsCacheKey(apiClient, request, serviceId, input, activeTimespan, baselineTimespan);
 		Response<TransactionsVolumeResult> response = (Response<TransactionsVolumeResult>)getItem(cacheKey);
 
 		return response;
@@ -672,13 +725,20 @@ public class ApiCache {
 		
 		return response;
 	}
+	
+	public static Response<TransactionsGraphResult> getTransactionsGraph(ApiClient apiClient, String serviceId,
+			BaseGraphInput input, int pointsWanted,
+			TransactionsGraphRequest request) {
+		return getTransactionsGraph(apiClient, serviceId, input, pointsWanted, 0, 0, request);
+	}
 
 	@SuppressWarnings("unchecked")
 	public static Response<TransactionsGraphResult> getTransactionsGraph(ApiClient apiClient, String serviceId,
-			BaseGraphInput input, int pointsWanted, TransactionsGraphRequest request) {
+			EventFilterInput input, int pointsWanted, int baselineTimespan, int activeTimespan, 
+			TransactionsGraphRequest request) {
 
 		TransactionsGraphCacheKey cacheKey = new TransactionsGraphCacheKey(apiClient, request, serviceId, input,
-				pointsWanted);
+				pointsWanted, baselineTimespan, activeTimespan);
 		Response<TransactionsGraphResult> response = (Response<TransactionsGraphResult>) ApiCache.getItem(cacheKey);
 		
 		return response;
@@ -696,7 +756,7 @@ public class ApiCache {
 	
 	public static RegressionOutput getRegressionOutput(ApiClient apiClient, String serviceId, 
 		EventFilterInput input, RegressionFunction function, boolean load) {
-		
+			
 		RegressionKey key = new RegressionKey(apiClient, serviceId, input, function);
 		
 		if (load) {
@@ -735,7 +795,8 @@ public class ApiCache {
 				
 				@Override
 				public RegressionWindow load(RegresionWindowKey key) {
-					RegressionWindow result = RegressionUtil.getActiveWindow(key.apiClient, key.input,
+					
+					RegressionWindow result = RegressionUtil.getActiveWindow(key.apiClient, key.input, 4,
 							System.out);
 					return result;
 				}

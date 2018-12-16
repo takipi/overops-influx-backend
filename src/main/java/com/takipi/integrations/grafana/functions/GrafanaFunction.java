@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -28,12 +29,14 @@ import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
 import com.takipi.api.client.data.transaction.Transaction;
+import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.data.view.SummarizedView;
 import com.takipi.api.client.request.TimeframeRequest;
 import com.takipi.api.client.request.ViewTimeframeRequest;
 import com.takipi.api.client.request.event.EventsRequest;
 import com.takipi.api.client.request.event.EventsSlimVolumeRequest;
 import com.takipi.api.client.request.metrics.GraphRequest;
+import com.takipi.api.client.request.transaction.TransactionsGraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsVolumeRequest;
 import com.takipi.api.client.request.view.ViewsRequest;
 import com.takipi.api.client.result.event.EventResult;
@@ -42,6 +45,7 @@ import com.takipi.api.client.result.event.EventsResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
 import com.takipi.api.client.result.event.EventsVolumeResult;
 import com.takipi.api.client.result.metrics.GraphResult;
+import com.takipi.api.client.result.transaction.TransactionsGraphResult;
 import com.takipi.api.client.result.transaction.TransactionsVolumeResult;
 import com.takipi.api.client.result.view.ViewsResult;
 import com.takipi.api.client.util.validation.ValidationUtil.GraphType;
@@ -52,6 +56,7 @@ import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.EnvironmentsFilterInput;
 import com.takipi.integrations.grafana.input.EnvironmentsInput;
+import com.takipi.integrations.grafana.input.EventFilterInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
@@ -87,8 +92,10 @@ public abstract class GrafanaFunction
 	protected static final String VALUE_COLUMN = "value";
 	
 	public static final String GRAFANA_SEPERATOR_RAW = "|";
+	public static final String ARRAY_SEPERATOR_RAW = ",";
+
 	public static final String GRAFANA_SEPERATOR = Pattern.quote(GRAFANA_SEPERATOR_RAW);
-	public static final String ARRAY_SEPERATOR = Pattern.quote(",");
+	public static final String ARRAY_SEPERATOR = Pattern.quote(ARRAY_SEPERATOR_RAW);
 	public static final String SERVICE_SEPERATOR = ": ";
 	public static final String GRAFANA_VAR_PREFIX = "$";
 	
@@ -98,6 +105,7 @@ public abstract class GrafanaFunction
 	protected static final char QUALIFIED_DELIM = '.';
 	protected static final char INTERNAL_DELIM = '/';
 	protected static final String TRANS_DELIM = "#";
+	protected static final String EMPTY_POSTFIX = ".";	
 	
 	private static final DateTimeFormatter fmt = ISODateTimeFormat.dateTime().withZoneUTC();
 	
@@ -381,7 +389,66 @@ public abstract class GrafanaFunction
 	
 	protected Collection<Transaction> getTransactions(String serviceId, String viewId,
 			Pair<DateTime, DateTime> timeSpan,
-			ViewInput input, String searchText)
+			ViewInput input, String searchText) {
+		return getTransactions(serviceId, viewId, timeSpan, input, searchText, 0, 0);	
+	}
+	
+	protected Collection<TransactionGraph> getTransactionGraphs(EventFilterInput input, String serviceId, String viewId, 
+			Pair<DateTime, DateTime> timeSpan, String searchText,
+			int pointsWanted, int activeTimespan, int baselineTimespan) {
+		
+		Pair<String, String> fromTo = TimeUtil.toTimespan(timeSpan);
+		
+		TransactionsGraphRequest.Builder builder = TransactionsGraphRequest.newBuilder().setServiceId(serviceId)
+				.setViewId(viewId).setFrom(fromTo.getFirst()).setTo(fromTo.getSecond())
+				.setWantedPointCount(pointsWanted);
+				
+		applyFilters(input, serviceId, builder);
+
+		Response<TransactionsGraphResult> response = ApiCache.getTransactionsGraph(apiClient, serviceId, input,
+			pointsWanted, baselineTimespan, activeTimespan, builder.build());
+				
+		validateResponse(response);
+		
+		if ((response.data == null) || (response.data.graphs == null)) { 
+
+			return Collections.emptyList();
+		}
+		
+		Collection<TransactionGraph> result;
+		
+		if ((input.hasTransactions() || (searchText != null)))
+		{
+			
+			result = new ArrayList<TransactionGraph>(response.data.graphs.size());
+			Collection<String> transactions = input.getTransactions(serviceId);
+			
+			GroupFilter transactionsFilter = GrafanaSettings.getServiceSettings(apiClient, serviceId).getTransactionsFilter(transactions);
+
+			for (TransactionGraph transaction : response.data.graphs)
+			{
+				Pair<String, String> nameAndMethod = getFullNameAndMethod(transaction.name);
+				
+				if (filterTransaction(transactionsFilter, searchText, nameAndMethod.getFirst(), nameAndMethod.getSecond()))
+				{
+					continue;
+				}
+				
+				result.add(transaction);
+			}
+			
+		}
+		else
+		{
+			result = response.data.graphs;
+		}
+		
+		return result;
+	}
+	
+	protected Collection<Transaction> getTransactions(String serviceId, String viewId,
+			Pair<DateTime, DateTime> timeSpan,
+			ViewInput input, String searchText, int activeTimespan, int baselineTimespan)
 	{
 		
 		Pair<String, String> fromTo = TimeUtil.toTimespan(timeSpan);
@@ -392,7 +459,7 @@ public abstract class GrafanaFunction
 		applyFilters(input, serviceId, builder);
 		
 		Response<TransactionsVolumeResult> response = ApiCache.getTransactionsVolume(apiClient, serviceId,
-				input, builder.build());
+				input, activeTimespan, baselineTimespan, builder.build());
 		
 		if (response.isBadResponse())
 		{
@@ -611,7 +678,7 @@ public abstract class GrafanaFunction
 				}
 			}
 		} else {	
-			taskResults = executeTasks(tasks);	
+			taskResults = executeTasks(tasks, true);	
 		}
 		
 		List<GraphSliceTaskResult> result = Lists.newArrayList();
@@ -844,9 +911,17 @@ public abstract class GrafanaFunction
 		return result;
 	}
 	
-	protected List<Object> executeTasks(Collection<Callable<Object>> tasks)
+	protected List<Object> executeTasks(Collection<Callable<Object>> tasks, boolean queryPool)
 	{	
-		CompletionService<Object> completionService = new ExecutorCompletionService<Object>(GrafanaThreadPool.getQueryExecutor(apiClient));
+		Executor executor;
+		
+		if (queryPool) {
+			executor = GrafanaThreadPool.getQueryExecutor(apiClient);
+		} else {
+			executor  = GrafanaThreadPool.getFunctionExecutor(apiClient);
+		} 
+		
+		CompletionService<Object> completionService = new ExecutorCompletionService<Object>(executor);
 		
 		for (Callable<Object> task : tasks)
 		{

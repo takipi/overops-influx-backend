@@ -1,8 +1,10 @@
 {
 	"general": {
 		"group_by_entryPoint": true,
-		"event_types": "Logged Error,Uncaught Exception,Logged Warning,Swallowed Exception,HTTP Error,Caught Exception",
-		"points_wanted": 24
+		"event_types": "Logged Error|Uncaught Exception|Logged Warning|Swallowed Exception|HTTP Error|Caught Exception",
+		"points_wanted": 24,
+		"transaction_points_wanted": 100,
+		"transaction_failures": "Logged Error|Uncaught Exception|HTTP Error"
 	},
 	
 	"transactions": {
@@ -57,6 +59,28 @@
 		]
 	,
 	
+	"user_groups": {
+		"groups": [
+			{
+				"app_groups": [
+					"prod-app"
+				],
+				"users": [
+					"tal.weiss@takipi.com",
+					"talw.gx@gmail.com"
+				]
+			}
+		]
+	},
+		
+	"slowdown": { 
+		"active_invocations_threshold": 50,
+		"baseline_invocations_threshold": 50,
+		"over_avg_slowing_percentage": 0.3,
+		"over_avg_critical_percentage": 0.6,
+		"std_dev_factor": 1.5
+	},
+	
 	"regression": {
 		"active_timespan": 1440,
 		"min_baseline_timespan": 20160,
@@ -65,10 +89,6 @@
 		"error_min_rate_threshold": 0.1,
 		"error_regression_delta": 0.5,
 		"error_critical_regression_delta": 1,
-		"timer_min_volume_threshold": 25,
-		"timer_min_rate_threshold": 0.03,
-		"timer_regression_delta": 0.5,
-		"timer_critical_regression_delta": 1,
 		"apply_seasonality": true,
 		"critical_exception_types": "NullPointerException|IndexOutOfBoundsException|InvalidCastException|AssertionError",
 		

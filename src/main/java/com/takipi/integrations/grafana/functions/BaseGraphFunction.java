@@ -161,7 +161,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 			Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
  
 		Collection<Callable<Object>> tasks = getTasks(serviceIds, request, timeSpan, pointsWanted);
-		List<Object> taskResults = executeTasks(tasks);
+		List<Object> taskResults = executeTasks(tasks, true);
 		
 		List<GraphSeries> result = new ArrayList<GraphSeries>();
 		

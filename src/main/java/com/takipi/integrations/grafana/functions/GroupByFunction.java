@@ -773,7 +773,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 				tasks.add(task);
 			}
 			
-			executeTasks(tasks);
+			executeTasks(tasks, true);
 		}
 
 		Map<String, GroupResult> result = new HashMap<String, GroupResult>();

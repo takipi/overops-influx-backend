@@ -7,7 +7,8 @@ import java.util.List;
 import org.joda.time.DateTime;
 
 import com.takipi.api.client.ApiClient;
-import com.takipi.api.client.data.transaction.Transaction;
+import com.takipi.api.client.data.transaction.TransactionGraph;
+import com.takipi.api.client.data.transaction.TransactionGraph.GraphPoint;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseVolumeInput.AggregationType;
 import com.takipi.integrations.grafana.input.FunctionInput;
@@ -52,27 +53,40 @@ public class TransactionsVolumeFunction extends BaseVolumeFunction {
 
 		long transactionTotal = 0;
 
-		Collection<Transaction> transactions = getTransactions(serviceId, viewId, timeSpan, input, input.getSearchText());
+		Collection<TransactionGraph> transactionGraphs = getTransactionGraphs(input, serviceId, viewId, 
+			timeSpan, input.getSearchText(), input.pointsWanted, 0, 0);
 		
-		if (transactions == null) {
+		if (transactionGraphs == null) {
 			return result;
 		}
 		
 		if ((input.volumeType.equals(TransactionVolumeType.avg)) 
 		|| (input.volumeType.equals(TransactionVolumeType.invocations))) {
 
-			for (Transaction transaction : transactions) {
-				transactionTotal += transaction.stats.invocations;
+			for (TransactionGraph transactionGraph : transactionGraphs) {
+				
+				if (transactionGraph.points == null) {
+					continue;
+				}
+				
+				for (GraphPoint gp : transactionGraph.points) {
+					transactionTotal += gp.stats.invocations;
+				}
 			}
 
 			result.invocations = transactionTotal;
 
-			if (input.volumeType.equals(TransactionVolumeType.avg)) {
-				for (Transaction transaction : transactions) {
+			if ((transactionTotal > 0) && (input.volumeType.equals(TransactionVolumeType.avg))) {
+				
+				for (TransactionGraph transactionGraph : transactionGraphs) {
 					
-					if (transactionTotal > 0) {
-						double rate = (double) transaction.stats.invocations / (double) (transactionTotal);
-						result.avgTime += transaction.stats.avg_time * rate;
+					if (transactionGraph.points == null) {
+						continue;
+					}
+					
+					for (GraphPoint gp : transactionGraph.points) {
+						double rate = (double) gp.stats.invocations / (double) (transactionTotal);
+						result.avgTime += gp.stats.avg_time * rate;
 					}
 				}
 			}
@@ -115,7 +129,7 @@ public class TransactionsVolumeFunction extends BaseVolumeFunction {
 			case avg:
 				
 				if (totalInvocations > 0) {
-					volume.sum += serviceVolume.avgTime * serviceVolume.invocations / totalInvocations;
+					volume.sum += serviceVolume.avgTime * (serviceVolume.invocations / totalInvocations);
 				}
 				break;
 

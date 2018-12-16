@@ -1,8 +1,8 @@
 package com.takipi.integrations.grafana.functions;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import java.util.TreeSet;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.client.ClientUtil;
@@ -48,20 +48,43 @@ public class ApplicationsFunction extends EnvironmentVariableFunction {
 				appender.append(appGroupName);
 			}
 		}
+				
+		Collection<String> liveApps = addApps(input, serviceId, serviceIds,
+			ClientUtil.getApplications(apiClient, serviceId, true), appender, null);
 		
-		List<String> serviceApps;
-		
-		try {
-			serviceApps	= ClientUtil.getApplications(apiClient, serviceId);	
-		} catch (Exception e) {
-			System.err.println(e);
-			serviceApps = Collections.emptyList();
-		}
-		
-		for (String app : serviceApps) {
+		addApps(input, serviceId, serviceIds,
+				ClientUtil.getApplications(apiClient, serviceId, false), appender, liveApps);
+	}
+	
+	@Override
+	protected void sort(List<List<Object>> series)
+	{
+		//do nothing
+	}
 
+	private Collection<String> addApps(EnvironmentsInput input, String serviceId, Collection<String> serviceIds, Collection<String> apps,
+		VariableAppender appender, Collection<String> existing) {
+		
+		Collection<String> result;
+		
+		if (input.sorted) {
+			result = new TreeSet<String>(apps); 
+		} else {
+			result = apps;
+		}
+				
+		for (String app : result) {
+
+			if ((existing != null) && (existing.contains(app))) {
+				continue;
+			}
+			
 			String serviceApp = getServiceValue(app, serviceId, serviceIds);
 			appender.append(serviceApp);
 		}
+		
+		return result;
 	}
+	
+	
 }

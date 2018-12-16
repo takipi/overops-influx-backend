@@ -3,7 +3,6 @@ package com.takipi.integrations.grafana.functions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -12,13 +11,9 @@ import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.transaction.Transaction;
 import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.data.transaction.TransactionGraph.GraphPoint;
-import com.takipi.api.client.request.transaction.TransactionsVolumeRequest;
-import com.takipi.api.client.result.transaction.TransactionsVolumeResult;
-import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.Pair;
-import com.takipi.integrations.grafana.input.BaseGraphInput;
+import com.takipi.integrations.grafana.input.EventFilterInput;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput;
-import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionAvgGraphFunction extends TransactionsGraphFunction
@@ -49,29 +44,15 @@ public class TransactionAvgGraphFunction extends TransactionsGraphFunction
 	
 	
 	@Override
-	protected Collection<TransactionGraph> getTransactionGraphs(TransactionsGraphInput input, String serviceId,
-			String viewId, BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, int pointsWanted)
-	{
-		Pair<String, String> fromTo = TimeUtil.toTimespan(timeSpan);
-		
-		TransactionsVolumeRequest.Builder builder = TransactionsVolumeRequest.newBuilder().setServiceId(serviceId)
-				.setViewId(viewId).setFrom(fromTo.getFirst()).setTo(fromTo.getSecond()).setRaw(true);
-				
-		applyFilters(request, serviceId, builder);
-
-		
-		Response<TransactionsVolumeResult> response = ApiCache.getTransactionsVolume(apiClient, serviceId, input, builder.build());
-		
-		validateResponse(response);
-		
-		if ((response.data == null) || (response.data.transactions == null)) { 
-
-			return Collections.emptyList();
-		}
+	protected Collection<TransactionGraph> getTransactionGraphs(EventFilterInput input, String serviceId,
+			String viewId, Pair<DateTime, DateTime> timeSpan, String searchText, 
+			int pointsWanted, int activeTimespan, int baselineTimespan)
+	{	
+		Collection<Transaction> transactions = getTransactions(serviceId, viewId, timeSpan, input, searchText);
 		
 		List<TransactionGraph> result = new ArrayList<TransactionGraph>();
 		
-		for (Transaction transaction : response.data.transactions) {
+		for (Transaction transaction : transactions) {
 			TransactionGraph transactionGraph = new TransactionGraph();
 			transactionGraph.name = transaction.name;
 			

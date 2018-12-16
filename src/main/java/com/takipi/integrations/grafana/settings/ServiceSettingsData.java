@@ -12,6 +12,10 @@ public class ServiceSettingsData
 	public GroupSettings applications;
 	public List<Category> tiers;	
 	
+	public UserGroupsSettings user_groups;
+	
+	public SlowdownSettings slowdown;
 	public RegressionSettings regression;
+	
 	public RegressionReportSettings regression_report;
 }

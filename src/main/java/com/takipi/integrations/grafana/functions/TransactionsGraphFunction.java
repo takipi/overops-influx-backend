@@ -15,9 +15,6 @@ import org.joda.time.format.ISODateTimeFormat;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.data.transaction.TransactionGraph.GraphPoint;
-import com.takipi.api.client.request.transaction.TransactionsGraphRequest;
-import com.takipi.api.client.result.transaction.TransactionsGraphResult;
-import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.GraphFunction.SeriesVolume;
@@ -27,8 +24,6 @@ import com.takipi.integrations.grafana.input.TransactionsGraphInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings.GroupFilter;
-import com.takipi.integrations.grafana.util.ApiCache;
-import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionsGraphFunction extends BaseGraphFunction {
 
@@ -63,30 +58,6 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 	public TransactionsGraphFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
-
-	protected Collection<TransactionGraph> getTransactionGraphs(TransactionsGraphInput input, String serviceId, String viewId, 
-			BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
-		
-		Pair<String, String> fromTo = TimeUtil.toTimespan(timeSpan);
-		
-		TransactionsGraphRequest.Builder builder = TransactionsGraphRequest.newBuilder().setServiceId(serviceId)
-				.setViewId(viewId).setFrom(fromTo.getFirst()).setTo(fromTo.getSecond())
-				.setWantedPointCount(pointsWanted);
-				
-		applyFilters(request, serviceId, builder);
-
-		Response<TransactionsGraphResult> response = ApiCache.getTransactionsGraph(apiClient, serviceId, input, pointsWanted, builder.build());
-				
-		validateResponse(response);
-		
-		if ((response.data == null) || (response.data.graphs == null)) { 
-
-			return Collections.emptyList();
-		}
-		
-		return response.data.graphs;
-	}
-	
     @Override
 	protected List<GraphSeries> processServiceGraph(String serviceId, String viewId, String viewName,
 			BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds, int pointsWanted) {
@@ -94,7 +65,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		TransactionsGraphInput input = (TransactionsGraphInput) request;
 
 		Collection<TransactionGraph> transactionGraphs = getTransactionGraphs(input, serviceId, 
-				viewId, request, timeSpan, pointsWanted);
+				viewId, timeSpan, input.getSearchText(), pointsWanted, 0, 0);
 				
 		Collection<String> transactions = getTransactions(serviceId, input, timeSpan);
 		
@@ -119,8 +90,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			result = Collections.singletonList(createAggregateGraphSeries(serviceId, graphs, transactionsFilter,
 					input, serviceIds, seriesName));
 		} else {
-			result = createMultiGraphSeries(serviceId, graphs, input, serviceIds,
-					transactionsFilter);
+			result = createMultiGraphSeries(serviceId, graphs, input, serviceIds);
 		}
 		
 		return result;
@@ -144,19 +114,20 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
     }
 
 	protected List<GraphSeries> createMultiGraphSeries(String serviceId, Collection<TransactionGraph> graphs,
-			TransactionsGraphInput input, Collection<String> serviceIds, GroupFilter transactionFilter) {
+			TransactionsGraphInput input, Collection<String> serviceIds) {
 
 		List<GraphSeries> result = new ArrayList<GraphSeries>();
-		String searchText = input.getSearchText();
 		
 		for (TransactionGraph graph : graphs) {
 
+			/*
 			Pair<String, String> nameAndMethod = getFullNameAndMethod(graph.name);
 			
 			if (filterTransaction(transactionFilter, searchText, nameAndMethod.getFirst(), nameAndMethod.getSecond()))
 			{
 				continue;
 			}
+			*/
 
 			if (input.volumeType.equals(GraphType.all)) {
 				result.add(createTransactionGraphSeries(serviceId, graph, GraphType.avg_time, serviceIds));

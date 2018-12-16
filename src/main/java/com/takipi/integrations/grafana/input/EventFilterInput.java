@@ -95,7 +95,10 @@ public class EventFilterInput extends ViewInput
 			return null;
 		}
 		
-		return getServiceFilters(types, null, true);
+		String value = types.replace(GrafanaFunction.ARRAY_SEPERATOR_RAW,
+				GrafanaFunction.GRAFANA_SEPERATOR_RAW);
+		
+		return getServiceFilters(value, null, true);
 	}
 	
 	public static Collection<String> toArray(String value)

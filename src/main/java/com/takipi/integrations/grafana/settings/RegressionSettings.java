@@ -15,12 +15,7 @@ public class RegressionSettings {
 	public double error_min_rate_threshold;
 	public double error_regression_delta;
 	public double error_critical_regression_delta;
-	
-	public int timer_min_volume_threshold;
-	public double timer_min_rate_threshold;
-	public double timer_regression_delta;
-	public double timer_critical_regression_delta;
-	
+		
 	public boolean apply_seasonality;
 	public String critical_exception_types;
 	

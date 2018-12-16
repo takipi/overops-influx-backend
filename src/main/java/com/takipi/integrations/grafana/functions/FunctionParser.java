@@ -227,7 +227,7 @@ public class FunctionParser {
 		
 		//regression functions
 		registerFunction(new RegressionFunction.Factory());
-		registerFunction(new RegressionReportFunction.Factory());
+		registerFunction(new ReliabilityReportFunction.Factory());
 		registerFunction(new RegressionGraphFunction.Factory());
 
 		//deployment functions

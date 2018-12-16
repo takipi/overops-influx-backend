@@ -1,6 +1,6 @@
 package com.takipi.integrations.grafana.input;
 
-public class RegressionReportInput extends RegressionsInput {
+public class RelabilityReportInput extends RegressionsInput {
 	
 	public enum ReportMode {
 		Applications, Deployments, Tiers;
@@ -11,4 +11,6 @@ public class RegressionReportInput extends RegressionsInput {
 	
 	public String thresholds;
 	public String postfixes;
+	
+	public int transactionPointsWanted;
 }
