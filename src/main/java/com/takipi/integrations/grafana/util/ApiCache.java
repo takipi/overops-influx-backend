@@ -491,7 +491,6 @@ public class ApiCache {
 
 		}
 
-		
 		public TransactionsGraphCacheKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId,
 				ViewInput input, int pointsWanted, int baselineTimespan, int activeTimespan) {
 
@@ -595,7 +594,6 @@ public class ApiCache {
 			EventFilterInput eventInput = (EventFilterInput)input;
 			EventFilterInput otherInput = (EventFilterInput)(other.input);
 			
-			
 			if (!Objects.equal(eventInput.types, otherInput.types)) {
 				return false;
 			}
@@ -620,6 +618,7 @@ public class ApiCache {
 				RegressionFunction function) {
 
 			super(apiClient, null, serviceId, input, null);
+			
 			this.function = function;
 		}
 	}
@@ -812,25 +811,24 @@ public class ApiCache {
 				
 				@Override
 				public Response<?> load(CacheKey key) {
-					
-					Response<?> result;
 					long t1 = System.currentTimeMillis();
 					
 					try {
-						result = key.apiClient.get(key.request);
+						Response<?> result = key.apiClient.get(key.request);
+						
+						long t2 = System.currentTimeMillis();
+						
+						if (PRINT_DURATIONS) {
+							double sec = (double)(t2-t1) / 1000;
+							System.out.println(sec + " sec: " + key);
+						}
+						
+						return result;
  					} catch (Throwable e) {
  						long t2 = System.currentTimeMillis();
+ 						
  						throw new IllegalStateException("Error executing after " + ((double)(t2-t1) / 1000) + " sec: " + key, e);
  					}
-					long t2 = System.currentTimeMillis();
-					
-					if (PRINT_DURATIONS) {
-						double sec = (t2-t1) / 1000;
-						System.out.println(sec + " sec: " + key);
-					}
-					
-					return result;
 				}
 			});
-
 }

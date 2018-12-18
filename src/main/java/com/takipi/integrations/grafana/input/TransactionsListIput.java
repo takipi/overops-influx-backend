@@ -5,7 +5,8 @@ public class TransactionsListIput extends BaseGraphInput {
 	public enum RenderMode
 	{
 		SingleStat,
-		Grid	}
+		Grid
+	}
 	
 	public String fields;
 	public RenderMode renderMode;

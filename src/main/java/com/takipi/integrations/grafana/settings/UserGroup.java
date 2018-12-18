@@ -6,5 +6,4 @@ public class UserGroup
 {
 	public List<String> app_groups;
 	public List<String> users;
-
 }
