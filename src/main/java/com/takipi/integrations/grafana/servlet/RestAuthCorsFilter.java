@@ -8,15 +8,17 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
 // It seems for CORS with authentication, it's a bit trickier than regular CORS.
 // Filter is based on https://stackoverflow.com/a/16307321/359134
-
-@WebFilter(urlPatterns = "/*")
-public class RestCorsAuthFilter implements Filter {
+@Component
+@Order(1)
+public class RestAuthCorsFilter implements Filter {
 	private static final String VALID_METHODS = "DELETE, HEAD, GET, OPTIONS, POST, PUT";
 
 	@Override
