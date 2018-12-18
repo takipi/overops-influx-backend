@@ -13,6 +13,7 @@ public class GeneralSettings {
 	public int points_wanted;
 	public int transaction_points_wanted;
 	public String transaction_failures;
+	public String proxy_link_prefix;
 
 	public Collection<String> getDefaultTypes() {
 		
@@ -21,7 +22,7 @@ public class GeneralSettings {
 			return Collections.emptyList();
 		}
 		
-		String[] types = event_types.split(GrafanaFunction.GRAFANA_SEPERATOR);
+		String[] types = event_types.split(GrafanaFunction.ARRAY_SEPERATOR);
 		return Arrays.asList(types);
 	}
 }

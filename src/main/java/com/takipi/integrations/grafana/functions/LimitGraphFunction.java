@@ -1,12 +1,9 @@
 package com.takipi.integrations.grafana.functions;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import org.joda.time.DateTime;
 
@@ -20,17 +17,6 @@ import com.takipi.integrations.grafana.output.Series;
 
 public abstract class LimitGraphFunction extends GraphFunction {
 
-	protected static class GraphData {
-		protected Map<Long, Long> points;
-		protected long volume;
-		protected String key;
-		
-		protected GraphData(String key) {
-			this.key = key;
-			this.points = new TreeMap<Long, Long>();
-		}
-	}
-	
 	public LimitGraphFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
@@ -51,24 +37,6 @@ public abstract class LimitGraphFunction extends GraphFunction {
 		List<GraphData> sorted = new ArrayList<GraphData>(graphsData);
 		sortGraphData(sorted);
 		return sorted.subList(0, Math.min(graphsData.size(), limit));
-	}
-	
-	protected static GraphSeries getGraphSeries(GraphData graphData, String name) {
-		
-		GraphSeries result = new GraphSeries();
-					
-		result.series = new Series();
-		
-		result.series.name = EMPTY_NAME;
-		result.series.columns = Arrays.asList(new String[] { TIME_COLUMN, name });
-		result.series.values = new ArrayList<List<Object>>();
-		result.volume = graphData.volume;
-			
-		for (Map.Entry<Long, Long> graphPoint : graphData.points.entrySet()) {				
-			result.series.values.add(Arrays.asList(new Object[] { graphPoint.getKey(), graphPoint.getValue() }));
-		}
-		
-		return result;
 	}
 	
 	protected abstract List<GraphSeries> processGraphSeries(String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,

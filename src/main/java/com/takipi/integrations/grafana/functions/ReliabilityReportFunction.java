@@ -32,9 +32,9 @@ import com.takipi.integrations.grafana.functions.TransactionsListFunction.Transa
 import com.takipi.integrations.grafana.input.EventFilterInput;
 import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
+import com.takipi.integrations.grafana.input.RegressionsInput;
 import com.takipi.integrations.grafana.input.RelabilityReportInput;
 import com.takipi.integrations.grafana.input.RelabilityReportInput.ReportMode;
-import com.takipi.integrations.grafana.input.RegressionsInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.RegressionReportSettings;
@@ -45,10 +45,7 @@ import com.takipi.integrations.grafana.util.TimeUtil;
 public class ReliabilityReportFunction extends EventsFunction {
 	
 	private static final List<String> FIELDS = Arrays.asList(
-			new String[] { "Name", "New Issues", "Regressions", "Slowdowns", "Score" });
-	
-	private static final String SEV_AND_NONSEV = "%d (%d P1)";
-	private static final String SEVERE_ONLY = "%d P1";
+			new String[] { FROM, TO, TIME_RANGE, "Name", "New Issues", "Regressions", "Slowdowns", "Score" });
 	
 	public static class Factory implements FunctionFactory {
 		
@@ -725,7 +722,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return createSingleStatSeries(timeSpan, singleStatText);
 	}
 
-	private static Object formatIssueType(int nonSevere, int severe)
+	private static Object formatIssueType(RelabilityReportInput input, int nonSevere, int severe)
 	{
 		
 		Object result;
@@ -734,11 +731,19 @@ public class ReliabilityReportFunction extends EventsFunction {
 		{
 			if ((nonSevere == 0) || (nonSevere == severe))
 			{
-				result = String.format(SEVERE_ONLY, severe);
+				if (input.sevOnlyFormat != null) {
+					result = String.format(input.sevOnlyFormat, severe);
+				} else {
+					result = String.valueOf(severe);
+				}
 			}
 			else
 			{
-				result = String.format(SEV_AND_NONSEV, nonSevere + severe, severe);
+				if (input.sevAndNonSevFormat != null) {
+					result = String.format(input.sevAndNonSevFormat, nonSevere + severe, severe);
+				} else {
+					result = String.valueOf(nonSevere + severe);
+				}
 			}
 		}
 		else
@@ -795,17 +800,26 @@ public class ReliabilityReportFunction extends EventsFunction {
 			Pair<DateTime, DateTime> timeSpan) {
 
 		List<List<Object>> result = new ArrayList<List<Object>>();
+		
 		Collection<ReportKeyOutput> reportKeyOutputs = executeReport(serviceId, (RelabilityReportInput) input, timeSpan);
 		Collection<ReportKeyResults > reportKeyResults = getReportResults(serviceId, reportKeyOutputs);
 		
+		RelabilityReportInput rrInput = (RelabilityReportInput)input;
+		
 		for (ReportKeyResults reportKeyResult : reportKeyResults) {
 			
-			Object newIssuesOutput = formatIssueType(reportKeyResult.newIssues, reportKeyResult.severeNewIssues);
-			Object regressionsOutput = formatIssueType(reportKeyResult.regressions, reportKeyResult.criticalRegressions);
-			Object slowdownsOutput = formatIssueType(reportKeyResult.slowdowns, reportKeyResult.severeSlowdowns);
+			Pair<Object, Object> fromTo = getTimeFilterPair(timeSpan, input.timeFilter);
+			String timeRange = TimeUtil.getTimeUnit(input.timeFilter); 
 			
-			Object[] row = new Object[] { reportKeyResult.output.key, newIssuesOutput, regressionsOutput, slowdownsOutput,
-					reportKeyResult.score };
+			Object newIssuesOutput = formatIssueType(rrInput, reportKeyResult.newIssues, reportKeyResult.severeNewIssues);
+			Object regressionsOutput = formatIssueType(rrInput, reportKeyResult.regressions, reportKeyResult.criticalRegressions);
+			Object slowdownsOutput = formatIssueType(rrInput, reportKeyResult.slowdowns, reportKeyResult.severeSlowdowns);
+			
+			String value = reportKeyResult.output.key;
+			
+			Object[] row = new Object[] { fromTo.getFirst(), fromTo.getSecond(), timeRange,
+					value, newIssuesOutput, regressionsOutput, slowdownsOutput,
+					reportKeyResult.score};
 
 			result.add(Arrays.asList(row));
 		}

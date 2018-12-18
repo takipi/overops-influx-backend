@@ -11,7 +11,7 @@
         "type": "dashboard"
       },
       {
-        "datasource": "OO",
+        "datasource": "OverOps-as-influx",
         "enable": true,
         "hide": true,
         "iconColor": "#1f78c1",
@@ -21,14 +21,26 @@
         "showIn": 0,
         "tags": [],
         "type": "tags"
+      },
+      {
+        "datasource": "OverOps-as-influx",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(255, 96, 96, 1)",
+        "limit": 100,
+        "name": "baseline",
+        "query": "baselineAnnotation({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"text\":\"<- baseline | active window->\"})",
+        "showIn": 0,
+        "tags": [],
+        "type": "tags"
       }
     ]
   },
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": null,
-  "iteration": 1543498878899,
+  "id": 28,
+  "iteration": 1545124397057,
   "links": [
     {
       "asDropdown": true,
@@ -48,12 +60,12 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "OO",
-      "description": "",
+      "datasource": "OverOps-as-influx",
+      "description": "Shows the relative rate of selected increasing errors, comparing them between the baseline period and active window as denoted by the red annotation on the graph.",
       "fill": 0,
       "gridPos": {
         "h": 6,
-        "w": 24,
+        "w": 12,
         "x": 0,
         "y": 0
       },
@@ -71,18 +83,7 @@
       },
       "lines": false,
       "linewidth": 1,
-      "links": [
-        {
-          "dashUri": "db/event-analysis",
-          "dashboard": "Event Analysis",
-          "includeVars": true,
-          "keepTime": true,
-          "targetBlank": true,
-          "title": "Event Analysis",
-          "type": "absolute",
-          "url": "/dashboard/d/xxx/event-analysis"
-        }
-      ],
+      "links": [],
       "nullPointMode": "null",
       "percentage": false,
       "pointradius": 3,
@@ -118,7 +119,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\", \"types\":\"$type\", \"limit\":$splitLimit, \"searchText\":\"$search\"})\n\n",
+          "query": "regressionGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\", \"types\":\"$type\",\"limit\":$splitLimit, \"searchText\":\"$search\"})\n\n",
           "rawQuery": true,
           "refId": "I",
           "resultFormat": "time_series",
@@ -140,9 +141,136 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": "21d",
+      "timeFrom": "$baseline",
       "timeShift": null,
-      "title": "Increasing Errors (%)",
+      "title": "Top Increases (%)",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "decimals": 0,
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "OverOps-as-influx",
+      "description": "Shows the volume of selected increasing errors, comparing them between the baseline period and active window as denoted by the red annotation on the graph.",
+      "fill": 0,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "hideTimeOverride": true,
+      "id": 39,
+      "interval": "",
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 3,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "/^./"
+        },
+        {
+          "alias": "Throughput",
+          "fill": 1
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "regressionGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\", \"types\":\"$type\",\"limit\":$splitLimit, \"searchText\":\"$search\", \"graphType\":\"Absolute\"})\n\n",
+          "rawQuery": true,
+          "refId": "I",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": "$baseline",
+      "timeShift": null,
+      "title": "Top Increases: Volume",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -183,7 +311,7 @@
     },
     {
       "columns": [],
-      "datasource": "OO",
+      "datasource": "OverOps-as-influx",
       "description": "",
       "fontSize": "100%",
       "gridPos": {
@@ -198,7 +326,7 @@
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 5,
+        "col": 10,
         "desc": true
       },
       "styles": [
@@ -215,14 +343,14 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "Go to Root Cause",
-          "linkUrl": "../tale.html?source=45&snapshot=${__cell}",
+          "linkUrl": "http://localhost:8888/link?link=${__cell}",
           "mappingType": 1,
           "pattern": "Link",
           "rangeMaps": [
             {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
+              "from": "S6295#45721#1538336116202#604800000",
+              "text": "moo",
+              "to": "S6295#45721#1538336116202#604800000"
             }
           ],
           "thresholds": [],
@@ -243,11 +371,11 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
+          "linkUrl": "http://localhost:8888/link?link=${__cell_0}",
           "mappingType": 1,
           "pattern": "Hits",
           "thresholds": [],
-          "type": "hidden",
+          "type": "number",
           "unit": "short"
         },
         {
@@ -263,7 +391,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
+          "linkUrl": "http://localhost:8888/link?link=${__cell_0}",
           "mappingType": 1,
           "pattern": "Entry point",
           "thresholds": [],
@@ -283,7 +411,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
+          "linkUrl": "http://localhost:8888/link?link=${__cell_0}",
           "mappingType": 1,
           "pattern": "Introduced by",
           "thresholds": [],
@@ -303,7 +431,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
+          "linkUrl": "http://localhost:8888/link?link=${__cell_0}",
           "mappingType": 1,
           "pattern": "First seen",
           "thresholds": [],
@@ -323,13 +451,13 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
+          "linkUrl": "http://localhost:8888/link?link=${__cell_0}",
           "mappingType": 1,
           "pattern": "Type",
           "preserveFormat": false,
           "sanitize": false,
           "thresholds": [],
-          "type": "string",
+          "type": "hidden",
           "unit": "short",
           "valueMaps": [
             {
@@ -375,7 +503,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
+          "linkUrl": "http://localhost:8888/link?link=${__cell_0}",
           "mappingType": 1,
           "pattern": "Name",
           "thresholds": [],
@@ -392,10 +520,10 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
-          "link": true,
+          "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_1} in ${__cell_2}, introduced by ${__cell_3}: Click for root cause",
-          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
+          "linkUrl": "https://app.overops.com/tale.html?snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Error location",
           "thresholds": [],
@@ -415,7 +543,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
+          "linkUrl": "http://localhost:8888/link?link=${__cell_0}",
           "mappingType": 1,
           "pattern": "Rate",
           "thresholds": [],
@@ -453,7 +581,7 @@
           ]
         },
         {
-          "alias": "",
+          "alias": "Message",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -465,15 +593,62 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_1} in ${__cell_2}, introduced by ${__cell_3}: Click for root cause",
-          "linkUrl": "../tale.html?source=45&snapshot=${__cell_0}",
+          "linkUrl": "https://$apiHost/tale.html?snapshot=${__cell_0}",
           "mappingType": 1,
-          "pattern": "Message",
+          "pattern": "TypeMessage",
           "thresholds": [],
           "type": "number",
           "unit": "short"
         },
         {
-          "alias": "Rate",
+          "alias": "Rate Δ",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": true,
+          "linkTooltip": "${__cell_5}",
+          "mappingType": 1,
+          "pattern": "RegDelta",
+          "thresholds": [],
+          "type": "number",
+          "unit": "percent"
+        },
+        {
+          "alias": "P",
+          "colorMode": "value",
+          "colors": [
+            "rgba(50, 172, 45, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Severity",
+          "thresholds": [
+            "1",
+            "2"
+          ],
+          "type": "string",
+          "unit": "short",
+          "valueMaps": [
+            {
+              "text": "2",
+              "value": "1"
+            },
+            {
+              "text": "1",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "alias": "",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -485,7 +660,7 @@
           "mappingType": 1,
           "pattern": "Regression",
           "thresholds": [],
-          "type": "number",
+          "type": "hidden",
           "unit": "short"
         }
       ],
@@ -507,7 +682,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressions({\"fields\":\"link,type,entry_point,introduced_by, message,error_location,stats.hits,rate,first_seen,regression\",  \"render\":\"Grid\", \"regressionTypes\":\"Regressions,SevereRegressions\", \"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"maxColumnLength\":60,\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"searchText\":\"$search\"})",
+          "query": "regressions({\"fields\":\"link,type,entry_point,introduced_by, severity,regression,typeMessage,error_location,stats.hits,rate,regDelta,first_seen\",  \"render\":\"Grid\", \"regressionTypes\":\"Regressions,SevereRegressions\", \"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"maxColumnLength\":60,\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",\"searchText\":\"$search\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -555,8 +730,12 @@
     "list": [
       {
         "allValue": "*",
-        "current": {},
-        "datasource": "OO",
+        "current": {
+          "selected": false,
+          "text": "OverOps Prod: S6295",
+          "value": "OverOps Prod: S6295"
+        },
+        "datasource": "OverOps-as-influx",
         "hide": 0,
         "includeAll": true,
         "label": "Env",
@@ -576,8 +755,11 @@
       },
       {
         "allValue": "*",
-        "current": {},
-        "datasource": "OO",
+        "current": {
+          "text": "all",
+          "value": "all"
+        },
+        "datasource": "OverOps-as-influx",
         "hide": 0,
         "includeAll": true,
         "label": "Apps",
@@ -597,8 +779,11 @@
       },
       {
         "allValue": "*",
-        "current": {},
-        "datasource": "OO",
+        "current": {
+          "text": "all",
+          "value": "all"
+        },
+        "datasource": "OverOps-as-influx",
         "hide": 0,
         "includeAll": true,
         "label": "Servers",
@@ -618,8 +803,11 @@
       },
       {
         "allValue": "all",
-        "current": {},
-        "datasource": "OO",
+        "current": {
+          "text": "all",
+          "value": "all"
+        },
+        "datasource": "OverOps-as-influx",
         "hide": 0,
         "includeAll": true,
         "label": "Type",
@@ -639,8 +827,11 @@
       },
       {
         "allValue": "*",
-        "current": {},
-        "datasource": "OO",
+        "current": {
+          "text": "all",
+          "value": "all"
+        },
+        "datasource": "OverOps-as-influx",
         "hide": 0,
         "includeAll": true,
         "label": "Deployments",
@@ -660,15 +851,18 @@
       },
       {
         "allValue": null,
-        "current": {},
-        "datasource": "OO",
+        "current": {
+          "text": "24",
+          "value": "24"
+        },
+        "datasource": "OverOps-as-influx",
         "hide": 2,
         "includeAll": false,
         "label": "Points Wanted",
         "multi": false,
         "name": "pointsWanted",
         "options": [],
-        "query": "settingsVar({\"environments\":\"$environments\", \"name\":\"pointsWanted\", \"defaultValue\":24})",
+        "query": "settingsVar({\"environments\":\"$environments\", \"name\":\"points_wanted\", \"defaultValue\":24})",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -682,7 +876,7 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
+          "selected": true,
           "text": "3",
           "value": "3"
         },
@@ -701,9 +895,14 @@
             "selected": false,
             "text": "5",
             "value": "5"
+          },
+          {
+            "selected": false,
+            "text": "1",
+            "value": "1"
           }
         ],
-        "query": "3,5",
+        "query": "3,5,1",
         "skipUrlSync": false,
         "type": "custom"
       },
@@ -732,7 +931,10 @@
       },
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "text": "BackendSourceCodeProcessor.buildClassProcessors",
+          "value": "BackendSourceCodeProcessor.buildClassProcessors"
+        },
         "hide": 0,
         "includeAll": false,
         "label": "Find",
@@ -740,7 +942,7 @@
         "name": "search",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "<term>",
             "value": "<term>"
           }
@@ -752,8 +954,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "30m",
-          "value": "30m"
+          "text": "30d",
+          "value": "30d"
         },
         "hide": 0,
         "includeAll": false,
@@ -787,7 +989,7 @@
             "value": "24h"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "2d",
             "value": "2d"
           },
@@ -803,18 +1005,65 @@
           },
           {
             "selected": false,
-            "text": "30d",
-            "value": "30d"
+            "text": "1m",
+            "value": "1m"
           }
         ],
-        "query": "30m,1h,4h,8h,24h,2d,7d,14d,30d",
+        "query": "30m,1h,4h,8h,24h,2d,7d,14d,1m",
         "skipUrlSync": false,
         "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "app.overops.com",
+          "value": "app.overops.com"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "apiHost",
+        "options": [
+          {
+            "selected": true,
+            "text": "app.overops.com",
+            "value": "app.overops.com"
+          }
+        ],
+        "query": "app.overops.com",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "150d",
+          "value": "150d"
+        },
+        "datasource": "OverOps-as-influx",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "baseline",
+        "options": [],
+        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
   "time": {
-    "from": "now-2d",
+    "from": "now-7d",
     "to": "now"
   },
   "timepicker": {
@@ -846,5 +1095,5 @@
   "timezone": "",
   "title": "Increasing Errors",
   "uid": "WZ739NYmk",
-  "version": 3
+  "version": 41
 }

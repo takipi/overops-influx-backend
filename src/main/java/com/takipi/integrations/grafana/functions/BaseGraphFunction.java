@@ -1,11 +1,13 @@
 package com.takipi.integrations.grafana.functions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.Callable;
 
 import org.joda.time.DateTime;
@@ -21,6 +23,17 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 
 	private static final int DEFAULT_POINTS = 100;
 
+	protected static class GraphData {
+		protected Map<Long, Long> points;
+		protected long volume;
+		protected String key;
+		
+		protected GraphData(String key) {
+			this.key = key;
+			this.points = new TreeMap<Long, Long>();
+		}
+	}
+	
 	protected static class GraphSeries {
 		protected Series series;
 		protected long volume;
@@ -102,6 +115,24 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		}
 				
 		String result = getServiceValue(tagName, serviceId, serviceIds);
+		
+		return result;
+	}
+	
+	protected static GraphSeries getGraphSeries(GraphData graphData, String name) {
+		
+		GraphSeries result = new GraphSeries();
+					
+		result.series = new Series();
+		
+		result.series.name = EMPTY_NAME;
+		result.series.columns = Arrays.asList(new String[] { TIME_COLUMN, name });
+		result.series.values = new ArrayList<List<Object>>();
+		result.volume = graphData.volume;
+			
+		for (Map.Entry<Long, Long> graphPoint : graphData.points.entrySet()) {				
+			result.series.values.add(Arrays.asList(new Object[] { graphPoint.getKey(), graphPoint.getValue() }));
+		}
 		
 		return result;
 	}

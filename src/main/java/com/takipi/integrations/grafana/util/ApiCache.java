@@ -608,6 +608,10 @@ public class ApiCache {
 				otherInput.transactions))) {
 				return false;
 			}
+			
+			if (!Objects.equal(eventInput.searchText, otherInput.searchText)) {
+				return false;
+			}
 
 			return true;
 		}

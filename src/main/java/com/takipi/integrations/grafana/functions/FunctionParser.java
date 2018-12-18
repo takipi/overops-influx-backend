@@ -229,6 +229,8 @@ public class FunctionParser {
 		registerFunction(new RegressionFunction.Factory());
 		registerFunction(new ReliabilityReportFunction.Factory());
 		registerFunction(new RegressionGraphFunction.Factory());
+		registerFunction(new BaselineWindowFunction.Factory());
+		registerFunction(new BaselineAnnotationFunction.Factory());
 
 		//deployment functions
 		registerFunction(new DeploymentsGraphFunction.Factory());
@@ -253,6 +255,7 @@ public class FunctionParser {
 		registerFunction(new TransactionsFunction.Factory());
 		
 		//variable metadata functions
+		registerFunction(new ApiHostFunction.Factory());
 		registerFunction(new ViewsFunction.Factory());
 		registerFunction(new LabelsFunction.Factory());
 		

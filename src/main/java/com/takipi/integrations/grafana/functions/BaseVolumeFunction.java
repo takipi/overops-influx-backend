@@ -112,7 +112,7 @@ public abstract class BaseVolumeFunction extends GrafanaFunction {
 				}
 			}
 			
-			if (!smiliarIds.contains(event.id)) {		
+			if ((event.stats.hits > 0) && (!smiliarIds.contains(event.id))) {		
 				result.count++;
 			}
 			

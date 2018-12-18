@@ -13,4 +13,7 @@ public class RelabilityReportInput extends RegressionsInput {
 	public String postfixes;
 	
 	public int transactionPointsWanted;
+	
+	public String sevAndNonSevFormat;
+	public String sevOnlyFormat;
 }

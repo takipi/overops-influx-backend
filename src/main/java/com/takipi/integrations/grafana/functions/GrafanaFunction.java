@@ -13,7 +13,6 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import org.joda.time.DateTime;
@@ -106,6 +105,11 @@ public abstract class GrafanaFunction
 	protected static final char INTERNAL_DELIM = '/';
 	protected static final String TRANS_DELIM = "#";
 	protected static final String EMPTY_POSTFIX = ".";	
+	
+	protected static final String FROM = "from";
+	protected static final String TO = "to";
+	protected static final String TIME_RANGE = "timeRange";
+
 	
 	private static final DateTimeFormatter fmt = ISODateTimeFormat.dateTime().withZoneUTC();
 	
@@ -237,6 +241,24 @@ public abstract class GrafanaFunction
 		String transactionName =
 				location.class_name + TRANS_DELIM + location.method_name + TRANS_DELIM + location.method_desc;
 		return transactionName;
+	}
+	
+	protected Pair<Object, Object> getTimeFilterPair(Pair<DateTime, DateTime> timeSpan, String timeFilter) {
+		
+		Object from;
+		Object to;
+		
+		String timeUnit = TimeUtil.getTimeUnit(timeFilter);
+		
+		if (timeUnit != null) {
+			from = "now-" + timeUnit;
+			to = "now";
+		} else {
+			from = timeSpan.getFirst().getMillis();
+			to = timeSpan.getSecond().getMillis();
+		}
+		
+		return Pair.of(from, to);
 	}
 	
 	protected static Pair<String, String> getTransactionNameAndMethod(String name)
@@ -936,11 +958,14 @@ public abstract class GrafanaFunction
 		{
 			try
 			{
+				/*
 				Future<Object> future = null;
 				
 				while (future == null) {
 					future = completionService.poll(2, TimeUnit.SECONDS);
 				}
+				*/
+				Future<Object> future = completionService.take();
 				
 				received++;
 				Object asynResult = future.get();

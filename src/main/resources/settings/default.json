@@ -1,10 +1,11 @@
 {
 	"general": {
 		"group_by_entryPoint": true,
-		"event_types": "Logged Error|Uncaught Exception|Logged Warning|Swallowed Exception|HTTP Error|Caught Exception",
+		"event_types": "Logged Error,Uncaught Exception,Logged Warning,Swallowed Exception,HTTP Error,Caught Exception",
 		"points_wanted": 24,
 		"transaction_points_wanted": 100,
-		"transaction_failures": "Logged Error|Uncaught Exception|HTTP Error"
+		"transaction_failures": "Logged Error,Uncaught Exception,HTTP Error",
+		"proxy_link_prefix": ""
 	},
 	
 	"transactions": {
@@ -28,6 +29,27 @@
 				"values": [
 					"/^.*Message.*$/"
 				]
+			},
+			
+			{
+				"name": " Actors",
+				"values": [
+					"/^.*Actor.*$/"
+				]
+			},
+			
+			{
+				"name": " Jobs",
+				"values": [
+					"/^.*Job.*$/"
+				]
+			},
+			
+			{
+				"name": " Restlets",
+				"values": [
+					"/^.*Restlet.*$/"
+				]
 			}
 			
 		]
@@ -35,13 +57,6 @@
 	
 	"applications": {
 		"groups": [
-			{
-				"name": "prod-app",
-				"values": [
-					"prod-app1",
-					"prod-app2"
-				]
-			}
 		]
 	},
 	
@@ -49,29 +64,12 @@
 		[
 			{
 				"names": [
-					"org.apache.catalina",
-					"org.apache.jasper",
-					"org.apache.coyote",
-					"org.apache.tomcat"
+					"com.acme"
 				],
-				"labels": ["MyTomcat"]
+				"labels": ["Acme"]
 			}
 		]
 	,
-	
-	"user_groups": {
-		"groups": [
-			{
-				"app_groups": [
-					"prod-app"
-				],
-				"users": [
-					"tal.weiss@takipi.com",
-					"talw.gx@gmail.com"
-				]
-			}
-		]
-	},
 		
 	"slowdown": { 
 		"active_invocations_threshold": 50,
@@ -90,7 +88,7 @@
 		"error_regression_delta": 0.5,
 		"error_critical_regression_delta": 1,
 		"apply_seasonality": true,
-		"critical_exception_types": "NullPointerException|IndexOutOfBoundsException|InvalidCastException|AssertionError",
+		"critical_exception_types": "NullPointerException,IndexOutOfBoundsException,InvalidCastException,AssertionError",
 		
 		"sort_order": "Severe New,Severe Regression,New,Regression",
 		"type_order": "Logged Error,Uncaught Exception,Logged Warning,HTTP Error,Timer,Swallowed Exception,Caught Exception"

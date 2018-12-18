@@ -28,6 +28,8 @@ public class RegressionSettings {
 			return null;
 		}
 		
-		return Arrays.asList(critical_exception_types.split(GrafanaFunction.ARRAY_SEPERATOR));
+		Collection<String> result = Arrays.asList(critical_exception_types.split(GrafanaFunction.ARRAY_SEPERATOR));
+		
+		return result;
 	}
 }

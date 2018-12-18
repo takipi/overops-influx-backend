@@ -56,7 +56,10 @@ public class KeyTransactionsGraphFunction extends TransactionsGraphFunction
 			for (Group group : transactionGroups.getGroups()) {
 				GraphSeries groupSeries = createAggregateGraphSeries(serviceId, graphs, group.getFilter(),
 						input, serviceIds, group.name);
-				result.add(groupSeries);
+				
+				if (groupSeries.volume > 0) {
+					result.add(groupSeries);
+				}
 			}
 		} else {
 			result = createMultiGraphSeries(serviceId, graphs, input, serviceIds);

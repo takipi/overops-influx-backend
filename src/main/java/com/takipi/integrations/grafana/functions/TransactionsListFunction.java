@@ -47,8 +47,6 @@ public class TransactionsListFunction extends GrafanaFunction {
 	private static final String ERROR_RATE = "error_rate";
 	private static final String ERRORS = "errors";
 	private static final String DELTA_DESC = "delta_description";
-	private static final String FROM = "from";
-	private static final String TO = "to";
 
 	
 	private static final List<String> FIELDS = Arrays.asList(new String[] { 
@@ -234,6 +232,8 @@ public class TransactionsListFunction extends GrafanaFunction {
 				link = null;
 			}
 			
+			Pair<Object, Object> fromTo = getTimeFilterPair(timeSpan, input.timeFilter);
+			
 			Object[] object = new Object[fields.size()];
 			
 			setOutputObjectField(object, fields, LINK, link);
@@ -245,8 +245,8 @@ public class TransactionsListFunction extends GrafanaFunction {
 			setOutputObjectField(object, fields, DELTA_DESC, getSlowdownDesc(transaction, stddevFactor));
 			setOutputObjectField(object, fields, ERROR_RATE, errorRate);
 			setOutputObjectField(object, fields, ERRORS, transaction.errorsHits);
-			setOutputObjectField(object, fields, FROM, timeSpan.getFirst().getMillis());
-			setOutputObjectField(object, fields, TO, timeSpan.getSecond().getMillis());
+			setOutputObjectField(object, fields, FROM, fromTo.getFirst());
+			setOutputObjectField(object, fields, TO, fromTo.getSecond());
 
 			result.add(Arrays.asList(object));
 		}
@@ -303,6 +303,10 @@ public class TransactionsListFunction extends GrafanaFunction {
 	
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
 		Pair<RegressionInput, RegressionWindow> inputPair = regressionFunction.getRegressionInput(serviceId, viewId, input, timeSpan);
+		
+		if (inputPair == null) {
+			return;
+		}
 		
 		RegressionInput regressionInput = inputPair.getFirst();
 		RegressionWindow regressionWindow = inputPair.getSecond();

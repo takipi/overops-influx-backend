@@ -36,7 +36,6 @@ public class EventsFunction extends GrafanaFunction {
 	protected static final String MESSAGE = "message";
 	protected static final String TYPE_MESSAGE = "typeMessage";
 
-
 	protected class EventData {
 		protected EventResult event;
 		

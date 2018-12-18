@@ -86,6 +86,7 @@ public class RegressionFunction extends EventsFunction
 		protected RegressionResult regression;
 		protected RateRegression regResult;
 		protected RegressionInput input;
+		protected List<String> mergedIds;
 		
 		protected RegressionData(RateRegression regResult, RegressionInput input,
 				EventResult event, RegressionType type)
@@ -95,6 +96,7 @@ public class RegressionFunction extends EventsFunction
 			this.regResult = regResult;
 			this.input = input;
 			this.regression = null;
+			this.mergedIds = new ArrayList<String>();
 		}
 			
 		protected RegressionData(RateRegression regResult, RegressionInput input,
@@ -232,6 +234,23 @@ public class RegressionFunction extends EventsFunction
 			}
 			
 			return Integer.valueOf(0);
+		}
+	}
+	
+	protected static class RegressionTimeRangeFormatter  extends FieldFormatter
+	{
+		
+		@Override
+		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
+				Pair<DateTime, DateTime> timeSpan)
+		{
+			if (input.timeFilter == null) {
+				return null;
+			}
+			
+			String timeUnit = TimeUtil.getTimeUnit(input.timeFilter); 
+					
+			return timeUnit;
 		}
 	}
 	
@@ -420,6 +439,12 @@ public class RegressionFunction extends EventsFunction
 			return new RegressionLinkFormatter();
 		}
 		
+
+		if (column.equals(TIME_RANGE))
+		{
+			return new RegressionTimeRangeFormatter();
+		}
+		
 		return super.getFormatter(column);
 	}
 	
@@ -557,7 +582,7 @@ public class RegressionFunction extends EventsFunction
 		
 		EventFilterInput baselineInput;
 		
-		if (input.deployments != null) {
+		if (input.hasDeployments()) {
 			Gson gson = new Gson();
 			baselineInput = gson.fromJson(gson.toJson(input), EventFilterInput.class);
 			baselineInput.deployments = null;
@@ -618,7 +643,7 @@ public class RegressionFunction extends EventsFunction
 		activeGraphResult.graphs = Collections.singletonList(activeWindowGraph);		
 		
 		GraphResult baselineGraphResult = new GraphResult();
-		activeGraphResult.graphs = Collections.singletonList(baselineGraph);		
+		baselineGraphResult.graphs = Collections.singletonList(baselineGraph);		
 		
 		ApiCache.putEventGraph(apiClient, serviceId, input, VolumeType.all, null,
 				input.pointsWanted, 0, graphActiveTimespan, 0, Response.of(200, activeGraphResult));
@@ -778,7 +803,7 @@ public class RegressionFunction extends EventsFunction
 		
 		regressionInput.validate();
 		
-		RateRegression rateRegression = RegressionUtil.calculateRateRegressions(apiClient, regressionInput, null,
+		RateRegression rateRegression = RegressionUtil.calculateRateRegressions(apiClient, regressionInput, System.out,
 				false);
 		
 		RegressionOutput result = createRegressionOutput(input, regressionInput, rateRegression, eventListMap,
@@ -802,11 +827,7 @@ public class RegressionFunction extends EventsFunction
 			
 			typeEvents.add(regData);
 		}
-		
-		if (result.size() > 1) {
-			System.out.println();
-		}
-		
+			
 		return result;
 	}
 	
@@ -833,6 +854,8 @@ public class RegressionFunction extends EventsFunction
 					baselineHits += regressionData.regression.getBaselineHits();
 					baselineInvocations += regressionData.regression.getBaselineInvocations();
 				}
+				
+				result.mergedIds.add(eventData.event.id);
 			}
 			
 			result.regression = RegressionResult.of(result.event, baselineHits, baselineInvocations);
