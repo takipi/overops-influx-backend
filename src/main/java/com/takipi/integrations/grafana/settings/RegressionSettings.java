@@ -7,25 +7,29 @@ import com.takipi.integrations.grafana.functions.GrafanaFunction;
 
 public class RegressionSettings {
 	
-	public int activeTimespan;
-	public int minBaselineTimespan;
-	public int baselineTimespanFactor;
-	public int minVolumeThreshold;
-	public double minErrorRateThreshold;
-	public double regressionDelta;
-	public double criticalRegressionDelta;
-	public boolean applySeasonality;
-	public String criticalExceptionTypes;
+	public int active_timespan;
+	public int min_baseline_timespan;
+	public int baseline_timespan_factor;
 	
-	public String sortOrder;
-	public String typeOrder;
+	public int error_min_volume_threshold;
+	public double error_min_rate_threshold;
+	public double error_regression_delta;
+	public double error_critical_regression_delta;
+		
+	public boolean apply_seasonality;
+	public String critical_exception_types;
+	
+	public String sort_order;
+	public String type_order;
 	
 	public  Collection<String> getCriticalExceptionTypes() {
 		
-		if (criticalExceptionTypes == null) {
+		if (critical_exception_types == null) {
 			return null;
 		}
 		
-		return Arrays.asList(criticalExceptionTypes.split(GrafanaFunction.ARRAY_SEPERATOR));
+		Collection<String> result = Arrays.asList(critical_exception_types.split(GrafanaFunction.ARRAY_SEPERATOR));
+		
+		return result;
 	}
 }

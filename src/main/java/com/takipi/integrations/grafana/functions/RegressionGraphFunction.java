@@ -15,6 +15,7 @@ import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.EventsFunction.EventData;
+import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionData;
 import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOutput;
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.input.RegressionGraphInput;
@@ -50,6 +51,14 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 			if (eventData.event.id.equals(id)) {
 				return eventData.event;
 			}
+			
+			RegressionData regData = (RegressionData)eventData;
+			
+			for (String similiarId : regData.mergedIds) {
+				if (similiarId.equals(id)) {
+					return eventData.event;
+				}
+			}
 		}
 		
 		return null;
@@ -58,14 +67,24 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 	private void appendGraphToMap(Map<String, GraphData> graphsData, 
 			List<EventData> eventData, Graph graph, RegressionGraphInput input) {
 		
-		for (GraphPoint gp : graph.points) {
+		List<GraphData> matchingGraphs = new ArrayList<GraphData>();
 
-			if (gp.contributors == null) {
-				continue;
-			}
+		
+		for (GraphPoint gp : graph.points) {
 
 			DateTime gpTime = TimeUtil.getDateTime(gp.time);
 			Long epochTime = Long.valueOf(gpTime.getMillis());
+			
+			if (gp.contributors == null) {
+				
+				for (GraphData graphData : graphsData.values()) {
+					graphData.points.put(epochTime, 0l);
+				}
+				
+				continue;
+			}
+			
+			matchingGraphs.clear();
 
 			for (GraphPointContributor gpc : gp.contributors) {
 
@@ -74,7 +93,7 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 				if (event == null) {
 					continue;
 				}
-
+				
 				String key = formatLocation(event.error_location);
 
 				GraphData graphData = graphsData.get(key);
@@ -100,30 +119,39 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 				
 				graphData.volume += pointValue;
 				graphData.points.put(epochTime, Long.valueOf(pointValue));
+				
+				matchingGraphs.add(graphData);
+
 			}
+			
+			for (GraphData graphData : graphsData.values()) {
+				
+				if (!matchingGraphs.contains(graphData)) {
+					graphData.points.put(epochTime, 0l);
+				}
+			}	
 		}
 	}
-
+	
 	@Override
 	protected List<GraphSeries> processGraphSeries(String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
 			GraphInput input) {
  		
 		RegressionGraphInput rgInput = (RegressionGraphInput)input;
-
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
 		
-		RegressionOutput regressionOutput = regressionFunction.runRegression(serviceId, input);
+		RegressionOutput regressionOutput = regressionFunction.runRegression(serviceId, rgInput);
 
 		if ((regressionOutput == null) || (regressionOutput.rateRegression == null) 
 			||  (regressionOutput.regressionInput == null)) {
 			return Collections.emptyList();
 		}
 		
-		List<EventData> eventDatas = regressionFunction.processRegression(input, regressionOutput.regressionInput,
+		List<EventData> eventDatas = regressionFunction.processRegression(rgInput, regressionOutput.regressionInput,
 			regressionOutput.rateRegression, false);
 		
 		
-		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
+		EventFilter eventFilter = rgInput.getEventFilter(apiClient, serviceId);
 		
 		List<EventData> filteredEventData = new ArrayList<EventData>(eventDatas.size());
 		

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.infra.Categories;
@@ -60,6 +61,23 @@ public class ServiceSettings {
 		return result;
 	}
 	
+	private boolean isMatch(Category a, Category b) {
+		
+		if ((a.labels == null) || (b.labels == null)) {
+			return false;
+		}
+		
+		for (String labelA : a.labels) {
+			for (String labelB : b.labels) {
+				if (Objects.equals(labelA ,labelB)) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+	
 	public Categories getCategories() {
 		
 		Categories defaultCategories = Categories.defaultCategories();
@@ -72,11 +90,23 @@ public class ServiceSettings {
 			
 			synchronized (Categories.class) {
 				if ((instance == null) && (!initialized)) {
-					initialized = true;
-					instance = new Categories();
 					
+					instance = new Categories();
 					instance.categories = new ArrayList<Categories.Category>(data.tiers);
+					
+					for (Category tier : data.tiers) {
+						if ((tier.names == null) || (tier.names.size() == 0)) {
+							for (Category defaultCategory : defaultCategories.categories) {
+								if (isMatch(tier, defaultCategory)) {
+									tier.names = defaultCategory.names;
+									break;
+								}
+							}
+						}
+					}
+					
 					instance.categories.addAll(defaultCategories.categories);
+					initialized = true;
 				}
 			}
 		}

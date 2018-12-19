@@ -60,7 +60,7 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 			return Collections.emptyList();
 		}
 		
-		Graph graph = getEventsGraph(apiClient, serviceId, viewId, input.pointsWanted, input, input.volumeType,
+		Graph graph = getEventsGraph(serviceId, viewId, input.pointsWanted, input, input.volumeType,
 				timeSpan.getFirst(), timeSpan.getSecond());
 		
 		if (graph == null) {
@@ -76,6 +76,7 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 		Long lastKey = null;
 		
 		Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();		
+		
 		for (GraphPoint gp : graph.points) {
 
 			if (gp.contributors == null) {
@@ -95,10 +96,21 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 					continue;
 				}
 
-				Set<String> labels = categories.getCategories(event.error_origin.class_name);
-				
-				if (labels == null) {
+				Set<String> originLabels = categories.getCategories(event.error_origin.class_name);
+				Set<String> locationLabels = categories.getCategories(event.error_location.class_name);
+
+				if ((originLabels == null) && (locationLabels == null)) {
 					continue;
+				}
+				
+				Set<String> labels = new HashSet<String>();
+				
+				if (originLabels != null)  {
+					labels.addAll(originLabels);
+				}
+				
+				if (locationLabels != null) {
+					labels.addAll(locationLabels);
 				}
 				
 				long pointValue;

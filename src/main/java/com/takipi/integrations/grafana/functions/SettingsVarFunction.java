@@ -61,7 +61,13 @@ public class SettingsVarFunction extends EnvironmentVariableFunction
 		
 		try
 		{
-			value = settings.getClass().getField(settingsVarInput.name).get(settings);
+			Object rawValue = settings.getClass().getField(settingsVarInput.name).get(settings);
+			
+			if ((rawValue != null) && (settingsVarInput.convertToArray)) {
+				 value = rawValue.toString().replaceAll(ARRAY_SEPERATOR, GRAFANA_SEPERATOR_RAW);
+			} else {
+				 value = rawValue;
+			}
 		}
 		catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e)
 		{

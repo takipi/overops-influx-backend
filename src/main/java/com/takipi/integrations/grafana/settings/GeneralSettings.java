@@ -1,17 +1,28 @@
 package com.takipi.integrations.grafana.settings;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
-import com.takipi.integrations.grafana.input.EventFilterInput;
+import com.takipi.integrations.grafana.functions.GrafanaFunction;
 
 public class GeneralSettings {
 	
-	public boolean groupByEntryPoint;
-	public String eventTypes;
-	public int pointsWanted;
+	public boolean group_by_entryPoint;
+	public String event_types;
+	public int points_wanted;
+	public int transaction_points_wanted;
+	public String transaction_failures;
+	public String proxy_link_prefix;
 
 	public Collection<String> getDefaultTypes() {
 		
-		return EventFilterInput.toArray(eventTypes);
+		if (event_types == null)
+		{
+			return Collections.emptyList();
+		}
+		
+		String[] types = event_types.split(GrafanaFunction.ARRAY_SEPERATOR);
+		return Arrays.asList(types);
 	}
 }

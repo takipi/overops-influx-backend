@@ -23,6 +23,17 @@ public class EventFilterInput extends ViewInput
 	public int pointsWanted;
 	public String searchText;
 	public String allowedTypes;
+	public String transactionSearchText;
+	
+	public String getSearchText() {
+		
+		if ((searchText == null) || (searchText.equals(EventFilter.TERM)) ) {
+			return null;
+		}
+		
+		return searchText;
+		
+	}
 	
 	public boolean hasEventFilter()
 	{
@@ -84,7 +95,10 @@ public class EventFilterInput extends ViewInput
 			return null;
 		}
 		
-		return getServiceFilters(types, null, true);
+		String value = types.replace(GrafanaFunction.ARRAY_SEPERATOR_RAW,
+				GrafanaFunction.GRAFANA_SEPERATOR_RAW);
+		
+		return getServiceFilters(value, null, true);
 	}
 	
 	public static Collection<String> toArray(String value)
@@ -122,7 +136,11 @@ public class EventFilterInput extends ViewInput
 		
 		if (this.allowedTypes != null)
 		{
-			allowedTypes = toArray(this.allowedTypes);
+			if (GrafanaFunction.VAR_ALL.contains(this.allowedTypes)) {
+				allowedTypes = Collections.emptyList();
+			} else {
+				allowedTypes = toArray(this.allowedTypes);
+			}
 		}
 		else
 		{
@@ -139,7 +157,7 @@ public class EventFilterInput extends ViewInput
 		}
 		
 		return EventFilter.of(getTypes(), allowedTypes, getIntroducedBy(serviceId), transactionsFilter,
-				geLabels(serviceId), labelsRegex, firstSeen, categories, searchText);
+				geLabels(serviceId), labelsRegex, firstSeen, categories, searchText, transactionSearchText);
 	}
 	
 }

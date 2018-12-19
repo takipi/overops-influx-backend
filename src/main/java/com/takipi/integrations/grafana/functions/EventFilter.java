@@ -34,11 +34,12 @@ public class EventFilter
 	private boolean hasCategoryTypes;
 	private Categories categories;
 	private String searchText;
+	private String transactionSearchText;
 	
 	public static EventFilter of(Collection<String> types, Collection<String> allowedTypes,
 			Collection<String> introducedBy, GroupFilter transactionsFilter,
 			Collection<String> labels, String labelsRegex, String firstSeen, Categories categories,
-			String searchText)
+			String searchText, String transactionSearchText)
 	{
 		
 		EventFilter result = new EventFilter();
@@ -52,6 +53,11 @@ public class EventFilter
 		if (!TERM.equals(searchText))
 		{
 			result.searchText = searchText;
+		}
+		
+		if (!TERM.equals(transactionSearchText))
+		{
+			result.transactionSearchText = transactionSearchText;
 		}
 		
 		if (labelsRegex != null)
@@ -142,23 +148,21 @@ public class EventFilter
 			}
 			
 		}
-		else if ((hasCategoryTypes) && (event.error_origin != null))
-		{
+		else if (hasCategoryTypes) 	{
 			
-			Set<String> labels = categories.getCategories(event.error_origin.class_name);
+			if (event.error_origin != null) {
+				Set<String> originLabels = categories.getCategories(event.error_origin.class_name);
+
+				if (matchLabels(originLabels)) {
+					return false;
+				}
+			}
 			
-			if (labels != null)
-			{
-				
-				for (String label : labels)
-				{
-					for (String type : types)
-					{
-						if (type.contains(label))
-						{
-							return false;
-						}
-					}
+			if (event.error_location != null) {
+				Set<String> locationLabels = categories.getCategories(event.error_location.class_name);
+
+				if (matchLabels(locationLabels)) {
+					return false;
 				}
 			}
 			
@@ -167,6 +171,26 @@ public class EventFilter
 		else if (!types.contains(event.type))
 		{
 			return true;
+		}
+		
+		return false;
+	}
+	
+	private boolean matchLabels(Collection<String> labels) {
+		
+		if (labels == null) {
+			return false;
+		}
+		
+		for (String label : labels)
+		{
+			for (String type : types)
+			{
+				if (type.contains(label))
+				{
+					return true;
+				}
+			}
 		}
 		
 		return false;
@@ -223,7 +247,7 @@ public class EventFilter
 			}
 			
 			if (GrafanaFunction.filterTransaction(transactionsFilter, 
-					entryPoint.class_name, entryPoint.method_name)) {
+					transactionSearchText, entryPoint.class_name, entryPoint.method_name)) {
 				return true;
 			}			
 		}

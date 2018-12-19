@@ -57,7 +57,7 @@ public class SplitGraphFunction extends LimitGraphFunction {
 			return Collections.emptyList();
 		}
 		
-		Graph graph = getEventsGraph(apiClient, serviceId, viewId, input.pointsWanted, input, input.volumeType,
+		Graph graph = getEventsGraph(serviceId, viewId, input.pointsWanted, input, input.volumeType,
 				timeSpan.getFirst(), timeSpan.getSecond());
 		
 		if (graph == null) {
@@ -65,18 +65,62 @@ public class SplitGraphFunction extends LimitGraphFunction {
 		}
 		
 		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
-
-		Map<String, GraphData> graphsData = new HashMap<String, GraphData>();
-
+		
+		Map<String, GraphData> eventsVolume = new HashMap<String, GraphData>();
+		
 		for (GraphPoint gp : graph.points) {
 
 			if (gp.contributors == null) {
 				continue;
 			}
 
+			for (GraphPointContributor gpc : gp.contributors) {
+
+				EventResult event = eventMap.get(gpc.id);
+
+				if ((event == null) || (eventFilter.filter(event))) {
+					continue;
+				}
+				
+				String key = getSimpleClassName(event.error_location.class_name);
+
+				GraphData graphData = eventsVolume.get(key);
+
+				if (graphData == null) {
+					graphData = new GraphData(key);
+					eventsVolume.put(key, graphData);
+				}
+				
+				graphData.volume += gpc.stats.hits;
+			}
+		}
+		
+		Collection<GraphData> limitedGraphs = getLimitedGraphData(eventsVolume.values(), limitInput.limit);
+
+		Map<String, GraphData> graphsData = new HashMap<String, GraphData>();
+		
+		for (GraphData graphData : limitedGraphs) {
+			graphsData.put(graphData.key, graphData);
+		}
+		
+		List<GraphData> matchingGraphs = new ArrayList<GraphData>();
+		
+		for (GraphPoint gp : graph.points) {
+
 			DateTime gpTime = TimeUtil.getDateTime(gp.time);
 			Long epochTime = Long.valueOf(gpTime.getMillis());
-
+			
+			if (gp.contributors == null) {
+				
+				for (GraphData graphData : limitedGraphs) {
+					graphData.points.put(epochTime, 0l);
+				}
+				
+				continue;
+			}
+			
+			matchingGraphs.clear();
+		
 			for (GraphPointContributor gpc : gp.contributors) {
 
 				EventResult event = eventMap.get(gpc.id);
@@ -98,16 +142,32 @@ public class SplitGraphFunction extends LimitGraphFunction {
 				GraphData graphData = graphsData.get(key);
 
 				if (graphData == null) {
-					graphData = new GraphData(key);
-					graphsData.put(key, graphData);
+					continue;
 				}
 				
 				graphData.volume += pointValue;
-				graphData.points.put(epochTime, Long.valueOf(pointValue));
+				
+				Long newValue;
+				Long existingValue = graphData.points.get(epochTime);
+				
+				if (existingValue != null) {
+					newValue = Long.valueOf(pointValue + existingValue.longValue());
+				} else {
+					newValue = Long.valueOf(pointValue);
+				}
+				
+				graphData.points.put(epochTime, newValue);
+				matchingGraphs.add(graphData);
 			}
+			
+			for (GraphData graphData : limitedGraphs) {
+				
+				if (!matchingGraphs.contains(graphData)) {
+					graphData.points.put(epochTime, 0l);
+				}
+			}	
 		}
 
-		Collection<GraphData> limitedGraphs = getLimitedGraphData(graphsData.values(), limitInput.limit);
 		
 		List<GraphSeries> result = new ArrayList<GraphSeries>();
 		

@@ -1,4 +1,3 @@
-
 package com.takipi.integrations.grafana.settings;
 
 import java.io.IOException;
@@ -10,12 +9,33 @@ import java.nio.charset.Charset;
 import org.apache.commons.io.IOUtils;
 
 public abstract class BaseSettingsStorage implements SettingsStorage {
-	
-	protected abstract InputStream getInputStream(String key);
-	protected abstract OutputStream getOutputStream(String key);
+	@Override
+	public String getDefaultServiceSettings() {
+		return getSettings(GrafanaSettings.DEFAULT);
+	}
+
+	@Override
+	public String getServiceSettings(String name) {
+		return getSettings(name);
+	}
+
+	@Override
+	public void saveServiceSettings(String name, String settings) {
+		try {
+			OutputStream outputStream = getOutputStream(name);
+			
+			if (outputStream == null) {
+				throw new IllegalStateException("Can not store settings for " + name);
+			}
+			
+			IOUtils.write(settings, outputStream, Charset.defaultCharset());
+			outputStream.close();
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
 	
 	private String getSettings(String key) {
-
 		try {
 			InputStream inputStream = getInputStream(key);
 			
@@ -31,33 +51,8 @@ public abstract class BaseSettingsStorage implements SettingsStorage {
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
-
 	}
-
-	@Override
-	public String getDefaultServiceSettings() {
-		return getSettings(GrafanaSettings.DEFAULT);
-	}
-
-	@Override
-	public String getServiceSettings(String name) {
-		return getSettings(name);
-	}
-
-	@Override
-	public void saveServiceSettings(String name, String settings) {
-
-		try {
-			OutputStream outputStream = getOutputStream(name);
-			
-			if (outputStream == null) {
-				throw new IllegalStateException("Can not store settings for " + name);
-			}
-			
-			IOUtils.write(settings, outputStream, Charset.defaultCharset());
-			outputStream.close();
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
-	}
+	
+	protected abstract InputStream getInputStream(String key);
+	protected abstract OutputStream getOutputStream(String key);
 }

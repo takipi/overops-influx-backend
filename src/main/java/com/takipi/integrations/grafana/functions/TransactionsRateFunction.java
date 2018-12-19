@@ -57,7 +57,15 @@ public class TransactionsRateFunction extends TransactionsVolumeFunction {
 	protected EventVolume getTransactionVolume(TransactionsVolumeInput input, 
 		Pair<DateTime, DateTime> timeSpan ) {
 			
-		EventVolume eventVolume = getEventVolume(input, VolumeType.hits, timeSpan);
+		VolumeType volumeType;
+		
+		if (input.eventVolumeType != null) {
+			volumeType = input.eventVolumeType;
+		} else {
+			volumeType = VolumeType.hits;
+		}
+		
+		EventVolume eventVolume = getEventVolume(input, volumeType, timeSpan);
 		EventVolume transactionVolume = super.getTransactionVolume(input, timeSpan);
 		
 		EventVolume result = new EventVolume();

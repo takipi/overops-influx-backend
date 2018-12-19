@@ -2,6 +2,7 @@ package com.takipi.integrations.grafana.util;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -37,6 +38,25 @@ public class TimeUtil {
 	public static String getDateTimeFromEpoch(String epoch) {
 		return new DateTime(Long.valueOf(epoch)).toString(fmt);
 	}
+	
+	public static String getTimeInterval(long timeDelta) {
+		
+		String result; 
+		
+		if (timeDelta > TimeUnit.DAYS.toMillis(1)) {
+			result = TimeUnit.MILLISECONDS.toDays(timeDelta) + "d";
+		} else if (timeDelta > TimeUnit.HOURS.toMillis(1)) {
+			result = TimeUnit.MILLISECONDS.toHours(timeDelta) + "h";
+		} else {
+			result =  TimeUnit.MILLISECONDS.toMinutes(timeDelta) + "m";
+		}
+		
+		return result;
+	}
+	
+	public static String getLastWindowTimeFilter(long timeDelta) {
+		return LAST_TIME_WINDOW + getTimeInterval(timeDelta);
+	}
 
 	public static int parseInterval(String timeWindowWithUnit) {
 		
@@ -51,7 +71,7 @@ public class TimeUtil {
 		} else if (timeUnit == 'm') {
 			return delta;
 		} else {
-			throw new IllegalStateException("Uknown time unit for " + timeWindowWithUnit);
+			throw new IllegalStateException("Unknown time unit for " + timeWindowWithUnit);
 		}
 	}
 
@@ -161,8 +181,18 @@ public class TimeUtil {
 		return result;
 	}
 	
+	public static String getTimeUnit(String timeFilter) {
+		
+		if (!timeFilter.contains(LAST_TIME_WINDOW)) {
+			return null;
+		}
+		
+		String result = timeFilter.substring(LAST_TIME_WINDOW.length(), timeFilter.length());
+
+		return result;
+	}
+	
 	private static int getTimeDelta(String timeFilter) {
-		String timeWindowWithUnit = timeFilter.substring(LAST_TIME_WINDOW.length(), timeFilter.length());
-		return parseInterval(timeWindowWithUnit);
+		return parseInterval(getTimeUnit(timeFilter));
 	}
 }

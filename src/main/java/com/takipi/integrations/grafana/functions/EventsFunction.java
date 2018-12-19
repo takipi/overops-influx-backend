@@ -36,7 +36,6 @@ public class EventsFunction extends GrafanaFunction {
 	protected static final String MESSAGE = "message";
 	protected static final String TYPE_MESSAGE = "typeMessage";
 
-
 	protected class EventData {
 		protected EventResult event;
 		
@@ -380,7 +379,7 @@ public class EventsFunction extends GrafanaFunction {
 		
 		GeneralSettings settings = GrafanaSettings.getData(apiClient, serviceId).general;
 		
-		if ((settings == null) || (!settings.groupByEntryPoint)) {
+		if ((settings == null) || (!settings.group_by_entryPoint)) {
 			return eventDatas;
 		}
 		

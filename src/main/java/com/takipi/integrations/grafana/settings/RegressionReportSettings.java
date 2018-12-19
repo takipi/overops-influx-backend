@@ -1,9 +1,9 @@
 package com.takipi.integrations.grafana.settings;
 
 public class RegressionReportSettings {
-	public int newEventScore;
-	public int regressionScore;
-	public int severeNewEventScore;
-	public int criticalRegressionScore;
-	public double scoreWeight;
+	public int new_event_score;
+	public int regression_score;
+	public int severe_new_event_score;
+	public int critical_regression_score;
+	public double score_weight;
 }

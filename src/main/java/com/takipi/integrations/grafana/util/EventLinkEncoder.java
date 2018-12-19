@@ -21,9 +21,9 @@ public class EventLinkEncoder {
 	private static final String HTTPS = "https://";
 	
 	private static final String URL = "%s/tale.html?snapshot=%s";
-
-	*/
 	
+	*/
+
 	private static final String TEMPLATE = "{\"service_id\":\"%s\",\"viewport_strings\":{\"from_timestamp\":\"%s\"," +
 				"\"to_timestamp\":\"%s\",\"until_now\":false,"+
 				"\"machine_names\":[%s],\"agent_names\":[%s],\"deployment_names\":[%s],"+
@@ -42,10 +42,7 @@ public class EventLinkEncoder {
 
 		String snapshot = Base64.getUrlEncoder().encodeToString(json.getBytes());
 		
-		//we need to remove the http prefix so grafana will recognize this as a link. a https:// will be add in the dahs.
-		//if an on-prm does not use https, then this will be a problem XXX
-		
-		//String appUrl = apiClient.getHostname().replace(SAAS_API, SAAS_APP).replaceAll(HTTP, "").replaceAll(HTTPS, "");
+		//String appUrl = apiClient.getHostname().replace(SAAS_API, SAAS_APP);
 		//String result = String.format(URL, appUrl, snapshot);
 
 		return snapshot;

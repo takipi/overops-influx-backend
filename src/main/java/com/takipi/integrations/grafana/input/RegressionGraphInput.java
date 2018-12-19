@@ -7,6 +7,6 @@ public class RegressionGraphInput extends GraphLimitInput
 	public String timeOverride;
 	
 	public enum GraphType {
-		Abosolute, Percentage
+		Absolute, Percentage
 	}
 }

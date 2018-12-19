@@ -3,8 +3,10 @@ package com.takipi.integrations.grafana.functions;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.joda.time.DateTime;
 
@@ -16,6 +18,7 @@ import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings.Group;
+import com.takipi.integrations.grafana.settings.GroupSettings.GroupFilter;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionsFunction extends EnvironmentVariableFunction {
@@ -73,20 +76,28 @@ public class TransactionsFunction extends EnvironmentVariableFunction {
 			return;
 		}
 		
-		GroupSettings groupSettings = GrafanaSettings.getData(apiClient, serviceId).transactions;
-		
-		if (groupSettings != null) {
-		
-			for (Group group : groupSettings.getGroups()) {
-				String groupName = getServiceValue(group.toGroupName(), serviceId, serviceIds);
-				appender.append(groupName);		
-			}
-		}
-		
-		Collection<Transaction> transactions = getTransactions(serviceId, viewId, timespan, viewInput);
+		Collection<Transaction> transactions = getTransactions(serviceId, viewId, timespan, viewInput, null);
 		
 		if (transactions == null) {
 			return;
+		}
+				
+		GroupSettings groupSettings = GrafanaSettings.getData(apiClient, serviceId).transactions;
+		
+		Set<Group> matchingGroups = new HashSet<Group>();	
+		Map<Group, GroupFilter> groupFilters;
+		
+		if (groupSettings != null) {
+						
+			groupFilters = new HashMap<Group, GroupFilter>();
+
+			for (Group group : groupSettings.getGroups()) {
+				
+				GroupFilter filter = group.getFilter();
+				groupFilters.put(group, filter);		
+			}
+		} else {
+			groupFilters = null;
 		}
 		
 		Map<String, List<String>> transactionMap = new HashMap<String, List<String>>();
@@ -97,6 +108,18 @@ public class TransactionsFunction extends EnvironmentVariableFunction {
 			
 			String className = nameAndMethod.getFirst();
 			String methodName = nameAndMethod.getSecond();
+			
+			if (groupFilters != null) {
+				
+				Pair<String, String> fullNameAndMethod = getFullNameAndMethod(transaction.name);
+				
+				for (Map.Entry<Group, GroupFilter> entry : groupFilters.entrySet()) {
+					
+					if (!filterTransaction(entry.getValue(), null, fullNameAndMethod.getFirst(), fullNameAndMethod.getSecond())) {
+						matchingGroups.add(entry.getKey());
+					}
+				}
+			}
 			
 			List<String> transactionMethods = transactionMap.get(className);
 
@@ -112,6 +135,11 @@ public class TransactionsFunction extends EnvironmentVariableFunction {
 					transactionMap.put(className, null);
 				}
 			}
+		}
+		
+		for (Group group : matchingGroups) {
+			String groupName = getServiceValue(group.toGroupName(), serviceId, serviceIds);
+			appender.append(groupName);	
 		}
 		
 		for (Map.Entry<String, List<String>> entry : transactionMap.entrySet()) {

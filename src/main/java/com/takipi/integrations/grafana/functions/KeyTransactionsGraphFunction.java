@@ -41,7 +41,6 @@ public class KeyTransactionsGraphFunction extends TransactionsGraphFunction
 	protected List<GraphSeries> processServiceGraph(String serviceId, TransactionsGraphInput input,
 			Collection<String> serviceIds, Collection<String> transactions, Collection<TransactionGraph> graphs)
 	{
-
 		GroupSettings transactionGroups = GrafanaSettings.getData(apiClient, serviceId).transactions;
 		
 		if (transactionGroups == null) {
@@ -57,11 +56,13 @@ public class KeyTransactionsGraphFunction extends TransactionsGraphFunction
 			for (Group group : transactionGroups.getGroups()) {
 				GraphSeries groupSeries = createAggregateGraphSeries(serviceId, graphs, group.getFilter(),
 						input, serviceIds, group.name);
-				result.add(groupSeries);
+				
+				if (groupSeries.volume > 0) {
+					result.add(groupSeries);
+				}
 			}
 		} else {
-			result = createMultiGraphSeries(serviceId, graphs, input, serviceIds,
-					transactionGroups.getAllGroupFilter());
+			result = createMultiGraphSeries(serviceId, graphs, input, serviceIds);
 		}
 		
 		return result;
