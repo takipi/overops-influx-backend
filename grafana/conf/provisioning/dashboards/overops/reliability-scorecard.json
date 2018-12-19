@@ -18,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 22,
-  "iteration": 1545218254786,
+  "iteration": 1545249161705,
   "links": [
     {
       "asDropdown": true,
@@ -38,7 +38,7 @@
       "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "OO",
       "description": "Chart the $graphType of the recent $limit deployments.",
       "fill": 1,
       "gridPos": {
@@ -160,7 +160,7 @@
       "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "OO",
       "description": "Chart the $graphType of the top $limit applications with the most errors.",
       "fill": 1,
       "gridPos": {
@@ -999,7 +999,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "tags": [],
           "text": "All",
           "value": [
@@ -1155,15 +1154,9 @@
         "label": "Points Wanted",
         "multi": false,
         "name": "pointsWanted",
-        "options": [
-          {
-            "selected": true,
-            "text": "24",
-            "value": "24"
-          }
-        ],
+        "options": [],
         "query": "settingsVar({\"environments\":\"$environments\", \"name\":\"points_wanted\", \"defaultValue\":24})",
-        "refresh": 0,
+        "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -1185,15 +1178,9 @@
         "label": "Points Wanted",
         "multi": false,
         "name": "transactionPointsWanted",
-        "options": [
-          {
-            "selected": true,
-            "text": "100",
-            "value": "100"
-          }
-        ],
+        "options": [],
         "query": "settingsVar({\"environments\":\"$environments\", \"name\":\"transaction_points_wanted\", \"defaultValue\":100})",
-        "refresh": 0,
+        "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -1311,8 +1298,8 @@
     ]
   },
   "time": {
-    "from": "now-7d",
-    "to": "now"
+    "from": "now/w",
+    "to": "now/w"
   },
   "timepicker": {
     "hidden": false,
@@ -1343,5 +1330,5 @@
   "timezone": "",
   "title": "Reliability Scorecard",
   "uid": "lfqKXMfmz",
-  "version": 70
+  "version": 77
 }
