@@ -442,7 +442,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 				tasks.add(new RegressionAsyncTask(regressionFunction, key, serviceId, regressionsInput, timeSpan));
 			}
 			
-			tasks.add(new SlowdownAsyncTask(transactionsListFunction, key, serviceId, transactionInput, timeSpan));
+			if (input.mode != ReportMode.Tiers) {
+				tasks.add(new SlowdownAsyncTask(transactionsListFunction, 
+					key, serviceId, transactionInput, timeSpan));
+			}
 		}
 		
 		if (tasks.size() == 1) {
@@ -640,7 +643,12 @@ public class ReliabilityReportFunction extends EventsFunction {
 			sortDeployments(sorted, true);
 			result = sorted;
 		} else {
-			result =  reportKeyOutputMap.values();
+			
+			List<ReportKeyOutput> sorted = new ArrayList<ReportKeyOutput>(reportKeyOutputMap.values());
+			sortKeys(sorted, true);
+			result = sorted;
+			
+			//result =  reportKeyOutputMap.values();
 		}
 		
 		return result;
@@ -656,6 +664,21 @@ public class ReliabilityReportFunction extends EventsFunction {
 					return DeploymentUtil.compareDeployments(o1.key, o2.key);
 				} else {
 					return DeploymentUtil.compareDeployments(o2.key, o1.key);
+				}
+			}
+		});
+	}
+	
+	private void sortKeys(List<ReportKeyOutput> scores, boolean asc) {
+		scores.sort(new Comparator<ReportKeyOutput>() {
+
+			@Override
+			public int compare(ReportKeyOutput o1, ReportKeyOutput o2) {
+
+				if (asc) {
+					return o1.key.compareTo(o2.key);
+				} else {
+					return o2.key.compareTo(o1.key);
 				}
 			}
 		});
