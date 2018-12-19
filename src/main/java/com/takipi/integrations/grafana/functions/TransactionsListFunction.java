@@ -461,8 +461,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 		}
 		
 		updateTransactionEvents(serviceId, timeSpan, input, result);
-		updateTransactionPerformance(serviceId, viewId, timeSpan, input, result);
-		
+		updateTransactionPerformance(serviceId, viewId, timeSpan, input, result);	
 		
 		return result;
 

@@ -39,12 +39,12 @@ public class ApiCache {
 
 	public static boolean PRINT_DURATIONS = true;
 	
-	protected abstract static class CacheKey {
+	protected abstract static class BaseCacheLoader {
 
 		protected ApiClient apiClient;
 		protected ApiGetRequest<?> request;
 
-		public CacheKey(ApiClient apiClient, ApiGetRequest<?> request) {
+		public BaseCacheLoader(ApiClient apiClient, ApiGetRequest<?> request) {
 			this.apiClient = apiClient;
 			this.request = request;
 		}
@@ -52,11 +52,11 @@ public class ApiCache {
 		@Override
 		public boolean equals(Object obj) {
 
-			if (!(obj instanceof CacheKey)) {
+			if (!(obj instanceof BaseCacheLoader)) {
 				return false;
 			}
 
-			CacheKey other = (CacheKey) obj;
+			BaseCacheLoader other = (BaseCacheLoader) obj;
 
 			if (!Objects.equal(apiClient, other.apiClient)) {
 				return false;
@@ -69,13 +69,34 @@ public class ApiCache {
 		public int hashCode() {
 			return apiClient.getHostname().hashCode();
 		}
+		
+		public Response<?> load() {
+				
+			Response<?> result;
+			long t1 = System.currentTimeMillis();
+				
+			try {
+				result = apiClient.get(request);
+			} catch (Throwable e) {
+				long t2 = System.currentTimeMillis();
+				throw new IllegalStateException("Error executing after " + ((double)(t2-t1) / 1000) + " sec: " + toString(), e);
+			}
+			long t2 = System.currentTimeMillis();
+				
+			if (PRINT_DURATIONS) {
+				double sec = (t2-t1) / 1000;
+				System.out.println(sec + " sec: " + toString());
+			}
+			
+			return result;
+		}
 	}
 
-	protected abstract static class ServiceCacheKey extends CacheKey {
+	protected abstract static class ServiceCacheLoader extends BaseCacheLoader {
 
 		protected String serviceId;
 
-		public ServiceCacheKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId) {
+		public ServiceCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId) {
 			super(apiClient, request);
 			this.serviceId = serviceId;
 		}
@@ -83,11 +104,11 @@ public class ApiCache {
 		@Override
 		public boolean equals(Object obj) {
 
-			if (!(obj instanceof ServiceCacheKey)) {
+			if (!(obj instanceof ServiceCacheLoader)) {
 				return false;
 			}
 
-			ServiceCacheKey other = (ServiceCacheKey) obj;
+			ServiceCacheLoader other = (ServiceCacheLoader) obj;
 
 			if (!super.equals(obj)) {
 				return false;
@@ -106,11 +127,11 @@ public class ApiCache {
 		}
 	}
 
-	protected static class ViewNameCacheKey extends ServiceCacheKey {
+	protected static class ViewCacheLoader extends ServiceCacheLoader {
 
 		protected String viewName;
 
-		public ViewNameCacheKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, String viewName) {
+		public ViewCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, String viewName) {
 
 			super(apiClient, request, serviceId);
 			this.viewName = viewName;
@@ -119,7 +140,7 @@ public class ApiCache {
 		@Override
 		public boolean equals(Object obj) {
 
-			if (!(obj instanceof ViewNameCacheKey)) {
+			if (!(obj instanceof ViewCacheLoader)) {
 				return false;
 			}
 
@@ -127,7 +148,7 @@ public class ApiCache {
 				return false;
 			}
 
-			ViewNameCacheKey other = (ViewNameCacheKey) obj;
+			ViewCacheLoader other = (ViewCacheLoader) obj;
 
 			if (!Objects.equal(viewName, other.viewName)) {
 				return false;
@@ -152,11 +173,11 @@ public class ApiCache {
 		}
 	}
 
-	protected abstract static class ViewCacheKey extends ServiceCacheKey {
+	protected abstract static class ViewInputCacheLoader extends ServiceCacheLoader {
 
 		protected ViewInput input;
 
-		public ViewCacheKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input) {
+		public ViewInputCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input) {
 
 			super(apiClient, request, serviceId);
 			this.input = input;
@@ -180,7 +201,7 @@ public class ApiCache {
 		@Override
 		public boolean equals(Object obj) {
 
-			if (!(obj instanceof ViewCacheKey)) {
+			if (!(obj instanceof ViewInputCacheLoader)) {
 				return false;
 			}
 
@@ -188,7 +209,7 @@ public class ApiCache {
 				return false;
 			}
 
-			ViewCacheKey other = (ViewCacheKey) obj;
+			ViewInputCacheLoader other = (ViewInputCacheLoader) obj;
 
 			if (!Objects.equal(input.timeFilter, other.input.timeFilter)) {
 				return false;
@@ -233,11 +254,11 @@ public class ApiCache {
 		}
 	}
 
-	protected abstract static class VolumeKey extends ViewCacheKey {
+	protected abstract static class VolumeCacheLoader extends ViewInputCacheLoader {
 
 		protected VolumeType volumeType;
 
-		public VolumeKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
+		public VolumeCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
 				VolumeType volumeType) {
 
 			super(apiClient, request, serviceId, input);
@@ -247,7 +268,7 @@ public class ApiCache {
 		@Override
 		public boolean equals(Object obj) {
 
-			if (!(obj instanceof VolumeKey)) {
+			if (!(obj instanceof VolumeCacheLoader)) {
 				return false;
 			}
 
@@ -255,7 +276,7 @@ public class ApiCache {
 				return false;
 			}
 
-			VolumeKey other = (VolumeKey) obj;
+			VolumeCacheLoader other = (VolumeCacheLoader) obj;
 			
 			if (volumeType != null) {
 				
@@ -292,9 +313,9 @@ public class ApiCache {
 		}
 	}
 	
-	protected static class SlimEventKey extends VolumeKey {
+	protected static class SlimVolumeCacheLoader extends VolumeCacheLoader {
 		
-		public SlimEventKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
+		public SlimVolumeCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
 				VolumeType volumeType) {
 
 			super(apiClient, request, serviceId, input, volumeType);
@@ -303,7 +324,7 @@ public class ApiCache {
 		@Override
 		public boolean equals(Object obj) {
 
-			if (!(obj instanceof SlimEventKey)) {
+			if (!(obj instanceof SlimVolumeCacheLoader)) {
 				return false;
 			}
 
@@ -316,9 +337,9 @@ public class ApiCache {
 	}
 
 
-	protected static class EventKey extends VolumeKey {
+	protected static class EventCacheLoader extends VolumeCacheLoader {
 		
-		public EventKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
+		public EventCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
 				VolumeType volumeType) {
 
 			super(apiClient, request, serviceId, input, volumeType);
@@ -327,7 +348,7 @@ public class ApiCache {
 		@Override
 		public boolean equals(Object obj) {
 
-			if (!(obj instanceof EventKey)) {
+			if (!(obj instanceof EventCacheLoader)) {
 				return false;
 			}
 
@@ -339,7 +360,7 @@ public class ApiCache {
 		}
 	}
 
-	protected static class GraphKey extends VolumeKey {
+	protected static class GraphCacheLoader extends VolumeCacheLoader {
 
 		protected int pointsWanted;
 		protected int activeWindow;
@@ -349,7 +370,7 @@ public class ApiCache {
 		@Override
 		public boolean equals(Object obj) {
 
-			if (!(obj instanceof GraphKey)) {
+			if (!(obj instanceof GraphCacheLoader)) {
 				return false;
 			}
 
@@ -357,7 +378,7 @@ public class ApiCache {
 				return false;
 			}
 
-			GraphKey other = (GraphKey) obj;
+			GraphCacheLoader other = (GraphCacheLoader) obj;
 
 			if (pointsWanted != other.pointsWanted) {
 				return false;
@@ -379,7 +400,7 @@ public class ApiCache {
 			return true;
 		}
 
-		public GraphKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
+		public GraphCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
 				VolumeType volumeType, int pointsWanted, int baselineWindow, int activeWindow, int windowSlice) {
 
 			super(apiClient, request, serviceId, input, volumeType);
@@ -402,8 +423,8 @@ public class ApiCache {
 			return result;
 		}
 	}
-
-	protected static class TransactionsCacheKey extends ViewCacheKey {
+	
+	protected static class TransactionsCacheLoader extends ViewInputCacheLoader {
 
 		protected int baselineTimespan;
 		protected int activeTimespan;
@@ -411,7 +432,7 @@ public class ApiCache {
 		@Override
 		public boolean equals(Object obj) {
 
-			if (!(obj instanceof TransactionsCacheKey)) {
+			if (!(obj instanceof TransactionsCacheLoader)) {
 				return false;
 			}
 
@@ -419,7 +440,7 @@ public class ApiCache {
 				return false;
 			}
 			
-			TransactionsCacheKey other = (TransactionsCacheKey)obj;
+			TransactionsCacheLoader other = (TransactionsCacheLoader)obj;
 			
 			if (activeTimespan != other.activeTimespan) {
 				return false;
@@ -432,12 +453,12 @@ public class ApiCache {
 			return true;
 		}
 
-		public TransactionsCacheKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input) {
+		public TransactionsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input) {
 
 			this(apiClient, request, serviceId, input, 0, 0);
 		}
 		
-		public TransactionsCacheKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input, int baselineTimespan, int activeTimespan) {
+		public TransactionsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input, int baselineTimespan, int activeTimespan) {
 			super(apiClient, request, serviceId, input);
 			
 			this.baselineTimespan = baselineTimespan;
@@ -445,7 +466,7 @@ public class ApiCache {
 		}
 	}
 
-	protected static class TransactionsGraphCacheKey extends ViewCacheKey {
+	protected static class TransactionsGraphCacheLoader extends ViewInputCacheLoader {
 
 		protected int pointsWanted;
 		protected int baselineTimespan;
@@ -454,7 +475,7 @@ public class ApiCache {
 		@Override
 		public boolean equals(Object obj) {
 
-			if (!(obj instanceof TransactionsGraphCacheKey)) {
+			if (!(obj instanceof TransactionsGraphCacheLoader)) {
 				return false;
 			}
 
@@ -462,7 +483,7 @@ public class ApiCache {
 				return false;
 			}
 
-			TransactionsGraphCacheKey other = (TransactionsGraphCacheKey) obj;
+			TransactionsGraphCacheLoader other = (TransactionsGraphCacheLoader) obj;
 
 			if (pointsWanted != other.pointsWanted) {
 				return false;
@@ -485,13 +506,14 @@ public class ApiCache {
 			return super.toString() + " aw = " + activeTimespan + " bw = " + baselineTimespan;
 		}
 
-		public TransactionsGraphCacheKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId,
+		public TransactionsGraphCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId,
 				ViewInput input, int pointsWanted) {
 			this(apiClient, request, serviceId, input, pointsWanted, 0, 0);
 
 		}
 
-		public TransactionsGraphCacheKey(ApiClient apiClient, ApiGetRequest<?> request, String serviceId,
+		
+		public TransactionsGraphCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId,
 				ViewInput input, int pointsWanted, int baselineTimespan, int activeTimespan) {
 
 			super(apiClient, request, serviceId, input);
@@ -501,11 +523,11 @@ public class ApiCache {
 		}
 	}
 	
-	private static class RegresionWindowKey {
+	private static class RegresionWindowCacheLoader {
 		protected RegressionInput input;
 		protected ApiClient apiClient;
 
-		protected RegresionWindowKey(ApiClient apiClient, RegressionInput input) {
+		protected RegresionWindowCacheLoader(ApiClient apiClient, RegressionInput input) {
 			this.input = input;
 			this.apiClient = apiClient;
 		}
@@ -513,7 +535,7 @@ public class ApiCache {
 		@Override
 		public boolean equals(Object obj) {
 
-			RegresionWindowKey other = (RegresionWindowKey) obj;
+			RegresionWindowCacheLoader other = (RegresionWindowCacheLoader) obj;
 
 			if (!apiClient.getHostname().equals(other.apiClient.getHostname())) {
 				return false;
@@ -574,14 +596,14 @@ public class ApiCache {
 		}
 	}
 	
-	protected static class RegressionKey extends EventKey {
+	protected static class RegressionCacheLoader extends EventCacheLoader {
 
 		protected RegressionFunction function;
 
 		@Override
 		public boolean equals(Object obj) {
 
-			if (!(obj instanceof RegressionKey)) {
+			if (!(obj instanceof RegressionCacheLoader)) {
 				return false;
 			}
 
@@ -589,10 +611,11 @@ public class ApiCache {
 				return false;
 			}
 
-			RegressionKey other = (RegressionKey) obj;
+			RegressionCacheLoader other = (RegressionCacheLoader) obj;
 			
 			EventFilterInput eventInput = (EventFilterInput)input;
 			EventFilterInput otherInput = (EventFilterInput)(other.input);
+			
 			
 			if (!Objects.equal(eventInput.types, otherInput.types)) {
 				return false;
@@ -614,16 +637,15 @@ public class ApiCache {
 			return true;
 		}
 
-		public RegressionKey(ApiClient apiClient, String serviceId, ViewInput input,
+		public RegressionCacheLoader(ApiClient apiClient, String serviceId, ViewInput input,
 				RegressionFunction function) {
 
 			super(apiClient, null, serviceId, input, null);
-			
 			this.function = function;
 		}
 	}
 
-	private static Response<?> getItem(CacheKey key) {
+	private static Response<?> getItem(BaseCacheLoader key) {
 		try {
 			Response<?> result = queryCache.get(key);
 			
@@ -641,7 +663,7 @@ public class ApiCache {
 	public static Response<ViewsResult> getView(ApiClient apiClient, String serviceId, String viewName,
 			ViewsRequest viewsRequest) {
 
-		ViewNameCacheKey cacheKey = new ViewNameCacheKey(apiClient, viewsRequest, serviceId, viewName);
+		ViewCacheLoader cacheKey = new ViewCacheLoader(apiClient, viewsRequest, serviceId, viewName);
 		Response<ViewsResult> response = (Response<ViewsResult>)getItem(cacheKey);
 
 		return response;
@@ -656,7 +678,7 @@ public class ApiCache {
 	public static Response<TransactionsVolumeResult> getTransactionsVolume(ApiClient apiClient, String serviceId,
 			ViewInput input, int activeTimespan, int baselineTimespan, TransactionsVolumeRequest request) {
 
-		TransactionsCacheKey cacheKey = new TransactionsCacheKey(apiClient, request, serviceId, input, activeTimespan, baselineTimespan);
+		TransactionsCacheLoader cacheKey = new TransactionsCacheLoader(apiClient, request, serviceId, input, activeTimespan, baselineTimespan);
 		Response<TransactionsVolumeResult> response = (Response<TransactionsVolumeResult>)getItem(cacheKey);
 
 		return response;
@@ -667,7 +689,7 @@ public class ApiCache {
 			ViewInput input, VolumeType volumeType, GraphRequest request, int pointsWanted,
 			int baselineWindow, int activeWindow, int windowSlice) {
 
-		GraphKey cacheKey = new GraphKey(apiClient, request, serviceId, input, volumeType, 
+		GraphCacheLoader cacheKey = new GraphCacheLoader(apiClient, request, serviceId, input, volumeType, 
 			pointsWanted, baselineWindow, activeWindow, windowSlice);
 		Response<GraphResult> response = (Response<GraphResult>) getItem(cacheKey);
 
@@ -678,7 +700,7 @@ public class ApiCache {
 			ViewInput input, VolumeType volumeType, GraphRequest request, int pointsWanted,
 			int baselineWindow, int activeWindow, int windowSlice, Response<GraphResult> graphResult) {
 
-		GraphKey cacheKey = new GraphKey(apiClient, request, serviceId, input, volumeType, 
+		GraphCacheLoader cacheKey = new GraphCacheLoader(apiClient, request, serviceId, input, volumeType, 
 			pointsWanted, baselineWindow, activeWindow, windowSlice);
 		
 		queryCache.put(cacheKey, graphResult);
@@ -688,7 +710,7 @@ public class ApiCache {
 	public static Response<EventsSlimVolumeResult> getEventVolume(ApiClient apiClient, String serviceId, 
 			ViewInput input, VolumeType volumeType, EventsSlimVolumeRequest request) {
 
-		SlimEventKey cacheKey = new SlimEventKey(apiClient, request, serviceId, input, volumeType);
+		SlimVolumeCacheLoader cacheKey = new SlimVolumeCacheLoader(apiClient, request, serviceId, input, volumeType);
 		Response<EventsSlimVolumeResult> response = (Response<EventsSlimVolumeResult>)getItem(cacheKey);
 		return response;
 	}
@@ -696,7 +718,7 @@ public class ApiCache {
 	private static Response<?> getEventList(ApiClient apiClient, String serviceId, 
 			ViewInput input, EventsRequest request, VolumeType volumeType, boolean load) {
 		
-		EventKey cacheKey = new EventKey(apiClient, request, serviceId, input, volumeType);		
+		EventCacheLoader cacheKey = new EventCacheLoader(apiClient, request, serviceId, input, volumeType);		
 		Response<?> response;
 		
 		if (load) {
@@ -740,7 +762,7 @@ public class ApiCache {
 			EventFilterInput input, int pointsWanted, int baselineTimespan, int activeTimespan, 
 			TransactionsGraphRequest request) {
 
-		TransactionsGraphCacheKey cacheKey = new TransactionsGraphCacheKey(apiClient, request, serviceId, input,
+		TransactionsGraphCacheLoader cacheKey = new TransactionsGraphCacheLoader(apiClient, request, serviceId, input,
 				pointsWanted, baselineTimespan, activeTimespan);
 		Response<TransactionsGraphResult> response = (Response<TransactionsGraphResult>) ApiCache.getItem(cacheKey);
 		
@@ -750,7 +772,7 @@ public class ApiCache {
 	public static RegressionWindow getRegressionWindow(ApiClient apiClient, RegressionInput input) {
 
 		try {
-			return regressionWindowCache.get(new RegresionWindowKey(apiClient, input));
+			return regressionWindowCache.get(new RegresionWindowCacheLoader(apiClient, input));
 
 		} catch (ExecutionException e) {
 			throw new IllegalStateException(e);
@@ -760,7 +782,7 @@ public class ApiCache {
 	public static RegressionOutput getRegressionOutput(ApiClient apiClient, String serviceId, 
 		EventFilterInput input, RegressionFunction function, boolean load) {
 			
-		RegressionKey key = new RegressionKey(apiClient, serviceId, input, function);
+		RegressionCacheLoader key = new RegressionCacheLoader(apiClient, serviceId, input, function);
 		
 		if (load) {
 			try
@@ -782,22 +804,22 @@ public class ApiCache {
 		}
 	}
 	
-	private static final LoadingCache<RegressionKey, RegressionOutput> rgressionReportRache = CacheBuilder
+	private static final LoadingCache<RegressionCacheLoader, RegressionOutput> rgressionReportRache = CacheBuilder
 			.newBuilder().maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_RETENTION, TimeUnit.MINUTES)
-			.build(new CacheLoader<RegressionKey, RegressionOutput>() {
+			.build(new CacheLoader<RegressionCacheLoader, RegressionOutput>() {
 				
 				@Override
-				public RegressionOutput load(RegressionKey key) {
+				public RegressionOutput load(RegressionCacheLoader key) {
 					return key.function.executeRegression(key.serviceId, (EventFilterInput)key.input);
 				}
 			});
 
-	private static final LoadingCache<RegresionWindowKey, RegressionWindow> regressionWindowCache = CacheBuilder
+	private static final LoadingCache<RegresionWindowCacheLoader, RegressionWindow> regressionWindowCache = CacheBuilder
 			.newBuilder().maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_RETENTION, TimeUnit.MINUTES)
-			.build(new CacheLoader<RegresionWindowKey, RegressionWindow>() {
+			.build(new CacheLoader<RegresionWindowCacheLoader, RegressionWindow>() {
 				
 				@Override
-				public RegressionWindow load(RegresionWindowKey key) {
+				public RegressionWindow load(RegresionWindowCacheLoader key) {
 					
 					RegressionWindow result = RegressionUtil.getActiveWindow(key.apiClient, key.input, 4,
 							System.out);
@@ -805,30 +827,16 @@ public class ApiCache {
 				}
 			});
 
-	private static final LoadingCache<CacheKey, Response<?>> queryCache = CacheBuilder.newBuilder()
+	private static final LoadingCache<BaseCacheLoader, Response<?>> queryCache = CacheBuilder.newBuilder()
 			.maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_RETENTION, TimeUnit.MINUTES)
-			.build(new CacheLoader<CacheKey, Response<?>>() {
+			.build(new CacheLoader<BaseCacheLoader, Response<?>>() {
 				
 				@Override
-				public Response<?> load(CacheKey key) {
-					long t1 = System.currentTimeMillis();
+				public Response<?> load(BaseCacheLoader key) {
 					
-					try {
-						Response<?> result = key.apiClient.get(key.request);
-						
-						long t2 = System.currentTimeMillis();
-						
-						if (PRINT_DURATIONS) {
-							double sec = (double)(t2-t1) / 1000;
-							System.out.println(sec + " sec: " + key);
-						}
-						
-						return result;
- 					} catch (Throwable e) {
- 						long t2 = System.currentTimeMillis();
- 						
- 						throw new IllegalStateException("Error executing after " + ((double)(t2-t1) / 1000) + " sec: " + key, e);
- 					}
+					Response<?> result = key.load();
+					return result;
 				}
 			});
+
 }

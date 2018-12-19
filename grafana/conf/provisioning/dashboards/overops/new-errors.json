@@ -11,7 +11,7 @@
         "type": "dashboard"
       },
       {
-        "datasource": "OverOps-as-influx",
+        "datasource": "OO",
         "enable": true,
         "hide": true,
         "iconColor": "#1f78c1",
@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 29,
-  "iteration": 1545124633014,
+  "iteration": 1545214638140,
   "links": [
     {
       "asDropdown": true,
@@ -48,7 +48,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "OverOps-as-influx",
+      "datasource": "OO",
       "description": "",
       "fill": 0,
       "gridPos": {
@@ -255,7 +255,7 @@
     },
     {
       "columns": [],
-      "datasource": "OverOps-as-influx",
+      "datasource": "OO",
       "description": "",
       "fontSize": "100%",
       "gridPos": {
@@ -270,8 +270,8 @@
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 1,
-        "desc": false
+        "col": 6,
+        "desc": true
       },
       "styles": [
         {
@@ -290,13 +290,7 @@
           "linkUrl": "http://localhost:8888/link?link=${__cell}",
           "mappingType": 1,
           "pattern": "Link",
-          "rangeMaps": [
-            {
-              "from": "S6295#45721#1538336116202#604800000",
-              "text": "moo",
-              "to": "S6295#45721#1538336116202#604800000"
-            }
-          ],
+          "rangeMaps": [],
           "thresholds": [],
           "type": "hidden",
           "unit": "short",
@@ -487,7 +481,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_2} in ${__cell_4}, introduced by ${__cell_5}: Click for root cause",
-          "linkUrl": "//$apiHost/tale.html?source=45&snapshot=${__cell_0}",
+          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "TypeMessage",
           "thresholds": [],
@@ -594,10 +588,13 @@
         "allValue": "*",
         "current": {
           "selected": false,
-          "text": "OverOps Prod: S6295",
-          "value": "OverOps Prod: S6295"
+          "tags": [],
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
         },
-        "datasource": "OverOps-as-influx",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Env",
@@ -618,11 +615,10 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
-        "datasource": "OverOps-as-influx",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Apps",
@@ -643,11 +639,10 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
-        "datasource": "OverOps-as-influx",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Servers",
@@ -668,11 +663,10 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
-        "datasource": "OverOps-as-influx",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Deployments",
@@ -693,11 +687,10 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
-        "datasource": "OverOps-as-influx",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Type",
@@ -718,11 +711,10 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
-        "datasource": "OverOps-as-influx",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Transactions",
@@ -743,11 +735,10 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24",
           "value": "24"
         },
-        "datasource": "OverOps-as-influx",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": "Points Wanted",
@@ -851,14 +842,39 @@
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
-        "datasource": "OverOps-as-influx",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
         "multi": false,
         "name": "apiHost",
         "options": [],
-        "query": "apiHost({})",
+        "query": "apiHost({\"type\":\"URL_NO_PORT\"})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "443",
+          "value": "443"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "apiPort",
+        "options": [],
+        "query": "apiHost({\"type\":\"PORT\"})",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -872,8 +888,8 @@
     ]
   },
   "time": {
-    "from": "now/w",
-    "to": "now/w"
+    "from": "now-7d",
+    "to": "now"
   },
   "timepicker": {
     "hidden": false,
@@ -904,5 +920,5 @@
   "timezone": "",
   "title": "New Errors",
   "uid": "3NZ83NLik",
-  "version": 29
+  "version": 34
 }

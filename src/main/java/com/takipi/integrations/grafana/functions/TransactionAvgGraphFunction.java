@@ -3,6 +3,7 @@ package com.takipi.integrations.grafana.functions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -18,6 +19,7 @@ import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionAvgGraphFunction extends TransactionsGraphFunction
 {
+
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -36,15 +38,22 @@ public class TransactionAvgGraphFunction extends TransactionsGraphFunction
 		}
 	}
 	
-	public TransactionAvgGraphFunction(ApiClient apiClient) {
+	public TransactionAvgGraphFunction(ApiClient apiClient)
+	{
 		super(apiClient);
 	}
+	
 	
 	@Override
 	protected Collection<TransactionGraph> getTransactionGraphs(EventFilterInput input, String serviceId,
 			String viewId, Pair<DateTime, DateTime> timeSpan, String searchText, 
-			int pointsWanted, int activeTimespan, int baselineTimespan) {	
+			int pointsWanted, int activeTimespan, int baselineTimespan)
+	{	
 		Collection<Transaction> transactions = getTransactions(serviceId, viewId, timeSpan, input, searchText);
+		
+		if (transactions == null) {
+			return Collections.emptyList();
+		}
 		
 		List<TransactionGraph> result = new ArrayList<TransactionGraph>();
 		
@@ -66,4 +75,5 @@ public class TransactionAvgGraphFunction extends TransactionsGraphFunction
 		
 		return result;
 	}
+	
 }

@@ -34,6 +34,7 @@ import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.RegressionsInput;
 import com.takipi.integrations.grafana.input.RelabilityReportInput;
+import com.takipi.integrations.grafana.input.RelabilityReportInput.GraphType;
 import com.takipi.integrations.grafana.input.RelabilityReportInput.ReportMode;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
@@ -45,7 +46,14 @@ import com.takipi.integrations.grafana.util.TimeUtil;
 public class ReliabilityReportFunction extends EventsFunction {
 	
 	private static final List<String> FIELDS = Arrays.asList(
-			new String[] { FROM, TO, TIME_RANGE, "Name", "New Issues", "Regressions", "Slowdowns", "Score" });
+			new String[] { FROM, TO, TIME_RANGE, "Name", 
+					"NewIssuesDesc", "RegressionsDesc", "SlowdownsDesc", 
+					"NewIssuesState", "RegressionsState", "SlowdownsState", 
+					"Score" });
+	
+	private enum IssueTypeStatus {
+		GREEN, YELLOW, RED
+	}
 	
 	public static class Factory implements FunctionFactory {
 		
@@ -431,7 +439,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 				tasks.add(new RegressionAsyncTask(regressionFunction, key, serviceId, regressionsInput, timeSpan));
 			}
 			
-			tasks.add(new SlowdownAsyncTask(transactionsListFunction, key, serviceId, regressionsInput, timeSpan));
+			tasks.add(new SlowdownAsyncTask(transactionsListFunction, key, serviceId, transactionInput, timeSpan));
 		}
 		
 		if (tasks.size() == 1) {
@@ -722,7 +730,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return createSingleStatSeries(timeSpan, singleStatText);
 	}
 
-	private static Object formatIssueType(RelabilityReportInput input, int nonSevere, int severe)
+	private static Object formatIssueDesc(RelabilityReportInput input, int nonSevere, int severe)
 	{
 		
 		Object result;
@@ -795,6 +803,19 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return result;
 	}
 	
+	private int getStatus(int nonSevere, int severe) {
+		
+		if (severe > 0) {
+			return IssueTypeStatus.RED.ordinal();
+		}
+		
+		if (nonSevere > 4) {
+			return IssueTypeStatus.YELLOW.ordinal();
+		}
+		
+		return IssueTypeStatus.GREEN.ordinal();
+	}
+	
 	@Override
 	protected List<List<Object>> processServiceEvents(String serviceId, EventsInput input,
 			Pair<DateTime, DateTime> timeSpan) {
@@ -811,14 +832,18 @@ public class ReliabilityReportFunction extends EventsFunction {
 			Pair<Object, Object> fromTo = getTimeFilterPair(timeSpan, input.timeFilter);
 			String timeRange = TimeUtil.getTimeUnit(input.timeFilter); 
 			
-			Object newIssuesOutput = formatIssueType(rrInput, reportKeyResult.newIssues, reportKeyResult.severeNewIssues);
-			Object regressionsOutput = formatIssueType(rrInput, reportKeyResult.regressions, reportKeyResult.criticalRegressions);
-			Object slowdownsOutput = formatIssueType(rrInput, reportKeyResult.slowdowns, reportKeyResult.severeSlowdowns);
-			
-			String value = reportKeyResult.output.key;
+			Object newIssuesDesc = formatIssueDesc(rrInput, reportKeyResult.newIssues, reportKeyResult.severeNewIssues);
+			Object regressionsDesc = formatIssueDesc(rrInput, reportKeyResult.regressions, reportKeyResult.criticalRegressions);
+			Object slowdownsDesc = formatIssueDesc(rrInput, reportKeyResult.slowdowns, reportKeyResult.severeSlowdowns);
+				
+			Object newIssuesState = getStatus(reportKeyResult.newIssues, reportKeyResult.severeNewIssues);
+			Object regressionsState = getStatus(reportKeyResult.regressions, reportKeyResult.criticalRegressions);
+			Object slowdownsState = getStatus(reportKeyResult.slowdowns, reportKeyResult.severeSlowdowns);
 			
 			Object[] row = new Object[] { fromTo.getFirst(), fromTo.getSecond(), timeRange,
-					value, newIssuesOutput, regressionsOutput, slowdownsOutput,
+					reportKeyResult.output.key, 
+					newIssuesDesc, regressionsDesc, slowdownsDesc,
+					newIssuesState, regressionsState, slowdownsState,
 					reportKeyResult.score};
 
 			result.add(Arrays.asList(row));
@@ -890,6 +915,29 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		return Pair.of(slowdowns, severeSlowdowns);
 	}
+	
+	private double getGraphValue(RelabilityReportInput input, ReportKeyResults reportKeyResult) {
+		
+		if (input.graphType == null) {
+			return reportKeyResult.score;
+		}
+		
+		GraphType graphType = GraphType.valueOf(input.graphType.replace(" ", ""));
+		
+		switch (graphType) {
+			
+			case NewIssues: return reportKeyResult.newIssues + reportKeyResult.severeNewIssues;
+			case SevereNewIssues: return reportKeyResult.severeNewIssues; 
+			case Regressions: return reportKeyResult.regressions + reportKeyResult.criticalRegressions;
+			case SevereRegressions: return reportKeyResult.criticalRegressions; 
+			case Slowdowns: return reportKeyResult.slowdowns + reportKeyResult.severeSlowdowns;
+			case SevereSlowdowns: return reportKeyResult.severeSlowdowns; 
+			case Score: return reportKeyResult.score; 
+		}
+		
+		return 0;
+	}
+	
 
 	private List<Series> processGraph(RelabilityReportInput input) {
 
@@ -901,45 +949,28 @@ public class ReliabilityReportFunction extends EventsFunction {
 		for (String serviceId : serviceIds) {
 
 			Collection<ReportKeyOutput> reportKeyOutputs = executeReport(serviceId, input, timeSpan);
-		
-			RegressionReportSettings reportSettings = GrafanaSettings.getData(apiClient, serviceId).regression_report;
-			
-			if (reportSettings == null)
-			{
-				throw new IllegalStateException("Unable to acquire regression report settings for " + serviceId);
-			}	
+			Collection<ReportKeyResults > reportKeyResults = getReportResults(serviceId, reportKeyOutputs);
 
-			for (ReportKeyOutput reportKeyOutput : reportKeyOutputs) {
+			for (ReportKeyResults reportKeyResult : reportKeyResults) {
 
-				Pair<Integer, Integer> slowdownPair = getSlowdowns(reportKeyOutput.transactionDatas);
+				double value = getGraphValue(input, reportKeyResult);
 				
-				if (reportKeyOutput.regressionData == null) {
-					continue;
-				}
-				
-				double score = getScore(reportSettings, reportKeyOutput.regressionData.regressionOutput, 
-					slowdownPair.getFirst(), slowdownPair.getSecond());
-				
-				if (score == 0) {
-					continue;
-				}
-
 				String seriesName;
-				String postfix = getPostfix(input, score);
+				String postfix = getPostfix(input, value);
 				
 				if (postfix != null) {
-					seriesName = reportKeyOutput.key + postfix;
+					seriesName = reportKeyResult.output.key + postfix;
 				} else {
-					seriesName = reportKeyOutput.key;
+					seriesName = reportKeyResult.output.key;
 				}
-				
+								
 				Series series = new Series();
 				series.values = new ArrayList<List<Object>>();
 
 				series.name = EMPTY_NAME;
 				series.columns = Arrays.asList(new String[] { TIME_COLUMN, seriesName });
 				series.values
-						.add(Arrays.asList(new Object[] { timeSpan.getFirst().getMillis(), score }));
+						.add(Arrays.asList(new Object[] { timeSpan.getFirst().getMillis(), value }));
 
 				result.add(series);
 			}

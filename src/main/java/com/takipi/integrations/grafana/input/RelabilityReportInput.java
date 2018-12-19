@@ -6,7 +6,16 @@ public class RelabilityReportInput extends RegressionsInput {
 		Applications, Deployments, Tiers;
 	}
 	
+	public enum GraphType {
+		NewIssues, SevereNewIssues, 
+		Regressions, SevereRegressions,
+		Slowdowns, SevereSlowdowns,
+		Score;
+	}
+	
+	public String graphType;
 	public ReportMode mode;
+	
 	public int limit;
 	
 	public String thresholds;

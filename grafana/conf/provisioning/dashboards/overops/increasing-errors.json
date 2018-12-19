@@ -11,7 +11,7 @@
         "type": "dashboard"
       },
       {
-        "datasource": "OverOps-as-influx",
+        "datasource": "OO",
         "enable": true,
         "hide": true,
         "iconColor": "#1f78c1",
@@ -23,7 +23,7 @@
         "type": "tags"
       },
       {
-        "datasource": "OverOps-as-influx",
+        "datasource": "OO",
         "enable": true,
         "hide": true,
         "iconColor": "rgba(255, 96, 96, 1)",
@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 28,
-  "iteration": 1545124397057,
+  "iteration": 1545215266902,
   "links": [
     {
       "asDropdown": true,
@@ -60,7 +60,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "OverOps-as-influx",
+      "datasource": "OO",
       "description": "Shows the relative rate of selected increasing errors, comparing them between the baseline period and active window as denoted by the red annotation on the graph.",
       "fill": 0,
       "gridPos": {
@@ -69,7 +69,7 @@
         "x": 0,
         "y": 0
       },
-      "hideTimeOverride": true,
+      "hideTimeOverride": false,
       "id": 36,
       "interval": "",
       "legend": {
@@ -187,7 +187,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "OverOps-as-influx",
+      "datasource": "OO",
       "description": "Shows the volume of selected increasing errors, comparing them between the baseline period and active window as denoted by the red annotation on the graph.",
       "fill": 0,
       "gridPos": {
@@ -196,7 +196,7 @@
         "x": 12,
         "y": 0
       },
-      "hideTimeOverride": true,
+      "hideTimeOverride": false,
       "id": 39,
       "interval": "",
       "legend": {
@@ -311,7 +311,7 @@
     },
     {
       "columns": [],
-      "datasource": "OverOps-as-influx",
+      "datasource": "OO",
       "description": "",
       "fontSize": "100%",
       "gridPos": {
@@ -341,18 +341,12 @@
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
           "link": false,
-          "linkTargetBlank": true,
-          "linkTooltip": "Go to Root Cause",
-          "linkUrl": "http://localhost:8888/link?link=${__cell}",
-          "mappingType": 1,
+          "linkTargetBlank": false,
+          "linkTooltip": "",
+          "linkUrl": "",
+          "mappingType": 2,
           "pattern": "Link",
-          "rangeMaps": [
-            {
-              "from": "S6295#45721#1538336116202#604800000",
-              "text": "moo",
-              "to": "S6295#45721#1538336116202#604800000"
-            }
-          ],
+          "rangeMaps": [],
           "thresholds": [],
           "type": "hidden",
           "unit": "short",
@@ -371,7 +365,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "http://localhost:8888/link?link=${__cell_0}",
+          "linkUrl": "",
           "mappingType": 1,
           "pattern": "Hits",
           "thresholds": [],
@@ -391,7 +385,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "http://localhost:8888/link?link=${__cell_0}",
+          "linkUrl": "",
           "mappingType": 1,
           "pattern": "Entry point",
           "thresholds": [],
@@ -411,7 +405,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "http://localhost:8888/link?link=${__cell_0}",
+          "linkUrl": "",
           "mappingType": 1,
           "pattern": "Introduced by",
           "thresholds": [],
@@ -431,7 +425,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "http://localhost:8888/link?link=${__cell_0}",
+          "linkUrl": "",
           "mappingType": 1,
           "pattern": "First seen",
           "thresholds": [],
@@ -451,7 +445,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "http://localhost:8888/link?link=${__cell_0}",
+          "linkUrl": "",
           "mappingType": 1,
           "pattern": "Type",
           "preserveFormat": false,
@@ -503,7 +497,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "http://localhost:8888/link?link=${__cell_0}",
+          "linkUrl": "",
           "mappingType": 1,
           "pattern": "Name",
           "thresholds": [],
@@ -522,8 +516,8 @@
           "decimals": 2,
           "link": false,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_1} in ${__cell_2}, introduced by ${__cell_3}: Click for root cause",
-          "linkUrl": "https://app.overops.com/tale.html?snapshot=${__cell_0}",
+          "linkTooltip": "",
+          "linkUrl": "",
           "mappingType": 1,
           "pattern": "Error location",
           "thresholds": [],
@@ -543,7 +537,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "http://localhost:8888/link?link=${__cell_0}",
+          "linkUrl": "",
           "mappingType": 1,
           "pattern": "Rate",
           "thresholds": [],
@@ -560,6 +554,7 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
+          "link": false,
           "mappingType": 1,
           "pattern": "IssueType",
           "thresholds": [],
@@ -593,7 +588,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_1} in ${__cell_2}, introduced by ${__cell_3}: Click for root cause",
-          "linkUrl": "https://$apiHost/tale.html?snapshot=${__cell_0}",
+          "linkUrl": "//$apiHost:$apiPort/tale.html?snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "TypeMessage",
           "thresholds": [],
@@ -628,6 +623,7 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
+          "link": false,
           "mappingType": 1,
           "pattern": "Severity",
           "thresholds": [
@@ -657,6 +653,7 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
+          "link": false,
           "mappingType": 1,
           "pattern": "Regression",
           "thresholds": [],
@@ -732,10 +729,13 @@
         "allValue": "*",
         "current": {
           "selected": false,
-          "text": "OverOps Prod: S6295",
-          "value": "OverOps Prod: S6295"
+          "tags": [],
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
         },
-        "datasource": "OverOps-as-influx",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Env",
@@ -756,10 +756,10 @@
       {
         "allValue": "*",
         "current": {
-          "text": "all",
-          "value": "all"
+          "text": "All",
+          "value": "$__all"
         },
-        "datasource": "OverOps-as-influx",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Apps",
@@ -780,10 +780,10 @@
       {
         "allValue": "*",
         "current": {
-          "text": "all",
-          "value": "all"
+          "text": "All",
+          "value": "$__all"
         },
-        "datasource": "OverOps-as-influx",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Servers",
@@ -804,10 +804,10 @@
       {
         "allValue": "all",
         "current": {
-          "text": "all",
-          "value": "all"
+          "text": "All",
+          "value": "$__all"
         },
-        "datasource": "OverOps-as-influx",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Type",
@@ -828,10 +828,10 @@
       {
         "allValue": "*",
         "current": {
-          "text": "all",
-          "value": "all"
+          "text": "All",
+          "value": "$__all"
         },
-        "datasource": "OverOps-as-influx",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Deployments",
@@ -855,7 +855,7 @@
           "text": "24",
           "value": "24"
         },
-        "datasource": "OverOps-as-influx",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": "Points Wanted",
@@ -932,8 +932,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "BackendSourceCodeProcessor.buildClassProcessors",
-          "value": "BackendSourceCodeProcessor.buildClassProcessors"
+          "tags": [],
+          "text": "<term>",
+          "value": "<term>"
         },
         "hide": 0,
         "includeAll": false,
@@ -942,7 +943,7 @@
         "name": "search",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "<term>",
             "value": "<term>"
           }
@@ -954,8 +955,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "30d",
-          "value": "30d"
+          "selected": true,
+          "text": "7d",
+          "value": "7d"
         },
         "hide": 0,
         "includeAll": false,
@@ -994,7 +996,7 @@
             "value": "2d"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "7d",
             "value": "7d"
           },
@@ -1005,44 +1007,23 @@
           },
           {
             "selected": false,
-            "text": "1m",
-            "value": "1m"
+            "text": "30d",
+            "value": "30d"
           }
         ],
-        "query": "30m,1h,4h,8h,24h,2d,7d,14d,1m",
+        "query": "30m,1h,4h,8h,24h,2d,7d,14d,30d",
         "skipUrlSync": false,
         "type": "custom"
       },
       {
         "allValue": null,
         "current": {
+          "isNone": true,
           "selected": true,
-          "text": "app.overops.com",
-          "value": "app.overops.com"
+          "text": "None",
+          "value": ""
         },
-        "hide": 2,
-        "includeAll": false,
-        "label": null,
-        "multi": false,
-        "name": "apiHost",
-        "options": [
-          {
-            "selected": true,
-            "text": "app.overops.com",
-            "value": "app.overops.com"
-          }
-        ],
-        "query": "app.overops.com",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "text": "150d",
-          "value": "150d"
-        },
-        "datasource": "OverOps-as-influx",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -1051,6 +1032,54 @@
         "options": [],
         "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\"})",
         "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "app.overops.com",
+          "value": "app.overops.com"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "apiHost",
+        "options": [],
+        "query": "apiHost({\"type\":\"URL_NO_PORT\"})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "443",
+          "value": "443"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "apiPort",
+        "options": [],
+        "query": "apiHost({\"type\":\"PORT\"})",
+        "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -1095,5 +1124,5 @@
   "timezone": "",
   "title": "Increasing Errors",
   "uid": "WZ739NYmk",
-  "version": 41
+  "version": 49
 }

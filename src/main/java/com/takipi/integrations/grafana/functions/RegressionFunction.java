@@ -600,6 +600,8 @@ public class RegressionFunction extends EventsFunction
 				VolumeType.all, regressionWindow.activeWindowStart, DateTime.now(), regressionWindow.activeTimespan, 0);
 		*/
 		
+		//This section needs to be refactored into its own blocking / synch cache loader 
+		
 		Collection<GraphSliceTask> baselineGraphTasks = getGraphTasks(serviceId, viewId, baselinePoints, baselineInput, 
 				VolumeType.all, regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan),
 			regressionWindow.activeWindowStart, regressionInput.baselineTimespan, 0, false);
