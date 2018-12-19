@@ -204,7 +204,7 @@
           "targetBlank": true,
           "title": "Performance",
           "type": "absolute",
-          "url": "$proxy_link_prefix/d/Z40SpeJmz/performance"
+          "url": "d/Z40SpeJmz/performance"
         }
       ],
       "mappingType": 1,
@@ -325,7 +325,7 @@
         {
           "title": "Performance",
           "type": "absolute",
-          "url": "$proxy_link_prefix/d/Z40SpeJmz/performance"
+          "url": "d/Z40SpeJmz/performance"
         }
       ],
       "mappingType": 1,
@@ -447,7 +447,7 @@
           "targetBlank": true,
           "title": "New Errors",
           "type": "absolute",
-          "url": "$proxy_link_prefix/d/3NZ83NLik/new-errors"
+          "url": "d/3NZ83NLik/new-errors"
         }
       ],
       "mappingType": 1,
@@ -676,13 +676,13 @@
       "interval": null,
       "links": [
         {
-          "dashboard": "$proxy_link_prefix/d/HYBPMdYik/errors",
+          "dashboard": "d/HYBPMdYik/errors",
           "includeVars": true,
           "keepTime": true,
           "targetBlank": true,
           "title": "Unique Errors",
           "type": "absolute",
-          "url": "$proxy_link_prefix/d/HYBPMdYik/errors"
+          "url": "d/HYBPMdYik/errors"
         }
       ],
       "mappingType": 1,
@@ -1180,7 +1180,7 @@
           "targetBlank": true,
           "title": "Performance",
           "type": "absolute",
-          "url": "$proxy_link_prefix/d/Z40SpeJmz/performance"
+          "url": "d/Z40SpeJmz/performance"
         }
       ],
       "pageSize": 1000,
@@ -1334,7 +1334,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "Jump to Slow Transaction Analysis",
-          "linkUrl": "$proxy_link_prefix/d/Z40SpeJmz/performance?from=${__cell_1}&to=${__cell_2}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=${__cell_5}",
+          "linkUrl": "d/Z40SpeJmz/performance?from=${__cell_1}&to=${__cell_2}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=${__cell_5}",
           "mappingType": 1,
           "pattern": "transaction",
           "thresholds": [],
@@ -1695,7 +1695,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_1} in ${__cell_2}, introduced by ${__cell_3}: Click for root cause",
-          "linkUrl": "$proxy_link_prefix/d/WZ739NYmk/increasing-errors?var-timeRange=${__cell_6}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=$transactions&var-type=$type&var-search=${__cell_2}",
+          "linkUrl": "d/WZ739NYmk/increasing-errors?var-timeRange=${__cell_6}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=$transactions&var-type=$type&var-search=${__cell_2}",
           "mappingType": 1,
           "pattern": "TypeMessage",
           "thresholds": [],
@@ -1780,7 +1780,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_5}",
-          "linkUrl": "$proxy_link_prefix/d/WZ739NYmk/increasing-errors?var-timeRange=${__cell_6}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=$transactions&var-type=$type&var-search=${__cell_2}",
+          "linkUrl": "d/WZ739NYmk/increasing-errors?var-timeRange=${__cell_6}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=$transactions&var-type=$type&var-search=${__cell_2}",
           "mappingType": 1,
           "pattern": "RegDelta",
           "thresholds": [],
@@ -1885,7 +1885,7 @@
           "targetBlank": true,
           "title": "New Errors",
           "type": "absolute",
-          "url": "$proxy_link_prefix/d/3NZ83NLik/new-errors"
+          "url": "d/3NZ83NLik/new-errors"
         }
       ],
       "pageSize": 20,

@@ -14,6 +14,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
@@ -44,6 +46,7 @@ import com.takipi.integrations.grafana.util.DeploymentUtil;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class ReliabilityReportFunction extends EventsFunction {
+	private static final Logger logger = LoggerFactory.getLogger(ReliabilityReportFunction.class);
 	
 	private static final List<String> FIELDS = Arrays.asList(
 			new String[] { FROM, TO, TIME_RANGE, "Name", 
@@ -594,7 +597,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		Collection<String> keys = getActiveKeys(serviceId, regInput, timeSpan);
 		
-		System.out.println("Executing report " + regInput.mode + " keys: " + Arrays.toString(keys.toArray()));
+		logger.debug("Executing report " + regInput.mode + " keys: " + Arrays.toString(keys.toArray()));
 
 		List<ReportAsyncResult> AsyncResults = processAsync(serviceId, regInput, timeSpan, keys);
 

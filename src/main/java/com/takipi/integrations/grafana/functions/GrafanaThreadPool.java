@@ -12,16 +12,16 @@ import com.takipi.api.client.ApiClient;
 import com.takipi.common.util.Pair;
 
 public class GrafanaThreadPool {
-	
 	private static final int CACHE_SIZE = 100;
 	private static final int CACHE_RETENTION_MIN = 2;
 	private static final int THREADS_PER_API_KEY = 20;
 	
-	private static final LoadingCache<ApiClient, Pair<Executor, Executor>> executorCache = CacheBuilder.newBuilder().
-			maximumSize(CACHE_SIZE).
-			expireAfterWrite(CACHE_RETENTION_MIN, TimeUnit.MINUTES).
-			expireAfterAccess(CACHE_RETENTION_MIN, TimeUnit.MINUTES).
-			build(new CacheLoader<ApiClient, Pair<Executor, Executor>>() {
+	private static final LoadingCache<ApiClient, Pair<Executor, Executor>> executorCache = CacheBuilder
+			.newBuilder()
+			.maximumSize(CACHE_SIZE)
+			.expireAfterWrite(CACHE_RETENTION_MIN, TimeUnit.MINUTES)
+			.expireAfterAccess(CACHE_RETENTION_MIN, TimeUnit.MINUTES)
+			.build(new CacheLoader<ApiClient, Pair<Executor, Executor>>() {
 				
 				@Override
 				public Pair<Executor, Executor> load(ApiClient key) {

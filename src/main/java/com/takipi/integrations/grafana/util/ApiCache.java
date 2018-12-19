@@ -4,6 +4,9 @@ import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Objects;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -33,7 +36,8 @@ import com.takipi.integrations.grafana.input.EventFilterInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 
 public class ApiCache {
-
+	private static final Logger logger = LoggerFactory.getLogger(ApiCache.class);
+	
 	private static final int CACHE_SIZE = 1000;
 	private static final int CACHE_RETENTION = 2;
 
@@ -71,24 +75,24 @@ public class ApiCache {
 		}
 		
 		public Response<?> load() {
-				
-			Response<?> result;
 			long t1 = System.currentTimeMillis();
 				
 			try {
-				result = apiClient.get(request);
+				Response<?> result = apiClient.get(request);
+				
+				long t2 = System.currentTimeMillis();
+				
+				if (PRINT_DURATIONS) {
+					double sec = (double)(t2-t1) / 1000;
+					logger.debug(sec + " sec: " + toString());
+				}
+				
+				return result;
 			} catch (Throwable e) {
 				long t2 = System.currentTimeMillis();
+				
 				throw new IllegalStateException("Error executing after " + ((double)(t2-t1) / 1000) + " sec: " + toString(), e);
 			}
-			long t2 = System.currentTimeMillis();
-				
-			if (PRINT_DURATIONS) {
-				double sec = (t2-t1) / 1000;
-				System.out.println(sec + " sec: " + toString());
-			}
-			
-			return result;
 		}
 	}
 

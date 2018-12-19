@@ -20,10 +20,8 @@ import com.takipi.api.client.data.service.SummarizedService;
 import com.takipi.api.client.util.client.ClientUtil;
 
 public class GrafanaSettings {
-
-	public static final String SETTINGS = File.separator + "settings" + File.separator;
 	public static final String EXTENSION = ".json";
-	public static final String DEFAULT = "default" + EXTENSION;
+	public static final String DEFAULT = File.separator + "oo_as_influx_default_settings" + EXTENSION;
 	
 	private static final int CACHE_SIZE = 1000;
 	private static final int CACHE_RETENTION = 1;
@@ -89,7 +87,7 @@ public class GrafanaSettings {
 	
 	private static String getBundledDefaultSettings() {
 		try {
-			InputStream stream = GrafanaSettings.class.getResourceAsStream(SETTINGS + DEFAULT);
+			InputStream stream = GrafanaSettings.class.getResourceAsStream(DEFAULT);
 
 			if (stream == null) {
 				return null;

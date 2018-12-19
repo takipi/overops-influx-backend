@@ -9,7 +9,6 @@ import java.nio.charset.Charset;
 import org.apache.commons.io.IOUtils;
 
 public abstract class BaseSettingsStorage implements SettingsStorage {
-	
 	@Override
 	public String getDefaultServiceSettings() {
 		return getSettings(GrafanaSettings.DEFAULT);

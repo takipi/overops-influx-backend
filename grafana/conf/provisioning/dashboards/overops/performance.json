@@ -1258,7 +1258,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "The rate of calls and: $transactionFailureTypes. Can be > 100%. Click to see errors.",
-          "linkUrl": "$proxy_link_prefix/d/HYBPMdYik/errors?from=${__cell_3}&to=${__cell_4}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=${__cell_5}&var-type=$transactionFailureTypes",
+          "linkUrl": "d/HYBPMdYik/errors?from=${__cell_3}&to=${__cell_4}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=${__cell_5}&var-type=$transactionFailureTypes",
           "mappingType": 1,
           "pattern": "error_rate",
           "thresholds": [
