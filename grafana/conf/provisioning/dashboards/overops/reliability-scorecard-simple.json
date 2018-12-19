@@ -17,8 +17,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 22,
-  "iteration": 1545261778373,
+  "id": 36,
+  "iteration": 1545261929166,
   "links": [
     {
       "asDropdown": true,
@@ -34,133 +34,48 @@
   ],
   "panels": [
     {
-      "activePatternIndex": -1,
+      "aliasColors": {},
+      "bars": true,
+      "dashLength": 10,
+      "dashes": false,
       "datasource": "OO",
-      "debug_mode": false,
-      "defaultPattern": {
-        "bgColors": "red|orange|green",
-        "col_name": "",
-        "decimals": 2,
-        "delimiter": ".",
-        "enable_bgColor": false,
-        "enable_transform": true,
-        "filter": {
-          "value_above": "",
-          "value_below": ""
-        },
-        "format": "none",
-        "null_color": "darkred",
-        "null_value": "No data",
-        "row_name": "",
-        "thresholds": "11,21,31,41,51,61,71,81,91",
-        "transform_values": "_fa-square,red,1_ _fa-s quare,gray,9_|_fa-square,red,2_ _fa-square,gray,8_|_fa-square,red,3_ _fa-square,gray,7_|_fa-square,red,4_ _fa-square,gray,6_|_fa-square,red,5_ _fa-square,gray,5_|_fa-square,red,6_ _fa-square,gray,4_|_fa-square,red,7_ _fa-square,gray,3_|_fa-square,yellow,8_ _fa-square,gray,2_|_fa-square,green,9_ _fa-square,gray,1_|_fa-square,green,10_ _fa-square,gray,0_",
-        "valueName": "total"
-      },
-      "default_title_for_rows": "Metric",
-      "description": "Scores for the top $limit applications with most events",
+      "description": "Chart the $graphType of the recent $limit deployments.",
+      "fill": 1,
       "gridPos": {
-        "h": 10,
-        "w": 8,
+        "h": 8,
+        "w": 12,
         "x": 0,
         "y": 0
       },
-      "hide_first_column": false,
-      "hide_headers": true,
-      "id": 77,
-      "links": [],
-      "nullPointMode": "connected",
-      "patterns": [],
-      "plugin_title": "Boom Table",
-      "row_col_wrapper": "_",
-      "targets": [
-        {
-          "aggregator": "sum",
-          "downsampleAggregator": "avg",
-          "downsampleFillPolicy": "none",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"render\":\"Graph\", \"mode\":\"Deployments\", \"limit\":\"$limit\",\"transactionPointsWanted\":\"$transactionPointsWanted\"})",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "title": "Deployments",
-      "type": "yesoreyeram-boomtable-panel"
-    },
-    {
-      "activePatternIndex": -1,
-      "datasource": "OO",
-      "debug_mode": false,
-      "defaultPattern": {
-        "bgColors": "red|orange|green",
-        "col_name": "",
-        "decimals": 2,
-        "delimiter": ".",
-        "enable_bgColor": false,
-        "enable_transform": true,
-        "filter": {
-          "value_above": "",
-          "value_below": ""
-        },
-        "format": "none",
-        "null_color": "darkred",
-        "null_value": "No data",
-        "row_name": "",
-        "thresholds": "11,21,31,41,51,61,71,81,91",
-        "transform_values": "_fa-square,red,1_ _fa-s quare,gray,9_|_fa-square,red,2_ _fa-square,gray,8_|_fa-square,red,3_ _fa-square,gray,7_|_fa-square,red,4_ _fa-square,gray,6_|_fa-square,red,5_ _fa-square,gray,5_|_fa-square,red,6_ _fa-square,gray,4_|_fa-square,red,7_ _fa-square,gray,3_|_fa-square,yellow,8_ _fa-square,gray,2_|_fa-square,green,9_ _fa-square,gray,1_|_fa-square,green,10_ _fa-square,gray,0_",
-        "valueName": "total"
-      },
-      "default_title_for_rows": "Metric",
-      "description": "Scores for the top $limit applications with most events",
-      "gridPos": {
-        "h": 10,
-        "w": 8,
-        "x": 8,
-        "y": 0
-      },
-      "hide_first_column": false,
-      "hide_headers": true,
       "id": 73,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": false,
+      "linewidth": 1,
       "links": [],
-      "nullPointMode": "connected",
-      "patterns": [],
-      "plugin_title": "Boom Table",
-      "row_col_wrapper": "_",
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "/.*/",
+          "color": "#9ac48a"
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
       "targets": [
         {
-          "aggregator": "sum",
-          "downsampleAggregator": "avg",
-          "downsampleFillPolicy": "none",
           "groupBy": [
             {
               "params": [
@@ -177,7 +92,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"render\":\"Graph\", \"mode\":\"Applications\", \"limit\":\"$limit\",\"transactionPointsWanted\":\"$transactionPointsWanted\"})",
+          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Graph\", \"mode\":\"Deployments\", \"limit\":\"$limit\", \"graphType\":\"$graphType\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -198,53 +113,91 @@
           "tags": []
         }
       ],
-      "title": "Applications",
-      "type": "yesoreyeram-boomtable-panel"
+      "thresholds": [],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Deployments: $graphType",
+      "tooltip": {
+        "shared": false,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "series",
+        "name": null,
+        "show": true,
+        "values": [
+          "total"
+        ]
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
-      "activePatternIndex": -1,
+      "aliasColors": {},
+      "bars": true,
+      "dashLength": 10,
+      "dashes": false,
       "datasource": "OO",
-      "debug_mode": false,
-      "defaultPattern": {
-        "bgColors": "red|orange|green",
-        "col_name": "",
-        "decimals": 2,
-        "delimiter": ".",
-        "enable_bgColor": false,
-        "enable_transform": true,
-        "filter": {
-          "value_above": "",
-          "value_below": ""
-        },
-        "format": "none",
-        "null_color": "darkred",
-        "null_value": "No data",
-        "row_name": "",
-        "thresholds": "11,21,31,41,51,61,71,81,91",
-        "transform_values": "_fa-square,red,1_ _fa-s quare,gray,9_|_fa-square,red,2_ _fa-square,gray,8_|_fa-square,red,3_ _fa-square,gray,7_|_fa-square,red,4_ _fa-square,gray,6_|_fa-square,red,5_ _fa-square,gray,5_|_fa-square,red,6_ _fa-square,gray,4_|_fa-square,red,7_ _fa-square,gray,3_|_fa-square,yellow,8_ _fa-square,gray,2_|_fa-square,green,9_ _fa-square,gray,1_|_fa-square,green,10_ _fa-square,gray,0_",
-        "valueName": "total"
-      },
-      "default_title_for_rows": "Metric",
-      "description": "Scores for the top $limit applications with most events",
+      "description": "Chart the $graphType of the top $limit applications with the most errors.",
+      "fill": 1,
       "gridPos": {
-        "h": 10,
-        "w": 8,
-        "x": 16,
+        "h": 8,
+        "w": 12,
+        "x": 12,
         "y": 0
       },
-      "hide_first_column": false,
-      "hide_headers": true,
-      "id": 78,
+      "id": 74,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": false,
+      "linewidth": 1,
       "links": [],
-      "nullPointMode": "connected",
-      "patterns": [],
-      "plugin_title": "Boom Table",
-      "row_col_wrapper": "_",
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "/.*/",
+          "color": "#9ac48a"
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
       "targets": [
         {
-          "aggregator": "sum",
-          "downsampleAggregator": "avg",
-          "downsampleFillPolicy": "none",
           "groupBy": [
             {
               "params": [
@@ -261,7 +214,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"render\":\"Graph\", \"mode\":\"Tiers\", \"limit\":\"$limit\",\"transactionPointsWanted\":\"$transactionPointsWanted\"})",
+          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Graph\", \"mode\":\"Applications\", \"limit\":\"$limit\", \"graphType\":\"$graphType\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -282,8 +235,47 @@
           "tags": []
         }
       ],
-      "title": "Tiers",
-      "type": "yesoreyeram-boomtable-panel"
+      "thresholds": [],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Applications: $graphType",
+      "tooltip": {
+        "shared": false,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "series",
+        "name": null,
+        "show": true,
+        "values": [
+          "total"
+        ]
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "columns": [],
@@ -291,10 +283,10 @@
       "description": "A report detailing providing a weighted score to the list of the last  $limit deployments based on the weights set in the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
-        "h": 11,
-        "w": 8,
+        "h": 12,
+        "w": 12,
         "x": 0,
-        "y": 10
+        "y": 8
       },
       "hideTimeOverride": true,
       "id": 75,
@@ -303,8 +295,8 @@
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": null,
-        "desc": false
+        "col": 1,
+        "desc": true
       },
       "styles": [
         {
@@ -520,7 +512,7 @@
           ]
         },
         {
-          "alias": "New",
+          "alias": "New Issues",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -540,7 +532,7 @@
           "unit": "short"
         },
         {
-          "alias": "Regressed",
+          "alias": "Regressions",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -576,7 +568,7 @@
           "unit": "short"
         },
         {
-          "alias": "Slow",
+          "alias": "Slowdowns",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -636,7 +628,7 @@
         }
       ],
       "timeFrom": null,
-      "title": "",
+      "title": "Deployments",
       "transform": "table",
       "type": "table"
     },
@@ -646,10 +638,10 @@
       "description": "A report detailing providing a weighted score to the list of the last  $limit applications based on the weights set in the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 8,
-        "y": 10
+        "h": 12,
+        "w": 12,
+        "x": 12,
+        "y": 8
       },
       "hideTimeOverride": true,
       "id": 76,
@@ -658,8 +650,8 @@
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 3,
-        "desc": false
+        "col": 1,
+        "desc": true
       },
       "styles": [
         {
@@ -875,7 +867,7 @@
           ]
         },
         {
-          "alias": "New",
+          "alias": "New Issues",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -895,7 +887,7 @@
           "unit": "short"
         },
         {
-          "alias": "Regressed",
+          "alias": "Regressions",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -931,7 +923,7 @@
           "unit": "short"
         },
         {
-          "alias": "Slow",
+          "alias": "Slowdowns",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -991,362 +983,7 @@
         }
       ],
       "timeFrom": null,
-      "title": "",
-      "transform": "table",
-      "type": "table"
-    },
-    {
-      "columns": [],
-      "datasource": "OO",
-      "description": "A report detailing providing a weighted score to the list of the last  $limit applications based on the weights set in the Settings dashboard.",
-      "fontSize": "100%",
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 16,
-        "y": 10
-      },
-      "hideTimeOverride": true,
-      "id": 79,
-      "links": [],
-      "pageSize": 10,
-      "scroll": true,
-      "showHeader": true,
-      "sort": {
-        "col": 3,
-        "desc": false
-      },
-      "styles": [
-        {
-          "alias": "Name",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": true,
-          "linkTargetBlank": true,
-          "linkTooltip": "Open ${__cell}",
-          "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-type=-${__cell_3}",
-          "mappingType": 1,
-          "pattern": "Name",
-          "rangeMaps": [
-            {
-              "from": "0",
-              "text": "⚠️",
-              "to": "99999999"
-            }
-          ],
-          "thresholds": [],
-          "type": "string",
-          "unit": "short",
-          "valueMaps": []
-        },
-        {
-          "alias": "Avg Score ",
-          "colorMode": "cell",
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 1,
-          "link": false,
-          "linkTargetBlank": false,
-          "linkTooltip": "",
-          "linkUrl": "",
-          "mappingType": 2,
-          "pattern": "Score",
-          "preserveFormat": false,
-          "rangeMaps": [],
-          "thresholds": [
-            "70",
-            "85"
-          ],
-          "type": "number",
-          "unit": "short",
-          "valueMaps": [
-            {
-              "text": "🍵🍵🍵",
-              "value": "100"
-            }
-          ]
-        },
-        {
-          "alias": "Regressions",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 0,
-          "link": true,
-          "linkTargetBlank": true,
-          "linkTooltip": "${__cell_5}",
-          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}&var-timeRange=${__cell_2}",
-          "mappingType": 1,
-          "pattern": "RegressionsState",
-          "preserveFormat": false,
-          "rangeMaps": [],
-          "sanitize": false,
-          "thresholds": [],
-          "type": "hidden",
-          "unit": "short",
-          "valueMaps": [
-            {
-              "text": "✔",
-              "value": "0"
-            },
-            {
-              "text": "⚠",
-              "value": "1"
-            },
-            {
-              "text": "✖",
-              "value": "2"
-            }
-          ]
-        },
-        {
-          "alias": "",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "mappingType": 1,
-          "pattern": "from",
-          "thresholds": [],
-          "type": "hidden",
-          "unit": "short"
-        },
-        {
-          "alias": "",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "mappingType": 1,
-          "pattern": "to",
-          "thresholds": [],
-          "type": "hidden",
-          "unit": "short"
-        },
-        {
-          "alias": "",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "mappingType": 1,
-          "pattern": "timeRange",
-          "thresholds": [],
-          "type": "hidden",
-          "unit": "short"
-        },
-        {
-          "alias": "New Issues",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 0,
-          "link": true,
-          "linkTargetBlank": true,
-          "linkTooltip": "${__cell_4}",
-          "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}",
-          "mappingType": 1,
-          "pattern": "NewIssuesState",
-          "thresholds": [],
-          "type": "hidden",
-          "unit": "short",
-          "valueMaps": [
-            {
-              "text": "✔",
-              "value": "0"
-            },
-            {
-              "text": "⚠",
-              "value": "1"
-            },
-            {
-              "text": "✖",
-              "value": "2"
-            }
-          ]
-        },
-        {
-          "alias": "Slowdowns",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 0,
-          "link": true,
-          "linkTargetBlank": true,
-          "linkTooltip": "${__cell_6}",
-          "linkUrl": "d/Z40SpeJmz/performance?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}",
-          "mappingType": 1,
-          "pattern": "SlowdownsState",
-          "thresholds": [],
-          "type": "hidden",
-          "unit": "short",
-          "valueMaps": [
-            {
-              "text": "✔",
-              "value": "0"
-            },
-            {
-              "text": "⚠",
-              "value": "1"
-            },
-            {
-              "text": "✖",
-              "value": "2"
-            }
-          ]
-        },
-        {
-          "alias": "New",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": true,
-          "linkTargetBlank": true,
-          "linkTooltip": "${__cell_4}",
-          "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-type=-${__cell_3}",
-          "mappingType": 1,
-          "pattern": "NewIssuesDesc",
-          "thresholds": [],
-          "type": "string",
-          "unit": "short"
-        },
-        {
-          "alias": "Regressed",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": true,
-          "linkTargetBlank": true,
-          "linkTooltip": "${__cell_5}",
-          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=$environments&var-servers=$servers&var-type=-${__cell_3}&var-timeRange=${__cell_2}",
-          "mappingType": 1,
-          "pattern": "RegressionsDesc",
-          "thresholds": [],
-          "type": "string",
-          "unit": "short"
-        },
-        {
-          "alias": "",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "mappingType": 1,
-          "pattern": "reg",
-          "thresholds": [],
-          "type": "hidden",
-          "unit": "short"
-        },
-        {
-          "alias": "Slowdowns",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": true,
-          "linkTargetBlank": true,
-          "linkTooltip": "${__cell_6}",
-          "linkUrl": "d/Z40SpeJmz/performance?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}",
-          "mappingType": 1,
-          "pattern": "SlowdownsDesc",
-          "thresholds": [],
-          "type": "hidden",
-          "unit": "short"
-        }
-      ],
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Grid\", \"mode\":\"Tiers\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\"})",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "table",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "timeFrom": null,
-      "title": "",
+      "title": "Applications",
       "transform": "table",
       "type": "table"
     }
@@ -1362,11 +999,9 @@
       {
         "allValue": "all",
         "current": {
-          "tags": [],
+          "selected": true,
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1389,6 +1024,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1413,6 +1049,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1437,6 +1074,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1484,6 +1122,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1508,6 +1147,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1532,6 +1172,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -1604,6 +1245,59 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "tags": [],
+          "text": "Score",
+          "value": "Score"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Chart",
+        "multi": false,
+        "name": "graphType",
+        "options": [
+          {
+            "selected": false,
+            "text": "New Issues",
+            "value": "New Issues"
+          },
+          {
+            "selected": false,
+            "text": "Severe New Issues",
+            "value": "Severe New Issues"
+          },
+          {
+            "selected": false,
+            "text": "Regressions",
+            "value": "Regressions"
+          },
+          {
+            "selected": false,
+            "text": "Severe Regressions",
+            "value": "Severe Regressions"
+          },
+          {
+            "selected": false,
+            "text": "Slowdowns",
+            "value": "Slowdowns"
+          },
+          {
+            "selected": false,
+            "text": "Severe Slowdowns",
+            "value": "Severe Slowdowns"
+          },
+          {
+            "selected": true,
+            "text": "Score",
+            "value": "Score"
+          }
+        ],
+        "query": "New Issues,Severe New Issues,Regressions,Severe Regressions,Slowdowns,Severe Slowdowns,Score",
+        "skipUrlSync": false,
+        "type": "custom"
       }
     ]
   },
@@ -1638,7 +1332,7 @@
     ]
   },
   "timezone": "",
-  "title": "Reliability Scorecard",
-  "uid": "lfqKXMfmz",
-  "version": 81
+  "title": "Reliability Scorecard Simple",
+  "uid": "82eIMSsmz",
+  "version": 2
 }

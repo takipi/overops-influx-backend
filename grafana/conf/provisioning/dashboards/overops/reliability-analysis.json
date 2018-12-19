@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 20,
-  "iteration": 1545218464732,
+  "iteration": 1545261815595,
   "links": [
     {
       "asDropdown": true,
@@ -74,13 +74,13 @@
       "interval": null,
       "links": [
         {
+          "dashUri": "db/new-errors",
           "dashboard": "New Errors",
           "includeVars": true,
           "keepTime": true,
           "targetBlank": true,
           "title": "New Errors",
-          "type": "absolute",
-          "url": "d/3NZ83NLik/new-errors"
+          "type": "dashboard"
         }
       ],
       "mappingType": 1,
@@ -197,13 +197,14 @@
       "interval": null,
       "links": [
         {
+          "dashUri": "db/performance",
           "dashboard": "Performance",
           "includeVars": true,
           "keepTime": true,
           "targetBlank": true,
           "title": "Performance",
           "type": "absolute",
-          "url": "d/Z40SpeJmz/performance"
+          "url": "$proxy_link_prefix/d/Z40SpeJmz/performance"
         }
       ],
       "mappingType": 1,
@@ -324,7 +325,7 @@
         {
           "title": "Performance",
           "type": "absolute",
-          "url": "d/Z40SpeJmz/performance"
+          "url": "$proxy_link_prefix/d/Z40SpeJmz/performance"
         }
       ],
       "mappingType": 1,
@@ -446,7 +447,7 @@
           "targetBlank": true,
           "title": "New Errors",
           "type": "absolute",
-          "url": "d/3NZ83NLik/new-errors"
+          "url": "$proxy_link_prefix/d/3NZ83NLik/new-errors"
         }
       ],
       "mappingType": 1,
@@ -675,13 +676,13 @@
       "interval": null,
       "links": [
         {
-          "dashboard": "Unique Errors",
+          "dashboard": "$proxy_link_prefix/d/HYBPMdYik/errors",
           "includeVars": true,
           "keepTime": true,
           "targetBlank": true,
           "title": "Unique Errors",
           "type": "absolute",
-          "url": "d/HYBPMdYik/errors"
+          "url": "$proxy_link_prefix/d/HYBPMdYik/errors"
         }
       ],
       "mappingType": 1,
@@ -799,7 +800,17 @@
       },
       "lines": true,
       "linewidth": 1,
-      "links": [],
+      "links": [
+        {
+          "dashboard": "$proxy_link_prefix/d/Z40SpeJmz/performance",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": true,
+          "title": "Performance",
+          "type": "absolute",
+          "url": "$proxy_link_prefix/d/Z40SpeJmz/performance"
+        }
+      ],
       "nullPointMode": "null as zero",
       "percentage": false,
       "pointradius": 5,
@@ -1179,7 +1190,7 @@
           "targetBlank": true,
           "title": "Performance",
           "type": "absolute",
-          "url": "d/Z40SpeJmz/performance"
+          "url": "$proxy_link_prefix/d/Z40SpeJmz/performance"
         }
       ],
       "pageSize": 1000,
@@ -1331,9 +1342,9 @@
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 0,
           "link": true,
-          "linkTargetBlank": true,
+          "linkTargetBlank": false,
           "linkTooltip": "Jump to Slow Transaction Analysis",
-          "linkUrl": "d/Z40SpeJmz/performance?from=${__cell_1}&to=${__cell_2}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=${__cell_5}",
+          "linkUrl": "$proxy_link_prefix/d/Z40SpeJmz/performance?from=${__cell_1}&to=${__cell_2}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=${__cell_5}",
           "mappingType": 1,
           "pattern": "transaction",
           "thresholds": [],
@@ -1692,9 +1703,9 @@
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
           "link": true,
-          "linkTargetBlank": true,
+          "linkTargetBlank": false,
           "linkTooltip": "${__cell_1} in ${__cell_2}, introduced by ${__cell_3}: Click for root cause",
-          "linkUrl": "d/WZ739NYmk/increasing-errors?var-timeRange=${__cell_6}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=$transactions&var-type=$type&var-search=${__cell_2}",
+          "linkUrl": "$proxy_link_prefix/d/WZ739NYmk/increasing-errors?var-timeRange=${__cell_6}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=$transactions&var-type=$type&var-search=${__cell_2}",
           "mappingType": 1,
           "pattern": "TypeMessage",
           "thresholds": [],
@@ -1777,9 +1788,9 @@
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
           "link": true,
-          "linkTargetBlank": true,
+          "linkTargetBlank": false,
           "linkTooltip": "${__cell_5}",
-          "linkUrl": "d/WZ739NYmk/increasing-errors?var-timeRange=${__cell_6}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=$transactions&var-type=$type&var-search=${__cell_2}",
+          "linkUrl": "$proxy_link_prefix/d/WZ739NYmk/increasing-errors?var-timeRange=${__cell_6}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=$transactions&var-type=$type&var-search=${__cell_2}",
           "mappingType": 1,
           "pattern": "RegDelta",
           "thresholds": [],
@@ -1839,7 +1850,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressions({\"fields\":\"link,type,error_location,introduced_by,  severity, regression,timeRange,typeMessage,stats.hits,rate,regDelta,first_seen\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":60, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"render\":\"Grid\",\"regressionTypes\":\"Regressions,SevereRegressions\"})\n",
+          "query": "regressions({\"fields\":\"link,type,error_location,introduced_by,  severity, regression,timeRange,typeMessage,stats.hits,rate,regDelta,first_seen\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":70, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"render\":\"Grid\",\"regressionTypes\":\"Regressions,SevereRegressions\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1867,7 +1878,7 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "The number of new errors (and any P1 ones, if detected). P1 marks events that exceeded min thresholds, or whose type is defined the critical exception types list. Both values are editable via the Settings dashboard.",
+      "description": "The number of new errors detected in the current timeframe. P1 marks events that exceeded min thresholds, or whose type is defined in the critical exception types list. Both values are editable via the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
         "h": 10,
@@ -1884,15 +1895,15 @@
           "targetBlank": true,
           "title": "New Errors",
           "type": "absolute",
-          "url": "d/3NZ83NLik/new-errors"
+          "url": "$proxy_link_prefix/d/3NZ83NLik/new-errors"
         }
       ],
       "pageSize": 20,
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 9,
-        "desc": false
+        "col": 7,
+        "desc": true
       },
       "styles": [
         {
@@ -2239,9 +2250,7 @@
         "allValue": "all",
         "current": {
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2364,9 +2373,7 @@
         "allValue": "*",
         "current": {
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2518,7 +2525,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -2543,7 +2549,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -2591,5 +2596,5 @@
   "timezone": "",
   "title": "Reliability Analysis",
   "uid": "4DHQ63-ik",
-  "version": 139
+  "version": 147
 }

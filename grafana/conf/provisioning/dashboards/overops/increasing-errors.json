@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 28,
-  "iteration": 1545215266902,
+  "iteration": 1545261814701,
   "links": [
     {
       "asDropdown": true,
@@ -143,7 +143,7 @@
       "thresholds": [],
       "timeFrom": "$baseline",
       "timeShift": null,
-      "title": "Top Increases (%)",
+      "title": "Top Increases: Ratio (Errors / Calls)",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -943,7 +943,7 @@
         "name": "search",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "<term>",
             "value": "<term>"
           }
@@ -1124,5 +1124,5 @@
   "timezone": "",
   "title": "Increasing Errors",
   "uid": "WZ739NYmk",
-  "version": 49
+  "version": 53
 }
