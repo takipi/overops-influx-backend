@@ -74,13 +74,13 @@
       "interval": null,
       "links": [
         {
-          "dashUri": "db/new-errors",
           "dashboard": "New Errors",
           "includeVars": true,
           "keepTime": true,
           "targetBlank": true,
           "title": "New Errors",
-          "type": "dashboard"
+          "type": "absolute",
+          "url": "d/3NZ83NLik/new-errors"
         }
       ],
       "mappingType": 1,
@@ -197,7 +197,6 @@
       "interval": null,
       "links": [
         {
-          "dashUri": "db/performance",
           "dashboard": "Performance",
           "includeVars": true,
           "keepTime": true,
@@ -676,7 +675,7 @@
       "interval": null,
       "links": [
         {
-          "dashboard": "d/HYBPMdYik/errors",
+          "dashboard": "Unique Errors",
           "includeVars": true,
           "keepTime": true,
           "targetBlank": true,

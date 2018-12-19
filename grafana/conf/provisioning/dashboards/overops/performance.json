@@ -533,14 +533,14 @@
       "interval": null,
       "links": [
         {
-          "dashUri": "db/errors",
           "dashboard": "Errors",
           "includeVars": true,
           "keepTime": true,
           "params": "var-type=$failureTypes",
           "targetBlank": true,
           "title": "Errors",
-          "type": "dashboard"
+          "type": "absolute",
+          "url": "d/HYBPMdYik/errors"
         }
       ],
       "mappingType": 1,
@@ -658,14 +658,14 @@
       "interval": null,
       "links": [
         {
-          "dashUri": "db/errors",
           "dashboard": "Errors",
           "includeVars": true,
           "keepTime": true,
           "params": "var-type=$failureTypes",
           "targetBlank": true,
           "title": "Errors",
-          "type": "dashboard"
+          "type": "absolute",
+          "url": "d/HYBPMdYik/errors"
         }
       ],
       "mappingType": 1,
