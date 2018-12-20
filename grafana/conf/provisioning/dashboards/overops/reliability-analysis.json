@@ -194,7 +194,7 @@
           "targetBlank": true,
           "title": "Performance",
           "type": "absolute",
-          "url": "/d/Z40SpeJmz/performance"
+          "url": "d/Z40SpeJmz/performance"
         }
       ],
       "mappingType": 1,
@@ -318,7 +318,7 @@
           "targetBlank": true,
           "title": "Performance",
           "type": "absolute",
-          "url": "/d/Z40SpeJmz/performance"
+          "url": "d/Z40SpeJmz/performance"
         }
       ],
       "mappingType": 1,
@@ -440,7 +440,7 @@
           "targetBlank": true,
           "title": "New Errors",
           "type": "absolute",
-          "url": "/d/3NZ83NLik/new-errors"
+          "url": "d/3NZ83NLik/new-errors"
         }
       ],
       "mappingType": 1,
@@ -801,7 +801,7 @@
           "targetBlank": true,
           "title": "Performance",
           "type": "absolute",
-          "url": "/d/Z40SpeJmz/performance"
+          "url": "d/Z40SpeJmz/performance"
         }
       ],
       "nullPointMode": "null as zero",
@@ -1183,7 +1183,7 @@
           "targetBlank": true,
           "title": "Performance",
           "type": "absolute",
-          "url": "/d/Z40SpeJmz/performance"
+          "url": "d/Z40SpeJmz/performance"
         }
       ],
       "pageSize": 1000,
@@ -1888,7 +1888,7 @@
           "targetBlank": true,
           "title": "New Errors",
           "type": "absolute",
-          "url": "/d/3NZ83NLik/new-errors"
+          "url": "d/3NZ83NLik/new-errors"
         }
       ],
       "pageSize": 20,
@@ -2066,7 +2066,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_1} in ${__cell_2}, introduced by ${__cell_3}: Click for root cause",
-          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot="${__cell_0}",
+          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Error location",
           "thresholds": [],
