@@ -6,15 +6,24 @@ import java.util.Base64;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 
+import com.takipi.integrations.grafana.settings.GrafanaSettings;
+
 public class ServletUtil {
 	public static String getConfigParam(HttpServlet servlet, String key) {
 		return servlet.getServletConfig().getInitParameter(key);
 	}
 	
 	public static Auth getAuthentication(HttpServletRequest request) {
-		
+		return getAuthentication(request, null);
+	}
+	
+	// When oo-as-influx is bundled inside OverOps API Server, we want it to pass its address.
+	// When oo-as-influx is standalone the authenticated username is the OverOps API Server address.
+	//
+	public static Auth getAuthentication(HttpServletRequest request, String hostname) {
 		// Proxy by OverOps Server
 		String hiddenToken = request.getHeader("X-API-KEY");
+		
 		if ((hiddenToken != null) && (!hiddenToken.isEmpty())) {
 			Auth auth = new Auth();
 			
@@ -32,8 +41,19 @@ public class ServletUtil {
 			String credentials = new String(credDecoded, StandardCharsets.UTF_8);
 			int sep = credentials.lastIndexOf(':');
 			
+			String user = credentials.substring(0, sep);
+			
 			Auth auth = new Auth();
-			auth.hostname = credentials.substring(0, sep);
+			
+			if (hostname != null)
+			{
+				auth.hostname = hostname;
+			}
+			else
+			{
+				auth.hostname = user;
+			}
+			
 			auth.token = credentials.substring(sep+1);
 			
 			return auth;

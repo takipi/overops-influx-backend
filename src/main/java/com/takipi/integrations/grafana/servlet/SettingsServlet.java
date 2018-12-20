@@ -17,48 +17,55 @@ import com.takipi.integrations.grafana.settings.FolderSettingsStorage;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.util.SettingsUtil;
 
-@WebServlet(name="SettingsServlet", urlPatterns="/settings", loadOnStartup = 0)public class SettingsServlet extends HttpServlet {
-
+@WebServlet(name = "SettingsServlet", urlPatterns = "/settings", loadOnStartup = 0)
+public class SettingsServlet extends HttpServlet
+{
 	private static final long serialVersionUID = -8423366031016047591L;
-
+	
 	private boolean disabled = false;
 	
-    @Override
-    public void init() throws ServletException
-    {
-        GrafanaSettings.init(new FolderSettingsStorage());
-        
-        String disabledStr = ServletUtil.getConfigParam(this, "disabled");
-
-		if (disabledStr != null) {
+	@Override
+	public void init() throws ServletException
+	{
+		GrafanaSettings.init(new FolderSettingsStorage());
+		
+		String disabledStr = ServletUtil.getConfigParam(this, "disabled");
+		
+		if (disabledStr != null)
+		{
 			disabled = Boolean.parseBoolean(disabledStr);
 		}
-    }
-    
-  @Override
+	}
+	
+	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-    	if (disabled) {
-    		response.sendError(HttpServletResponse.SC_NOT_FOUND);
-    		return;
-    	}
-    	
+			throws ServletException, IOException
+	{
+		if (disabled)
+		{
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+		
 		String data = IOUtils.toString(request.getInputStream(), Charset.forName("UTF-8"));
 		
 		String resp = SettingsUtil.process(data);
 		
 		PrintWriter writer = response.getWriter();
-
+		
 		response.setContentType("text/plain");
 		response.setCharacterEncoding("UTF-8");
 		
-		if (resp != null) {
+		if (resp != null)
+		{
 			System.err.println(resp);
 			writer.write("Error applying settings: " + resp);
-		} else {
+		}
+		else
+		{
 			writer.write("Settings saved");
 		}
-
+		
 		writer.flush();
 	}
 }

@@ -19,7 +19,6 @@ import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionAvgGraphFunction extends TransactionsGraphFunction
 {
-
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -42,7 +41,6 @@ public class TransactionAvgGraphFunction extends TransactionsGraphFunction
 	{
 		super(apiClient);
 	}
-	
 	
 	@Override
 	protected Collection<TransactionGraph> getTransactionGraphs(EventFilterInput input, String serviceId,
@@ -75,5 +73,4 @@ public class TransactionAvgGraphFunction extends TransactionsGraphFunction
 		
 		return result;
 	}
-	
 }
