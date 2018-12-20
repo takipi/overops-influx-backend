@@ -1,0 +1,13 @@
+# This assumes OverOps as Influx is bundled with OverOps Server and Grafana is separate
+apiVersion: 1
+
+datasources:
+- name: OO
+  type: influxdb
+  access: proxy
+  database: telegraf
+  is_default: true
+  url: ${TAKIPI_API_URL}/api/v1/oo-as-influx
+  basicAuth: true
+  basicAuthUser: X-API-KEY
+  basicAuthPassword: ${TAKIPI_API_TOKEN}
