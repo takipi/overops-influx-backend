@@ -588,7 +588,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_1} in ${__cell_2}, introduced by ${__cell_3}: Click for root cause",
-          "linkUrl": "//$apiHost:$apiPort/tale.html?snapshot=${__cell_0}",
+          "linkUrl": "//$apiHost:$apiPort/tale.html?snapshot=${__cell_0}&source=45",
           "mappingType": 1,
           "pattern": "TypeMessage",
           "thresholds": [],
