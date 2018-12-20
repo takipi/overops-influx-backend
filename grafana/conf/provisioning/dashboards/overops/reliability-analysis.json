@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 20,
-  "iteration": 1545261815595,
+  "iteration": 1545264082334,
   "links": [
     {
       "asDropdown": true,
@@ -72,17 +72,7 @@
       },
       "id": 62,
       "interval": null,
-      "links": [
-        {
-          "dashUri": "db/new-errors",
-          "dashboard": "New Errors",
-          "includeVars": true,
-          "keepTime": true,
-          "targetBlank": true,
-          "title": "New Errors",
-          "type": "dashboard"
-        }
-      ],
+      "links": [],
       "mappingType": 1,
       "mappingTypes": [
         {
@@ -204,7 +194,7 @@
           "targetBlank": true,
           "title": "Performance",
           "type": "absolute",
-          "url": "$proxy_link_prefix/d/Z40SpeJmz/performance"
+          "url": "/d/Z40SpeJmz/performance"
         }
       ],
       "mappingType": 1,
@@ -323,9 +313,12 @@
       "interval": null,
       "links": [
         {
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": true,
           "title": "Performance",
           "type": "absolute",
-          "url": "$proxy_link_prefix/d/Z40SpeJmz/performance"
+          "url": "/d/Z40SpeJmz/performance"
         }
       ],
       "mappingType": 1,
@@ -447,7 +440,7 @@
           "targetBlank": true,
           "title": "New Errors",
           "type": "absolute",
-          "url": "$proxy_link_prefix/d/3NZ83NLik/new-errors"
+          "url": "/d/3NZ83NLik/new-errors"
         }
       ],
       "mappingType": 1,
@@ -676,13 +669,13 @@
       "interval": null,
       "links": [
         {
-          "dashboard": "$proxy_link_prefix/d/HYBPMdYik/errors",
+          "dashboard": "/d/HYBPMdYik/errors",
           "includeVars": true,
           "keepTime": true,
           "targetBlank": true,
           "title": "Unique Errors",
           "type": "absolute",
-          "url": "$proxy_link_prefix/d/HYBPMdYik/errors"
+          "url": "d/HYBPMdYik/errors"
         }
       ],
       "mappingType": 1,
@@ -802,13 +795,13 @@
       "linewidth": 1,
       "links": [
         {
-          "dashboard": "$proxy_link_prefix/d/Z40SpeJmz/performance",
+          "dashboard": "/d/Z40SpeJmz/performance",
           "includeVars": true,
           "keepTime": true,
           "targetBlank": true,
           "title": "Performance",
           "type": "absolute",
-          "url": "$proxy_link_prefix/d/Z40SpeJmz/performance"
+          "url": "/d/Z40SpeJmz/performance"
         }
       ],
       "nullPointMode": "null as zero",
@@ -1190,7 +1183,7 @@
           "targetBlank": true,
           "title": "Performance",
           "type": "absolute",
-          "url": "$proxy_link_prefix/d/Z40SpeJmz/performance"
+          "url": "/d/Z40SpeJmz/performance"
         }
       ],
       "pageSize": 1000,
@@ -1344,7 +1337,7 @@
           "link": true,
           "linkTargetBlank": false,
           "linkTooltip": "Jump to Slow Transaction Analysis",
-          "linkUrl": "$proxy_link_prefix/d/Z40SpeJmz/performance?from=${__cell_1}&to=${__cell_2}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=${__cell_5}",
+          "linkUrl": "/d/Z40SpeJmz/performance?from=${__cell_1}&to=${__cell_2}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=${__cell_5}",
           "mappingType": 1,
           "pattern": "transaction",
           "thresholds": [],
@@ -1705,7 +1698,7 @@
           "link": true,
           "linkTargetBlank": false,
           "linkTooltip": "${__cell_1} in ${__cell_2}, introduced by ${__cell_3}: Click for root cause",
-          "linkUrl": "$proxy_link_prefix/d/WZ739NYmk/increasing-errors?var-timeRange=${__cell_6}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=$transactions&var-type=$type&var-search=${__cell_2}",
+          "linkUrl": "/d/WZ739NYmk/increasing-errors?var-timeRange=${__cell_6}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=$transactions&var-type=$type&var-search=${__cell_2}",
           "mappingType": 1,
           "pattern": "TypeMessage",
           "thresholds": [],
@@ -1790,7 +1783,7 @@
           "link": true,
           "linkTargetBlank": false,
           "linkTooltip": "${__cell_5}",
-          "linkUrl": "$proxy_link_prefix/d/WZ739NYmk/increasing-errors?var-timeRange=${__cell_6}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=$transactions&var-type=$type&var-search=${__cell_2}",
+          "linkUrl": "/d/WZ739NYmk/increasing-errors?var-timeRange=${__cell_6}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=$transactions&var-type=$type&var-search=${__cell_2}",
           "mappingType": 1,
           "pattern": "RegDelta",
           "thresholds": [],
@@ -1895,7 +1888,7 @@
           "targetBlank": true,
           "title": "New Errors",
           "type": "absolute",
-          "url": "$proxy_link_prefix/d/3NZ83NLik/new-errors"
+          "url": "/d/3NZ83NLik/new-errors"
         }
       ],
       "pageSize": 20,
@@ -2274,9 +2267,7 @@
         "allValue": "all",
         "current": {
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2347,9 +2338,7 @@
         "allValue": "all",
         "current": {
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2596,5 +2585,5 @@
   "timezone": "",
   "title": "Reliability Analysis",
   "uid": "4DHQ63-ik",
-  "version": 147
+  "version": 152
 }

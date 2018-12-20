@@ -18,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 36,
-  "iteration": 1545261929166,
+  "iteration": 1545263885473,
   "links": [
     {
       "asDropdown": true,
@@ -991,9 +991,7 @@
   "refresh": false,
   "schemaVersion": 16,
   "style": "dark",
-  "tags": [
-    "OverOps"
-  ],
+  "tags": [],
   "templating": {
     "list": [
       {
@@ -1334,5 +1332,5 @@
   "timezone": "",
   "title": "Reliability Scorecard Simple",
   "uid": "82eIMSsmz",
-  "version": 2
+  "version": 4
 }
