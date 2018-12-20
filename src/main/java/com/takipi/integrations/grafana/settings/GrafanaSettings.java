@@ -21,7 +21,7 @@ import com.takipi.api.client.util.client.ClientUtil;
 
 public class GrafanaSettings {
 	public static final String EXTENSION = ".json";
-	public static final String DEFAULT = File.separator + "oo_as_influx_default_settings" + EXTENSION;
+	public static final String DEFAULT = File.separator + "settings" + File.separator + "oo_as_influx_default_settings" + EXTENSION;
 	
 	private static final int CACHE_SIZE = 1000;
 	private static final int CACHE_RETENTION = 1;

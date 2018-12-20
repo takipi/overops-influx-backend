@@ -1,0 +1,108 @@
+{
+	"general": {
+		"group_by_entryPoint": true,
+		"event_types": "Logged Error,Uncaught Exception,Logged Warning,Swallowed Exception,HTTP Error,Caught Exception",
+		"points_wanted": 24,
+		"transaction_points_wanted": 100,
+		"transaction_failures": "Logged Error,Uncaught Exception,HTTP Error",
+		"proxy_link_prefix": ""
+	},
+	
+	"transactions": {
+		"groups": [
+			{
+				"name": " Servlets",
+				"values": [
+					"/^.*Servlet.*$/"
+				]
+			},
+			
+			{
+				"name": " Tasks",
+				"values": [
+					"/^.*Task.*$/"
+				]
+			},
+			
+			{
+				"name": " Messages",
+				"values": [
+					"/^.*Message.*$/"
+				]
+			},
+			
+			{
+				"name": " Actors",
+				"values": [
+					"/^.*Actor.*$/"
+				]
+			},
+			
+			{
+				"name": " Jobs",
+				"values": [
+					"/^.*Job.*$/"
+				]
+			},
+			
+			{
+				"name": " Restlets",
+				"values": [
+					"/^.*Restlet.*$/"
+				]
+			}
+			
+		]
+	},
+	
+	"applications": {
+		"groups": [
+		]
+	},
+	
+	"tiers": 
+		[
+			{
+				"names": [
+					"com.acme"
+				],
+				"labels": ["Acme"]
+			},
+			
+			{
+				"labels": ["AWS"]
+			}
+		]
+	,
+		
+	"slowdown": { 
+		"active_invocations_threshold": 50,
+		"baseline_invocations_threshold": 50,
+		"over_avg_slowing_percentage": 0.3,
+		"over_avg_critical_percentage": 0.6,
+		"std_dev_factor": 1.5
+	},
+	
+	"regression": {
+		"active_timespan": 1440,
+		"min_baseline_timespan": 20160,
+		"baseline_timespan_factor": 4,
+		"error_min_volume_threshold": 50,
+		"error_min_rate_threshold": 0.1,
+		"error_regression_delta": 0.5,
+		"error_critical_regression_delta": 1,
+		"apply_seasonality": true,
+		"critical_exception_types": "NullPointerException,IndexOutOfBoundsException,InvalidCastException,AssertionError",
+		
+		"sort_order": "Severe New,Severe Regression,New,Regression",
+		"type_order": "Logged Error,Uncaught Exception,Logged Warning,HTTP Error,Timer,Swallowed Exception,Caught Exception"
+	},
+	
+	"regression_report": {
+		"new_event_score": 1,
+		"regression_score": 1,
+		"severe_new_event_score": 2,
+		"critical_regression_score": 2,
+		"score_weight": 2.5
+	}
+}
