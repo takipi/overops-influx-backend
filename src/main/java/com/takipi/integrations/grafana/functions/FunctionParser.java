@@ -102,7 +102,7 @@ public class FunctionParser {
 			input = (FunctionInput)(new Gson().fromJson(json, factory.getInputClass()));
 			function = factory.create(apiClient);
 		} catch (Exception e) {
-			throw new IllegalStateException("Could not parse json " + json, e);
+			throw new IllegalStateException("Could not parse query: " + e.toString() + " query:" + json, e);
 		}
 		
 		logger.debug("OO-AS-INFLUX | About to process {} with input {}", function, input);
@@ -112,7 +112,7 @@ public class FunctionParser {
 		try {
 			result = function.process(input);
 		} catch (Exception e) {
-			throw new IllegalStateException("Could not parse json " + json, e);
+			throw new IllegalStateException("Could not process query: " + e.toString() + " query:" + json, e);
 		}
 		
 		return result;
@@ -244,6 +244,7 @@ public class FunctionParser {
 		registerFunction(new TransactionsRateFunction.Factory());
 		registerFunction(new KeyTransactionsGraphFunction.Factory());
 		registerFunction(new TransactionAvgGraphFunction.Factory());
+		registerFunction(new SlowTransactionsFunction.Factory());
 		
 
 		//variable filter functions

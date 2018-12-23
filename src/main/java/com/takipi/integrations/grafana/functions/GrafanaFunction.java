@@ -92,14 +92,17 @@ public abstract class GrafanaFunction
 	
 	public static final String GRAFANA_SEPERATOR_RAW = "|";
 	public static final String ARRAY_SEPERATOR_RAW = ",";
+	public static final String GRAFANA_VAR_ADD = "And";
 
 	public static final String GRAFANA_SEPERATOR = Pattern.quote(GRAFANA_SEPERATOR_RAW);
 	public static final String ARRAY_SEPERATOR = Pattern.quote(ARRAY_SEPERATOR_RAW);
 	public static final String SERVICE_SEPERATOR = ": ";
 	public static final String GRAFANA_VAR_PREFIX = "$";
 	
-	public static final String ALL = "all";
-	public static final List<String> VAR_ALL = Arrays.asList(new String[] { "*", ALL });
+	public static final String ALL = "All";
+	public static final String NONE = "None";
+	public static final List<String> VAR_ALL = Arrays.asList(new String[] { "*", ALL, 
+		ALL.toLowerCase(), NONE, NONE.toLowerCase() });
 	
 	protected static final char QUALIFIED_DELIM = '.';
 	protected static final char INTERNAL_DELIM = '/';
@@ -339,6 +342,8 @@ public abstract class GrafanaFunction
 		}
 		
 		List<String> result = serviceIds.subList(0, Math.min(MAX_COMBINE_SERVICES, serviceIds.size()));
+		
+		result.remove(NONE);
 		
 		return result;
 	}

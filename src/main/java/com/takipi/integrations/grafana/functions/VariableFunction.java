@@ -31,21 +31,24 @@ public abstract class VariableFunction extends GrafanaFunction {
 		return o.toString().toLowerCase();
 	}
 	
-
+	protected int compareValues(String o1, String o2) {
+		return o1.compareTo(o2);
+	}
+	
 	@SuppressWarnings("unchecked")
-	protected int compareValues(Object o1, Object o2) {
+	private int compareListValues(Object o1, Object o2) {
 		String a = getStringValue(((List<Object>) o1).get(1));
 		String b = getStringValue(((List<Object>) o2).get(1));
 
-		return a.compareTo(b);
+		return compareValues(a, b);
 	}
-	
+		
 	protected void sort(List<List<Object>> series) {
 		series.sort(new Comparator<Object>() {
 
 			@Override
 			public int compare(Object o1, Object o2) {
-				return compareValues(o1, o2);
+				return compareListValues(o1, o2);
 			}
 		});
 	}

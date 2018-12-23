@@ -169,13 +169,15 @@ public class GraphFunction extends BaseGraphFunction {
 		
 		for (GraphPoint gp : graph.points) {
 
+			DateTime gpTime = TimeUtil.getDateTime(gp.time);
+
 			if (gp.contributors == null) {
+				values.add(Arrays.asList(new Object[] { Long.valueOf(gpTime.getMillis()), Long.valueOf(0l) }));
 				continue;
 			}
 			
 			EventResult event = null;
 			long value = 0;
-			DateTime gpTime = TimeUtil.getDateTime(gp.time);
 
 			for (GraphPointContributor gpc : gp.contributors) {
 

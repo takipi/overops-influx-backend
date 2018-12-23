@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 19,
-  "iteration": 1545261819628,
+  "iteration": 1545534540322,
   "links": [
     {
       "asDropdown": true,
@@ -1014,7 +1014,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "Al events of type: $transactionFailureTypes. Click on a transaction's failure rate below to drill down into its errors. Which error types are defined as failures is defined in the Settings dashboard.",
+      "description": "Al events of type: $transactionFailureText. Click on a transaction's failure rate below to drill down into its errors. The error types defined as failures is defined in the Settings dashboard.",
       "fill": 0,
       "gridPos": {
         "h": 7,
@@ -1098,7 +1098,7 @@
           "tags": []
         },
         {
-          "alias": "Times",
+          "alias": "Failures",
           "groupBy": [
             {
               "params": [
@@ -1116,7 +1116,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$transactionFailureTypes\",seriesName\":\"Times\", \"transactions\":\"$transactions\", \"transactionSearchText\":\"$searchText\"})\n",
+          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$transactionFailureTypes\",seriesName\":\"Failures\", \"transactions\":\"$transactions\", \"transactionSearchText\":\"$searchText\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1140,7 +1140,7 @@
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Failures",
+      "title": "Transactions Failures",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -1218,7 +1218,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "d/KsF5KIbik/performance-drill-down?orgId=1&var-transaction=${__cell_0}",
+          "linkUrl": "https://grafana.overops-samples.com/d/KsF5KIbik/performance-drill-down?orgId=1&var-transaction=${__cell_0}",
           "mappingType": 1,
           "pattern": "invocations",
           "thresholds": [],
@@ -1238,7 +1238,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "d/KsF5KIbik/performance-drill-down?orgId=1&var-transaction=${__cell_1}",
+          "linkUrl": "/d/KsF5KIbik/performance-drill-down?orgId=1&var-transaction=${__cell_1}",
           "mappingType": 1,
           "pattern": "errors",
           "thresholds": [],
@@ -1257,8 +1257,8 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "The rate of calls and: $transactionFailureTypes. Can be > 100%. Click to see errors.",
-          "linkUrl": "d/HYBPMdYik/errors?from=${__cell_3}&to=${__cell_4}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=${__cell_5}&var-type=$transactionFailureTypes",
+          "linkTooltip": "${__cell_12} errors of type: $transactionFailureText in ${__cell_9} calls",
+          "linkUrl": "d/HYBPMdYik/errors?from=${__cell_3}&to=${__cell_4}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=${__cell_8}&var-type=$transactionFailureTypes",
           "mappingType": 1,
           "pattern": "error_rate",
           "thresholds": [
@@ -1280,7 +1280,7 @@
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
-          "linkUrl": "d/KsF5KIbik/performance-drill-down?orgId=1&var-transaction=${__cell_0}",
+          "linkUrl": "https://grafana.overops-samples.com/d/KsF5KIbik/performance-drill-down?orgId=1&var-transaction=${__cell_0}",
           "pattern": "avg_response",
           "thresholds": [],
           "type": "number",
@@ -1299,7 +1299,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "Jump to Slow Call Analysis",
-          "linkUrl": "//$apiHost:$apiPort/tale.html?snapshot=${__cell_0}&source=45",
+          "linkUrl": "//$apiHost:$apiPort/tale.html?snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "transaction",
           "thresholds": [],
@@ -1369,7 +1369,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_2}",
-          "linkUrl": "//$apiHost:$apiPort/tale.html?snapshot=${__cell_0}&source=45",
+          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-timeRange=${__cell_5}&var-transactions=${__cell_8}&var-performanceStates=OK|SLOWING|CRITICAL",
           "mappingType": 1,
           "pattern": "slow_delta",
           "thresholds": [
@@ -1426,6 +1426,74 @@
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
+        },
+        {
+          "alias": "Baseline Avg (ms)",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 1,
+          "link": true,
+          "linkTargetBlank": true,
+          "linkTooltip": "The avg response time in the baseline window with ${__cell_6} calls",
+          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-timeRange=${__cell_5}&var-transactions=${__cell_8}&var-performanceStates=OK|SLOWING|CRITICAL",
+          "mappingType": 1,
+          "pattern": "baseline_avg",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "baseline_calls",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "active_calls",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "timeRange",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
         }
       ],
       "targets": [
@@ -1446,7 +1514,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"fields\":\"link,slow_delta,delta_description,from,to,transaction,invocations,avg_response,error_rate,errors\",\"renderMode\":\"Grid\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"searchText\":\"$searchText\", \"pointsWanted\":\"$transactionPointsWanted\"})",
+          "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"fields\":\"link,slow_delta,delta_description,from,to,timeRange,baseline_calls,active_calls,transaction,invocations,avg_response,baseline_avg,error_rate,errors\",\"renderMode\":\"Grid\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"searchText\":\"$searchText\", \"pointsWanted\":\"$transactionPointsWanted\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1481,18 +1549,14 @@
   "templating": {
     "list": [
       {
-        "allValue": "*",
+        "allValue": "all",
         "current": {
-          "selected": false,
-          "tags": [],
-          "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "text": "None",
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
-        "includeAll": true,
+        "includeAll": false,
         "label": "Environments",
         "multi": true,
         "name": "environments",
@@ -1559,11 +1623,8 @@
       {
         "allValue": "*",
         "current": {
-          "tags": [],
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1728,6 +1789,30 @@
       {
         "allValue": null,
         "current": {
+          "text": "Logged Error,Uncaught Exception,HTTP Error",
+          "value": "Logged Error,Uncaught Exception,HTTP Error"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "transactionFailureText",
+        "options": [],
+        "query": "settingsVar({\"environments\":\"$environments\", \"name\":\"transaction_failures\", \"convertToArray\":\"false\"})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
           "tags": [],
           "text": "<term>",
           "value": "<term>"
@@ -1807,30 +1892,6 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "text": "",
-          "value": ""
-        },
-        "datasource": "OO",
-        "hide": 2,
-        "includeAll": false,
-        "label": null,
-        "multi": false,
-        "name": "proxy_link_prefix",
-        "options": [],
-        "query": "settingsVar({\"environments\":\"$environments\", \"name\":\"proxy_link_prefix\"})",
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
       }
     ]
   },
@@ -1867,5 +1928,5 @@
   "timezone": "",
   "title": "Performance",
   "uid": "Z40SpeJmz",
-  "version": 60
+  "version": 72
 }

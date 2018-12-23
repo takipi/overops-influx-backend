@@ -60,6 +60,10 @@ public class EventsFunction extends GrafanaFunction {
 				return false;
 			}
 			
+			if (!Objects.equal(event.call_stack_group, other.event.call_stack_group)) {
+				return false;
+			}
+			
 			return true;	
 		}
 		

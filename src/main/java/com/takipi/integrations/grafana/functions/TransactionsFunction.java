@@ -46,17 +46,13 @@ public class TransactionsFunction extends EnvironmentVariableFunction {
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
-	protected int compareValues(Object o1, Object o2) {
+	protected int compareValues(String o1, String o2) {
 		
-		Object a = ((List<Object>) o1).get(1);
-		Object b = ((List<Object>) o2).get(1);
-		
-		if (GroupSettings.isGroup(a.toString())) {
+		if (GroupSettings.isGroup(o1.toString())) {
 			return -1;
 		}
 		
-		if (GroupSettings.isGroup(b.toString())) {
+		if (GroupSettings.isGroup(o2.toString())) {
 			return 1;
 		}
 		

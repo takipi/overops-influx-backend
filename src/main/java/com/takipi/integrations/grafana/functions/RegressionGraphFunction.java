@@ -13,6 +13,7 @@ import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
 import com.takipi.api.client.result.event.EventResult;
+import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.EventsFunction.EventData;
 import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionData;
@@ -113,8 +114,13 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 					pointValue = 100 * gpc.stats.hits /  gpc.stats.invocations;
 
 				} else {
-					pointValue = gpc.stats.hits;
+					
+					if (input.volumeType.equals(VolumeType.invocations)) {
+						pointValue = gpc.stats.invocations;
 
+					} else {
+						pointValue = gpc.stats.hits;	
+					}
 				}
 				
 				graphData.volume += pointValue;

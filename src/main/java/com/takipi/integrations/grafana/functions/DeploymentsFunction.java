@@ -53,7 +53,7 @@ public class DeploymentsFunction extends EnvironmentVariableFunction {
 	}
 
 	@Override
-	protected int compareValues(Object o1, Object o2) {
+	protected int compareValues(String o1, String o2) {
 		return DeploymentUtil.compareDeployments(o1, o2);
 	}
 }

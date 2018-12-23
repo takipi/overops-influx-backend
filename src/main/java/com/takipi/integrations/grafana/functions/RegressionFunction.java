@@ -805,7 +805,7 @@ public class RegressionFunction extends EventsFunction
 		
 		regressionInput.validate();
 		
-		RateRegression rateRegression = RegressionUtil.calculateRateRegressions(apiClient, regressionInput, System.out,
+		RateRegression rateRegression = RegressionUtil.calculateRateRegressions(apiClient, regressionInput, null,
 				false);
 		
 		RegressionOutput result = createRegressionOutput(input, regressionInput, rateRegression, eventListMap,
@@ -835,6 +835,7 @@ public class RegressionFunction extends EventsFunction
 	
 	private EventData mergeRegressionsOfType(List<EventData> eventDatas)
 	{
+		
 		RegressionData first = (RegressionData)(eventDatas.get(0));
 		List<EventData> merged = super.mergeEventDatas(eventDatas);
 		
@@ -882,7 +883,6 @@ public class RegressionFunction extends EventsFunction
 	{
 		List<EventData> result = new ArrayList<EventData>(super.mergeSimilarEvents(serviceId, eventDatas));
 		sortRegressions(serviceId, result);
-		
 		return result;
 	}
 	
@@ -902,6 +902,7 @@ public class RegressionFunction extends EventsFunction
 	protected List<EventData> getEventData(String serviceId, EventsInput input,
 			Pair<DateTime, DateTime> timeSpan)
 	{
+		
 		RegressionsInput regInput = (RegressionsInput)input;
 		RegressionOutput regressionOutput = runRegression(serviceId, regInput);
 		
@@ -954,6 +955,7 @@ public class RegressionFunction extends EventsFunction
 	
 	private double getSingleStat(Collection<String> serviceIds, RegressionsInput input)
 	{
+		
 		double result = 0;
 		
 		for (String serviceId : serviceIds)
@@ -966,6 +968,7 @@ public class RegressionFunction extends EventsFunction
 	
 	private List<Series> processSingleStat(RegressionsInput input)
 	{
+		
 		Collection<String> serviceIds = getServiceIds(input);
 		
 		if (CollectionUtil.safeIsEmpty(serviceIds))
@@ -984,6 +987,7 @@ public class RegressionFunction extends EventsFunction
 			return Collections.emptyList();
 		}
 		
+		
 		if (input.singleStatFormat != null)
 		{
 			if (singleStatValue > 0)
@@ -1000,12 +1004,14 @@ public class RegressionFunction extends EventsFunction
 			singleStatText = Integer.valueOf((int)singleStatValue);
 		}
 		
+		
 		return createSingleStatSeries(timeSpan, singleStatText);
 	}
 	
 	@Override
 	public List<Series> process(FunctionInput functionInput)
 	{
+		
 		if (!(functionInput instanceof RegressionsInput))
 		{
 			throw new IllegalArgumentException("functionInput");
@@ -1028,6 +1034,7 @@ public class RegressionFunction extends EventsFunction
 				
 			default:
 				return processSingleStat(regInput);
+			
 		}
 	}
 }

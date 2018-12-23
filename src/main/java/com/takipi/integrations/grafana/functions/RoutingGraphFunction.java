@@ -79,11 +79,16 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 		
 		for (GraphPoint gp : graph.points) {
 
+			DateTime gpTime = TimeUtil.getDateTime(gp.time);
+
 			if (gp.contributors == null) {
+				
+				for (GraphData graphData : graphsData.values()) {
+					graphData.points.put(key, Long.valueOf(0l));
+				}
+				
 				continue;
 			}
-
-			DateTime gpTime = TimeUtil.getDateTime(gp.time);
 			
 			lastKey = key;
 			key = Long.valueOf(gpTime.getMillis());

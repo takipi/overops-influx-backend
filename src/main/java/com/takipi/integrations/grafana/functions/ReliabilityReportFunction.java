@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.logging.log4j.util.Strings;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,10 +50,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 	private static final Logger logger = LoggerFactory.getLogger(ReliabilityReportFunction.class);
 	
 	private static final List<String> FIELDS = Arrays.asList(
-			new String[] { FROM, TO, TIME_RANGE, "Name", 
+			new String[] { FROM, TO, TIME_RANGE, "Name",
 					"NewIssuesDesc", "RegressionsDesc", "SlowdownsDesc", 
 					"NewIssuesState", "RegressionsState", "SlowdownsState", 
-					"Score" });
+					"Score", "ScoreDesc" });
 	
 	private enum IssueTypeStatus {
 		GREEN, YELLOW, RED
@@ -98,6 +99,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		protected int slowdowns;
 		protected int severeSlowdowns;
 		protected double score;
+		protected String desc;
 		
 		protected ReportKeyResults(ReportKeyOutput output) {
 			this.output = output;	
@@ -155,7 +157,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 
 			try {
 
-				Map<String, TransactionData> tansactionDatas = function.getTransactionDatas(serviceId, timeSpan, input);
+				Map<String, TransactionData> tansactionDatas = function.getTransactionDatas(serviceId, timeSpan, input, false);				
 				SlowdownAsyncResult result = new SlowdownAsyncResult(key, tansactionDatas.values());
 				
 				return result;
@@ -579,7 +581,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return keys;
 	}
 	
-	public static double getScore(RegressionReportSettings reportSettings, RegressionOutput regressionOutput,
+	public static Pair<Double, String> getScore(RegressionReportSettings reportSettings, RegressionOutput regressionOutput,
 		int slowdowns, int severeslowdowns)
 	{
 		
@@ -590,9 +592,56 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		long days = Math.max(1, TimeUnit.MINUTES.toDays(regressionOutput.regressionInput.activeTimespan));			
 		double score = (newEventsScore + severeNewEventScore + criticalRegressionsScore + regressionsScore) / days;
-		double weightedScore = Math.max(100 - (reportSettings.score_weight * score), 0);
+		double resultScore = Math.max(100 - (reportSettings.score_weight * score), 0);
 		
-		return weightedScore;
+		StringBuilder resultDesc = new StringBuilder();
+		
+		resultDesc.append("100");
+		
+		if (resultScore != 100) {
+			resultDesc.append(" - (");
+			
+			List<String> deductions = new ArrayList<String>();
+			
+			if (regressionOutput.newIssues > 0) {
+				deductions.add(regressionOutput.newIssues 
+					+ " new issues * " + reportSettings.new_event_score);				
+			}
+			
+			if (regressionOutput.severeNewIssues > 0) {
+				deductions.add(regressionOutput.severeNewIssues 
+					+ " severe new issues * " + reportSettings.severe_new_event_score );				
+			}
+			
+			if (regressionOutput.regressions > 0) {
+				deductions.add(regressionOutput.regressions 
+					+ " error increases * " + reportSettings.regression_score);				
+			}
+			
+			if (regressionOutput.criticalRegressions > 0) {
+				deductions.add(regressionOutput.criticalRegressions 
+					+ " severe error increases * " + reportSettings.critical_regression_score);				
+			}
+			
+			if (slowdowns > 0) {
+				deductions.add(slowdowns 
+					+ " slowdowns * " + reportSettings.regression_score);				
+			}
+			
+			if (severeslowdowns > 0) {
+				deductions.add(severeslowdowns 
+					+ " severe slowdowns * " + reportSettings.critical_regression_score);				
+			}
+			
+			String deductionString = Strings.join(deductions, '-');
+			resultDesc.append(deductionString);
+			resultDesc.append(") / ");
+			resultDesc.append(days);
+			resultDesc.append(" days ");
+		}
+		
+		
+		return Pair.of(resultScore, resultDesc.toString());
 	}	
 	
 	protected Collection<ReportKeyOutput> executeReport(String serviceId, RelabilityReportInput regInput,
@@ -631,9 +680,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			if (asyncResult instanceof SlowdownAsyncResult) {
 				
-				Collection<TransactionData> TransactionDatas = ((SlowdownAsyncResult)asyncResult).transactionDatas;
-				reportKeyOutput.transactionDatas = TransactionDatas;
+				SlowdownAsyncResult slowdownAsyncResult = (SlowdownAsyncResult)asyncResult;
+				reportKeyOutput.transactionDatas = slowdownAsyncResult.transactionDatas;
 			}
+			
 		}
 
 		Collection<ReportKeyOutput> result;
@@ -782,7 +832,11 @@ public class ReliabilityReportFunction extends EventsFunction {
 		}
 		else
 		{
-			result = Integer.valueOf(nonSevere);
+			if (nonSevere != 0) {
+				result = Integer.valueOf(nonSevere);
+			} else {
+				result = "";
+			}
 		}
 		
 		return result;
@@ -818,8 +872,11 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			if (reportKeyOutput.regressionData != null) {
 			
-				reportKeyResults.score = getScore(reportSettings, reportKeyOutput.regressionData.regressionOutput, 
+				Pair<Double, String> scorePair = getScore(reportSettings, reportKeyOutput.regressionData.regressionOutput, 
 						reportKeyResults.slowdowns, reportKeyResults.severeSlowdowns);
+				
+				reportKeyResults.score = scorePair.getFirst();
+				reportKeyResults.desc = scorePair.getSecond();
 				
 				result.add(reportKeyResults);
 
@@ -867,10 +924,11 @@ public class ReliabilityReportFunction extends EventsFunction {
 			Object slowdownsState = getStatus(reportKeyResult.slowdowns, reportKeyResult.severeSlowdowns);
 			
 			Object[] row = new Object[] { fromTo.getFirst(), fromTo.getSecond(), timeRange,
-					reportKeyResult.output.key, 
+					reportKeyResult.output.key,
 					newIssuesDesc, regressionsDesc, slowdownsDesc,
 					newIssuesState, regressionsState, slowdownsState,
-					reportKeyResult.score};
+					reportKeyResult.score,
+					reportKeyResult.desc};
 
 			result.add(Arrays.asList(row));
 		}

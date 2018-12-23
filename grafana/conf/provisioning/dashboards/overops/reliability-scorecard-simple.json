@@ -18,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 36,
-  "iteration": 1545263885473,
+  "iteration": 1545535440077,
   "links": [
     {
       "asDropdown": true,
@@ -295,7 +295,7 @@
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 1,
+        "col": 3,
         "desc": true
       },
       "styles": [
@@ -368,10 +368,10 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 0,
-          "link": true,
+          "link": false,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_5}",
-          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=$environments&var-servers=$servers&var-deployments=${__cell_3}&var-timeRange=${__cell_2}",
+          "linkTooltip": "",
+          "linkUrl": "",
           "mappingType": 1,
           "pattern": "RegressionsState",
           "preserveFormat": false,
@@ -453,10 +453,10 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 0,
-          "link": true,
+          "link": false,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_4}",
-          "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-deployments=${__cell_3}",
+          "linkTooltip": "",
+          "linkUrl": "",
           "mappingType": 1,
           "pattern": "NewIssuesState",
           "thresholds": [],
@@ -487,10 +487,10 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 0,
-          "link": true,
+          "link": false,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_6}",
-          "linkUrl": "d/Z40SpeJmz/performance?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-deployments=${__cell_3}",
+          "linkTooltip": "",
+          "linkUrl": "",
           "mappingType": 1,
           "pattern": "SlowdownsState",
           "thresholds": [],
@@ -512,7 +512,7 @@
           ]
         },
         {
-          "alias": "New Issues",
+          "alias": "New",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -532,7 +532,7 @@
           "unit": "short"
         },
         {
-          "alias": "Regressions",
+          "alias": "Increasing",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -568,7 +568,7 @@
           "unit": "short"
         },
         {
-          "alias": "Slowdowns",
+          "alias": "Slow",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -580,11 +580,43 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_6}",
-          "linkUrl": "d/Z40SpeJmz/performance?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-deployments=${__cell_3}",
+          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=$environments&var-servers=$servers&var-deployments=${__cell_3}&var-timeRange=${__cell_2}",
           "mappingType": 1,
           "pattern": "SlowdownsDesc",
           "thresholds": [],
           "type": "string",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "TransactionsVariable",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "ScoreDesc",
+          "thresholds": [],
+          "type": "hidden",
           "unit": "short"
         }
       ],
@@ -628,7 +660,7 @@
         }
       ],
       "timeFrom": null,
-      "title": "Deployments",
+      "title": "",
       "transform": "table",
       "type": "table"
     },
@@ -650,7 +682,7 @@
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 1,
+        "col": 6,
         "desc": true
       },
       "styles": [
@@ -723,10 +755,10 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 0,
-          "link": true,
+          "link": false,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_5}",
-          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}&var-timeRange=${__cell_2}",
+          "linkTooltip": "",
+          "linkUrl": "",
           "mappingType": 1,
           "pattern": "RegressionsState",
           "preserveFormat": false,
@@ -808,10 +840,10 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 0,
-          "link": true,
+          "link": false,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_4}",
-          "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}",
+          "linkTooltip": "",
+          "linkUrl": "",
           "mappingType": 1,
           "pattern": "NewIssuesState",
           "thresholds": [],
@@ -842,10 +874,10 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 0,
-          "link": true,
+          "link": false,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_6}",
-          "linkUrl": "d/Z40SpeJmz/performance?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}",
+          "linkTooltip": "",
+          "linkUrl": "",
           "mappingType": 1,
           "pattern": "SlowdownsState",
           "thresholds": [],
@@ -867,7 +899,7 @@
           ]
         },
         {
-          "alias": "New Issues",
+          "alias": "New",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -887,7 +919,7 @@
           "unit": "short"
         },
         {
-          "alias": "Regressions",
+          "alias": "Increasing",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -923,7 +955,7 @@
           "unit": "short"
         },
         {
-          "alias": "Slowdowns",
+          "alias": "Slow",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -935,11 +967,43 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_6}",
-          "linkUrl": "d/Z40SpeJmz/performance?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}",
+          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}&var-timeRange=${__cell_2}",
           "mappingType": 1,
           "pattern": "SlowdownsDesc",
           "thresholds": [],
           "type": "string",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "TransactionsVariable",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "ScoreDesc",
+          "thresholds": [],
+          "type": "hidden",
           "unit": "short"
         }
       ],
@@ -983,7 +1047,7 @@
         }
       ],
       "timeFrom": null,
-      "title": "Applications",
+      "title": "",
       "transform": "table",
       "type": "table"
     }
@@ -997,9 +1061,12 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
+          "selected": false,
+          "tags": [],
+          "text": "None",
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -1022,7 +1089,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1047,7 +1113,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1072,7 +1137,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1120,7 +1184,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1145,7 +1208,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1170,7 +1232,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -1223,6 +1284,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "",
           "value": ""
         },
@@ -1247,7 +1309,7 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
+          "selected": true,
           "text": "Score",
           "value": "Score"
         },
@@ -1332,5 +1394,5 @@
   "timezone": "",
   "title": "Reliability Scorecard Simple",
   "uid": "82eIMSsmz",
-  "version": 4
+  "version": 8
 }

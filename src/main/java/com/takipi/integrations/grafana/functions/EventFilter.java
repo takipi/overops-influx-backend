@@ -1,6 +1,8 @@
 package com.takipi.integrations.grafana.functions;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,11 +32,12 @@ public class EventFilter
 	private Collection<String> labels;
 	private Pattern labelsPattern;
 	private Pair<DateTime, DateTime> firstSeen;
-	private boolean hasExceptionTypes;
-	private boolean hasCategoryTypes;
 	private Categories categories;
 	private String searchText;
 	private String transactionSearchText;
+	private List<String> exceptionTypes;
+	private List<String> eventTypes;
+	private List<String> categoryTypes;
 	
 	public static EventFilter of(Collection<String> types, Collection<String> allowedTypes,
 			Collection<String> introducedBy, GroupFilter transactionsFilter,
@@ -65,19 +68,24 @@ public class EventFilter
 			result.labelsPattern = Pattern.compile(labelsRegex);
 		}
 		
+		result.exceptionTypes = new ArrayList<String>();
+		result.eventTypes = new ArrayList<String>();
+		result.categoryTypes = new ArrayList<String>();
+		
 		if (types != null)
 		{
 			for (String type : types)
 			{
-				
 				if (type.startsWith(EXCEPTION_PREFIX))
 				{
-					result.hasExceptionTypes = true;
-				}
-				
-				if (GroupSettings.isGroup(type))
+					result.exceptionTypes.add(type.substring(EXCEPTION_PREFIX.length()));
+				} 
+				else if (GroupSettings.isGroup(type))
 				{
-					result.hasCategoryTypes = true;
+					result.categoryTypes.add(type.substring(CATEGORY_PREFIX.length()));
+				}
+				else {
+					result.eventTypes.add(type);
 				}
 			}
 		}
@@ -133,46 +141,71 @@ public class EventFilter
 		return (labelsPattern == null) || (labelsPattern.matcher(label).find());
 	}
 	
+	private boolean filterExceptionType(EventResult event) {
+		
+		if (exceptionTypes.size() == 0)	{
+			return false;
+		}
+		
+		if (exceptionTypes.contains(event.name)) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private boolean filterCategoryType(EventResult event) {
+		
+		if (categoryTypes.size() == 0) 	{
+			return false;
+		}
+			
+		if (event.error_origin != null) {
+			Set<String> originLabels = categories.getCategories(event.error_origin.class_name);
+			
+			if (matchLabels(originLabels)) {
+				return false;
+			}
+		}
+		
+		if (event.error_location != null) {
+			Set<String> locationLabels = categories.getCategories(event.error_location.class_name);
+			
+			if (matchLabels(locationLabels)) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	private boolean filterEventType(EventResult event) {
+		
+		if (eventTypes.size() == 0) {
+			return false;
+		}
+		
+		if (eventTypes.contains(event.type)) {
+			return false;
+		}
+		
+		return true;
+	}
+	
 	private boolean filterType(EventResult event)
 	{
-		if (event.type.toLowerCase().contains(EXCEPTION_PREFIX))
-		{
-			if (!types.contains(event.type))
-			{
-				return true;
-			}
-			
-			if ((hasExceptionTypes) && (!types.contains(event.name)))
-			{
-				return true;
-			}
-			
-		}
-		else if (hasCategoryTypes) 	{
-			
-			if (event.error_origin != null) {
-				Set<String> originLabels = categories.getCategories(event.error_origin.class_name);
-
-				if (matchLabels(originLabels)) {
-					return false;
-				}
-			}
-			
-			if (event.error_location != null) {
-				Set<String> locationLabels = categories.getCategories(event.error_location.class_name);
-
-				if (matchLabels(locationLabels)) {
-					return false;
-				}
-			}
-			
-			return true;
-		}
-		else if (!types.contains(event.type))
-		{
+		if (filterExceptionType(event)) {
 			return true;
 		}
 		
+		if (filterCategoryType(event)) {
+			return true;
+		}
+		
+		if (filterEventType(event)) {
+			return true;
+		}
+			
 		return false;
 	}
 	
@@ -184,9 +217,9 @@ public class EventFilter
 		
 		for (String label : labels)
 		{
-			for (String type : types)
+			for (String type : categoryTypes)
 			{
-				if (type.contains(label))
+				if (type.equals(label))
 				{
 					return true;
 				}

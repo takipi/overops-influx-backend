@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 31,
-  "iteration": 1545261825014,
+  "iteration": 1545534544101,
   "links": [
     {
       "asDropdown": true,
@@ -559,18 +559,14 @@
   "templating": {
     "list": [
       {
-        "allValue": "*",
+        "allValue": "None",
         "current": {
-          "selected": true,
-          "tags": [],
-          "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "text": "None",
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
-        "includeAll": true,
+        "includeAll": false,
         "label": "Env",
         "multi": true,
         "name": "environments",
@@ -812,7 +808,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -837,7 +832,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -894,5 +888,5 @@
   "timezone": "",
   "title": "Unique Errors",
   "uid": "HYBPMdYik",
-  "version": 35
+  "version": 39
 }
