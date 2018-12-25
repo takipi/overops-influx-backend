@@ -28,36 +28,20 @@ import com.takipi.api.client.util.transaction.TransactionUtil;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
-import com.takipi.integrations.grafana.input.EventFilterInput;
+import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.TransactionsListIput;
+import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
-import com.takipi.integrations.grafana.settings.SlowdownSettings;
+import com.takipi.integrations.grafana.settings.input.SlowdownSettings;
 import com.takipi.integrations.grafana.util.EventLinkEncoder;
 import com.takipi.integrations.grafana.util.NumberUtil;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionsListFunction extends GrafanaFunction {
 	
-	private static final String LINK = "link";
-	private static final String TRANSACTION = "transaction";
-	private static final String TOTAL = "invocations";
-	private static final String AVG_RESPONSE = "avg_response";
-	private static final String SLOW_STATE = "slow_state";
-	private static final String SLOW_DELTA = "slow_delta";
-	private static final String ERROR_RATE = "error_rate";
-	private static final String ERRORS = "errors";
-	private static final String DELTA_DESC = "delta_description";
-	private static final String BASELINE_AVG = "baseline_avg";
-	private static final String BASELINE_CALLS = "baseline_calls";
-	private static final String ACTIVE_CALLS = "active_calls";
-
 	private static final DecimalFormat df = new DecimalFormat("#.##");
-	
-	private static final List<String> FIELDS = Arrays.asList(new String[] { 
-			LINK, TRANSACTION, TOTAL, AVG_RESPONSE, BASELINE_AVG, BASELINE_CALLS, ACTIVE_CALLS, SLOW_STATE, SLOW_DELTA,
-			DELTA_DESC, ERROR_RATE, ERRORS, TIME_RANGE });
 
 	public static class Factory implements FunctionFactory {
 
@@ -218,21 +202,21 @@ public class TransactionsListFunction extends GrafanaFunction {
 			
 			Object[] object = new Object[fields.size()];
 			
-			setOutputObjectField(object, fields, LINK, link);
-			setOutputObjectField(object, fields, TRANSACTION, name);
-			setOutputObjectField(object, fields, TOTAL, stats.invocations);
-			setOutputObjectField(object, fields, AVG_RESPONSE, stats.avg_time);
-			setOutputObjectField(object, fields, BASELINE_AVG, TransactionData.baselineAvg);
-			setOutputObjectField(object, fields, BASELINE_CALLS, NumberUtil.format(TransactionData.baselineInvocations));
-			setOutputObjectField(object, fields, ACTIVE_CALLS, NumberUtil.format(stats.invocations));
-			setOutputObjectField(object, fields, SLOW_STATE, getStateValue(TransactionData.state));
-			setOutputObjectField(object, fields, SLOW_DELTA, TransactionData.score);
-			setOutputObjectField(object, fields, DELTA_DESC, getSlowdownDesc(TransactionData, stddevFactor));
-			setOutputObjectField(object, fields, ERROR_RATE, errorRate);
-			setOutputObjectField(object, fields, ERRORS, TransactionData.errorsHits);
-			setOutputObjectField(object, fields, FROM, fromTo.getFirst());
-			setOutputObjectField(object, fields, TO, fromTo.getSecond());
-			setOutputObjectField(object, fields, TIME_RANGE, timeRange);
+			setOutputObjectField(object, fields, TransactionsListIput.LINK, link);
+			setOutputObjectField(object, fields, TransactionsListIput.TRANSACTION, name);
+			setOutputObjectField(object, fields, TransactionsListIput.TOTAL, stats.invocations);
+			setOutputObjectField(object, fields, TransactionsListIput.AVG_RESPONSE, stats.avg_time);
+			setOutputObjectField(object, fields, TransactionsListIput. BASELINE_AVG, TransactionData.baselineAvg);
+			setOutputObjectField(object, fields, TransactionsListIput.BASELINE_CALLS, NumberUtil.format(TransactionData.baselineInvocations));
+			setOutputObjectField(object, fields, TransactionsListIput.ACTIVE_CALLS, NumberUtil.format(stats.invocations));
+			setOutputObjectField(object, fields, TransactionsListIput.SLOW_STATE, getStateValue(TransactionData.state));
+			setOutputObjectField(object, fields, TransactionsListIput.SLOW_DELTA, TransactionData.score);
+			setOutputObjectField(object, fields, TransactionsListIput.DELTA_DESC, getSlowdownDesc(TransactionData, stddevFactor));
+			setOutputObjectField(object, fields, TransactionsListIput.ERROR_RATE, errorRate);
+			setOutputObjectField(object, fields, TransactionsListIput.ERRORS, TransactionData.errorsHits);
+			setOutputObjectField(object, fields, ViewInput.FROM, fromTo.getFirst());
+			setOutputObjectField(object, fields, ViewInput.TO, fromTo.getSecond());
+			setOutputObjectField(object, fields, ViewInput.TIME_RANGE, timeRange);
 			
 
 			result.add(Arrays.asList(object));
@@ -286,7 +270,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 	}
 	
 	public void updateTransactionPerformance(String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
-			EventFilterInput input, Map<String, TransactionData> transactionDatas) {
+			BaseEventVolumeInput input, Map<String, TransactionData> transactionDatas) {
 	
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
 		Pair<RegressionInput, RegressionWindow> inputPair = regressionFunction.getRegressionInput(serviceId, viewId, input, timeSpan);
@@ -300,12 +284,12 @@ public class TransactionsListFunction extends GrafanaFunction {
 		
 		DateTime baselineStart = regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan);
 		
-		EventFilterInput baselineInput;
+		BaseEventVolumeInput baselineInput;
 		
 		if (input.hasDeployments()) {
 			Gson gson = new Gson();
 			String json = gson.toJson(input);
-			baselineInput = gson.fromJson(json, EventFilterInput.class);
+			baselineInput = gson.fromJson(json, input.getClass());
 			baselineInput.deployments = null;
 		} else {
 			baselineInput = input;
@@ -368,7 +352,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 	
 	
 	private void updateTransactionEvents(String serviceId, Pair<DateTime, DateTime> timeSpan,
-			EventFilterInput input, Map<String, TransactionData> transactions) 
+			BaseEventVolumeInput input, Map<String, TransactionData> transactions) 
 	{
 		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, timeSpan.getFirst(),
 			timeSpan.getSecond(), VolumeType.hits, input.pointsWanted);
@@ -420,7 +404,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 	}
 	
 	public Map<String, TransactionData> getTransactionDatas(String serviceId, Pair<DateTime, DateTime> timeSpan,
-			EventFilterInput input, boolean updateEvents) {
+			BaseEventVolumeInput input, boolean updateEvents) {
 		
 		String viewId = getViewId(serviceId, input.view);
 		
@@ -436,7 +420,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 	
 	public Map<String, TransactionData> getTransactionDatas(Collection<TransactionGraph> transactionGraphs,
 			String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
-			EventFilterInput input, boolean updateEvents) {
+			BaseEventVolumeInput input, boolean updateEvents) {
 				
 		if (transactionGraphs == null) {
 			return Collections.emptyMap();
@@ -534,7 +518,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 		if (input.fields != null) {
 			series.columns = Arrays.asList(input.fields.split(ARRAY_SEPERATOR));
 		} else {
-			series.columns = FIELDS;
+			series.columns = TransactionsListIput.FIELDS;
 		}
 		series.values = new ArrayList<List<Object>>();
 

@@ -30,14 +30,17 @@ import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
+import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
 import com.takipi.integrations.grafana.input.EventFilterInput;
 import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.RegressionsInput;
+import com.takipi.integrations.grafana.input.RegressionsInput.RegressionType;
+import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
-import com.takipi.integrations.grafana.settings.RegressionReportSettings;
-import com.takipi.integrations.grafana.settings.RegressionSettings;
+import com.takipi.integrations.grafana.settings.input.RegressionReportSettings;
+import com.takipi.integrations.grafana.settings.input.RegressionSettings;
 import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.EventLinkEncoder;
 import com.takipi.integrations.grafana.util.TimeUtil;
@@ -48,14 +51,6 @@ public class RegressionFunction extends EventsFunction
 	private static String REG_DELTA = "regDelta";
 	private static String REGRESSION = "regression";
 	private static String SEVERITY = "severity";
-	
-	public static enum RegressionType
-	{
-		NewIssues,
-		SevereNewIssues,
-		Regressions,
-		SevereRegressions
-	}
 	
 	public static class Factory implements FunctionFactory
 	{
@@ -440,7 +435,7 @@ public class RegressionFunction extends EventsFunction
 		}
 		
 
-		if (column.equals(TIME_RANGE))
+		if (column.equals(ViewInput.TIME_RANGE))
 		{
 			return new RegressionTimeRangeFormatter();
 		}
@@ -564,7 +559,7 @@ public class RegressionFunction extends EventsFunction
 	
 	private Pair<Graph, Graph> getRegressionGraphs(String serviceId, String viewId,
 			RegressionInput regressionInput, RegressionWindow regressionWindow,
-			EventFilterInput input)
+			BaseEventVolumeInput input)
 	{
 		
 		int ratioBaselinePoints = (regressionInput.baselineTimespan / regressionWindow.activeTimespan) * 2;
@@ -584,7 +579,7 @@ public class RegressionFunction extends EventsFunction
 		
 		if (input.hasDeployments()) {
 			Gson gson = new Gson();
-			baselineInput = gson.fromJson(gson.toJson(input), EventFilterInput.class);
+			baselineInput = gson.fromJson(gson.toJson(input), input.getClass());
 			baselineInput.deployments = null;
 		} else {
 			baselineInput = input;
@@ -749,7 +744,7 @@ public class RegressionFunction extends EventsFunction
 		return result;
 	}
 		
-	public RegressionOutput executeRegression(String serviceId, EventFilterInput input)
+	public RegressionOutput executeRegression(String serviceId, BaseEventVolumeInput input)
 	{
 		String viewId = getViewId(serviceId, input.view);
 		

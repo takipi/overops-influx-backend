@@ -32,16 +32,17 @@ import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOutput;
 import com.takipi.integrations.grafana.functions.TransactionsListFunction.TransactionData;
-import com.takipi.integrations.grafana.input.EventFilterInput;
+import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
 import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.RegressionsInput;
 import com.takipi.integrations.grafana.input.RelabilityReportInput;
 import com.takipi.integrations.grafana.input.RelabilityReportInput.GraphType;
 import com.takipi.integrations.grafana.input.RelabilityReportInput.ReportMode;
+import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
-import com.takipi.integrations.grafana.settings.RegressionReportSettings;
+import com.takipi.integrations.grafana.settings.input.RegressionReportSettings;
 import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.DeploymentUtil;
 import com.takipi.integrations.grafana.util.TimeUtil;
@@ -50,7 +51,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 	private static final Logger logger = LoggerFactory.getLogger(ReliabilityReportFunction.class);
 	
 	private static final List<String> FIELDS = Arrays.asList(
-			new String[] { FROM, TO, TIME_RANGE, "Name",
+			new String[] { ViewInput.FROM, ViewInput.TO, ViewInput.TIME_RANGE, "Name",
 					"NewIssuesDesc", "RegressionsDesc", "SlowdownsDesc", 
 					"NewIssuesState", "RegressionsState", "SlowdownsState", 
 					"Score", "ScoreDesc" });
@@ -137,7 +138,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		protected TransactionsListFunction function;
 		protected String key;
 		protected String serviceId;
-		protected EventFilterInput input;
+		protected BaseEventVolumeInput input;
 		protected Pair<DateTime, DateTime> timeSpan;
 
 		protected SlowdownAsyncTask(TransactionsListFunction function, String key, String serviceId, RegressionsInput input,

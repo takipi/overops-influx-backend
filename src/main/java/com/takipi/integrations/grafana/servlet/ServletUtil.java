@@ -6,8 +6,6 @@ import java.util.Base64;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 
-import com.takipi.integrations.grafana.settings.GrafanaSettings;
-
 public class ServletUtil {
 	public static String getConfigParam(HttpServlet servlet, String key) {
 		return servlet.getServletConfig().getInitParameter(key);

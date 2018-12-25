@@ -12,12 +12,12 @@ import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.util.infra.Categories;
 import com.takipi.common.util.CollectionUtil;
-import com.takipi.integrations.grafana.input.EnvironmentsInput;
+import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.EventTypesInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
-import com.takipi.integrations.grafana.settings.GeneralSettings;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings;
+import com.takipi.integrations.grafana.settings.input.GeneralSettings;
 
 public class EventTypesFunction extends EnvironmentVariableFunction {
 
@@ -54,7 +54,7 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 	}
 
 	@Override
-	protected void populateServiceValues(EnvironmentsInput input, Collection<String> serviceIds, String serviceId,
+	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender) {
 
 		EventTypesInput eventInput = (EventTypesInput) input;

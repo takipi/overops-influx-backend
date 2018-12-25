@@ -18,6 +18,7 @@ import com.google.gson.GsonBuilder;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.service.SummarizedService;
 import com.takipi.api.client.util.client.ClientUtil;
+import com.takipi.integrations.grafana.settings.input.ServiceSettingsData;
 
 public class GrafanaSettings {
 	public static final String OO_AS_INFLUX = "oo-as-influx";

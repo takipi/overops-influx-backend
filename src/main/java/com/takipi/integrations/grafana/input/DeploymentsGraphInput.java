@@ -20,6 +20,9 @@ package com.takipi.integrations.grafana.input;
  * 		"timeFilter":"$timeFilter","environments":"$environments", 
  * 		"applications":"$applications", "servers":"$servers","deployments":"$deployments",
  * 		"graphCount":3})
+ * 
+ * Screenshot: 
+ * 		https://drive.google.com/file/d/1LJ_kMUkykxSWVVK5ixlhRsjTiJPjhYHS/view?usp=sharing
  *
  */
 public class DeploymentsGraphInput extends GraphInput{

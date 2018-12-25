@@ -23,16 +23,13 @@ import com.takipi.integrations.grafana.functions.TransactionsListFunction.Transa
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput;
+import com.takipi.integrations.grafana.input.TransactionsGraphInput.GraphType;
 import com.takipi.integrations.grafana.input.TransactionsListIput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings.GroupFilter;
 
 public class TransactionsGraphFunction extends BaseGraphFunction {
-
-	public enum GraphType {
-		avg_time, invocations, all
-	}
 
 	public static class Factory implements FunctionFactory {
 

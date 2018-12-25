@@ -14,7 +14,7 @@ import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.util.performance.calc.PerformanceState;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.TransactionsListFunction.TransactionData;
-import com.takipi.integrations.grafana.input.EnvironmentsInput;
+import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.SlowTransactionsInput;
 import com.takipi.integrations.grafana.input.TransactionsListIput;
@@ -89,7 +89,7 @@ public class SlowTransactionsFunction extends EnvironmentVariableFunction
 	}
 
 	@Override
-	protected void populateServiceValues(EnvironmentsInput input, Collection<String> serviceIds, String serviceId,
+	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender)
 	{
 		SlowTransactionsInput stInput = (SlowTransactionsInput)input;

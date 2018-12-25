@@ -1,10 +1,57 @@
 package com.takipi.integrations.grafana.input;
 
-import com.takipi.integrations.grafana.functions.TransactionsGraphFunction.GraphType;
-
+/**
+ * A function returning a set of times series depicting the volume of calls into a target set 
+ * of entry points (i.e. transactions)
+ *
+ * Example query:
+ * 
+ * 		transactionsGraph({"graphType":"view","volumeType":"invocations","view":"$view",
+ * 		"timeFilter":"$timeFilter","environments":"$environments", "applications":"$applications",
+ * 		"deployments":"$deployments","servers":"$servers","aggregate":true,
+ * 		"seriesName":"Throughput","pointsWanted":"$pointsWanted","transactions":"$transactions"})
+ * 
+ * 	Screenshot: https://drive.google.com/file/d/1i_9DjK-mugjsagBKh-ZuJb3G07AtcyH6/view?usp=sharing
+ */
 public class TransactionsGraphInput extends BaseGraphInput {
+	
+	
+	public enum GraphType {
+		/**
+		 * use the avg response time to complete calls into the target transactions as the Y value
+		 */
+		avg_time, 
+		
+		/**
+		 * use the number of calls into the target transactions as the Y value
+		 */
+		invocations, 
+		
+		/**
+		 * return time series for the number of calls and the avg response time to complete calls into the target transactions as the Y value
+		 */
+		all
+	}
+	
+	/**
+	 * The volume type to be used for the Y value of each of the points in the time series.
+	 */
 	public GraphType volumeType;
+	
+	/**
+	 * Controls whether the time series Y values for the matching transactions are merged into a single
+	 * aggregate series.
+	 */
 	public boolean aggregate;
+	
+	/**
+	 * Control the max number of separate time series returned by this function if aggregate is set to false
+	 */
 	public int limit;
+	
+	/**
+	 * A comma delimited array of performance states, that a target transaction must meet in order to be returned
+	 * by this function. Possible values are: 	NO_DATA, OK, SLOWING, CRITICAL
+	 */
 	public String performanceStates;
 }

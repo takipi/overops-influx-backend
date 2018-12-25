@@ -3,7 +3,7 @@ package com.takipi.integrations.grafana.input;
 /**
  * Basic input for all functions which returns a single stat volume value
  */
-public class BaseVolumeInput extends EventFilterInput  {
+public abstract class BaseVolumeInput extends BaseEventVolumeInput  {
 	
 	/**
 	 * The type of volume returned by the query:
@@ -16,7 +16,7 @@ public class BaseVolumeInput extends EventFilterInput  {
 	}
 	
 	/**
-	 * The type of volume returned by this query
+	 * A comma delimited array of the types of volume returned by this query. 
 	 */
 	public String type;
 }

@@ -39,10 +39,6 @@ import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class GroupByFunction extends BaseVolumeFunction {
 
-	public enum AggregationField {
-		type, name, location, entryPoint, label, introduced_by, application, server, deployment;
-	}
-
 	public static class Factory implements FunctionFactory {
 
 		@Override

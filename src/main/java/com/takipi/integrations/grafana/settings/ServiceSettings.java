@@ -11,6 +11,7 @@ import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.infra.Categories.Category;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.integrations.grafana.settings.GroupSettings.GroupFilter;
+import com.takipi.integrations.grafana.settings.input.ServiceSettingsData;
 
 public class ServiceSettings {
 	

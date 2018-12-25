@@ -10,7 +10,7 @@ import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaselineWindowInput;
-import com.takipi.integrations.grafana.input.EnvironmentsInput;
+import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class BaselineWindowFunction extends EnvironmentVariableFunction
@@ -39,7 +39,7 @@ public class BaselineWindowFunction extends EnvironmentVariableFunction
 	}
 
 	@Override
-	protected void populateServiceValues(EnvironmentsInput input, Collection<String> serviceIds, String serviceId,
+	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender)
 	{		
 		BaselineWindowInput bwInput = (BaselineWindowInput)input;

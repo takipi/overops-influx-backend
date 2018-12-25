@@ -13,7 +13,8 @@ import org.joda.time.DateTime;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.transaction.Transaction;
 import com.takipi.common.util.Pair;
-import com.takipi.integrations.grafana.input.EnvironmentsInput;
+import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
+import com.takipi.integrations.grafana.input.TransactionsInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings;
@@ -32,7 +33,7 @@ public class TransactionsFunction extends EnvironmentVariableFunction {
 
 		@Override
 		public Class<?> getInputClass() {
-			return ViewInput.class;
+			return TransactionsInput.class;
 		}
 
 		@Override
@@ -60,7 +61,7 @@ public class TransactionsFunction extends EnvironmentVariableFunction {
 	}
 
 	@Override
-	protected void populateServiceValues(EnvironmentsInput input, Collection<String> serviceIds, String serviceId,
+	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender) {
 		
 		ViewInput viewInput = (ViewInput)input;

@@ -21,6 +21,7 @@ import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.input.GraphLimitInput;
+import com.takipi.integrations.grafana.input.RoutingGraphInput;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
@@ -34,7 +35,7 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 
 		@Override
 		public Class<?> getInputClass() {
-			return GraphLimitInput.class;
+			return RoutingGraphInput.class;
 		}
 
 		@Override

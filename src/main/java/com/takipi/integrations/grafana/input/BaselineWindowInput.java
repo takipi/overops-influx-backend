@@ -8,11 +8,11 @@ package com.takipi.integrations.grafana.input;
  * 
  * Example query:
  * 		baselineWindow({"graphType":"view","view":"$view",
- * 		"timeFilter":"time >= now() - $timeRange","environments":"$environments",
+ * 		"timeFilter":"timeFilter","environments":"$environments",
  * 		"applications":"$applications", "servers":"$servers","deployments":"$deployments",
  * 		"baselineOnly":"true"})
  */
-public class BaselineWindowInput extends EventFilterInput
+public class BaselineWindowInput extends BaseEventVolumeInput
 {
 	/**
 	 * Set whether to return the combined value of the active and baseline windows,

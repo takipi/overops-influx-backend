@@ -14,10 +14,26 @@ import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings;
 import com.takipi.integrations.grafana.util.ArrayUtil;
 
-public class EnvironmentsFilterInput extends EnvironmentsInput {
+/**
+ * Input for functions that use a filter to request data from a specific combination
+ * of applications, deployments and / or server groups.
+ */
+public abstract class EnvironmentsFilterInput extends BaseEnvironmentsInput {
 	
+	/**
+	 * A comma delimited array of application names to use as a filter. Specify null, "", "all" or "*" to skip
+	 */
 	public String applications;
+	
+	/**
+	 * A comma delimited array of server names to use as a filter. Specify null, "", "all" or "*" to skip
+	 */
+	
 	public String servers;
+	
+	/**
+	 * A comma delimited array of deployment names to use as a filter. Specify null, "", "all" or "*" to skip
+	 */
 	public String deployments;
 	
 	protected List<String> getServiceFilters(String value, String serviceId, boolean matchCase) {

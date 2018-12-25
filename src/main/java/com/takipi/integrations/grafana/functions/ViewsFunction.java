@@ -9,7 +9,7 @@ import com.takipi.api.client.data.view.SummarizedView;
 import com.takipi.api.client.data.view.ViewInfo;
 import com.takipi.api.client.util.category.CategoryUtil;
 import com.takipi.api.client.util.view.ViewUtil;
-import com.takipi.integrations.grafana.input.EnvironmentsInput;
+import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.ViewsInput;
 
 public class ViewsFunction extends EnvironmentVariableFunction {
@@ -37,7 +37,7 @@ public class ViewsFunction extends EnvironmentVariableFunction {
 	}
 
 	@Override
-	protected void populateServiceValues(EnvironmentsInput input, Collection<String> serviceIds, String serviceId,
+	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender) {
 
 		if (!(input instanceof ViewsInput)) {

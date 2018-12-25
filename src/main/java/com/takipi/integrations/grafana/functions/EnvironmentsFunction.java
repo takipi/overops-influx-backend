@@ -5,8 +5,8 @@ import java.util.List;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.service.SummarizedService;
 import com.takipi.api.client.util.client.ClientUtil;
+import com.takipi.integrations.grafana.input.EnvironmentsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
-import com.takipi.integrations.grafana.input.VariableInput;
 
 public class EnvironmentsFunction extends VariableFunction {
 	
@@ -19,7 +19,7 @@ public class EnvironmentsFunction extends VariableFunction {
 
 		@Override
 		public Class<?> getInputClass() {
-			return VariableInput.class;
+			return EnvironmentsInput.class;
 		}
 
 		@Override
