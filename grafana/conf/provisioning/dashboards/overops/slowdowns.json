@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 37,
-  "iteration": 1545534546188,
+  "iteration": 1545774696217,
   "links": [
     {
       "asDropdown": true,
@@ -108,7 +108,7 @@
         },
         {
           "alias": ".Avg (ms)",
-          "color": "#3f2b5b",
+          "color": "#1f78c1",
           "dashes": true
         }
       ],
@@ -859,6 +859,8 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
+          "tags": [],
           "text": "None",
           "value": [
             "None"
@@ -1075,7 +1077,7 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
+          "selected": true,
           "text": "<term>",
           "value": "<term>"
         },
@@ -1235,8 +1237,8 @@
         "current": {
           "selected": true,
           "tags": [],
-          "text": "7d",
-          "value": "7d"
+          "text": "2d",
+          "value": "2d"
         },
         "hide": 0,
         "includeAll": false,
@@ -1270,12 +1272,12 @@
             "value": "24h"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "2d",
             "value": "2d"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "7d",
             "value": "7d"
           },
@@ -1377,5 +1379,5 @@
   "timezone": "",
   "title": "Slowdowns",
   "uid": "iHSORcymk",
-  "version": 23
+  "version": 24
 }

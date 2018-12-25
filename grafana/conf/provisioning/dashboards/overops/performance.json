@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 19,
-  "iteration": 1545534540322,
+  "iteration": 1545774715273,
   "links": [
     {
       "asDropdown": true,
@@ -803,7 +803,7 @@
         },
         {
           "alias": ".Avg (ms)",
-          "color": "#3f2b5b",
+          "color": "#1f78c1",
           "dashes": true
         }
       ],
@@ -1257,7 +1257,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_12} errors of type: $transactionFailureText in ${__cell_9} calls",
+          "linkTooltip": "${__cell_13} errors of type: $transactionFailureText in ${__cell_9} calls",
           "linkUrl": "d/HYBPMdYik/errors?from=${__cell_3}&to=${__cell_4}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=${__cell_8}&var-type=$transactionFailureTypes",
           "mappingType": 1,
           "pattern": "error_rate",
@@ -1551,8 +1551,12 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
+          "tags": [],
           "text": "None",
-          "value": "None"
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -1813,7 +1817,7 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
+          "selected": true,
           "text": "<term>",
           "value": "<term>"
         },
@@ -1836,6 +1840,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -1866,6 +1871,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -1928,5 +1934,5 @@
   "timezone": "",
   "title": "Performance",
   "uid": "Z40SpeJmz",
-  "version": 72
+  "version": 75
 }
