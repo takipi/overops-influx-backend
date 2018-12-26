@@ -9,7 +9,7 @@ import com.takipi.integrations.grafana.functions.GrafanaFunction;
 /** 
  * A function returning a table, graph or single stat relating to the number of new and increasing issues
  * within a target set of events. The determination of which events have regressed is governed by the regression
- * analysis algorithm - XXX
+ * configuration in the Settings dashboard.
  * 
  * Example query to return table:
  * 

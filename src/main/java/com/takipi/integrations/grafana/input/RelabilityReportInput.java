@@ -6,7 +6,7 @@ package com.takipi.integrations.grafana.input;
  * either a tabular report or a chart, where a key selected value from each row is used as the Y value
  * and the name of the target app, deployment, tier is used as the X value. The decisions regarding
  * which events are new, regressing and which transactions have slowdowns are governed by the 
- * regression algorithm - XXX and transaction slowdown algorithm XXX 
+ * regression and transaction setting available in the Settings dashboard.
  *
  * Example query for table:
  * 		regressionReport({"timeFilter":"$timeFilter","environments":"$environments",

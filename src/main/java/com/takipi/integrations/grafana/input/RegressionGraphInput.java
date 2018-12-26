@@ -2,7 +2,7 @@ package com.takipi.integrations.grafana.input;
 
 /**
  * This function returns a list of time series data depicting volume increases within a target set of events.
- * The algorithm used to decided which events to include is defined in: <XXX>.
+ * The algorithm used to decided which events to include is defined the Settings dashboard.
  *    
  * 	Example query:
  * 		regressionGraph({"type":"sum","graphType":"view","volumeType":"all","view":"$view",
