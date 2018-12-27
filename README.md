@@ -8,4 +8,4 @@ The solution has two components:
 
 The project is bundled as part of the OverOps API Server , and can be run separately as a Spring boot uber jar.
 
-Follow [grafana/README.MD](grafana/README.MD) for more deployment options and setup instructions.
+Follow [grafana/README.md](grafana/README.md) for more deployment options and setup instructions.
