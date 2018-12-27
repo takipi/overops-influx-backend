@@ -670,7 +670,7 @@
       "interval": null,
       "links": [
         {
-          "dashboard": "/d/HYBPMdYik/errors",
+          "dashboard": "d/HYBPMdYik/errors",
           "includeVars": true,
           "keepTime": true,
           "targetBlank": true,
@@ -796,7 +796,7 @@
       "linewidth": 1,
       "links": [
         {
-          "dashboard": "/d/Z40SpeJmz/performance",
+          "dashboard": "d/Z40SpeJmz/performance",
           "includeVars": true,
           "keepTime": true,
           "targetBlank": true,
