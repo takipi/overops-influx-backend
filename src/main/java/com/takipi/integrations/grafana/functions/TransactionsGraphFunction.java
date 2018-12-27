@@ -15,21 +15,21 @@ import org.joda.time.format.ISODateTimeFormat;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.data.transaction.TransactionGraph.GraphPoint;
+import com.takipi.api.client.util.performance.calc.PerformanceState;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.GraphFunction.SeriesVolume;
+import com.takipi.integrations.grafana.functions.TransactionsListFunction.TransactionData;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput;
+import com.takipi.integrations.grafana.input.TransactionsGraphInput.GraphType;
+import com.takipi.integrations.grafana.input.TransactionsListIput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings.GroupFilter;
 
 public class TransactionsGraphFunction extends BaseGraphFunction {
-
-	public enum GraphType {
-		avg_time, invocations, all
-	}
 
 	public static class Factory implements FunctionFactory {
 
@@ -58,21 +58,75 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 	public TransactionsGraphFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
+	
+	protected Collection<TransactionGraph> getTransactionsGraphs(String serviceId, 
+		String viewId, Pair<DateTime, DateTime> timeSpan, TransactionsGraphInput input, int pointsWanted) {
+		
+		Collection<TransactionGraph> result;
+		
+		Collection<TransactionGraph> activeGraphs = getTransactionGraphs(input, serviceId, 
+				viewId, timeSpan, input.getSearchText(), pointsWanted, 0, 0);
+		
+		if (input.performanceStates != null) {	
+			
+			Collection<PerformanceState> performanceStates = TransactionsListIput.getStates(input.performanceStates);
+			
+			TransactionsListFunction transactionsFunction = new TransactionsListFunction(apiClient);
+			Map<String, TransactionData> transactionDatas = transactionsFunction.getTransactionDatas(activeGraphs, serviceId, viewId, timeSpan, input, false);
+			
+			List<TransactionGraph> graphs = new ArrayList<TransactionGraph>();
+			
+			for (TransactionData transactionData : transactionDatas.values()) {
+				
+				if (!performanceStates.contains(transactionData.state)) {
+					continue;
+				}
+				
+				TransactionGraph graph = new TransactionGraph();
+				
+				graph.name = transactionData.graph.name;
+				graph.class_name = transactionData.graph.class_name;
+				graph.method_name = transactionData.graph.method_name;
+				graph.method_desc = transactionData.graph.method_desc;
+			
+				int size = transactionData.graph.points.size();
+				
+				if (transactionData.baselineGraph!= null) {
+					size += transactionData.baselineGraph.points.size();
+				}
+				
+				graph.points = new ArrayList<GraphPoint>(size);
+			
+				if (transactionData.baselineGraph!= null) {
+					graph.points.addAll(transactionData.baselineGraph.points);
+				}
+				
+				graph.points.addAll(transactionData.graph.points);
+				
+				graphs.add(graph);
+			}
+			
+			result = graphs;
+			
+		} else {
+			result = activeGraphs;
+		}
+		
+		return result;
+	}
+	
     @Override
 	protected List<GraphSeries> processServiceGraph(String serviceId, String viewId, String viewName,
-			BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds, int pointsWanted) {
+			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds, int pointsWanted) {
 
-		TransactionsGraphInput input = (TransactionsGraphInput) request;
-
-		Collection<TransactionGraph> transactionGraphs = getTransactionGraphs(input, serviceId, 
-				viewId, timeSpan, input.getSearchText(), pointsWanted, 0, 0);
-				
-		Collection<String> transactions = getTransactions(serviceId, input, timeSpan);
+		TransactionsGraphInput tgInput = (TransactionsGraphInput) input;
+		Collection<String> transactions = getTransactions(serviceId, tgInput, timeSpan);
 		
-		List<GraphSeries> result = processServiceGraph(serviceId, input, 
+		Collection<TransactionGraph> transactionGraphs = getTransactionsGraphs(serviceId, viewId, timeSpan, tgInput, pointsWanted);
+		
+		List<GraphSeries> result = processServiceGraph(serviceId, tgInput, 
 				serviceIds, transactions, transactionGraphs);
-		
-
+	
 		return result;
 	}
     
@@ -119,15 +173,6 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		List<GraphSeries> result = new ArrayList<GraphSeries>();
 		
 		for (TransactionGraph graph : graphs) {
-
-			/*
-			Pair<String, String> nameAndMethod = getFullNameAndMethod(graph.name);
-			
-			if (filterTransaction(transactionFilter, searchText, nameAndMethod.getFirst(), nameAndMethod.getSecond()))
-			{
-				continue;
-			}
-			*/
 
 			if (input.volumeType.equals(GraphType.all)) {
 				result.add(createTransactionGraphSeries(serviceId, graph, GraphType.avg_time, serviceIds));

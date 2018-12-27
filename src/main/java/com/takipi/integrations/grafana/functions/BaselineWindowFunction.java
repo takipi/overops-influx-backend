@@ -9,8 +9,8 @@ import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.common.util.Pair;
-import com.takipi.integrations.grafana.input.EnvironmentsInput;
-import com.takipi.integrations.grafana.input.EventFilterInput;
+import com.takipi.integrations.grafana.input.BaselineWindowInput;
+import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class BaselineWindowFunction extends EnvironmentVariableFunction
@@ -29,7 +29,7 @@ public class BaselineWindowFunction extends EnvironmentVariableFunction
 
 		@Override
 		public Class<?> getInputClass() {
-			return EventFilterInput.class;
+			return BaselineWindowInput.class;
 		}
 
 		@Override
@@ -39,24 +39,28 @@ public class BaselineWindowFunction extends EnvironmentVariableFunction
 	}
 
 	@Override
-	protected void populateServiceValues(EnvironmentsInput input, Collection<String> serviceIds, String serviceId,
+	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender)
 	{		
-		EventFilterInput viewInput = (EventFilterInput)input;
+		BaselineWindowInput bwInput = (BaselineWindowInput)input;
 		
-		String viewId = getViewId(serviceId, viewInput.view);
+		String viewId = getViewId(serviceId, bwInput.view);
 		
 		if (viewId == null)
 		{
 			return;
 		}
 		
-		Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(viewInput.timeFilter);
+		Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(bwInput.timeFilter);
 		
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
-		Pair<RegressionInput, RegressionWindow> inputPair = regressionFunction.getRegressionInput(serviceId, viewId, viewInput, timespan);
+		Pair<RegressionInput, RegressionWindow> inputPair = regressionFunction.getRegressionInput(serviceId, viewId, bwInput, timespan);
 		
-		long time = inputPair.getFirst().baselineTimespan + inputPair.getSecond().activeTimespan;
+		long time = inputPair.getFirst().baselineTimespan;
+		
+		if (!bwInput.baselineOnly) {
+			time += inputPair.getSecond().activeTimespan;
+		}
 		
 		String value = TimeUtil.getTimeInterval(TimeUnit.MINUTES.toMillis(time));
 		

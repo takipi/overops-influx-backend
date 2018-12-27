@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.joda.time.DateTime;
 
@@ -15,6 +16,7 @@ import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.BaselineAnnotationInput;
 import com.takipi.integrations.grafana.output.Series;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class BaselineAnnotationFunction extends BaseGraphFunction {
 		
@@ -58,9 +60,17 @@ public class BaselineAnnotationFunction extends BaseGraphFunction {
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
 		Pair<RegressionInput, RegressionWindow> inputPair = regressionFunction.getRegressionInput(serviceId, viewId, input, timeSpan);
 		
-		long time = inputPair.getSecond().activeWindowStart.getMillis();
+		RegressionInput regressionInput = inputPair.getFirst();
+		RegressionWindow regressionWindow = inputPair.getSecond();
 		
-		result.series.values.add(Arrays.asList(new Object[] { time, getServiceValue(baInput.text, serviceId, serviceIds) }));
+		long time = regressionWindow.activeWindowStart.getMillis();
+		
+		String activeWindow = TimeUtil.getTimeInterval(TimeUnit.MINUTES.toMillis(regressionWindow.activeTimespan));
+		String baselineWindow = TimeUtil.getTimeInterval(TimeUnit.MINUTES.toMillis(regressionInput.baselineTimespan));
+
+		String text = String.format(baInput.text, baselineWindow, activeWindow);
+		
+		result.series.values.add(Arrays.asList(new Object[] { time, getServiceValue(text, serviceId, serviceIds) }));
 		
 		return Collections.singletonList(result);
 	}

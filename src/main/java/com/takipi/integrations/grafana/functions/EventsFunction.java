@@ -19,8 +19,8 @@ import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.settings.GeneralSettings;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
+import com.takipi.integrations.grafana.settings.input.GeneralSettings;
 import com.takipi.integrations.grafana.util.ArrayUtil;
 import com.takipi.integrations.grafana.util.EventLinkEncoder;
 import com.takipi.integrations.grafana.util.TimeUtil;
@@ -57,6 +57,10 @@ public class EventsFunction extends GrafanaFunction {
 			}
 			
 			if (!Objects.equal(event.error_location, other.event.error_location)) {
+				return false;
+			}
+			
+			if (!Objects.equal(event.call_stack_group, other.event.call_stack_group)) {
 				return false;
 			}
 			

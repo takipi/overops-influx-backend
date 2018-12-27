@@ -64,9 +64,9 @@
 		[
 			{
 				"names": [
-					"com.acme"
+					"com.acme.mycode"
 				],
-				"labels": ["Acme"]
+				"labels": ["Mycode"]
 			},
 			
 			{
@@ -78,6 +78,7 @@
 	"slowdown": { 
 		"active_invocations_threshold": 50,
 		"baseline_invocations_threshold": 50,
+		"min_delta_threshold": 5,
 		"over_avg_slowing_percentage": 0.3,
 		"over_avg_critical_percentage": 0.6,
 		"std_dev_factor": 1.5

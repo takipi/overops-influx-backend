@@ -1,0 +1,1367 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      },
+      {
+        "datasource": "OO",
+        "enable": true,
+        "hide": true,
+        "iconColor": "#0a50a1",
+        "limit": 100,
+        "name": "deployments",
+        "query": "deploymentsAnnotation({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"All Events\",\"timeFilter\":\"time >= now() - 90d\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\",\"seriesName\":\"Times\",\"graphCount\":3})",
+        "showIn": 0,
+        "tags": [],
+        "type": "tags"
+      },
+      {
+        "datasource": "OO",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(255, 96, 96, 1)",
+        "limit": 100,
+        "name": "baseline",
+        "query": "baselineAnnotation({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"text\":\"<- baseline %s | active window %s  ->\"})",
+        "showIn": 0,
+        "tags": [],
+        "type": "tags"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": 37,
+  "iteration": 1545885110014,
+  "links": [
+    {
+      "asDropdown": true,
+      "icon": "dashboard",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [
+        "OverOps"
+      ],
+      "targetBlank": true,
+      "title": "",
+      "tooltip": "",
+      "type": "dashboards",
+      "url": ""
+    }
+  ],
+  "panels": [
+    {
+      "aliasColors": {
+        ".avg_time": "#1f78c1"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "OO",
+      "description": "The response time of the selected transactions overlaid on the number of calls (throughput) into them.",
+      "fill": 0,
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "hideTimeOverride": false,
+      "id": 12,
+      "interval": "5m",
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null as zero",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "Throughput",
+          "color": "#9ac48a",
+          "fill": 2,
+          "linewidth": 0,
+          "yaxis": 2
+        },
+        {
+          "alias": "Avg Response (ms)",
+          "color": "#f2c96d"
+        },
+        {
+          "alias": ".Avg (ms)",
+          "color": "#1f78c1",
+          "dashes": true
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "Throughput",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregate\":true,\"transactions\":\"$transactions\",\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\"})",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "alias": "Avg Response (ms)",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregate\":\"true\",\"transactions\":\"$transactions\",\"seriesName\":\"Avg Response (ms)\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\",\"performanceStates\":\"$performanceStates\"})",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "transactionsAvgGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"aggregate\":\"false\",\"transactions\":\"$transactions\",\"seriesName\":\"Avg (ms)\", \"pointsWanted\":\"$transactionPointsWanted\", \"aggregate\":\"true\", \"searchText\":\"$searchText\",\"performanceStates\":\"$performanceStates\"}) ",
+          "rawQuery": true,
+          "refId": "D",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": "$timeRange",
+      "timeShift": null,
+      "title": "Avg Response: $timeRange",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "transparent": false,
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "decimals": null,
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {
+        ".avg_time": "#1f78c1"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "OO",
+      "description": "The response time of the selected transactions in the selected timeframe ($timeRange) compared to the baseline ($baseline)",
+      "fill": 0,
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "hideTimeOverride": false,
+      "id": 13,
+      "interval": "5m",
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null as zero",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "Throughput",
+          "color": "#9ac48a",
+          "fill": 2,
+          "linewidth": 0,
+          "yaxis": 2
+        },
+        {
+          "alias": "Avg Response (ms)",
+          "color": "#f2c96d"
+        },
+        {
+          "alias": ".Avg (ms)",
+          "color": "#3f2b5b",
+          "dashes": true
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "Throughput",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregate\":true,\"transactions\":\"$transactions\",\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\",\"performanceStates\":\"$performanceStates\"})",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "alias": "Avg Response (ms)",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregate\":\"true\",\"transactions\":\"$transactions\",\"seriesName\":\"Avg Response (ms)\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\",\"performanceStates\":\"$performanceStates\"})",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": true,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "transactionsAvgGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"aggregate\":\"false\",\"transactions\":\"$transactions\",\"seriesName\":\"Avg (ms)\", \"pointsWanted\":\"$transactionPointsWanted\", \"aggregate\":\"true\", \"searchText\":\"$searchText\",\"performanceStates\":\"$performanceStates\"}) ",
+          "rawQuery": true,
+          "refId": "D",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": "$baseline",
+      "timeShift": null,
+      "title": "Avg Response: $timeRange vs.$baselineOnly",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "transparent": false,
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "decimals": null,
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "columns": [],
+      "datasource": "OO",
+      "description": "The list of selected transactions and their details.",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 11,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "id": 8,
+      "links": [],
+      "pageSize": 1000,
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": 1,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "Time",
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "pattern": "Time",
+          "type": "hidden"
+        },
+        {
+          "alias": "Volume",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "linkTargetBlank": true,
+          "linkTooltip": "",
+          "linkUrl": "d/KsF5KIbik/performance-drill-down?orgId=1&var-transaction=${__cell_0}",
+          "mappingType": 1,
+          "pattern": "invocations",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "Failures",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 0,
+          "link": false,
+          "linkTargetBlank": true,
+          "linkTooltip": "",
+          "linkUrl": "d/KsF5KIbik/performance-drill-down?orgId=1&var-transaction=${__cell_1}",
+          "mappingType": 1,
+          "pattern": "errors",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "Failure Rate",
+          "colorMode": "value",
+          "colors": [
+            "rgba(50, 172, 45, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": true,
+          "linkTargetBlank": true,
+          "linkTooltip": "${__cell_12} errors of type: $transactionFailureText in ${__cell_6} calls",
+          "linkUrl": "d/HYBPMdYik/errors?from=${__cell_3}&to=${__cell_4}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=${__cell_5}&var-type=$transactionFailureTypes",
+          "mappingType": 1,
+          "pattern": "error_rate",
+          "thresholds": [
+            "0.01",
+            "0.05"
+          ],
+          "type": "number",
+          "unit": "percentunit"
+        },
+        {
+          "alias": "Avg Response (ms)",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "decimals": null,
+          "link": false,
+          "linkTargetBlank": true,
+          "linkTooltip": "",
+          "linkUrl": "d/KsF5KIbik/performance-drill-down?orgId=1&var-transaction=${__cell_0}",
+          "pattern": "avg_response",
+          "thresholds": [],
+          "type": "number",
+          "unit": "none"
+        },
+        {
+          "alias": "Transaction",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 0,
+          "link": true,
+          "linkTargetBlank": true,
+          "linkTooltip": "Jump to Slow Call Analysis",
+          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
+          "mappingType": 1,
+          "pattern": "transaction",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "mappingType": 1,
+          "pattern": "link",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "P",
+          "colorMode": "value",
+          "colors": [
+            "rgba(50, 172, 45, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "slow_state",
+          "thresholds": [
+            "1",
+            "2"
+          ],
+          "type": "string",
+          "unit": "short",
+          "valueMaps": [
+            {
+              "text": "2",
+              "value": "1"
+            },
+            {
+              "text": "1",
+              "value": "2"
+            },
+            {
+              "text": "✔",
+              "value": "0"
+            }
+          ]
+        },
+        {
+          "alias": "Slow Δ",
+          "colorMode": "value",
+          "colors": [
+            "rgba(50, 172, 45, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": true,
+          "linkTargetBlank": false,
+          "linkTooltip": "${__cell_2}",
+          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
+          "mappingType": 1,
+          "pattern": "slow_delta",
+          "thresholds": [
+            "30",
+            "60"
+          ],
+          "type": "number",
+          "unit": "percent"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "delta_description",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "from",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "to",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "Baseline Avg (ms)",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 1,
+          "link": true,
+          "linkTooltip": "The avg response time in the preceding $baselineOnly with ${__cell_5} calls",
+          "mappingType": 1,
+          "pattern": "baseline_avg",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "baseline_calls",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "active_calls",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"fields\":\"link,slow_delta,delta_description,from,to,baseline_calls,active_calls,transaction,invocations,avg_response,baseline_avg,error_rate,errors\",\"renderMode\":\"Grid\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"searchText\":\"$searchText\", \"pointsWanted\":\"$transactionPointsWanted\", \"performanceStates\":\"$performanceStates\"})",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "title": "",
+      "transform": "table",
+      "type": "table"
+    },
+    {
+      "content": "<script>\n\nfunction hide(name) {\n  var element = document.getElementsByClassName(name);\n  \n  if ((element) && (element.length == 1)) {\n    element[0].style.display = 'none';\n  }\n\n}\n\nfunction hideButtons() {\n  hide(\"btn navbar-button gf-timepicker-nav-btn\");\n  hide(\"navbar-buttons navbar-buttons--zoom\");\n}\n\nhideButtons();\n\n</script>\n\n\n",
+      "gridPos": {
+        "h": 1,
+        "w": 1,
+        "x": 0,
+        "y": 18
+      },
+      "id": 15,
+      "links": [],
+      "mode": "html",
+      "title": "",
+      "type": "text"
+    }
+  ],
+  "refresh": false,
+  "schemaVersion": 16,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "allValue": "all",
+        "current": {
+          "text": "None",
+          "value": [
+            "None"
+          ]
+        },
+        "datasource": "OO",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Environments",
+        "multi": true,
+        "name": "environments",
+        "options": [],
+        "query": "environments({\"sorted\":\"true\"})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": "*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "OO",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Applications",
+        "multi": true,
+        "name": "applications",
+        "options": [],
+        "query": "applications({\"environments\":\"$environments\",\"sorted\":\"true\"})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": "*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "OO",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Deployments",
+        "multi": false,
+        "name": "deployments",
+        "options": [],
+        "query": "deployments({\"environments\":\"$environments\", \"sorted\":true})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": "All",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "OO",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Servers",
+        "multi": true,
+        "name": "servers",
+        "options": [],
+        "query": "servers({\"environments\":\"$environments\",\"sorted\":\"true\"})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": "*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "OO",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Transaction",
+        "multi": true,
+        "name": "transactions",
+        "options": [],
+        "query": "slowTransactions({\"environments\":\"$environments\",\"view\":\"All Events\",\"timeFilter\":\"time >= now() - $timeRange\",\"sorted\":\"true\", \"pointsWanted\":\"$transactionPointsWanted\", \"performanceStates\":\"$performanceStates\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "24",
+          "value": "24"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "pointsWanted",
+        "options": [],
+        "query": "settingsVar({\"environments\":\"$environments\", \"name\":\"points_wanted\", \"defaultValue\":24})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "100",
+          "value": "100"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "transactionPointsWanted",
+        "options": [],
+        "query": "settingsVar({\"environments\":\"$environments\", \"name\":\"transaction_points_wanted\", \"defaultValue\":100})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "3",
+          "value": "3"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "label": "Split Top",
+        "multi": false,
+        "name": "splitLimit",
+        "options": [
+          {
+            "selected": true,
+            "text": "3",
+            "value": "3"
+          }
+        ],
+        "query": "3",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "All Events",
+          "value": "All Events"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "label": "View",
+        "multi": false,
+        "name": "view",
+        "options": [
+          {
+            "selected": true,
+            "text": "All Events",
+            "value": "All Events"
+          }
+        ],
+        "query": "All Events",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "<term>",
+          "value": "<term>"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Search",
+        "multi": false,
+        "name": "searchText",
+        "options": [
+          {
+            "selected": true,
+            "text": "<term>",
+            "value": "<term>"
+          }
+        ],
+        "query": "<term>",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "Logged Error|Uncaught Exception|HTTP Error",
+          "value": "Logged Error|Uncaught Exception|HTTP Error"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "transactionFailureTypes",
+        "options": [],
+        "query": "settingsVar({\"environments\":\"$environments\", \"name\":\"transaction_failures\", \"convertToArray\":\"true\", \"defaultValue\":\"Logged Error|Uncaught Exception|HTTP Error\"})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "Logged Error,Uncaught Exception,HTTP Error",
+          "value": "Logged Error,Uncaught Exception,HTTP Error"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "transactionFailureText",
+        "options": [],
+        "query": "settingsVar({\"environments\":\"$environments\", \"name\":\"transaction_failures\", \"convertToArray\":\"false\", \"defaultValue\":\"Logged Error,Uncaught Exception,HTTP Error\"})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "app.overops.com",
+          "value": "app.overops.com"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "apiHost",
+        "options": [],
+        "query": "apiHost({\"type\":\"URL_NO_PORT\"})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "443",
+          "value": "443"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "apiPort",
+        "options": [],
+        "query": "apiHost({\"type\":\"PORT\"})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "baseline",
+        "options": [],
+        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "tags": [],
+          "text": "2d",
+          "value": "2d"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Last",
+        "multi": false,
+        "name": "timeRange",
+        "options": [
+          {
+            "selected": false,
+            "text": "30m",
+            "value": "30m"
+          },
+          {
+            "selected": false,
+            "text": "1h",
+            "value": "1h"
+          },
+          {
+            "selected": false,
+            "text": "4h",
+            "value": "4h"
+          },
+          {
+            "selected": false,
+            "text": "8h",
+            "value": "8h"
+          },
+          {
+            "selected": false,
+            "text": "24h",
+            "value": "24h"
+          },
+          {
+            "selected": true,
+            "text": "2d",
+            "value": "2d"
+          },
+          {
+            "selected": false,
+            "text": "7d",
+            "value": "7d"
+          },
+          {
+            "selected": false,
+            "text": "14d",
+            "value": "14d"
+          },
+          {
+            "selected": false,
+            "text": "30d",
+            "value": "30d"
+          }
+        ],
+        "query": "30m,1h,4h,8h,24h,2d,7d,14d,30d",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "SLOWING|CRITICAL",
+          "value": "SLOWING|CRITICAL"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "performanceStates",
+        "options": [
+          {
+            "selected": true,
+            "text": "SLOWING|CRITICAL",
+            "value": "SLOWING|CRITICAL"
+          }
+        ],
+        "query": "SLOWING|CRITICAL",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "baselineOnly",
+        "options": [],
+        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"baselineOnly\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {
+    "hidden": false,
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
+  },
+  "timezone": "",
+  "title": "Slowdowns",
+  "uid": "iHSORcymk",
+  "version": 26
+}

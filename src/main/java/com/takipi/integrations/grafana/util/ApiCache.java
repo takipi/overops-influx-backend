@@ -31,6 +31,7 @@ import com.takipi.api.core.request.intf.ApiGetRequest;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.integrations.grafana.functions.RegressionFunction;
 import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOutput;
+import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.EventFilterInput;
 import com.takipi.integrations.grafana.input.ViewInput;
@@ -763,7 +764,7 @@ public class ApiCache {
 
 	@SuppressWarnings("unchecked")
 	public static Response<TransactionsGraphResult> getTransactionsGraph(ApiClient apiClient, String serviceId,
-			EventFilterInput input, int pointsWanted, int baselineTimespan, int activeTimespan, 
+			BaseEventVolumeInput input, int pointsWanted, int baselineTimespan, int activeTimespan, 
 			TransactionsGraphRequest request) {
 
 		TransactionsGraphCacheLoader cacheKey = new TransactionsGraphCacheLoader(apiClient, request, serviceId, input,
@@ -814,7 +815,7 @@ public class ApiCache {
 				
 				@Override
 				public RegressionOutput load(RegressionCacheLoader key) {
-					return key.function.executeRegression(key.serviceId, (EventFilterInput)key.input);
+					return key.function.executeRegression(key.serviceId, (BaseEventVolumeInput)key.input);
 				}
 			});
 

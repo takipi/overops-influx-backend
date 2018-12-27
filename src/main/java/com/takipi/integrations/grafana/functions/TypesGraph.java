@@ -15,7 +15,7 @@ import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.input.TypesGraphInput;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
-import com.takipi.integrations.grafana.settings.GeneralSettings;
+import com.takipi.integrations.grafana.settings.input.GeneralSettings;
 
 public class TypesGraph extends GraphFunction {
 

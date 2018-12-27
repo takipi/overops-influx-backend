@@ -8,7 +8,7 @@ import com.takipi.api.client.data.label.Label;
 import com.takipi.api.client.request.label.LabelsRequest;
 import com.takipi.api.client.result.label.LabelsResult;
 import com.takipi.api.core.url.UrlClient.Response;
-import com.takipi.integrations.grafana.input.EnvironmentsInput;
+import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.LabelsInput;
 
 public class LabelsFunction extends EnvironmentVariableFunction {
@@ -36,7 +36,7 @@ public class LabelsFunction extends EnvironmentVariableFunction {
 	}
 
 	@Override
-	protected void populateServiceValues(EnvironmentsInput input, Collection<String> serviceIds, String serviceId,
+	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender) {
 		
 		if (!(input instanceof LabelsInput)) {

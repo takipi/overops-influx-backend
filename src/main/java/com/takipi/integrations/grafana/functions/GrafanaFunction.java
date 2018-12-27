@@ -52,10 +52,10 @@ import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
+import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.EnvironmentsFilterInput;
-import com.takipi.integrations.grafana.input.EnvironmentsInput;
-import com.takipi.integrations.grafana.input.EventFilterInput;
+import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
@@ -92,25 +92,23 @@ public abstract class GrafanaFunction
 	
 	public static final String GRAFANA_SEPERATOR_RAW = "|";
 	public static final String ARRAY_SEPERATOR_RAW = ",";
+	public static final String GRAFANA_VAR_ADD = "And";
 
 	public static final String GRAFANA_SEPERATOR = Pattern.quote(GRAFANA_SEPERATOR_RAW);
 	public static final String ARRAY_SEPERATOR = Pattern.quote(ARRAY_SEPERATOR_RAW);
 	public static final String SERVICE_SEPERATOR = ": ";
 	public static final String GRAFANA_VAR_PREFIX = "$";
 	
-	public static final String ALL = "all";
-	public static final List<String> VAR_ALL = Arrays.asList(new String[] { "*", ALL });
+	public static final String ALL = "All";
+	public static final String NONE = "None";
+	public static final List<String> VAR_ALL = Arrays.asList(new String[] { "*", ALL, 
+		ALL.toLowerCase(), NONE, NONE.toLowerCase() });
 	
 	protected static final char QUALIFIED_DELIM = '.';
 	protected static final char INTERNAL_DELIM = '/';
 	protected static final String TRANS_DELIM = "#";
 	protected static final String EMPTY_POSTFIX = ".";	
-	
-	protected static final String FROM = "from";
-	protected static final String TO = "to";
-	protected static final String TIME_RANGE = "timeRange";
-
-	
+		
 	private static final DateTimeFormatter fmt = ISODateTimeFormat.dateTime().withZoneUTC();
 	
 	protected static final Map<String, String> TYPES_MAP;
@@ -328,7 +326,7 @@ public abstract class GrafanaFunction
 		return getSimpleClassName(location.class_name) + QUALIFIED_DELIM + location.method_name;
 	}
 	
-	protected Collection<String> getServiceIds(EnvironmentsInput input)
+	protected Collection<String> getServiceIds(BaseEnvironmentsInput input)
 	{
 		
 		List<String> serviceIds = input.getServiceIds();
@@ -339,6 +337,8 @@ public abstract class GrafanaFunction
 		}
 		
 		List<String> result = serviceIds.subList(0, Math.min(MAX_COMBINE_SERVICES, serviceIds.size()));
+		
+		result.remove(NONE);
 		
 		return result;
 	}
@@ -415,7 +415,7 @@ public abstract class GrafanaFunction
 		return getTransactions(serviceId, viewId, timeSpan, input, searchText, 0, 0);	
 	}
 	
-	protected Collection<TransactionGraph> getTransactionGraphs(EventFilterInput input, String serviceId, String viewId, 
+	protected Collection<TransactionGraph> getTransactionGraphs(BaseEventVolumeInput input, String serviceId, String viewId, 
 			Pair<DateTime, DateTime> timeSpan, String searchText,
 			int pointsWanted, int activeTimespan, int baselineTimespan) {
 		

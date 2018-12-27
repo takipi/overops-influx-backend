@@ -5,7 +5,8 @@ import java.util.List;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.client.ClientUtil;
-import com.takipi.integrations.grafana.input.EnvironmentsInput;
+import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
+import com.takipi.integrations.grafana.input.ServersInput;
 
 public class ServersFunction extends EnvironmentVariableFunction {
 
@@ -18,7 +19,7 @@ public class ServersFunction extends EnvironmentVariableFunction {
 
 		@Override
 		public Class<?> getInputClass() {
-			return EnvironmentsInput.class;
+			return ServersInput.class;
 		}
 
 		@Override
@@ -32,7 +33,7 @@ public class ServersFunction extends EnvironmentVariableFunction {
 	}
 
 	@Override
-	protected void populateServiceValues(EnvironmentsInput input, Collection<String> serviceIds, String serviceId,
+	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender) {
 
 		List<String> serviceServers;

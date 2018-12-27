@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.regex.Pattern;
 
 import com.takipi.api.client.ApiClient;
-import com.takipi.integrations.grafana.input.EnvironmentsInput;
+import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 
 public class SettingsUtil {
@@ -26,10 +26,7 @@ public class SettingsUtil {
 
 	private static String getServiceId(String environments) {
 
-		EnvironmentsInput input = new EnvironmentsInput();
-		input.environments = environments;
-
-		Collection<String> serviceIds = input.getServiceIds();
+		Collection<String> serviceIds = BaseEnvironmentsInput.getServiceIds(environments);
 
 		if ((serviceIds == null) || (serviceIds.size() != 1)) {
 			throw new IllegalStateException("Invalid env: " + environments);

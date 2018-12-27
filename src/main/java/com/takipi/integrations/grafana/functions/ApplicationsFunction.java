@@ -6,7 +6,8 @@ import java.util.TreeSet;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.client.ClientUtil;
-import com.takipi.integrations.grafana.input.EnvironmentsInput;
+import com.takipi.integrations.grafana.input.ApplicationsInput;
+import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings.Group;
@@ -22,7 +23,7 @@ public class ApplicationsFunction extends EnvironmentVariableFunction {
 
 		@Override
 		public Class<?> getInputClass() {
-			return EnvironmentsInput.class;
+			return ApplicationsInput.class;
 		}
 
 		@Override
@@ -36,7 +37,7 @@ public class ApplicationsFunction extends EnvironmentVariableFunction {
 	}
 
 	@Override
-	protected void populateServiceValues(EnvironmentsInput input, Collection<String> serviceIds, String serviceId,
+	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender) {
 	
 		GroupSettings appGroupSettings = GrafanaSettings.getData(apiClient, serviceId).applications;
@@ -62,7 +63,7 @@ public class ApplicationsFunction extends EnvironmentVariableFunction {
 		//do nothing
 	}
 
-	private Collection<String> addApps(EnvironmentsInput input, String serviceId, Collection<String> serviceIds, Collection<String> apps,
+	private Collection<String> addApps(BaseEnvironmentsInput input, String serviceId, Collection<String> serviceIds, Collection<String> apps,
 		VariableAppender appender, Collection<String> existing) {
 		
 		Collection<String> result;

@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 31,
-  "iteration": 1545261825014,
+  "iteration": 1545789597882,
   "links": [
     {
       "asDropdown": true,
@@ -524,7 +524,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "events({\"fields\":\"link,type,entry_point,introduced_by,message,error_location,stats.hits,rate,first_seen\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":80, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
+          "query": "events({\"fields\":\"link,type,entry_point,introduced_by,message,error_location,stats.hits,rate,first_seen\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":70, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -559,18 +559,15 @@
   "templating": {
     "list": [
       {
-        "allValue": "*",
+        "allValue": "None",
         "current": {
           "selected": true,
-          "tags": [],
-          "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "text": "None",
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
-        "includeAll": true,
+        "includeAll": false,
         "label": "Env",
         "multi": true,
         "name": "environments",
@@ -589,6 +586,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -613,6 +611,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -637,6 +636,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -661,6 +661,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -709,6 +710,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -894,5 +896,5 @@
   "timezone": "",
   "title": "Unique Errors",
   "uid": "HYBPMdYik",
-  "version": 35
+  "version": 40
 }
