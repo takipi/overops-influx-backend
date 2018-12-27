@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 37,
-  "iteration": 1545774696217,
+  "iteration": 1545885110014,
   "links": [
     {
       "asDropdown": true,
@@ -859,8 +859,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
-          "tags": [],
           "text": "None",
           "value": [
             "None"
@@ -1148,7 +1146,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -1158,15 +1155,9 @@
         "label": null,
         "multi": false,
         "name": "apiHost",
-        "options": [
-          {
-            "selected": true,
-            "text": "app.overops.com",
-            "value": "app.overops.com"
-          }
-        ],
+        "options": [],
         "query": "apiHost({\"type\":\"URL_NO_PORT\"})",
-        "refresh": 0,
+        "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -1179,7 +1170,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -1189,15 +1179,9 @@
         "label": null,
         "multi": false,
         "name": "apiPort",
-        "options": [
-          {
-            "selected": true,
-            "text": "443",
-            "value": "443"
-          }
-        ],
+        "options": [],
         "query": "apiHost({\"type\":\"PORT\"})",
-        "refresh": 0,
+        "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -1379,5 +1363,5 @@
   "timezone": "",
   "title": "Slowdowns",
   "uid": "iHSORcymk",
-  "version": 24
+  "version": 26
 }
