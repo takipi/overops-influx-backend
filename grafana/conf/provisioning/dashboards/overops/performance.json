@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 19,
-  "iteration": 1545774715273,
+  "iteration": 1545774715279,
   "links": [
     {
       "asDropdown": true,
@@ -1850,15 +1850,9 @@
         "label": null,
         "multi": false,
         "name": "apiHost",
-        "options": [
-          {
-            "selected": true,
-            "text": "app.overops.com",
-            "value": "app.overops.com"
-          }
-        ],
+        "options": [],
         "query": "apiHost({\"type\":\"URL_NO_PORT\"})",
-        "refresh": 0,
+        "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -1871,7 +1865,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -1881,15 +1874,9 @@
         "label": null,
         "multi": false,
         "name": "apiPort",
-        "options": [
-          {
-            "selected": true,
-            "text": "443",
-            "value": "443"
-          }
-        ],
+        "options": [],
         "query": "apiHost({\"type\":\"PORT\"})",
-        "refresh": 0,
+        "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -1934,5 +1921,5 @@
   "timezone": "",
   "title": "Performance",
   "uid": "Z40SpeJmz",
-  "version": 75
+  "version": 77
 }
