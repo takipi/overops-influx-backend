@@ -2532,8 +2532,8 @@
             "value": "Logged Error|Uncaught Exception|HTTP Error"
           }
         ],
-        "query": "settingsVar({\"environments\":\"$environments\", \"name\":\"transaction_failures\",\"convertToArray\":\"true\"})",
-        "refresh": 0,
+        "query": "settingsVar({\"environments\":\"$environments\", \"name\":\"transaction_failures\", \"convertToArray\":\"true\", \"defaultValue\":\"Logged Error|Uncaught Exception|HTTP Error\"})",
+        "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
