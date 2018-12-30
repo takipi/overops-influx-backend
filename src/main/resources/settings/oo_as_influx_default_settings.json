@@ -1,12 +1,33 @@
 {
+	
+	//General settings related to how data is presented and ordered in table and graph widgets
 	"general": {
+		
+		//Control whether events in table functions should group events from the same event location
+		//but different entry points into one row
 		"group_by_entryPoint": true,
+		
+		//The default list of event types (comma delimited) to be used when performing volume functions
 		"event_types": "Logged Error,Uncaught Exception,Logged Warning,Swallowed Exception,HTTP Error,Caught Exception",
+		
+		//The default number of points to use when querying the OO REST api for event volume graphs
 		"points_wanted": 24,
+		
+		//The default number of points to use when querying the OO REST api for transaction call graphs
 		"transaction_points_wanted": 100,
-		"transaction_failures": "Logged Error,Uncaught Exception,HTTP Error",
-		"proxy_link_prefix": ""
+		
+		//A list of event types that each if found within the context of an entry point (transaction) call
+	 	//will mark that transaction as failed.Note that more than one of these events can take place within
+	 	//the context of a single transaction call (i.e. more than one log error can take place within the execution of a single entry point call)
+		
+		"transaction_failures": "Logged Error,Uncaught Exception,HTTP Error"		
 	},
+	
+	 //A list of pattern groups that defined key high level packages groups that can be specifically 
+	 //reported on and visualized within Grafana dashboards. For example, a user may define all code nested
+	 //within the com.acme.payment top package as the "Payment" to and have the ability to report
+	 //on any new errors, regressions and slowdowns within them as a single logical unit. OverOps
+	 //used a set of out of the box categorizations defined in: https://git.io/fpPT0 to provide default tiers that can be reported on  
 	
 	"transactions": {
 		"groups": [
@@ -55,11 +76,22 @@
 		]
 	},
 	
+	//A list of pattern groups that defined key application groups that can be specifically 
+	//reported on and visualized within Grafana dashboards. For example, a user may defined a group
+	//microservices related to payment, as the "Payment" app group and have the ability to report
+	//on any new errors, regressions and slowdowns within them as a single logical unit.
+
 	"applications": {
 		"groups": [
 		]
 	},
 	
+	 //A list of pattern groups that defined key high level packages groups that can be specifically 
+	 //reported on and visualized within Grafana dashboards. For example, a user may define all code nested
+	 //within the com.acme.payment top package as the "Payment" to and have the ability to report
+	 //on any new errors, regressions and slowdowns within them as a single logical unit. OverOps
+	 //used a set of out of the box categorizations defined in: https://git.io/fpPT0 to provide default tiers that can be reported on  
+		
 	"tiers": 
 		[
 			{
@@ -75,35 +107,122 @@
 		]
 	,
 		
+	//The settings used to determine for a target entry point called into by the app whether its avg
+	//response time is slowing down in comparison to a baseline period.
 	"slowdown": { 
+		
+		//The minimal number of calls into a target entry point within the selected time frame for it 
+	 	//to be considered for slowdown analysis
 		"active_invocations_threshold": 50,
+		
+		//The minimal number of calls into a target entry point within the baseline time frame for it 
+	 	//to be considered for slowdown analysis
 		"baseline_invocations_threshold": 50,
+		
+		//The minimal change (in ms) between the avg response time within the selected time frame and baseline
+	 	//for a transaction's state to be marked as Slowing or Critical
 		"min_delta_threshold": 5,
+		
+		//The percentage change (between 0 and 1) that the number of calls within the active timeframe whose
+	 	//response time exceeds the avg of the baseline + the std dev of the baseline * std_dev_factor,
+	 	//for a call to be considered slowing. 
+	 	//For example, if the number of calls in the last week whose avg response
+	 	//time is 90ms, where the baseline avg was 60ms and the std dev was 5s, is more than 0.3 (30%) of the calls,
+	 	//the transaction will be marked as slowing.
 		"over_avg_slowing_percentage": 0.3,
+		
+		//The percentage change (between 0 and 1) that the number of calls within the active timeframe whose
+	 	//response time exceeds the avg of the baseline + the std dev of the baseline * std_dev_factor,
+	 	//for a call to be considered critical. 
+	 	//For example, if the number of calls in the last week whose avg response
+	 	//time is 90ms, where the baseline avg was 60ms and the std dev was 5s, is more than 0.6 (60%) of the calls,
+	 	//the transaction will be marked as critical.
 		"over_avg_critical_percentage": 0.6,
+		
+		//The number of additional std devs (as calculated from the baseline time frame) added to the current baseline
+	 	//avg when calculating the percentage of calls exceeding that combined value for a transaction to 
+	 	//be considered slow or slowing.
 		"std_dev_factor": 1.5
 	},
 	
+	//The settings used to whether an event active within the current time frame is considered new or regressed (increasing),
+	//and if so, at what severity level.
 	"regression": {
-		"active_timespan": 1440,
-		"min_baseline_timespan": 20160,
-		"baseline_timespan_factor": 4,
-		"error_min_volume_threshold": 50,
-		"error_min_rate_threshold": 0.1,
-		"error_regression_delta": 0.5,
-		"error_critical_regression_delta": 1,
-		"apply_seasonality": true,
-		"critical_exception_types": "NullPointerException,IndexOutOfBoundsException,InvalidCastException,AssertionError",
 		
+		//The default active timespan used to compare the volume of a target event against its baseline
+		"active_timespan": 1440,
+		
+		//The minimal baseline time period to use when comparing an event's volume in the current time frame
+	 	//and a baseline time frame
+		"min_baseline_timespan": 20160,
+		
+		//The minimal ratio that must be maintained between the active window and baseline window. For example,
+		//if a active window of 2 weeks is selected and the baseline_timespan_factor is set to 4, the baseline window
+		//will be 8 weeks.
+		"baseline_timespan_factor": 4,
+		
+		//The minimal volume an event must have within the active window for it to be considered regression
+	 	//analysis. Example value - 50.
+		"error_min_volume_threshold": 50,
+		
+		//The minimal rate between event volume and calls into the event location event must have within the active window for it to be considered regression
+		//analysis. For example for 10%, specify 0.1.
+		"error_min_rate_threshold": 0.1,
+		
+		//The minimal change in % between the relative volume of an event in the active time frame vs. that of the
+	 	//base line for it to be considered a regression. For example, a value of 0.2 specifies that is the relative
+	 	//rate (the ration between volume and calls) of an event has increased by more than 20% in the active
+	 	//and baseline period it will be considered to have regressed.
+		"error_regression_delta": 0.5,
+		
+		//The minimal change in % between the relative volume of an event in the active time frame vs. that of the
+	 	//base line for it to be considered a regression. For example, a value of 1 specifies that is the relative
+	 	//rate (the ration between volume and calls) of an event has increased by more than 100% in the active
+	 	//and baseline period it will be considered to have critically regressed.
+		"error_critical_regression_delta": 1,
+		
+		//Control whether to exclude an object that has had more than one slice / season within
+	 	//the baseline window exceed the volume of the active window, or 2 windows that have exceeded it by > 50% of
+	 	//the absolute volume of the active window. For example, if the active window is a day, and the baseline
+	 	//is set to two weeks, and the volume of events for a target event within the active window is 100,
+	 	//if any of the days in previous two weeks has seen more than 100 events, or two days have seen 
+	 	//more than 50 events, that event will not be considered to have regressed
+		"apply_seasonality": true,
+		
+		//A comma delimited list of event types that if a new event is introduced within the active time frame
+	 	//whose type is contained in the list, it will be considered a severe new issues, regardless
+	 	//of whether it exceeded the error_min_rate_threshold and error_min_volume_threshold settings. For example,
+	 	//a *new* NullPointerException may be considered severe, regardless of whether .or not it exceeded the minimal
+	 	//volume thresholds.
+		"critical_exception_types": "NullPointerException,IndexOutOfBoundsException,InvalidCastException,AssertionError",
+				
+		//A comma delimited list of regression types that controls the sort order by which regressions
+	 	//reported by a table widget are returned.
 		"sort_order": "Severe New,Severe Regression,New,Regression",
+		
+		//A comma delimited list of event types that controls the secondary sort order by which regressions
+	 	//reported by a table widget are returned.
 		"type_order": "Logged Error,Uncaught Exception,Logged Warning,HTTP Error,Timer,Swallowed Exception,Caught Exception"
 	},
 	
+	// The settings used to provide a high-level reliability score for target app, deployment, tier
+	//based on the number of severe and non severe new events, regressions and slowdowns occuring within it
+	//within the current time frame.
 	"regression_report": {
+		
+		//The number of points deducted for a new event 
 		"new_event_score": 1,
+		
+		//The number of points deducted for a regressed event
 		"regression_score": 1,
+		
+		//The number of points deducted for a severe new event 
 		"severe_new_event_score": 2,
+		
+		//The number of points deducted for a severe regression or slowdown
 		"critical_regression_score": 2,
+		
+		//A factor applied to the score deduction of a new error, regression or slowdown. 
 		"score_weight": 2.5
 	}
 }

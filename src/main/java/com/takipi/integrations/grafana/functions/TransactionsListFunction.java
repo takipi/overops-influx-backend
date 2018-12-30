@@ -42,7 +42,7 @@ import com.takipi.integrations.grafana.util.TimeUtil;
 public class TransactionsListFunction extends GrafanaFunction {
 	
 	private static final DecimalFormat df = new DecimalFormat("#.##");
-
+	
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -141,7 +141,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 		return result;
 	}
 	
-	private String getSlowdownDesc(TransactionData transactionData, double stddevFactor) {
+	private String getSlowdownDesc(TransactionData transactionData, SlowdownSettings slowdownSettings ) {
 		
 		if (transactionData.baselineAvg == 0) {
 			return "";
@@ -152,16 +152,23 @@ public class TransactionsListFunction extends GrafanaFunction {
 		}
 		
 		Stats stats = TransactionUtil.aggregateGraph(transactionData.baselineGraph);
-		double baseline = stats.avg_time_std_deviation * stddevFactor + transactionData.baselineAvg;
+		double baseline = stats.avg_time_std_deviation * slowdownSettings.std_dev_factor + transactionData.baselineAvg;
 		
 		StringBuilder result = new StringBuilder();
 		
 		result.append((int)(transactionData.score));
 		result.append("% of calls took more than baseline avg + ");
-		result.append(stddevFactor);
+		result.append(slowdownSettings.std_dev_factor);
 		result.append("x std dev (");
 		result.append(df.format(baseline));
 		result.append("ms)");
+		
+		if ((transactionData.state == PerformanceState.CRITICAL) ||
+			(transactionData.state == PerformanceState.SLOWING)) {
+			result.append(" and avg response > baseline avg response by ");
+			result.append(slowdownSettings.min_delta_threshold);
+			result.append("ms");			
+		}
 
 		return result.toString();
 	}
@@ -170,27 +177,27 @@ public class TransactionsListFunction extends GrafanaFunction {
 			String serviceId, Pair<DateTime, DateTime> timeSpan,
 			TransactionsListIput input, List<String> fields) {
 		
-		double stddevFactor = GrafanaSettings.getData(apiClient, serviceId).slowdown.std_dev_factor;
+		SlowdownSettings slowdownSettings = GrafanaSettings.getData(apiClient, serviceId).slowdown;
 		
 		List<List<Object>> result = new ArrayList<List<Object>>(transactions.size());
 
-		for (TransactionData TransactionData : transactions) {
+		for (TransactionData transactionData : transactions) {
 
-			String name = getTransactionMessage(TransactionData);
-			Stats stats = getTrasnactionGraphStats(TransactionData.graph);
+			String name = getTransactionMessage(transactionData);
+			Stats stats = getTrasnactionGraphStats(transactionData.graph);
 					
 			double errorRate;
 			
 			if (stats.invocations > 0) {
-				errorRate = (double)TransactionData.errorsHits / (double)stats.invocations;
+				errorRate = (double)transactionData.errorsHits / (double)stats.invocations;
 			} else {
 				errorRate = 0;
 			}
 				
 			String link;
 			
-			if (TransactionData.currTimer != null) {
-				link = EventLinkEncoder.encodeLink(apiClient, serviceId, input, TransactionData.currTimer, 
+			if (transactionData.currTimer != null) {
+				link = EventLinkEncoder.encodeLink(apiClient, serviceId, input, transactionData.currTimer, 
 					timeSpan.getFirst(), timeSpan.getSecond());
 			} else {
 				link = null;
@@ -199,21 +206,22 @@ public class TransactionsListFunction extends GrafanaFunction {
 			Pair<Object, Object> fromTo = getTimeFilterPair(timeSpan, input.timeFilter);
 			String timeRange = TimeUtil.getTimeUnit(input.timeFilter); 
 
-			
+			int scoreValue = getStateValue(transactionData.state);
+		
 			Object[] object = new Object[fields.size()];
 			
 			setOutputObjectField(object, fields, TransactionsListIput.LINK, link);
 			setOutputObjectField(object, fields, TransactionsListIput.TRANSACTION, name);
 			setOutputObjectField(object, fields, TransactionsListIput.TOTAL, stats.invocations);
 			setOutputObjectField(object, fields, TransactionsListIput.AVG_RESPONSE, stats.avg_time);
-			setOutputObjectField(object, fields, TransactionsListIput. BASELINE_AVG, TransactionData.baselineAvg);
-			setOutputObjectField(object, fields, TransactionsListIput.BASELINE_CALLS, NumberUtil.format(TransactionData.baselineInvocations));
+			setOutputObjectField(object, fields, TransactionsListIput. BASELINE_AVG, transactionData.baselineAvg);
+			setOutputObjectField(object, fields, TransactionsListIput.BASELINE_CALLS, NumberUtil.format(transactionData.baselineInvocations));
 			setOutputObjectField(object, fields, TransactionsListIput.ACTIVE_CALLS, NumberUtil.format(stats.invocations));
-			setOutputObjectField(object, fields, TransactionsListIput.SLOW_STATE, getStateValue(TransactionData.state));
-			setOutputObjectField(object, fields, TransactionsListIput.SLOW_DELTA, TransactionData.score);
-			setOutputObjectField(object, fields, TransactionsListIput.DELTA_DESC, getSlowdownDesc(TransactionData, stddevFactor));
+			setOutputObjectField(object, fields, TransactionsListIput.SLOW_STATE, getStateValue(transactionData.state));
+			setOutputObjectField(object, fields, TransactionsListIput.SLOW_DELTA, scoreValue);
+			setOutputObjectField(object, fields, TransactionsListIput.DELTA_DESC, getSlowdownDesc(transactionData, slowdownSettings));
 			setOutputObjectField(object, fields, TransactionsListIput.ERROR_RATE, errorRate);
-			setOutputObjectField(object, fields, TransactionsListIput.ERRORS, TransactionData.errorsHits);
+			setOutputObjectField(object, fields, TransactionsListIput.ERRORS, transactionData.errorsHits);
 			setOutputObjectField(object, fields, ViewInput.FROM, fromTo.getFirst());
 			setOutputObjectField(object, fields, ViewInput.TO, fromTo.getSecond());
 			setOutputObjectField(object, fields, ViewInput.TIME_RANGE, timeRange);
@@ -224,7 +232,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 
 		return result;
 	}
-	
+
 	private int getStateValue(PerformanceState state) {
 		
 		if (state == null) {
@@ -336,7 +344,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 			
 			transactionData.state = performanceScore.state;
 			transactionData.score = performanceScore.score;
-			
+						
 			transactionData.baselineGraph = baselineGraphsMap.get(transactionName);
 		
 			if (transactionData.baselineGraph != null) {

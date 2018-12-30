@@ -638,6 +638,10 @@ public class ApiCache {
 			if (!Objects.equal(eventInput.searchText, otherInput.searchText)) {
 				return false;
 			}
+			
+			if (!Objects.equal(eventInput.eventLocations, otherInput.eventLocations)) {
+				return false;
+			}
 
 			return true;
 		}
@@ -826,7 +830,7 @@ public class ApiCache {
 				@Override
 				public RegressionWindow load(RegresionWindowCacheLoader key) {
 					
-					RegressionWindow result = RegressionUtil.getActiveWindow(key.apiClient, key.input, 4,
+					RegressionWindow result = RegressionUtil.getActiveWindow(key.apiClient, key.input, 
 							System.out);
 					return result;
 				}

@@ -2,21 +2,25 @@ package com.takipi.integrations.grafana.functions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.ISODateTimeFormat;
 
 import com.takipi.api.client.ApiClient;
-import com.takipi.api.client.data.metrics.Graph;
-import com.takipi.api.client.data.metrics.Graph.GraphPoint;
+import com.takipi.api.client.data.deployment.SummarizedDeployment;
+import com.takipi.api.client.request.deployment.DeploymentsRequest;
+import com.takipi.api.client.result.deployment.DeploymentsResult;
+import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.DeploymentsGraphInput;
-import com.takipi.integrations.grafana.input.GraphInput;
-import com.takipi.integrations.grafana.util.TimeUtil;
+import com.takipi.integrations.grafana.output.Series;
 
-public class DeploymentsAnnotation extends DeploymentsGraphFunction {
+public class DeploymentsAnnotation extends BaseGraphFunction {
+	
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -40,34 +44,42 @@ public class DeploymentsAnnotation extends DeploymentsGraphFunction {
 	}
 	
 	@Override
-	protected int getPointsWanted(BaseGraphInput input, Pair<DateTime, DateTime> timespan) {
-		
-		long delta = timespan.getSecond().minus(timespan.getFirst().getMillis()).getMillis();
-		long days = TimeUnit.MILLISECONDS.toDays(delta) ;
-		
-		if (days > 1) {
-			return (int)days;
-		} else {
-			return (int)TimeUnit.DAYS.toHours(1);
-		}
-	}
-
-	@Override
-	protected SeriesVolume processGraphPoints(String serviceId, String viewId, 
-			Pair<DateTime, DateTime> timeSpan, Graph graph, GraphInput input) {
-	
-		List<List<Object>> values = new ArrayList<List<Object>>(graph.points.size());
-		
-		for (GraphPoint gp : graph.points) {
+	protected List<GraphSeries> processServiceGraph(String serviceId, String viewId, String viewName,
+			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds, int pointsWanted) {
 			
-			if ((gp.stats.hits > 0) || (gp.stats.invocations > 0)) {
-				DateTime gpTime = TimeUtil.getDateTime(gp.time);
-				values.add(Arrays.asList(new Object[] { Long.valueOf(gpTime.getMillis()), input.deployments }));
-				
-				break;
-			}
+		GraphSeries result = new GraphSeries();
+		
+		result.series = new Series();
+		
+		result.series.name = EMPTY_NAME;
+		result.series.columns = Arrays.asList(new String[] { TIME_COLUMN, "deployments" });
+		result.series.values = new ArrayList<List<Object>>();
+		result.volume = 1;
+		
+		DeploymentsRequest request = DeploymentsRequest.newBuilder().setServiceId(serviceId).setActive(false).build();
+
+		Response<DeploymentsResult> response = apiClient.get(request);
+
+		if ((response.isBadResponse()) || (response.data == null)) {
+			throw new IllegalStateException(
+					"Could not acquire deployments for service " + serviceId + " . Error " + response.responseCode);
 		}
 		
-		return SeriesVolume.of(values,0);
+		if (response.data.deployments == null) {
+			return Collections.emptyList();
+		}
+		
+		for (SummarizedDeployment dep : response.data.deployments) {
+			
+			if (dep.first_seen == null) {
+				continue;
+			}
+			
+			DateTime firstSeen = ISODateTimeFormat.dateTime().withZoneUTC().parseDateTime(dep.first_seen);
+			result.series.values.add(Arrays.asList(new Object[] { firstSeen.getMillis(), 
+				getServiceValue(dep.name, serviceId, serviceIds) }));
+		}
+				
+		return Collections.singletonList(result);
 	}
 }

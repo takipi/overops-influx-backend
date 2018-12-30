@@ -1,7 +1,7 @@
 package com.takipi.integrations.grafana.settings.input;
 
 /**
- * Scoring the reliability of a target application, deployment of tier is done as follwing:
+ * Scoring the reliability of a target application, deployment of tier is done as following:
  *  score = 100 - score_weight * 
  *  	( new_event_score * newEventCount + 
  * 	  severe_new_event_score * severeNewEventCount + 

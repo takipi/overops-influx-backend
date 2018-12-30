@@ -6,6 +6,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 
@@ -14,7 +15,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.service.SummarizedService;
 import com.takipi.api.client.util.client.ClientUtil;
@@ -144,9 +144,31 @@ public class GrafanaSettings {
 				});
 	}
 	
+	private static String cleanJson(String json) {
+		String[] lines = json.split(Pattern.quote("\n"));
+		
+		StringBuilder result = new StringBuilder(json.length());
+		
+		for (String line: lines) { 
+			
+			int index = line.indexOf("//");
+			
+			if (index != -1) {
+				String value = line.substring(0, index);
+				result.append(value);	
+	
+			} else {
+				result.append(line);	
+			}
+		}
+		
+		return result.toString();
+	}
+		
+	
 	private static ServiceSettings getServiceSettings(String serviceId, ApiClient apiClient, String json) {
-		ServiceSettingsData data = new Gson().fromJson(json, ServiceSettingsData.class);
-		return new ServiceSettings(serviceId, apiClient, data);
+		ServiceSettingsData data = new Gson().fromJson(cleanJson(json), ServiceSettingsData.class);
+		return new ServiceSettings(serviceId, apiClient, json, data);
 	}
 	
 	public static ServiceSettingsData getData(ApiClient apiClient, String serviceId) {
@@ -167,26 +189,16 @@ public class GrafanaSettings {
 	
 	public static String getServiceSettingsJson(ApiClient apiClient, String serviceId) {
 		ServiceSettings settings = getServiceSettings(apiClient, serviceId);
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		String result = gson.toJson(settings.getData());
-		
-		return result;
+		return settings.getJson();
 	}
 
 	public static void saveServiceSettings(ApiClient apiClient, String serviceId, String json) {
-		ServiceSettings settings =  getServiceSettings(serviceId, apiClient, json);
-		saveServiceSettings(apiClient, serviceId, settings);
-	}
-	
-	public static void saveServiceSettings(ApiClient apiClient, String serviceId, ServiceSettings serviceSettings) {
-		authService(apiClient, serviceId);
 		
-		Gson gson = new Gson();
-		String json = gson.toJson(serviceSettings.getData());
+		ServiceSettings settings =  getServiceSettings(serviceId, apiClient, json);
 		
 		SettingsCacheKey key = new SettingsCacheKey(apiClient, serviceId);
 		
-		settingsCache.put(key, serviceSettings);
+		settingsCache.put(key, settings);
 		settingsStorage.saveServiceSettings(getServiceJsonName(serviceId), json);
 	}
 	

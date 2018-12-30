@@ -172,7 +172,10 @@ public class SplitGraphFunction extends LimitGraphFunction {
 		List<GraphSeries> result = new ArrayList<GraphSeries>();
 		
 		for (GraphData graphData : limitedGraphs) {
-			result.add(getGraphSeries(graphData, graphData.key));	
+			
+			if (graphData.volume > 0) {
+				result.add(getGraphSeries(graphData, graphData.key));
+			}
 		}
 				
 		return result;
