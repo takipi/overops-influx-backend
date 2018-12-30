@@ -28,6 +28,7 @@ public class EventFilter
 	private Collection<String> allowedTypes;
 	private Collection<String> types;
 	private Collection<String> introducedBy;
+	private List<Pair<String, String>> eventLocations;
 	private GroupFilter transactionsFilter;
 	private Collection<String> labels;
 	private Pattern labelsPattern;
@@ -40,15 +41,31 @@ public class EventFilter
 	private List<String> categoryTypes;
 	
 	public static EventFilter of(Collection<String> types, Collection<String> allowedTypes,
-			Collection<String> introducedBy, GroupFilter transactionsFilter,
+			Collection<String> introducedBy, Collection<String> eventLocations, GroupFilter transactionsFilter,
 			Collection<String> labels, String labelsRegex, String firstSeen, Categories categories,
-			String searchText, String transactionSearchText)
-	{
+			String searchText, String transactionSearchText) {
 		
 		EventFilter result = new EventFilter();
 		result.types = types;
 		result.allowedTypes = allowedTypes;
 		result.introducedBy = introducedBy;
+		
+		if (eventLocations != null) {
+			
+			result.eventLocations = new ArrayList<Pair<String, String>>();
+			
+			for (String eventLocation : eventLocations) {
+				
+				String[] eventLocationParts = eventLocation.split(Pattern.quote("."));
+						
+				if (eventLocationParts.length == 2) {
+					result.eventLocations.add(Pair.of(eventLocationParts[0], eventLocationParts[1]));		
+				} else {
+					result.eventLocations.add(Pair.of(eventLocation, null));		
+				}
+			}
+		}
+
 		result.transactionsFilter = transactionsFilter;
 		result.labels = labels;
 		result.categories = categories;
@@ -288,6 +305,25 @@ public class EventFilter
 		return false;
 	}
 	
+	private boolean filterEventLocation(EventResult event) {
+		
+		String eventSimpleClass = GrafanaFunction.getSimpleClassName(event.error_location.class_name);
+		
+		for (Pair<String, String> eventLocation : eventLocations) {
+			
+			if (!eventLocation.getFirst().equals(eventSimpleClass)) {
+				continue;
+			}
+			
+			if ((eventLocation.getSecond() == null) 
+			|| (eventLocation.getSecond().equals(event.error_location.method_name))) {
+				return false;		
+			}
+		}
+		
+		return true;
+	}
+	
 	public boolean filter(EventResult event)
 	{
 		if (event.is_rethrow)
@@ -311,6 +347,14 @@ public class EventFilter
 				return true;
 			}
 		}
+		
+		if ((eventLocations != null) && (!eventLocations.isEmpty()))
+		{
+			if (filterEventLocation(event))
+			{
+				return true;
+			}
+		} 
 		
 		if ((introducedBy != null) && (!introducedBy.isEmpty()) && (!introducedBy.contains(event.introduced_by)))
 		{

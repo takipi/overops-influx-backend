@@ -340,10 +340,10 @@ public class RegressionFunction extends EventsFunction
 	}
 	
 	public List<EventData> processRegression(EventFilterInput functionInput, RegressionInput input,
-			RateRegression rateRegression, boolean includeNew)
+			RateRegression rateRegression, boolean includeNew, boolean includeRegressions)
 	{
 		List<EventData> result;
-		List<EventData> eventDatas = processRegressionData(input, rateRegression, includeNew);
+		List<EventData> eventDatas = processRegressionData(input, rateRegression, includeNew, includeRegressions);
 				
 		if (functionInput.hasTransactions()) {
 			result = eventDatas;
@@ -355,7 +355,7 @@ public class RegressionFunction extends EventsFunction
 	}
 	
 	private List<EventData> processRegressionData(RegressionInput input,
-			RateRegression rateRegression, boolean includeNew)
+			RateRegression rateRegression, boolean includeNew, boolean includeRegressions)
 	{
 		
 		List<EventData> result = new ArrayList<EventData>();
@@ -391,20 +391,22 @@ public class RegressionFunction extends EventsFunction
 			}
 		}
 		
-		for (RegressionResult regressionResult : rateRegression.getSortedCriticalRegressions())
-		{
-			result.add(new RegressionData(rateRegression, input, regressionResult, RegressionType.SevereRegressions));
-		}
-		
-		for (RegressionResult regressionResult : rateRegression.getSortedAllRegressions())
-		{
-			
-			if (rateRegression.getCriticalRegressions().containsKey(regressionResult.getEvent().id))
+		if (includeRegressions) {
+			for (RegressionResult regressionResult : rateRegression.getSortedCriticalRegressions())
 			{
-				continue;
+				result.add(new RegressionData(rateRegression, input, regressionResult, RegressionType.SevereRegressions));
 			}
 			
-			result.add(new RegressionData(rateRegression, input, regressionResult, RegressionType.Regressions));
+			for (RegressionResult regressionResult : rateRegression.getSortedAllRegressions())
+			{
+				
+				if (rateRegression.getCriticalRegressions().containsKey(regressionResult.getEvent().id))
+				{
+					continue;
+				}
+				
+				result.add(new RegressionData(rateRegression, input, regressionResult, RegressionType.Regressions));
+			}
 		}
 		
 		return result;
@@ -711,7 +713,7 @@ public class RegressionFunction extends EventsFunction
 		
 		if ((regressionInput != null) && (rateRegression != null)) {
 			
-			result.eventDatas = processRegression(input, regressionInput, rateRegression, true);
+			result.eventDatas = processRegression(input, regressionInput, rateRegression, true, true);
 			
 			for (EventData eventData : result.eventDatas)
 			{

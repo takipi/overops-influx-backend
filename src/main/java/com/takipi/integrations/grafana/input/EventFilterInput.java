@@ -44,7 +44,16 @@ public abstract class EventFilterInput extends ViewInput
 	 * enough for the event to match at least one of the labels specified to be selected.
 	 */
 	public String labels;
+
 	
+	/**
+	 * An optional string value list containing a value in the format of class.method.
+	 * If the value is matched against the error_location of a target event, it is selected.
+	 * 
+	 */
+	public String eventLocations;
+
+
 	/**
 	 * An optional regex pattern applied to each of the target event's labels. If one of the labels
 	 * match the regex pattern the event is selected.
@@ -207,7 +216,9 @@ public abstract class EventFilterInput extends ViewInput
 			}
 		}
 		
-		return EventFilter.of(getTypes(), allowedTypes, getIntroducedBy(serviceId), transactionsFilter,
+		Collection<String> eventLocations = getServiceFilters(this.eventLocations, serviceId, true);
+	
+		return EventFilter.of(getTypes(), allowedTypes, getIntroducedBy(serviceId), eventLocations, transactionsFilter,
 				geLabels(serviceId), labelsRegex, firstSeen, categories, searchText, transactionSearchText);
 	}
 	

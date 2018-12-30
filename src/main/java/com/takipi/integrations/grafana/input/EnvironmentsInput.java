@@ -11,6 +11,6 @@ package com.takipi.integrations.grafana.input;
 * Screenshot: https://drive.google.com/file/d/187V1IuD5PeC9cz9sd4nzpY12q2PxpmW9/view?usp=sharing
 *
 */
-public class EnvironmentsInput extends VariableInput {
+public class EnvironmentsInput extends BaseEnvironmentsInput {
 	
 }

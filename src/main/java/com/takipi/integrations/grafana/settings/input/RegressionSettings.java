@@ -19,7 +19,7 @@ public class RegressionSettings {
 	public int min_baseline_timespan;
 	
 	/**
-	 * Thr minimal ratio that must be maintained between the active window and baseline window. For example,
+	 * The minimal ratio that must be maintained between the active window and baseline window. For example,
 	 * if a active window of 2 weeks is selected and the baseline_timespan_factor is set to 4, the baseline window
 	 * will be 8 weeks.
 	 */

@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 29,
-  "iteration": 1545534545256,
+  "iteration": 1546151986581,
   "links": [
     {
       "asDropdown": true,
@@ -150,7 +150,7 @@
               "type": "fill"
             }
           ],
-          "hide": false,
+          "hide": true,
           "orderByTime": "ASC",
           "policy": "default",
           "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"introducedBy\":\"$deployments\",\"firstSeen\":\"$timeFilter\",\"pointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\",seriesName\":\"Times\", \"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
@@ -191,7 +191,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "splitGraph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"introducedBy\":\"$deployments\",\"firstSeen\":\"$timeFilter\",\"pointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\",seriesName\":\"Times\", \"transactions\":\"$transactions\", \"limit\":\"$splitLimit\", \"searchText\":\"$search\"})\n",
+          "query": "regressionGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\",\"limit\":$splitLimit, \"searchText\":\"$search\", \"regressionType\":\"NewIssues\"})\n\n",
           "rawQuery": true,
           "refId": "C",
           "resultFormat": "time_series",
@@ -215,7 +215,7 @@
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "$type",
+      "title": "Top $splitLimit New Selected",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -587,8 +587,11 @@
       {
         "allValue": "all",
         "current": {
+          "tags": [],
           "text": "None",
-          "value": "None"
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -611,6 +614,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": false,
           "text": "All",
           "value": "$__all"
         },
@@ -938,5 +942,5 @@
   "timezone": "",
   "title": "New Errors",
   "uid": "3NZ83NLik",
-  "version": 51
+  "version": 54
 }

@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 37,
-  "iteration": 1545885110014,
+  "iteration": 1546139611917,
   "links": [
     {
       "asDropdown": true,
@@ -453,7 +453,7 @@
       "thresholds": [],
       "timeFrom": "$baseline",
       "timeShift": null,
-      "title": "Avg Response: $timeRange vs.$baselineOnly",
+      "title": "Last $timeRange vs $baselineOnly baseline",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -647,26 +647,29 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
+          "link": true,
+          "linkTargetBlank": true,
+          "linkTooltip": "${__cell_2}",
+          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "slow_state",
           "thresholds": [
-            "1",
-            "2"
+            ""
           ],
           "type": "string",
           "unit": "short",
           "valueMaps": [
             {
-              "text": "2",
+              "text": "✅",
+              "value": "0"
+            },
+            {
+              "text": "⚠",
               "value": "1"
             },
             {
-              "text": "1",
+              "text": "❌",
               "value": "2"
-            },
-            {
-              "text": "✔",
-              "value": "0"
             }
           ]
         },
@@ -810,7 +813,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"fields\":\"link,slow_delta,delta_description,from,to,baseline_calls,active_calls,transaction,invocations,avg_response,baseline_avg,error_rate,errors\",\"renderMode\":\"Grid\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"searchText\":\"$searchText\", \"pointsWanted\":\"$transactionPointsWanted\", \"performanceStates\":\"$performanceStates\"})",
+          "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"fields\":\"link,slow_state,delta_description,from,to,baseline_calls,active_calls,transaction,invocations,avg_response,baseline_avg,error_rate,errors\",\"renderMode\":\"Grid\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"searchText\":\"$searchText\", \"pointsWanted\":\"$transactionPointsWanted\", \"performanceStates\":\"$performanceStates\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1221,8 +1224,8 @@
         "current": {
           "selected": true,
           "tags": [],
-          "text": "2d",
-          "value": "2d"
+          "text": "7d",
+          "value": "7d"
         },
         "hide": 0,
         "includeAll": false,
@@ -1256,12 +1259,12 @@
             "value": "24h"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "2d",
             "value": "2d"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "7d",
             "value": "7d"
           },
@@ -1294,7 +1297,7 @@
         "name": "performanceStates",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "SLOWING|CRITICAL",
             "value": "SLOWING|CRITICAL"
           }
@@ -1363,5 +1366,5 @@
   "timezone": "",
   "title": "Slowdowns",
   "uid": "iHSORcymk",
-  "version": 26
+  "version": 29
 }

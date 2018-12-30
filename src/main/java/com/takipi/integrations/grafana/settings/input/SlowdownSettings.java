@@ -15,10 +15,10 @@ public class SlowdownSettings
 	public int baseline_invocations_threshold;
 	
 	/**
-	 * The minimal change (in ms) between the avg reponse time within the selected time frame and baseline
+	 * The minimal change (in ms) between the avg response time within the selected time frame and baseline
 	 * for a transaction's state to be marked as Slowing or Critical
 	 */
-	public int min_delta_threshold;
+	public int  min_delta_threshold;
 
 	/**
 	 * The percentage change (between 0 and 1) that the number of calls within the active timeframe whose

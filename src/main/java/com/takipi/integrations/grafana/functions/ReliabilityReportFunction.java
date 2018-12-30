@@ -27,6 +27,7 @@ import com.takipi.api.client.util.client.ClientUtil;
 import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.performance.calc.PerformanceState;
 import com.takipi.api.client.util.regression.RateRegression;
+import com.takipi.api.client.util.regression.RegressionResult;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
@@ -56,9 +57,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 					"NewIssuesState", "RegressionsState", "SlowdownsState", 
 					"Score", "ScoreDesc" });
 	
-	private enum IssueTypeStatus {
-		GREEN, YELLOW, RED
-	}
+	private static final int MAX_ITEMS_DESC = 3; 
 	
 	public static class Factory implements FunctionFactory {
 		
@@ -99,6 +98,9 @@ public class ReliabilityReportFunction extends EventsFunction {
 		protected int regressions;
 		protected int slowdowns;
 		protected int severeSlowdowns;
+		protected String slowDownsDesc; 
+		protected String regressionsDesc; 
+		protected String newIssuesDesc; 
 		protected double score;
 		protected String desc;
 		
@@ -807,14 +809,14 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return createSingleStatSeries(timeSpan, singleStatText);
 	}
 
-	private static Object formatIssueDesc(RelabilityReportInput input, int nonSevere, int severe)
+	private static Object formatValue(RelabilityReportInput input, int nonSevere, int severe)
 	{
 		
 		Object result;
 		
 		if (severe > 0)
 		{
-			if ((nonSevere == 0) || (nonSevere == severe))
+			if (nonSevere == 0)
 			{
 				if (input.sevOnlyFormat != null) {
 					result = String.format(input.sevOnlyFormat, severe);
@@ -842,6 +844,141 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		return result;
 	}
+
+	private String getNewIssuesDesc(RateRegression rateRegression, int newIssues,
+			int severeNewIssues) {
+		
+		StringBuilder result = new StringBuilder();
+		
+		int size = 0;
+		
+		Collection<EventResult> newEvents =  rateRegression.getSortedAllNewEvents();
+		
+		for (EventResult newEvent : newEvents) {
+			
+			if (newEvent.stats.hits > 0) {
+				result.append(newEvent.name);
+				result.append(" in ");
+				result.append(getSimpleClassName(newEvent.error_location.class_name));
+				
+				size++;
+			} else {
+				continue;
+			}
+				
+			if (size == MAX_ITEMS_DESC) {
+				break;
+			} else {
+				if (size < newIssues + severeNewIssues) {
+					result.append(", ");
+				}
+			}
+		}
+		
+		int remaining = newIssues + severeNewIssues - size;
+		
+		if (remaining > 0) {
+			result.append("\nand ");
+			result.append(remaining);
+			result.append(" more");
+		}
+		
+		return result.toString();
+	}
+	
+	private String getRegressionsDesc(RateRegression rateRegression, int regressionsSize,
+		int severeRegressionsSize) {
+		
+		StringBuilder result = new StringBuilder();
+		
+		int size = 0;
+		
+		Collection<RegressionResult> regressions =  rateRegression.getSortedAllRegressions();
+		
+		for (RegressionResult regressionResult : regressions) {
+			
+			result.append(regressionResult.getEvent().name);
+			result.append(" in ");
+			result.append(getSimpleClassName(regressionResult.getEvent().error_location.class_name));
+						
+			size++;
+			
+			if (size == MAX_ITEMS_DESC) {
+				break;
+			} else {
+				if (size < regressionsSize + severeRegressionsSize) {
+					result.append(", ");
+				}
+			}
+		}
+		
+		int remaining = regressionsSize + severeRegressionsSize - size;
+		
+		if (remaining > 0) {
+			result.append("\nand ");
+			result.append(remaining);
+			result.append(" more");
+		}
+		
+		return result.toString();
+	}
+	
+	private String getSlowdownsDesc(Collection<TransactionData> transactionDatas, 
+		int slowdownsSize, int severeSlowdownsSize) {
+		
+		StringBuilder result = new StringBuilder();
+					
+		List<TransactionData> slowdowns = new ArrayList<TransactionData>();
+		List<TransactionData> severeSlowdowns = new ArrayList<TransactionData>();
+		
+		for (TransactionData transactionData : transactionDatas) {
+			
+			if (transactionData.state == PerformanceState.CRITICAL) {
+				severeSlowdowns.add(transactionData);
+			} else if (transactionData.state == PerformanceState.SLOWING) {
+				slowdowns.add(transactionData);	
+			}
+			
+			if (severeSlowdowns.size() + slowdowns.size() >= MAX_ITEMS_DESC) {
+				break;
+			}
+		}
+		
+		int index = 0;
+		
+		for (TransactionData transactionData : severeSlowdowns) {
+		
+			result.append(getTransactionName(transactionData.graph.name, false));
+			index++;
+			
+			
+			if ((index < severeSlowdowns.size()) || (slowdowns.size() > 0)) {
+				result.append(", ");
+			}
+		}
+		
+		index = 0;
+		
+		for (TransactionData transactionData : slowdowns) {
+			
+			result.append(getTransactionName(transactionData.graph.name, false));
+			index++;
+		
+			if (index < slowdowns.size()) {
+				result.append(", ");
+			}
+		}
+		
+		int remaining = slowdowns.size() + severeSlowdowns.size() - severeSlowdownsSize -  slowdownsSize;
+		
+		if (remaining > 0) {
+			result.append(" and ");
+			result.append(remaining);
+			result.append(" more");
+		}
+		
+		return result.toString();
+	}
 	
 	private Collection<ReportKeyResults> getReportResults(String serviceId, Collection<ReportKeyOutput> reportKeyOutputs) {
 		
@@ -863,12 +1000,21 @@ public class ReliabilityReportFunction extends EventsFunction {
 				reportKeyResults.severeNewIssues = reportKeyOutput.regressionData.regressionOutput.severeNewIssues;
 				reportKeyResults.criticalRegressions = reportKeyOutput.regressionData.regressionOutput.criticalRegressions;
 				reportKeyResults.regressions = reportKeyOutput.regressionData.regressionOutput.regressions;
+				
+				reportKeyResults.newIssuesDesc = getNewIssuesDesc(reportKeyOutput.regressionData.regressionOutput.rateRegression,
+					reportKeyResults.newIssues, reportKeyResults.severeNewIssues);
+					
+				reportKeyResults.regressionsDesc = getRegressionsDesc(reportKeyOutput.regressionData.regressionOutput.rateRegression,
+						reportKeyResults.regressions, reportKeyResults.criticalRegressions);
+
 			}
 			
 			if (reportKeyOutput.transactionDatas != null) {
 				Pair<Integer, Integer> slowdownPair = getSlowdowns(reportKeyOutput.transactionDatas);
 				reportKeyResults.slowdowns = slowdownPair.getFirst().intValue();
 				reportKeyResults.severeSlowdowns = slowdownPair.getSecond().intValue();
+				reportKeyResults.slowDownsDesc = getSlowdownsDesc(reportKeyOutput.transactionDatas,
+						reportKeyResults.slowdowns, reportKeyResults.severeSlowdowns);
 			}
 			
 			if (reportKeyOutput.regressionData != null) {
@@ -887,19 +1033,6 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return result;
 	}
 	
-	private int getStatus(int nonSevere, int severe) {
-		
-		if (severe > 0) {
-			return IssueTypeStatus.RED.ordinal();
-		}
-		
-		if (nonSevere > 4) {
-			return IssueTypeStatus.YELLOW.ordinal();
-		}
-		
-		return IssueTypeStatus.GREEN.ordinal();
-	}
-	
 	@Override
 	protected List<List<Object>> processServiceEvents(String serviceId, EventsInput input,
 			Pair<DateTime, DateTime> timeSpan) {
@@ -916,18 +1049,14 @@ public class ReliabilityReportFunction extends EventsFunction {
 			Pair<Object, Object> fromTo = getTimeFilterPair(timeSpan, input.timeFilter);
 			String timeRange = TimeUtil.getTimeUnit(input.timeFilter); 
 			
-			Object newIssuesDesc = formatIssueDesc(rrInput, reportKeyResult.newIssues, reportKeyResult.severeNewIssues);
-			Object regressionsDesc = formatIssueDesc(rrInput, reportKeyResult.regressions, reportKeyResult.criticalRegressions);
-			Object slowdownsDesc = formatIssueDesc(rrInput, reportKeyResult.slowdowns, reportKeyResult.severeSlowdowns);
-				
-			Object newIssuesState = getStatus(reportKeyResult.newIssues, reportKeyResult.severeNewIssues);
-			Object regressionsState = getStatus(reportKeyResult.regressions, reportKeyResult.criticalRegressions);
-			Object slowdownsState = getStatus(reportKeyResult.slowdowns, reportKeyResult.severeSlowdowns);
-			
+			Object newIssuesValue = formatValue(rrInput, reportKeyResult.newIssues, reportKeyResult.severeNewIssues);
+			Object regressionsValue = formatValue(rrInput, reportKeyResult.regressions, reportKeyResult.criticalRegressions);
+			Object slowdownsValue = formatValue(rrInput, reportKeyResult.slowdowns, reportKeyResult.severeSlowdowns);
+					
 			Object[] row = new Object[] { fromTo.getFirst(), fromTo.getSecond(), timeRange,
 					reportKeyResult.output.key,
-					newIssuesDesc, regressionsDesc, slowdownsDesc,
-					newIssuesState, regressionsState, slowdownsState,
+					newIssuesValue, regressionsValue, slowdownsValue,
+					reportKeyResult.newIssuesDesc, reportKeyResult.regressionsDesc, reportKeyResult.slowDownsDesc,
 					reportKeyResult.score,
 					reportKeyResult.desc};
 
