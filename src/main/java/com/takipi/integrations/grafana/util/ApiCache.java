@@ -413,10 +413,6 @@ public class ApiCache {
 			this.activeWindow = activeWindow;
 			this.baselineWindow = baselineWindow;
 			this.windowSlice = windowSlice;
-			
-			if (pointsWanted == 0) {
-				System.out.println();
-			}
 		}
 		
 		@Override

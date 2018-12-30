@@ -21,6 +21,7 @@ import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOu
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.input.RegressionGraphInput;
 import com.takipi.integrations.grafana.input.RegressionGraphInput.GraphType;
+import com.takipi.integrations.grafana.input.RegressionGraphInput.RegressionType;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class RegressionGraphFunction extends LimitGraphFunction {
@@ -153,9 +154,19 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 			return Collections.emptyList();
 		}
 		
-		List<EventData> eventDatas = regressionFunction.processRegression(rgInput, regressionOutput.regressionInput,
-			regressionOutput.rateRegression, false);
+		boolean inlcudeNew;
+		boolean includeRegressions;
 		
+		if ((rgInput.regressionType == null) || (rgInput.regressionType == RegressionType.Regressions)) {
+			inlcudeNew = false;
+			includeRegressions = true;
+		} else {
+			inlcudeNew = true;
+			includeRegressions = false;
+		}
+		
+		List<EventData> eventDatas = regressionFunction.processRegression(rgInput, regressionOutput.regressionInput,
+			regressionOutput.rateRegression, inlcudeNew, includeRegressions);
 		
 		EventFilter eventFilter = rgInput.getEventFilter(apiClient, serviceId);
 		

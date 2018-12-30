@@ -128,7 +128,7 @@ public class SplitGraphFunction extends LimitGraphFunction {
 				if ((event == null) || (eventFilter.filter(event))) {
 					continue;
 				}
-
+				
 				long pointValue;
 
 				if (input.volumeType.equals(VolumeType.invocations)) {
