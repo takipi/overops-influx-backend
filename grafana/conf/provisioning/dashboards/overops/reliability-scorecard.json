@@ -18,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 22,
-  "iteration": 1545535231670,
+  "iteration": 1546139238911,
   "links": [
     {
       "asDropdown": true,
@@ -531,7 +531,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_4}",
+          "linkTooltip": "${__cell_7}",
           "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-deployments=${__cell_3}",
           "mappingType": 1,
           "pattern": "NewIssuesDesc",
@@ -551,7 +551,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_5}",
+          "linkTooltip": "${__cell_8}",
           "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=$environments&var-servers=$servers&var-deployments=${__cell_3}&var-timeRange=${__cell_2}",
           "mappingType": 1,
           "pattern": "RegressionsDesc",
@@ -587,7 +587,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_6}",
+          "linkTooltip": "${__cell_9}",
           "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=$environments&var-servers=$servers&var-deployments=${__cell_3}&var-timeRange=${__cell_2}",
           "mappingType": 1,
           "pattern": "SlowdownsDesc",
@@ -918,7 +918,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_4}",
+          "linkTooltip": "${__cell_7}",
           "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}",
           "mappingType": 1,
           "pattern": "NewIssuesDesc",
@@ -938,7 +938,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_5}",
+          "linkTooltip": "${__cell_8}",
           "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}&var-timeRange=${__cell_2}",
           "mappingType": 1,
           "pattern": "RegressionsDesc",
@@ -974,7 +974,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_6}",
+          "linkTooltip": "${__cell_9}",
           "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}&var-timeRange=${__cell_2}",
           "mappingType": 1,
           "pattern": "SlowdownsDesc",
@@ -1305,7 +1305,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_4}",
+          "linkTooltip": "${__cell_7}",
           "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-type=-${__cell_3}",
           "mappingType": 1,
           "pattern": "NewIssuesDesc",
@@ -1325,7 +1325,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_5}",
+          "linkTooltip": "${__cell_8}",
           "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=$environments&var-servers=$servers&var-type=-${__cell_3}&var-timeRange=${__cell_2}",
           "mappingType": 1,
           "pattern": "RegressionsDesc",
@@ -1458,12 +1458,9 @@
       {
         "allValue": "None",
         "current": {
-          "selected": false,
-          "tags": [],
+          "selected": true,
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1486,6 +1483,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1510,6 +1508,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1534,6 +1533,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1605,6 +1605,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1629,6 +1630,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -1713,5 +1715,5 @@
   "timezone": "",
   "title": "Reliability Scorecard",
   "uid": "lfqKXMfmz",
-  "version": 99
+  "version": 102
 }

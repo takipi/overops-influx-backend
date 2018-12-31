@@ -20,11 +20,17 @@ public class ServiceSettings {
 	private volatile Categories instance = null;
 	private String serviceId;
 	private ApiClient apiClient;
+	private String json;
 	
-	public ServiceSettings(String serviceId, ApiClient apiClient, ServiceSettingsData data) {
+	public ServiceSettings(String serviceId, ApiClient apiClient, String json, ServiceSettingsData data) {
 		this.data = data;
 		this.serviceId = serviceId;
 		this.apiClient = apiClient;
+		this.json = json;
+	}
+	
+	public String getJson() {
+		return json;
 	}
 	
 	public ServiceSettingsData getData() {

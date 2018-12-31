@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 19,
-  "iteration": 1545774715279,
+  "iteration": 1546139484516,
   "links": [
     {
       "asDropdown": true,
@@ -1325,7 +1325,7 @@
         },
         {
           "alias": "P",
-          "colorMode": "value",
+          "colorMode": null,
           "colors": [
             "rgba(50, 172, 45, 0.97)",
             "rgba(237, 129, 40, 0.89)",
@@ -1333,26 +1333,29 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
+          "link": true,
+          "linkTargetBlank": true,
+          "linkTooltip": "${__cell_2}",
+          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-timeRange=${__cell_5}&var-transactions=${__cell_8}&var-performanceStates=OK|SLOWING|CRITICAL",
           "mappingType": 1,
           "pattern": "slow_state",
           "thresholds": [
-            "1",
-            "2"
+            ""
           ],
           "type": "string",
           "unit": "short",
           "valueMaps": [
             {
-              "text": "2",
+              "text": "✅",
+              "value": "0"
+            },
+            {
+              "text": "⚠",
               "value": "1"
             },
             {
-              "text": "1",
+              "text": "❌",
               "value": "2"
-            },
-            {
-              "text": "✔",
-              "value": "0"
             }
           ]
         },
@@ -1514,7 +1517,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"fields\":\"link,slow_delta,delta_description,from,to,timeRange,baseline_calls,active_calls,transaction,invocations,avg_response,baseline_avg,error_rate,errors\",\"renderMode\":\"Grid\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"searchText\":\"$searchText\", \"pointsWanted\":\"$transactionPointsWanted\"})",
+          "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"fields\":\"link,slow_state,delta_description,from,to,timeRange,baseline_calls,active_calls,transaction,invocations,avg_response,baseline_avg,error_rate,errors\",\"renderMode\":\"Grid\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"searchText\":\"$searchText\", \"pointsWanted\":\"$transactionPointsWanted\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1921,5 +1924,5 @@
   "timezone": "",
   "title": "Performance",
   "uid": "Z40SpeJmz",
-  "version": 77
+  "version": 80
 }

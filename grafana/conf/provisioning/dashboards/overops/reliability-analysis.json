@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 20,
-  "iteration": 1545534539103,
+  "iteration": 1546139510782,
   "links": [
     {
       "asDropdown": true,
@@ -1208,7 +1208,7 @@
       "description": "The number of new errors detected in the current timeframe. P1 marks events that exceeded min thresholds, or whose type is defined in the critical exception types list. Both values are editable via the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
-        "h": 10,
+        "h": 9,
         "w": 24,
         "x": 0,
         "y": 9
@@ -1225,7 +1225,7 @@
           "url": "d/3NZ83NLik/new-errors"
         }
       ],
-      "pageSize": 20,
+      "pageSize": 8,
       "scroll": true,
       "showHeader": true,
       "sort": {
@@ -1548,7 +1548,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 19
+        "y": 18
       },
       "id": 63,
       "links": [
@@ -1891,7 +1891,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 19
+        "y": 18
       },
       "id": 61,
       "links": [],
@@ -2090,7 +2090,7 @@
           "link": true,
           "linkTargetBlank": false,
           "linkTooltip": "${__cell_1} in ${__cell_2}, introduced by ${__cell_3}: Click for root cause",
-          "linkUrl": "d/WZ739NYmk/increasing-errors?var-timeRange=${__cell_6}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=$transactions&var-type=$type&var-search=${__cell_2}",
+          "linkUrl": "d/WZ739NYmk/increasing-errors?var-timeRange=${__cell_6}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=$transactions&var-type=$type&var-increasingErrors=${__cell_2}",
           "mappingType": 1,
           "pattern": "TypeMessage",
           "thresholds": [],
@@ -2209,7 +2209,7 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
-          "link": false,
+          "link": true,
           "mappingType": 1,
           "pattern": "Error location",
           "thresholds": [],
@@ -2235,7 +2235,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressions({\"fields\":\"link,type,error_location,introduced_by,  severity, regression,timeRange,typeMessage,stats.hits,rate,regDelta,first_seen\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":60, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"render\":\"Grid\",\"regressionTypes\":\"Regressions,SevereRegressions\"})\n",
+          "query": "regressions({\"fields\":\"link,type,error_location,introduced_by,  severity, regression,timeRange,typeMessage,stats.hits,rate,regDelta,first_seen\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":70, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"render\":\"Grid\",\"regressionTypes\":\"Regressions,SevereRegressions\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -2525,13 +2525,7 @@
         "label": null,
         "multi": false,
         "name": "transactionFailureTypes",
-        "options": [
-          {
-            "selected": true,
-            "text": "Logged Error|Uncaught Exception|HTTP Error",
-            "value": "Logged Error|Uncaught Exception|HTTP Error"
-          }
-        ],
+        "options": [],
         "query": "settingsVar({\"environments\":\"$environments\", \"name\":\"transaction_failures\", \"convertToArray\":\"true\", \"defaultValue\":\"Logged Error|Uncaught Exception|HTTP Error\"})",
         "refresh": 1,
         "regex": "",
@@ -2617,5 +2611,5 @@
   "timezone": "",
   "title": "Reliability Analysis",
   "uid": "4DHQ63-ik",
-  "version": 175
+  "version": 179
 }

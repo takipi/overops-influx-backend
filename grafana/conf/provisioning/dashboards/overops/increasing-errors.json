@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 28,
-  "iteration": 1545789241161,
+  "iteration": 1546139582115,
   "links": [
     {
       "asDropdown": true,
@@ -112,7 +112,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\", \"types\":\"$type\",\"limit\":$splitLimit, \"searchText\":\"$search\"})\n\n",
+          "query": "regressionGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\",\"limit\":$splitLimit, \"searchText\":\"$search\",\"eventLocations\":\"$increasingErrors\"})\n\n",
           "rawQuery": true,
           "refId": "I",
           "resultFormat": "time_series",
@@ -241,7 +241,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\", \"types\":\"$type\",\"limit\":$splitLimit, \"searchText\":\"$search\", \"graphType\":\"Absolute\"})\n\n",
+          "query": "regressionGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\",\"limit\":$splitLimit, \"searchText\":\"$search\", \"graphType\":\"Absolute\",\"eventLocations\":\"$increasingErrors\"})\n\n",
           "rawQuery": true,
           "refId": "I",
           "resultFormat": "time_series",
@@ -714,7 +714,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressions({\"fields\":\"link,type,entry_point,introduced_by, severity,regression,typeMessage,error_location,stats.hits,rate,regDelta,first_seen\",  \"render\":\"Grid\", \"regressionTypes\":\"Regressions,SevereRegressions\", \"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"maxColumnLength\":90,\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",\"searchText\":\"$search\"})",
+          "query": "regressions({\"fields\":\"link,type,entry_point,introduced_by, severity,regression,typeMessage,error_location,stats.hits,rate,regDelta,first_seen\",  \"render\":\"Grid\", \"regressionTypes\":\"Regressions,SevereRegressions\", \"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"maxColumnLength\":90,\"pointsWanted\":\"$pointsWanted\",\"searchText\":\"$search\", \"eventLocations\":\"$increasingErrors\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -763,11 +763,9 @@
       {
         "allValue": "*",
         "current": {
-          "tags": [],
+          "selected": true,
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -790,6 +788,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -814,6 +813,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -838,11 +838,12 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
         "datasource": "OO",
-        "hide": 0,
+        "hide": 2,
         "includeAll": true,
         "label": "Type",
         "multi": true,
@@ -862,6 +863,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -886,6 +888,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -914,7 +917,7 @@
           "text": "3",
           "value": "3"
         },
-        "hide": 0,
+        "hide": 2,
         "includeAll": false,
         "label": "Split Top",
         "multi": false,
@@ -964,9 +967,33 @@
         "type": "custom"
       },
       {
+        "allValue": "All",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "OO",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Increases",
+        "multi": true,
+        "name": "increasingErrors",
+        "options": [],
+        "query": "increasingErrors({\"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
         "allValue": null,
         "current": {
-          "tags": [],
+          "selected": true,
           "text": "<term>",
           "value": "<term>"
         },
@@ -977,7 +1004,7 @@
         "name": "search",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "<term>",
             "value": "<term>"
           }
@@ -990,8 +1017,9 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "text": "2d",
-          "value": "2d"
+          "tags": [],
+          "text": "7d",
+          "value": "7d"
         },
         "hide": 0,
         "includeAll": false,
@@ -1025,12 +1053,12 @@
             "value": "24h"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "2d",
             "value": "2d"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "7d",
             "value": "7d"
           },
@@ -1077,6 +1105,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -1101,6 +1130,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -1182,5 +1212,5 @@
   "timezone": "",
   "title": "Increasing Errors",
   "uid": "WZ739NYmk",
-  "version": 65
+  "version": 74
 }

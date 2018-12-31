@@ -231,6 +231,8 @@ public class FunctionParser {
 		registerFunction(new RegressionGraphFunction.Factory());
 		registerFunction(new BaselineWindowFunction.Factory());
 		registerFunction(new BaselineAnnotationFunction.Factory());
+		registerFunction(new RegressedEventsFunction.Factory());
+
 
 		//deployment functions
 		registerFunction(new DeploymentsGraphFunction.Factory());
