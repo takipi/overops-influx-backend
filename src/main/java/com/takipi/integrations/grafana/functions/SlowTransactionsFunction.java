@@ -17,7 +17,7 @@ import com.takipi.integrations.grafana.functions.TransactionsListFunction.Transa
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.SlowTransactionsInput;
-import com.takipi.integrations.grafana.input.TransactionsListIput;
+import com.takipi.integrations.grafana.input.TransactionsListInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
@@ -58,13 +58,15 @@ public class SlowTransactionsFunction extends EnvironmentVariableFunction
 		
 		Set<String> result = new HashSet<String>();
 
-		Collection<PerformanceState> performanceStates = TransactionsListIput.getStates(input.performanceStates);
+		Collection<PerformanceState> performanceStates = TransactionsListInput.getStates(input.performanceStates);
 		
 		Collection<TransactionGraph> activeGraphs = getTransactionGraphs(input, serviceId, 
 				viewId, timeSpan, input.getSearchText(), input.pointsWanted, 0, 0);
 		
 		TransactionsListFunction transactionsFunction = new TransactionsListFunction(apiClient);
-		Map<String, TransactionData> transactionDatas = transactionsFunction.getTransactionDatas(activeGraphs, serviceId, viewId, timeSpan, input, false);
+		
+		Map<String, TransactionData> transactionDatas = transactionsFunction.getTransactionDatas(activeGraphs,
+			serviceId, viewId, timeSpan, input, false, 0);
 						
 		for (TransactionData transactionData : transactionDatas.values()) {
 			

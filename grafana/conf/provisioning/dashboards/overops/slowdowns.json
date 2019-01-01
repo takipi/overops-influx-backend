@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 37,
-  "iteration": 1546139611917,
+  "iteration": 1546369021080,
   "links": [
     {
       "asDropdown": true,
@@ -813,7 +813,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"fields\":\"link,slow_state,delta_description,from,to,baseline_calls,active_calls,transaction,invocations,avg_response,baseline_avg,error_rate,errors\",\"renderMode\":\"Grid\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"searchText\":\"$searchText\", \"pointsWanted\":\"$transactionPointsWanted\", \"performanceStates\":\"$performanceStates\"})",
+          "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"fields\":\"link,slow_state,delta_description,from,to,baseline_calls,active_calls,transaction,invocations,avg_response,baseline_avg,error_rate,errors\",\"renderMode\":\"Grid\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"searchText\":\"$searchText\", \"pointsWanted\":\"$transactionPointsWanted\", \"eventPointsWanted\":\"$pointsWanted\",\"performanceStates\":\"$performanceStates\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1366,5 +1366,5 @@
   "timezone": "",
   "title": "Slowdowns",
   "uid": "iHSORcymk",
-  "version": 29
+  "version": 31
 }

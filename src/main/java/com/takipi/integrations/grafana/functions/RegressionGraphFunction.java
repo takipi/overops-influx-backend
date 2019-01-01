@@ -90,6 +90,16 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 
 			for (GraphPointContributor gpc : gp.contributors) {
 
+				if (gpc.id.startsWith("5605")) {
+					
+
+					int v = Integer.valueOf(gpc.id);
+					
+					if ((v >= 56056) && (v <= 56059)) {
+						System.out.println();
+					}
+				}
+				
 				EventResult event = getEvent(eventData, gpc.id);
 				
 				if (event == null) {
@@ -105,20 +115,19 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 					graphsData.put(key, graphData);
 				}
 				
-				if (gpc.stats.invocations == 0) {
-					continue;
-				}
-				
 				long pointValue;
 				
 				if ((input.graphType == null) || (input.graphType.equals(GraphType.Percentage))) {
-					pointValue = 100 * gpc.stats.hits /  gpc.stats.invocations;
-
-				} else {
 					
+					if (gpc.stats.invocations > 0) {
+						pointValue = 100 * gpc.stats.hits /  gpc.stats.invocations;
+					} else {
+						pointValue = 0l;
+					}
+
+				} else {	
 					if (input.volumeType.equals(VolumeType.invocations)) {
 						pointValue = gpc.stats.invocations;
-
 					} else {
 						pointValue = gpc.stats.hits;	
 					}
@@ -180,20 +189,18 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 			
 			filteredEventData.add(eventData);
 		}
-
-		List<EventData> limitEventData = filteredEventData.subList(0, Math.min(filteredEventData.size(), rgInput.limit));
 		
 		Map<String, GraphData> graphsData = new HashMap<String, GraphData>();
 
 		if (regressionOutput.baseVolumeGraph != null) {
-			appendGraphToMap(graphsData, limitEventData, regressionOutput.baseVolumeGraph, rgInput);
+			appendGraphToMap(graphsData, filteredEventData, regressionOutput.baseVolumeGraph, rgInput);
 		}
 		
 		if (regressionOutput.activeVolumeGraph != null) {
-			appendGraphToMap(graphsData, limitEventData, regressionOutput.activeVolumeGraph, rgInput);
+			appendGraphToMap(graphsData, filteredEventData, regressionOutput.activeVolumeGraph, rgInput);
 		}
 	
-		List<GraphSeries> result = new ArrayList<GraphSeries>();
+		List<GraphSeries> seriesList = new ArrayList<GraphSeries>();
 		
 		for (GraphData graphData : graphsData.values()) {
 			
@@ -205,9 +212,11 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 				seriesName = graphData.key;
 			}
 			
-			result.add(getGraphSeries(graphData, seriesName));	
+			seriesList.add(getGraphSeries(graphData, seriesName));	
 		}
-				
+		
+		List<GraphSeries> result = limitGraphSeries(seriesList, rgInput.limit);
+		
 		return result;
 	}
 }

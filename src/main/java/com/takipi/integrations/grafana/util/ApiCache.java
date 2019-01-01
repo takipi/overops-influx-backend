@@ -12,12 +12,14 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.request.event.EventRequest;
 import com.takipi.api.client.request.event.EventsRequest;
 import com.takipi.api.client.request.event.EventsSlimVolumeRequest;
 import com.takipi.api.client.request.metrics.GraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsGraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsVolumeRequest;
 import com.takipi.api.client.request.view.ViewsRequest;
+import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
 import com.takipi.api.client.result.metrics.GraphResult;
 import com.takipi.api.client.result.transaction.TransactionsGraphResult;
@@ -85,7 +87,7 @@ public class ApiCache {
 				
 				if (PRINT_DURATIONS) {
 					double sec = (double)(t2-t1) / 1000;
-					logger.debug(sec + " sec: " + toString());
+					logger.info(sec + " sec: " + toString());
 				}
 				
 				return result;
@@ -129,6 +131,52 @@ public class ApiCache {
 		@Override
 		public int hashCode() {
 			return super.hashCode() ^ serviceId.hashCode();
+		}
+	}
+	
+	protected static class EventCacheLoader extends ServiceCacheLoader {
+
+		protected String Id;
+
+		public EventCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, String Id) {
+
+			super(apiClient, request, serviceId);
+			this.Id = Id;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+
+			if (!(obj instanceof EventCacheLoader)) {
+				return false;
+			}
+
+			if (!super.equals(obj)) {
+				return false;
+			}
+
+			EventCacheLoader other = (EventCacheLoader) obj;
+
+			if (!Objects.equal(Id, other.Id)) {
+				return false;
+			}
+
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+
+			if (Id == null) {
+				return super.hashCode();
+			}
+
+			return super.hashCode() ^ Id.hashCode();
+		}
+		
+		@Override
+		public String toString() {
+			return this.getClass().getSimpleName() + ": " + Id;
 		}
 	}
 
@@ -342,9 +390,9 @@ public class ApiCache {
 	}
 
 
-	protected static class EventCacheLoader extends VolumeCacheLoader {
+	protected static class EventsCacheLoader extends VolumeCacheLoader {
 		
-		public EventCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
+		public EventsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
 				VolumeType volumeType) {
 
 			super(apiClient, request, serviceId, input, volumeType);
@@ -353,7 +401,7 @@ public class ApiCache {
 		@Override
 		public boolean equals(Object obj) {
 
-			if (!(obj instanceof EventCacheLoader)) {
+			if (!(obj instanceof EventsCacheLoader)) {
 				return false;
 			}
 
@@ -422,6 +470,15 @@ public class ApiCache {
 				+ activeWindow + " bw: " + baselineWindow + " slc: " + windowSlice;
 			
 			return result;
+		}
+		
+		@Override
+		public Response<?> load()
+		{
+			if (pointsWanted == 100) {
+				System.out.println();
+			}
+			return super.load();
 		}
 	}
 	
@@ -597,7 +654,7 @@ public class ApiCache {
 		}
 	}
 	
-	protected static class RegressionCacheLoader extends EventCacheLoader {
+	protected static class RegressionCacheLoader extends EventsCacheLoader {
 
 		protected RegressionFunction function;
 
@@ -723,7 +780,7 @@ public class ApiCache {
 	private static Response<?> getEventList(ApiClient apiClient, String serviceId, 
 			ViewInput input, EventsRequest request, VolumeType volumeType, boolean load) {
 		
-		EventCacheLoader cacheKey = new EventCacheLoader(apiClient, request, serviceId, input, volumeType);		
+		EventsCacheLoader cacheKey = new EventsCacheLoader(apiClient, request, serviceId, input, volumeType);		
 		Response<?> response;
 		
 		if (load) {
@@ -770,6 +827,18 @@ public class ApiCache {
 		TransactionsGraphCacheLoader cacheKey = new TransactionsGraphCacheLoader(apiClient, request, serviceId, input,
 				pointsWanted, baselineTimespan, activeTimespan);
 		Response<TransactionsGraphResult> response = (Response<TransactionsGraphResult>) ApiCache.getItem(cacheKey);
+		
+		return response;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static Response<EventResult> getEvent(ApiClient apiClient, String serviceId,
+			String Id) {
+
+		EventRequest.Builder builder = EventRequest.newBuilder().setServiceId(serviceId).setEventId(Id);
+		
+		EventCacheLoader cacheKey = new EventCacheLoader(apiClient, builder.build(), serviceId, Id);
+		Response<EventResult> response = (Response<EventResult>) ApiCache.getItem(cacheKey);
 		
 		return response;
 	}

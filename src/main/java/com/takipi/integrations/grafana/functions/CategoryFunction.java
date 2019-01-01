@@ -90,7 +90,7 @@ public class CategoryFunction extends GraphFunction {
 			return output;
 		}
 		
-		List<Series> result = limitGraphSeries(series, categoryInput.limit);
+		List<Series> result = limitSeries(series, categoryInput.limit);
 		
 		sortByName(result);
 		

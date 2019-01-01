@@ -54,6 +54,7 @@ dependencies {
       "org.ocpsoft.prettytime:prettytime:4.0.2.Final",
       "com.google.guava:guava:20.0",
       "org.slf4j:slf4j-api:1.7.25",
+      "ch.qos.logback:logback-classic:1.2.3"
     )
     
     if (rootProject.hasProperty("localApiClient") && "$rootProject.localApiClient" == "true") {

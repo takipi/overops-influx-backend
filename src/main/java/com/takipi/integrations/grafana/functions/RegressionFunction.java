@@ -461,8 +461,8 @@ public class RegressionFunction extends EventsFunction
 		protected double score;
 		long volume;
 		
-		protected int slowsdowns;
-		protected int severeSlowsdowns;
+		protected int slowdowns;
+		protected int severeSlowdowns;
 		
 		protected int severeNewIssues;
 		protected int newIssues;

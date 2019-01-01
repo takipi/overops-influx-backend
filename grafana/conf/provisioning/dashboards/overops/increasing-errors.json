@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 28,
-  "iteration": 1546139582115,
+  "iteration": 1546375302691,
   "links": [
     {
       "asDropdown": true,
@@ -621,7 +621,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_1} in ${__cell_2}, introduced by ${__cell_3}: Click for root cause",
+          "linkTooltip": "${__cell_1} in transaction ${__cell_2}, introduced by ${__cell_3}: Click for root cause (Event Id: ${__cell_6})",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "TypeMessage",
@@ -694,6 +694,22 @@
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Id",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
         }
       ],
       "targets": [
@@ -714,7 +730,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressions({\"fields\":\"link,type,entry_point,introduced_by, severity,regression,typeMessage,error_location,stats.hits,rate,regDelta,first_seen\",  \"render\":\"Grid\", \"regressionTypes\":\"Regressions,SevereRegressions\", \"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"maxColumnLength\":90,\"pointsWanted\":\"$pointsWanted\",\"searchText\":\"$search\", \"eventLocations\":\"$increasingErrors\"})",
+          "query": "regressions({\"fields\":\"link,type,entry_point,introduced_by, severity,regression,id,typeMessage,error_location,stats.hits,rate,regDelta,first_seen\",  \"render\":\"Grid\", \"regressionTypes\":\"Regressions,SevereRegressions\", \"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"maxColumnLength\":90,\"pointsWanted\":\"$pointsWanted\",\"searchText\":\"$search\", \"eventLocations\":\"$increasingErrors\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -763,9 +779,11 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
+          "tags": [],
           "text": "None",
-          "value": "None"
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -788,7 +806,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -813,7 +830,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -838,7 +854,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -863,7 +878,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -888,7 +902,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -993,7 +1006,7 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
+          "tags": [],
           "text": "<term>",
           "value": "<term>"
         },
@@ -1105,7 +1118,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -1130,7 +1142,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -1212,5 +1223,5 @@
   "timezone": "",
   "title": "Increasing Errors",
   "uid": "WZ739NYmk",
-  "version": 74
+  "version": 76
 }

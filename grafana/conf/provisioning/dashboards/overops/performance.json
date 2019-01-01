@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 19,
-  "iteration": 1546139484516,
+  "iteration": 1546367258004,
   "links": [
     {
       "asDropdown": true,
@@ -595,7 +595,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsRate({\"type\":\"sum\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\",  \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"filter\":\"events\",\"searchText\":\"$searchText\", \"transactionSearchText\":\"$searchText\",\"pointsWanted\":\"$transactionPointsWanted\"})",
+          "query": "transactionsRate({\"type\":\"sum\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\",  \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"filter\":\"events\",\"searchText\":\"$searchText\", \"transactionSearchText\":\"$searchText\",\"pointsWanted\":\"$pointsWanted\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -719,7 +719,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "volume({\"type\":\"sum\",\"volumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"$failureTypes\",\"transactions\":\"$transactions\", \"transactionSearchText\":\"$searchText\"})",
+          "query": "volume({\"type\":\"sum\",\"volumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"$failureTypes\",\"transactions\":\"$transactions\", \"transactionSearchText\":\"$searchText\",\"pointsWanted\":\"$pointsWanted\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1014,7 +1014,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "Al events of type: $transactionFailureText. Click on a transaction's failure rate below to drill down into its errors. The error types defined as failures is defined in the Settings dashboard.",
+      "description": "All transaction failure types: $transactionFailureText. Click on a transaction's failure rate below to drill down into its errors. The error types defined as failures are defined in the Settings dashboard.",
       "fill": 0,
       "gridPos": {
         "h": 7,
@@ -1234,7 +1234,7 @@
             "rgba(50, 172, 45, 0.97)"
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 0,
+          "decimals": 1,
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
@@ -1517,7 +1517,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"fields\":\"link,slow_state,delta_description,from,to,timeRange,baseline_calls,active_calls,transaction,invocations,avg_response,baseline_avg,error_rate,errors\",\"renderMode\":\"Grid\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"searchText\":\"$searchText\", \"pointsWanted\":\"$transactionPointsWanted\"})",
+          "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"fields\":\"link,slow_state,delta_description,from,to,timeRange,baseline_calls,active_calls,transaction,invocations,avg_response,baseline_avg,error_rate,errors\",\"renderMode\":\"Grid\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"searchText\":\"$searchText\", \"pointsWanted\":\"$transactionPointsWanted\",\"eventPointsWanted\":\"$pointsWanted\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1554,7 +1554,7 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
+          "selected": false,
           "tags": [],
           "text": "None",
           "value": [
@@ -1868,6 +1868,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -1924,5 +1925,5 @@
   "timezone": "",
   "title": "Performance",
   "uid": "Z40SpeJmz",
-  "version": 80
+  "version": 81
 }

@@ -18,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 36,
-  "iteration": 1546139639453,
+  "iteration": 1546368922894,
   "links": [
     {
       "asDropdown": true,
@@ -300,7 +300,7 @@
       },
       "styles": [
         {
-          "alias": "Name",
+          "alias": "Deploy",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -311,7 +311,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "Open ${__cell}",
+          "linkTooltip": "Score for  ${__cell} =  ${__cell_11}",
           "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-deployments=${__cell_3}",
           "mappingType": 1,
           "pattern": "Name",
@@ -532,7 +532,7 @@
           "unit": "short"
         },
         {
-          "alias": "Increasing",
+          "alias": "Inc",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -687,7 +687,7 @@
       },
       "styles": [
         {
-          "alias": "Name",
+          "alias": "App",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -698,10 +698,11 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "Open ${__cell}",
+          "linkTooltip": "Score for  ${__cell} =  ${__cell_11}",
           "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}",
           "mappingType": 1,
           "pattern": "Name",
+          "preserveFormat": false,
           "rangeMaps": [
             {
               "from": "0",
@@ -709,6 +710,7 @@
               "to": "99999999"
             }
           ],
+          "sanitize": false,
           "thresholds": [],
           "type": "string",
           "unit": "short",
@@ -919,7 +921,7 @@
           "unit": "short"
         },
         {
-          "alias": "Increasing",
+          "alias": "Inc",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1367,5 +1369,5 @@
   "timezone": "",
   "title": "Reliability Scorecard Simple",
   "uid": "82eIMSsmz",
-  "version": 12
+  "version": 14
 }

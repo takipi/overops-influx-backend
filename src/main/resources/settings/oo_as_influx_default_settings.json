@@ -1,8 +1,5 @@
 {
-	//**********************************************************
-	//THIS JSON IS CONSUMED BY GOOGLE-GSON WHICH ALLOWS COMMENTS
-	//**********************************************************
-	//
+	
 	//General settings related to how data is presented and ordered in table and graph widgets
 	"general": {
 		
