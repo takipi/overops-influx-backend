@@ -139,7 +139,6 @@ public class ReliabilityReportFunction extends EventsFunction {
 	}
 
 	public static class SlowdownAsyncTask extends BaseAsyncTask implements Callable<Object> {
-
 		protected TransactionsListFunction function;
 		protected String key;
 		protected String serviceId;
@@ -170,7 +169,6 @@ public class ReliabilityReportFunction extends EventsFunction {
 			} finally {
 				afterCall();
 			}
-
 		}
 
 		@Override
@@ -561,8 +559,6 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return result;
 	}
 	
-	
-
 	private Collection<String> getActiveKeys(String serviceId, RelabilityReportInput regInput,
 			Pair<DateTime, DateTime> timeSpan) {
 		
@@ -594,7 +590,6 @@ public class ReliabilityReportFunction extends EventsFunction {
 	}
 	
 	private static void addDeduction(String name, int value, int weight, List<String> deductions) {
-		
 		if (value == 0) {
 			return;
 		}
@@ -635,10 +630,11 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		resultDesc.append("100");
 		
-		if (regressionOutput.newIssues + regressionOutput.severeNewIssues + 
-			regressionOutput.criticalRegressions + regressionOutput.regressions +
-			slowdowns + severeSlowdowns != 0) {
-			
+		int allIssuesCount = regressionOutput.newIssues + regressionOutput.severeNewIssues + 
+				regressionOutput.criticalRegressions + regressionOutput.regressions +
+				slowdowns + severeSlowdowns;
+		
+		if (allIssuesCount > 0) {
 			resultDesc.append(" - (");
 			
 			List<String> deductions = new ArrayList<String>();
