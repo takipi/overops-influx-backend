@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BaseAsyncTask {
-	
 	private static final Logger logger = LoggerFactory.getLogger(BaseAsyncTask.class);
 	
 	private String oldName;
@@ -19,7 +18,7 @@ public class BaseAsyncTask {
 	}
 	
 	protected void afterCall() {
-		double sec = (System.currentTimeMillis() - startTime) / 1000;
+		double sec = (double)(System.currentTimeMillis() - startTime) / 1000;
 		logger.debug("Task {} afterCall {} sec", getClass(), sec);
 		
 		Thread.currentThread().setName(oldName);
