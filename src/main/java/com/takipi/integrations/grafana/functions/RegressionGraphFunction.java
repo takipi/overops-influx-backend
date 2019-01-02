@@ -85,21 +85,10 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 				
 				continue;
 			}
-			
+
 			matchingGraphs.clear();
 
 			for (GraphPointContributor gpc : gp.contributors) {
-
-				if (gpc.id.startsWith("5605")) {
-					
-
-					int v = Integer.valueOf(gpc.id);
-					
-					if ((v >= 56056) && (v <= 56059)) {
-						System.out.println();
-					}
-				}
-				
 				EventResult event = getEvent(eventData, gpc.id);
 				
 				if (event == null) {
@@ -118,7 +107,6 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 				long pointValue;
 				
 				if ((input.graphType == null) || (input.graphType.equals(GraphType.Percentage))) {
-					
 					if (gpc.stats.invocations > 0) {
 						pointValue = 100 * gpc.stats.hits /  gpc.stats.invocations;
 					} else {
@@ -137,7 +125,6 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 				graphData.points.put(epochTime, Long.valueOf(pointValue));
 				
 				matchingGraphs.add(graphData);
-
 			}
 			
 			for (GraphData graphData : graphsData.values()) {
@@ -152,21 +139,22 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 	@Override
 	protected List<GraphSeries> processGraphSeries(String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
 			GraphInput input) {
- 		
 		RegressionGraphInput rgInput = (RegressionGraphInput)input;
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
 		
 		RegressionOutput regressionOutput = regressionFunction.runRegression(serviceId, rgInput);
 
-		if ((regressionOutput == null) || (regressionOutput.rateRegression == null) 
-			||  (regressionOutput.regressionInput == null)) {
+		if ((regressionOutput == null) 
+				|| (regressionOutput.rateRegression == null) 
+				|| (regressionOutput.regressionInput == null)) {
 			return Collections.emptyList();
 		}
 		
 		boolean inlcudeNew;
 		boolean includeRegressions;
 		
-		if ((rgInput.regressionType == null) || (rgInput.regressionType == RegressionType.Regressions)) {
+		if ((rgInput.regressionType == null)
+				|| (rgInput.regressionType == RegressionType.Regressions)) {
 			inlcudeNew = false;
 			includeRegressions = true;
 		} else {
@@ -182,7 +170,6 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 		List<EventData> filteredEventData = new ArrayList<EventData>(eventDatas.size());
 		
 		for (EventData eventData : eventDatas) {	 
-			
 			if (eventFilter.filter(eventData.event)) {
 				continue;
 			}
@@ -203,7 +190,6 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 		List<GraphSeries> seriesList = new ArrayList<GraphSeries>();
 		
 		for (GraphData graphData : graphsData.values()) {
-			
 			String seriesName;
 			
 			if (rgInput.sevSeriesPostfix != null) {

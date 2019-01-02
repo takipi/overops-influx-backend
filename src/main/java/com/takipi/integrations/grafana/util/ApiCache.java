@@ -136,12 +136,12 @@ public class ApiCache {
 	
 	protected static class EventCacheLoader extends ServiceCacheLoader {
 
-		protected String Id;
+		protected String id;
 
-		public EventCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, String Id) {
+		public EventCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, String id) {
 
 			super(apiClient, request, serviceId);
-			this.Id = Id;
+			this.id = id;
 		}
 
 		@Override
@@ -157,7 +157,7 @@ public class ApiCache {
 
 			EventCacheLoader other = (EventCacheLoader) obj;
 
-			if (!Objects.equal(Id, other.Id)) {
+			if (!Objects.equal(id, other.id)) {
 				return false;
 			}
 
@@ -167,16 +167,16 @@ public class ApiCache {
 		@Override
 		public int hashCode() {
 
-			if (Id == null) {
+			if (id == null) {
 				return super.hashCode();
 			}
 
-			return super.hashCode() ^ Id.hashCode();
+			return super.hashCode() ^ id.hashCode();
 		}
 		
 		@Override
 		public String toString() {
-			return this.getClass().getSimpleName() + ": " + Id;
+			return this.getClass().getSimpleName() + ": " + id;
 		}
 	}
 
@@ -187,6 +187,7 @@ public class ApiCache {
 		public ViewCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, String viewName) {
 
 			super(apiClient, request, serviceId);
+			
 			this.viewName = viewName;
 		}
 
@@ -212,7 +213,6 @@ public class ApiCache {
 
 		@Override
 		public int hashCode() {
-
 			if (viewName == null) {
 				return super.hashCode();
 			}
@@ -231,13 +231,12 @@ public class ApiCache {
 		protected ViewInput input;
 
 		public ViewInputCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input) {
-
 			super(apiClient, request, serviceId);
+			
 			this.input = input;
 		}
 
 		private static boolean compare(Collection<String> a, Collection<String> b) {
-
 			if (a.size() != b.size()) {
 				return false;
 			}
@@ -414,7 +413,6 @@ public class ApiCache {
 	}
 
 	protected static class GraphCacheLoader extends VolumeCacheLoader {
-
 		protected int pointsWanted;
 		protected int activeWindow;
 		protected int baselineWindow;
@@ -422,7 +420,6 @@ public class ApiCache {
 
 		@Override
 		public boolean equals(Object obj) {
-
 			if (!(obj instanceof GraphCacheLoader)) {
 				return false;
 			}
@@ -455,8 +452,8 @@ public class ApiCache {
 
 		public GraphCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
 				VolumeType volumeType, int pointsWanted, int baselineWindow, int activeWindow, int windowSlice) {
-
 			super(apiClient, request, serviceId, input, volumeType);
+			
 			this.pointsWanted = pointsWanted;
 			this.activeWindow = activeWindow;
 			this.baselineWindow = baselineWindow;
@@ -471,25 +468,14 @@ public class ApiCache {
 			
 			return result;
 		}
-		
-		@Override
-		public Response<?> load()
-		{
-			if (pointsWanted == 100) {
-				System.out.println();
-			}
-			return super.load();
-		}
 	}
 	
 	protected static class TransactionsCacheLoader extends ViewInputCacheLoader {
-
 		protected int baselineTimespan;
 		protected int activeTimespan;
 		
 		@Override
 		public boolean equals(Object obj) {
-
 			if (!(obj instanceof TransactionsCacheLoader)) {
 				return false;
 			}
@@ -512,7 +498,6 @@ public class ApiCache {
 		}
 
 		public TransactionsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input) {
-
 			this(apiClient, request, serviceId, input, 0, 0);
 		}
 		
