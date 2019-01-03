@@ -137,20 +137,32 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		return result;
 	}
 	
-	protected List<Series> limitGraphSeries(List<GraphSeries> series, int limit) {
+	protected List<Series> limitSeries(List<GraphSeries> series, int limit) {
+		
+		List<GraphSeries> limitedGraphSeries = limitGraphSeries(series, limit);
+		List<Series> result = new ArrayList<Series>(limitedGraphSeries.size());
+		
+		for (GraphSeries graphSeries : limitedGraphSeries) {
+			result.add(graphSeries.series);
+		}
+		
+		return result;
+	}
+	
+	protected List<GraphSeries> limitGraphSeries(List<GraphSeries> series, int limit) {
 		
 		List<GraphSeries> sorted = new ArrayList<GraphSeries>(series);
 		
 		sortSeriesByVolume(sorted);
 		
-		List<Series> result = new ArrayList<Series>();
+		List<GraphSeries> result = new ArrayList<GraphSeries>();
 		
 		for (int i = 0; i < Math.min(limit, sorted.size()); i++) {
 			
 			GraphSeries graphSeries = sorted.get(i);
 			
 			if (graphSeries.volume > 0) {
-				result.add(graphSeries.series);
+				result.add(graphSeries);
 			}
 		}
 		return result;

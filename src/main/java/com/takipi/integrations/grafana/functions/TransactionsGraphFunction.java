@@ -24,7 +24,7 @@ import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput.GraphType;
-import com.takipi.integrations.grafana.input.TransactionsListIput;
+import com.takipi.integrations.grafana.input.TransactionsListInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings.GroupFilter;
@@ -69,10 +69,11 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		
 		if (input.performanceStates != null) {	
 			
-			Collection<PerformanceState> performanceStates = TransactionsListIput.getStates(input.performanceStates);
+			Collection<PerformanceState> performanceStates = TransactionsListInput.getStates(input.performanceStates);
 			
 			TransactionsListFunction transactionsFunction = new TransactionsListFunction(apiClient);
-			Map<String, TransactionData> transactionDatas = transactionsFunction.getTransactionDatas(activeGraphs, serviceId, viewId, timeSpan, input, false);
+			Map<String, TransactionData> transactionDatas = transactionsFunction.getTransactionDatas(activeGraphs, 
+				serviceId, viewId, timeSpan, input, false, 0);
 			
 			List<TransactionGraph> graphs = new ArrayList<TransactionGraph>();
 			
@@ -405,7 +406,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			return super.processSeries(series, input);
 		}
 		
-		return limitGraphSeries(series, tgInput.limit);
+		return limitSeries(series, tgInput.limit);
 	}
 	
 

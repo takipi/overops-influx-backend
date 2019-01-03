@@ -63,7 +63,7 @@ public abstract class LimitGraphFunction extends GraphFunction {
 			return output;
 		}
 		
-		List<Series> result = limitGraphSeries(series, graphLimitInput.limit);
+		List<Series> result = limitSeries(series, graphLimitInput.limit);
 		
 		sortByName(result);
 		

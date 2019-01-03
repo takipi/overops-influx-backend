@@ -1,5 +1,6 @@
 package com.takipi.integrations.grafana.functions;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -108,9 +109,13 @@ public abstract class GrafanaFunction
 	protected static final char INTERNAL_DELIM = '/';
 	protected static final String TRANS_DELIM = "#";
 	protected static final String EMPTY_POSTFIX = ".";	
-		
-	private static final DateTimeFormatter fmt = ISODateTimeFormat.dateTime().withZoneUTC();
 	
+	protected static final String HTTP = "http://";
+	protected static final String HTTPS = "https://";
+	
+	protected static final DateTimeFormatter dateTimeFormatter = ISODateTimeFormat.dateTime().withZoneUTC();
+	protected static final DecimalFormat decimalFormat = new DecimalFormat("#.##");
+
 	protected static final Map<String, String> TYPES_MAP;
 	
 	static
@@ -550,7 +555,7 @@ public abstract class GrafanaFunction
 			ViewInput input, VolumeType volumeType, DateTime from, DateTime to, int baselineWindow, int activeWindow, int windowSlice) {
 		
 		GraphRequest.Builder builder = GraphRequest.newBuilder().setServiceId(serviceId).setViewId(viewId)
-				.setGraphType(GraphType.view).setFrom(from.toString(fmt)).setTo(to.toString(fmt))
+				.setGraphType(GraphType.view).setFrom(from.toString(dateTimeFormatter)).setTo(to.toString(dateTimeFormatter))
 				.setVolumeType(volumeType).setWantedPointCount(pointsCount).setRaw(true);
 		
 		applyFilters(input, serviceId, builder);
@@ -780,7 +785,7 @@ public abstract class GrafanaFunction
 	{	
 		EventsSlimVolumeRequest.Builder builder =
 				EventsSlimVolumeRequest.newBuilder().setVolumeType(volumeType).setServiceId(serviceId).setViewId(viewId)
-						.setFrom(from.toString(fmt)).setTo(to.toString(fmt))
+						.setFrom(from.toString(dateTimeFormatter)).setTo(to.toString(dateTimeFormatter))
 						.setVolumeType(volumeType).setRaw(true);
 		
 		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);
@@ -821,9 +826,9 @@ public abstract class GrafanaFunction
 	private Collection<EventResult> getEventList(String serviceId, String viewId, ViewInput input, DateTime from,
 			DateTime to)
 	{
-		
 		EventsRequest.Builder builder = EventsRequest.newBuilder().setRaw(true);
 		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);
+		
 		Response<?> response = ApiCache.getEventList(apiClient, serviceId, input, builder.build());
 		validateResponse(response);
 		

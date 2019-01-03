@@ -17,6 +17,8 @@ public class TimeUtil {
 	private static final String RANGE_WINDOW = "and time <= ";
 	private static final String MILLI_UNIT = "ms";
 
+	public static final String DEFAULT_TIME_RANGE_STR = "1d";
+	
 	private static final DateTimeFormatter fmt = ISODateTimeFormat.dateTime().withZoneUTC();
 	private static final PrettyTime prettyTime = new PrettyTime();
 
@@ -178,6 +180,17 @@ public class TimeUtil {
 
 		DateTime result = new DateTime(Long.valueOf(timeWindow));
 
+		return result;
+	}
+	
+	public static String getTimeRange(String timeFilter) {
+		
+		String result = getTimeUnit(timeFilter);
+		
+		if (result == null) {
+			return DEFAULT_TIME_RANGE_STR;
+		}
+		
 		return result;
 	}
 	

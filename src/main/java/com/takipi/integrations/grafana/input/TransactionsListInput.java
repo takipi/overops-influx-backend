@@ -27,7 +27,7 @@ import com.takipi.integrations.grafana.functions.GrafanaFunction;
  *
  * 			https://drive.google.com/file/d/1A7eGLJIXvfUMHgvAcGEiY8uGTN1Xcn8X/view?usp=sharing
  */
-public class TransactionsListIput extends BaseGraphInput {
+public class TransactionsListInput extends BaseGraphInput {
 	
 	/**
 	 * Control whether to return a list of rows or a single stat value
@@ -105,7 +105,7 @@ public class TransactionsListIput extends BaseGraphInput {
 	 * The number of calls into the selected transaction in human readable format
 	 */
 	public static final String ACTIVE_CALLS = "active_calls";
-		
+	
 	/**
 	 * A comma delimited array defining which fields to add for each returned row. If no value
 	 * is specified, all fields are added.
@@ -127,6 +127,12 @@ public class TransactionsListIput extends BaseGraphInput {
 	 * by this function. Possible values are: 	NO_DATA, OK, SLOWING, CRITICAL
 	 */
 	public String performanceStates;
+	
+	/**
+	 * The number of graph points to use when calculating event failures. If 0, the 
+	 * pointsWanted field will be used.
+	 */
+	public int eventPointsWanted;
 	
 	public static final List<String> FIELDS = Arrays.asList(new String[] { 
 			LINK, TRANSACTION, TOTAL, AVG_RESPONSE, BASELINE_AVG, BASELINE_CALLS, ACTIVE_CALLS, SLOW_STATE, SLOW_DELTA,

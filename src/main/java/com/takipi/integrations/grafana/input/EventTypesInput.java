@@ -13,10 +13,10 @@ import com.takipi.integrations.grafana.util.ArrayUtil;
  * 		1. A list of all event types available to the user to filter by. These could be provided by the function's
  * 		types variable, or if left null will be read from the "event_types" value under the "general"
  * 		section of the Settings dashboard.
- * 		2. A list of all code tiers to which events active in the last 14 days belong. These are preceded 
+ * 		2. A list of all code tiers to which events active in the last 7 days belong. These are preceded 
  * 		by a "-" prefix.
  * 		3. A list of all exception simple name (e.g. NullPointerException) that match those of events
- * 		active in the last 14 days. These values are preceded by a "--" prefix.
+ * 		active in the last 7 days. These values are preceded by a "--" prefix.
  *  
  * Example query:
  * 		eventTypes({"environments":"$environments", "view":"$view"})  	
@@ -36,6 +36,11 @@ public class EventTypesInput extends ViewInput {
 	 *  Screenshot: https://drive.google.com/file/d/1bCrsjOcPZrht7Z78qi4XRHr3O4xF7CoF/view?usp=sharing
 	 */
 	public String types; 
+	
+	/**
+	 * if set to true only populate values seen in events first seen in the last week
+	 */
+	public boolean newOnly;
 
 	public Collection<String> getTypes() {
 		
