@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 29,
-  "iteration": 1546369076053,
+  "iteration": 1546495482652,
   "links": [
     {
       "asDropdown": true,
@@ -45,14 +45,14 @@
   "panels": [
     {
       "aliasColors": {},
-      "bars": false,
+      "bars": true,
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
       "description": "",
       "fill": 0,
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 24,
         "x": 0,
         "y": 0
@@ -69,7 +69,7 @@
         "total": false,
         "values": false
       },
-      "lines": true,
+      "lines": false,
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
@@ -111,7 +111,7 @@
               "type": "fill"
             }
           ],
-          "hide": false,
+          "hide": true,
           "orderByTime": "ASC",
           "policy": "default",
           "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregate\":true,\"seriesName\":\"Throughput\",\"transactionPointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\"})",
@@ -215,7 +215,7 @@
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Top $splitLimit New Selected",
+      "title": "Top $splitLimit New Errors",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -262,16 +262,16 @@
         "h": 13,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 5
       },
       "id": 34,
       "links": [],
-      "pageSize": null,
+      "pageSize": 50,
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 7,
-        "desc": true
+        "col": null,
+        "desc": false
       },
       "styles": [
         {
@@ -550,7 +550,7 @@
           "unit": "short"
         },
         {
-          "alias": "Jira",
+          "alias": "Tkt",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -561,7 +561,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "http://${__cell_3:raw}",
+          "linkTooltip": "",
           "linkUrl": "http://${__cell_3:raw}",
           "mappingType": 1,
           "pattern": "Jira state",
@@ -570,7 +570,7 @@
           "unit": "short",
           "valueMaps": [
             {
-              "text": "🗳",
+              "text": "🎟",
               "value": "1"
             }
           ]
@@ -645,6 +645,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": false,
           "tags": [],
           "text": "None",
           "value": [
@@ -672,8 +673,12 @@
       {
         "allValue": "*",
         "current": {
+          "selected": false,
+          "tags": [],
           "text": "All",
-          "value": "$__all"
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -696,8 +701,8 @@
       {
         "allValue": "*",
         "current": {
-          "text": "All",
-          "value": "$__all"
+          "text": "all",
+          "value": "all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -754,7 +759,7 @@
         "multi": true,
         "name": "type",
         "options": [],
-        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"All Events\"})",
+        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\", \"newOnly\":true})",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -844,7 +849,7 @@
           "text": "3",
           "value": "3"
         },
-        "hide": 0,
+        "hide": 2,
         "includeAll": false,
         "label": "Split Top",
         "multi": false,
@@ -999,5 +1004,5 @@
   "timezone": "",
   "title": "New Errors",
   "uid": "3NZ83NLik",
-  "version": 61
+  "version": 79
 }

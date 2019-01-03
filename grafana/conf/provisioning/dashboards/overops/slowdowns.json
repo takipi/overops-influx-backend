@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 37,
-  "iteration": 1546369021080,
+  "iteration": 1546495517330,
   "links": [
     {
       "asDropdown": true,
@@ -571,7 +571,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_12} errors of type: $transactionFailureText in ${__cell_6} calls",
+          "linkTooltip": "${__cell_12} errors of type: $transactionFailureText in ${__cell_5} calls",
           "linkUrl": "d/HYBPMdYik/errors?from=${__cell_3}&to=${__cell_4}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=${__cell_5}&var-type=$transactionFailureTypes",
           "mappingType": 1,
           "pattern": "error_rate",
@@ -756,6 +756,7 @@
           "decimals": 1,
           "link": true,
           "linkTooltip": "The avg response time in the preceding $baselineOnly with ${__cell_5} calls",
+          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "baseline_avg",
           "thresholds": [],
@@ -862,6 +863,8 @@
       {
         "allValue": "all",
         "current": {
+          "selected": false,
+          "tags": [],
           "text": "None",
           "value": [
             "None"
@@ -912,6 +915,8 @@
       {
         "allValue": "*",
         "current": {
+          "selected": false,
+          "tags": [],
           "text": "All",
           "value": "$__all"
         },
@@ -936,8 +941,8 @@
       {
         "allValue": "All",
         "current": {
-          "text": "All",
-          "value": "$__all"
+          "text": "all",
+          "value": "all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1197,9 +1202,8 @@
       {
         "allValue": null,
         "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
+          "text": "14d",
+          "value": "14d"
         },
         "datasource": "OO",
         "hide": 2,
@@ -1222,7 +1226,7 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
+          "selected": false,
           "tags": [],
           "text": "7d",
           "value": "7d"
@@ -1297,7 +1301,7 @@
         "name": "performanceStates",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "SLOWING|CRITICAL",
             "value": "SLOWING|CRITICAL"
           }
@@ -1309,9 +1313,8 @@
       {
         "allValue": null,
         "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
+          "text": "14d",
+          "value": "14d"
         },
         "datasource": "OO",
         "hide": 2,
@@ -1366,5 +1369,5 @@
   "timezone": "",
   "title": "Slowdowns",
   "uid": "iHSORcymk",
-  "version": 31
+  "version": 35
 }

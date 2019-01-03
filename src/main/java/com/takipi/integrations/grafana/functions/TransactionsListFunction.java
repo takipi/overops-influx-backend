@@ -139,7 +139,8 @@ public class TransactionsListFunction extends GrafanaFunction {
 		return result;
 	}
 	
-	private String getSlowdownDesc(TransactionData transactionData, SlowdownSettings slowdownSettings ) {
+	private String getSlowdownDesc(TransactionData transactionData, 
+		SlowdownSettings slowdownSettings, Stats stats) {
 		
 		if (transactionData.baselineAvg == 0) {
 			return "";
@@ -149,23 +150,33 @@ public class TransactionsListFunction extends GrafanaFunction {
 			return "";
 		}
 		
-		Stats stats = TransactionUtil.aggregateGraph(transactionData.baselineGraph);
-		double baseline = stats.avg_time_std_deviation * slowdownSettings.std_dev_factor + transactionData.baselineAvg;
+		Stats baselineStats = TransactionUtil.aggregateGraph(transactionData.baselineGraph);
+		double baseline = baselineStats.avg_time_std_deviation * slowdownSettings.std_dev_factor + transactionData.baselineAvg;
 		
 		StringBuilder result = new StringBuilder();
 		
-		result.append((int)(transactionData.score));
-		result.append("% of calls took more than baseline avg + ");
-		result.append(slowdownSettings.std_dev_factor);
-		result.append("x std dev (");
-		result.append(decimalFormat.format(baseline));
-		result.append("ms)");
+		boolean isSlowdown = (transactionData.state == PerformanceState.CRITICAL) ||
+				(transactionData.state == PerformanceState.SLOWING);
 		
-		if ((transactionData.state == PerformanceState.CRITICAL) ||
-			(transactionData.state == PerformanceState.SLOWING)) {
-			result.append(" and avg response > baseline by ");
+		if (isSlowdown) {
+			result.append("(");	
+		}
+		
+		result.append((int)(transactionData.score));
+		result.append("% of calls > baseline avg ");
+		result.append((int)(baselineStats.avg_time));
+		result.append("ms + ");
+		result.append(slowdownSettings.std_dev_factor);
+		result.append("x stdDev = ");
+		result.append((int)(baseline));
+		result.append("ms");
+		
+		if (isSlowdown) {
+			result.append(") AND (avg response ");
+			result.append((int)(stats.avg_time));
+			result.append("ms > baseline by more than ");
 			result.append(slowdownSettings.min_delta_threshold);
-			result.append("ms");			
+			result.append("ms). Thresholds are set in the Settings dashboard.");			
 		}
 
 		return result.toString();
@@ -205,7 +216,8 @@ public class TransactionsListFunction extends GrafanaFunction {
 			String timeRange = TimeUtil.getTimeUnit(input.timeFilter); 
 
 			int scoreValue = getStateValue(transactionData.state);
-		
+			String description = getSlowdownDesc(transactionData, slowdownSettings, stats);
+			
 			Object[] object = new Object[fields.size()];
 			
 			setOutputObjectField(object, fields, TransactionsListInput.LINK, link);
@@ -217,7 +229,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 			setOutputObjectField(object, fields, TransactionsListInput.ACTIVE_CALLS, NumberUtil.format(stats.invocations));
 			setOutputObjectField(object, fields, TransactionsListInput.SLOW_STATE, getStateValue(transactionData.state));
 			setOutputObjectField(object, fields, TransactionsListInput.SLOW_DELTA, scoreValue);
-			setOutputObjectField(object, fields, TransactionsListInput.DELTA_DESC, getSlowdownDesc(transactionData, slowdownSettings));
+			setOutputObjectField(object, fields, TransactionsListInput.DELTA_DESC, description);
 			setOutputObjectField(object, fields, TransactionsListInput.ERROR_RATE, errorRate);
 			setOutputObjectField(object, fields, TransactionsListInput.ERRORS, transactionData.errorsHits);
 			setOutputObjectField(object, fields, ViewInput.FROM, fromTo.getFirst());

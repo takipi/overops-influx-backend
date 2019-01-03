@@ -826,9 +826,9 @@ public abstract class GrafanaFunction
 	private Collection<EventResult> getEventList(String serviceId, String viewId, ViewInput input, DateTime from,
 			DateTime to)
 	{
-		
 		EventsRequest.Builder builder = EventsRequest.newBuilder().setRaw(true);
 		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);
+		
 		Response<?> response = ApiCache.getEventList(apiClient, serviceId, input, builder.build());
 		validateResponse(response);
 		

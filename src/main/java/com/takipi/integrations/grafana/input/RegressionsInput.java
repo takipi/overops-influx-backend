@@ -44,24 +44,24 @@ public class RegressionsInput extends EventsInput
 	public static enum RegressionType
 	{
 		/**
-		 * A new issue detected within the context of this regression report
-		 */
-		NewIssues,
-		
-		/**
 		 * A severe new issue detected within the context of this regression report
 		 */
 		SevereNewIssues,
 		
 		/**
-		 * A regression detected within the context of this regression report
+		 * A new issue detected within the context of this regression report
 		 */
-		Regressions,
+		NewIssues,
 		
 		/**
 		 * A severe regression detected within the context of this regression report
 		 */
-		SevereRegressions
+		SevereRegressions,
+		
+		/**
+		 * A regression detected within the context of this regression report
+		 */
+		Regressions	
 	}
 	
 	public enum RenderMode

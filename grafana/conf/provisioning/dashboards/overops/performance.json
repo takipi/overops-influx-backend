@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 19,
-  "iteration": 1546367258004,
+  "iteration": 1546496024047,
   "links": [
     {
       "asDropdown": true,
@@ -376,7 +376,7 @@
           "tags": []
         }
       ],
-      "thresholds": "2,4",
+      "thresholds": "1,3",
       "title": "Slow Transactions",
       "type": "singlestat",
       "valueFontSize": "80%",
@@ -1554,7 +1554,7 @@
       {
         "allValue": "all",
         "current": {
-          "selected": false,
+          "selected": true,
           "tags": [],
           "text": "None",
           "value": [
@@ -1868,7 +1868,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -1925,5 +1924,5 @@
   "timezone": "",
   "title": "Performance",
   "uid": "Z40SpeJmz",
-  "version": 81
+  "version": 84
 }

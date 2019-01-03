@@ -2,6 +2,7 @@ package com.takipi.integrations.grafana.functions;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -21,6 +22,8 @@ import com.takipi.integrations.grafana.settings.input.GeneralSettings;
 
 public class EventTypesFunction extends EnvironmentVariableFunction {
 
+	private static int DEFAULT_TIME_DAYS = 7;
+	
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -59,12 +62,29 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 
 		EventTypesInput eventInput = (EventTypesInput) input;
 
+		String viewId = getViewId(serviceId, eventInput.view);
+
+		if (viewId == null) {
+			return;
+		}
+
+		DateTime to = DateTime.now();
+		DateTime from = to.minusDays(DEFAULT_TIME_DAYS);
+		
+		Map<String, EventResult> events = getEventMap(serviceId, eventInput,
+			from, to, null);
+				
+		if (events == null) {
+			return;
+		}
+		
+		
 		Collection<String> types;
 		
 		if (eventInput.types != null) {
 			types = eventInput.getTypes();
 		} else {
-			GeneralSettings settings =  GrafanaSettings.getData(apiClient, serviceId).general;
+			GeneralSettings settings = GrafanaSettings.getData(apiClient, serviceId).general;
 			
 			if (settings != null) {
 				types = settings.getDefaultTypes();
@@ -72,31 +92,24 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 				types = Collections.emptyList();
 			}
 		}
-		
-		for (String type : types) {
-			appender.append(type);
-		}
-		
-		String viewId = getViewId(serviceId, eventInput.view);
-
-		if (viewId == null) {
-			return;
-		}
-
-		Map<String, EventResult> events = getEventMap(serviceId, eventInput, DateTime.now().minusDays(14), DateTime.now(), null);
-				
-		if (events == null) {
-			return;
-		}
-		
+			
+		Set<String> eventTypes = new HashSet<String>();
 		Set<String> exceptionTypes = new TreeSet<String>();
 		Set<String> categoryNames = new TreeSet<String>();
-		
+	
 		Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();
 
 		for (EventResult event : events.values()) {
 			
-			if (event.name != null) {
+			DateTime firstSeen = dateTimeFormatter.parseDateTime(event.first_seen);
+			
+			if ((eventInput.newOnly) && (firstSeen.plusDays(DEFAULT_TIME_DAYS).getMillis() < to.getMillis())) {
+				continue;
+			}
+			
+			eventTypes.add(event.type);
+			
+			if ((event.name != null) && (!types.contains(event.name))) {
 				exceptionTypes.add(event.name);
 			}
 			
@@ -118,6 +131,10 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 					}
 				}
 			}
+		}
+		
+		for (String type : eventTypes) {
+			appender.append(type);
 		}
 		
 		for (String categoryName : categoryNames) {

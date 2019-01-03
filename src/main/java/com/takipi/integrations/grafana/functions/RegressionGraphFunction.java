@@ -1,6 +1,7 @@
 package com.takipi.integrations.grafana.functions;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -56,10 +57,8 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 			
 			RegressionData regData = (RegressionData)eventData;
 			
-			for (String similiarId : regData.mergedIds) {
-				if (similiarId.equals(id)) {
-					return eventData.event;
-				}
+			if (regData.mergedIds.contains(id)) {
+				return eventData.event;
 			}
 		}
 		
@@ -85,10 +84,11 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 				
 				continue;
 			}
-
+			
 			matchingGraphs.clear();
 
 			for (GraphPointContributor gpc : gp.contributors) {
+
 				EventResult event = getEvent(eventData, gpc.id);
 				
 				if (event == null) {
@@ -107,6 +107,7 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 				long pointValue;
 				
 				if ((input.graphType == null) || (input.graphType.equals(GraphType.Percentage))) {
+					
 					if (gpc.stats.invocations > 0) {
 						pointValue = 100 * gpc.stats.hits /  gpc.stats.invocations;
 					} else {
@@ -122,9 +123,17 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 				}
 				
 				graphData.volume += pointValue;
-				graphData.points.put(epochTime, Long.valueOf(pointValue));
+				
+				Long existingValue = graphData.points.get(epochTime);
+				
+				if (existingValue != null) {
+					graphData.points.put(epochTime, Long.valueOf(existingValue.longValue() + pointValue));
+				} else {
+					graphData.points.put(epochTime, Long.valueOf(pointValue));
+				}	
 				
 				matchingGraphs.add(graphData);
+
 			}
 			
 			for (GraphData graphData : graphsData.values()) {
@@ -139,37 +148,37 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 	@Override
 	protected List<GraphSeries> processGraphSeries(String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
 			GraphInput input) {
+ 		
 		RegressionGraphInput rgInput = (RegressionGraphInput)input;
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
 		
 		RegressionOutput regressionOutput = regressionFunction.runRegression(serviceId, rgInput);
 
-		if ((regressionOutput == null) 
-				|| (regressionOutput.rateRegression == null) 
-				|| (regressionOutput.regressionInput == null)) {
+		if ((regressionOutput == null) || (regressionOutput.rateRegression == null) 
+			||  (regressionOutput.regressionInput == null)) {
 			return Collections.emptyList();
 		}
 		
-		boolean inlcudeNew;
+		boolean includeNew;
 		boolean includeRegressions;
 		
-		if ((rgInput.regressionType == null)
-				|| (rgInput.regressionType == RegressionType.Regressions)) {
-			inlcudeNew = false;
+		if ((rgInput.regressionType == null) || (rgInput.regressionType == RegressionType.Regressions)) {
+			includeNew = false;
 			includeRegressions = true;
 		} else {
-			inlcudeNew = true;
+			includeNew = true;
 			includeRegressions = false;
 		}
 		
 		List<EventData> eventDatas = regressionFunction.processRegression(rgInput, regressionOutput.regressionInput,
-			regressionOutput.rateRegression, inlcudeNew, includeRegressions);
+			regressionOutput.rateRegression, includeNew, includeRegressions);
 		
 		EventFilter eventFilter = rgInput.getEventFilter(apiClient, serviceId);
 		
 		List<EventData> filteredEventData = new ArrayList<EventData>(eventDatas.size());
 		
 		for (EventData eventData : eventDatas) {	 
+			
 			if (eventFilter.filter(eventData.event)) {
 				continue;
 			}
@@ -186,23 +195,57 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 		if (regressionOutput.activeVolumeGraph != null) {
 			appendGraphToMap(graphsData, filteredEventData, regressionOutput.activeVolumeGraph, rgInput);
 		}
-	
-		List<GraphSeries> seriesList = new ArrayList<GraphSeries>();
-		
-		for (GraphData graphData : graphsData.values()) {
-			String seriesName;
 			
-			if (rgInput.sevSeriesPostfix != null) {
-				seriesName = graphData.key + rgInput.sevSeriesPostfix;
-			} else {
-				seriesName = graphData.key;
+		List<GraphSeries> result = getGraphSeries(graphsData, eventDatas, rgInput, includeRegressions);
+				
+		return result;
+	}
+	
+	private List<GraphSeries> getGraphSeries(Map<String, GraphData> graphsData,
+			Collection<EventData> eventDatas, RegressionGraphInput rgInput,
+			boolean regressions) {
+	
+		List<GraphSeries> result = new ArrayList<GraphSeries>();
+					
+		int limit = Math.min(eventDatas.size(), rgInput.limit);
+			
+		for (EventData eventData : eventDatas) {
+				
+			if (!(eventData instanceof RegressionData)) {
+				continue;
 			}
 			
-			seriesList.add(getGraphSeries(graphData, seriesName));	
+			RegressionData regressionData = (RegressionData)eventData;
+			
+			if ((regressionData.regression != null) != regressions) {
+				continue;
+			}
+			
+			String key = formatLocation(eventData.event.error_location);
+			GraphData graphData = graphsData.get(key);
+				
+			if (graphData != null) {
+				result.add(getGraphSeries(graphData, rgInput));
+			}
+								
+			if (result.size() >= limit) {
+				break;
+			}
 		}
 		
-		List<GraphSeries> result = limitGraphSeries(seriesList, rgInput.limit);
-		
 		return result;
+	}
+	
+	private GraphSeries getGraphSeries(GraphData graphData, RegressionGraphInput rgInput) {
+		
+		String seriesName;
+		
+		if (rgInput.sevSeriesPostfix != null) {
+			seriesName = graphData.key + rgInput.sevSeriesPostfix;
+		} else {
+			seriesName = graphData.key;
+		}
+		
+		return getGraphSeries(graphData, seriesName);	
 	}
 }

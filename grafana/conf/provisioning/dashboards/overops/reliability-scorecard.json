@@ -18,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 22,
-  "iteration": 1546325213159,
+  "iteration": 1546496145235,
   "links": [
     {
       "asDropdown": true,
@@ -303,8 +303,8 @@
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 3,
-        "desc": true
+        "col": null,
+        "desc": false
       },
       "styles": [
         {
@@ -1607,7 +1607,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1632,7 +1631,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -1717,5 +1715,5 @@
   "timezone": "",
   "title": "Reliability Scorecard",
   "uid": "lfqKXMfmz",
-  "version": 105
+  "version": 108
 }

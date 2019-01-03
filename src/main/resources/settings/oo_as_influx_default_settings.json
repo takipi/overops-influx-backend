@@ -197,15 +197,7 @@
 	 	//of whether it exceeded the error_min_rate_threshold and error_min_volume_threshold settings. For example,
 	 	//a *new* NullPointerException may be considered severe, regardless of whether .or not it exceeded the minimal
 	 	//volume thresholds.
-		"critical_exception_types": "NullPointerException,IndexOutOfBoundsException,InvalidCastException,AssertionError",
-				
-		//A comma delimited list of regression types that controls the sort order by which regressions
-	 	//reported by a table widget are returned.
-		"sort_order": "Severe New,Severe Regression,New,Regression",
-		
-		//A comma delimited list of event types that controls the secondary sort order by which regressions
-	 	//reported by a table widget are returned.
-		"type_order": "Logged Error,Uncaught Exception,Logged Warning,HTTP Error,Timer,Swallowed Exception,Caught Exception"
+		"critical_exception_types": "NullPointerException,IndexOutOfBoundsException,InvalidCastException,AssertionError"
 	},
 	
 	// The settings used to provide a high-level reliability score for target app, deployment, tier

@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 28,
-  "iteration": 1546375302691,
+  "iteration": 1546490949672,
   "links": [
     {
       "asDropdown": true,
@@ -61,7 +61,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "Shows the relative rate of selected increasing errors, comparing them between the baseline period and active window as denoted by the red annotation on the graph.",
+      "description": "Shows the relative rate of increasing errors, comparing them between the last $timeRange window and the preceding $baselineOnly baseline period, as denoted by the red annotation on the graph.",
       "fill": 0,
       "gridPos": {
         "h": 6,
@@ -69,7 +69,7 @@
         "x": 0,
         "y": 0
       },
-      "hideTimeOverride": false,
+      "hideTimeOverride": true,
       "id": 36,
       "interval": "",
       "legend": {
@@ -112,7 +112,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\",\"limit\":$splitLimit, \"searchText\":\"$search\",\"eventLocations\":\"$increasingErrors\"})\n\n",
+          "query": "regressionGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\",\"limit\":$splitLimit, \"searchText\":\"$search\",\"eventLocations\":\"$increasingErrors\",\"graphType\":\"Percentage\"})\n\n",
           "rawQuery": true,
           "refId": "I",
           "resultFormat": "time_series",
@@ -136,7 +136,7 @@
       "thresholds": [],
       "timeFrom": "$baseline",
       "timeShift": null,
-      "title": "Errors / Calls Ratio  (Last $timeRange vs.$baselineOnly)",
+      "title": "Errors / Calls Ratio  (Last $timeRange vs. preceding $baselineOnly)",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -181,7 +181,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "Shows the volume of selected increasing errors, comparing them between the baseline period and active window as denoted by the red annotation on the graph.",
+      "description": "Shows the volume of selected increasing errors, comparing them between the last $timeRange window and the preceding $baselineOnly baseline period, as denoted by the red annotation on the graph.",
       "fill": 0,
       "gridPos": {
         "h": 6,
@@ -189,7 +189,7 @@
         "x": 12,
         "y": 0
       },
-      "hideTimeOverride": false,
+      "hideTimeOverride": true,
       "id": 39,
       "interval": "",
       "legend": {
@@ -304,7 +304,7 @@
       "thresholds": [],
       "timeFrom": "$baseline",
       "timeShift": null,
-      "title": "Volume (Last $timeRange vs.$baselineOnly)",
+      "title": "Volume (Last $timeRange vs. preceding $baselineOnly)",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -346,7 +346,7 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "",
+      "description": "Shows a list of increasing errors, comparing them between the last $timeRange window and the preceding $baselineOnly baseline period, as denoted by the red annotation on the graph.",
       "fontSize": "100%",
       "gridPos": {
         "h": 16,
@@ -360,8 +360,8 @@
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 4,
-        "desc": true
+        "col": null,
+        "desc": false
       },
       "styles": [
         {
@@ -1093,9 +1093,8 @@
       {
         "allValue": null,
         "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
+          "text": "35d",
+          "value": "35d"
         },
         "datasource": "OO",
         "hide": 2,
@@ -1166,9 +1165,8 @@
       {
         "allValue": null,
         "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
+          "text": "28d",
+          "value": "28d"
         },
         "datasource": "OO",
         "hide": 2,
@@ -1223,5 +1221,5 @@
   "timezone": "",
   "title": "Increasing Errors",
   "uid": "WZ739NYmk",
-  "version": 76
+  "version": 84
 }
