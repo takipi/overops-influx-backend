@@ -409,5 +409,4 @@ public class EventFilter
 		
 		return false;
 	}
-	
 }

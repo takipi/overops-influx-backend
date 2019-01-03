@@ -43,6 +43,15 @@
   "iteration": 1546490949672,
   "links": [
     {
+      "icon": "external link",
+      "tags": [],
+      "targetBlank": true,
+      "title": "Learn More",
+      "tooltip": "Learn more about this dashboard",
+      "type": "link",
+      "url": "https://doc.overops.com/docs/increasing-errors-dashboard"
+    },
+    {
       "asDropdown": true,
       "icon": "external link",
       "includeVars": true,

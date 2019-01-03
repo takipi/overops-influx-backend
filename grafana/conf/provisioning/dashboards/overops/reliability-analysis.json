@@ -33,6 +33,15 @@
   "iteration": 1546498370600,
   "links": [
     {
+      "icon": "external link",
+      "tags": [],
+      "targetBlank": true,
+      "title": "Learn More",
+      "tooltip": "Learn more about this dashboard",
+      "type": "link",
+      "url": "https://doc.overops.com/docs/reliability-analysis-dashboard"
+    },
+    {
       "asDropdown": true,
       "icon": "external link",
       "includeVars": true,

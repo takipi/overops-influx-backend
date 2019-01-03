@@ -18,8 +18,17 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1543495310080,
+  "iteration": 1546513626456,
   "links": [
+    {
+      "icon": "external link",
+      "tags": [],
+      "targetBlank": true,
+      "title": "Learn More",
+      "tooltip": "Learn more about this dashboard",
+      "type": "link",
+      "url": "https://doc.overops.com/docs/reliability-dashboards-overview"
+    },
     {
       "asDropdown": true,
       "icon": "external link",
@@ -133,5 +142,5 @@
   "timezone": "",
   "title": "Settings",
   "uid": "mTGNNTfiz",
-  "version": 10
+  "version": 1
 }

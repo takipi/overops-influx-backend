@@ -21,6 +21,15 @@
   "iteration": 1546368922894,
   "links": [
     {
+      "icon": "external link",
+      "tags": [],
+      "targetBlank": true,
+      "title": "Learn More",
+      "tooltip": "Learn more about this dashboard",
+      "type": "link",
+      "url": "https://doc.overops.com/docs/reliability-scorecard-dashboard"
+    },
+    {
       "asDropdown": true,
       "icon": "external link",
       "includeVars": true,
