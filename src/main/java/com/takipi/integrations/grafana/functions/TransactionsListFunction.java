@@ -213,8 +213,8 @@ public class TransactionsListFunction extends GrafanaFunction {
 			}
 			
 			Pair<Object, Object> fromTo = getTimeFilterPair(timeSpan, input.timeFilter);
-			String timeRange = TimeUtil.getTimeUnit(input.timeFilter); 
-
+			String timeRange = TimeUtil.getTimeRange(input.timeFilter); 
+			
 			int scoreValue = getStateValue(transactionData.state);
 			String description = getSlowdownDesc(transactionData, slowdownSettings, stats);
 			

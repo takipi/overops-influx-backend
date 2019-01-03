@@ -253,7 +253,7 @@ public class RegressionFunction extends EventsFunction
 				return null;
 			}
 			
-			String timeUnit = TimeUtil.getTimeUnit(input.timeFilter); 
+			String timeUnit = TimeUtil.getTimeRange(input.timeFilter); 
 					
 			return timeUnit;
 		}

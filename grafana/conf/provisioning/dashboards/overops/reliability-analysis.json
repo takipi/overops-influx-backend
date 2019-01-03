@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 20,
-  "iteration": 1546496046369,
+  "iteration": 1546498370600,
   "links": [
     {
       "asDropdown": true,
@@ -1496,7 +1496,7 @@
           ]
         },
         {
-          "alias": "Jira",
+          "alias": "Tkt",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1516,7 +1516,7 @@
           "unit": "short",
           "valueMaps": [
             {
-              "text": "🗳",
+              "text": "🎟",
               "value": "1"
             }
           ]
@@ -2303,6 +2303,7 @@
       "type": "table"
     }
   ],
+  "refresh": false,
   "schemaVersion": 16,
   "style": "dark",
   "tags": [
@@ -2313,8 +2314,12 @@
       {
         "allValue": "all",
         "current": {
+          "selected": false,
+          "tags": [],
           "text": "None",
-          "value": "None"
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -2560,7 +2565,10 @@
       },
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "text": "Logged Error|Uncaught Exception|HTTP Error",
+          "value": "Logged Error|Uncaught Exception|HTTP Error"
+        },
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2582,6 +2590,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -2606,6 +2615,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -2653,5 +2663,5 @@
   "timezone": "",
   "title": "Reliability Analysis",
   "uid": "4DHQ63-ik",
-  "version": 188
+  "version": 190
 }

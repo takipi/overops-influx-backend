@@ -1096,7 +1096,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		for (ReportKeyResults reportKeyResult : reportKeyResults) {
 			
 			Pair<Object, Object> fromTo = getTimeFilterPair(timeSpan, input.timeFilter);
-			String timeRange = TimeUtil.getTimeUnit(input.timeFilter); 
+			String timeRange = TimeUtil.getTimeRange(input.timeFilter); 
 			
 			Object newIssuesValue = formatValue(rrInput, reportKeyResult.newIssues, reportKeyResult.severeNewIssues);
 			Object regressionsValue = formatValue(rrInput, reportKeyResult.regressions, reportKeyResult.criticalRegressions);
