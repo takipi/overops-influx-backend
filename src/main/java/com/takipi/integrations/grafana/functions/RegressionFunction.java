@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,6 +14,8 @@ import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.metrics.Graph;
@@ -89,11 +90,12 @@ public class RegressionFunction extends EventsFunction
 				EventResult event, RegressionType type)
 		{
 			super(event);
+			
 			this.type = type;
 			this.regResult = regResult;
 			this.input = input;
 			this.regression = null;
-			this.mergedIds = new HashSet<String>();
+			this.mergedIds = Sets.newHashSet();
 		}
 			
 		protected RegressionData(RateRegression regResult, RegressionInput input,
@@ -104,7 +106,6 @@ public class RegressionFunction extends EventsFunction
 		}
 		
 		protected int getDelta() {
-			
 			if (regression == null) {
 				return 0;
 			}
@@ -140,7 +141,6 @@ public class RegressionFunction extends EventsFunction
 		
 		public String getText()
 		{
-			
 			switch (type)
 			{
 				case NewIssues:
@@ -171,7 +171,6 @@ public class RegressionFunction extends EventsFunction
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
 				Pair<DateTime, DateTime> timeSpan)
 		{
-			
 			RegressionData regData = (RegressionData)eventData;
 			
 			if (regData.regression != null)
@@ -191,7 +190,6 @@ public class RegressionFunction extends EventsFunction
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
 				Pair<DateTime, DateTime> timeSpan)
 		{
-			
 			RegressionData regData = (RegressionData)eventData;
 			
 			if (regData.regression != null)
@@ -212,7 +210,6 @@ public class RegressionFunction extends EventsFunction
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
 				Pair<DateTime, DateTime> timeSpan)
 		{
-			
 			RegressionReportSettings settings = GrafanaSettings.getData(apiClient, serviceId).regression_report;
 			
 			if (settings == null) {
@@ -262,7 +259,6 @@ public class RegressionFunction extends EventsFunction
 	private int expandBaselineTimespan(int baselineTimespanFactor, int minBaselineTimespan,
 			RegressionWindow activeWindow)
 	{
-		
 		int result;
 		double factor = (double)minBaselineTimespan / (double)activeWindow.activeTimespan;
 		
@@ -286,7 +282,6 @@ public class RegressionFunction extends EventsFunction
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
 				Pair<DateTime, DateTime> timeSpan)
 		{
-			
 			RegressionData regData = (RegressionData)eventData;
 			
 			DateTime from = regData.regResult.getActiveWndowStart().minusMinutes(regData.input.baselineTimespan);
@@ -345,9 +340,12 @@ public class RegressionFunction extends EventsFunction
 		List<EventData> result;
 		List<EventData> eventDatas = processRegressionData(input, rateRegression, includeNew, includeRegressions);
 				
-		if (functionInput.hasTransactions()) {
+		if (functionInput.hasTransactions())
+		{
 			result = eventDatas;
-		} else {
+		} 
+		else
+		{
 			result = doMergeSimilarEvents(input.serviceId, eventDatas);
 		}
 		
@@ -357,12 +355,10 @@ public class RegressionFunction extends EventsFunction
 	private List<EventData> processRegressionData(RegressionInput input,
 			RateRegression rateRegression, boolean includeNew, boolean includeRegressions)
 	{
-		
-		List<EventData> result = new ArrayList<EventData>();
+		List<EventData> result = Lists.newArrayList();
 		
 		if (includeNew)
 		{
-			
 			for (EventResult event : rateRegression.getSortedCriticalNewEvents())
 			{
 				result.add(new RegressionData(rateRegression, input, event, RegressionType.SevereNewIssues));
@@ -375,7 +371,6 @@ public class RegressionFunction extends EventsFunction
 			
 			for (EventResult event : rateRegression.getSortedAllNewEvents())
 			{
-				
 				if (rateRegression.getExceededNewEvents().containsKey(event.id))
 				{
 					continue;
@@ -387,11 +382,11 @@ public class RegressionFunction extends EventsFunction
 				}
 				
 				result.add(new RegressionData(rateRegression, input, event, RegressionType.NewIssues));
-				
 			}
 		}
 		
-		if (includeRegressions) {
+		if (includeRegressions)
+		{
 			for (RegressionResult regressionResult : rateRegression.getSortedCriticalRegressions())
 			{
 				result.add(new RegressionData(rateRegression, input, regressionResult, RegressionType.SevereRegressions));
@@ -415,7 +410,6 @@ public class RegressionFunction extends EventsFunction
 	@Override
 	protected FieldFormatter getFormatter(String column)
 	{
-		
 		if (column.equals(REG_DELTA))
 		{
 			return new RegressionRateFormatter();
@@ -436,7 +430,6 @@ public class RegressionFunction extends EventsFunction
 			return new RegressionLinkFormatter();
 		}
 		
-
 		if (column.equals(ViewInput.TIME_RANGE))
 		{
 			return new RegressionTimeRangeFormatter();
@@ -497,7 +490,6 @@ public class RegressionFunction extends EventsFunction
 	
 	private RegressionSettings getRegressionSettings(String serviceId)
 	{
-		
 		RegressionSettings regressionSettings = GrafanaSettings.getData(apiClient, serviceId).regression;
 		
 		if (regressionSettings == null)
@@ -512,7 +504,6 @@ public class RegressionFunction extends EventsFunction
 			EventFilterInput input,
 			Pair<DateTime, DateTime> timeSpan)
 	{
-		
 		RegressionSettings regressionSettings = getRegressionSettings(serviceId);
 		
 		RegressionInput regressionInput = new RegressionInput();
@@ -563,7 +554,6 @@ public class RegressionFunction extends EventsFunction
 			RegressionInput regressionInput, RegressionWindow regressionWindow,
 			BaseEventVolumeInput input)
 	{
-		
 		int ratioBaselinePoints = (regressionInput.baselineTimespan / regressionWindow.activeTimespan) * 2;
 		int baselineDays = (int)TimeUnit.MINUTES.toDays(regressionInput.baselineTimespan);
 		
@@ -651,7 +641,6 @@ public class RegressionFunction extends EventsFunction
 				input.pointsWanted, regressionInput.baselineTimespan, 0, 0, Response.of(200, baselineGraphResult));
 		
 		return Pair.of(baselineGraph, activeWindowGraph);
-		
 	}
 	
 	private Pair<Collection<EventResult>, Long> getEventList(String serviceId, Map<String, EventResult> eventListMap,
@@ -701,7 +690,6 @@ public class RegressionFunction extends EventsFunction
 			RegressionInput regressionInput,RateRegression rateRegression, Map<String, EventResult> eventListMap,
 			Graph baseVolumeGraph, Graph activeVolumeGraph, long volume)
 	{
-		
 		RegressionOutput result = new RegressionOutput(false);
 		
 		result.regressionInput = regressionInput;
@@ -882,6 +870,7 @@ public class RegressionFunction extends EventsFunction
 	{
 		List<EventData> result = new ArrayList<EventData>(super.mergeSimilarEvents(serviceId, eventDatas));
 		sortRegressions(result);
+		
 		return result;
 	}
 	
@@ -894,6 +883,7 @@ public class RegressionFunction extends EventsFunction
 	public RegressionOutput runRegression(String serviceId, EventFilterInput regInput)
 	{
 		RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient, serviceId, regInput, this, true);
+		
 		return regressionOutput;
 	}
 	
@@ -901,7 +891,6 @@ public class RegressionFunction extends EventsFunction
 	protected List<EventData> getEventData(String serviceId, EventsInput input,
 			Pair<DateTime, DateTime> timeSpan)
 	{
-		
 		RegressionsInput regInput = (RegressionsInput)input;
 		RegressionOutput regressionOutput = runRegression(serviceId, regInput);
 		
@@ -954,7 +943,6 @@ public class RegressionFunction extends EventsFunction
 	
 	private double getSingleStat(Collection<String> serviceIds, RegressionsInput input)
 	{
-		
 		double result = 0;
 		
 		for (String serviceId : serviceIds)
@@ -967,7 +955,6 @@ public class RegressionFunction extends EventsFunction
 	
 	private List<Series> processSingleStat(RegressionsInput input)
 	{
-		
 		Collection<String> serviceIds = getServiceIds(input);
 		
 		if (CollectionUtil.safeIsEmpty(serviceIds))
@@ -986,7 +973,6 @@ public class RegressionFunction extends EventsFunction
 			return Collections.emptyList();
 		}
 		
-		
 		if (input.singleStatFormat != null)
 		{
 			if (singleStatValue > 0)
@@ -1003,14 +989,12 @@ public class RegressionFunction extends EventsFunction
 			singleStatText = Integer.valueOf((int)singleStatValue);
 		}
 		
-		
 		return createSingleStatSeries(timeSpan, singleStatText);
 	}
 	
 	@Override
 	public List<Series> process(FunctionInput functionInput)
 	{
-		
 		if (!(functionInput instanceof RegressionsInput))
 		{
 			throw new IllegalArgumentException("functionInput");
