@@ -43,6 +43,15 @@
   "iteration": 1546495517330,
   "links": [
     {
+      "icon": "external link",
+      "tags": [],
+      "targetBlank": true,
+      "title": "Learn More",
+      "tooltip": "Learn more about this dashboard",
+      "type": "link",
+      "url": "https://doc.overops.com/docs/slowdowns-dashboard"
+    },
+    {
       "asDropdown": true,
       "icon": "dashboard",
       "includeVars": true,

@@ -31,6 +31,15 @@
   "iteration": 1546496024047,
   "links": [
     {
+      "icon": "external link",
+      "tags": [],
+      "targetBlank": true,
+      "title": "Learn More",
+      "tooltip": "Learn more about this dashboard",
+      "type": "link",
+      "url": "https://doc.overops.com/docs/performance-dashboard"
+    },
+    {
       "asDropdown": true,
       "icon": "dashboard",
       "includeVars": true,

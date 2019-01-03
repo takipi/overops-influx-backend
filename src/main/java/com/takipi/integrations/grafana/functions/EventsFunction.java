@@ -92,6 +92,10 @@ public class EventsFunction extends GrafanaFunction {
 		
 		@Override
 		public boolean equals(Object obj) {
+			if (obj == null ||
+				(!(obj instanceof EventData))) {
+				return false;
+			}
 			
 			EventData other = (EventData)obj;
 			
