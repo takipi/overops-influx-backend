@@ -93,14 +93,15 @@ public class DeploymentsAnnotation extends BaseGraphFunction {
 			}
 		});
 		
-		for (int i = 0; i <= Math.min(deployments.size(), MAX_DEPLOY_ANNOTATIONS); i++) {
-			
+		int maxDeployments = Math.min(deployments.size(), MAX_DEPLOY_ANNOTATIONS);
+		
+		for (int i = 0; i < maxDeployments; i++) {
 			Pair<Long, String> pair = deployments.get(i);
 			
 			result.series.values.add(Arrays.asList(new Object[] {pair.getFirst(), 
 					getServiceValue(pair.getSecond(), serviceId, serviceIds) }));
 		}
-				
+		
 		return Collections.singletonList(result);
 	}
 }
