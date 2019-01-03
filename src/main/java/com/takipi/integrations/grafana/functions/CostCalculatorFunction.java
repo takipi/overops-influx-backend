@@ -36,6 +36,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 	protected static final String MESSAGE = "message";
 	protected static final String COST = "cost";
 	protected static final String COSTPCT = "costpct";
+	protected static final String COSTYRL = "costyrl";
 	
 	protected class EventData {
 		protected EventResult event;
@@ -272,6 +273,17 @@ public class CostCalculatorFunction extends GrafanaFunction {
 
 	}
 
+	protected static class CostYrlFormatter extends FieldFormatter {
+
+		@Override
+		protected Object getValue(EventData eventData, String serviceId, CostCalculatorInput input,
+				Pair<DateTime, DateTime> timeSpan) {
+
+			return .0;
+		}
+
+	}
+	
 	protected FieldFormatter getFormatter(String column) {
 		
 		if (column.equals(LINK)) {
@@ -285,6 +297,10 @@ public class CostCalculatorFunction extends GrafanaFunction {
 		if (column.equals(COSTPCT)) {
 			return new CostPctFormatter();
 		}		
+
+		if (column.equals(COSTYRL)) {
+			return new CostYrlFormatter();
+		}
 		
 		if (column.equals(MESSAGE)) {
 			return new MessageFormatter();
@@ -475,22 +491,26 @@ public class CostCalculatorFunction extends GrafanaFunction {
 		
 		final double costTotal = runningCostTotal;
 		
-		final double targetTablelimit = runningCostTotal * input.tableLimit / 100.0;
+		final double targetTablelimit = runningCostTotal * Math.min(100.0,Math.max(.01,input.tableLimit)) / 100.0;
 		
 		result.sort(new Comparator<List<Object>>() {
 
 			@Override
 			public int compare(List<Object> o1, List<Object> o2) {
-				return (int)((Double)o2.get(4) - (Double)o1.get(4));
+				return (int)((Double)o2.get(costFieldNr) - (Double)o1.get(costFieldNr));
 			}
 		});
 
 		List<List<Object>> sortedResult = new ArrayList<List<Object>>(mergedDatas.size());
 
 		double runningcostTotal = .0;
+		int costPctFieldNr = getColumns(input.fields).indexOf("Costpct");
+		int costYrlFieldNr = getColumns(input.fields).indexOf("Costyrl");
+		long intervalLen = timeSpan.getSecond().getMillis() - timeSpan.getFirst().getMillis() + 1L;
+		long millisInYr = timeSpan.getSecond().getMillis() - timeSpan.getSecond().minusYears(1).getMillis();
+		double intervalFactor = 1.0 * millisInYr / intervalLen;
 		for (List <Object> res : result) {
 			if (runningcostTotal <= targetTablelimit) {
-				int costPctFieldNr = getColumns(input.fields).indexOf("Costpct");
 				if (costPctFieldNr > -1 && costPctFieldNr < res.size() && res.get(costPctFieldNr) instanceof Double) {
 					if (costTotal != .0) {
 						res.set(costPctFieldNr, (Double) res.get(costFieldNr) / costTotal);
@@ -498,8 +518,14 @@ public class CostCalculatorFunction extends GrafanaFunction {
 						res.set(costPctFieldNr, "NA");
 					}
 				}
+				
+				if (costYrlFieldNr > -1 && costYrlFieldNr < res.size() && res.get(costYrlFieldNr) instanceof Double) {
+					res.set(costYrlFieldNr, (Double) res.get(costFieldNr) * intervalFactor);
+				}
 				runningcostTotal += (Double) res.get(costFieldNr);
 				sortedResult.add(res);
+			} else {
+				break;
 			}
 		};
 		

@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 7,
-  "iteration": 1546446697945,
+  "iteration": 1546519410583,
   "links": [
     {
       "asDropdown": true,
@@ -287,7 +287,7 @@
           "unit": "percentunit"
         },
         {
-          "alias": "Cost (cents)",
+          "alias": "Cost ($c)",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -318,6 +318,22 @@
           "thresholds": [],
           "type": "number",
           "unit": "percentunit"
+        },
+        {
+          "alias": "Yearly ($c)",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Costyrl",
+          "thresholds": [],
+          "type": "number",
+          "unit": "currencyUSD"
         }
       ],
       "targets": [
@@ -339,7 +355,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "costCalc({\"fields\":\"link,type,message,error_location,cost,costpct\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":80,\"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\",\"costHigherThan\":.0,\"costMatrix\":$costMatrix,\"tableLimit\":$splitLimit})",
+          "query": "costCalc({\"fields\":\"link,type,message,error_location,costpct,cost,costyrl\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":80,\"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\",\"costHigherThan\":.0,\"costMatrix\":$costMatrix,\"tableLimit\":$splitLimit})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -646,5 +662,5 @@
   "timezone": "",
   "title": "Cost Analysis",
   "uid": "-lETtCsik",
-  "version": 8
+  "version": 22
 }
