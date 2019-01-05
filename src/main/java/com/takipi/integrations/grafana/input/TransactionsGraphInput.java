@@ -15,7 +15,10 @@ package com.takipi.integrations.grafana.input;
  */
 public class TransactionsGraphInput extends BaseGraphInput {
 	
-	
+	/**
+	 * Control the Y valiue of the return time series data.
+	 *
+	 */
 	public enum GraphType {
 		/**
 		 * use the avg response time to complete calls into the target transactions as the Y value
@@ -28,7 +31,7 @@ public class TransactionsGraphInput extends BaseGraphInput {
 		invocations, 
 		
 		/**
-		 * return time series for the number of calls and the avg response time to complete calls into the target transactions as the Y value
+		 * return time series for the number of calls AND the avg response time to complete calls into the target transactions as the Y value
 		 */
 		all
 	}
@@ -54,4 +57,30 @@ public class TransactionsGraphInput extends BaseGraphInput {
 	 * by this function. Possible values are: 	NO_DATA, OK, SLOWING, CRITICAL
 	 */
 	public String performanceStates;
+	
+	/**
+	 * 
+	 * Control which time window is used for Y values
+	 */
+	public enum TimeWindow {
+		/**
+		 * Use the avg response of the active time window as the Y value
+		 */
+		Active, 
+		
+		/**
+		 * Use the avg response of the baseline time window as the Y value
+		 */
+		Baseline, 
+		
+		/**
+		 * Add the avg response of the active and baseline time windows as the Y value
+		 */
+		All
+	}
+	
+	/**
+	 * Control which time window's points to use to calculate the weighted avg. Default = All
+	 */
+	public TimeWindow timeWindow;
 }

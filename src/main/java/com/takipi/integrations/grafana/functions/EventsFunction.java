@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -12,8 +13,6 @@ import java.util.concurrent.Callable;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.Location;
 import com.takipi.api.client.data.event.Stats;
@@ -145,12 +144,14 @@ public class EventsFunction extends GrafanaFunction {
 		protected Collection<EventResult> events;
 
 		protected EventsJiraAsyncTask(String serviceId, Collection<EventResult> events) {
+
 			this.serviceId = serviceId;
 			this.events = events;
 		}
 
-		private String getJiraUrl(String serviceId, String id) {
-			Response<EventResult> response = ApiCache.getEvent(apiClient, serviceId, id);
+		private String getJiraUrl(String serviceId, String Id) {
+			
+			Response<EventResult> response = ApiCache.getEvent(apiClient, serviceId, Id);
 			
 			if ((response == null) || (response.data == null)) {
 				return null;
@@ -164,6 +165,7 @@ public class EventsFunction extends GrafanaFunction {
 		}
 		
 		private String getEventJiraUrl(EventResult event) {
+			
 			if (event.jira_issue_url != null) {
 				return event.jira_issue_url;
 			}
@@ -188,6 +190,7 @@ public class EventsFunction extends GrafanaFunction {
 			return null;
 		}
 		
+		
 		@Override
 		public Object call() {
 
@@ -195,7 +198,7 @@ public class EventsFunction extends GrafanaFunction {
 
 			try {
 				
-				Map<String, String> result = Maps.newHashMap();
+				Map<String, String> result = new HashMap<String, String>();
 				
 				for (EventResult event : events) {
 					String jiraUrl = getEventJiraUrl(event);
@@ -209,6 +212,7 @@ public class EventsFunction extends GrafanaFunction {
 			} finally {
 				afterCall();
 			}
+
 		}
 
 		@Override
@@ -218,6 +222,7 @@ public class EventsFunction extends GrafanaFunction {
 	}
 	
 	protected abstract static class FieldFormatter {
+
 		private static String formatList(Object value) {
 
 			@SuppressWarnings("unchecked")
@@ -237,6 +242,7 @@ public class EventsFunction extends GrafanaFunction {
 		}
 
 		protected Object formatValue(Object value, EventsInput input) {
+
 			if (value == null) {
 				return "";
 			}
@@ -254,7 +260,7 @@ public class EventsFunction extends GrafanaFunction {
 				String str = (String) value;
 
 				if (str.length() > input.maxColumnLength) {
-					return str.substring(0, input.maxColumnLength);
+					return str.substring(0, input.maxColumnLength) + "...";
 
 				} else {
 					return str;
@@ -276,6 +282,7 @@ public class EventsFunction extends GrafanaFunction {
 	}
 
 	protected static class ReflectFormatter extends FieldFormatter {
+
 		private Field field;
 
 		protected ReflectFormatter(Field field) {
@@ -299,6 +306,7 @@ public class EventsFunction extends GrafanaFunction {
 	}
 	
 	protected static class StatsFormatter extends ReflectFormatter {
+
 		protected StatsFormatter(Field field) {
 			super(field);
 		}
@@ -310,6 +318,7 @@ public class EventsFunction extends GrafanaFunction {
 	}
 
 	protected static class DateFormatter extends ReflectFormatter {
+
 		protected DateFormatter(Field field) {
 			super(field);
 		}
@@ -468,7 +477,7 @@ public class EventsFunction extends GrafanaFunction {
 		}
 
 		String[] columnsArray = ArrayUtil.safeSplitArray(columns, ARRAY_SEPERATOR, true);
-		Map<String, FieldFormatter> result = Maps.newLinkedHashMapWithExpectedSize(columnsArray.length);
+		Map<String, FieldFormatter> result = new LinkedHashMap<String, FieldFormatter>(columnsArray.length);
 
 		for (String column : columnsArray) {
 			FieldFormatter fieldFormatter = getFormatter(column);
@@ -492,7 +501,7 @@ public class EventsFunction extends GrafanaFunction {
 			return Collections.emptyList();
 		}
 		
-		List<EventData> result = Lists.newArrayListWithCapacity(eventsMap.size());
+		List<EventData> result = new ArrayList<EventData>(eventsMap.size());
 		
 		for (EventResult event : eventsMap.values()) {
 			result.add(new EventData(event));
@@ -509,21 +518,21 @@ public class EventsFunction extends GrafanaFunction {
 			return eventDatas;
 		}
 		
-		Map<EventData, List<EventData>> eventDataMap = Maps.newHashMapWithExpectedSize(eventDatas.size());
+		Map<EventData, List<EventData>> eventDataMap = new HashMap<EventData, List<EventData>>(eventDatas.size());
 		
 		for (EventData eventData : eventDatas) {
 			
 			List<EventData> eventDataMatches = eventDataMap.get(eventData);
 			
 			if (eventDataMatches == null) {
-				eventDataMatches = Lists.newArrayList();
+				eventDataMatches = new ArrayList<EventData>();
 				eventDataMap.put(eventData, eventDataMatches);		
 			}
 			
 			eventDataMatches.add(eventData);
 		}
 		
-		List<EventData> result = Lists.newArrayList();
+		List<EventData> result = new ArrayList<EventData>();
 		
 		for (List<EventData> similarEventDatas : eventDataMap.values()) {
 			
@@ -538,22 +547,23 @@ public class EventsFunction extends GrafanaFunction {
 	}
 	
 	private void mergeSimilarIds(EventResult target, EventResult source) {
+		
 		if (source == null) {
 			return;
 		}
 		
 		if (source.similar_event_ids != null) {
 			if (target.similar_event_ids != null) {
-				for (String similarId : source.similar_event_ids) {
+				for (String similarId: source.similar_event_ids) {
 					if (!target.similar_event_ids.contains(similarId)) {
 						target.similar_event_ids.add(similarId);
 					}
 				}
 			} else {
-				target.similar_event_ids = Lists.newArrayList(source.similar_event_ids);	
+				target.similar_event_ids = new ArrayList<String>(source.similar_event_ids);	
 			}
 		} else if (target.similar_event_ids == null) {
-			target.similar_event_ids = Lists.newArrayList();
+			target.similar_event_ids = new ArrayList<String>();
 		}
 		
 		if (!target.similar_event_ids.contains(source.id)) {
@@ -562,6 +572,7 @@ public class EventsFunction extends GrafanaFunction {
 	}
 	
 	protected List<EventData> mergeEventDatas(List<EventData> eventDatas) {
+		
 		if (eventDatas.size() == 0) {
 			throw new IllegalArgumentException("eventDatas");
 		}
@@ -606,16 +617,25 @@ public class EventsFunction extends GrafanaFunction {
 	}
 
 	private void updateJiraUrls(String serviceId, Collection <EventData> eventDatas) {
-		List<Callable<Object>> tasks = Lists.newArrayList();
-		List<EventResult> currentBatch = null;
 		
+		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
+		
+		List<EventResult> currentBatch = null;
 		int index = 0;
 		
 		for (EventData eventData : eventDatas) {
 			
+			if (eventData.event.jira_issue_url != null) {
+				continue;
+			}
+			
+			if ((CollectionUtil.safeIsEmpty(eventData.event.labels)) ||
+				(!eventData.event.labels.contains(JIRA_LABEL))) {
+				continue;
+			}
+			
 			if (currentBatch == null) {
-				currentBatch = Lists.newArrayList();
-				
+				currentBatch = new ArrayList<EventResult>();
 				tasks.add(new EventsJiraAsyncTask(serviceId, currentBatch));
 			}
 			
@@ -630,7 +650,7 @@ public class EventsFunction extends GrafanaFunction {
 		
 		List<Object> taskResults = executeTasks(tasks, true);
 
-		Map<String, String> eventUrlMap = Maps.newHashMap();
+		Map<String, String> eventUrlMap = new HashMap<String, String>();
 		
 		for (Object taskResult : taskResults) {
 			 
@@ -652,7 +672,10 @@ public class EventsFunction extends GrafanaFunction {
 		}
 	}
 	
-	protected List<List<Object>> processServiceEvents(String serviceId, EventsInput input, Pair<DateTime, DateTime> timeSpan) {
+	/**
+	 * @param serviceIds - needed for children
+	 */
+	protected List<List<Object>> processServiceEvents(Collection<String> serviceIds, String serviceId, EventsInput input, Pair<DateTime, DateTime> timeSpan) {
 
 		Map<String, FieldFormatter> formatters = getFieldFormatters(input.fields);
 		
@@ -667,10 +690,10 @@ public class EventsFunction extends GrafanaFunction {
 			
 		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
 
-		List<List<Object>> result = Lists.newArrayListWithCapacity(mergedDatas.size());
-		
+		List<List<Object>> result = new ArrayList<List<Object>>(mergedDatas.size());
+			
 		if ((formatters.containsKey(JIRA_ISSUE_URL)) 
-				|| (formatters.containsKey(JIRA_STATE))) {
+		|| (formatters.containsKey(JIRA_STATE))) {
 			updateJiraUrls(serviceId, eventDatas);
 		}
 		
@@ -698,7 +721,7 @@ public class EventsFunction extends GrafanaFunction {
 	protected List<String> getColumns(String fields) {
 
 		String[] fieldArray = ArrayUtil.safeSplitArray(fields, ARRAY_SEPERATOR, true);
-		List<String> result = Lists.newArrayListWithCapacity(fieldArray.length);
+		List<String> result = new ArrayList<String>(fieldArray.length);
 
 		for (String field : fieldArray) {
 
@@ -779,7 +802,7 @@ public class EventsFunction extends GrafanaFunction {
 		Collection<String> serviceIds = getServiceIds(input);
 
 		for (String serviceId : serviceIds) {
-			List<List<Object>> serviceEvents = processServiceEvents(serviceId, input, timeSpan);
+			List<List<Object>> serviceEvents = processServiceEvents(serviceIds, serviceId, input, timeSpan);
 			series.values.addAll(serviceEvents);
 		}
 

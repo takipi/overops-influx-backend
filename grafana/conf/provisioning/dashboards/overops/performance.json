@@ -28,13 +28,13 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 19,
-  "iteration": 1546496024047,
+  "iteration": 1546729429107,
   "links": [
     {
       "icon": "external link",
       "tags": [],
       "targetBlank": true,
-      "title": "Learn More",
+      "title": "HELP",
       "tooltip": "Learn more about this dashboard",
       "type": "link",
       "url": "https://doc.overops.com/docs/performance-dashboard"
@@ -800,18 +800,18 @@
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "Throughput",
+          "alias": "/^.Throughput/",
           "color": "#9ac48a",
           "fill": 2,
           "linewidth": 0,
           "yaxis": 2
         },
         {
-          "alias": "Avg Response (ms)",
+          "alias": "/^.Response/",
           "color": "#f2c96d"
         },
         {
-          "alias": ".Avg (ms)",
+          "alias": "/^.Avg/",
           "color": "#1f78c1",
           "dashes": true
         }
@@ -821,7 +821,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "Throughput",
+          "alias": "",
           "groupBy": [
             {
               "params": [
@@ -860,7 +860,7 @@
           "tags": []
         },
         {
-          "alias": "Avg Response (ms)",
+          "alias": "",
           "groupBy": [
             {
               "params": [
@@ -878,7 +878,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregate\":\"true\",\"transactions\":\"$transactions\",\"seriesName\":\"Avg Response (ms)\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\"})",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregate\":\"true\",\"transactions\":\"$transactions\",\"seriesName\":\"Response (ms)\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\"})",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -1053,14 +1053,14 @@
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "Throughput",
+          "alias": "/^.Throughput/",
           "color": "#7eb26d",
           "fill": 2,
           "linewidth": 0,
           "yaxis": 2
         },
         {
-          "alias": "Times"
+          "alias": "/^.Failures/"
         }
       ],
       "spaceLength": 10,
@@ -1068,7 +1068,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "Throughput",
+          "alias": "",
           "groupBy": [
             {
               "params": [
@@ -1107,7 +1107,7 @@
           "tags": []
         },
         {
-          "alias": "Failures",
+          "alias": "",
           "groupBy": [
             {
               "params": [
@@ -1125,7 +1125,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$transactionFailureTypes\",seriesName\":\"Failures\", \"transactions\":\"$transactions\", \"transactionSearchText\":\"$searchText\"})\n",
+          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$transactionFailureTypes\",\"seriesName\":\"Failures\", \"transactions\":\"$transactions\", \"transactionSearchText\":\"$searchText\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1564,11 +1564,8 @@
         "allValue": "all",
         "current": {
           "selected": true,
-          "tags": [],
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1591,6 +1588,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1615,6 +1613,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1639,6 +1638,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1663,6 +1663,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1687,6 +1688,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1877,6 +1879,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -1933,5 +1936,5 @@
   "timezone": "",
   "title": "Performance",
   "uid": "Z40SpeJmz",
-  "version": 84
+  "version": 92
 }

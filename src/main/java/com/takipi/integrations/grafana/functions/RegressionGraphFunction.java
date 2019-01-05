@@ -26,6 +26,7 @@ import com.takipi.integrations.grafana.input.RegressionGraphInput.RegressionType
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class RegressionGraphFunction extends LimitGraphFunction {
+	
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -146,7 +147,8 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 	}
 	
 	@Override
-	protected List<GraphSeries> processGraphSeries(String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
+	protected List<GraphSeries> processGraphSeries(Collection<String> servieIds, 
+			String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
 			GraphInput input) {
  		
 		RegressionGraphInput rgInput = (RegressionGraphInput)input;
@@ -196,13 +198,14 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 			appendGraphToMap(graphsData, filteredEventData, regressionOutput.activeVolumeGraph, rgInput);
 		}
 			
-		List<GraphSeries> result = getGraphSeries(graphsData, eventDatas, rgInput, includeRegressions);
+		List<GraphSeries> result = getGraphSeries(servieIds, serviceId, graphsData, 
+			eventDatas, rgInput, includeRegressions);
 				
 		return result;
 	}
 	
-	private List<GraphSeries> getGraphSeries(Map<String, GraphData> graphsData,
-			Collection<EventData> eventDatas, RegressionGraphInput rgInput,
+	private List<GraphSeries> getGraphSeries(Collection<String> serviceIds, String serviceId,
+			Map<String, GraphData> graphsData, Collection<EventData> eventDatas, RegressionGraphInput rgInput,
 			boolean regressions) {
 	
 		List<GraphSeries> result = new ArrayList<GraphSeries>();
@@ -225,7 +228,7 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 			GraphData graphData = graphsData.get(key);
 				
 			if (graphData != null) {
-				result.add(getGraphSeries(graphData, rgInput));
+				result.add(getGraphSeries(serviceIds, serviceId, graphData, rgInput));
 			}
 								
 			if (result.size() >= limit) {
@@ -236,7 +239,9 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 		return result;
 	}
 	
-	private GraphSeries getGraphSeries(GraphData graphData, RegressionGraphInput rgInput) {
+	private GraphSeries getGraphSeries(Collection<String> serviceIds,
+			String serviceId, GraphData graphData, 
+		RegressionGraphInput rgInput) {
 		
 		String seriesName;
 		
@@ -246,6 +251,6 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 			seriesName = graphData.key;
 		}
 		
-		return getGraphSeries(graphData, seriesName);	
+		return getGraphSeries(graphData, getServiceValue(seriesName, serviceId, serviceIds));	
 	}
 }

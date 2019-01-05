@@ -63,6 +63,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 	}
 
 	protected class TransactionData {
+		protected Stats stats;
 		protected TransactionGraph graph;
 		protected TransactionGraph baselineGraph;
 		protected long timersHits;
@@ -159,25 +160,28 @@ public class TransactionsListFunction extends GrafanaFunction {
 				(transactionData.state == PerformanceState.SLOWING);
 		
 		if (isSlowdown) {
+			
 			result.append("(");	
-		}
-		
-		result.append((int)(transactionData.score));
-		result.append("% of calls > baseline avg ");
-		result.append((int)(baselineStats.avg_time));
-		result.append("ms + ");
-		result.append(slowdownSettings.std_dev_factor);
-		result.append("x stdDev = ");
-		result.append((int)(baseline));
-		result.append("ms");
-		
-		if (isSlowdown) {
+			result.append((int)(transactionData.score));
+			result.append("% of calls > baseline avg ");
+			result.append((int)(baselineStats.avg_time));
+			result.append("ms + ");
+			result.append(slowdownSettings.std_dev_factor);
+			result.append("x stdDev = ");
+			result.append((int)(baseline));
+			result.append("ms");
 			result.append(") AND (avg response ");
 			result.append((int)(stats.avg_time));
-			result.append("ms > baseline by more than ");
+			result.append("ms - ");
+			result.append((int)(baselineStats.avg_time));
+			result.append("ms baseline > ");
 			result.append(slowdownSettings.min_delta_threshold);
-			result.append("ms). Thresholds are set in the Settings dashboard.");			
+			result.append("ms threshold).");			
+		} else {
+			result.append("Avg response falls within baseline tolerance.");
 		}
+		
+		result.append(" Thresholds are set in the Settings dashboard.");		
 
 		return result.toString();
 	}
@@ -193,12 +197,11 @@ public class TransactionsListFunction extends GrafanaFunction {
 		for (TransactionData transactionData : transactions) {
 
 			String name = getTransactionMessage(transactionData);
-			Stats stats = getTrasnactionGraphStats(transactionData.graph);
-					
+			
 			double errorRate;
 			
-			if (stats.invocations > 0) {
-				errorRate = (double)transactionData.errorsHits / (double)stats.invocations;
+			if (transactionData.stats.invocations > 0) {
+				errorRate = (double)transactionData.errorsHits / (double)transactionData.stats.invocations;
 			} else {
 				errorRate = 0;
 			}
@@ -215,20 +218,18 @@ public class TransactionsListFunction extends GrafanaFunction {
 			Pair<Object, Object> fromTo = getTimeFilterPair(timeSpan, input.timeFilter);
 			String timeRange = TimeUtil.getTimeRange(input.timeFilter); 
 			
-			int scoreValue = getStateValue(transactionData.state);
-			String description = getSlowdownDesc(transactionData, slowdownSettings, stats);
+			String description = getSlowdownDesc(transactionData, slowdownSettings, transactionData.stats);
 			
 			Object[] object = new Object[fields.size()];
 			
 			setOutputObjectField(object, fields, TransactionsListInput.LINK, link);
 			setOutputObjectField(object, fields, TransactionsListInput.TRANSACTION, name);
-			setOutputObjectField(object, fields, TransactionsListInput.TOTAL, stats.invocations);
-			setOutputObjectField(object, fields, TransactionsListInput.AVG_RESPONSE, stats.avg_time);
+			setOutputObjectField(object, fields, TransactionsListInput.TOTAL, transactionData.stats.invocations);
+			setOutputObjectField(object, fields, TransactionsListInput.AVG_RESPONSE, transactionData.stats.avg_time);
 			setOutputObjectField(object, fields, TransactionsListInput. BASELINE_AVG, transactionData.baselineAvg);
 			setOutputObjectField(object, fields, TransactionsListInput.BASELINE_CALLS, NumberUtil.format(transactionData.baselineInvocations));
-			setOutputObjectField(object, fields, TransactionsListInput.ACTIVE_CALLS, NumberUtil.format(stats.invocations));
+			setOutputObjectField(object, fields, TransactionsListInput.ACTIVE_CALLS, NumberUtil.format(transactionData.stats.invocations));
 			setOutputObjectField(object, fields, TransactionsListInput.SLOW_STATE, getStateValue(transactionData.state));
-			setOutputObjectField(object, fields, TransactionsListInput.SLOW_DELTA, scoreValue);
 			setOutputObjectField(object, fields, TransactionsListInput.DELTA_DESC, description);
 			setOutputObjectField(object, fields, TransactionsListInput.ERROR_RATE, errorRate);
 			setOutputObjectField(object, fields, TransactionsListInput.ERRORS, transactionData.errorsHits);
@@ -354,7 +355,8 @@ public class TransactionsListFunction extends GrafanaFunction {
 			
 			transactionData.state = performanceScore.state;
 			transactionData.score = performanceScore.score;
-						
+			transactionData.stats = getTrasnactionGraphStats(transactionData.graph);
+
 			transactionData.baselineGraph = baselineGraphsMap.get(transactionName);
 		
 			if (transactionData.baselineGraph != null) {

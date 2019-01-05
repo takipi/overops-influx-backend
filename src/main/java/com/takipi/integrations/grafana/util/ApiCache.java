@@ -95,7 +95,7 @@ public class ApiCache {
 				
 				long t2 = System.currentTimeMillis();
 				
-				if ((PRINT_DURATIONS) && (printDuration())) {
+				if ((PRINT_DURATIONS)  && (printDuration())) {
 					double sec = (double)(t2-t1) / 1000;
 					logger.info(sec + " sec: " + toString());
 				}
@@ -115,7 +115,6 @@ public class ApiCache {
 
 		public ServiceCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId) {
 			super(apiClient, request);
-			
 			this.serviceId = serviceId;
 		}
 
@@ -146,12 +145,13 @@ public class ApiCache {
 	}
 	
 	protected static class EventCacheLoader extends ServiceCacheLoader {
-		protected String id;
 
-		public EventCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, String id) {
+		protected String Id;
+
+		public EventCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, String Id) {
+
 			super(apiClient, request, serviceId);
-			
-			this.id = id;
+			this.Id = Id;
 		}
 		
 		@Override
@@ -173,7 +173,7 @@ public class ApiCache {
 
 			EventCacheLoader other = (EventCacheLoader) obj;
 
-			if (!Objects.equal(id, other.id)) {
+			if (!Objects.equal(Id, other.Id)) {
 				return false;
 			}
 
@@ -182,20 +182,22 @@ public class ApiCache {
 
 		@Override
 		public int hashCode() {
-			if (id == null) {
+
+			if (Id == null) {
 				return super.hashCode();
 			}
 
-			return super.hashCode() ^ id.hashCode();
+			return super.hashCode() ^ Id.hashCode();
 		}
 		
 		@Override
 		public String toString() {
-			return this.getClass().getSimpleName() + ": " + id;
+			return this.getClass().getSimpleName() + ": " + Id;
 		}
 	}
 
 	protected static class ViewCacheLoader extends ServiceCacheLoader {
+
 		protected String viewName;
 
 		public ViewCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, String viewName) {

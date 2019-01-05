@@ -13,7 +13,10 @@ import com.takipi.api.client.data.transaction.Stats;
 import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.data.transaction.TransactionGraph.GraphPoint;
 import com.takipi.common.util.Pair;
+import com.takipi.integrations.grafana.input.FunctionInput;
+import com.takipi.integrations.grafana.input.TransactionAvgGraphInput;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput;
+import com.takipi.integrations.grafana.output.Series;
 
 public class TransactionAvgGraphFunction extends TransactionsGraphFunction
 {
@@ -27,7 +30,7 @@ public class TransactionAvgGraphFunction extends TransactionsGraphFunction
 
 		@Override
 		public Class<?> getInputClass() {
-			return TransactionsGraphInput.class;
+			return TransactionAvgGraphInput.class;
 		}
 
 		@Override
@@ -52,7 +55,7 @@ public class TransactionAvgGraphFunction extends TransactionsGraphFunction
 		if (transactionGraphs == null) {
 			return Collections.emptyList();
 		}
-		
+			
 		List<TransactionGraph> result = new ArrayList<TransactionGraph>();
 		
 		for (TransactionGraph transactionGraph : transactionGraphs) {
@@ -103,6 +106,16 @@ public class TransactionAvgGraphFunction extends TransactionsGraphFunction
 		}
 		
 		return result;
+	}
+	
+	@Override
+	public List<Series> process(FunctionInput functionInput) {
+		
+		if (!(functionInput instanceof TransactionAvgGraphInput)) {
+			throw new IllegalArgumentException("functionInput");
+		}
+
+		return super.process(functionInput);
 	}
 	
 }

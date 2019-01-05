@@ -79,7 +79,6 @@ public abstract class GrafanaFunction
 		public String getName();
 	}
 	
-	protected static final String TIMER = "Timer";
 	protected static final String RESOVED = "Resolved";
 	protected static final String HIDDEN = "Hidden";
 	
@@ -118,18 +117,25 @@ public abstract class GrafanaFunction
 
 	protected static final Map<String, String> TYPES_MAP;
 	
+	protected static final String LOGGED_ERROR = "Logged Error";
+	protected static final String LOGGED_WARNING = "Logged Warning";
+	protected static final String CAUGHT_EXCEPTION = "Caught Exception";
+	protected static final String UNCAUGHT_EXCEPTION = "Uncaught Exception";
+	protected static final String SWALLOWED_EXCEPTION = "Swallowed Exception";
+	protected static final String TIMER = "Timer";
+	protected static final String HTTP_ERROR = "HTTP Error";
+
 	static
 	{
 		TYPES_MAP = new HashMap<String, String>();
 		
-		TYPES_MAP.put("Logged Error", "ERR");
-		TYPES_MAP.put("Logged Warning", "WRN");
-		TYPES_MAP.put("Caught Exception", "CEX");
-		TYPES_MAP.put("Uncaught Exception", "UNC");
-		TYPES_MAP.put("Swallowed Exception", "SWL");
-		TYPES_MAP.put("Timer", "TMR");
-		TYPES_MAP.put("HTTP_ERROR", "HTTP");
-		
+		TYPES_MAP.put(LOGGED_ERROR, "ERR");
+		TYPES_MAP.put(LOGGED_WARNING, "WRN");
+		TYPES_MAP.put(CAUGHT_EXCEPTION, "CEX");
+		TYPES_MAP.put(UNCAUGHT_EXCEPTION, "UNC");
+		TYPES_MAP.put(SWALLOWED_EXCEPTION, "SWL");
+		TYPES_MAP.put(TIMER, "TMR");
+		TYPES_MAP.put(HTTP_ERROR, "HTTP");	
 	}
 	
 	private static final int END_SLICE_POINT_COUNT = 2;
@@ -789,8 +795,10 @@ public abstract class GrafanaFunction
 						.setVolumeType(volumeType).setRaw(true);
 		
 		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);
+		
 		Response<EventsSlimVolumeResult> response =
 				ApiCache.getEventVolume(apiClient, serviceId, input, volumeType, builder.build());
+		
 		validateResponse(response);
 		
 		if ((response.data == null) || (response.data.events == null))
@@ -963,13 +971,6 @@ public abstract class GrafanaFunction
 		{
 			try
 			{
-				/*
-				Future<Object> future = null;
-				
-				while (future == null) {
-					future = completionService.poll(2, TimeUnit.SECONDS);
-				}
-				*/
 				Future<Object> future = completionService.take();
 				
 				received++;

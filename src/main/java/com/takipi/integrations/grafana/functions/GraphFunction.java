@@ -60,8 +60,8 @@ public class GraphFunction extends BaseGraphFunction {
 	}
 
 	@Override
-	protected List<GraphSeries> processServiceGraph(String serviceId, String viewId, String viewName,
-			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds, int pointsWanted) {
+	protected List<GraphSeries> processServiceGraph(Collection<String> serviceIds, String serviceId, String viewId, String viewName,
+			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
 
 		GraphInput graphInput = (GraphInput) input;
 

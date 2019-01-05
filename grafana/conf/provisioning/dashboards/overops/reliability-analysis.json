@@ -30,13 +30,13 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 20,
-  "iteration": 1546498370600,
+  "iteration": 1546729496770,
   "links": [
     {
       "icon": "external link",
       "tags": [],
       "targetBlank": true,
-      "title": "Learn More",
+      "title": "HELP",
       "tooltip": "Learn more about this dashboard",
       "type": "link",
       "url": "https://doc.overops.com/docs/reliability-analysis-dashboard"
@@ -821,20 +821,15 @@
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "Throughput",
+          "alias": "/^.Throughput/",
           "color": "#9ac48a",
           "fill": 2,
           "linewidth": 0,
           "yaxis": 2
         },
         {
-          "alias": "Avg Response (ms)",
+          "alias": "/^.Response/",
           "color": "#f2c96d"
-        },
-        {
-          "alias": ".Avg (ms)",
-          "color": "#3f2b5b",
-          "dashes": true
         }
       ],
       "spaceLength": 10,
@@ -842,7 +837,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "Throughput",
+          "alias": "",
           "groupBy": [
             {
               "params": [
@@ -881,7 +876,7 @@
           "tags": []
         },
         {
-          "alias": "Avg Time",
+          "alias": "",
           "groupBy": [
             {
               "params": [
@@ -898,7 +893,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"aggregate\":true,\"transactions\":\"$transactions\",\"seriesName\":\"Avg Time\",\"pointsWanted\":\"$transactionPointsWanted\"})",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"aggregate\":true,\"transactions\":\"$transactions\",\"seriesName\":\"Response (ms)\",\"pointsWanted\":\"$transactionPointsWanted\"})",
           "rawQuery": true,
           "refId": "C",
           "resultFormat": "time_series",
@@ -1036,7 +1031,7 @@
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "Throughput",
+          "alias": "/^.Throughput/",
           "color": "#7eb26d",
           "fill": 2,
           "linewidth": 0,
@@ -1053,7 +1048,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "Throughput",
+          "alias": "",
           "groupBy": [
             {
               "params": [
@@ -1484,7 +1479,10 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 0,
-          "link": false,
+          "link": true,
+          "linkTargetBlank": true,
+          "linkTooltip": "${__cell_6}",
+          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Severity",
           "thresholds": [
@@ -1545,6 +1543,22 @@
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Description",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
         }
       ],
       "targets": [
@@ -1565,7 +1579,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressions({\"fields\":\"link,type,error_location,introduced_by,  severity, jira_issue_url,typeMessage,entry_point,stats.hits,rate,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":110, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"render\":\"Grid\",\"regressionTypes\":\"NewIssues,SevereNewIssues\"})\n",
+          "query": "regressions({\"fields\":\"link,type,error_location,introduced_by,  severity, jira_issue_url,description,typeMessage,entry_point,stats.hits,rate,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":110, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"render\":\"Grid\",\"regressionTypes\":\"NewIssues,SevereNewIssues\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1798,7 +1812,9 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
-          "link": false,
+          "link": true,
+          "linkTooltip": "${__cell_5}",
+          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-timeRange=${__cell_3}&var-transactions=${__cell_6}",
           "mappingType": 1,
           "pattern": "slow_state",
           "thresholds": [
@@ -1888,6 +1904,22 @@
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
+        },
+        {
+          "alias": "Baseline Avg",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 0,
+          "mappingType": 1,
+          "pattern": "baseline_avg",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
         }
       ],
       "targets": [
@@ -1908,7 +1940,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"fields\":\"link,from,to,timeRange,slow_state,delta_description,transaction,avg_response,slow_delta,invocations\",\"renderMode\":\"Grid\",\"transactions\":\"$transactions\", \"pointsWanted\":\"$transactionPointsWanted\", \"eventPointsWanted\":\"$pointsWanted\",\"performanceStates\":\"SLOWING|CRITICAL\"})",
+          "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"fields\":\"link,from,to,timeRange,slow_state,delta_description,transaction,avg_response,baseline_avg,invocations\",\"renderMode\":\"Grid\",\"transactions\":\"$transactions\", \"pointsWanted\":\"$transactionPointsWanted\", \"eventPointsWanted\":\"$pointsWanted\",\"performanceStates\":\"SLOWING|CRITICAL\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -2176,7 +2208,9 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 0,
-          "link": false,
+          "link": true,
+          "linkTooltip": "${__cell_7}",
+          "linkUrl": "d/WZ739NYmk/increasing-errors?var-timeRange=${__cell_6}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=$transactions&var-type=$type&var-increasingErrors=${__cell_2}",
           "mappingType": 1,
           "pattern": "Severity",
           "thresholds": [
@@ -2266,6 +2300,22 @@
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Description",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
         }
       ],
       "targets": [
@@ -2286,7 +2336,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressions({\"fields\":\"link,type,error_location,introduced_by,  severity, regression,timeRange,typeMessage,stats.hits,rate,regDelta,first_seen\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":65, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"render\":\"Grid\",\"regressionTypes\":\"Regressions,SevereRegressions\"})\n",
+          "query": "regressions({\"fields\":\"link,type,error_location,introduced_by,severity,regression,timeRange,description,typeMessage,stats.hits,rate,regDelta,first_seen\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":65, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"render\":\"Grid\",\"regressionTypes\":\"Regressions,SevereRegressions\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -2323,12 +2373,8 @@
       {
         "allValue": "all",
         "current": {
-          "selected": false,
-          "tags": [],
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2599,7 +2645,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -2624,7 +2669,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -2672,5 +2716,5 @@
   "timezone": "",
   "title": "Reliability Analysis",
   "uid": "4DHQ63-ik",
-  "version": 190
+  "version": 197
 }

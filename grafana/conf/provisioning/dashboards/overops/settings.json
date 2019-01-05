@@ -17,14 +17,14 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": null,
-  "iteration": 1546513626456,
+  "id": 23,
+  "iteration": 1546729553456,
   "links": [
     {
       "icon": "external link",
       "tags": [],
       "targetBlank": true,
-      "title": "Learn More",
+      "title": "HELP",
       "tooltip": "Learn more about this dashboard",
       "type": "link",
       "url": "https://doc.overops.com/docs/reliability-dashboards-overview"
@@ -67,7 +67,11 @@
     "list": [
       {
         "allValue": "*",
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "None",
+          "value": "None"
+        },
         "datasource": "OO",
         "hide": 0,
         "includeAll": false,
@@ -88,7 +92,11 @@
       },
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "isNone": true,
+          "text": "None",
+          "value": ""
+        },
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -110,7 +118,7 @@
     ]
   },
   "time": {
-    "from": "now-2d",
+    "from": "now-7d",
     "to": "now"
   },
   "timepicker": {
@@ -142,5 +150,5 @@
   "timezone": "",
   "title": "Settings",
   "uid": "mTGNNTfiz",
-  "version": 1
+  "version": 22
 }

@@ -28,13 +28,13 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 29,
-  "iteration": 1546495482652,
+  "iteration": 1546729452814,
   "links": [
     {
       "icon": "external link",
       "tags": [],
       "targetBlank": true,
-      "title": "Learn More",
+      "title": "HELP",
       "tooltip": "Learn more about this dashboard",
       "type": "link",
       "url": "https://doc.overops.com/docs/new-errors-dashboard"
@@ -523,6 +523,10 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
+          "link": true,
+          "linkTargetBlank": true,
+          "linkTooltip": "${__cell_6}",
+          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Severity",
           "thresholds": [
@@ -599,6 +603,22 @@
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Description",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
         }
       ],
       "targets": [
@@ -619,7 +639,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressions({\"fields\":\"link,severity,type,jira_issue_url,entry_point,id,typeMessage,error_location,stats.hits,rate,introduced_by,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"introducedBy\":\"$deployments\",\"firstSeen\":\"$timeFilter\",\"volumeType\":\"all\",\"maxColumnLength\":100, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"render\":\"Grid\", \"searchText\":\"$search\"})",
+          "query": "regressions({\"fields\":\"link,severity,type,jira_issue_url,entry_point,id,description,typeMessage,error_location,stats.hits,rate,introduced_by,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"introducedBy\":\"$deployments\",\"firstSeen\":\"$timeFilter\",\"volumeType\":\"all\",\"maxColumnLength\":100, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"render\":\"Grid\", \"searchText\":\"$search\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -654,12 +674,8 @@
       {
         "allValue": "all",
         "current": {
-          "selected": false,
-          "tags": [],
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -682,12 +698,8 @@
       {
         "allValue": "*",
         "current": {
-          "selected": false,
-          "tags": [],
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -710,8 +722,8 @@
       {
         "allValue": "*",
         "current": {
-          "text": "all",
-          "value": "all"
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1013,5 +1025,5 @@
   "timezone": "",
   "title": "New Errors",
   "uid": "3NZ83NLik",
-  "version": 79
+  "version": 84
 }

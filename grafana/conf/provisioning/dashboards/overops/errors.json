@@ -27,8 +27,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": null,
-  "iteration": 1546514699911,
+  "id": 31,
+  "iteration": 1546729401539,
   "links": [
     {
       "icon": "external link",
@@ -58,7 +58,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "",
+      "description": "This graph shows the number of calls into transactions containing the selected events (Throughput). Overlaid on this are the top $splitLimit selected errors and the overall volume of all events (Times).",
       "fill": 0,
       "gridPos": {
         "h": 6,
@@ -88,14 +88,14 @@
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "Throughput",
+          "alias": "/^.Throughput/",
           "color": "#7eb26d",
           "fill": 2,
           "linewidth": 0,
           "yaxis": 2
         },
         {
-          "alias": "Times",
+          "alias": "/^.Volume/",
           "color": "#1f78c1",
           "linewidth": 2
         }
@@ -105,7 +105,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "Throughput",
+          "alias": "",
           "groupBy": [
             {
               "params": [
@@ -144,7 +144,7 @@
           "tags": []
         },
         {
-          "alias": "Times",
+          "alias": "",
           "groupBy": [
             {
               "params": [
@@ -162,7 +162,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",seriesName\":\"Times\", \"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
+          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",\"seriesName\":\"Volume\", \"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -265,7 +265,7 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "",
+      "description": "A deduplicated list of all errors in the selected time frame and filter set.",
       "fontSize": "100%",
       "gridPos": {
         "h": 13,
@@ -275,11 +275,11 @@
       },
       "id": 34,
       "links": [],
-      "pageSize": 1000,
+      "pageSize": 50,
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 9,
+        "col": 8,
         "desc": true
       },
       "styles": [
@@ -467,10 +467,10 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
-          "link": false,
-          "linkTargetBlank": false,
-          "linkTooltip": "",
-          "linkUrl": "",
+          "link": true,
+          "linkTargetBlank": true,
+          "linkTooltip": " ${__cell_9} / ${__cell_6} ",
+          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Rate",
           "thresholds": [],
@@ -538,7 +538,7 @@
           ]
         },
         {
-          "alias": "Jira",
+          "alias": "Tkt",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -558,7 +558,7 @@
           "unit": "short",
           "valueMaps": [
             {
-              "text": "🗳",
+              "text": "🎟",
               "value": "1"
             }
           ]
@@ -575,6 +575,22 @@
           "decimals": 2,
           "mappingType": 1,
           "pattern": "Id",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Invocations",
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
@@ -598,7 +614,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "events({\"fields\":\"link,type,entry_point,introduced_by,jira_issue_url,id,message,error_location,stats.hits,rate,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":100, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
+          "query": "events({\"fields\":\"link,type,entry_point,introduced_by,jira_issue_url,id,stats.invocations,message,error_location,stats.hits,rate,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":100, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -634,7 +650,11 @@
     "list": [
       {
         "allValue": "None",
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "None",
+          "value": "None"
+        },
         "datasource": "OO",
         "hide": 0,
         "includeAll": false,
@@ -655,7 +675,11 @@
       },
       {
         "allValue": "*",
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
@@ -676,7 +700,11 @@
       },
       {
         "allValue": "*",
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
@@ -697,7 +725,11 @@
       },
       {
         "allValue": "all",
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
@@ -718,7 +750,11 @@
       },
       {
         "allValue": "*",
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
@@ -739,7 +775,10 @@
       },
       {
         "allValue": "*",
-        "current": {},
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
@@ -760,7 +799,11 @@
       },
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "24",
+          "value": "24"
+        },
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -809,17 +852,12 @@
           "text": "3",
           "value": "3"
         },
-        "hide": 0,
+        "hide": 2,
         "includeAll": false,
         "label": "Split Top",
         "multi": false,
         "name": "splitLimit",
         "options": [
-          {
-            "selected": false,
-            "text": "0",
-            "value": "0"
-          },
           {
             "selected": true,
             "text": "3",
@@ -829,9 +867,14 @@
             "selected": false,
             "text": "5",
             "value": "5"
+          },
+          {
+            "selected": false,
+            "text": "1",
+            "value": "1"
           }
         ],
-        "query": "0,3,5",
+        "query": "3,5,1",
         "skipUrlSync": false,
         "type": "custom"
       },
@@ -860,7 +903,10 @@
       },
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "text": "app.overops.com",
+          "value": "app.overops.com"
+        },
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -881,7 +927,10 @@
       },
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "text": "443",
+          "value": "443"
+        },
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -903,7 +952,7 @@
     ]
   },
   "time": {
-    "from": "now-2d",
+    "from": "now-7d",
     "to": "now"
   },
   "timepicker": {
@@ -933,7 +982,7 @@
     ]
   },
   "timezone": "",
-  "title": "Unique Errors",
+  "title": "Errors",
   "uid": "HYBPMdYik",
-  "version": 13
+  "version": 61
 }
