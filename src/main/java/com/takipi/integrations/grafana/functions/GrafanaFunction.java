@@ -269,19 +269,28 @@ public abstract class GrafanaFunction
 		
 		return Pair.of(from, to);
 	}
-	
-	protected static Pair<String, String> getTransactionNameAndMethod(String name)
+
+	protected static Pair<String, String> getTransactionNameAndMethod(String name, boolean fullyQualified)
 	{
 		
 		String[] parts = name.split(TRANS_DELIM);
 		
 		if (parts.length == 1)
 		{
-			return Pair.of(getSimpleClassName(toQualified(name)), null);
+			if (fullyQualified) {
+				return Pair.of(toQualified(name), null);
+			} else {
+				return Pair.of(getSimpleClassName(toQualified(name)), null);
+			}
+			
 		}
 		else
 		{
-			return Pair.of(getSimpleClassName(toQualified((parts[0]))), parts[1]);
+			if (fullyQualified) {
+				return Pair.of(toQualified((parts[0])), parts[1]);		
+			} else {
+				return Pair.of(getSimpleClassName(toQualified((parts[0]))), parts[1]);
+			}
 		}
 	}
 	
@@ -303,7 +312,7 @@ public abstract class GrafanaFunction
 	protected static String getTransactionName(String name, boolean includeMethod)
 	{
 		
-		Pair<String, String> nameAndMethod = getTransactionNameAndMethod(name);
+		Pair<String, String> nameAndMethod = getTransactionNameAndMethod(name, false);
 		
 		if ((includeMethod) && (nameAndMethod.getSecond() != null))
 		{

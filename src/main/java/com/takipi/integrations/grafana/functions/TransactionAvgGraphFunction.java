@@ -17,6 +17,7 @@ import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.TransactionAvgGraphInput;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput;
 import com.takipi.integrations.grafana.output.Series;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionAvgGraphFunction extends TransactionsGraphFunction
 {
@@ -94,7 +95,7 @@ public class TransactionAvgGraphFunction extends TransactionsGraphFunction
 			stats.invocations = sum;
 			
 			GraphPoint p1 = new GraphPoint();
-			p1.time = transactionGraph.points.get(0).time;
+			p1.time = TimeUtil.toString(timeSpan.getFirst());
 			p1.stats = stats;
 
 			GraphPoint p2 = new GraphPoint();

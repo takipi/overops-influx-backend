@@ -40,13 +40,13 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 37,
-  "iteration": 1546495517330,
+  "iteration": 1546799563102,
   "links": [
     {
       "icon": "external link",
       "tags": [],
       "targetBlank": true,
-      "title": "Learn More",
+      "title": "HELP",
       "tooltip": "Learn more about this dashboard",
       "type": "link",
       "url": "https://doc.overops.com/docs/slowdowns-dashboard"
@@ -560,6 +560,7 @@
       },
       "yaxes": [
         {
+          "decimals": null,
           "format": "short",
           "label": "",
           "logBase": 1,
@@ -953,6 +954,8 @@
       {
         "allValue": "all",
         "current": {
+          "selected": false,
+          "tags": [],
           "text": "None",
           "value": [
             "None"
@@ -1052,7 +1055,9 @@
         "allValue": "*",
         "current": {
           "text": "All",
-          "value": "$__all"
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -1313,10 +1318,10 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
+          "selected": false,
           "tags": [],
-          "text": "2d",
-          "value": "2d"
+          "text": "7d",
+          "value": "7d"
         },
         "hide": 0,
         "includeAll": false,
@@ -1388,7 +1393,7 @@
         "name": "performanceStates",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "SLOWING|CRITICAL",
             "value": "SLOWING|CRITICAL"
           }
@@ -1457,5 +1462,5 @@
   "timezone": "",
   "title": "Slowdowns",
   "uid": "iHSORcymk",
-  "version": 39
+  "version": 46
 }

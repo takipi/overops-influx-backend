@@ -106,7 +106,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			Collection<PerformanceState> performanceStates = TransactionsListInput.getStates(input.performanceStates);
 			TransactionsListFunction transactionsFunction = new TransactionsListFunction(apiClient);
 			
-			Map<String, TransactionData> transactionDatas = transactionsFunction.getTransactionDatas(activeGraphs, 
+			Map<Pair<String, String>, TransactionData> transactionDatas = transactionsFunction.getTransactionDatas(activeGraphs, 
 				serviceId, viewId, timeSpan, input, false, 0);
 			
 			List<TransactionGraph> graphs = new ArrayList<TransactionGraph>();

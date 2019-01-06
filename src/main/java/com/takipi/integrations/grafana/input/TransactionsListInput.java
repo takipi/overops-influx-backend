@@ -80,6 +80,11 @@ public class TransactionsListInput extends BaseGraphInput {
 	public static final String ERRORS = "errors";
 	
 	/**
+	 * a text description of the volume of errors of the type defined in the Settings dashboard a "transaction failure types".
+	 */
+	public static final String ERRORS_DESC = "error_description";
+	
+	/**
 	 * A string describing the change in performance between the current time range and the baseline time frange.
 	 */
 	public static final String DELTA_DESC = "delta_description";

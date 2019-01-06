@@ -65,7 +65,7 @@ public class SlowTransactionsFunction extends EnvironmentVariableFunction
 		
 		TransactionsListFunction transactionsFunction = new TransactionsListFunction(apiClient);
 		
-		Map<String, TransactionData> transactionDatas = transactionsFunction.getTransactionDatas(activeGraphs,
+		Map<Pair<String, String>, TransactionData> transactionDatas = transactionsFunction.getTransactionDatas(activeGraphs,
 			serviceId, viewId, timeSpan, input, false, 0);
 						
 		for (TransactionData transactionData : transactionDatas.values()) {

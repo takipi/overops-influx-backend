@@ -164,7 +164,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 
 			try {
 
-				Map<String, TransactionData> tansactionDatas = function.getTransactionDatas(serviceId, timeSpan, input, false, 0);				
+				Map<Pair<String, String>, TransactionData> tansactionDatas = function.getTransactionDatas(serviceId, timeSpan, input, false, 0);				
 				SlowdownAsyncResult result = new SlowdownAsyncResult(key, tansactionDatas.values());
 				
 				return result;
