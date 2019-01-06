@@ -42,6 +42,8 @@ import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionsListFunction extends GrafanaFunction {
 		
+	private static final String MISSING_TIMER_LINK = "missing-timer-event";
+	
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -283,7 +285,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 				link = EventLinkEncoder.encodeLink(apiClient, serviceId, input, transactionData.currTimer, 
 					timeSpan.getFirst(), timeSpan.getSecond());
 			} else {
-				link = null;
+				link = MISSING_TIMER_LINK;
 			}
 			
 			Pair<Object, Object> fromTo = getTimeFilterPair(timeSpan, input.timeFilter);
@@ -469,11 +471,6 @@ public class TransactionsListFunction extends GrafanaFunction {
 				continue;
 			}
 			
-			if (transaction.graph.name.contains("GetAllNo")) {
-				System.out.println();
-			}
-			
-
 			if (event.type.equals(TIMER)) {
 				
 				transaction.timersHits += event.stats.hits;
