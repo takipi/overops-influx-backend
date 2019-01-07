@@ -83,4 +83,15 @@ public class TransactionsGraphInput extends BaseGraphInput {
 	 * Control which time window's points to use to calculate the weighted avg. Default = All
 	 */
 	public TimeWindow timeWindow;
+	
+	public TimeWindow getTimeWindow() {
+		
+		TimeWindow result = this.timeWindow;
+		
+		if (result == null) {
+			result = TimeWindow.All;
+		}
+		
+		return result;
+	}
 }

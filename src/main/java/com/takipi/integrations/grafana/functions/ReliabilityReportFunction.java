@@ -34,6 +34,7 @@ import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOutput;
 import com.takipi.integrations.grafana.functions.TransactionsListFunction.TransactionData;
+import com.takipi.integrations.grafana.functions.TransactionsListFunction.TransactionDataResult;
 import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
 import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
@@ -164,9 +165,16 @@ public class ReliabilityReportFunction extends EventsFunction {
 
 			try {
 
-				Map<Pair<String, String>, TransactionData> tansactionDatas = function.getTransactionDatas(serviceId, timeSpan, input, false, 0);				
-				SlowdownAsyncResult result = new SlowdownAsyncResult(key, tansactionDatas.values());
+				TransactionDataResult transactionDataResult = function.getTransactionDatas(serviceId, timeSpan, input, false, 0);				
 				
+				SlowdownAsyncResult result;
+				
+				if (transactionDataResult != null) {
+					result = new SlowdownAsyncResult(key, transactionDataResult.items.values());
+				} else {
+					result = new SlowdownAsyncResult(key, Collections.emptyList());
+				}
+							
 				return result;
 			} finally {
 				afterCall();

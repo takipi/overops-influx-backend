@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 37,
-  "iteration": 1546799563102,
+  "iteration": 1546836893402,
   "links": [
     {
       "icon": "external link",
@@ -112,12 +112,12 @@
           "yaxis": 2
         },
         {
-          "alias": "Avg Response (ms)",
+          "alias": "/^Response/",
           "color": "#f2c96d"
         },
         {
-          "alias": "Avg (ms)",
-          "color": "#1f78c1",
+          "alias": "/^Active/",
+          "color": "#82b5d8",
           "dashes": true
         }
       ],
@@ -204,7 +204,7 @@
           "tags": []
         },
         {
-          "alias": "Avg (ms)",
+          "alias": "Active $timeRange Avg (ms)",
           "groupBy": [
             {
               "params": [
@@ -335,11 +335,12 @@
         },
         {
           "alias": "/^Active/",
-          "color": "#0a437c",
+          "color": "#82b5d8",
           "dashes": true
         },
         {
           "alias": "/^Baseline/",
+          "color": "#f9934e",
           "dashes": true
         }
       ],
@@ -662,8 +663,8 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_12} errors of type: $transactionFailureText in ${__cell_5} calls",
-          "linkUrl": "d/HYBPMdYik/errors?from=${__cell_3}&to=${__cell_4}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=${__cell_7}&var-type=$transactionFailureTypes",
+          "linkTooltip": "${__cell_7}",
+          "linkUrl": "d/HYBPMdYik/errors?from=${__cell_3}&to=${__cell_4}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=${__cell_8}&var-type=$transactionFailureTypes",
           "mappingType": 1,
           "pattern": "error_rate",
           "thresholds": [
@@ -885,6 +886,22 @@
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "error_description",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
         }
       ],
       "targets": [
@@ -905,7 +922,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"fields\":\"link,slow_state,delta_description,from,to,baseline_calls,active_calls,transaction,invocations,avg_response,baseline_avg,error_rate,errors\",\"renderMode\":\"Grid\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"searchText\":\"$searchText\", \"pointsWanted\":\"$transactionPointsWanted\", \"eventPointsWanted\":\"$pointsWanted\",\"performanceStates\":\"$performanceStates\"})",
+          "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"fields\":\"link,slow_state,delta_description,from,to,baseline_calls,active_calls,error_description,transaction,invocations,avg_response,baseline_avg,error_rate,errors\",\"renderMode\":\"Grid\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"searchText\":\"$searchText\", \"pointsWanted\":\"$transactionPointsWanted\", \"eventPointsWanted\":\"$pointsWanted\",\"performanceStates\":\"$performanceStates\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -931,7 +948,7 @@
       "type": "table"
     },
     {
-      "content": "<script>\n\nfunction hide(name) {\n  var element = document.getElementsByClassName(name);\n  \n  if ((element) && (element.length == 1)) {\n    element[0].style.display = 'none';\n  }\n\n}\n\nfunction hideButtons() {\n  hide(\"btn navbar-button gf-timepicker-nav-btn\");\n  hide(\"navbar-buttons navbar-buttons--zoom\");\n}\n\nhideButtons();\n\n</script>\n\n\n",
+      "content": "<script>\n\nfunction hide(name) {\n  var element = document.getElementsByClassName(name);\n  \n  if ((element) && (element.length == 1)) {\n    element[0].style.display = 'none';\n  }\n\n}\n\nfunction hideButtons() {\n  hide(\"btn navbar-button gf-timepicker-nav-btn\");\n  hide(\"navbar-buttons navbar-buttons--zoom\");\n  hide(\"btn navbar-button navbar-button--zoom\");\n}\n\nhideButtons();\n\n</script>\n\n\n",
       "gridPos": {
         "h": 1,
         "w": 1,
@@ -954,8 +971,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": false,
-          "tags": [],
           "text": "None",
           "value": [
             "None"
@@ -1055,9 +1070,7 @@
         "allValue": "*",
         "current": {
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1066,7 +1079,7 @@
         "multi": true,
         "name": "transactions",
         "options": [],
-        "query": "slowTransactions({\"environments\":\"$environments\",\"view\":\"All Events\",\"timeFilter\":\"time >= now() - $timeRange\",\"sorted\":\"true\", \"pointsWanted\":\"$transactionPointsWanted\", \"performanceStates\":\"$performanceStates\"})",
+        "query": "slowTransactions({\"environments\":\"$environments\",\"applications\":\"$applications\",\"deployments\":\"$deployments\",\"servers\":\"$servers\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"sorted\":\"true\", \"pointsWanted\":\"$transactionPointsWanted\", \"performanceStates\":\"$performanceStates\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1318,10 +1331,10 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
+          "selected": true,
           "tags": [],
-          "text": "7d",
-          "value": "7d"
+          "text": "2d",
+          "value": "2d"
         },
         "hide": 0,
         "includeAll": false,
@@ -1393,7 +1406,7 @@
         "name": "performanceStates",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "SLOWING|CRITICAL",
             "value": "SLOWING|CRITICAL"
           }
@@ -1462,5 +1475,5 @@
   "timezone": "",
   "title": "Slowdowns",
   "uid": "iHSORcymk",
-  "version": 46
+  "version": 53
 }

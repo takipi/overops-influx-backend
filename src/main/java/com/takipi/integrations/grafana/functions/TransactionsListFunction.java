@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.joda.time.DateTime;
 
+import com.google.common.base.Objects;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.transaction.Stats;
@@ -62,8 +63,57 @@ public class TransactionsListFunction extends GrafanaFunction {
 		}
 	}
 
-	public TransactionsListFunction(ApiClient apiClient) {
-		super(apiClient);
+	public static class TransactionKey {
+		
+		public String className;
+		public String methodName;
+		
+		public static TransactionKey of(String className, String methodName) {
+			
+			TransactionKey result = new TransactionKey();
+			result.className = className;
+			result.methodName = methodName;
+			
+			return result;
+		}
+		
+		
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (!(obj instanceof TransactionKey)) {
+				return false;
+			}
+			
+			TransactionKey other = (TransactionKey)obj;
+			
+			if (!Objects.equal(className, other.className)) {
+				return false;
+			}
+			
+			if (!Objects.equal(methodName, other.methodName)) {
+				return false;
+			}
+			
+			return true;
+		}
+		
+		@Override
+		public int hashCode()
+		{
+			if (methodName == null) {
+				return className.hashCode();
+			}
+			
+			return className.hashCode() ^ methodName.hashCode();
+		}
+	}
+	
+	public static class TransactionDataResult {
+		
+		public Map<TransactionKey, TransactionData> items;
+		public RegressionInput regressionInput;
+		public RegressionWindow regressionWindow;
 	}
 
 	protected class TransactionData {
@@ -78,7 +128,10 @@ public class TransactionsListFunction extends GrafanaFunction {
 		protected double score;
 		protected double baselineAvg;
 		protected long baselineInvocations;
-
+	}
+	
+	public TransactionsListFunction(ApiClient apiClient) {
+		super(apiClient);
 	}
 	
 	private String getTransactionErrorDesc(TransactionData transactionData) {
@@ -152,7 +205,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 	private List<List<Object>> processServiceTransactions(String serviceId, Pair<DateTime, DateTime> timeSpan,
 			TransactionsListInput input, List<String> fields, Collection<PerformanceState> states) {
 
-		Map<Pair<String, String>, TransactionData> transactions = getTransactionDatas(serviceId, timeSpan, 
+		TransactionDataResult transactions = getTransactionDatas(serviceId, timeSpan, 
 			input, true, input.eventPointsWanted);
 		
 		if (transactions == null) {
@@ -162,19 +215,31 @@ public class TransactionsListFunction extends GrafanaFunction {
 		Collection<TransactionData> targets;
 		
 		if (input.performanceStates != null) {
-			List<TransactionData> matchingTransactions = new ArrayList<TransactionData>(transactions.size());
+			List<TransactionData> matchingTransactions = new ArrayList<TransactionData>(transactions.items.size());
 			
-			for (TransactionData transactionData : transactions.values()) {
+			for (TransactionData transactionData : transactions.items.values()) {
 				if (states.contains(transactionData.state)) {
 					matchingTransactions.add(transactionData);
 				}
 			}
 			targets = matchingTransactions;
 		} else {
-			targets = transactions.values();
+			targets = transactions.items.values();
 		}	
+		
+		List<TransactionData> sorted = new ArrayList<TransactionData>(targets);
+		
+		sorted.sort(new Comparator<TransactionData>()
+		{
 
-		List<List<Object>> result = formatResultObjects(targets, serviceId, timeSpan, input, fields);
+			@Override
+			public int compare(TransactionData o1, TransactionData o2)
+			{
+				return o2.state.ordinal() - o1.state.ordinal();
+			}
+		});
+
+		List<List<Object>> result = formatResultObjects(sorted, serviceId, timeSpan, input, fields);
 		
 		return result;	
 	}
@@ -347,34 +412,34 @@ public class TransactionsListFunction extends GrafanaFunction {
 		}
 	}
 	
-	private TransactionData getTransactionData(Map<Pair<String, String>, TransactionData> transactions, EventResult event) {
+	private TransactionData getEventTransactionData(Map<TransactionKey, TransactionData> transactions, EventResult event) {
 		
-		Pair<String, String> classOnlyPair = Pair.of(event.entry_point.class_name, null);
-		TransactionData result = transactions.get(classOnlyPair);
+		TransactionKey classOnlyKey = TransactionKey.of(event.entry_point.class_name, null);
+		TransactionData result = transactions.get(classOnlyKey);
 
 		if (result == null) {
 			
-			Pair<String, String> classAndMethodPair = Pair.of(event.entry_point.class_name, 
+			TransactionKey classAndMethodKey = TransactionKey.of(event.entry_point.class_name, 
 				event.entry_point.method_name);
 			
-			result = transactions.get(classAndMethodPair);
+			result = transactions.get(classAndMethodKey);
 		}
 		
 		return result;
 	}
 	
-	public void updateTransactionPerformance(String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
-			BaseEventVolumeInput input, Map<Pair<String, String>, TransactionData> transactionDatas) {
+	private Pair<RegressionInput, RegressionWindow> updateTransactionPerformance(String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
+			BaseEventVolumeInput input, Map<TransactionKey, TransactionData> transactionDatas) {
 	
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
-		Pair<RegressionInput, RegressionWindow> inputPair = regressionFunction.getRegressionInput(serviceId, viewId, input, timeSpan);
+		Pair<RegressionInput, RegressionWindow> result = regressionFunction.getRegressionInput(serviceId, viewId, input, timeSpan);
 		
-		if (inputPair == null) {
-			return;
+		if (result == null) {
+			return null;
 		}
 		
-		RegressionInput regressionInput = inputPair.getFirst();
-		RegressionWindow regressionWindow = inputPair.getSecond();
+		RegressionInput regressionInput = result.getFirst();
+		RegressionWindow regressionWindow = result.getSecond();
 		
 		DateTime baselineStart = regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan);
 		
@@ -423,7 +488,8 @@ public class TransactionsListFunction extends GrafanaFunction {
 			PerformanceScore performanceScore = entry.getValue();
 			
 			Pair<String, String> graphPair = getTransactionNameAndMethod(transactionName, true);
-			TransactionData transactionData = transactionDatas.get(graphPair);
+			TransactionKey key = TransactionKey.of(graphPair.getFirst(), graphPair.getSecond());
+			TransactionData transactionData = transactionDatas.get(key);
 			
 			if (transactionData == null) {
 				continue;
@@ -444,11 +510,13 @@ public class TransactionsListFunction extends GrafanaFunction {
 				}
 			}
 		}
+		
+		return result;
 	}
 	
 	
 	private void updateTransactionEvents(String serviceId, Pair<DateTime, DateTime> timeSpan,
-			BaseEventVolumeInput input, Map<Pair<String, String>, TransactionData> transactions) 
+			BaseEventVolumeInput input, Map<TransactionKey, TransactionData> transactions) 
 	{
 		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, timeSpan.getFirst(),
 			timeSpan.getSecond(), VolumeType.hits, input.pointsWanted);
@@ -465,7 +533,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 				continue;
 			}
 				
-			TransactionData transaction = getTransactionData(transactions, event);
+			TransactionData transaction = getEventTransactionData(transactions, event);
 			
 			if (transaction == null) {
 				continue;
@@ -505,13 +573,13 @@ public class TransactionsListFunction extends GrafanaFunction {
 		}
 	}
 	
-	public Map<Pair<String, String>, TransactionData> getTransactionDatas(String serviceId, Pair<DateTime, DateTime> timeSpan,
+	public TransactionDataResult getTransactionDatas(String serviceId, Pair<DateTime, DateTime> timeSpan,
 			BaseEventVolumeInput input, boolean updateEvents, int eventPoints) {
 		
 		String viewId = getViewId(serviceId, input.view);
 		
 		if (viewId == null) {
-			return Collections.emptyMap();
+			return null;
 		}
 		
 		Collection<TransactionGraph> transactionGraphs = getTransactionGraphs(input,
@@ -520,22 +588,24 @@ public class TransactionsListFunction extends GrafanaFunction {
 		return getTransactionDatas(transactionGraphs, serviceId, viewId, timeSpan,
 			input, updateEvents, eventPoints);
 	}
-		
-	public Map<Pair<String, String>, TransactionData> getTransactionDatas(Collection<TransactionGraph> transactionGraphs,
+			
+	public TransactionDataResult getTransactionDatas(Collection<TransactionGraph> transactionGraphs,
 			String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
 			BaseEventVolumeInput input, boolean updateEvents, int eventPoints) {
 				
 		if (transactionGraphs == null) {
-			return Collections.emptyMap();
+			return null;
 		}
+		
+		TransactionDataResult result = new TransactionDataResult();
+		result.items = new HashMap<TransactionKey, TransactionData>();
 				
-		Map<Pair<String, String>, TransactionData> result = new HashMap<Pair<String, String>, TransactionData>();
-
 		for (TransactionGraph transactionGraph :transactionGraphs) {	
 			TransactionData transactionData = new TransactionData();	
 			transactionData.graph = transactionGraph;
 			Pair<String, String> pair = getTransactionNameAndMethod(transactionGraph.name, true);
-			result.put(pair, transactionData);
+			TransactionKey key = TransactionKey.of(pair.getFirst(), pair.getSecond());
+			result.items.put(key, transactionData);
 		}
 		
 		if (updateEvents) {
@@ -550,10 +620,13 @@ public class TransactionsListFunction extends GrafanaFunction {
 				eventInput = input;
 			}
 			
-			updateTransactionEvents(serviceId, timeSpan, eventInput, result);
+			updateTransactionEvents(serviceId, timeSpan, eventInput, result.items);
 		}
 		
-		updateTransactionPerformance(serviceId, viewId, timeSpan, input, result);	
+		Pair<RegressionInput, RegressionWindow> regPair = updateTransactionPerformance(serviceId, viewId, timeSpan, input, result.items);	
+		
+		result.regressionInput = regPair.getFirst();
+		result.regressionWindow = regPair.getSecond();
 		
 		return result;
 
@@ -562,12 +635,16 @@ public class TransactionsListFunction extends GrafanaFunction {
 	private int getServiceSingleStat(String serviceId, TransactionsListInput input, 
 		Pair<DateTime, DateTime> timeSpan, Collection<PerformanceState> states)
 	{	
-		int result = 0;
-
-		Map<Pair<String, String>, TransactionData> transactionDatas = getTransactionDatas(serviceId,
+		TransactionDataResult transactionDataResult = getTransactionDatas(serviceId,
 			timeSpan, input, false, 0);
 
-		for (TransactionData transactionData : transactionDatas.values()) {
+		if (transactionDataResult == null) {
+			return 0;
+		}
+		
+		int result = 0;
+	
+		for (TransactionData transactionData : transactionDataResult.items.values()) {
 			
 			if (states.contains(transactionData.state)) {
 				result++;

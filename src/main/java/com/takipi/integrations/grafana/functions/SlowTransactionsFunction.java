@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.joda.time.DateTime;
@@ -14,6 +13,7 @@ import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.util.performance.calc.PerformanceState;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.TransactionsListFunction.TransactionData;
+import com.takipi.integrations.grafana.functions.TransactionsListFunction.TransactionDataResult;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.SlowTransactionsInput;
@@ -56,8 +56,6 @@ public class SlowTransactionsFunction extends EnvironmentVariableFunction
 			return Collections.emptyList();
 		}
 		
-		Set<String> result = new HashSet<String>();
-
 		Collection<PerformanceState> performanceStates = TransactionsListInput.getStates(input.performanceStates);
 		
 		Collection<TransactionGraph> activeGraphs = getTransactionGraphs(input, serviceId, 
@@ -65,10 +63,16 @@ public class SlowTransactionsFunction extends EnvironmentVariableFunction
 		
 		TransactionsListFunction transactionsFunction = new TransactionsListFunction(apiClient);
 		
-		Map<Pair<String, String>, TransactionData> transactionDatas = transactionsFunction.getTransactionDatas(activeGraphs,
+		TransactionDataResult transactionDataResult = transactionsFunction.getTransactionDatas(activeGraphs,
 			serviceId, viewId, timeSpan, input, false, 0);
-						
-		for (TransactionData transactionData : transactionDatas.values()) {
+			
+		if (transactionDataResult == null) {
+			return Collections.emptyList();
+		}
+		
+		Set<String> result = new HashSet<String>();
+		
+		for (TransactionData transactionData : transactionDataResult.items.values()) {
 			
 			if (!performanceStates.contains(transactionData.state)) {
 				continue;

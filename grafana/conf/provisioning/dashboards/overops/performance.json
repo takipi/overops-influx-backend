@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 19,
-  "iteration": 1546800327537,
+  "iteration": 1546835356341,
   "links": [
     {
       "icon": "external link",
@@ -66,7 +66,7 @@
       ],
       "datasource": "OO",
       "decimals": 2,
-      "description": "The number of calls into the selected transactions.",
+      "description": "The number of calls into the selected transactions within the selected timeframe.",
       "format": "short",
       "gauge": {
         "maxValue": 100,
@@ -523,7 +523,7 @@
       ],
       "datasource": "OO",
       "decimals": 2,
-      "description": "The rate of uncaught exceptions, log errors and HTTP errors and the number of calls into the selected transactions.",
+      "description": "The rate of $transactionFailureTypes and the number of calls into the selected transactions. Transaction failure types are defined in the Settings dashboard.",
       "format": "percentunit",
       "gauge": {
         "maxValue": 100,
@@ -648,7 +648,7 @@
         "#d44a3a"
       ],
       "datasource": "OO",
-      "description": "The number of uncaught exceptions, log errors and HTTP errors that occured in the selected transactions.",
+      "description": "The number of $transactionFailureTypes that occured in the selected transactions. Failure types are defined in the Settings dashboard.",
       "format": "short",
       "gauge": {
         "maxValue": 100,
@@ -728,7 +728,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "volume({\"type\":\"sum\",\"volumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"$failureTypes\",\"transactions\":\"$transactions\", \"transactionSearchText\":\"$searchText\",\"pointsWanted\":\"$pointsWanted\"})",
+          "query": "volume({\"type\":\"sum\",\"volumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"transactionSearchText\":\"$searchText\",\"pointsWanted\":\"$pointsWanted\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -812,7 +812,7 @@
         },
         {
           "alias": "/^.Avg/",
-          "color": "#1f78c1",
+          "color": "#70dbed",
           "dashes": true
         }
       ],
@@ -1204,8 +1204,8 @@
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 1,
-        "desc": true
+        "col": null,
+        "desc": false
       },
       "styles": [
         {
@@ -1579,9 +1579,11 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
+          "tags": [],
           "text": "None",
-          "value": "None"
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -1604,7 +1606,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1629,7 +1630,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1654,7 +1654,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1679,6 +1678,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": false,
           "text": "All",
           "value": "$__all"
         },
@@ -1703,7 +1703,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1728,7 +1727,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -1870,6 +1868,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -1894,6 +1893,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -1950,5 +1950,5 @@
   "timezone": "",
   "title": "Performance",
   "uid": "Z40SpeJmz",
-  "version": 94
+  "version": 95
 }
