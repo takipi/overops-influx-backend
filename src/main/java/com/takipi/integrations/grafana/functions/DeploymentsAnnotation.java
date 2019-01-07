@@ -22,6 +22,7 @@ import com.takipi.integrations.grafana.output.Series;
 
 public class DeploymentsAnnotation extends BaseGraphFunction {
 	
+	private static final String DEPLOY_SERIES_NAME = "deployments";
 	private static final int MAX_DEPLOY_ANNOTATIONS = 3;
 	
 	public static class Factory implements FunctionFactory {
@@ -47,15 +48,17 @@ public class DeploymentsAnnotation extends BaseGraphFunction {
 	}
 	
 	@Override
-	protected List<GraphSeries> processServiceGraph(String serviceId, String viewId, String viewName,
-			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds, int pointsWanted) {
+	protected List<GraphSeries> processServiceGraph(Collection<String> serviceIds, String serviceId, String viewId, String viewName,
+			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
 			
 		GraphSeries result = new GraphSeries();
 		
 		result.series = new Series();
 		
 		result.series.name = EMPTY_NAME;
-		result.series.columns = Arrays.asList(new String[] { TIME_COLUMN, "deployments" });
+		result.series.columns = Arrays.asList(new String[] { TIME_COLUMN, 
+			getServiceValue(DEPLOY_SERIES_NAME, serviceId, serviceIds) });
+		
 		result.series.values = new ArrayList<List<Object>>();
 		result.volume = 1;
 		

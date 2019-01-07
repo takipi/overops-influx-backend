@@ -34,6 +34,7 @@ import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOutput;
 import com.takipi.integrations.grafana.functions.TransactionsListFunction.TransactionData;
+import com.takipi.integrations.grafana.functions.TransactionsListFunction.TransactionDataResult;
 import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
 import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
@@ -44,6 +45,7 @@ import com.takipi.integrations.grafana.input.RelabilityReportInput.ReportMode;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
+import com.takipi.integrations.grafana.settings.GroupSettings;
 import com.takipi.integrations.grafana.settings.input.RegressionReportSettings;
 import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.DeploymentUtil;
@@ -54,9 +56,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 	private static final Logger logger = LoggerFactory.getLogger(ReliabilityReportFunction.class);
 	
 	private static final List<String> FIELDS = Arrays.asList(
-			new String[] { ViewInput.FROM, ViewInput.TO, ViewInput.TIME_RANGE, "Name",
+			new String[] { ViewInput.FROM, ViewInput.TO, ViewInput.TIME_RANGE, 
+					"Service", "Key", "Name",
+					"NewIssues", "Regressions", "Slowdowns", 
 					"NewIssuesDesc", "RegressionsDesc", "SlowdownsDesc", 
-					"NewIssuesState", "RegressionsState", "SlowdownsState", 
 					"Score", "ScoreDesc" });
 	
 	private static final int MAX_ITEMS_DESC = 3; 
@@ -162,9 +165,16 @@ public class ReliabilityReportFunction extends EventsFunction {
 
 			try {
 
-				Map<String, TransactionData> tansactionDatas = function.getTransactionDatas(serviceId, timeSpan, input, false, 0);				
-				SlowdownAsyncResult result = new SlowdownAsyncResult(key, tansactionDatas.values());
+				TransactionDataResult transactionDataResult = function.getTransactionDatas(serviceId, timeSpan, input, false, 0);				
 				
+				SlowdownAsyncResult result;
+				
+				if (transactionDataResult != null) {
+					result = new SlowdownAsyncResult(key, transactionDataResult.items.values());
+				} else {
+					result = new SlowdownAsyncResult(key, Collections.emptyList());
+				}
+							
 				return result;
 			} finally {
 				afterCall();
@@ -503,16 +513,34 @@ public class ReliabilityReportFunction extends EventsFunction {
 	private Collection<String> getActiveApplications(String serviceId, RelabilityReportInput input,
 			Pair<DateTime, DateTime> timeSpan) {
 
-		Collection<String> apps = ClientUtil.getApplications(apiClient, serviceId, true);
-
-		if (apps.size() < input.limit) {
-			return apps;
+		List<String> result = new ArrayList<>();
+		
+		GroupSettings appGroups = GrafanaSettings.getData(apiClient, serviceId).applications;
+		
+		if (appGroups != null) {
+			result.addAll(appGroups.getAllGroupValues());
 		}
-
+			
+		if (result.size() > input.limit) {
+			return result.subList(0, input.limit);
+		}
+		
+		Collection<String> apps = ClientUtil.getApplications(apiClient, serviceId, true);
+		
+		if (result.size() + apps.size() < input.limit) {
+			result.addAll(apps);
+			return result;
+		}
+		
 		List<VolumeOutput> appVolumes = getAppVolumes(serviceId, input, timeSpan, apps);
-
-		Collection<String> result = limitVolumes(appVolumes, input.limit);
-
+		Collection<String> appsByVolume = limitVolumes(appVolumes, input.limit);
+		
+		result.addAll(appsByVolume);
+		
+		if (result.size() > input.limit) {
+			return result.subList(0, input.limit);
+		}
+		
 		return result;
 	}
 
@@ -792,14 +820,19 @@ public class ReliabilityReportFunction extends EventsFunction {
 	}
 	
 	private double getSingleStat(Collection<String> serviceIds, Pair<DateTime, DateTime> timeSpan, RelabilityReportInput input)
-	{
+	{	
+		if (CollectionUtil.safeIsEmpty(serviceIds)) {
+			return 0;
+		}
 		
-		double result = 0;
+		double sum = 0;
 		
 		for (String serviceId : serviceIds)
 		{
-			result += getServiceSingleStat(serviceId, timeSpan, input);
+			sum += getServiceSingleStat(serviceId, timeSpan, input);
 		}
+		
+		double result = sum / serviceIds.size();
 		
 		return result;
 	}
@@ -934,6 +967,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return result.toString();
 	}
 	
+	private String getSlowdownRate(TransactionData transactionData) {
+		return Math.round(transactionData.stats.avg_time / transactionData.baselineAvg * 100) + "%";
+	}
+	
 	private String getSlowdownsDesc(Collection<TransactionData> transactionDatas, 
 		int slowdownsSize, int severeSlowdownsSize) {
 		
@@ -959,9 +996,12 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		for (TransactionData transactionData : severeSlowdowns) {
 		
+			result.append("+");
+			result.append(getSlowdownRate(transactionData));
+			result.append(" ");
 			result.append(getTransactionName(transactionData.graph.name, false));
+						
 			index++;
-			
 			
 			if ((index < severeSlowdowns.size()) || (slowdowns.size() > 0)) {
 				result.append(", ");
@@ -972,7 +1012,11 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		for (TransactionData transactionData : slowdowns) {
 			
+			result.append("+");
+			result.append(getSlowdownRate(transactionData));
+			result.append(" ");
 			result.append(getTransactionName(transactionData.graph.name, false));
+		
 			index++;
 		
 			if (index < slowdowns.size()) {
@@ -1083,7 +1127,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 	}
 	
 	@Override
-	protected List<List<Object>> processServiceEvents(String serviceId, EventsInput input,
+	protected List<List<Object>> processServiceEvents(Collection<String> serviceIds,
+			String serviceId, EventsInput input,
 			Pair<DateTime, DateTime> timeSpan) {
 
 		List<List<Object>> result = new ArrayList<List<Object>>();
@@ -1103,7 +1148,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 			Object slowdownsValue = formatValue(rrInput, reportKeyResult.slowdowns, reportKeyResult.severeSlowdowns);
 					
 			Object[] row = new Object[] { fromTo.getFirst(), fromTo.getSecond(), timeRange,
-					reportKeyResult.output.key,
+					serviceId, reportKeyResult.output.key,
+					getServiceValue(reportKeyResult.output.key, serviceId, serviceIds),
 					newIssuesValue, regressionsValue, slowdownsValue,
 					reportKeyResult.newIssuesDesc, reportKeyResult.regressionsDesc, reportKeyResult.slowDownsDesc,
 					reportKeyResult.score,
@@ -1223,9 +1269,9 @@ public class ReliabilityReportFunction extends EventsFunction {
 				String postfix = getPostfix(input, value);
 				
 				if (postfix != null) {
-					seriesName = reportKeyResult.output.key + postfix;
+					seriesName = getServiceValue(reportKeyResult.output.key + postfix, serviceId, serviceIds);
 				} else {
-					seriesName = reportKeyResult.output.key;
+					seriesName = getServiceValue(reportKeyResult.output.key, serviceId, serviceIds);
 				}
 								
 				Series series = new Series();

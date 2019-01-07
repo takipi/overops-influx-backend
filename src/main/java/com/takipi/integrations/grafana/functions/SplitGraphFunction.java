@@ -48,7 +48,8 @@ public class SplitGraphFunction extends LimitGraphFunction {
 	}
 
 	@Override
-	protected List<GraphSeries> processGraphSeries(String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
+	protected List<GraphSeries> processGraphSeries(Collection<String> serviceIds,
+			String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
 			GraphInput input) {
 		GraphLimitInput limitInput = (GraphLimitInput)input;
 
@@ -183,8 +184,9 @@ public class SplitGraphFunction extends LimitGraphFunction {
 		List<GraphSeries> result = new ArrayList<GraphSeries>();
 		
 		for (GraphData graphData : limitedGraphs) {
+			
 			if (graphData.volume > 0) {
-				result.add(getGraphSeries(graphData, graphData.key));
+				result.add(getGraphSeries(graphData, getServiceValue(graphData.key, serviceId, serviceIds)));
 			}
 		}
 				

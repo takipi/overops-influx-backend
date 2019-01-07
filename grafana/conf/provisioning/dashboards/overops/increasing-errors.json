@@ -40,13 +40,13 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 28,
-  "iteration": 1546490949672,
+  "iteration": 1546836854969,
   "links": [
     {
       "icon": "external link",
       "tags": [],
       "targetBlank": true,
-      "title": "Learn More",
+      "title": "HELP",
       "tooltip": "Learn more about this dashboard",
       "type": "link",
       "url": "https://doc.overops.com/docs/increasing-errors-dashboard"
@@ -121,7 +121,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\",\"limit\":$splitLimit, \"searchText\":\"$search\",\"eventLocations\":\"$increasingErrors\",\"graphType\":\"Percentage\"})\n\n",
+          "query": "regressionGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\",\"limit\":$splitLimit, \"searchText\":\"$search\",\"eventLocations\":\"$increasingErrors\",\"graphType\":\"Percentage\", \"types\":\"$type\"})\n\n",
           "rawQuery": true,
           "refId": "I",
           "resultFormat": "time_series",
@@ -250,7 +250,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\",\"limit\":$splitLimit, \"searchText\":\"$search\", \"graphType\":\"Absolute\",\"eventLocations\":\"$increasingErrors\"})\n\n",
+          "query": "regressionGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\",\"limit\":$splitLimit, \"searchText\":\"$search\", \"graphType\":\"Absolute\",\"eventLocations\":\"$increasingErrors\", \"types\":\"$type\"})\n\n",
           "rawQuery": true,
           "refId": "I",
           "resultFormat": "time_series",
@@ -667,7 +667,10 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
-          "link": false,
+          "link": true,
+          "linkTargetBlank": true,
+          "linkTooltip": "${__cell_7}",
+          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Severity",
           "thresholds": [
@@ -719,6 +722,22 @@
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Description",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
         }
       ],
       "targets": [
@@ -739,7 +758,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressions({\"fields\":\"link,type,entry_point,introduced_by, severity,regression,id,typeMessage,error_location,stats.hits,rate,regDelta,first_seen\",  \"render\":\"Grid\", \"regressionTypes\":\"Regressions,SevereRegressions\", \"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"maxColumnLength\":90,\"pointsWanted\":\"$pointsWanted\",\"searchText\":\"$search\", \"eventLocations\":\"$increasingErrors\"})",
+          "query": "regressions({\"fields\":\"link,type,entry_point,introduced_by, severity,regression,id,description,typeMessage,error_location,stats.hits,rate,regDelta,first_seen\",  \"render\":\"Grid\", \"regressionTypes\":\"Regressions,SevereRegressions\", \"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"maxColumnLength\":90,\"pointsWanted\":\"$pointsWanted\",\"searchText\":\"$search\", \"eventLocations\":\"$increasingErrors\", \"types\":\"$type\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -765,7 +784,7 @@
       "type": "table"
     },
     {
-      "content": "<script>\n\nfunction hide(name) {\n  var element = document.getElementsByClassName(name);\n  \n  if ((element) && (element.length == 1)) {\n    element[0].style.display = 'none';\n  }\n\n}\n\nfunction hideButtons() {\n  hide(\"btn navbar-button gf-timepicker-nav-btn\");\n  hide(\"navbar-buttons navbar-buttons--zoom\");\n}\n\nhideButtons();\n\n</script>\n\n\n",
+      "content": "<script>\n\nfunction hide(name) {\n  var element = document.getElementsByClassName(name);\n  \n  if ((element) && (element.length == 1)) {\n    element[0].style.display = 'none';\n  }\n\n}\n\nfunction hideButtons() {\n  hide(\"btn navbar-button gf-timepicker-nav-btn\");\n  hide(\"navbar-buttons navbar-buttons--zoom\");\n  hide(\"btn navbar-button navbar-button--zoom\");\n}\n\nhideButtons();\n\n</script>\n\n\n",
       "gridPos": {
         "h": 1,
         "w": 1,
@@ -788,7 +807,6 @@
       {
         "allValue": "*",
         "current": {
-          "tags": [],
           "text": "None",
           "value": [
             "None"
@@ -867,13 +885,13 @@
           "value": "$__all"
         },
         "datasource": "OO",
-        "hide": 2,
+        "hide": 0,
         "includeAll": true,
         "label": "Type",
         "multi": true,
         "name": "type",
         "options": [],
-        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"All Events\"})",
+        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\"})",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -1102,8 +1120,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "35d",
-          "value": "35d"
+          "isNone": true,
+          "text": "None",
+          "value": ""
         },
         "datasource": "OO",
         "hide": 2,
@@ -1174,8 +1193,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "28d",
-          "value": "28d"
+          "isNone": true,
+          "text": "None",
+          "value": ""
         },
         "datasource": "OO",
         "hide": 2,
@@ -1230,5 +1250,5 @@
   "timezone": "",
   "title": "Increasing Errors",
   "uid": "WZ739NYmk",
-  "version": 84
+  "version": 94
 }

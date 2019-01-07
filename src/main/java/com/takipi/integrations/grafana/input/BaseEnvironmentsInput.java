@@ -33,6 +33,10 @@ public abstract class BaseEnvironmentsInput extends VariableInput {
 			return Collections.emptyList();
 		}
 		
+		if ((serviceIds.length == 1) && (environments.contains(GrafanaFunction.ARRAY_SEPERATOR_RAW))) {
+			serviceIds = ArrayUtil.safeSplitArray(environments, GrafanaFunction.ARRAY_SEPERATOR, false);
+		}
+		
 		List<String> result = new ArrayList<String>();
 
 		for (int i = 0; i < serviceIds.length; i++) {

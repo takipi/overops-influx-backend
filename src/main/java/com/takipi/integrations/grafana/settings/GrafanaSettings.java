@@ -69,6 +69,7 @@ public class GrafanaSettings {
 	}
 	
 	private static void authService(ApiClient apiClient, String serviceId) {
+		
 		if (apiClient.getHostname() == "null") { // TODO: this is ugly, but it means we are authenticated elsewhere
 			return;
 		}

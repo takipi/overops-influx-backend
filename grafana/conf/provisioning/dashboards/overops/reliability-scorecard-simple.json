@@ -18,13 +18,13 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 36,
-  "iteration": 1546368922894,
+  "iteration": 1546729537964,
   "links": [
     {
       "icon": "external link",
       "tags": [],
       "targetBlank": true,
-      "title": "Learn More",
+      "title": "HELP",
       "tooltip": "Learn more about this dashboard",
       "type": "link",
       "url": "https://doc.overops.com/docs/reliability-scorecard-dashboard"
@@ -292,7 +292,7 @@
       "description": "A report detailing providing a weighted score to the list of the last  $limit deployments based on the weights set in the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
-        "h": 12,
+        "h": 11,
         "w": 12,
         "x": 0,
         "y": 8
@@ -300,12 +300,12 @@
       "hideTimeOverride": true,
       "id": 75,
       "links": [],
-      "pageSize": 10,
+      "pageSize": 50,
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 3,
-        "desc": true
+        "col": null,
+        "desc": false
       },
       "styles": [
         {
@@ -320,8 +320,8 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "Score for  ${__cell} =  ${__cell_11}",
-          "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-deployments=${__cell_3}",
+          "linkTooltip": "Score for  ${__cell} =  ${__cell_13}",
+          "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-deployments=${__cell_4}",
           "mappingType": 1,
           "pattern": "Name",
           "rangeMaps": [
@@ -382,7 +382,7 @@
           "linkTooltip": "",
           "linkUrl": "",
           "mappingType": 1,
-          "pattern": "RegressionsState",
+          "pattern": "RegressionsDesc",
           "preserveFormat": false,
           "rangeMaps": [],
           "sanitize": false,
@@ -467,7 +467,7 @@
           "linkTooltip": "",
           "linkUrl": "",
           "mappingType": 1,
-          "pattern": "NewIssuesState",
+          "pattern": "NewIssuesDesc",
           "thresholds": [],
           "type": "hidden",
           "unit": "short",
@@ -501,7 +501,7 @@
           "linkTooltip": "",
           "linkUrl": "",
           "mappingType": 1,
-          "pattern": "SlowdownsState",
+          "pattern": "SlowdownsDesc",
           "thresholds": [],
           "type": "hidden",
           "unit": "short",
@@ -532,10 +532,10 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_7}",
-          "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-deployments=${__cell_3}",
+          "linkTooltip": "${__cell_9}",
+          "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-deployments=${__cell_4}",
           "mappingType": 1,
-          "pattern": "NewIssuesDesc",
+          "pattern": "NewIssues",
           "thresholds": [],
           "type": "string",
           "unit": "short"
@@ -552,10 +552,10 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_8}",
-          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=$environments&var-servers=$servers&var-deployments=${__cell_3}&var-timeRange=${__cell_2}",
+          "linkTooltip": "${__cell_10}",
+          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-deployments=${__cell_4}&var-timeRange=${__cell_2}",
           "mappingType": 1,
-          "pattern": "RegressionsDesc",
+          "pattern": "Regressions",
           "thresholds": [],
           "type": "string",
           "unit": "short"
@@ -588,10 +588,10 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_9}",
-          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=$environments&var-servers=$servers&var-deployments=${__cell_3}&var-timeRange=${__cell_2}",
+          "linkTooltip": "${__cell_11}",
+          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-deployments=${__cell_4}&var-timeRange=${__cell_2}",
           "mappingType": 1,
-          "pattern": "SlowdownsDesc",
+          "pattern": "Slowdowns",
           "thresholds": [],
           "type": "string",
           "unit": "short"
@@ -624,6 +624,38 @@
           "decimals": 2,
           "mappingType": 1,
           "pattern": "ScoreDesc",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Key",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Service",
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
@@ -679,7 +711,7 @@
       "description": "A report detailing providing a weighted score to the list of the last  $limit applications based on the weights set in the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
-        "h": 12,
+        "h": 11,
         "w": 12,
         "x": 12,
         "y": 8
@@ -687,7 +719,7 @@
       "hideTimeOverride": true,
       "id": 76,
       "links": [],
-      "pageSize": 10,
+      "pageSize": 50,
       "scroll": true,
       "showHeader": true,
       "sort": {
@@ -707,8 +739,8 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "Score for  ${__cell} =  ${__cell_11}",
-          "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}",
+          "linkTooltip": "Score for  ${__cell} =  ${__cell_13}",
+          "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-applications=${__cell_4}",
           "mappingType": 1,
           "pattern": "Name",
           "preserveFormat": false,
@@ -771,7 +803,7 @@
           "linkTooltip": "",
           "linkUrl": "",
           "mappingType": 1,
-          "pattern": "RegressionsState",
+          "pattern": "RegressionsDesc",
           "preserveFormat": false,
           "rangeMaps": [],
           "sanitize": false,
@@ -856,7 +888,7 @@
           "linkTooltip": "",
           "linkUrl": "",
           "mappingType": 1,
-          "pattern": "NewIssuesState",
+          "pattern": "NewIssuesDesc",
           "thresholds": [],
           "type": "hidden",
           "unit": "short",
@@ -890,7 +922,7 @@
           "linkTooltip": "",
           "linkUrl": "",
           "mappingType": 1,
-          "pattern": "SlowdownsState",
+          "pattern": "SlowdownsDesc",
           "thresholds": [],
           "type": "hidden",
           "unit": "short",
@@ -921,10 +953,10 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_7}",
-          "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}",
+          "linkTooltip": "${__cell_9}",
+          "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-applications=${__cell_4}",
           "mappingType": 1,
-          "pattern": "NewIssuesDesc",
+          "pattern": "NewIssues",
           "thresholds": [],
           "type": "string",
           "unit": "short"
@@ -941,10 +973,10 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_8}",
-          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}&var-timeRange=${__cell_2}",
+          "linkTooltip": "${__cell_10}",
+          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-applications=${__cell_4}&var-timeRange=${__cell_2}",
           "mappingType": 1,
-          "pattern": "RegressionsDesc",
+          "pattern": "Regressions",
           "thresholds": [],
           "type": "string",
           "unit": "short"
@@ -977,10 +1009,10 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_9}",
-          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}&var-timeRange=${__cell_2}",
+          "linkTooltip": "${__cell_11}",
+          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-applications=${__cell_4}&var-timeRange=${__cell_2}",
           "mappingType": 1,
-          "pattern": "SlowdownsDesc",
+          "pattern": "Slowdowns",
           "thresholds": [],
           "type": "string",
           "unit": "short"
@@ -1013,6 +1045,38 @@
           "decimals": 2,
           "mappingType": 1,
           "pattern": "ScoreDesc",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Key",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Service",
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
@@ -1378,5 +1442,5 @@
   "timezone": "",
   "title": "Reliability Scorecard Simple",
   "uid": "82eIMSsmz",
-  "version": 14
+  "version": 16
 }

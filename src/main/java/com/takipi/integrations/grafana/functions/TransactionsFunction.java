@@ -101,7 +101,7 @@ public class TransactionsFunction extends EnvironmentVariableFunction {
 		
 		for (Transaction transaction : transactions) {
 			
-			Pair<String, String> nameAndMethod = getTransactionNameAndMethod(transaction.name);
+			Pair<String, String> nameAndMethod = getTransactionNameAndMethod(transaction.name, false);
 			
 			String className = nameAndMethod.getFirst();
 			String methodName = nameAndMethod.getSecond();
