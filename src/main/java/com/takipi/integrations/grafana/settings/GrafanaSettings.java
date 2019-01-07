@@ -6,7 +6,6 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 
@@ -144,31 +143,9 @@ public class GrafanaSettings {
 					}
 				});
 	}
-	
-	private static String cleanJson(String json) {
-		String[] lines = json.split(Pattern.quote("\n"));
 		
-		StringBuilder result = new StringBuilder(json.length());
-		
-		for (String line: lines) { 
-			
-			int index = line.indexOf("//");
-			
-			if (index != -1) {
-				String value = line.substring(0, index);
-				result.append(value);	
-	
-			} else {
-				result.append(line);	
-			}
-		}
-		
-		return result.toString();
-	}
-		
-	
 	private static ServiceSettings getServiceSettings(String serviceId, ApiClient apiClient, String json) {
-		ServiceSettingsData data = new Gson().fromJson(cleanJson(json), ServiceSettingsData.class);
+		ServiceSettingsData data = new Gson().fromJson(json, ServiceSettingsData.class);
 		return new ServiceSettings(serviceId, apiClient, json, data);
 	}
 	

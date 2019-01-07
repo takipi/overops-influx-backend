@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 29,
-  "iteration": 1546729452814,
+  "iteration": 1546879687310,
   "links": [
     {
       "icon": "external link",
@@ -639,7 +639,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressions({\"fields\":\"link,severity,type,jira_issue_url,entry_point,id,description,typeMessage,error_location,stats.hits,rate,introduced_by,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"introducedBy\":\"$deployments\",\"firstSeen\":\"$timeFilter\",\"volumeType\":\"all\",\"maxColumnLength\":100, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"render\":\"Grid\", \"searchText\":\"$search\"})",
+          "query": "regressions({\"fields\":\"link,severity,type,jira_issue_url,entry_point,id,description,typeMessage,error_location,stats.hits,rate,introduced_by,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"introducedBy\":\"$deployments\",\"firstSeen\":\"$timeFilter\",\"volumeType\":\"all\",\"maxColumnLength\":80, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"render\":\"Grid\", \"searchText\":\"$search\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -674,8 +674,11 @@
       {
         "allValue": "all",
         "current": {
+          "tags": [],
           "text": "None",
-          "value": "None"
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -698,6 +701,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": false,
           "text": "All",
           "value": "$__all"
         },
@@ -1025,5 +1029,5 @@
   "timezone": "",
   "title": "New Errors",
   "uid": "3NZ83NLik",
-  "version": 84
+  "version": 89
 }
