@@ -158,7 +158,7 @@ public class EventsFunction extends GrafanaFunction {
 			}
 			
 			if (response.data.jira_issue_url != null) {
-				return response.data.jira_issue_url.replaceAll(HTTP, "").replaceAll(HTTPS, "");
+				return response.data.jira_issue_url;
 			}
 			
 			return null;
@@ -343,6 +343,27 @@ public class EventsFunction extends GrafanaFunction {
 		}
 	}
 	
+	protected class JiraUrlFormatter extends ReflectFormatter {
+
+		protected JiraUrlFormatter(Field field)
+		{
+			super(field);
+		}
+
+		@Override
+		protected Object formatValue(Object value, EventsInput input)
+		{
+			if (value == null) {
+				return super.formatValue(value, input);
+			}
+			
+			String result = 	value.toString().replaceAll(HTTP, "").replaceAll(HTTPS, "");
+
+			return result;
+		}
+	}
+	
+	
 	protected class LinkFormatter extends FieldFormatter {
 
 		@Override
@@ -458,6 +479,10 @@ public class EventsFunction extends GrafanaFunction {
 		
 		Field field = getReflectField(column);
 
+		if (column.equals(JIRA_ISSUE_URL)) {
+			return new JiraUrlFormatter(field);
+		}
+		
 		if ((column.equals(FIRST_SEEN)) || (column.equals(LAST_SEEN))) {
 			return new DateFormatter(field);
 		}
