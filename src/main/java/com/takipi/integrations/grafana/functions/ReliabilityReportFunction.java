@@ -941,6 +941,13 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		for (RegressionResult regressionResult : regressions) {
 			
+			double baseRate = (double) regressionResult.getBaselineHits() / (double) regressionResult.getBaselineInvocations();
+			double activeRate = (double) regressionResult.getEvent().stats.hits / (double) regressionResult.getEvent().stats.invocations;
+
+			result.append("+"); 
+			result.append((int)((activeRate - baseRate) * 100));
+			result.append("% "); 
+
 			result.append(regressionResult.getEvent().name);
 			result.append(" in ");
 			result.append(getSimpleClassName(regressionResult.getEvent().error_location.class_name));
