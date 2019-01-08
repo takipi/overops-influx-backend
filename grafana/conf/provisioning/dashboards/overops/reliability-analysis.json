@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 20,
-  "iteration": 1546729496770,
+  "iteration": 1546935952314,
   "links": [
     {
       "icon": "external link",
@@ -1212,7 +1212,7 @@
       "description": "The number of new errors detected in the current timeframe. P1 marks events that exceeded min thresholds, or whose type is defined in the critical exception types list. Both values are editable via the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
-        "h": 9,
+        "h": 7,
         "w": 24,
         "x": 0,
         "y": 9
@@ -1613,7 +1613,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 18
+        "y": 16
       },
       "id": 63,
       "links": [
@@ -1974,7 +1974,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 18
+        "y": 16
       },
       "id": 61,
       "links": [],
@@ -2336,7 +2336,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressions({\"fields\":\"link,type,error_location,introduced_by,severity,regression,timeRange,description,typeMessage,stats.hits,rate,regDelta,first_seen\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":65, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"render\":\"Grid\",\"regressionTypes\":\"Regressions,SevereRegressions\"})\n",
+          "query": "regressions({\"fields\":\"link,type,error_location,introduced_by,severity,regression,timeRange,description,typeMessage,stats.hits,rate,regDelta,first_seen\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":55, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"render\":\"Grid\",\"regressionTypes\":\"Regressions,SevereRegressions\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -2373,8 +2373,12 @@
       {
         "allValue": "all",
         "current": {
+          "selected": false,
+          "tags": [],
           "text": "None",
-          "value": "None"
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -2716,5 +2720,5 @@
   "timezone": "",
   "title": "Reliability Analysis",
   "uid": "4DHQ63-ik",
-  "version": 197
+  "version": 200
 }
