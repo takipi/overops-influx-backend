@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 31,
-  "iteration": 1546879831143,
+  "iteration": 1547019915245,
   "links": [
     {
       "icon": "external link",
@@ -265,7 +265,7 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "A deduplicated list of all errors in the selected time frame and filter set.",
+      "description": "A list of all unique errors in the selected time frame and filter set.",
       "fontSize": "100%",
       "gridPos": {
         "h": 13,
@@ -279,8 +279,8 @@
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 8,
-        "desc": true
+        "col": null,
+        "desc": false
       },
       "styles": [
         {
@@ -469,7 +469,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": " ${__cell_9} / ${__cell_6} ",
+          "linkTooltip": " ${__cell_9} / ${__cell_6}. Click to drill-in.",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Rate",
@@ -489,7 +489,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_1} in transaction ${__cell_2}, introduced by ${__cell_3}: Click for root cause (Event Id: ${__cell_5})",
+          "linkTooltip": "${__cell_1} in transaction ${__cell_2}, introduced by ${__cell_3}: Click to drill-in  (Event Id: ${__cell_5})",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Message",
@@ -549,7 +549,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "",
+          "linkTooltip": "🔎",
           "linkUrl": "http://${__cell_4:raw}",
           "mappingType": 1,
           "pattern": "Jira state",
@@ -651,12 +651,9 @@
       {
         "allValue": "None",
         "current": {
-          "selected": false,
-          "tags": [],
+          "selected": true,
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -679,6 +676,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -703,6 +701,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -727,6 +726,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -751,6 +751,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -799,6 +800,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -982,5 +984,5 @@
   "timezone": "",
   "title": "Errors",
   "uid": "HYBPMdYik",
-  "version": 67
+  "version": 73
 }

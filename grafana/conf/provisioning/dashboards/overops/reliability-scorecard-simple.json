@@ -18,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 36,
-  "iteration": 1546729537964,
+  "iteration": 1547020121649,
   "links": [
     {
       "icon": "external link",
@@ -320,10 +320,11 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "Score for  ${__cell} =  ${__cell_13}",
+          "linkTooltip": "Score for  ${__cell} =  ${__cell_13}. $settingsPostfix. $drilldownPostfix",
           "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-deployments=${__cell_4}",
           "mappingType": 1,
           "pattern": "Name",
+          "preserveFormat": false,
           "rangeMaps": [
             {
               "from": "0",
@@ -532,7 +533,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_9}",
+          "linkTooltip": "${__cell_9}. $drilldownPostfix",
           "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-deployments=${__cell_4}",
           "mappingType": 1,
           "pattern": "NewIssues",
@@ -552,7 +553,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_10}",
+          "linkTooltip": "${__cell_10}. $drilldownPostfix",
           "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-deployments=${__cell_4}&var-timeRange=${__cell_2}",
           "mappingType": 1,
           "pattern": "Regressions",
@@ -588,7 +589,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_11}",
+          "linkTooltip": "${__cell_11}. $drilldownPostfix",
           "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-deployments=${__cell_4}&var-timeRange=${__cell_2}",
           "mappingType": 1,
           "pattern": "Slowdowns",
@@ -739,7 +740,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "Score for  ${__cell} =  ${__cell_13}",
+          "linkTooltip": "Score for  ${__cell} =  ${__cell_13}. $settingsPostfix. $drilldownPostfix",
           "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-applications=${__cell_4}",
           "mappingType": 1,
           "pattern": "Name",
@@ -953,7 +954,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_9}",
+          "linkTooltip": "${__cell_9}.  $drilldownPostfix",
           "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-applications=${__cell_4}",
           "mappingType": 1,
           "pattern": "NewIssues",
@@ -973,7 +974,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_10}",
+          "linkTooltip": "${__cell_10}.  $drilldownPostfix",
           "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-applications=${__cell_4}&var-timeRange=${__cell_2}",
           "mappingType": 1,
           "pattern": "Regressions",
@@ -1009,7 +1010,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_11}",
+          "linkTooltip": "${__cell_11}.  $drilldownPostfix",
           "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-applications=${__cell_4}&var-timeRange=${__cell_2}",
           "mappingType": 1,
           "pattern": "Slowdowns",
@@ -1136,6 +1137,7 @@
       {
         "allValue": "all",
         "current": {
+          "tags": [],
           "text": "None",
           "value": [
             "None"
@@ -1358,6 +1360,7 @@
         "allValue": null,
         "current": {
           "selected": true,
+          "tags": [],
           "text": "Score",
           "value": "Score"
         },
@@ -1406,6 +1409,50 @@
         "query": "New Issues,Severe New Issues,Regressions,Severe Regressions,Slowdowns,Severe Slowdowns,Score",
         "skipUrlSync": false,
         "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "Weights are defined in the Settings dashboard",
+          "value": "Weights are defined in the Settings dashboard"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "settingsPostfix",
+        "options": [
+          {
+            "selected": true,
+            "text": "Weights are defined in the Settings dashboard",
+            "value": "Weights are defined in the Settings dashboard"
+          }
+        ],
+        "query": "Weights are defined in the Settings dashboard",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "Click to drill down",
+          "value": "Click to drill down"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "drilldownPostfix",
+        "options": [
+          {
+            "selected": true,
+            "text": "Click to drill down",
+            "value": "Click to drill down"
+          }
+        ],
+        "query": "Click to drill down",
+        "skipUrlSync": false,
+        "type": "custom"
       }
     ]
   },
@@ -1442,5 +1489,5 @@
   "timezone": "",
   "title": "Reliability Scorecard Simple",
   "uid": "82eIMSsmz",
-  "version": 16
+  "version": 17
 }

@@ -56,12 +56,29 @@ public class BaselineWindowFunction extends EnvironmentVariableFunction
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
 		Pair<RegressionInput, RegressionWindow> inputPair = regressionFunction.getRegressionInput(serviceId, viewId, bwInput, timespan);
 		
-		long time = inputPair.getFirst().baselineTimespan;
+		long time;
 		
-		if (!bwInput.baselineOnly) {
-			time += inputPair.getSecond().activeTimespan;
+		switch (bwInput.getWindowType()) {
+			
+			case Baseline: {
+				time = inputPair.getFirst().baselineTimespan;
+				break;
+			}
+			
+			case Active: {
+				time = inputPair.getSecond().activeTimespan;
+				break;
+			}
+			
+			case Combined: {
+				time = inputPair.getFirst().baselineTimespan + inputPair.getSecond().activeTimespan;
+				break;
+			}
+			
+			default: 
+				throw new IllegalStateException(bwInput.getWindowType().toString());	
 		}
-		
+			
 		String value = TimeUtil.getTimeInterval(TimeUnit.MINUTES.toMillis(time));
 		
 		appender.append(value);

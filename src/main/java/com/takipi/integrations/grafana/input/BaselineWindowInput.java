@@ -2,7 +2,7 @@ package com.takipi.integrations.grafana.input;
 
 /**
  * This query is used to populate a variable holding the value of the current baseline window. 
- * This query will produce one value that can be used for both presentation purposes insidie
+ * This query will produce one value that can be used for both presentation purposes inside
  * widget titles as well as to set and Time window overrides for widgets which are used
  * to display graphs that show any regression and slowdown calculations.
  * 
@@ -10,13 +10,45 @@ package com.takipi.integrations.grafana.input;
  * 		baselineWindow({"graphType":"view","view":"$view",
  * 		"timeFilter":"timeFilter","environments":"$environments",
  * 		"applications":"$applications", "servers":"$servers","deployments":"$deployments",
- * 		"baselineOnly":"true"})
+ * 		"windowType":"Active"})
  */
+
 public class BaselineWindowInput extends BaseEventVolumeInput
 {
 	/**
-	 * Set whether to return the combined value of the active and baseline windows,
-	 * or just that of the baseline.
+	 * 
+	 * The type of window to return
 	 */
-	public boolean baselineOnly;
+	public enum WindowType {
+		
+		/**
+		 * Return the active time window
+		 */
+		Active,
+		
+		/**
+		 * Return the baseline time window
+		 */
+		Baseline,
+		
+		/**
+		 * Return the active and baseline window combined
+		 */
+		Combined
+	}
+	
+	/**
+	 * Set whether to return the combined value of the active, baseline window,
+	 * or their combined time span. Default is Active.
+	 */
+	public WindowType windowType;
+	
+	public WindowType getWindowType() {
+		
+		if (windowType == null) {
+			return WindowType.Active;
+		}
+		
+		return windowType;
+	}
 }

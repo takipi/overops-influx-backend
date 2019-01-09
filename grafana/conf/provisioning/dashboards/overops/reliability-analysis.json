@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 20,
-  "iteration": 1546935952314,
+  "iteration": 1547020071417,
   "links": [
     {
       "icon": "external link",
@@ -2373,12 +2373,9 @@
       {
         "allValue": "all",
         "current": {
-          "selected": false,
-          "tags": [],
+          "selected": true,
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2401,6 +2398,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2425,6 +2423,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2449,6 +2448,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2496,6 +2496,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2544,6 +2545,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -2649,6 +2651,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -2673,6 +2676,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "443",
           "value": "443"
         },
