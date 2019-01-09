@@ -804,7 +804,7 @@ public class ApiCache {
 			response = getEventList(apiClient, serviceId, 
 					input, request,volumeType, false);
 			
-			if (response != null) {
+			if ((response != null)  && (response.data != null)) {
 				return response;
 			}
 		}

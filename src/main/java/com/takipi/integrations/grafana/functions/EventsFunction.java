@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -248,7 +249,7 @@ public class EventsFunction extends GrafanaFunction {
 			}
 
 			if (value instanceof Location) {
-				return formatLocation((Location) value);
+				return getSimpleClassName(((Location)value).class_name);
 			}
 
 			if (value instanceof List) {
@@ -697,6 +698,18 @@ public class EventsFunction extends GrafanaFunction {
 		}
 	}
 	
+	protected void sortEventDatas(List<EventData> eventDatas ) {
+	
+		eventDatas.sort(new Comparator<EventData>()
+		{
+			@Override
+			public int compare(EventData o1, EventData o2)
+			{
+				return (int)(o2.event.stats.hits - o1.event.stats.hits);
+			}
+		});
+	}
+	
 	/**
 	 * @param serviceIds - needed for children
 	 */
@@ -712,6 +725,8 @@ public class EventsFunction extends GrafanaFunction {
 		} else {
 			mergedDatas = mergeSimilarEvents(serviceId, eventDatas);
 		}
+		
+		sortEventDatas(mergedDatas);
 			
 		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
 
@@ -722,7 +737,7 @@ public class EventsFunction extends GrafanaFunction {
 			updateJiraUrls(serviceId, eventDatas);
 		}
 		
-		for (EventData eventData : eventDatas) {	 
+		for (EventData eventData : mergedDatas) {	 
 	
 			if (eventFilter.filter(eventData.event)) {
 				continue;

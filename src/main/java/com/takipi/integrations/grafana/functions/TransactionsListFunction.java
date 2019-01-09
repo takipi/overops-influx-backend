@@ -196,9 +196,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 			result.append(transactionData.errors.size() - size );
 			result.append(" more locations");
 		}
-		
-		result.append(". Transaction Failure types are defined in the Settings dashboard.");
-		
+			
 		return result.toString();	
 	}
 
@@ -235,7 +233,13 @@ public class TransactionsListFunction extends GrafanaFunction {
 			@Override
 			public int compare(TransactionData o1, TransactionData o2)
 			{
-				return o2.state.ordinal() - o1.state.ordinal();
+				int diff = o2.state.ordinal() - o1.state.ordinal();
+				
+				if (diff != 0) {
+					return diff;
+				}
+				
+				return (int)(o2.stats.invocations - o1.stats.invocations);
 			}
 		});
 
@@ -280,15 +284,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 	
 	private String getSlowdownDesc(TransactionData transactionData, 
 		SlowdownSettings slowdownSettings, Stats stats) {
-		
-		if (transactionData.baselineAvg == 0) {
-			return "";
-		}
-		
-		if (transactionData.score == 0) {
-			return "";
-		}
-		
+				
 		Stats baselineStats = TransactionUtil.aggregateGraph(transactionData.baselineGraph);
 		double baseline = baselineStats.avg_time_std_deviation * slowdownSettings.std_dev_factor + transactionData.baselineAvg;
 		
@@ -298,6 +294,12 @@ public class TransactionsListFunction extends GrafanaFunction {
 				(transactionData.state == PerformanceState.SLOWING);
 		
 		if (isSlowdown) {
+			
+			if  (transactionData.state == PerformanceState.CRITICAL) {
+				result.append("Slow: ");		
+			} else {
+				result.append("Slowing: ");		
+			}
 			
 			result.append("(");	
 			result.append((int)(transactionData.score));
@@ -314,13 +316,11 @@ public class TransactionsListFunction extends GrafanaFunction {
 			result.append((int)(baselineStats.avg_time));
 			result.append("ms baseline > ");
 			result.append(slowdownSettings.min_delta_threshold);
-			result.append("ms threshold).");			
+			result.append("ms threshold)");			
 		} else {
-			result.append("Avg response falls within baseline tolerance.");
+			result.append("OK: Avg response falls within baseline tolerance");
 		}
-		
-		result.append(" Thresholds are set in the Settings dashboard.");		
-
+	
 		return result.toString();
 	}
 	

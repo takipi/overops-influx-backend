@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 37,
-  "iteration": 1546836893402,
+  "iteration": 1547019991828,
   "links": [
     {
       "icon": "external link",
@@ -244,9 +244,9 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": "$timeRange",
+      "timeFrom": "$activeWindow",
       "timeShift": null,
-      "title": "Avg Response: $timeRange",
+      "title": "Avg Response: $activeWindow",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -544,7 +544,7 @@
       "thresholds": [],
       "timeFrom": "$baseline",
       "timeShift": null,
-      "title": "Last $timeRange vs $baselineOnly baseline",
+      "title": "Last $activeWindow vs $baselineOnly baseline",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -675,14 +675,14 @@
           "unit": "percentunit"
         },
         {
-          "alias": "Avg Response (ms)",
+          "alias": "Avg Response",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "decimals": null,
+          "decimals": 1,
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
@@ -690,7 +690,7 @@
           "pattern": "avg_response",
           "thresholds": [],
           "type": "number",
-          "unit": "none"
+          "unit": "ms"
         },
         {
           "alias": "Transaction",
@@ -704,7 +704,7 @@
           "decimals": 0,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "Jump to Slow Call Analysis",
+          "linkTooltip": "${__cell_2}. Thresholds are defined in the Settings dashboard. Click to drill-in.",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "transaction",
@@ -741,7 +741,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_2}",
+          "linkTooltip": "${__cell_2}}. Thresholds are defined in the Settings dashboard. Click to drill-in.",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "slow_state",
@@ -837,7 +837,7 @@
           "unit": "short"
         },
         {
-          "alias": "Baseline Avg (ms)",
+          "alias": "Baseline Avg",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -853,7 +853,7 @@
           "pattern": "baseline_avg",
           "thresholds": [],
           "type": "number",
-          "unit": "short"
+          "unit": "ms"
         },
         {
           "alias": "",
@@ -1317,7 +1317,7 @@
         "multi": false,
         "name": "baseline",
         "options": [],
-        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\"})",
+        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Combined\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1333,8 +1333,8 @@
         "current": {
           "selected": true,
           "tags": [],
-          "text": "2d",
-          "value": "2d"
+          "text": "7d",
+          "value": "7d"
         },
         "hide": 0,
         "includeAll": false,
@@ -1429,7 +1429,32 @@
         "multi": false,
         "name": "baselineOnly",
         "options": [],
-        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"baselineOnly\":\"true\"})",
+        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Baseline\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "activeWindow",
+        "options": [],
+        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Active\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1475,5 +1500,5 @@
   "timezone": "",
   "title": "Slowdowns",
   "uid": "iHSORcymk",
-  "version": 53
+  "version": 58
 }

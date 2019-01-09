@@ -556,6 +556,7 @@ public class RegressionFunction extends EventsFunction
 		public boolean empty;
 		
 		public RegressionInput regressionInput;
+		public RegressionWindow regressionWindow;
 		public RateRegression rateRegression;
 		public Graph baseVolumeGraph;
 		public Graph activeVolumeGraph;
@@ -802,13 +803,15 @@ public class RegressionFunction extends EventsFunction
 	}
 		
 	protected RegressionOutput createRegressionOutput(EventFilterInput input,
-			RegressionInput regressionInput,RateRegression rateRegression, Map<String, EventResult> eventListMap,
+			RegressionInput regressionInput, RegressionWindow regressionWindow,
+			RateRegression rateRegression, Map<String, EventResult> eventListMap,
 			Graph baseVolumeGraph, Graph activeVolumeGraph, long volume)
 	{
 		
 		RegressionOutput result = new RegressionOutput(false);
 		
 		result.regressionInput = regressionInput;
+		result.regressionWindow = regressionWindow;
 		result.rateRegression = rateRegression;
 		result.baseVolumeGraph = baseVolumeGraph;
 		result.activeVolumeGraph = activeVolumeGraph;
@@ -909,7 +912,9 @@ public class RegressionFunction extends EventsFunction
 		RateRegression rateRegression = RegressionUtil.calculateRateRegressions(apiClient, regressionInput, null,
 				false);
 		
-		RegressionOutput result = createRegressionOutput(input, regressionInput, rateRegression, eventListMap,
+		RegressionOutput result = createRegressionOutput(input, 
+				regressionInput, regressionWindow,
+				rateRegression, eventListMap,
 				baselineGraph, activeWindowGraph, volume);
 				
 		return result;
@@ -987,6 +992,11 @@ public class RegressionFunction extends EventsFunction
 		List<EventData> result = new ArrayList<EventData>(super.mergeSimilarEvents(serviceId, eventDatas));
 		sortRegressions(result);
 		return result;
+	}
+	
+	@Override
+	protected void sortEventDatas(List<EventData> eventDatas)
+	{
 	}
 	
 	@Override

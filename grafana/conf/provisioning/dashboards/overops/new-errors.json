@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 29,
-  "iteration": 1546927414407,
+  "iteration": 1547020020539,
   "links": [
     {
       "icon": "external link",
@@ -674,11 +674,8 @@
       {
         "allValue": "all",
         "current": {
-          "tags": [],
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,

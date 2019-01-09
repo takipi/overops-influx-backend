@@ -29,6 +29,7 @@ import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.performance.calc.PerformanceState;
 import com.takipi.api.client.util.regression.RateRegression;
 import com.takipi.api.client.util.regression.RegressionResult;
+import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
@@ -682,7 +683,6 @@ public class ReliabilityReportFunction extends EventsFunction {
 			resultDesc.append(days);
 			resultDesc.append(" days = ");
 			resultDesc.append(decimalFormat.format(resultScore));
-			resultDesc.append(". Weights are defined in the Settings dashboard.");
 		}
 		
 		return Pair.of(resultScore, resultDesc.toString());
@@ -1147,8 +1147,20 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		for (ReportKeyResults reportKeyResult : reportKeyResults) {
 			
-			Pair<Object, Object> fromTo = getTimeFilterPair(timeSpan, input.timeFilter);
-			String timeRange = TimeUtil.getTimeRange(input.timeFilter); 
+			RegressionWindow regressionWindow = reportKeyResult.output.regressionData.regressionOutput.regressionWindow;
+			
+			String timeRange;
+			Pair<Object, Object> fromTo;
+			
+			if (regressionWindow != null) {
+				timeRange = TimeUtil.getTimeInterval(TimeUnit.MINUTES.toMillis(regressionWindow.activeTimespan));
+				DateTime to = regressionWindow.activeWindowStart.plusMinutes(regressionWindow.activeTimespan);
+				fromTo = Pair.of(regressionWindow.activeWindowStart, to);
+			} else {
+				fromTo = getTimeFilterPair(timeSpan, input.timeFilter);
+				timeRange = TimeUtil.getTimeRange(input.timeFilter);	
+			}
+			
 			
 			Object newIssuesValue = formatValue(rrInput, reportKeyResult.newIssues, reportKeyResult.severeNewIssues);
 			Object regressionsValue = formatValue(rrInput, reportKeyResult.regressions, reportKeyResult.criticalRegressions);
