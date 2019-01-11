@@ -60,16 +60,17 @@ public abstract class LimitGraphFunction extends GraphFunction {
 		return sorted.subList(0, Math.min(graphsData.size(), ++i));
 	}
 	
-	protected abstract List<GraphSeries> processGraphSeries(String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
+	protected abstract List<GraphSeries> processGraphSeries(Collection<String> serviceIds,
+			String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
 			GraphInput input);
 
 	@Override
-	protected List<GraphSeries> processServiceGraph(String serviceId, String viewId, String viewName,
-			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds, int pointsWanted) {
+	protected List<GraphSeries> processServiceGraph(Collection<String> serviceIds, String serviceId, 
+			String viewId, String viewName, BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
 
 		GraphInput graphInput = (GraphInput) input;
 
-		List<GraphSeries> result = processGraphSeries(serviceId, viewId, timeSpan, graphInput);
+		List<GraphSeries> result = processGraphSeries(serviceIds, serviceId, viewId, timeSpan, graphInput);
 		
 		return result;
  	}
@@ -84,7 +85,7 @@ public abstract class LimitGraphFunction extends GraphFunction {
 			return output;
 		}
 		
-		List<Series> result = limitGraphSeries(series, graphLimitInput.limit);
+		List<Series> result = limitSeries(series, graphLimitInput.limit);
 		
 		sortByName(result);
 		

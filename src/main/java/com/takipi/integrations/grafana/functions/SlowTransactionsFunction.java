@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.joda.time.DateTime;
@@ -14,10 +13,11 @@ import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.util.performance.calc.PerformanceState;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.TransactionsListFunction.TransactionData;
+import com.takipi.integrations.grafana.functions.TransactionsListFunction.TransactionDataResult;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.SlowTransactionsInput;
-import com.takipi.integrations.grafana.input.TransactionsListIput;
+import com.takipi.integrations.grafana.input.TransactionsListInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
@@ -56,17 +56,23 @@ public class SlowTransactionsFunction extends EnvironmentVariableFunction
 			return Collections.emptyList();
 		}
 		
-		Set<String> result = new HashSet<String>();
-
-		Collection<PerformanceState> performanceStates = TransactionsListIput.getStates(input.performanceStates);
+		Collection<PerformanceState> performanceStates = TransactionsListInput.getStates(input.performanceStates);
 		
 		Collection<TransactionGraph> activeGraphs = getTransactionGraphs(input, serviceId, 
 				viewId, timeSpan, input.getSearchText(), input.pointsWanted, 0, 0);
 		
 		TransactionsListFunction transactionsFunction = new TransactionsListFunction(apiClient);
-		Map<String, TransactionData> transactionDatas = transactionsFunction.getTransactionDatas(activeGraphs, serviceId, viewId, timeSpan, input, false);
-						
-		for (TransactionData transactionData : transactionDatas.values()) {
+		
+		TransactionDataResult transactionDataResult = transactionsFunction.getTransactionDatas(activeGraphs,
+			serviceId, viewId, timeSpan, input, false, 0);
+			
+		if (transactionDataResult == null) {
+			return Collections.emptyList();
+		}
+		
+		Set<String> result = new HashSet<String>();
+		
+		for (TransactionData transactionData : transactionDataResult.items.values()) {
 			
 			if (!performanceStates.contains(transactionData.state)) {
 				continue;

@@ -6,8 +6,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.joda.time.DateTime;
@@ -51,6 +53,7 @@ public class RegressionFunction extends EventsFunction
 	private static String REG_DELTA = "regDelta";
 	private static String REGRESSION = "regression";
 	private static String SEVERITY = "severity";
+	private static String DESCRIPTION = "description";
 	
 	public static class Factory implements FunctionFactory
 	{
@@ -81,7 +84,7 @@ public class RegressionFunction extends EventsFunction
 		protected RegressionResult regression;
 		protected RateRegression regResult;
 		protected RegressionInput input;
-		protected List<String> mergedIds;
+		protected Set<String> mergedIds;
 		
 		protected RegressionData(RateRegression regResult, RegressionInput input,
 				EventResult event, RegressionType type)
@@ -91,7 +94,7 @@ public class RegressionFunction extends EventsFunction
 			this.regResult = regResult;
 			this.input = input;
 			this.regression = null;
-			this.mergedIds = new ArrayList<String>();
+			this.mergedIds = new HashSet<String>();
 		}
 			
 		protected RegressionData(RateRegression regResult, RegressionInput input,
@@ -99,6 +102,102 @@ public class RegressionFunction extends EventsFunction
 		{
 			this(regResult, input, regression.getEvent(), type);
 			this.regression = regression;
+		}
+		
+		protected int getDelta() {
+			
+			if (regression == null) {
+				return 0;
+			}
+			
+			double baselineRate = (double) regression.getBaselineHits() 
+					/ (double) regression.getBaselineInvocations()  * 100;
+				
+			double activeRate = (double) event.stats.hits
+					/ (double) event.stats.invocations  * 100;
+				
+			double delta = activeRate - baselineRate;
+					
+			return (int)(delta);
+		}
+		
+		public String getDescription() {
+			
+			String ratio;
+			
+			if (event.stats.invocations > 0) {
+				ratio = (decimalFormat.format((double)event.stats.hits / (double)event.stats.invocations));
+			} else {
+				ratio = "N/A";
+			}
+			
+			String description;
+			
+			switch (type)
+			{
+				case NewIssues:
+					
+					if (event.stats.hits < input.minVolumeThreshold) {
+						description = String.format("Nonsevere: volume %d < %d", 
+								event.stats.hits, input.minVolumeThreshold);	
+					} else {
+						description = String.format("Nonsevere:rate %s < %.2f", 
+								ratio, input.minErrorRateThreshold);
+					}
+					
+					break;
+					
+				case SevereNewIssues:
+					
+					if (regResult.getCriticalNewEvents().containsKey(event.id)) {
+
+						if (event.type.equals(UNCAUGHT_EXCEPTION)) {
+							description = String.format("Severe: event is uncaught exception");					
+						} else {
+							description = String.format("Severe: event type " + 
+								event.name + " is defined as a critical exception type");	
+						}
+					} else {
+						description = String.format("Severe: (volume  %d > %s) AND (rate %s > %.2f)",
+							event.stats.hits, input.minVolumeThreshold, ratio,  input.minErrorRateThreshold);
+					}
+					
+					break;
+
+					
+				case Regressions:
+					
+					description = String.format("Nonsevere: (volume %d > %d) AND (rate %s > %.2f) AND (rate change from baseline %.2f > %.2f)",
+							event.stats.hits, input.minVolumeThreshold,
+							ratio, input.minErrorRateThreshold,
+							getRateDelta(), input.regressionDelta);
+					break;
+					
+				case SevereRegressions:
+					
+					description = String.format("Severe: (volume %d > %d) AND (rate %s > %.2f) AND (rate change from baseline %.2f > %.2f)",
+							event.stats.hits, input.minVolumeThreshold,
+							ratio, input.minErrorRateThreshold,
+							getRateDelta(), input.criticalRegressionDelta);
+					break;
+					
+				default: throw new IllegalStateException(String.valueOf(type));
+			}
+			
+			return description + ". Thresholds are set in the Settings dashboard.";	
+		}
+		
+		private double getRateDelta() {
+			
+			double baselineRate = (double) regression.getBaselineHits() 
+				/ (double) regression.getBaselineInvocations();
+				
+			double activeRate = (double) event.stats.hits
+					/ (double) event.stats.invocations;
+					
+			double result =  (activeRate / baselineRate) - 1;
+			
+			return result;
 		}
 		
 		@Override
@@ -177,16 +276,7 @@ public class RegressionFunction extends EventsFunction
 			
 			if (regData.regression != null)
 			{
-				double baselineRate = (double) regData.regression.getBaselineHits() 
-					/ (double) regData.regression.getBaselineInvocations()  * 100;
-				
-				double activeRate = (double) regData.event.stats.hits
-						/ (double) regData.event.stats.invocations  * 100;
-				
-				double delta = activeRate - baselineRate;
-					
-				return (int)(delta);
-				
+				return regData.getDelta();	
 			}
 			else
 			{
@@ -243,9 +333,28 @@ public class RegressionFunction extends EventsFunction
 				return null;
 			}
 			
-			String timeUnit = TimeUtil.getTimeUnit(input.timeFilter); 
+			String timeUnit = TimeUtil.getTimeRange(input.timeFilter); 
 					
 			return timeUnit;
+		}
+	}
+	
+	protected static class RegressionDescriptionFormatter extends FieldFormatter
+	{
+		
+		@Override
+		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
+				Pair<DateTime, DateTime> timeSpan)
+		{
+			RegressionData regData = (RegressionData)eventData;
+			String result = regData.getDescription();
+			return result;
+		}
+		
+		@Override
+		protected Object formatValue(Object value, EventsInput input)
+		{
+			return value;
 		}
 	}
 	
@@ -297,44 +406,34 @@ public class RegressionFunction extends EventsFunction
 		super(apiClient);
 	}
 	
-	private void sortRegressions(String serviceId, List<EventData> eventData)
-	{
-		
-		RegressionSettings regressionSettings = GrafanaSettings.getData(apiClient, serviceId).regression;
-		
-		if ((regressionSettings == null) || (regressionSettings.sort_order == null))
-		{
-			return;
-		}
-		
-		List<String> order = Arrays.asList(regressionSettings.sort_order.split(GrafanaFunction.ARRAY_SEPERATOR));
-		List<String> types = Arrays.asList(regressionSettings.type_order.split(GrafanaFunction.ARRAY_SEPERATOR));
-		
+	private void sortRegressions(List<EventData> eventData)
+	{		
 		eventData.sort(new Comparator<EventData>()
 		{
 			
 			@Override
 			public int compare(EventData o1, EventData o2)
 			{
-				
 				RegressionData r1 = (RegressionData)o1;
 				RegressionData r2 = (RegressionData)o2;
 				
-				int result = order.indexOf(r1.getText()) - order.indexOf(r2.getText());
+				int typeDelta = r1.type.ordinal() - r2.type.ordinal();
 				
-				if (result != 0)
-				{
-					return result;
+				if (typeDelta != 0) {
+					return typeDelta;
 				}
 				
-				result = types.indexOf(r1.event.type) - types.indexOf(r2.event.type);
+				if ((r1.type == RegressionType.SevereNewIssues) ||
+					(r1.type == RegressionType.NewIssues)) {
+					return (int)(r2.event.stats.hits -  r1.event.stats.hits);
+				}			
 				
-				if (result != 0)
-				{
-					return result;
-				}
+				if ((r1.type == RegressionType.SevereRegressions) ||
+					(r1.type == RegressionType.Regressions)) {
+					return r2.getDelta() - r1.getDelta();		
+				}		
 				
-				return (int)(o2.event.stats.hits - o1.event.stats.hits);
+				throw new IllegalStateException();
 			}
 		});
 	}
@@ -442,6 +541,11 @@ public class RegressionFunction extends EventsFunction
 			return new RegressionTimeRangeFormatter();
 		}
 		
+		if (column.equals(DESCRIPTION))
+		{
+			return new RegressionDescriptionFormatter();
+		}
+		
 		return super.getFormatter(column);
 	}
 	
@@ -452,6 +556,7 @@ public class RegressionFunction extends EventsFunction
 		public boolean empty;
 		
 		public RegressionInput regressionInput;
+		public RegressionWindow regressionWindow;
 		public RateRegression rateRegression;
 		public Graph baseVolumeGraph;
 		public Graph activeVolumeGraph;
@@ -461,8 +566,8 @@ public class RegressionFunction extends EventsFunction
 		protected double score;
 		long volume;
 		
-		protected int slowsdowns;
-		protected int severeSlowsdowns;
+		protected int slowdowns;
+		protected int severeSlowdowns;
 		
 		protected int severeNewIssues;
 		protected int newIssues;
@@ -698,13 +803,15 @@ public class RegressionFunction extends EventsFunction
 	}
 		
 	protected RegressionOutput createRegressionOutput(EventFilterInput input,
-			RegressionInput regressionInput,RateRegression rateRegression, Map<String, EventResult> eventListMap,
+			RegressionInput regressionInput, RegressionWindow regressionWindow,
+			RateRegression rateRegression, Map<String, EventResult> eventListMap,
 			Graph baseVolumeGraph, Graph activeVolumeGraph, long volume)
 	{
 		
 		RegressionOutput result = new RegressionOutput(false);
 		
 		result.regressionInput = regressionInput;
+		result.regressionWindow = regressionWindow;
 		result.rateRegression = rateRegression;
 		result.baseVolumeGraph = baseVolumeGraph;
 		result.activeVolumeGraph = activeVolumeGraph;
@@ -805,7 +912,9 @@ public class RegressionFunction extends EventsFunction
 		RateRegression rateRegression = RegressionUtil.calculateRateRegressions(apiClient, regressionInput, null,
 				false);
 		
-		RegressionOutput result = createRegressionOutput(input, regressionInput, rateRegression, eventListMap,
+		RegressionOutput result = createRegressionOutput(input, 
+				regressionInput, regressionWindow,
+				rateRegression, eventListMap,
 				baselineGraph, activeWindowGraph, volume);
 				
 		return result;
@@ -838,25 +947,27 @@ public class RegressionFunction extends EventsFunction
 		
 		RegressionData result = new RegressionData(first.regResult, first.input, merged.get(0).event, first.type);
 		
-		if (first.regression != null)
+		long baselineHits = 0;
+		long baselineInvocations = 0;
+			
+		for (EventData eventData : eventDatas)
 		{	
-			long baselineHits = 0;
-			long baselineInvocations = 0;
-			
-			for (EventData eventData : eventDatas)
+			RegressionData regressionData = (RegressionData)eventData;
+				
+			if (regressionData.regression != null)
 			{
-				
-				RegressionData regressionData = (RegressionData)eventData;
-				
-				if (regressionData.regression != null)
-				{
-					baselineHits += regressionData.regression.getBaselineHits();
-					baselineInvocations += regressionData.regression.getBaselineInvocations();
-				}
-				
-				result.mergedIds.add(eventData.event.id);
+				baselineHits += regressionData.regression.getBaselineHits();
+				baselineInvocations += regressionData.regression.getBaselineInvocations();
 			}
-			
+				
+			result.mergedIds.add(eventData.event.id);
+				
+			if (eventData.event.similar_event_ids != null) {
+				result.mergedIds.addAll(eventData.event.similar_event_ids);
+			}
+		}
+				
+		if (first.regression != null) {
 			result.regression = RegressionResult.of(result.event, baselineHits, baselineInvocations);
 		}
 		
@@ -879,8 +990,13 @@ public class RegressionFunction extends EventsFunction
 	private List<EventData> doMergeSimilarEvents(String serviceId, List<EventData> eventDatas)
 	{
 		List<EventData> result = new ArrayList<EventData>(super.mergeSimilarEvents(serviceId, eventDatas));
-		sortRegressions(serviceId, result);
+		sortRegressions(result);
 		return result;
+	}
+	
+	@Override
+	protected void sortEventDatas(List<EventData> eventDatas)
+	{
 	}
 	
 	@Override

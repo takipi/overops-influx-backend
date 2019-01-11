@@ -12,16 +12,19 @@ public class SettingsUtil {
 	private static final char SEPERATOR = '=';
 
 	private static String getSettingsJson(String settings) {
-
-		String escaped = settings.replace("\n", "").replace("\\n", "").replace("\\r", "")
-				.replaceAll(Pattern.quote("\\"), "");
+		
+		String escaped = settings.
+			replaceAll(Pattern.quote("\\\""), "\"").
+			replaceAll(Pattern.quote("\\r"), "\r").
+			replaceAll(Pattern.quote("\\n"), "\n").
+			replaceAll(Pattern.quote("\\t"), "\t");
 
 		int startIndex = escaped.indexOf('{');
 		int endIndex = escaped.lastIndexOf('}');
 
 		String result = escaped.substring(startIndex, endIndex + 1);
-
-		return result;
+		
+		return result;	
 	}
 
 	private static String getServiceId(String environments) {

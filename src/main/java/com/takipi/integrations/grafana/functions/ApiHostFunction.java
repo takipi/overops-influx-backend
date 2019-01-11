@@ -13,9 +13,6 @@ public class ApiHostFunction extends VariableFunction
 	private static final String SAAS_API = "api.overops.com";
 	private static final String SAAS_APP = "app.overops.com";
 	
-	private static final String HTTP = "http://";
-	private static final String HTTPS = "https://";
-	
 	public ApiHostFunction(ApiClient apiClient)
 	{
 		super(apiClient);

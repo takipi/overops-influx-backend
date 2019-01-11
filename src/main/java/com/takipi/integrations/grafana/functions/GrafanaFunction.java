@@ -1,5 +1,6 @@
 package com.takipi.integrations.grafana.functions;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -78,7 +79,6 @@ public abstract class GrafanaFunction
 		public String getName();
 	}
 	
-	protected static final String TIMER = "Timer";
 	protected static final String RESOVED = "Resolved";
 	protected static final String HIDDEN = "Hidden";
 	
@@ -108,23 +108,34 @@ public abstract class GrafanaFunction
 	protected static final char INTERNAL_DELIM = '/';
 	protected static final String TRANS_DELIM = "#";
 	protected static final String EMPTY_POSTFIX = ".";	
-		
-	private static final DateTimeFormatter fmt = ISODateTimeFormat.dateTime().withZoneUTC();
 	
+	protected static final String HTTP = "http://";
+	protected static final String HTTPS = "https://";
+	
+	protected static final DateTimeFormatter dateTimeFormatter = ISODateTimeFormat.dateTime().withZoneUTC();
+	protected static final DecimalFormat decimalFormat = new DecimalFormat("#.##");
+
 	protected static final Map<String, String> TYPES_MAP;
 	
+	protected static final String LOGGED_ERROR = "Logged Error";
+	protected static final String LOGGED_WARNING = "Logged Warning";
+	protected static final String CAUGHT_EXCEPTION = "Caught Exception";
+	protected static final String UNCAUGHT_EXCEPTION = "Uncaught Exception";
+	protected static final String SWALLOWED_EXCEPTION = "Swallowed Exception";
+	protected static final String TIMER = "Timer";
+	protected static final String HTTP_ERROR = "HTTP Error";
+
 	static
 	{
 		TYPES_MAP = new HashMap<String, String>();
 		
-		TYPES_MAP.put("Logged Error", "ERR");
-		TYPES_MAP.put("Logged Warning", "WRN");
-		TYPES_MAP.put("Caught Exception", "CEX");
-		TYPES_MAP.put("Uncaught Exception", "UNC");
-		TYPES_MAP.put("Swallowed Exception", "SWL");
-		TYPES_MAP.put("Timer", "TMR");
-		TYPES_MAP.put("HTTP_ERROR", "HTTP");
-		
+		TYPES_MAP.put(LOGGED_ERROR, "ERR");
+		TYPES_MAP.put(LOGGED_WARNING, "WRN");
+		TYPES_MAP.put(CAUGHT_EXCEPTION, "CEX");
+		TYPES_MAP.put(UNCAUGHT_EXCEPTION, "UNC");
+		TYPES_MAP.put(SWALLOWED_EXCEPTION, "SWL");
+		TYPES_MAP.put(TIMER, "TMR");
+		TYPES_MAP.put(HTTP_ERROR, "HTTP");	
 	}
 	
 	private static final int END_SLICE_POINT_COUNT = 2;
@@ -258,19 +269,28 @@ public abstract class GrafanaFunction
 		
 		return Pair.of(from, to);
 	}
-	
-	protected static Pair<String, String> getTransactionNameAndMethod(String name)
+
+	protected static Pair<String, String> getTransactionNameAndMethod(String name, boolean fullyQualified)
 	{
 		
 		String[] parts = name.split(TRANS_DELIM);
 		
 		if (parts.length == 1)
 		{
-			return Pair.of(getSimpleClassName(toQualified(name)), null);
+			if (fullyQualified) {
+				return Pair.of(toQualified(name), null);
+			} else {
+				return Pair.of(getSimpleClassName(toQualified(name)), null);
+			}
+			
 		}
 		else
 		{
-			return Pair.of(getSimpleClassName(toQualified((parts[0]))), parts[1]);
+			if (fullyQualified) {
+				return Pair.of(toQualified((parts[0])), parts[1]);		
+			} else {
+				return Pair.of(getSimpleClassName(toQualified((parts[0]))), parts[1]);
+			}
 		}
 	}
 	
@@ -292,7 +312,7 @@ public abstract class GrafanaFunction
 	protected static String getTransactionName(String name, boolean includeMethod)
 	{
 		
-		Pair<String, String> nameAndMethod = getTransactionNameAndMethod(name);
+		Pair<String, String> nameAndMethod = getTransactionNameAndMethod(name, false);
 		
 		if ((includeMethod) && (nameAndMethod.getSecond() != null))
 		{
@@ -576,7 +596,7 @@ public abstract class GrafanaFunction
 			ViewInput input, VolumeType volumeType, DateTime from, DateTime to, int baselineWindow, int activeWindow, int windowSlice) {
 		
 		GraphRequest.Builder builder = GraphRequest.newBuilder().setServiceId(serviceId).setViewId(viewId)
-				.setGraphType(GraphType.view).setFrom(from.toString(fmt)).setTo(to.toString(fmt))
+				.setGraphType(GraphType.view).setFrom(from.toString(dateTimeFormatter)).setTo(to.toString(dateTimeFormatter))
 				.setVolumeType(volumeType).setWantedPointCount(pointsCount).setRaw(true);
 		
 		applyFilters(input, serviceId, builder);
@@ -806,12 +826,14 @@ public abstract class GrafanaFunction
 	{	
 		EventsSlimVolumeRequest.Builder builder =
 				EventsSlimVolumeRequest.newBuilder().setVolumeType(volumeType).setServiceId(serviceId).setViewId(viewId)
-						.setFrom(from.toString(fmt)).setTo(to.toString(fmt))
+						.setFrom(from.toString(dateTimeFormatter)).setTo(to.toString(dateTimeFormatter))
 						.setVolumeType(volumeType).setRaw(true);
 		
 		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);
+		
 		Response<EventsSlimVolumeResult> response =
 				ApiCache.getEventVolume(apiClient, serviceId, input, volumeType, builder.build());
+		
 		validateResponse(response);
 		
 		if ((response.data == null) || (response.data.events == null))
@@ -847,9 +869,9 @@ public abstract class GrafanaFunction
 	private Collection<EventResult> getEventList(String serviceId, String viewId, ViewInput input, DateTime from,
 			DateTime to)
 	{
-		
 		EventsRequest.Builder builder = EventsRequest.newBuilder().setRaw(true);
 		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);
+		
 		Response<?> response = ApiCache.getEventList(apiClient, serviceId, input, builder.build());
 		validateResponse(response);
 		
@@ -984,13 +1006,6 @@ public abstract class GrafanaFunction
 		{
 			try
 			{
-				/*
-				Future<Object> future = null;
-				
-				while (future == null) {
-					future = completionService.poll(2, TimeUnit.SECONDS);
-				}
-				*/
 				Future<Object> future = completionService.take();
 				
 				received++;

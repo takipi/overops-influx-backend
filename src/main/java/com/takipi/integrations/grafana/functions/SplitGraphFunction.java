@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.metrics.Graph;
@@ -21,7 +23,8 @@ import com.takipi.integrations.grafana.input.GraphLimitInput;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class SplitGraphFunction extends LimitGraphFunction {
-
+	private static final Logger logger = LoggerFactory.getLogger(SplitGraphFunction.class); 
+	
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -45,9 +48,9 @@ public class SplitGraphFunction extends LimitGraphFunction {
 	}
 
 	@Override
-	protected List<GraphSeries> processGraphSeries(String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
+	protected List<GraphSeries> processGraphSeries(Collection<String> serviceIds,
+			String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
 			GraphInput input) {
-
 		GraphLimitInput limitInput = (GraphLimitInput)input;
 
 		Map<String, EventResult> eventMap = getEventMap(serviceId, input, timeSpan.getFirst(), timeSpan.getSecond(),
@@ -75,10 +78,15 @@ public class SplitGraphFunction extends LimitGraphFunction {
 			}
 
 			for (GraphPointContributor gpc : gp.contributors) {
-
 				EventResult event = eventMap.get(gpc.id);
 
 				if ((event == null) || (eventFilter.filter(event))) {
+					continue;
+				}
+				
+				if (event.error_location == null)
+				{
+					logger.warn("Event {} does not have error location!", event.id);
 					continue;
 				}
 				
@@ -122,10 +130,15 @@ public class SplitGraphFunction extends LimitGraphFunction {
 			matchingGraphs.clear();
 		
 			for (GraphPointContributor gpc : gp.contributors) {
-
 				EventResult event = eventMap.get(gpc.id);
 
 				if ((event == null) || (eventFilter.filter(event))) {
+					continue;
+				}
+				
+				if (event.error_location == null)
+				{
+					logger.warn("Event {} does not have error location!", event.id);
 					continue;
 				}
 				
@@ -138,7 +151,7 @@ public class SplitGraphFunction extends LimitGraphFunction {
 				}
 				
 				String key = getSimpleClassName(event.error_location.class_name);
-
+				
 				GraphData graphData = graphsData.get(key);
 
 				if (graphData == null) {
@@ -167,14 +180,13 @@ public class SplitGraphFunction extends LimitGraphFunction {
 				}
 			}	
 		}
-
 		
 		List<GraphSeries> result = new ArrayList<GraphSeries>();
 		
 		for (GraphData graphData : limitedGraphs) {
 			
 			if (graphData.volume > 0) {
-				result.add(getGraphSeries(graphData, graphData.key));
+				result.add(getGraphSeries(graphData, getServiceValue(graphData.key, serviceId, serviceIds)));
 			}
 		}
 				

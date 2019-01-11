@@ -49,7 +49,8 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 	}
 
 	@Override
-	protected List<GraphSeries> processGraphSeries(String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
+	protected List<GraphSeries> processGraphSeries(Collection<String> serviceIds,
+			String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
 			GraphInput input) {
 		
 		GraphLimitInput limitInput = (GraphLimitInput)input;
@@ -81,6 +82,9 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 		for (GraphPoint gp : graph.points) {
 
 			DateTime gpTime = TimeUtil.getDateTime(gp.time);
+		
+			lastKey = key;
+			key = Long.valueOf(gpTime.getMillis());
 
 			if (gp.contributors == null) {
 				
@@ -90,9 +94,6 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 				
 				continue;
 			}
-			
-			lastKey = key;
-			key = Long.valueOf(gpTime.getMillis());
 			
 			for (GraphPointContributor gpc : gp.contributors) {
 
@@ -140,7 +141,7 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 						
 						graphsData.put(label, graphData);
 					}
-										
+								
 					Long currValue = graphData.points.get(key);
 					Long newValue;
 					
@@ -177,7 +178,12 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 				Collection<GraphData> additionalGraphs = getLimitedGraphData(graphsData.values(),
 					limitInput.limit - limitedGraphs.size());
 				
-				limitedGraphs.addAll(additionalGraphs);
+				for (GraphData graphData : additionalGraphs) {				
+					
+					if (!limitedGraphs.contains(graphData)) {
+						limitedGraphs.add(graphData);
+					}
+				}
 			}
 		}  else {
 			limitedGraphs = getLimitedGraphData(graphsData.values(), limitInput.limit);
@@ -186,7 +192,7 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 		List<GraphSeries> result = new ArrayList<GraphSeries>();
 		
 		for (GraphData graphData : limitedGraphs) {
-			result.add(getGraphSeries(graphData, graphData.key));	
+			result.add(getGraphSeries(graphData, getServiceValue(graphData.key, serviceId, serviceIds)));	
 		}
 				
 		return result;

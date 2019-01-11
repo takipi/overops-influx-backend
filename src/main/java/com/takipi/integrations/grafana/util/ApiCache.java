@@ -1,7 +1,9 @@
 package com.takipi.integrations.grafana.util;
 
 import java.util.Collection;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -11,13 +13,17 @@ import com.google.common.base.Objects;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListenableFutureTask;
 import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.request.event.EventRequest;
 import com.takipi.api.client.request.event.EventsRequest;
 import com.takipi.api.client.request.event.EventsSlimVolumeRequest;
 import com.takipi.api.client.request.metrics.GraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsGraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsVolumeRequest;
 import com.takipi.api.client.request.view.ViewsRequest;
+import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
 import com.takipi.api.client.result.metrics.GraphResult;
 import com.takipi.api.client.result.transaction.TransactionsGraphResult;
@@ -29,6 +35,7 @@ import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.request.intf.ApiGetRequest;
 import com.takipi.api.core.url.UrlClient.Response;
+import com.takipi.integrations.grafana.functions.GrafanaThreadPool;
 import com.takipi.integrations.grafana.functions.RegressionFunction;
 import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOutput;
 import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
@@ -40,20 +47,25 @@ public class ApiCache {
 	private static final Logger logger = LoggerFactory.getLogger(ApiCache.class);
 	
 	private static final int CACHE_SIZE = 1000;
-	private static final int CACHE_RETENTION = 2;
-
+	private static final int CACHE_REFRESH_RETENTION = 2;
+	private static final int CACHE_RELOAD_WINDOW = 3;
+	
 	public static boolean PRINT_DURATIONS = true;
 	
 	protected abstract static class BaseCacheLoader {
 
 		protected ApiClient apiClient;
 		protected ApiGetRequest<?> request;
-
+		
 		public BaseCacheLoader(ApiClient apiClient, ApiGetRequest<?> request) {
 			this.apiClient = apiClient;
 			this.request = request;
 		}
 
+		protected boolean printDuration() {
+			return true;
+		}
+		
 		@Override
 		public boolean equals(Object obj) {
 
@@ -83,9 +95,9 @@ public class ApiCache {
 				
 				long t2 = System.currentTimeMillis();
 				
-				if (PRINT_DURATIONS) {
+				if ((PRINT_DURATIONS)  && (printDuration())) {
 					double sec = (double)(t2-t1) / 1000;
-					logger.debug(sec + " sec: " + toString());
+					logger.info(sec + " sec: " + toString());
 				}
 				
 				return result;
@@ -131,6 +143,58 @@ public class ApiCache {
 			return super.hashCode() ^ serviceId.hashCode();
 		}
 	}
+	
+	protected static class EventCacheLoader extends ServiceCacheLoader {
+
+		protected String Id;
+
+		public EventCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, String Id) {
+
+			super(apiClient, request, serviceId);
+			this.Id = Id;
+		}
+		
+		@Override
+		protected boolean printDuration()
+		{
+			return false;
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+
+			if (!(obj instanceof EventCacheLoader)) {
+				return false;
+			}
+
+			if (!super.equals(obj)) {
+				return false;
+			}
+
+			EventCacheLoader other = (EventCacheLoader) obj;
+
+			if (!Objects.equal(Id, other.Id)) {
+				return false;
+			}
+
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+
+			if (Id == null) {
+				return super.hashCode();
+			}
+
+			return super.hashCode() ^ Id.hashCode();
+		}
+		
+		@Override
+		public String toString() {
+			return this.getClass().getSimpleName() + ": " + Id;
+		}
+	}
 
 	protected static class ViewCacheLoader extends ServiceCacheLoader {
 
@@ -139,6 +203,7 @@ public class ApiCache {
 		public ViewCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, String viewName) {
 
 			super(apiClient, request, serviceId);
+			
 			this.viewName = viewName;
 		}
 
@@ -164,7 +229,6 @@ public class ApiCache {
 
 		@Override
 		public int hashCode() {
-
 			if (viewName == null) {
 				return super.hashCode();
 			}
@@ -183,8 +247,8 @@ public class ApiCache {
 		protected ViewInput input;
 
 		public ViewInputCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input) {
-
 			super(apiClient, request, serviceId);
+			
 			this.input = input;
 		}
 
@@ -215,8 +279,9 @@ public class ApiCache {
 			}
 
 			ViewInputCacheLoader other = (ViewInputCacheLoader) obj;
-
-			if (!Objects.equal(input.timeFilter, other.input.timeFilter)) {
+			
+			if ((input.timeFilter != null) && (other.input.timeFilter != null) &&
+				(!Objects.equal(input.timeFilter, other.input.timeFilter))) {
 				return false;
 			}
 
@@ -342,9 +407,9 @@ public class ApiCache {
 	}
 
 
-	protected static class EventCacheLoader extends VolumeCacheLoader {
+	protected static class EventsCacheLoader extends VolumeCacheLoader {
 		
-		public EventCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
+		public EventsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
 				VolumeType volumeType) {
 
 			super(apiClient, request, serviceId, input, volumeType);
@@ -353,7 +418,7 @@ public class ApiCache {
 		@Override
 		public boolean equals(Object obj) {
 
-			if (!(obj instanceof EventCacheLoader)) {
+			if (!(obj instanceof EventsCacheLoader)) {
 				return false;
 			}
 
@@ -366,7 +431,6 @@ public class ApiCache {
 	}
 
 	protected static class GraphCacheLoader extends VolumeCacheLoader {
-
 		protected int pointsWanted;
 		protected int activeWindow;
 		protected int baselineWindow;
@@ -374,7 +438,6 @@ public class ApiCache {
 
 		@Override
 		public boolean equals(Object obj) {
-
 			if (!(obj instanceof GraphCacheLoader)) {
 				return false;
 			}
@@ -426,13 +489,11 @@ public class ApiCache {
 	}
 	
 	protected static class TransactionsCacheLoader extends ViewInputCacheLoader {
-
 		protected int baselineTimespan;
 		protected int activeTimespan;
 		
 		@Override
 		public boolean equals(Object obj) {
-
 			if (!(obj instanceof TransactionsCacheLoader)) {
 				return false;
 			}
@@ -455,7 +516,6 @@ public class ApiCache {
 		}
 
 		public TransactionsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input) {
-
 			this(apiClient, request, serviceId, input, 0, 0);
 		}
 		
@@ -597,7 +657,7 @@ public class ApiCache {
 		}
 	}
 	
-	protected static class RegressionCacheLoader extends EventCacheLoader {
+	protected static class RegressionCacheLoader extends EventsCacheLoader {
 
 		protected RegressionFunction function;
 
@@ -616,7 +676,6 @@ public class ApiCache {
 			
 			EventFilterInput eventInput = (EventFilterInput)input;
 			EventFilterInput otherInput = (EventFilterInput)(other.input);
-			
 			
 			if (!Objects.equal(eventInput.types, otherInput.types)) {
 				return false;
@@ -723,7 +782,7 @@ public class ApiCache {
 	private static Response<?> getEventList(ApiClient apiClient, String serviceId, 
 			ViewInput input, EventsRequest request, VolumeType volumeType, boolean load) {
 		
-		EventCacheLoader cacheKey = new EventCacheLoader(apiClient, request, serviceId, input, volumeType);		
+		EventsCacheLoader cacheKey = new EventsCacheLoader(apiClient, request, serviceId, input, volumeType);		
 		Response<?> response;
 		
 		if (load) {
@@ -745,7 +804,7 @@ public class ApiCache {
 			response = getEventList(apiClient, serviceId, 
 					input, request,volumeType, false);
 			
-			if (response != null) {
+			if ((response != null)  && (response.data != null)) {
 				return response;
 			}
 		}
@@ -770,6 +829,18 @@ public class ApiCache {
 		TransactionsGraphCacheLoader cacheKey = new TransactionsGraphCacheLoader(apiClient, request, serviceId, input,
 				pointsWanted, baselineTimespan, activeTimespan);
 		Response<TransactionsGraphResult> response = (Response<TransactionsGraphResult>) ApiCache.getItem(cacheKey);
+		
+		return response;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static Response<EventResult> getEvent(ApiClient apiClient, String serviceId,
+			String Id) {
+
+		EventRequest.Builder builder = EventRequest.newBuilder().setServiceId(serviceId).setEventId(Id);
+		
+		EventCacheLoader cacheKey = new EventCacheLoader(apiClient, builder.build(), serviceId, Id);
+		Response<EventResult> response = (Response<EventResult>) ApiCache.getItem(cacheKey);
 		
 		return response;
 	}
@@ -810,7 +881,7 @@ public class ApiCache {
 	}
 	
 	private static final LoadingCache<RegressionCacheLoader, RegressionOutput> rgressionReportRache = CacheBuilder
-			.newBuilder().maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_RETENTION, TimeUnit.MINUTES)
+			.newBuilder().maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_REFRESH_RETENTION, TimeUnit.MINUTES)
 			.build(new CacheLoader<RegressionCacheLoader, RegressionOutput>() {
 				
 				@Override
@@ -820,7 +891,9 @@ public class ApiCache {
 			});
 
 	private static final LoadingCache<RegresionWindowCacheLoader, RegressionWindow> regressionWindowCache = CacheBuilder
-			.newBuilder().maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_RETENTION, TimeUnit.MINUTES)
+			.newBuilder().maximumSize(CACHE_SIZE)
+			.expireAfterAccess(CACHE_REFRESH_RETENTION, TimeUnit.MINUTES)
+			.refreshAfterWrite(CACHE_RELOAD_WINDOW, TimeUnit.MINUTES)
 			.build(new CacheLoader<RegresionWindowCacheLoader, RegressionWindow>() {
 				
 				@Override
@@ -833,7 +906,9 @@ public class ApiCache {
 			});
 
 	private static final LoadingCache<BaseCacheLoader, Response<?>> queryCache = CacheBuilder.newBuilder()
-			.maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_RETENTION, TimeUnit.MINUTES)
+			.maximumSize(CACHE_SIZE)
+			.expireAfterAccess(CACHE_REFRESH_RETENTION, TimeUnit.MINUTES)
+			.refreshAfterWrite(CACHE_REFRESH_RETENTION, TimeUnit.MINUTES)
 			.build(new CacheLoader<BaseCacheLoader, Response<?>>() {
 				
 				@Override
@@ -842,6 +917,24 @@ public class ApiCache {
 					Response<?> result = key.load();
 					return result;
 				}
+				
+				@Override
+				public ListenableFuture<Response<?>> reload(final BaseCacheLoader key, Response<?> prev) {
+		              
+					ListenableFutureTask<Response<?>> task = ListenableFutureTask.create(new Callable<Response<?>>() {
+		                
+						@Override
+						public Response<?> call() {
+		                     return key.load();
+		                   }
+		                });
+		                 
+		                Executor executor = GrafanaThreadPool.getQueryExecutor(key.apiClient);
+		                executor.execute(task);
+		                
+		                return task;
+		               
+		             }
 			});
 
 }

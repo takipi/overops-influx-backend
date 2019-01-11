@@ -16,15 +16,19 @@ import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.data.transaction.TransactionGraph.GraphPoint;
 import com.takipi.api.client.util.performance.calc.PerformanceState;
+import com.takipi.api.client.util.regression.RegressionInput;
+import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.GraphFunction.SeriesVolume;
 import com.takipi.integrations.grafana.functions.TransactionsListFunction.TransactionData;
+import com.takipi.integrations.grafana.functions.TransactionsListFunction.TransactionDataResult;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput.GraphType;
-import com.takipi.integrations.grafana.input.TransactionsListIput;
+import com.takipi.integrations.grafana.input.TransactionsGraphInput.TimeWindow;
+import com.takipi.integrations.grafana.input.TransactionsListInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings.GroupFilter;
@@ -49,6 +53,12 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		}
 	}
 	
+	protected class TransactionGraphsResult {
+		protected Collection<TransactionGraph> graphs;
+		protected RegressionInput regressionInput;
+		protected RegressionWindow regressionWindow;
+	}
+	
 	protected static class TimeAvg {
 		protected long invocations;
 		protected double avgTime;
@@ -59,73 +69,111 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		super(apiClient);
 	}
 	
-	protected Collection<TransactionGraph> getTransactionsGraphs(String serviceId, 
-		String viewId, Pair<DateTime, DateTime> timeSpan, TransactionsGraphInput input, int pointsWanted) {
+	private TransactionGraph mergeGraphs(TransactionData transactionData) {
 		
-		Collection<TransactionGraph> result;
+		TransactionGraph result = new TransactionGraph();
+		
+		result.name = transactionData.graph.name;
+		result.class_name = transactionData.graph.class_name;
+		result.method_name = transactionData.graph.method_name;
+		result.method_desc = transactionData.graph.method_desc;
+	
+		int size = transactionData.graph.points.size();
+		
+		if (transactionData.baselineGraph!= null) {
+			size += transactionData.baselineGraph.points.size();
+		}
+		
+		result.points = new ArrayList<GraphPoint>(size);
+	
+		if (transactionData.baselineGraph!= null) {
+			result.points.addAll(transactionData.baselineGraph.points);
+		}
+		
+		result.points.addAll(transactionData.graph.points);
+		
+		return result;
+	}
+
+	protected TransactionGraphsResult getTransactionsGraphs(String serviceId, 
+		String viewId, Pair<DateTime, DateTime> timeSpan, 
+		TransactionsGraphInput input, int pointsWanted) {
+		
 		
 		Collection<TransactionGraph> activeGraphs = getTransactionGraphs(input, serviceId, 
 				viewId, timeSpan, input.getSearchText(), pointsWanted, 0, 0);
 		
-		if (input.performanceStates != null) {	
+		TimeWindow timeWindow = input.getTimeWindow();
+		
+		TransactionGraphsResult result = new TransactionGraphsResult();
+		
+		if ((input.performanceStates != null) || (!TimeWindow.Active.equals(timeWindow))) {	
 			
-			Collection<PerformanceState> performanceStates = TransactionsListIput.getStates(input.performanceStates);
-			
+			Collection<PerformanceState> performanceStates = TransactionsListInput.getStates(input.performanceStates);
 			TransactionsListFunction transactionsFunction = new TransactionsListFunction(apiClient);
-			Map<String, TransactionData> transactionDatas = transactionsFunction.getTransactionDatas(activeGraphs, serviceId, viewId, timeSpan, input, false);
 			
-			List<TransactionGraph> graphs = new ArrayList<TransactionGraph>();
+			TransactionDataResult transactionDataResult = transactionsFunction.getTransactionDatas(activeGraphs, 
+				serviceId, viewId, timeSpan, input, false, 0);
 			
-			for (TransactionData transactionData : transactionDatas.values()) {
+			if (transactionDataResult == null) {
+				return null;
+			}
+			
+			result.graphs = new ArrayList<TransactionGraph>();
+			result.regressionWindow = transactionDataResult.regressionWindow;
+			result.regressionInput = transactionDataResult.regressionInput; 	
+			
+			for (TransactionData transactionData : transactionDataResult.items.values()) {
 				
 				if (!performanceStates.contains(transactionData.state)) {
 					continue;
 				}
 				
-				TransactionGraph graph = new TransactionGraph();
+				TransactionGraph graph;
 				
-				graph.name = transactionData.graph.name;
-				graph.class_name = transactionData.graph.class_name;
-				graph.method_name = transactionData.graph.method_name;
-				graph.method_desc = transactionData.graph.method_desc;
-			
-				int size = transactionData.graph.points.size();
-				
-				if (transactionData.baselineGraph!= null) {
-					size += transactionData.baselineGraph.points.size();
+				switch (timeWindow) {
+					case Active:
+						graph = transactionData.graph;
+						break;
+
+					case Baseline:
+						graph = transactionData.baselineGraph;
+						break;
+
+					case All:
+						graph = mergeGraphs(transactionData);
+						break;
+						
+					default:
+						throw new IllegalStateException(timeWindow.toString());
+					
 				}
-				
-				graph.points = new ArrayList<GraphPoint>(size);
-			
-				if (transactionData.baselineGraph!= null) {
-					graph.points.addAll(transactionData.baselineGraph.points);
-				}
-				
-				graph.points.addAll(transactionData.graph.points);
-				
-				graphs.add(graph);
-			}
-			
-			result = graphs;
-			
+							
+				result.graphs.add(graph);
+			}			
 		} else {
-			result = activeGraphs;
+			result.graphs = activeGraphs;
 		}
 		
 		return result;
 	}
 	
     @Override
-	protected List<GraphSeries> processServiceGraph(String serviceId, String viewId, String viewName,
-			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds, int pointsWanted) {
+	protected List<GraphSeries> processServiceGraph( Collection<String> serviceIds, 
+			String serviceId, String viewId, String viewName,
+			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
 
 		TransactionsGraphInput tgInput = (TransactionsGraphInput) input;
 		Collection<String> transactions = getTransactions(serviceId, tgInput, timeSpan);
 		
-		Collection<TransactionGraph> transactionGraphs = getTransactionsGraphs(serviceId, viewId, timeSpan, tgInput, pointsWanted);
+		TransactionGraphsResult transactionGraphs = getTransactionsGraphs(serviceId, viewId, timeSpan, tgInput, pointsWanted);
+		
+		if (transactionGraphs == null) {
+			return Collections.emptyList();
+		}
 		
 		List<GraphSeries> result = processServiceGraph(serviceId, tgInput, 
-				serviceIds, transactions, transactionGraphs);
+				serviceIds, transactions, transactionGraphs.graphs);
 	
 		return result;
 	}
@@ -142,7 +190,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			
 			String seriesName = getSeriesName(input, input.seriesName, input.volumeType, serviceId, serviceIds);
 			result = Collections.singletonList(createAggregateGraphSeries(serviceId, graphs, transactionsFilter,
-					input, serviceIds, seriesName));
+					input, serviceIds,seriesName));
 		} else {
 			result = createMultiGraphSeries(serviceId, graphs, input, serviceIds);
 		}
@@ -405,7 +453,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			return super.processSeries(series, input);
 		}
 		
-		return limitGraphSeries(series, tgInput.limit);
+		return limitSeries(series, tgInput.limit);
 	}
 	
 

@@ -72,18 +72,6 @@ public class RegressionSettings {
 	 */
 	public String critical_exception_types;
 	
-	/**
-	 * A comma delimited list of regression types that controls the sort order by which regressions
-	 * reported by a table widget are returned.
-	 */
-	public String sort_order;
-	
-	/**
-	 * A comma delimited list of event types that controls the secondary sort order by which regressions
-	 * reported by a table widget are returned.
-	 */
-	public String type_order;
-	
 	public  Collection<String> getCriticalExceptionTypes() {
 		
 		if (critical_exception_types == null) {

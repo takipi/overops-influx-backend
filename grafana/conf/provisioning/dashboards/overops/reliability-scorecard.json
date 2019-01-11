@@ -18,8 +18,17 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 22,
-  "iteration": 1546139238911,
+  "iteration": 1546879815886,
   "links": [
+    {
+      "icon": "external link",
+      "tags": [],
+      "targetBlank": true,
+      "title": "HELP",
+      "tooltip": "Learn more about this dashboard",
+      "type": "link",
+      "url": "https://doc.overops.com/docs/reliability-scorecard-dashboard"
+    },
     {
       "asDropdown": true,
       "icon": "external link",
@@ -299,16 +308,16 @@
       "hideTimeOverride": true,
       "id": 75,
       "links": [],
-      "pageSize": 10,
+      "pageSize": 50,
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 3,
-        "desc": true
+        "col": null,
+        "desc": false
       },
       "styles": [
         {
-          "alias": "Name",
+          "alias": "Deploy",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -319,10 +328,11 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "Open ${__cell}",
-          "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-deployments=${__cell_3}",
+          "linkTooltip": "Score for  ${__cell} =  ${__cell_13}. $settingsPostfix. $drilldownPostfix",
+          "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-deployments=${__cell_4}",
           "mappingType": 1,
           "pattern": "Name",
+          "preserveFormat": false,
           "rangeMaps": [
             {
               "from": "0",
@@ -381,7 +391,7 @@
           "linkTooltip": "",
           "linkUrl": "",
           "mappingType": 1,
-          "pattern": "RegressionsState",
+          "pattern": "RegressionsDesc",
           "preserveFormat": false,
           "rangeMaps": [],
           "sanitize": false,
@@ -466,7 +476,7 @@
           "linkTooltip": "",
           "linkUrl": "",
           "mappingType": 1,
-          "pattern": "NewIssuesState",
+          "pattern": "NewIssuesDesc",
           "thresholds": [],
           "type": "hidden",
           "unit": "short",
@@ -500,7 +510,7 @@
           "linkTooltip": "",
           "linkUrl": "",
           "mappingType": 1,
-          "pattern": "SlowdownsState",
+          "pattern": "SlowdownsDesc",
           "thresholds": [],
           "type": "hidden",
           "unit": "short",
@@ -531,16 +541,16 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_7}",
-          "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-deployments=${__cell_3}",
+          "linkTooltip": "${__cell_9}. $drilldownPostfix",
+          "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-deployments=${__cell_4}",
           "mappingType": 1,
-          "pattern": "NewIssuesDesc",
+          "pattern": "NewIssues",
           "thresholds": [],
           "type": "string",
           "unit": "short"
         },
         {
-          "alias": "Increasing",
+          "alias": "Inc",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -551,10 +561,10 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_8}",
-          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=$environments&var-servers=$servers&var-deployments=${__cell_3}&var-timeRange=${__cell_2}",
+          "linkTooltip": "${__cell_10}. $drilldownPostfix",
+          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-deployments=${__cell_4}&var-timeRange=${__cell_2}",
           "mappingType": 1,
-          "pattern": "RegressionsDesc",
+          "pattern": "Regressions",
           "thresholds": [],
           "type": "string",
           "unit": "short"
@@ -587,10 +597,10 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_9}",
-          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=$environments&var-servers=$servers&var-deployments=${__cell_3}&var-timeRange=${__cell_2}",
+          "linkTooltip": "${__cell_11}. $drilldownPostfix",
+          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-deployments=${__cell_4}&var-timeRange=${__cell_2}",
           "mappingType": 1,
-          "pattern": "SlowdownsDesc",
+          "pattern": "Slowdowns",
           "thresholds": [],
           "type": "string",
           "unit": "short"
@@ -623,6 +633,38 @@
           "decimals": 2,
           "mappingType": 1,
           "pattern": "ScoreDesc",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Key",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Service",
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
@@ -686,7 +728,7 @@
       "hideTimeOverride": true,
       "id": 76,
       "links": [],
-      "pageSize": 10,
+      "pageSize": 50,
       "scroll": true,
       "showHeader": true,
       "sort": {
@@ -695,7 +737,7 @@
       },
       "styles": [
         {
-          "alias": "Name",
+          "alias": "App",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -706,10 +748,11 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "Open ${__cell}",
-          "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}",
+          "linkTooltip": "Score for  ${__cell} =  ${__cell_13}. $settingsPostfix. $drilldownPostfix",
+          "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-applications=${__cell_4}",
           "mappingType": 1,
           "pattern": "Name",
+          "preserveFormat": false,
           "rangeMaps": [
             {
               "from": "0",
@@ -717,6 +760,7 @@
               "to": "99999999"
             }
           ],
+          "sanitize": false,
           "thresholds": [],
           "type": "string",
           "unit": "short",
@@ -768,7 +812,7 @@
           "linkTooltip": "",
           "linkUrl": "",
           "mappingType": 1,
-          "pattern": "RegressionsState",
+          "pattern": "RegressionsDesc",
           "preserveFormat": false,
           "rangeMaps": [],
           "sanitize": false,
@@ -853,7 +897,7 @@
           "linkTooltip": "",
           "linkUrl": "",
           "mappingType": 1,
-          "pattern": "NewIssuesState",
+          "pattern": "NewIssuesDesc",
           "thresholds": [],
           "type": "hidden",
           "unit": "short",
@@ -887,7 +931,7 @@
           "linkTooltip": "",
           "linkUrl": "",
           "mappingType": 1,
-          "pattern": "SlowdownsState",
+          "pattern": "SlowdownsDesc",
           "thresholds": [],
           "type": "hidden",
           "unit": "short",
@@ -918,16 +962,16 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_7}",
-          "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}",
+          "linkTooltip": "${__cell_9}.  $drilldownPostfix",
+          "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-applications=${__cell_4}",
           "mappingType": 1,
-          "pattern": "NewIssuesDesc",
+          "pattern": "NewIssues",
           "thresholds": [],
           "type": "string",
           "unit": "short"
         },
         {
-          "alias": "Increasing",
+          "alias": "Inc",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -938,10 +982,10 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_8}",
-          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}&var-timeRange=${__cell_2}",
+          "linkTooltip": "${__cell_10}.  $drilldownPostfix",
+          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-applications=${__cell_4}&var-timeRange=${__cell_2}",
           "mappingType": 1,
-          "pattern": "RegressionsDesc",
+          "pattern": "Regressions",
           "thresholds": [],
           "type": "string",
           "unit": "short"
@@ -974,10 +1018,10 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_9}",
-          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}&var-timeRange=${__cell_2}",
+          "linkTooltip": "${__cell_11}.  $drilldownPostfix",
+          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-applications=${__cell_4}&var-timeRange=${__cell_2}",
           "mappingType": 1,
-          "pattern": "SlowdownsDesc",
+          "pattern": "Slowdowns",
           "thresholds": [],
           "type": "string",
           "unit": "short"
@@ -1010,6 +1054,38 @@
           "decimals": 2,
           "mappingType": 1,
           "pattern": "ScoreDesc",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Key",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Service",
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
@@ -1073,7 +1149,7 @@
       "hideTimeOverride": true,
       "id": 79,
       "links": [],
-      "pageSize": 10,
+      "pageSize": 50,
       "scroll": true,
       "showHeader": true,
       "sort": {
@@ -1082,7 +1158,7 @@
       },
       "styles": [
         {
-          "alias": "Name",
+          "alias": "Tier",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1093,8 +1169,8 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "Open ${__cell}",
-          "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-type=-${__cell_3}",
+          "linkTooltip": "Score for  ${__cell} =  ${__cell_13}. $settingsPostfix. $drilldownPostfix",
+          "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-type=-${__cell_4}",
           "mappingType": 1,
           "pattern": "Name",
           "rangeMaps": [
@@ -1151,11 +1227,11 @@
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 0,
           "link": true,
-          "linkTargetBlank": true,
-          "linkTooltip": "${__cell_5}",
-          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}&var-timeRange=${__cell_2}",
+          "linkTargetBlank": false,
+          "linkTooltip": "",
+          "linkUrl": "",
           "mappingType": 1,
-          "pattern": "RegressionsState",
+          "pattern": "RegressionsDesc",
           "preserveFormat": false,
           "rangeMaps": [],
           "sanitize": false,
@@ -1236,11 +1312,11 @@
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 0,
           "link": true,
-          "linkTargetBlank": true,
-          "linkTooltip": "${__cell_4}",
-          "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}",
+          "linkTargetBlank": false,
+          "linkTooltip": "",
+          "linkUrl": "",
           "mappingType": 1,
-          "pattern": "NewIssuesState",
+          "pattern": "NewIssuesDesc",
           "thresholds": [],
           "type": "hidden",
           "unit": "short",
@@ -1274,7 +1350,7 @@
           "linkTooltip": "${__cell_6}",
           "linkUrl": "d/Z40SpeJmz/performance?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}",
           "mappingType": 1,
-          "pattern": "SlowdownsState",
+          "pattern": "Slowdowns",
           "thresholds": [],
           "type": "hidden",
           "unit": "short",
@@ -1305,16 +1381,16 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_7}",
-          "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-type=-${__cell_3}",
+          "linkTooltip": "${__cell_9}. $drilldownPostfix",
+          "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-type=-${__cell_4}",
           "mappingType": 1,
-          "pattern": "NewIssuesDesc",
+          "pattern": "NewIssues",
           "thresholds": [],
           "type": "string",
           "unit": "short"
         },
         {
-          "alias": "Regressed",
+          "alias": "Inc",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1325,10 +1401,10 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_8}",
-          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=$environments&var-servers=$servers&var-type=-${__cell_3}&var-timeRange=${__cell_2}",
+          "linkTooltip": "${__cell_10}. $drilldownPostfix",
+          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-type=-${__cell_4}&var-timeRange=${__cell_2}",
           "mappingType": 1,
-          "pattern": "RegressionsDesc",
+          "pattern": "Regressions",
           "thresholds": [],
           "type": "string",
           "unit": "short"
@@ -1359,10 +1435,10 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
-          "link": true,
-          "linkTargetBlank": true,
-          "linkTooltip": "${__cell_6}",
-          "linkUrl": "d/Z40SpeJmz/performance?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}",
+          "link": false,
+          "linkTargetBlank": false,
+          "linkTooltip": "",
+          "linkUrl": "",
           "mappingType": 1,
           "pattern": "SlowdownsDesc",
           "thresholds": [],
@@ -1397,6 +1473,38 @@
           "decimals": 2,
           "mappingType": 1,
           "pattern": "ScoreDesc",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Key",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Service",
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
@@ -1458,9 +1566,12 @@
       {
         "allValue": "None",
         "current": {
-          "selected": true,
+          "selected": false,
+          "tags": [],
           "text": "None",
-          "value": "None"
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -1483,9 +1594,10 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
-          "value": "$__all"
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -1508,7 +1620,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1533,7 +1644,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1605,7 +1715,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1630,7 +1739,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -1679,6 +1787,50 @@
         "query": "5,10",
         "skipUrlSync": false,
         "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "Weights are defined in the Settings dashboard",
+          "value": "Weights are defined in the Settings dashboard"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "settingsPostfix",
+        "options": [
+          {
+            "selected": true,
+            "text": "Weights are defined in the Settings dashboard",
+            "value": "Weights are defined in the Settings dashboard"
+          }
+        ],
+        "query": "Weights are defined in the Settings dashboard",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "Click to drill down",
+          "value": "Click to drill down"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "drilldownPostfix",
+        "options": [
+          {
+            "selected": true,
+            "text": "Click to drill down",
+            "value": "Click to drill down"
+          }
+        ],
+        "query": "Click to drill down",
+        "skipUrlSync": false,
+        "type": "custom"
       }
     ]
   },
@@ -1715,5 +1867,5 @@
   "timezone": "",
   "title": "Reliability Scorecard",
   "uid": "lfqKXMfmz",
-  "version": 102
+  "version": 116
 }

@@ -53,7 +53,7 @@ dependencies {
       "org.apache.commons:commons-lang3:3.7",
       "org.ocpsoft.prettytime:prettytime:4.0.2.Final",
       "com.google.guava:guava:20.0",
-      "org.slf4j:slf4j-api:1.7.25",
+      "org.slf4j:slf4j-api:1.7.25"
     )
     
     if (rootProject.hasProperty("localApiClient") && "$rootProject.localApiClient" == "true") {
@@ -67,8 +67,8 @@ dependencies {
       println "Compiling overops as influx with maven api-client"
 
       compile (
-        "com.takipi:api-client:2.10.0",
-        "com.takipi:api-client-util:2.10.0",
+        "com.takipi:api-client:2.11.0",
+        "com.takipi:api-client-util:2.11.0",
       )
     }
 

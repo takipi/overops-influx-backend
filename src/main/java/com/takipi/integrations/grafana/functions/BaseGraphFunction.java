@@ -12,6 +12,7 @@ import java.util.concurrent.Callable;
 
 import org.joda.time.DateTime;
 
+import com.google.common.base.Objects;
 import com.takipi.api.client.ApiClient;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
@@ -31,6 +32,18 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		protected GraphData(String key) {
 			this.key = key;
 			this.points = new TreeMap<Long, Long>();
+		}
+		
+		@Override
+		public boolean equals(Object obj)
+		{
+			return Objects.equal(key, ((GraphData)obj).key);
+		}
+		
+		@Override
+		public int hashCode()
+		{
+			return key.hashCode();
 		}
 	}
 	
@@ -73,8 +86,8 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 			beforeCall();
 			
 			try {
-				List<GraphSeries> serviceSeries = processServiceGraph(serviceId, viewId, viewName,
-						request, timeSpan, serviceIds, pointsWanted);
+				List<GraphSeries> serviceSeries = processServiceGraph(serviceIds, serviceId, viewId, viewName,
+						request, timeSpan, pointsWanted);
 	
 				return new AsyncResult(serviceSeries);
 			}
@@ -137,20 +150,32 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		return result;
 	}
 	
-	protected List<Series> limitGraphSeries(List<GraphSeries> series, int limit) {
+	protected List<Series> limitSeries(List<GraphSeries> series, int limit) {
+		
+		List<GraphSeries> limitedGraphSeries = limitGraphSeries(series, limit);
+		List<Series> result = new ArrayList<Series>(limitedGraphSeries.size());
+		
+		for (GraphSeries graphSeries : limitedGraphSeries) {
+			result.add(graphSeries.series);
+		}
+		
+		return result;
+	}
+	
+	protected List<GraphSeries> limitGraphSeries(List<GraphSeries> series, int limit) {
 		
 		List<GraphSeries> sorted = new ArrayList<GraphSeries>(series);
 		
 		sortSeriesByVolume(sorted);
 		
-		List<Series> result = new ArrayList<Series>();
+		List<GraphSeries> result = new ArrayList<GraphSeries>();
 		
 		for (int i = 0; i < Math.min(limit, sorted.size()); i++) {
 			
 			GraphSeries graphSeries = sorted.get(i);
 			
 			if (graphSeries.volume > 0) {
-				result.add(graphSeries.series);
+				result.add(graphSeries);
 			}
 		}
 		return result;
@@ -210,8 +235,8 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		return result;
 	}
 
-	protected abstract List<GraphSeries> processServiceGraph(String serviceId, String viewId, String viewName,
-			BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds, int pointsWanted);
+	protected abstract List<GraphSeries> processServiceGraph(Collection<String> serviceIds, String serviceId, 
+			String viewId, String viewName, BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, int pointsWanted);
 
 	protected Map<String, String> getViews(String serviceId, BaseGraphInput input) {
 		String viewId = getViewId(serviceId, input.view);

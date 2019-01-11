@@ -27,7 +27,7 @@ import com.takipi.integrations.grafana.functions.GrafanaFunction;
  *
  * 			https://drive.google.com/file/d/1A7eGLJIXvfUMHgvAcGEiY8uGTN1Xcn8X/view?usp=sharing
  */
-public class TransactionsListIput extends BaseGraphInput {
+public class TransactionsListInput extends BaseGraphInput {
 	
 	/**
 	 * Control whether to return a list of rows or a single stat value
@@ -69,13 +69,6 @@ public class TransactionsListIput extends BaseGraphInput {
 	public static final String SLOW_STATE = "slow_state";
 	
 	/**
-	 * The percentage of transaction calls in the current time range that have exceeded the 
-	 * its avg during the baseline preiod + the std devivation factor specified in the Settings
-	 * dashboard
-	 */
-	public static final String SLOW_DELTA = "slow_delta";
-	
-	/**
 	 * The ratio between calls into the current transaction (invocations) and the volume of errors
 	 * of the type defined in the Settings dashboard a "transaction failure types".
 	 */
@@ -85,6 +78,11 @@ public class TransactionsListIput extends BaseGraphInput {
 	 * the volume of errors of the type defined in the Settings dashboard a "transaction failure types".
 	 */
 	public static final String ERRORS = "errors";
+	
+	/**
+	 * a text description of the volume of errors of the type defined in the Settings dashboard a "transaction failure types".
+	 */
+	public static final String ERRORS_DESC = "error_description";
 	
 	/**
 	 * A string describing the change in performance between the current time range and the baseline time frange.
@@ -105,7 +103,7 @@ public class TransactionsListIput extends BaseGraphInput {
 	 * The number of calls into the selected transaction in human readable format
 	 */
 	public static final String ACTIVE_CALLS = "active_calls";
-		
+	
 	/**
 	 * A comma delimited array defining which fields to add for each returned row. If no value
 	 * is specified, all fields are added.
@@ -128,8 +126,14 @@ public class TransactionsListIput extends BaseGraphInput {
 	 */
 	public String performanceStates;
 	
+	/**
+	 * The number of graph points to use when calculating event failures. If 0, the 
+	 * pointsWanted field will be used.
+	 */
+	public int eventPointsWanted;
+	
 	public static final List<String> FIELDS = Arrays.asList(new String[] { 
-			LINK, TRANSACTION, TOTAL, AVG_RESPONSE, BASELINE_AVG, BASELINE_CALLS, ACTIVE_CALLS, SLOW_STATE, SLOW_DELTA,
+			LINK, TRANSACTION, TOTAL, AVG_RESPONSE, BASELINE_AVG, BASELINE_CALLS, ACTIVE_CALLS, SLOW_STATE,
 			DELTA_DESC, ERROR_RATE, ERRORS, ViewInput.TIME_RANGE });
 	
 	

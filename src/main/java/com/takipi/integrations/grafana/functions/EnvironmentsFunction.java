@@ -54,7 +54,14 @@ public class EnvironmentsFunction extends VariableFunction {
 		List<SummarizedService> services = ClientUtil.getEnvironments(apiClient);
 
 		for (SummarizedService service : services) {
-			appender.append(getServiceValue(service.name, service.id));
+			
+			String cleanServiceName = service.name.replace(ARRAY_SEPERATOR_RAW, "").
+				replace(GRAFANA_SEPERATOR_RAW, "").replace(SERVICE_SEPERATOR, "");
+			
+			String value = getServiceValue(cleanServiceName, service.id);
+			
+			appender.append(value);
+			
 		}
 	}
 }

@@ -1,16 +1,18 @@
 package com.takipi.integrations.grafana.functions;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.joda.time.DateTime;
 
+import com.google.common.base.Objects;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.transaction.Stats;
@@ -30,7 +32,7 @@ import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
-import com.takipi.integrations.grafana.input.TransactionsListIput;
+import com.takipi.integrations.grafana.input.TransactionsListInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
@@ -40,8 +42,8 @@ import com.takipi.integrations.grafana.util.NumberUtil;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionsListFunction extends GrafanaFunction {
-	
-	private static final DecimalFormat df = new DecimalFormat("#.##");
+		
+	private static final String MISSING_TIMER_LINK = "missing-timer-event";
 	
 	public static class Factory implements FunctionFactory {
 
@@ -52,7 +54,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 
 		@Override
 		public Class<?> getInputClass() {
-			return TransactionsListIput.class;
+			return TransactionsListInput.class;
 		}
 
 		@Override
@@ -61,27 +63,148 @@ public class TransactionsListFunction extends GrafanaFunction {
 		}
 	}
 
-	public TransactionsListFunction(ApiClient apiClient) {
-		super(apiClient);
+	public static class TransactionKey {
+		
+		public String className;
+		public String methodName;
+		
+		public static TransactionKey of(String className, String methodName) {
+			
+			TransactionKey result = new TransactionKey();
+			result.className = className;
+			result.methodName = methodName;
+			
+			return result;
+		}
+		
+		
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (!(obj instanceof TransactionKey)) {
+				return false;
+			}
+			
+			TransactionKey other = (TransactionKey)obj;
+			
+			if (!Objects.equal(className, other.className)) {
+				return false;
+			}
+			
+			if (!Objects.equal(methodName, other.methodName)) {
+				return false;
+			}
+			
+			return true;
+		}
+		
+		@Override
+		public int hashCode()
+		{
+			if (methodName == null) {
+				return className.hashCode();
+			}
+			
+			return className.hashCode() ^ methodName.hashCode();
+		}
+	}
+	
+	public static class TransactionDataResult {
+		
+		public Map<TransactionKey, TransactionData> items;
+		public RegressionInput regressionInput;
+		public RegressionWindow regressionWindow;
 	}
 
 	protected class TransactionData {
+		protected Stats stats;
 		protected TransactionGraph graph;
 		protected TransactionGraph baselineGraph;
 		protected long timersHits;
 		protected long errorsHits;
+		protected List<EventResult> errors;
 		protected EventResult currTimer;
 		protected PerformanceState state;
 		protected double score;
 		protected double baselineAvg;
 		protected long baselineInvocations;
+	}
+	
+	public TransactionsListFunction(ApiClient apiClient) {
+		super(apiClient);
+	}
+	
+	private String getTransactionErrorDesc(TransactionData transactionData) {
+		
+		if (transactionData.errorsHits == 0) {
+			return "No errors";
+		}
+		
+		StringBuilder result = new StringBuilder();
+		
+		result.append(transactionData.errorsHits);
+		result.append(" errors in ");
+		
+		int size = Math.min(transactionData.errors.size(), 3);
+		
+		transactionData.errors.sort(new Comparator<EventResult>()
+		{
 
+			@Override
+			public int compare(EventResult o1, EventResult o2)
+			{
+				return (int)(o2.stats.hits - o1.stats.hits);
+			}
+		});
+		
+		Map<String, Long> values = new LinkedHashMap<String, Long>(size); 
+		
+		
+		for (int i = 0; i < size; i++) {
+			EventResult error = transactionData.errors.get(i);
+			String key = getSimpleClassName(error.error_location.class_name);
+			
+			Long existing = values.get(key);
+			
+			if (existing != null) {
+				values.put(key, existing.longValue() + error.stats.hits);
+			} else {
+				values.put(key, error.stats.hits);
+			}
+			
+		}
+		
+		int index = 0;
+		
+		for (Map.Entry<String, Long> entry : values.entrySet()) {
+			
+			result.append(entry.getKey());
+			
+			result.append("(");
+			result.append(entry.getValue());
+			result.append(")");
+			
+			if (index < values.size() - 1) {
+				result.append(", ");
+			}
+			
+			index++;
+		}
+		
+		if (transactionData.errors.size() - size > 0) {
+			result.append(" and ");
+			result.append(transactionData.errors.size() - size );
+			result.append(" more locations");
+		}
+			
+		return result.toString();	
 	}
 
 	private List<List<Object>> processServiceTransactions(String serviceId, Pair<DateTime, DateTime> timeSpan,
-			TransactionsListIput input, List<String> fields, Collection<PerformanceState> states) {
+			TransactionsListInput input, List<String> fields, Collection<PerformanceState> states) {
 
-		Map<String, TransactionData> transactions = getTransactionDatas(serviceId, timeSpan, input, true);
+		TransactionDataResult transactions = getTransactionDatas(serviceId, timeSpan, 
+			input, true, input.eventPointsWanted);
 		
 		if (transactions == null) {
 			return Collections.emptyList();
@@ -90,19 +213,37 @@ public class TransactionsListFunction extends GrafanaFunction {
 		Collection<TransactionData> targets;
 		
 		if (input.performanceStates != null) {
-			List<TransactionData> matchingTransactions = new ArrayList<TransactionData>(transactions.size());
+			List<TransactionData> matchingTransactions = new ArrayList<TransactionData>(transactions.items.size());
 			
-			for (TransactionData transactionData : transactions.values()) {
+			for (TransactionData transactionData : transactions.items.values()) {
 				if (states.contains(transactionData.state)) {
 					matchingTransactions.add(transactionData);
 				}
 			}
 			targets = matchingTransactions;
 		} else {
-			targets = transactions.values();
+			targets = transactions.items.values();
 		}	
+		
+		List<TransactionData> sorted = new ArrayList<TransactionData>(targets);
+		
+		sorted.sort(new Comparator<TransactionData>()
+		{
 
-		List<List<Object>> result = formatResultObjects(targets, serviceId, timeSpan, input, fields);
+			@Override
+			public int compare(TransactionData o1, TransactionData o2)
+			{
+				int diff = o2.state.ordinal() - o1.state.ordinal();
+				
+				if (diff != 0) {
+					return diff;
+				}
+				
+				return (int)(o2.stats.invocations - o1.stats.invocations);
+			}
+		});
+
+		List<List<Object>> result = formatResultObjects(sorted, serviceId, timeSpan, input, fields);
 		
 		return result;	
 	}
@@ -141,41 +282,51 @@ public class TransactionsListFunction extends GrafanaFunction {
 		return result;
 	}
 	
-	private String getSlowdownDesc(TransactionData transactionData, SlowdownSettings slowdownSettings ) {
-		
-		if (transactionData.baselineAvg == 0) {
-			return "";
-		}
-		
-		if (transactionData.score == 0) {
-			return "";
-		}
-		
-		Stats stats = TransactionUtil.aggregateGraph(transactionData.baselineGraph);
-		double baseline = stats.avg_time_std_deviation * slowdownSettings.std_dev_factor + transactionData.baselineAvg;
+	private String getSlowdownDesc(TransactionData transactionData, 
+		SlowdownSettings slowdownSettings, Stats stats) {
+				
+		Stats baselineStats = TransactionUtil.aggregateGraph(transactionData.baselineGraph);
+		double baseline = baselineStats.avg_time_std_deviation * slowdownSettings.std_dev_factor + transactionData.baselineAvg;
 		
 		StringBuilder result = new StringBuilder();
 		
-		result.append((int)(transactionData.score));
-		result.append("% of calls took more than baseline avg + ");
-		result.append(slowdownSettings.std_dev_factor);
-		result.append("x std dev (");
-		result.append(df.format(baseline));
-		result.append("ms)");
+		boolean isSlowdown = (transactionData.state == PerformanceState.CRITICAL) ||
+				(transactionData.state == PerformanceState.SLOWING);
 		
-		if ((transactionData.state == PerformanceState.CRITICAL) ||
-			(transactionData.state == PerformanceState.SLOWING)) {
-			result.append(" and avg response > baseline avg response by ");
+		if (isSlowdown) {
+			
+			if  (transactionData.state == PerformanceState.CRITICAL) {
+				result.append("Slow: ");		
+			} else {
+				result.append("Slowing: ");		
+			}
+			
+			result.append("(");	
+			result.append((int)(transactionData.score));
+			result.append("% of calls > baseline avg ");
+			result.append((int)(baselineStats.avg_time));
+			result.append("ms + ");
+			result.append(slowdownSettings.std_dev_factor);
+			result.append("x stdDev = ");
+			result.append((int)(baseline));
+			result.append("ms");
+			result.append(") AND (avg response ");
+			result.append((int)(stats.avg_time));
+			result.append("ms - ");
+			result.append((int)(baselineStats.avg_time));
+			result.append("ms baseline > ");
 			result.append(slowdownSettings.min_delta_threshold);
-			result.append("ms");			
+			result.append("ms threshold)");			
+		} else {
+			result.append("OK: Avg response falls within baseline tolerance");
 		}
-
+	
 		return result.toString();
 	}
 	
 	private List<List<Object>> formatResultObjects(Collection<TransactionData> transactions, 
 			String serviceId, Pair<DateTime, DateTime> timeSpan,
-			TransactionsListIput input, List<String> fields) {
+			TransactionsListInput input, List<String> fields) {
 		
 		SlowdownSettings slowdownSettings = GrafanaSettings.getData(apiClient, serviceId).slowdown;
 		
@@ -184,12 +335,11 @@ public class TransactionsListFunction extends GrafanaFunction {
 		for (TransactionData transactionData : transactions) {
 
 			String name = getTransactionMessage(transactionData);
-			Stats stats = getTrasnactionGraphStats(transactionData.graph);
-					
+			
 			double errorRate;
 			
-			if (stats.invocations > 0) {
-				errorRate = (double)transactionData.errorsHits / (double)stats.invocations;
+			if (transactionData.stats.invocations > 0) {
+				errorRate = (double)transactionData.errorsHits / (double)transactionData.stats.invocations;
 			} else {
 				errorRate = 0;
 			}
@@ -200,28 +350,29 @@ public class TransactionsListFunction extends GrafanaFunction {
 				link = EventLinkEncoder.encodeLink(apiClient, serviceId, input, transactionData.currTimer, 
 					timeSpan.getFirst(), timeSpan.getSecond());
 			} else {
-				link = null;
+				link = MISSING_TIMER_LINK;
 			}
 			
 			Pair<Object, Object> fromTo = getTimeFilterPair(timeSpan, input.timeFilter);
-			String timeRange = TimeUtil.getTimeUnit(input.timeFilter); 
-
-			int scoreValue = getStateValue(transactionData.state);
-		
+			String timeRange = TimeUtil.getTimeRange(input.timeFilter); 
+			
+			String description = getSlowdownDesc(transactionData, slowdownSettings, transactionData.stats);
+			
 			Object[] object = new Object[fields.size()];
 			
-			setOutputObjectField(object, fields, TransactionsListIput.LINK, link);
-			setOutputObjectField(object, fields, TransactionsListIput.TRANSACTION, name);
-			setOutputObjectField(object, fields, TransactionsListIput.TOTAL, stats.invocations);
-			setOutputObjectField(object, fields, TransactionsListIput.AVG_RESPONSE, stats.avg_time);
-			setOutputObjectField(object, fields, TransactionsListIput. BASELINE_AVG, transactionData.baselineAvg);
-			setOutputObjectField(object, fields, TransactionsListIput.BASELINE_CALLS, NumberUtil.format(transactionData.baselineInvocations));
-			setOutputObjectField(object, fields, TransactionsListIput.ACTIVE_CALLS, NumberUtil.format(stats.invocations));
-			setOutputObjectField(object, fields, TransactionsListIput.SLOW_STATE, getStateValue(transactionData.state));
-			setOutputObjectField(object, fields, TransactionsListIput.SLOW_DELTA, scoreValue);
-			setOutputObjectField(object, fields, TransactionsListIput.DELTA_DESC, getSlowdownDesc(transactionData, slowdownSettings));
-			setOutputObjectField(object, fields, TransactionsListIput.ERROR_RATE, errorRate);
-			setOutputObjectField(object, fields, TransactionsListIput.ERRORS, transactionData.errorsHits);
+			setOutputObjectField(object, fields, TransactionsListInput.LINK, link);
+			setOutputObjectField(object, fields, TransactionsListInput.TRANSACTION, name);
+			setOutputObjectField(object, fields, TransactionsListInput.TOTAL, transactionData.stats.invocations);
+			setOutputObjectField(object, fields, TransactionsListInput.AVG_RESPONSE, transactionData.stats.avg_time);
+			setOutputObjectField(object, fields, TransactionsListInput. BASELINE_AVG, transactionData.baselineAvg);
+			setOutputObjectField(object, fields, TransactionsListInput.BASELINE_CALLS, NumberUtil.format(transactionData.baselineInvocations));
+			setOutputObjectField(object, fields, TransactionsListInput.ACTIVE_CALLS, NumberUtil.format(transactionData.stats.invocations));
+			setOutputObjectField(object, fields, TransactionsListInput.SLOW_STATE, getStateValue(transactionData.state));
+			setOutputObjectField(object, fields, TransactionsListInput.DELTA_DESC, description);
+			setOutputObjectField(object, fields, TransactionsListInput.ERROR_RATE, errorRate);
+			setOutputObjectField(object, fields, TransactionsListInput.ERRORS, transactionData.errorsHits);
+			setOutputObjectField(object, fields, TransactionsListInput.ERRORS_DESC, getTransactionErrorDesc(transactionData));
+
 			setOutputObjectField(object, fields, ViewInput.FROM, fromTo.getFirst());
 			setOutputObjectField(object, fields, ViewInput.TO, fromTo.getSecond());
 			setOutputObjectField(object, fields, ViewInput.TIME_RANGE, timeRange);
@@ -261,34 +412,34 @@ public class TransactionsListFunction extends GrafanaFunction {
 		}
 	}
 	
-	private TransactionData getTransactionData(Map<String, TransactionData> transactions, EventResult event) {
+	private TransactionData getEventTransactionData(Map<TransactionKey, TransactionData> transactions, EventResult event) {
 		
-		TransactionData result = transactions.get(event.entry_point.class_name);
+		TransactionKey classOnlyKey = TransactionKey.of(event.entry_point.class_name, null);
+		TransactionData result = transactions.get(classOnlyKey);
 
 		if (result == null) {
 			
-			result = transactions.get(toTransactionName(event.entry_point));
+			TransactionKey classAndMethodKey = TransactionKey.of(event.entry_point.class_name, 
+				event.entry_point.method_name);
 			
-			if (result == null) {
-				return null;
-			}
+			result = transactions.get(classAndMethodKey);
 		}
 		
 		return result;
 	}
 	
-	public void updateTransactionPerformance(String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
-			BaseEventVolumeInput input, Map<String, TransactionData> transactionDatas) {
+	private Pair<RegressionInput, RegressionWindow> updateTransactionPerformance(String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
+			BaseEventVolumeInput input, Map<TransactionKey, TransactionData> transactionDatas) {
 	
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
-		Pair<RegressionInput, RegressionWindow> inputPair = regressionFunction.getRegressionInput(serviceId, viewId, input, timeSpan);
+		Pair<RegressionInput, RegressionWindow> result = regressionFunction.getRegressionInput(serviceId, viewId, input, timeSpan);
 		
-		if (inputPair == null) {
-			return;
+		if (result == null) {
+			return null;
 		}
 		
-		RegressionInput regressionInput = inputPair.getFirst();
-		RegressionWindow regressionWindow = inputPair.getSecond();
+		RegressionInput regressionInput = result.getFirst();
+		RegressionWindow regressionWindow = result.getSecond();
 		
 		DateTime baselineStart = regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan);
 		
@@ -336,7 +487,9 @@ public class TransactionsListFunction extends GrafanaFunction {
 			String transactionName = entry.getKey().name;
 			PerformanceScore performanceScore = entry.getValue();
 			
-			TransactionData transactionData = transactionDatas.get(toQualified(transactionName));
+			Pair<String, String> graphPair = getTransactionNameAndMethod(transactionName, true);
+			TransactionKey key = TransactionKey.of(graphPair.getFirst(), graphPair.getSecond());
+			TransactionData transactionData = transactionDatas.get(key);
 			
 			if (transactionData == null) {
 				continue;
@@ -344,7 +497,8 @@ public class TransactionsListFunction extends GrafanaFunction {
 			
 			transactionData.state = performanceScore.state;
 			transactionData.score = performanceScore.score;
-						
+			transactionData.stats = getTrasnactionGraphStats(transactionData.graph);
+
 			transactionData.baselineGraph = baselineGraphsMap.get(transactionName);
 		
 			if (transactionData.baselineGraph != null) {
@@ -356,11 +510,13 @@ public class TransactionsListFunction extends GrafanaFunction {
 				}
 			}
 		}
+		
+		return result;
 	}
 	
 	
 	private void updateTransactionEvents(String serviceId, Pair<DateTime, DateTime> timeSpan,
-			BaseEventVolumeInput input, Map<String, TransactionData> transactions) 
+			BaseEventVolumeInput input, Map<TransactionKey, TransactionData> transactions) 
 	{
 		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, timeSpan.getFirst(),
 			timeSpan.getSecond(), VolumeType.hits, input.pointsWanted);
@@ -377,12 +533,12 @@ public class TransactionsListFunction extends GrafanaFunction {
 				continue;
 			}
 				
-			TransactionData transaction = getTransactionData(transactions, event);
+			TransactionData transaction = getEventTransactionData(transactions, event);
 			
 			if (transaction == null) {
 				continue;
 			}
-
+			
 			if (event.type.equals(TIMER)) {
 				
 				transaction.timersHits += event.stats.hits;
@@ -407,60 +563,88 @@ public class TransactionsListFunction extends GrafanaFunction {
 				}
 				
 				transaction.errorsHits += event.stats.hits;
+				
+				if (transaction.errors == null) {
+					transaction.errors = new ArrayList<EventResult>();
+				}
+				
+				transaction.errors.add(event);
 			}
 		}
 	}
 	
-	public Map<String, TransactionData> getTransactionDatas(String serviceId, Pair<DateTime, DateTime> timeSpan,
-			BaseEventVolumeInput input, boolean updateEvents) {
+	public TransactionDataResult getTransactionDatas(String serviceId, Pair<DateTime, DateTime> timeSpan,
+			BaseEventVolumeInput input, boolean updateEvents, int eventPoints) {
 		
 		String viewId = getViewId(serviceId, input.view);
 		
 		if (viewId == null) {
-			return Collections.emptyMap();
+			return null;
 		}
 		
 		Collection<TransactionGraph> transactionGraphs = getTransactionGraphs(input,
 				serviceId, viewId, timeSpan, input.getSearchText(), input.pointsWanted, 0, 0);
 		
-		return getTransactionDatas(transactionGraphs, serviceId, viewId, timeSpan, input, updateEvents);
+		return getTransactionDatas(transactionGraphs, serviceId, viewId, timeSpan,
+			input, updateEvents, eventPoints);
 	}
-	
-	public Map<String, TransactionData> getTransactionDatas(Collection<TransactionGraph> transactionGraphs,
+			
+	public TransactionDataResult getTransactionDatas(Collection<TransactionGraph> transactionGraphs,
 			String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
-			BaseEventVolumeInput input, boolean updateEvents) {
+			BaseEventVolumeInput input, boolean updateEvents, int eventPoints) {
 				
 		if (transactionGraphs == null) {
-			return Collections.emptyMap();
+			return null;
 		}
+		
+		TransactionDataResult result = new TransactionDataResult();
+		result.items = new HashMap<TransactionKey, TransactionData>();
 				
-		Map<String, TransactionData> result = new HashMap<String, TransactionData>();
-
 		for (TransactionGraph transactionGraph :transactionGraphs) {	
 			TransactionData transactionData = new TransactionData();	
 			transactionData.graph = transactionGraph;
-			result.put(toQualified(transactionGraph.name), transactionData);
+			Pair<String, String> pair = getTransactionNameAndMethod(transactionGraph.name, true);
+			TransactionKey key = TransactionKey.of(pair.getFirst(), pair.getSecond());
+			result.items.put(key, transactionData);
 		}
 		
 		if (updateEvents) {
-			updateTransactionEvents(serviceId, timeSpan, input, result);
+			
+			BaseEventVolumeInput eventInput;
+			
+			if (eventPoints != 0) {
+				String json = new Gson().toJson(input);
+				eventInput = new Gson().fromJson(json, input.getClass()); 
+				eventInput.pointsWanted = eventPoints;
+			} else {
+				eventInput = input;
+			}
+			
+			updateTransactionEvents(serviceId, timeSpan, eventInput, result.items);
 		}
 		
+		Pair<RegressionInput, RegressionWindow> regPair = updateTransactionPerformance(serviceId, viewId, timeSpan, input, result.items);	
 		
-		updateTransactionPerformance(serviceId, viewId, timeSpan, input, result);	
+		result.regressionInput = regPair.getFirst();
+		result.regressionWindow = regPair.getSecond();
 		
 		return result;
 
 	}
 	
-	private int getServiceSingleStat(String serviceId, TransactionsListIput input, 
+	private int getServiceSingleStat(String serviceId, TransactionsListInput input, 
 		Pair<DateTime, DateTime> timeSpan, Collection<PerformanceState> states)
 	{	
+		TransactionDataResult transactionDataResult = getTransactionDatas(serviceId,
+			timeSpan, input, false, 0);
+
+		if (transactionDataResult == null) {
+			return 0;
+		}
+		
 		int result = 0;
-
-		Map<String, TransactionData> transactionDatas = getTransactionDatas(serviceId, timeSpan, input, true);
-
-		for (TransactionData transactionData : transactionDatas.values()) {
+	
+		for (TransactionData transactionData : transactionDataResult.items.values()) {
 			
 			if (states.contains(transactionData.state)) {
 				result++;
@@ -471,7 +655,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 	}
 	
 	private int getSingleStat(Collection<String> serviceIds, 
-		TransactionsListIput input, Pair<DateTime, DateTime> timeSpan,
+		TransactionsListInput input, Pair<DateTime, DateTime> timeSpan,
 		Collection<PerformanceState> states)
 	{
 		
@@ -485,14 +669,14 @@ public class TransactionsListFunction extends GrafanaFunction {
 		return result;
 	}
 	
-	private List<Series> processSingleStat(TransactionsListIput input, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds) {
+	private List<Series> processSingleStat(TransactionsListInput input, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds) {
 				
 		if (CollectionUtil.safeIsEmpty(serviceIds))
 		{
 			return Collections.emptyList();
 		}
 						
-		Collection<PerformanceState> performanceStates = TransactionsListIput.getStates(input.performanceStates);
+		Collection<PerformanceState> performanceStates = TransactionsListInput.getStates(input.performanceStates);
 		
 		Object singleStatText;
 		int singleStatValue = getSingleStat(serviceIds, input, timeSpan, performanceStates);
@@ -517,7 +701,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 		return createSingleStatSeries(timeSpan, singleStatText);
 	}
 
-	private List<Series> processGrid(TransactionsListIput input, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds) {
+	private List<Series> processGrid(TransactionsListInput input, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds) {
 		
 		Series series = new Series();
 		
@@ -526,11 +710,11 @@ public class TransactionsListFunction extends GrafanaFunction {
 		if (input.fields != null) {
 			series.columns = Arrays.asList(input.fields.split(ARRAY_SEPERATOR));
 		} else {
-			series.columns = TransactionsListIput.FIELDS;
+			series.columns = TransactionsListInput.FIELDS;
 		}
 		series.values = new ArrayList<List<Object>>();
 
-		Collection<PerformanceState> performanceStates = TransactionsListIput.getStates(input.performanceStates);
+		Collection<PerformanceState> performanceStates = TransactionsListInput.getStates(input.performanceStates);
 		
 		for (String serviceId : serviceIds) {
 			List<List<Object>> serviceEvents = processServiceTransactions(serviceId, 
@@ -545,11 +729,11 @@ public class TransactionsListFunction extends GrafanaFunction {
 	public List<Series> process(FunctionInput functionInput)
 	{
 		
-		if (!(functionInput instanceof TransactionsListIput)) {
+		if (!(functionInput instanceof TransactionsListInput)) {
 			throw new IllegalArgumentException("functionInput");
 		}
 
-		TransactionsListIput input = (TransactionsListIput) functionInput;
+		TransactionsListInput input = (TransactionsListInput) functionInput;
 		
 		if (input.renderMode == null)
 		{
