@@ -21,12 +21,12 @@ public abstract class LimitGraphFunction extends GraphFunction {
 		super(apiClient);
 	}
 	
-	protected void sortGraphData(List<GraphData> graphsData) {
+	protected <T extends GraphData> void sortGraphData(List<T> graphsData) {
 				
-		graphsData.sort(new Comparator<GraphData>() {
+		graphsData.sort(new Comparator<T>() {
 
 			@Override
-			public int compare(GraphData o1, GraphData o2) {
+			public int compare(T o1, T o2) {
 				return (int)(o2.volume - o1.volume);
 			}
 		});
@@ -37,6 +37,27 @@ public abstract class LimitGraphFunction extends GraphFunction {
 		List<GraphData> sorted = new ArrayList<GraphData>(graphsData);
 		sortGraphData(sorted);
 		return sorted.subList(0, Math.min(graphsData.size(), limit));
+	}
+
+	protected <T extends GraphData> List<T> getLimitedPercentageGraphData(Collection<T> graphsData, int limit) {
+		
+		List<T> sorted = new ArrayList<T>(graphsData);
+		sortGraphData(sorted);
+		long totalVol = 0;
+		for (GraphData gd: graphsData) {
+			totalVol += gd.volume;
+		}
+		long targetVol = Math.min(100, Math.max(0, limit)) * totalVol / 100;
+		long resultVol=0;
+		int i = 0;
+		while (resultVol < targetVol && i < graphsData.size()) {
+			resultVol += sorted.get(i).volume;
+			if (resultVol >= targetVol)
+				break;
+			else
+				++i;
+		}
+		return sorted.subList(0, Math.min(graphsData.size(), ++i));
 	}
 	
 	protected abstract List<GraphSeries> processGraphSeries(String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,

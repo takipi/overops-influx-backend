@@ -269,6 +269,7 @@ public class FunctionParser {
 		
 		//cost functions
 		registerFunction(new CostCalculatorFunction.Factory());
+		registerFunction(new CostSplitGraphFunction.Factory());
 
 	}
 }

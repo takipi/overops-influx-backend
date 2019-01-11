@@ -312,6 +312,32 @@ public abstract class GrafanaFunction
 		return result;
 	}
 	
+	public static String getTypeAndSimpleClassName(String type, String className, String methodName)
+	{
+		String result="";
+		
+		if (type != null && !type.isEmpty()) {
+				result += type;
+		}
+		result += QUALIFIED_DELIM + toQualified(className) + QUALIFIED_DELIM + methodName;
+		return result;
+	}
+	
+	public static String getTypeAbbr(String type)
+	{
+		String result="";
+		
+		if (type != null && !type.trim().isEmpty()) {
+			String typeAbbrv = TYPES_MAP.get(type.trim());
+			if (typeAbbrv != null && !typeAbbrv.isEmpty()) {
+				result = typeAbbrv;
+			} else {
+				result = type.trim();
+			}
+		}
+		return result;
+	}
+
 	protected void validateResponse(Response<?> response)
 	{
 		if ((response.isBadResponse()) || (response.data == null))

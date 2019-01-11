@@ -245,10 +245,10 @@ public class CostCalculatorFunction extends GrafanaFunction {
 			Double costPerHit = .0;
 			String type = (eventData.event.type == null) ? "" : eventData.event.type.trim();
 			
-			if (input.costMatrix.containsKey(type)) {
-				costPerHit = input.costMatrix.get(type);
-			} else if (input.costMatrix.containsKey("")) {
-				costPerHit = input.costMatrix.get("");
+			if (input.costData.costMatrix.containsKey(type)) {
+				costPerHit = input.costData.costMatrix.get(type);
+			} else if (input.costData.costMatrix.containsKey("")) {
+				costPerHit = input.costData.costMatrix.get("");
 			} 
 
 			if (costPerHit == null) {
@@ -537,7 +537,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 		List<String> col = getColumns(input.fields);
 		int costFieldNr = col.indexOf("Cost");
 		if (costFieldNr > -1  && costFieldNr < outputObject.size()  && outputObject.get(costFieldNr) instanceof Double)
-			if ((double) outputObject.get(costFieldNr) <= input.costHigherThan) {
+			if ((double) outputObject.get(costFieldNr) <= input.costData.costHigherThan) {
 				return true;
 			}
 		
