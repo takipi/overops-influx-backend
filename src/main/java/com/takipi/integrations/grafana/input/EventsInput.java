@@ -39,4 +39,13 @@ public class EventsInput extends BaseEventVolumeInput {
 	 * An optional value controlling the max string length of the message and typeMessage columns.
 	 */
 	public int maxColumnLength;
+	
+	/**
+	 * Additional available fields
+	 */
+	public static final String LINK = "link";
+	public static final String TYPE_MESSAGE = "typeMessage";
+	public static final String JIRA_STATE = "jira_state";
+	public static final String RATE = "rate";
+	public static final String RATE_DESC = "rate_desc";
 }

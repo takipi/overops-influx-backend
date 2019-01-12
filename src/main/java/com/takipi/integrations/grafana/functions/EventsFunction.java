@@ -18,6 +18,7 @@ import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.Location;
 import com.takipi.api.client.data.event.Stats;
 import com.takipi.api.client.result.event.EventResult;
+import com.takipi.api.client.util.regression.RegressionStringUtil;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
@@ -36,13 +37,9 @@ public class EventsFunction extends GrafanaFunction {
 	private static final String STATS = Stats.class.getSimpleName().toLowerCase();
 	private static final String JIRA_LABEL = "JIRA";
 
-	protected static final String LINK = "link";
-	protected static final String RATE = "rate";
 	protected static final String FIRST_SEEN = "first_seen";
 	protected static final String LAST_SEEN = "last_seen";
 	protected static final String MESSAGE = "message";
-	protected static final String TYPE_MESSAGE = "typeMessage";
-	protected static final String JIRA_STATE = "jira_state";
 	protected static final String JIRA_ISSUE_URL = "jira_issue_url";
 	
 	private static final int MAX_JIRA_BATCH_SIZE = 10;
@@ -455,18 +452,33 @@ public class EventsFunction extends GrafanaFunction {
 		}
 
 	}
+	
+	protected static class RateDescFormatter extends FieldFormatter {
+
+		@Override
+		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
+				Pair<DateTime, DateTime> timeSpan) {
+
+			return RegressionStringUtil.getEventRate(eventData.event, true);
+		}
+
+	}
 
 	protected FieldFormatter getFormatter(String column) {
 		
-		if (column.equals(LINK)) {
+		if (column.equals(EventsInput.LINK)) {
 			return new LinkFormatter();
 		}
 
-		if (column.equals(RATE)) {
+		if (column.equals(EventsInput.RATE)) {
 			return new RateFormatter();
 		}
 		
-		if (column.equals(JIRA_STATE)) {
+		if (column.equals(EventsInput.RATE_DESC)) {
+			return new RateDescFormatter();
+		}	
+		
+		if (column.equals(EventsInput.JIRA_STATE)) {
 			return new JiraStateFormatter();
 		}
 		
@@ -474,7 +486,7 @@ public class EventsFunction extends GrafanaFunction {
 			return new MessageFormatter();
 		}
 		
-		if (column.equals(TYPE_MESSAGE)) {
+		if (column.equals(EventsInput.TYPE_MESSAGE)) {
 			return new TypeMessageFormatter();
 		}
 		
@@ -733,7 +745,7 @@ public class EventsFunction extends GrafanaFunction {
 		List<List<Object>> result = new ArrayList<List<Object>>(mergedDatas.size());
 			
 		if ((formatters.containsKey(JIRA_ISSUE_URL)) 
-		|| (formatters.containsKey(JIRA_STATE))) {
+		|| (formatters.containsKey(EventsInput.JIRA_STATE))) {
 			updateJiraUrls(serviceId, eventDatas);
 		}
 		

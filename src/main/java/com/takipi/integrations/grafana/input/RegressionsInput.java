@@ -100,6 +100,18 @@ public class RegressionsInput extends EventsInput
 	 */
 	public String singleStatFormat;
 	
+	/**
+	 * Additional fields supported by this functions
+	 */
+	public static String REG_DELTA = "regDelta";
+	
+	public static String REGRESSION = "regression";
+	
+	public static String SEVERITY = "severity";
+	
+	public static String DESCRIPTION = "description";
+	
+	
 	public Collection<RegressionType> getRegressionTypes()
 	{
 		

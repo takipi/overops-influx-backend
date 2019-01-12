@@ -78,14 +78,14 @@ public class FunctionParser {
 			throw new IllegalArgumentException("Missing opening parenthesis: " + query);
 		}
 
-		char endChar = trimmedQuery.charAt(trimmedQuery.length() - 1);
+		int endIndex = trimmedQuery.lastIndexOf(')');
 
-		if (endChar != ')') {
+		if (endIndex < endIndex) {
 			throw new IllegalArgumentException("Missing closing parenthesis: " + query);
 		}
 
 		String name = trimmedQuery.substring(0, parenthesisIndex);
-		String params = trimmedQuery.substring(parenthesisIndex + 1, trimmedQuery.length() - 1);
+		String params = trimmedQuery.substring(parenthesisIndex + 1, endIndex);
 
 		FunctionFactory factory = factories.get(name);
 		
@@ -218,6 +218,7 @@ public class FunctionParser {
 		registerFunction(new GraphFunction.Factory());
 		registerFunction(new GroupByFunction.Factory());
 		registerFunction(new VolumeFunction.Factory());
+		registerFunction(new EventsDiffFunction.Factory());
 		
 		//Routing graphs
 		registerFunction(new CategoryFunction.Factory());
@@ -247,8 +248,8 @@ public class FunctionParser {
 		registerFunction(new KeyTransactionsGraphFunction.Factory());
 		registerFunction(new TransactionAvgGraphFunction.Factory());
 		registerFunction(new SlowTransactionsFunction.Factory());
-		
-
+		registerFunction(new TransactionsDiffFunction.Factory());
+	
 		//variable filter functions
 		registerFunction(new EnvironmentsFunction.Factory());
 		registerFunction(new ApplicationsFunction.Factory());

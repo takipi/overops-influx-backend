@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 28,
-  "iteration": 1547020052683,
+  "iteration": 1547191352960,
   "links": [
     {
       "icon": "external link",
@@ -649,6 +649,7 @@
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
           "link": true,
+          "linkTargetBlank": true,
           "linkTooltip": "${__cell_5}. Click to drill-down.",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
@@ -1275,5 +1276,5 @@
   "timezone": "",
   "title": "Increasing Errors",
   "uid": "WZ739NYmk",
-  "version": 96
+  "version": 98
 }

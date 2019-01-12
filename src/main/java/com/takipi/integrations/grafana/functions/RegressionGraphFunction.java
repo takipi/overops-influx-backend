@@ -251,6 +251,7 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 			seriesName = graphData.key;
 		}
 		
-		return getGraphSeries(graphData, getServiceValue(seriesName, serviceId, serviceIds));	
+		return getGraphSeries(graphData, getServiceValue(seriesName, serviceId, 
+			serviceIds), rgInput);	
 	}
 }

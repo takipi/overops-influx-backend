@@ -87,6 +87,16 @@ public class RelabilityReportInput extends RegressionsInput {
 		SevereSlowdowns,
 		
 		/**
+		 * chart the volume of events of the target app, deployment, tier
+		 */
+		EventVolume,
+		
+		/**
+		 * chart the unique number of events of the target app, deployment, tier
+		 */
+		UniqueEvents,
+		
+		/**
 		 * chart the reliability score of the target app, deployment, tier
 		 */
 		Score;
@@ -108,12 +118,17 @@ public class RelabilityReportInput extends RegressionsInput {
 	public int limit;
 	
 	/**
-	 * Obsolete
+	 * A comma delimited pair of numeric values used to define thresholds by which
+	 * to choose a postfix for a score series based on the values set in postfixes
 	 */
 	public String thresholds;
 	
 	/**
-	 * Obsolete
+	 * A comma delimited arrays of 3 postfix to be added to the series name. The post fix
+	 * is selected based on if the reliability score is smaller than, in between or greater than the upper
+	 * threshold. For example if this is set to "BAD,OK,GOOD" and thresholds is "70,85"
+	 * a score below 70 will have the postfix BAD added to the series name, 80 will be
+	 * OK and 90 will be GOOD 
 	 */
 	public String postfixes;
 	
@@ -136,4 +151,24 @@ public class RelabilityReportInput extends RegressionsInput {
 	 * for example: "%d issues"
 	 */
 	public String sevOnlyFormat;
+	
+	public enum SortType {
+		
+		Ascending,
+		
+		Descending,
+		
+		Default
+	}
+	
+	public SortType sortType;	
+	
+	public SortType getSortType() {
+		
+		if (sortType == null) {
+			return SortType.Default;
+		}
+		
+		return sortType;
+	}
 }

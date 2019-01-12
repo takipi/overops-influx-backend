@@ -24,6 +24,7 @@ public class EventFilter
 	public static final String CATEGORY_PREFIX = "-";
 	public static final String EXCEPTION_PREFIX = "--";
 	public static final String TERM = "<term>";
+	public static final String ARCHIVED = "Archive";
 	
 	private Collection<String> allowedTypes;
 	private Collection<String> types;
@@ -331,7 +332,14 @@ public class EventFilter
 			return true;
 		}
 		
-		if ((!CollectionUtil.safeIsEmpty(allowedTypes)) && (!allowedTypes.contains(event.type)))
+		if ((!CollectionUtil.safeIsEmpty(event.labels)) 
+		&& (event.labels.contains(ARCHIVED)))
+		{
+			return true;
+		}
+		
+		if ((!CollectionUtil.safeIsEmpty(allowedTypes)) 
+		&& (!allowedTypes.contains(event.type)))
 		{
 			return true;
 		}

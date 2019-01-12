@@ -934,12 +934,13 @@ public class GroupByFunction extends BaseVolumeFunction {
 		return result;
 	}
 
-	private static void appendGroupByValues(GroupByInput input, GroupByValue value, Long time, Series series) {
+	private static void appendGroupByValues(GroupByInput input, 
+		GroupByValue value, Long time, Series series) {
 
 		String[] types = input.type.split(ARRAY_SEPERATOR);
 		Object[] values = new Object[types.length + 1];
 
-		values[0] = time;
+		values[0] = getTimeValue(time, input);
 
 		for (int i = 0; i < types.length; i++) {
 

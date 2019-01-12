@@ -48,13 +48,7 @@ import com.takipi.integrations.grafana.util.EventLinkEncoder;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class RegressionFunction extends EventsFunction
-{
-	
-	private static String REG_DELTA = "regDelta";
-	private static String REGRESSION = "regression";
-	private static String SEVERITY = "severity";
-	private static String DESCRIPTION = "description";
-	
+{	
 	public static class Factory implements FunctionFactory
 	{
 		
@@ -256,7 +250,7 @@ public class RegressionFunction extends EventsFunction
 			
 			if (regData.regression != null)
 			{
-				return RegressionStringUtil.getRegressedEventRate(regData.regression);
+				return RegressionStringUtil.getRegressedEventRate(regData.regression, true);
 			}
 			else
 			{
@@ -515,22 +509,22 @@ public class RegressionFunction extends EventsFunction
 	protected FieldFormatter getFormatter(String column)
 	{
 		
-		if (column.equals(REG_DELTA))
+		if (column.equals(RegressionsInput.REG_DELTA))
 		{
 			return new RegressionRateFormatter();
 		}
 		
-		if (column.equals(REGRESSION))
+		if (column.equals(RegressionsInput.REGRESSION))
 		{
 			return new RegressionFullRateFormatter();
 		}
 		
-		if (column.equals(SEVERITY))
+		if (column.equals(RegressionsInput.SEVERITY))
 		{
 			return new RegressionSeverityFormatter();
 		}
 		
-		if (column.equals(LINK))
+		if (column.equals(EventsInput.LINK))
 		{
 			return new RegressionLinkFormatter();
 		}
@@ -541,7 +535,7 @@ public class RegressionFunction extends EventsFunction
 			return new RegressionTimeRangeFormatter();
 		}
 		
-		if (column.equals(DESCRIPTION))
+		if (column.equals(RegressionsInput.DESCRIPTION))
 		{
 			return new RegressionDescriptionFormatter();
 		}
@@ -551,7 +545,7 @@ public class RegressionFunction extends EventsFunction
 	
 	public static class RegressionOutput
 	{	
-		public static RegressionOutput emptyOutput = new RegressionOutput(true);
+		public static final RegressionOutput emptyOutput = new RegressionOutput(true);
 		
 		public boolean empty;
 		
@@ -564,7 +558,7 @@ public class RegressionFunction extends EventsFunction
 		public List<EventData> eventDatas;
 		
 		protected double score;
-		long volume;
+		protected long volume;
 		
 		protected int slowdowns;
 		protected int severeSlowdowns;

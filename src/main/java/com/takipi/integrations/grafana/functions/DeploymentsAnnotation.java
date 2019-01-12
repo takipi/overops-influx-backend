@@ -101,7 +101,9 @@ public class DeploymentsAnnotation extends BaseGraphFunction {
 		for (int i = 0; i < maxDeployments; i++) {
 			Pair<Long, String> pair = deployments.get(i);
 			
-			result.series.values.add(Arrays.asList(new Object[] {pair.getFirst(), 
+			Object timeValue = getTimeValue(pair.getFirst(), input);
+			
+			result.series.values.add(Arrays.asList(new Object[] {timeValue, 
 					getServiceValue(pair.getSecond(), serviceId, serviceIds) }));
 		}
 		

@@ -65,13 +65,15 @@ public class BaselineAnnotationFunction extends BaseGraphFunction {
 		RegressionWindow regressionWindow = inputPair.getSecond();
 		
 		long time = regressionWindow.activeWindowStart.getMillis();
+		Object timeValue = getTimeValue(time, input);
+
 		
 		String activeWindow = TimeUtil.getTimeInterval(TimeUnit.MINUTES.toMillis(regressionWindow.activeTimespan));
 		String baselineWindow = TimeUtil.getTimeInterval(TimeUnit.MINUTES.toMillis(regressionInput.baselineTimespan));
 
 		String text = String.format(baInput.text, baselineWindow, activeWindow);
 		
-		result.series.values.add(Arrays.asList(new Object[] { time, getServiceValue(text, serviceId, serviceIds) }));
+		result.series.values.add(Arrays.asList(new Object[] { timeValue, getServiceValue(text, serviceId, serviceIds) }));
 		
 		return Collections.singletonList(result);
 	}
