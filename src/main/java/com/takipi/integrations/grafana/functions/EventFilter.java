@@ -24,7 +24,8 @@ public class EventFilter
 	public static final String CATEGORY_PREFIX = "-";
 	public static final String EXCEPTION_PREFIX = "--";
 	public static final String TERM = "<term>";
-	public static final String ARCHIVED = "Archive";
+	public static final String ARCHIVE = "Archive";
+	public static final String RESOLVED = "Resolved";
 	
 	private Collection<String> allowedTypes;
 	private Collection<String> types;
@@ -332,14 +333,14 @@ public class EventFilter
 			return true;
 		}
 		
-		if ((!CollectionUtil.safeIsEmpty(event.labels)) 
-		&& (event.labels.contains(ARCHIVED)))
+		if (CollectionUtil.safeContains(event.labels, ARCHIVE) ||
+			CollectionUtil.safeContains(event.labels, RESOLVED))
 		{
 			return true;
 		}
 		
 		if ((!CollectionUtil.safeIsEmpty(allowedTypes)) 
-		&& (!allowedTypes.contains(event.type)))
+				&& (!allowedTypes.contains(event.type)))
 		{
 			return true;
 		}
@@ -371,7 +372,6 @@ public class EventFilter
 		
 		if ((labels != null) && (!labels.isEmpty()))
 		{
-			
 			if (event.labels == null)
 			{
 				return true;
@@ -385,7 +385,6 @@ public class EventFilter
 		
 		if (labelsPattern != null)
 		{
-			
 			if (event.labels == null)
 			{
 				return true;
@@ -417,5 +416,4 @@ public class EventFilter
 		
 		return false;
 	}
-	
 }
