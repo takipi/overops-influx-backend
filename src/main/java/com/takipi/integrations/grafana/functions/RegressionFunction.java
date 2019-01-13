@@ -506,7 +506,7 @@ public class RegressionFunction extends EventsFunction
 	}
 	
 	@Override
-	protected FieldFormatter getFormatter(String column)
+	protected FieldFormatter getFormatter(String serviceId, String column)
 	{
 		
 		if (column.equals(RegressionsInput.REG_DELTA))
@@ -529,7 +529,6 @@ public class RegressionFunction extends EventsFunction
 			return new RegressionLinkFormatter();
 		}
 		
-
 		if (column.equals(ViewInput.TIME_RANGE))
 		{
 			return new RegressionTimeRangeFormatter();
@@ -540,7 +539,7 @@ public class RegressionFunction extends EventsFunction
 			return new RegressionDescriptionFormatter();
 		}
 		
-		return super.getFormatter(column);
+		return super.getFormatter(serviceId, column);
 	}
 	
 	public static class RegressionOutput

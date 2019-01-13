@@ -6,9 +6,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import org.joda.time.DateTime;
@@ -18,6 +20,7 @@ import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.Location;
 import com.takipi.api.client.data.event.Stats;
 import com.takipi.api.client.result.event.EventResult;
+import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.regression.RegressionStringUtil;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
@@ -341,6 +344,69 @@ public class EventsFunction extends GrafanaFunction {
 		}
 	}
 	
+	protected class LocationDescriptionFormatter extends FieldFormatter {
+
+		private Categories categories;
+		
+		protected LocationDescriptionFormatter(Categories categories) {
+			this.categories = categories;
+		}
+		
+		@Override
+		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
+				Pair<DateTime, DateTime> timeSpan) {
+
+			if (eventData.event.error_location ==  null) {
+				return null;
+			}
+			
+			Set<String> labels = null;
+			
+			if (categories != null) {
+				Set<String> originLabels;
+				
+				if (eventData.event.error_origin != null) {
+					originLabels = categories.getCategories(eventData.event.error_origin.class_name);
+				} else {
+					originLabels = null;
+				}
+						
+				Set<String> locationLabels = categories.getCategories(eventData.event.error_location.class_name);
+					
+				if (locationLabels != null) {
+						
+					if (originLabels != null) {
+						labels = new HashSet<>(locationLabels.size() + originLabels.size());
+						labels.addAll(locationLabels);
+						labels.addAll(originLabels);
+						
+					} else {
+						labels = locationLabels;
+					}
+				} 
+				else {
+					labels = originLabels;
+				}
+			}
+			
+			StringBuilder result = new StringBuilder();
+			
+			result.append(formatLocation(eventData.event.error_location));
+			
+			if (!CollectionUtil.safeIsEmpty(labels)) {
+				result.append(". Tier");
+				
+				if ((labels != null) && (labels.size() > 1)) {
+					result.append("s");
+				}
+				result.append(": ");
+				result.append(String.join(", ", labels));
+			}
+			
+			return result.toString();
+		}
+	}
+	
 	protected class JiraUrlFormatter extends ReflectFormatter {
 
 		protected JiraUrlFormatter(Field field)
@@ -464,7 +530,7 @@ public class EventsFunction extends GrafanaFunction {
 
 	}
 
-	protected FieldFormatter getFormatter(String column) {
+	protected FieldFormatter getFormatter(String serviceId, String column) {
 		
 		if (column.equals(EventsInput.LINK)) {
 			return new LinkFormatter();
@@ -490,6 +556,11 @@ public class EventsFunction extends GrafanaFunction {
 			return new TypeMessageFormatter();
 		}
 		
+		if (column.equals(EventsInput.ERROR_LOCATION_DESC)) {
+			Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();
+			return new LocationDescriptionFormatter(categories);
+		}
+			
 		Field field = getReflectField(column);
 
 		if (column.equals(JIRA_ISSUE_URL)) {
@@ -508,7 +579,7 @@ public class EventsFunction extends GrafanaFunction {
 
 	}
 
-	private Map<String, FieldFormatter> getFieldFormatters(String columns) {
+	private Map<String, FieldFormatter> getFieldFormatters(String serviceId, String columns) {
 
 		if ((columns == null) || (columns.isEmpty())) {
 			throw new IllegalArgumentException("columns cannot be empty");
@@ -518,7 +589,7 @@ public class EventsFunction extends GrafanaFunction {
 		Map<String, FieldFormatter> result = new LinkedHashMap<String, FieldFormatter>(columnsArray.length);
 
 		for (String column : columnsArray) {
-			FieldFormatter fieldFormatter = getFormatter(column);
+			FieldFormatter fieldFormatter = getFormatter(serviceId, column);
 			result.put(column, fieldFormatter);
 		}
 
@@ -727,7 +798,7 @@ public class EventsFunction extends GrafanaFunction {
 	 */
 	protected List<List<Object>> processServiceEvents(Collection<String> serviceIds, String serviceId, EventsInput input, Pair<DateTime, DateTime> timeSpan) {
 
-		Map<String, FieldFormatter> formatters = getFieldFormatters(input.fields);
+		Map<String, FieldFormatter> formatters = getFieldFormatters(serviceId, input.fields);
 		
 		List<EventData> mergedDatas;
 		List<EventData> eventDatas = getEventData(serviceId, input, timeSpan);

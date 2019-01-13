@@ -103,12 +103,25 @@ public class RegressionsInput extends EventsInput
 	/**
 	 * Additional fields supported by this functions
 	 */
+	
+	/**
+	 * Value of the regression rate
+	 */
 	public static String REG_DELTA = "regDelta";
 	
+	/**
+	 * Text description of the regression rate
+	 */
 	public static String REGRESSION = "regression";
 	
+	/**
+	 * Text value for the severity of the regression
+	 */
 	public static String SEVERITY = "severity";
 	
+	/**
+	 * Text description of the regression
+	 */
 	public static String DESCRIPTION = "description";
 	
 	

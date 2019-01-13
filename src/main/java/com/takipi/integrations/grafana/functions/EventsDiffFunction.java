@@ -205,7 +205,7 @@ public class EventsDiffFunction extends EventsFunction
 	}
 	
 	@Override
-	protected FieldFormatter getFormatter(String column) {
+	protected FieldFormatter getFormatter(String serviceId, String column) {
 		
 		if (column.equals(EventsDiffInput.DIFF)) {
 			return new DiffFormatter();
@@ -215,7 +215,7 @@ public class EventsDiffFunction extends EventsFunction
 			return new DiffDescFormatter();
 		}
 		
-		return super.getFormatter(column);
+		return super.getFormatter(serviceId, column);
 	}
 	
 	@Override
