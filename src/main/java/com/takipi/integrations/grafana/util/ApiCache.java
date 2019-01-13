@@ -289,11 +289,17 @@ public class ApiCache {
 				return false;
 			}
 
-			if (!compare(input.getDeployments(serviceId), other.input.getDeployments(serviceId))) {
+			Collection<String> deps = input.getDeployments(serviceId);
+			Collection<String> otherDeps = other.input.getDeployments(serviceId);
+			
+			if (!compare(deps, otherDeps)) {
 				return false;
 			}
-
-			if (!compare(input.getServers(serviceId), other.input.getServers(serviceId))) {
+			
+			Collection<String> servers = input.getServers(serviceId);
+			Collection<String> otherServers = other.input.getServers(serviceId);
+			
+			if (!compare(servers, otherServers)) {
 				return false;
 			}
 

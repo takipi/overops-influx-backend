@@ -18,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 36,
-  "iteration": 1547020121649,
+  "iteration": 1547242214784,
   "links": [
     {
       "icon": "external link",
@@ -48,8 +48,8 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "Chart the $graphType of the recent $limit deployments.",
-      "fill": 1,
+      "description": "Chart the $graphType of the selected deployments. If no deployments are selected, the last $limit deployments are chosen. Scores are based on the weights set in the Settings dashboard.",
+      "fill": 0,
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -66,8 +66,8 @@
         "total": false,
         "values": false
       },
-      "lines": false,
-      "linewidth": 1,
+      "lines": true,
+      "linewidth": 0,
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
@@ -77,6 +77,18 @@
       "seriesOverrides": [
         {
           "alias": "/.*/",
+          "color": "#9ac48a"
+        },
+        {
+          "alias": "/.*(R).$/",
+          "color": "#e24d42"
+        },
+        {
+          "alias": "/.*(Y).$/",
+          "color": "#eab839"
+        },
+        {
+          "alias": "/.*(G).$/",
           "color": "#9ac48a"
         }
       ],
@@ -101,7 +113,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Graph\", \"mode\":\"Deployments\", \"limit\":\"$limit\", \"graphType\":\"$graphType\"})",
+          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Graph\", \"mode\":\"Deployments\", \"limit\":\"$limit\", \"graphType\":\"$graphType\", \"sortType\":\"Descending\", \"postfixes\":\" $postfixes\", \"thresholds\":\"$thresholds\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -170,7 +182,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "Chart the $graphType of the top $limit applications with the most errors.",
+      "description": "Chart the $graphType of the selected applications. If no applications are selected, any key applications defined in the Settings dashboard are selected. Otherwise the top $limit applications are selected.",
       "fill": 1,
       "gridPos": {
         "h": 8,
@@ -200,6 +212,18 @@
         {
           "alias": "/.*/",
           "color": "#9ac48a"
+        },
+        {
+          "alias": "/.*(R).$/",
+          "color": "#e0752d"
+        },
+        {
+          "alias": "/.*(Y).$/",
+          "color": "#eab839"
+        },
+        {
+          "alias": "/.*(G).$/",
+          "color": "#9ac48a"
         }
       ],
       "spaceLength": 10,
@@ -223,7 +247,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Graph\", \"mode\":\"Applications\", \"limit\":\"$limit\", \"graphType\":\"$graphType\"})",
+          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Graph\", \"mode\":\"Applications\", \"limit\":\"$limit\", \"graphType\":\"$graphType\",\"postfixes\":\" $postfixes\", \"thresholds\":\"$thresholds\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -289,7 +313,7 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "A report detailing providing a weighted score to the list of the last  $limit deployments based on the weights set in the Settings dashboard.",
+      "description": "A report detailing providing a weighted score to the list of the selected deployments. If no deployments are selected, the last  $limit deployments are chosen. Scores are based on the weights set in the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
         "h": 11,
@@ -709,7 +733,7 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "A report detailing providing a weighted score to the list of the last  $limit applications based on the weights set in the Settings dashboard.",
+      "description": "A report detailing score of the selected applications. If no applications are selected, any key applications defined in the Settings dashboard are selected. Otherwise the top $limit applications are selected. based on the weights set in the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
         "h": 11,
@@ -1131,16 +1155,18 @@
   "refresh": false,
   "schemaVersion": 16,
   "style": "dark",
-  "tags": [],
+  "tags": [
+    "OverOps"
+  ],
   "templating": {
     "list": [
       {
         "allValue": "all",
         "current": {
           "tags": [],
-          "text": "None",
+          "text": "All",
           "value": [
-            "None"
+            "$__all"
           ]
         },
         "datasource": "OO",
@@ -1219,7 +1245,7 @@
         "hide": 0,
         "includeAll": true,
         "label": "Deployments",
-        "multi": false,
+        "multi": true,
         "name": "deployments",
         "options": [],
         "query": "deployments({\"environments\":\"$environments\", \"sorted\":true})",
@@ -1332,8 +1358,9 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "text": "10",
-          "value": "10"
+          "tags": [],
+          "text": "5",
+          "value": "5"
         },
         "hide": 0,
         "includeAll": false,
@@ -1342,12 +1369,12 @@
         "name": "limit",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "5",
             "value": "5"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "10",
             "value": "10"
           }
@@ -1360,7 +1387,6 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "tags": [],
           "text": "Score",
           "value": "Score"
         },
@@ -1402,11 +1428,21 @@
           },
           {
             "selected": true,
+            "text": "Event Volume",
+            "value": "Event Volume"
+          },
+          {
+            "selected": false,
+            "text": "Unique Events",
+            "value": "Unique Events"
+          },
+          {
+            "selected": false,
             "text": "Score",
             "value": "Score"
           }
         ],
-        "query": "New Issues,Severe New Issues,Regressions,Severe Regressions,Slowdowns,Severe Slowdowns,Score",
+        "query": "New Issues,Severe New Issues,Regressions,Severe Regressions,Slowdowns,Severe Slowdowns,Event Volume, Unique Events,Score",
         "skipUrlSync": false,
         "type": "custom"
       },
@@ -1453,6 +1489,50 @@
         "query": "Click to drill down",
         "skipUrlSync": false,
         "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "70|85",
+          "value": "70|85"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "thresholds",
+        "options": [
+          {
+            "selected": true,
+            "text": "70|85",
+            "value": "70|85"
+          }
+        ],
+        "query": "70|85",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "(R)|(Y)|(G)",
+          "value": "(R)|(Y)|(G)"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "postfixes",
+        "options": [
+          {
+            "selected": true,
+            "text": "(R)|(Y)|(G)",
+            "value": "(R)|(Y)|(G)"
+          }
+        ],
+        "query": "(R)|(Y)|(G)",
+        "skipUrlSync": false,
+        "type": "custom"
       }
     ]
   },
@@ -1487,7 +1567,7 @@
     ]
   },
   "timezone": "",
-  "title": "Reliability Scorecard Simple",
+  "title": "Reliability Trend",
   "uid": "82eIMSsmz",
-  "version": 17
+  "version": 26
 }

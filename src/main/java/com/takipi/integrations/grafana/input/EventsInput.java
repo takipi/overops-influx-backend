@@ -21,13 +21,40 @@ public class EventsInput extends BaseEventVolumeInput {
 	
 	/**
 	 * A comma delimited list of attributes defined in: https://doc.overops.com/reference#get_services-env-id-events-event-id
-	 * that can be used to define the columns within the result table. Additional available fields are:
-	 * 		typeMessage: a field containing the combination of the event's type and message. 
-	 * 		rate: the ratio between the event's stats.hits and stats.invocations.
-	 * 		link: an link to the object's ARC analysis within OverOps.
-	 * 		protected static final String LINK = "link";
+	 * that can be used to define the columns within the result table. 
+	 * Additional available fields described below.
 	 */
 	public String fields;
+	
+	/**
+	 * A link to the event's ARC analysis
+	 */
+	public static final String LINK = "link";
+	
+	/**
+	 * A field containing a combination of the event type and message
+	 */
+	public static final String TYPE_MESSAGE = "typeMessage";
+	
+	/**
+	 * returns 1 if the event has a ticket assigned 
+	 */
+	public static final String JIRA_STATE = "jira_state";
+	
+	/**
+	 * The event rate hits / invocations
+	 */
+	public static final String RATE = "rate";
+	
+	/**
+	 * A text description of the event rate
+	 */
+	public static final String RATE_DESC = "rate_desc";
+	
+	/**
+	 * A text description of the error location, containing optional tier information
+	 */
+	public static final String ERROR_LOCATION_DESC = "error_location_decription";
 	
 	/**
 	 * An optional value to control the volume data retrieved for objects in this query. If "hits" is specified,

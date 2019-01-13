@@ -428,20 +428,13 @@ public class TransactionsListFunction extends GrafanaFunction {
 		return result;
 	}
 	
-	private Pair<RegressionInput, RegressionWindow> updateTransactionPerformance(String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
-			BaseEventVolumeInput input, Map<TransactionKey, TransactionData> transactionDatas) {
-	
-		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
-		Pair<RegressionInput, RegressionWindow> result = regressionFunction.getRegressionInput(serviceId, viewId, input, timeSpan);
-		
-		if (result == null) {
-			return null;
-		}
-		
-		RegressionInput regressionInput = result.getFirst();
-		RegressionWindow regressionWindow = result.getSecond();
-		
-		DateTime baselineStart = regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan);
+	/**
+	 * @param timeSpan - needed for children 
+	 */
+	protected Collection<TransactionGraph> getBaselineTransactionGraphs(
+		String serviceId, String viewId, BaseEventVolumeInput input, 
+		Pair<DateTime, DateTime> timeSpan, RegressionInput regressionInput, 
+		RegressionWindow regressionWindow) {
 		
 		BaseEventVolumeInput baselineInput;
 		
@@ -454,11 +447,34 @@ public class TransactionsListFunction extends GrafanaFunction {
 			baselineInput = input;
 		}
 		
-		Collection<TransactionGraph> baselineTransactionGraphs = getTransactionGraphs(baselineInput, serviceId, 
+		DateTime baselineStart = regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan);
+
+		
+		Collection<TransactionGraph> result = getTransactionGraphs(baselineInput, serviceId, 
 				viewId, Pair.of(baselineStart, regressionWindow.activeWindowStart), 
 				null, baselineInput.pointsWanted, 
 				regressionWindow.activeTimespan, regressionInput.baselineTimespan);
-			
+		
+		return result;
+	}
+	
+	private Pair<RegressionInput, RegressionWindow> updateTransactionPerformance(String serviceId, String viewId, 
+			Pair<DateTime, DateTime> timeSpan, BaseEventVolumeInput input, 
+			Map<TransactionKey, TransactionData> transactionDatas) {
+	
+		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
+		Pair<RegressionInput, RegressionWindow> result = regressionFunction.getRegressionInput(serviceId, viewId, input, timeSpan);
+		
+		if (result == null) {
+			return null;
+		}
+		
+		RegressionInput regressionInput = result.getFirst();
+		RegressionWindow regressionWindow = result.getSecond();
+		
+		Collection<TransactionGraph> baselineTransactionGraphs = getBaselineTransactionGraphs(serviceId, 
+			viewId, input, timeSpan, regressionInput, regressionWindow);
+	
 		SlowdownSettings slowdownSettings = GrafanaSettings.getData(apiClient, serviceId).slowdown;
 		
 		if (slowdownSettings == null) {
@@ -625,8 +641,10 @@ public class TransactionsListFunction extends GrafanaFunction {
 		
 		Pair<RegressionInput, RegressionWindow> regPair = updateTransactionPerformance(serviceId, viewId, timeSpan, input, result.items);	
 		
-		result.regressionInput = regPair.getFirst();
-		result.regressionWindow = regPair.getSecond();
+		if (regPair != null) {
+			result.regressionInput = regPair.getFirst();
+			result.regressionWindow = regPair.getSecond();
+		}
 		
 		return result;
 

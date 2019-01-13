@@ -119,7 +119,15 @@ public class TransactionAvgGraphFunction extends TransactionsGraphFunction
 		result.regressionWindow = transactionGraphsResult.regressionWindow;
 		
 		for (TransactionGraph transactionGraph : transactionGraphsResult.graphs) {
-				
+			
+			if (transactionGraph == null) {
+				continue;
+			}
+			
+			if (transactionGraph.points == null) {
+				continue;
+			}
+			
 			if (transactionGraph.points.size() == 0) {
 				continue;
 			}

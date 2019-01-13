@@ -18,6 +18,7 @@ import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
+import com.takipi.integrations.grafana.input.FunctionInput.TimeFormat;
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.util.TimeUtil;
@@ -80,7 +81,8 @@ public class GraphFunction extends BaseGraphFunction {
 		series.name = EMPTY_NAME;
 		series.columns = Arrays.asList(new String[] { TIME_COLUMN, tagName });
 		
-		if ((graphInput.condense) && (seriesData.values.size() > pointsWanted)) {
+		if ((graphInput.condense) && (seriesData.values.size() > pointsWanted) &&
+			(graphInput.getTimeFormat() == TimeFormat.EPOCH)) {
 			series.values = condensePoints(seriesData.values, pointsWanted);
 		} else {
 			series.values = seriesData.values;
@@ -98,8 +100,9 @@ public class GraphFunction extends BaseGraphFunction {
 		return ((Long)(points.get(index).get(1))).longValue();
 	}
 	
-	private List<List<Object>> condensePoints(List<List<Object>> points, int pointsWanted) {
-		
+	private List<List<Object>> condensePoints(List<List<Object>> points, 
+		int pointsWanted) {
+				
 		double groupSize = (points.size() - 2) / ((double)pointsWanted - 2);
 		double currSize = groupSize;
 
@@ -169,10 +172,18 @@ public class GraphFunction extends BaseGraphFunction {
 		
 		for (GraphPoint gp : graph.points) {
 
-			DateTime gpTime = TimeUtil.getDateTime(gp.time);
+			Object timeValue;
+			
+			if (input.getTimeFormat() == TimeFormat.ISO_UTC) {
+				timeValue = gp.time;
+			} else {
+				DateTime gpTime = TimeUtil.getDateTime(gp.time);
+				timeValue = Long.valueOf(gpTime.getMillis());
+			}
+			
 
 			if (gp.contributors == null) {
-				values.add(Arrays.asList(new Object[] { Long.valueOf(gpTime.getMillis()), Long.valueOf(0l) }));
+				values.add(Arrays.asList(new Object[] {timeValue , Long.valueOf(0l) }));
 				continue;
 			}
 			
@@ -197,7 +208,7 @@ public class GraphFunction extends BaseGraphFunction {
 			}
 
 			volume += value;
-			values.add(Arrays.asList(new Object[] { Long.valueOf(gpTime.getMillis()), Long.valueOf(value) }));
+			values.add(Arrays.asList(new Object[] { timeValue, Long.valueOf(value) }));
 		}
 		
 		return SeriesVolume.of(values,volume);

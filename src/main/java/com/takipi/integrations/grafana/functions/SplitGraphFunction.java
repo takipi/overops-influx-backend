@@ -186,7 +186,8 @@ public class SplitGraphFunction extends LimitGraphFunction {
 		for (GraphData graphData : limitedGraphs) {
 			
 			if (graphData.volume > 0) {
-				result.add(getGraphSeries(graphData, getServiceValue(graphData.key, serviceId, serviceIds)));
+				result.add(getGraphSeries(graphData, 
+					getServiceValue(graphData.key, serviceId, serviceIds), input));
 			}
 		}
 				

@@ -252,6 +252,28 @@ public abstract class GrafanaFunction
 		return transactionName;
 	}
 	
+	protected Object getTimeValue(long value, FunctionInput input) {
+		
+		switch (input.getTimeFormat()) {
+			
+			case EPOCH: return Long.valueOf(value);
+			case ISO_UTC: return TimeUtil.getDateTimeFromEpoch(value);
+		}
+		
+		throw new IllegalStateException();
+	}
+	
+	protected static Object getTimeValue(Long value, FunctionInput input) {
+		
+		switch (input.getTimeFormat()) {
+			
+			case EPOCH: return value;
+			case ISO_UTC: return TimeUtil.getDateTimeFromEpoch(value.longValue());
+		}
+		
+		throw new IllegalStateException();
+	}
+	
 	protected Pair<Object, Object> getTimeFilterPair(Pair<DateTime, DateTime> timeSpan, String timeFilter) {
 		
 		Object from;
