@@ -18,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 22,
-  "iteration": 1547463213677,
+  "iteration": 1547463948109,
   "links": [
     {
       "icon": "external link",
@@ -1690,9 +1690,9 @@
         "allValue": "All",
         "current": {
           "tags": [],
-          "text": "-Netty",
+          "text": "All",
           "value": [
-            "-Netty"
+            "$__all"
           ]
         },
         "datasource": "OO",
@@ -1747,7 +1747,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -1876,5 +1875,5 @@
   "timezone": "",
   "title": "Reliability Scorecard",
   "uid": "lfqKXMfmz",
-  "version": 122
+  "version": 123
 }
