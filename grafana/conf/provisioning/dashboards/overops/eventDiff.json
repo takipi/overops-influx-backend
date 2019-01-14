@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 38,
-  "iteration": 1547462835456,
+  "iteration": 1547480270727,
   "links": [
     {
       "asDropdown": true,
@@ -1025,7 +1025,7 @@
             "rgba(245, 54, 54, 0.9)"
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
+          "decimals": 0,
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_7}. Click to drill-down.",
@@ -1033,11 +1033,11 @@
           "mappingType": 1,
           "pattern": "error_rate",
           "thresholds": [
-            "0.01",
-            "0.05"
+            "1",
+            "5"
           ],
           "type": "number",
-          "unit": "percentunit"
+          "unit": "percent"
         },
         {
           "alias": "Avg Response",
@@ -1341,7 +1341,7 @@
       {
         "allValue": "None",
         "current": {
-          "selected": false,
+          "tags": [],
           "text": "None",
           "value": "None"
         },
@@ -1366,7 +1366,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1391,7 +1390,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1416,7 +1414,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1441,7 +1438,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1466,7 +1462,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1491,7 +1486,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1572,7 +1566,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -1597,7 +1590,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -1644,15 +1636,14 @@
         "useTags": false
       },
       {
-        "allValue": "*",
+        "allValue": "All",
         "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
-        "includeAll": false,
+        "includeAll": true,
         "label": "To Deployment",
         "multi": false,
         "name": "compareToDeployments",
@@ -1669,7 +1660,7 @@
         "useTags": false
       },
       {
-        "allValue": "*",
+        "allValue": "All",
         "current": {
           "text": "All",
           "value": "$__all"
@@ -1678,7 +1669,7 @@
         "hide": 0,
         "includeAll": true,
         "label": "To Servers",
-        "multi": false,
+        "multi": true,
         "name": "compareToServers",
         "options": [],
         "query": "servers({\"environments\":\"$environments\",\"sorted\":true})",
@@ -1810,5 +1801,5 @@
   "timezone": "",
   "title": "Event Diff",
   "uid": "CVCRTgwmz",
-  "version": 13
+  "version": 16
 }
