@@ -1591,7 +1591,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1616,7 +1615,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1641,7 +1639,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1689,7 +1686,6 @@
       {
         "allValue": "All",
         "current": {
-          "tags": [],
           "text": "All",
           "value": [
             "$__all"
@@ -1701,15 +1697,9 @@
         "label": "Tiers",
         "multi": true,
         "name": "tiers",
-        "options": [
-          {
-            "selected": true,
-            "text": "All",
-            "value": "$__all"
-          }
-        ],
+        "options": [],
         "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\", \"eventTypes\":\"Tiers\"})",
-        "refresh": 0,
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
