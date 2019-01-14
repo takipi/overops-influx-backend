@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 31,
-  "iteration": 1547351875598,
+  "iteration": 1547463287960,
   "links": [
     {
       "icon": "external link",
@@ -323,7 +323,7 @@
           "pattern": "Hits",
           "thresholds": [],
           "type": "number",
-          "unit": "short"
+          "unit": "none"
         },
         {
           "alias": "Entry Point",
@@ -469,7 +469,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_6}. Click to drill-in.",
+          "linkTooltip": "${__cell_3}. Click to drill-in.",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Rate",
@@ -489,7 +489,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_1} in transaction ${__cell_2}, introduced by ${__cell_3}: Click to drill-in  (Event Id: ${__cell_5})",
+          "linkTooltip": "${__cell_4}. Click to drill-in.",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Message",
@@ -550,7 +550,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "🔎",
-          "linkUrl": "http://${__cell_4:raw}",
+          "linkUrl": "http://${__cell_2:raw}",
           "mappingType": 1,
           "pattern": "Jira state",
           "thresholds": [],
@@ -622,7 +622,7 @@
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
           "mappingType": 1,
-          "pattern": "Error location decription",
+          "pattern": "Description",
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
@@ -646,7 +646,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "events({\"fields\":\"link,type,entry_point,introduced_by,jira_issue_url,id,rate_desc,error_location_decription,message,error_location,stats.hits,rate,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":80, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
+          "query": "events({\"fields\":\"link,type,jira_issue_url,rate_desc,description,message,stats.hits,rate,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":120, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -683,7 +683,7 @@
       {
         "allValue": "None",
         "current": {
-          "selected": true,
+          "selected": false,
           "tags": [],
           "text": "None",
           "value": [
@@ -769,7 +769,7 @@
         "multi": true,
         "name": "type",
         "options": [],
-        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"All Events\"})",
+        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\"})",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -817,7 +817,7 @@
         "multi": true,
         "name": "transactions",
         "options": [],
-        "query": "transactions({\"environments\":\"$environments\",\"view\":\"All Events\",\"timeFilter\":\"time >= now() - 7d\",\"sorted\":\"true\"})",
+        "query": "transactions({\"environments\":\"$environments\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - 7d\",\"sorted\":\"true\"})",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -1014,5 +1014,5 @@
   "timezone": "",
   "title": "Errors",
   "uid": "HYBPMdYik",
-  "version": 77
+  "version": 85
 }

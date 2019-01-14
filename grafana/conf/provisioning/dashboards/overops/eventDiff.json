@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 38,
-  "iteration": 1547247131716,
+  "iteration": 1547462835456,
   "links": [
     {
       "asDropdown": true,
@@ -250,7 +250,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_6}. Click to drill-in.",
+          "linkTooltip": "${__cell_2}. Click to drill-in.",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Rate",
@@ -270,7 +270,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_1} in transaction ${__cell_2}, introduced by ${__cell_3}: Click to drill-in  (Event Id: ${__cell_5})",
+          "linkTooltip": "${__cell_3}: Click to drill-in.",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Message",
@@ -331,7 +331,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "🔎",
-          "linkUrl": "http://${__cell_4:raw}",
+          "linkUrl": "http://${__cell_1:raw}",
           "mappingType": 1,
           "pattern": "Jira state",
           "thresholds": [],
@@ -427,6 +427,22 @@
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Description",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
         }
       ],
       "targets": [
@@ -447,7 +463,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "eventsDiff({\"fields\":\"link,type,entry_point,introduced_by,jira_issue_url,id,rate_desc,diff_desc,diff,message,error_location,stats.hits,rate,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":80, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"compareToApplications\":\"$compareToApplications\", \"compareToDeployments\":\"$compareToDeployments\",\"compareToServers\":\"$compareToServers\", \"diffTypes\":\"New\"})\n",
+          "query": "eventsDiff({\"fields\":\"link,jira_issue_url,rate_desc,description,diff_desc,diff,type,message,stats.hits,rate,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":80, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"compareToApplications\":\"$compareToApplications\", \"compareToDeployments\":\"$compareToDeployments\",\"compareToServers\":\"$compareToServers\", \"diffTypes\":\"New\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -679,7 +695,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_6}. Click to drill-in.",
+          "linkTooltip": "${__cell_2}. Click to drill-in.",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Rate",
@@ -699,7 +715,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_1} in transaction ${__cell_2}, introduced by ${__cell_3}: Click to drill-in  (Event Id: ${__cell_5})",
+          "linkTooltip": "${__cell_6}: Click to drill-in.",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Message",
@@ -760,7 +776,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "🔎",
-          "linkUrl": "http://${__cell_4:raw}",
+          "linkUrl": "http://${__cell_1:raw}",
           "mappingType": 1,
           "pattern": "Jira state",
           "thresholds": [],
@@ -838,7 +854,7 @@
           "unit": "short"
         },
         {
-          "alias": "Δ",
+          "alias": "Rate Δ",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -849,13 +865,45 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_7}. Click to drill-in.",
+          "linkTooltip": "${__cell_3}. Click to drill-in.",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Diff",
           "thresholds": [],
           "type": "number",
           "unit": "percentunit"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Description",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
         }
       ],
       "targets": [
@@ -876,7 +924,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "eventsDiff({\"fields\":\"link,type,entry_point,introduced_by,jira_issue_url,id,rate_desc,diff_desc,diff,message,error_location,stats.hits,rate,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":80, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"compareToApplications\":\"$compareToApplications\", \"compareToDeployments\":\"$compareToDeployments\",\"compareToServers\":\"$compareToServers\", \"diffTypes\":\"Increasing\"})\n",
+          "query": "eventsDiff({\"fields\":\"link,jira_issue_url,rate_desc,diff_desc,type,diff,description,message,stats.hits,rate,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":80, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"compareToApplications\":\"$compareToApplications\", \"compareToDeployments\":\"$compareToDeployments\",\"compareToServers\":\"$compareToServers\", \"diffTypes\":\"Increasing\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1293,8 +1341,7 @@
       {
         "allValue": "None",
         "current": {
-          "selected": true,
-          "tags": [],
+          "selected": false,
           "text": "None",
           "value": "None"
         },
@@ -1319,6 +1366,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1343,6 +1391,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1367,6 +1416,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1391,6 +1441,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1415,6 +1466,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1439,6 +1491,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1519,6 +1572,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -1543,6 +1597,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -1755,5 +1810,5 @@
   "timezone": "",
   "title": "Event Diff",
   "uid": "CVCRTgwmz",
-  "version": 9
+  "version": 13
 }

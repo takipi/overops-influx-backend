@@ -19,9 +19,9 @@ import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.EventsDiffInput;
 import com.takipi.integrations.grafana.input.EventsDiffInput.DiffType;
-import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
+import com.takipi.integrations.grafana.output.Series;
 
 public class EventsDiffFunction extends EventsFunction
 {
@@ -110,7 +110,14 @@ public class EventsDiffFunction extends EventsFunction
 
 			if (eventData instanceof DiffEventData) {
 				DiffEventData diffEventData = (DiffEventData)eventData;
-				return diffEventData.getDelta();
+				
+				double delta = diffEventData.getDelta();
+				
+				if (delta > 10) {
+					return ">1000%";
+				}
+				
+				return delta;
 			} else {
 				return "New";
 			}

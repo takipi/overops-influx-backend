@@ -15,6 +15,7 @@ import com.takipi.api.client.util.infra.Categories;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.EventTypesInput;
+import com.takipi.integrations.grafana.input.EventTypesInput.EventTypes;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings;
@@ -78,7 +79,6 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 			return;
 		}
 		
-		
 		Collection<String> types;
 		
 		if (eventInput.types != null) {
@@ -133,16 +133,24 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 			}
 		}
 		
-		for (String type : eventTypes) {
-			appender.append(type);
+		Collection<EventTypes> availTypes = eventInput.getEventTypes(); 
+		
+		if (availTypes.contains(EventTypes.EventTypes)) {
+			for (String type : eventTypes) {
+				appender.append(type);
+			}
 		}
 		
-		for (String categoryName : categoryNames) {
-			appender.append(GroupSettings.toGroupName(categoryName));
+		if (availTypes.contains(EventTypes.Tiers)) {
+			for (String categoryName : categoryNames) {
+				appender.append(GroupSettings.toGroupName(categoryName));
+			}
 		}
 
-		for (String exceptionType : exceptionTypes) {
-			appender.append(EventFilter.EXCEPTION_PREFIX + exceptionType);
+		if (availTypes.contains(EventTypes.ExceptionTypes)) {
+			for (String exceptionType : exceptionTypes) {
+				appender.append(EventFilter.EXCEPTION_PREFIX + exceptionType);
+			}
 		}
 	}
 }

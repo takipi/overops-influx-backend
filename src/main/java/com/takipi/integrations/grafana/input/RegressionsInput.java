@@ -107,7 +107,7 @@ public class RegressionsInput extends EventsInput
 	/**
 	 * Value of the regression rate
 	 */
-	public static String REG_DELTA = "regDelta";
+	public static String REG_DELTA = "reg_delta";
 	
 	/**
 	 * Text description of the regression rate
@@ -122,7 +122,7 @@ public class RegressionsInput extends EventsInput
 	/**
 	 * Text description of the regression
 	 */
-	public static String DESCRIPTION = "description";
+	public static String REG_DESC = "reg_desc";
 	
 	
 	public Collection<RegressionType> getRegressionTypes()

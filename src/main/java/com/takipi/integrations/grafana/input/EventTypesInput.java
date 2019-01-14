@@ -1,5 +1,6 @@
 package com.takipi.integrations.grafana.input;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,6 +36,11 @@ public class EventTypesInput extends ViewInput {
 	 *  
 	 *  Screenshot: https://drive.google.com/file/d/1bCrsjOcPZrht7Z78qi4XRHr3O4xF7CoF/view?usp=sharing
 	 */
+	
+	/**
+	 * A | delimited list of the events type to add to the list. If no value is provided,
+	 * the event_types property is used from theSettings dashboard. 
+	 */
 	public String types; 
 	
 	/**
@@ -42,6 +48,33 @@ public class EventTypesInput extends ViewInput {
 	 */
 	public boolean newOnly;
 
+	/**
+	 * The different event types that will be added to the list
+	 */
+	public enum EventTypes {
+		
+		/**
+		 * Populate the different available event types
+		 */
+		EventTypes,
+		
+		/**
+		 * Populate the different exception types available to the user
+		 */
+		ExceptionTypes,
+		
+		/**
+		 * Populate the different code tiers available to the user
+		 */
+		Tiers
+	}
+	
+	/**
+	 * A comma delimited list of the different event types to populate in the list. If no value is specified,
+	 * all event types are added
+	 */
+	public String eventTypes;
+	
 	public Collection<String> getTypes() {
 		
 		if (types == null) {
@@ -49,7 +82,30 @@ public class EventTypesInput extends ViewInput {
 		}
 
 		return Arrays.asList(ArrayUtil.safeSplitArray(types, GrafanaFunction.GRAFANA_SEPERATOR, false));
-
+	}
+	
+	public Collection<EventTypes> getEventTypes()
+	{	
+		if (eventTypes == null)
+		{
+			return Arrays.asList(EventTypes.values());
+		}
+		
+		String[] parts = eventTypes.split(GrafanaFunction.ARRAY_SEPERATOR);
+		Collection<EventTypes> result = new ArrayList<EventTypes>(parts.length);
+		
+		for (String part : parts)
+		{
+			EventTypes type = EventTypes.valueOf(part);
+			
+			if (type != null)
+			{
+				result.add(type);
+			}
+		}
+		
+		return result;
+		
 	}
 }
 
