@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 20,
-  "iteration": 1547463495342,
+  "iteration": 1547463028589,
   "links": [
     {
       "icon": "external link",
@@ -1423,7 +1423,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_2}: Click for root cause",
+          "linkTooltip": "${__cell_2}. Click for root cause",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "TypeMessage",
@@ -2385,9 +2385,11 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
+          "tags": [],
           "text": "None",
-          "value": "None"
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -2410,7 +2412,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2435,7 +2436,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2460,9 +2460,10 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
-          "value": "$__all"
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -2508,7 +2509,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2533,7 +2533,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2558,7 +2557,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -2664,7 +2662,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -2689,7 +2686,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -2737,5 +2733,5 @@
   "timezone": "",
   "title": "Reliability Analysis",
   "uid": "4DHQ63-ik",
-  "version": 206
+  "version": 207
 }
