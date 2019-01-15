@@ -778,7 +778,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 	
 		double weight;
 		
-		if (reportKeyResults.output.reportKey.isKey) {
+		if (reportKeyResults.output.reportKey.isKey && reportSettings.key_score_weight > 0) {
 			weight = reportSettings.key_score_weight;
 		} else {
 			weight = reportSettings.score_weight;	
@@ -825,7 +825,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 			result.append(deductionString);
 			result.append(") * ");
 			
-			if (reportKeyResults.output.reportKey.isKey) {
+			if (reportKeyResults.output.reportKey.isKey && reportSettings.key_score_weight > 0) {
 				result.append(reportSettings.key_score_weight);
 			} else {
 				result.append(reportSettings.score_weight);
