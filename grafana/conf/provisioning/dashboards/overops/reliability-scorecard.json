@@ -18,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 22,
-  "iteration": 1547462463872,
+  "iteration": 1547462463882,
   "links": [
     {
       "icon": "external link",
@@ -1702,15 +1702,9 @@
         "label": "Tiers",
         "multi": true,
         "name": "tiers",
-        "options": [
-          {
-            "selected": true,
-            "text": "All",
-            "value": "$__all"
-          }
-        ],
+        "options": [],
         "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\", \"eventTypes\":\"Tiers\"})",
-        "refresh": 0,
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -1877,5 +1871,5 @@
   "timezone": "",
   "title": "Reliability Scorecard",
   "uid": "lfqKXMfmz",
-  "version": 130
+  "version": 132
 }
