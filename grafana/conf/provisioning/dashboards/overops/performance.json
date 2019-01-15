@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 19,
-  "iteration": 1547020090707,
+  "iteration": 1547480312339,
   "links": [
     {
       "icon": "external link",
@@ -1255,7 +1255,7 @@
           "unit": "short"
         },
         {
-          "alias": "Failure Rate",
+          "alias": "Failure Rate (%)",
           "colorMode": "value",
           "colors": [
             "rgba(50, 172, 45, 0.97)",
@@ -1263,7 +1263,7 @@
             "rgba(245, 54, 54, 0.9)"
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
+          "decimals": 0,
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_7}. Click to drill-down.",
@@ -1271,11 +1271,17 @@
           "mappingType": 1,
           "pattern": "error_rate",
           "thresholds": [
-            "0.01",
-            "0.05"
+            "1",
+            "5"
           ],
           "type": "number",
-          "unit": "percentunit"
+          "unit": "percent",
+          "valueMaps": [
+            {
+              "text": "< 1%",
+              "value": "0.009"
+            }
+          ]
         },
         {
           "alias": "Avg Response",
@@ -1580,8 +1586,11 @@
         "allValue": "all",
         "current": {
           "selected": true,
+          "tags": [],
           "text": "None",
-          "value": "None"
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -1604,7 +1613,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1629,7 +1637,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1654,7 +1661,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1679,7 +1685,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1704,7 +1709,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1729,7 +1733,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -1800,7 +1803,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "Logged Error|Uncaught Exception|HTTP Error",
           "value": "Logged Error|Uncaught Exception|HTTP Error"
         },
@@ -1954,5 +1956,5 @@
   "timezone": "",
   "title": "Performance",
   "uid": "Z40SpeJmz",
-  "version": 104
+  "version": 106
 }

@@ -534,7 +534,7 @@ public class RegressionFunction extends EventsFunction
 			return new RegressionTimeRangeFormatter();
 		}
 		
-		if (column.equals(RegressionsInput.DESCRIPTION))
+		if (column.equals(RegressionsInput.REG_DESC))
 		{
 			return new RegressionDescriptionFormatter();
 		}

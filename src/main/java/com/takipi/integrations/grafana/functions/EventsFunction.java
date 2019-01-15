@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 import org.joda.time.DateTime;
+import org.ocpsoft.prettytime.PrettyTime;
 
 import com.google.common.base.Objects;
 import com.takipi.api.client.ApiClient;
@@ -92,11 +93,11 @@ public class EventsFunction extends GrafanaFunction {
 		
 		@Override
 		public boolean equals(Object obj) {
-			if (obj == null ||
-				(!(obj instanceof EventData))) {
+			
+			if (obj == null || (!(obj instanceof EventData))) {
 				return false;
 			}
-			
+				
 			EventData other = (EventData)obj;
 			
 			if (!Objects.equal(event.type, other.event.type)) {
@@ -249,7 +250,8 @@ public class EventsFunction extends GrafanaFunction {
 			}
 
 			if (value instanceof Location) {
-				return getSimpleClassName(((Location)value).class_name);
+				Location location = (Location)value;
+				return getSimpleClassName(location.class_name) + "." + location.method_name;
 			}
 
 			if (value instanceof List) {
@@ -344,20 +346,35 @@ public class EventsFunction extends GrafanaFunction {
 		}
 	}
 	
-	protected class LocationDescriptionFormatter extends FieldFormatter {
+	protected class EventDescriptionFormatter extends FieldFormatter {
 
 		private Categories categories;
+		private PrettyTime prettyTime;
 		
-		protected LocationDescriptionFormatter(Categories categories) {
+		protected EventDescriptionFormatter(Categories categories) {
 			this.categories = categories;
+			this.prettyTime = new PrettyTime();
 		}
 		
 		@Override
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
 				Pair<DateTime, DateTime> timeSpan) {
 
-			if (eventData.event.error_location ==  null) {
-				return null;
+			
+			StringBuilder result = new StringBuilder();
+			
+			result.append(eventData.event.type);
+			
+			if (eventData.event.error_location !=  null) {
+				result.append(" from ");
+				result.append(getSimpleClassName(eventData.event.error_location.class_name));
+				result.append(".");
+				result.append(eventData.event.error_location.method_name);
+			}
+			
+			if (eventData.event.entry_point !=  null) {
+				result.append(" in tansaction ");
+				result.append(getSimpleClassName(eventData.event.entry_point.class_name));
 			}
 			
 			Set<String> labels = null;
@@ -388,10 +405,15 @@ public class EventsFunction extends GrafanaFunction {
 					labels = originLabels;
 				}
 			}
-			
-			StringBuilder result = new StringBuilder();
-			
-			result.append(formatLocation(eventData.event.error_location));
+				
+			if (eventData.event.introduced_by != null) {
+				result.append(". Introduced by: ");
+				result.append(eventData.event.introduced_by);
+			} else {
+				result.append(". First seen: ");
+				DateTime firstSeen = TimeUtil.getDateTime(eventData.event.first_seen);
+				result.append(prettyTime.format(firstSeen.toDate()));	
+			}
 			
 			if (!CollectionUtil.safeIsEmpty(labels)) {
 				result.append(". Tier");
@@ -404,6 +426,12 @@ public class EventsFunction extends GrafanaFunction {
 			}
 			
 			return result.toString();
+		}
+		
+		@Override
+		protected Object formatValue(Object value, EventsInput input)
+		{
+			return value;
 		}
 	}
 	
@@ -511,6 +539,11 @@ public class EventsFunction extends GrafanaFunction {
 
 			if (eventData.event.stats.invocations > 0) {
 				double rate = (double) eventData.event.stats.hits / (double) eventData.event.stats.invocations;
+				
+				if (rate > 10) {
+					return "> 1000%";
+				}
+								
 				return rate;
 			} else {
 				return "NA";
@@ -556,9 +589,9 @@ public class EventsFunction extends GrafanaFunction {
 			return new TypeMessageFormatter();
 		}
 		
-		if (column.equals(EventsInput.ERROR_LOCATION_DESC)) {
+		if (column.equals(EventsInput.DESCRIPTION)) {
 			Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();
-			return new LocationDescriptionFormatter(categories);
+			return new EventDescriptionFormatter(categories);
 		}
 			
 		Field field = getReflectField(column);

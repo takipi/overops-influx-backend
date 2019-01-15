@@ -340,9 +340,25 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return FIELDS;
 	}
 
-	private Collection<String> getRoutingVolumes(String serviceId, RelabilityReportInput input,
+	private Collection<String> getTiers(String serviceId, RelabilityReportInput input,
 			Pair<DateTime, DateTime> timeSpan) {
  		
+		Collection<String> types = input.getTypes();
+		
+		if (!CollectionUtil.safeIsEmpty(types)) {
+			Set<String> tiers = new HashSet<String>();
+			
+			for (String type : types) {
+				if (type.startsWith(EventFilter.CATEGORY_PREFIX)) {
+					tiers.add(type.substring(EventFilter.CATEGORY_PREFIX.length()));
+				}
+			}
+			
+			if (tiers.size() > 0) {
+				return tiers;
+			}
+		}
+		
 		Collection<String> tiers = GrafanaSettings.getServiceSettings(apiClient, serviceId).getTierNames();
 		
 		Map<String, VolumeOutput> volumeMap = new HashMap<String, VolumeOutput>();
@@ -617,7 +633,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 					break;
 					
 				case Tiers: 
-					keys = getRoutingVolumes(serviceId, regInput, timeSpan);
+					keys = getTiers(serviceId, regInput, timeSpan);
 					break;
 				
 				case Applications: 
@@ -698,7 +714,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		int regressionsScore = (regressionOutput.regressions + slowdowns) * reportSettings.regression_score;
 		
 		int scoreWindow = getRegressionScoreWindow(regressionOutput);		
-		double scoreDays = (double)scoreWindow / 60 / 24;
+		double scoreDays = Math.max(1, (double)scoreWindow / 60 / 24);
 	
 		double rawScore = (newEventsScore + severeNewEventScore + criticalRegressionsScore + regressionsScore) / scoreDays;
 		double resultScore = Math.max(100 - (reportSettings.score_weight * rawScore), 0);
@@ -1024,8 +1040,15 @@ public class ReliabilityReportFunction extends EventsFunction {
 			double baseRate = (double) regressionResult.getBaselineHits() / (double) regressionResult.getBaselineInvocations();
 			double activeRate = (double) regressionResult.getEvent().stats.hits / (double) regressionResult.getEvent().stats.invocations;
 
-			result.append("+"); 
-			result.append((int)((activeRate - baseRate) * 100));
+			int delta = (int)((activeRate - baseRate) * 100);
+			
+			if (delta < 1000) {
+				result.append("+"); 
+				result.append(delta);
+			} else {
+				result.append(">1000"); 
+			}
+			
 			result.append("% "); 
 
 			result.append(regressionResult.getEvent().name);

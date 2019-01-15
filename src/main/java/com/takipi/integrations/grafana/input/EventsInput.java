@@ -54,7 +54,7 @@ public class EventsInput extends BaseEventVolumeInput {
 	/**
 	 * A text description of the error location, containing optional tier information
 	 */
-	public static final String ERROR_LOCATION_DESC = "error_location_decription";
+	public static final String DESCRIPTION = "description";
 	
 	/**
 	 * An optional value to control the volume data retrieved for objects in this query. If "hits" is specified,

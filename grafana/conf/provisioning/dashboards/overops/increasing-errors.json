@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 28,
-  "iteration": 1547352255071,
+  "iteration": 1547462902432,
   "links": [
     {
       "icon": "external link",
@@ -630,7 +630,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_1} in transaction ${__cell_2}, introduced by ${__cell_3}: Click for root cause (Event Id: ${__cell_6})",
+          "linkTooltip": "${__cell_2}: Click to drill -in.",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "TypeMessage",
@@ -650,10 +650,10 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_5}. Click to drill-down.",
+          "linkTooltip": "${__cell_1}. Click to drill-down.",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
-          "pattern": "RegDelta",
+          "pattern": "Reg delta",
           "thresholds": [],
           "type": "number",
           "unit": "percent"
@@ -670,7 +670,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_7}",
+          "linkTooltip": "${__cell_3}",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Severity",
@@ -751,7 +751,7 @@
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
           "mappingType": 1,
-          "pattern": "Error location decription",
+          "pattern": "Reg desc",
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
@@ -775,7 +775,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressions({\"fields\":\"link,type,entry_point,introduced_by, severity,regression,id,description,error_location_decription,typeMessage,error_location,stats.hits,rate,regDelta,first_seen\",  \"render\":\"Grid\", \"regressionTypes\":\"Regressions,SevereRegressions\", \"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"maxColumnLength\":90,\"pointsWanted\":\"$pointsWanted\",\"searchText\":\"$search\", \"eventLocations\":\"$increasingErrors\", \"types\":\"$type\"})",
+          "query": "regressions({\"fields\":\"link,regression,description,reg_desc,severity,typeMessage,stats.hits,rate,reg_delta,first_seen\",  \"render\":\"Grid\", \"regressionTypes\":\"Regressions,SevereRegressions\", \"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"maxColumnLength\":120,\"pointsWanted\":\"$pointsWanted\",\"searchText\":\"$search\", \"eventLocations\":\"$increasingErrors\", \"types\":\"$type\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -824,7 +824,6 @@
       {
         "allValue": "*",
         "current": {
-          "tags": [],
           "text": "None",
           "value": [
             "None"
@@ -1186,8 +1185,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "35d",
-          "value": "35d"
+          "isNone": true,
+          "text": "None",
+          "value": ""
         },
         "datasource": "OO",
         "hide": 2,
@@ -1210,8 +1210,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "28d",
-          "value": "28d"
+          "isNone": true,
+          "text": "None",
+          "value": ""
         },
         "datasource": "OO",
         "hide": 2,
@@ -1234,8 +1235,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "7d",
-          "value": "7d"
+          "isNone": true,
+          "text": "None",
+          "value": ""
         },
         "datasource": "OO",
         "hide": 2,
@@ -1290,5 +1292,5 @@
   "timezone": "",
   "title": "Increasing Errors",
   "uid": "WZ739NYmk",
-  "version": 99
+  "version": 103
 }
