@@ -18,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 22,
-  "iteration": 1547463948109,
+  "iteration": 1547462463882,
   "links": [
     {
       "icon": "external link",
@@ -270,7 +270,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$tiers\", \"render\":\"Graph\", \"mode\":\"Tiers\", \"limit\":\"$limit\",\"transactionPointsWanted\":\"$transactionPointsWanted\"})",
+          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$tiers\", \"render\":\"Graph\", \"mode\":\"Tiers\", \"limit\":\"$limit\",\"transactionPointsWanted\":\"$transactionPointsWanted\", \"scoreType\":\"Regressions\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1170,7 +1170,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "Score for  ${__cell} =  ${__cell_13}. $settingsPostfix. $drilldownPostfix",
-          "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-type=-${__cell_4}",
+          "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-type=-${__cell_4}&var-scoreType=Regressions",
           "mappingType": 1,
           "pattern": "Name",
           "rangeMaps": [
@@ -1528,7 +1528,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$tiers\", \"render\":\"Grid\", \"mode\":\"Tiers\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\"})",
+          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$tiers\", \"render\":\"Grid\", \"mode\":\"Tiers\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"scoreType\":\"Regressions\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1566,9 +1566,12 @@
       {
         "allValue": "None",
         "current": {
-          "selected": true,
+          "selected": false,
+          "tags": [],
           "text": "None",
-          "value": "None"
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -1592,7 +1595,9 @@
         "allValue": "all",
         "current": {
           "text": "All",
-          "value": "$__all"
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -1712,7 +1717,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1789,6 +1793,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "Weights are defined in the Settings dashboard",
           "value": "Weights are defined in the Settings dashboard"
         },
@@ -1811,6 +1816,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "Click to drill down",
           "value": "Click to drill down"
         },
@@ -1865,5 +1871,5 @@
   "timezone": "",
   "title": "Reliability Scorecard",
   "uid": "lfqKXMfmz",
-  "version": 123
+  "version": 132
 }

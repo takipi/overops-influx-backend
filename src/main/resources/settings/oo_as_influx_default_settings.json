@@ -218,6 +218,9 @@
 		"critical_regression_score": 2,
 		
 		//A factor applied to the score deduction of a new error, regression or slowdown. 
-		"score_weight": 2.5
+		"score_weight": 2.5,
+		
+		//A factor applied to the score deduction of a new error, regression or slowdown in a key app or tier. 
+		"key_score_weight": 5
 	}
 }

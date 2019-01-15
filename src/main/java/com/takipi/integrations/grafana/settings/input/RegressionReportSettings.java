@@ -41,4 +41,9 @@ public class RegressionReportSettings {
 	 * A factor applied to the score deduction of a new error, regression or slowdown. 
 	 */
 	public double score_weight;
+	
+	/**
+	 * 	A factor applied to the score deduction of a new error, regression or slowdown in a key app or tier. 
+	 */
+	public double key_score_weight;
 }
