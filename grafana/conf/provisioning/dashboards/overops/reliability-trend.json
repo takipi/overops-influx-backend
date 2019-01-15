@@ -27,7 +27,7 @@
       "title": "HELP",
       "tooltip": "Learn more about this dashboard",
       "type": "link",
-      "url": "https://doc.overops.com/docs/reliability-scorecard-dashboard"
+      "url": "https://doc.overops.com/docs/reliability-trends-dashboard"
     },
     {
       "asDropdown": true,
@@ -37,7 +37,6 @@
       "tags": [
         "OverOps"
       ],
-      "targetBlank": true,
       "type": "dashboards"
     }
   ],
