@@ -42,6 +42,7 @@ import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
 import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.RegressionsInput;
+import com.takipi.integrations.grafana.input.RegressionsInput.RenderMode;
 import com.takipi.integrations.grafana.input.RelabilityReportInput;
 import com.takipi.integrations.grafana.input.RelabilityReportInput.GraphType;
 import com.takipi.integrations.grafana.input.RelabilityReportInput.ReportMode;
@@ -1281,7 +1282,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 			}			
 		}
 		
-		if (input.limit < result.size()) {
+		if ((input.render != RenderMode.SingleStat) && (input.limit < result.size())) {
 			return limitByScore(result, input.limit);
 		}
 		
