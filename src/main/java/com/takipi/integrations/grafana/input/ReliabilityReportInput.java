@@ -22,10 +22,10 @@ package com.takipi.integrations.grafana.input;
  * 		"view":"$view","pointsWanted":"$pointsWanted", "transactionPointsWanted":"$transactionPointsWanted",
  * 		"types":"$type", "render":"Graph", "mode":"Deployments", "limit":"$limit",
  * 		"graphType":"$graphType"})
- * 
+ * ˙
  *  Screenshot: https://drive.google.com/file/d/1aEXcfTGC9OfNaJvsEeRptqp2o1czd0SW/view?usp=sharing
  */
-public class RelabilityReportInput extends RegressionsInput {
+public class ReliabilityReportInput extends RegressionsInput {
 	
 	/**
 	 * Control the set of events and filters on which to report

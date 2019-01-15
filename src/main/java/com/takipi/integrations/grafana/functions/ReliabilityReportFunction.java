@@ -43,11 +43,11 @@ import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.RegressionsInput;
 import com.takipi.integrations.grafana.input.RegressionsInput.RenderMode;
-import com.takipi.integrations.grafana.input.RelabilityReportInput;
-import com.takipi.integrations.grafana.input.RelabilityReportInput.GraphType;
-import com.takipi.integrations.grafana.input.RelabilityReportInput.ReportMode;
-import com.takipi.integrations.grafana.input.RelabilityReportInput.ScoreType;
-import com.takipi.integrations.grafana.input.RelabilityReportInput.SortType;
+import com.takipi.integrations.grafana.input.ReliabilityReportInput;
+import com.takipi.integrations.grafana.input.ReliabilityReportInput.GraphType;
+import com.takipi.integrations.grafana.input.ReliabilityReportInput.ReportMode;
+import com.takipi.integrations.grafana.input.ReliabilityReportInput.ScoreType;
+import com.takipi.integrations.grafana.input.ReliabilityReportInput.SortType;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
@@ -81,7 +81,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		@Override
 		public Class<?> getInputClass()
 		{
-			return RelabilityReportInput.class;
+			return ReliabilityReportInput.class;
 		}
 		
 		@Override
@@ -345,7 +345,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		super(apiClient);
 	}
 
-	private RelabilityReportInput getInput(RelabilityReportInput reportInput, 
+	private ReliabilityReportInput getInput(ReliabilityReportInput reportInput, 
 		String name, boolean mustCopy) {
 		
 		ReportMode mode = reportInput.getReportMode();
@@ -356,7 +356,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		
 		Gson gson = new Gson();
 		String json = gson.toJson(reportInput);
-		RelabilityReportInput result = gson.fromJson(json, RelabilityReportInput.class);
+		ReliabilityReportInput result = gson.fromJson(json, ReliabilityReportInput.class);
 
 		if (mode == ReportMode.Default) {
 			return result;
@@ -388,7 +388,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		return FIELDS;
 	}
 
-	private Collection<ReportKey> getTiers(String serviceId, RelabilityReportInput input,
+	private Collection<ReportKey> getTiers(String serviceId, ReliabilityReportInput input,
 			Pair<DateTime, DateTime> timeSpan) {
  		
 		Collection<String> keyTiers = GrafanaSettings.getServiceSettings(apiClient, serviceId).getTierNames();
@@ -452,7 +452,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		return result;
 	}
 
-	private List<VolumeOutput> getAppVolumes(String serviceId, RelabilityReportInput input,
+	private List<VolumeOutput> getAppVolumes(String serviceId, ReliabilityReportInput input,
 			Pair<DateTime, DateTime> timeSpan, Collection<String> apps) {
 
 		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
@@ -490,7 +490,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		}
 	}
 
-	protected List<ReportAsyncResult> processAsync(String serviceId, RelabilityReportInput input,
+	protected List<ReportAsyncResult> processAsync(String serviceId, ReliabilityReportInput input,
 			Pair<DateTime, DateTime> timeSpan, Collection<ReportKey> reportKeys) {
 
 		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
@@ -565,7 +565,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		return result;
 	}
 
-	private Collection<ReportKey> getActiveApplications(String serviceId, RelabilityReportInput input,
+	private Collection<ReportKey> getActiveApplications(String serviceId, ReliabilityReportInput input,
 			Pair<DateTime, DateTime> timeSpan) {
 
 		List<String> keyApps = new ArrayList<String>();
@@ -638,7 +638,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		return result;
 	}
 	
-	private Collection<ReportKey> getActiveDeployments(String serviceId, RelabilityReportInput input) {
+	private Collection<ReportKey> getActiveDeployments(String serviceId, ReliabilityReportInput input) {
 
 		List<String> selectedDeployments = input.getDeployments(serviceId);
 		
@@ -676,7 +676,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		return toReportKeys(result, false);
 	}
 	
-	private Collection<ReportKey> getActiveKeys(String serviceId, RelabilityReportInput regInput,
+	private Collection<ReportKey> getActiveKeys(String serviceId, ReliabilityReportInput regInput,
 			Pair<DateTime, DateTime> timeSpan) {
 		
 		Collection<ReportKey> keys;
@@ -840,7 +840,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		return result.toString(); 
 	}
 	
-	protected Collection<ReportKeyOutput> executeReport(String serviceId, RelabilityReportInput regInput,
+	protected Collection<ReportKeyOutput> executeReport(String serviceId, ReliabilityReportInput regInput,
 			Pair<DateTime, DateTime> timeSpan) {
 		
 		Collection<ReportKey> keys = getActiveKeys(serviceId, regInput, timeSpan);
@@ -951,11 +951,11 @@ protected static class ReportKey implements Comparable<ReportKey>{
 	@Override
 	public List<Series> process(FunctionInput functionInput) {
 
-		if (!(functionInput instanceof RelabilityReportInput)) {
+		if (!(functionInput instanceof ReliabilityReportInput)) {
 			throw new IllegalArgumentException("functionInput");
 		}
 
-		RelabilityReportInput input = (RelabilityReportInput) functionInput;
+		ReliabilityReportInput input = (ReliabilityReportInput) functionInput;
 
 		if (input.render == null) {
 			throw new IllegalStateException("Missing render mode");
@@ -974,7 +974,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		}
 	}
 	
-	private double getServiceSingleStat(String serviceId, Pair<DateTime, DateTime> timeSpan, RelabilityReportInput input)
+	private double getServiceSingleStat(String serviceId, Pair<DateTime, DateTime> timeSpan, ReliabilityReportInput input)
 	{
 		Collection<ReportKeyOutput> reportKeyOutputs = executeReport(serviceId, input, timeSpan);
 		Collection<ReportKeyResults> reportKeyResults = getReportResults(serviceId, input, reportKeyOutputs);
@@ -991,7 +991,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		return result;
 	}
 	
-	private double getSingleStat(Collection<String> serviceIds, Pair<DateTime, DateTime> timeSpan, RelabilityReportInput input)
+	private double getSingleStat(Collection<String> serviceIds, Pair<DateTime, DateTime> timeSpan, ReliabilityReportInput input)
 	{	
 		if (CollectionUtil.safeIsEmpty(serviceIds)) {
 			return 0;
@@ -1009,7 +1009,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		return result;
 	}
 
-	private List<Series> processSingleStat(RelabilityReportInput input)
+	private List<Series> processSingleStat(ReliabilityReportInput input)
 	{
 		Collection<String> serviceIds = getServiceIds(input);
 		
@@ -1025,7 +1025,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		return createSingleStatSeries(timeSpan, singleStatText);
 	}
 
-	private static Object formatValue(RelabilityReportInput input, int nonSevere, int severe)
+	private static Object formatValue(ReliabilityReportInput input, int nonSevere, int severe)
 	{
 		
 		Object result;
@@ -1222,7 +1222,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 	}
 	
 	private Collection<ReportKeyResults> getReportResults(String serviceId, 
-			RelabilityReportInput input, Collection<ReportKeyOutput> reportKeyOutputs) {
+			ReliabilityReportInput input, Collection<ReportKeyOutput> reportKeyOutputs) {
 		
 		RegressionReportSettings reportSettings = GrafanaSettings.getData(apiClient, serviceId).regression_report;
 		
@@ -1380,7 +1380,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 
 		List<List<Object>> result = new ArrayList<List<Object>>();
 		
-		RelabilityReportInput rrInput = (RelabilityReportInput)input;
+		ReliabilityReportInput rrInput = (ReliabilityReportInput)input;
 		
 		Collection<ReportKeyOutput> reportKeyOutputs = executeReport(serviceId, rrInput, timeSpan);
 		Collection<ReportKeyResults > reportKeyResults = getReportResults(serviceId, rrInput, reportKeyOutputs);
@@ -1430,7 +1430,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		}
 	}
 	
-	private String getPostfix(RelabilityReportInput input, double score) {
+	private String getPostfix(ReliabilityReportInput input, double score) {
 		
 		GraphType graphType = getGraphType(input);
 		
@@ -1500,7 +1500,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		return Pair.of(slowdowns, severeSlowdowns);
 	}
 	
-	private GraphType getGraphType(RelabilityReportInput input) {
+	private GraphType getGraphType(ReliabilityReportInput input) {
 		
 		if (input.graphType == null) {
 			return null;
@@ -1510,7 +1510,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		return result;
 	}
 	
-	private double getGraphValue(RelabilityReportInput input, ReportKeyResults reportKeyResult) {
+	private double getGraphValue(ReliabilityReportInput input, ReportKeyResults reportKeyResult) {
 		
 		GraphType graphType = getGraphType(input);
 
@@ -1535,7 +1535,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 	}
 	
 
-	private List<Series> processGraph(RelabilityReportInput input) {
+	private List<Series> processGraph(ReliabilityReportInput input) {
 
 		List<Series> result = new ArrayList<Series>();
 
