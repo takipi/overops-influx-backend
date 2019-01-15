@@ -48,7 +48,12 @@ public class RelabilityReportInput extends RegressionsInput {
 		 * have the highest volume of events. If any key tiers are defiend in the Settings dashboard
 		 * they are used first.
 		 */
-		Tiers;
+		Tiers,
+		
+		/**
+		 * The report will return a a single row for the target event set
+		 */
+		Default;
 	}
 	
 	/**
@@ -111,6 +116,47 @@ public class RelabilityReportInput extends RegressionsInput {
 	 * The target filters to report each row by: application, deployment or tier
 	 */
 	public ReportMode mode;
+	
+	public ReportMode getReportMode() {
+		
+		if (mode == null) {
+			return  ReportMode.Default;
+		}
+		
+		return mode;	
+	}
+	
+	/**
+	 * Control the type of events used to compute the report score
+	 *
+	 */
+	public enum ScoreType {
+		/**
+		 * Include regression analysis for new and increasing events
+		 */
+		Regressions, 
+		
+		/**
+		 * Include slowdown analysis 
+		 */
+		Slowdowns, 
+	
+		/**
+		 * Combine regression and slowdown analysis in the output (default)
+		 */
+		Combined
+	}
+	
+	public ScoreType scoreType;
+	
+	public ScoreType getScoreType() {
+		
+		if (scoreType == null) {
+			return ScoreType.Combined;
+		}
+		
+		return scoreType;
+	}
 	
 	/**
 	 * The max number of rows / time series points to return
