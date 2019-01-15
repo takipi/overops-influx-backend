@@ -1406,8 +1406,8 @@ protected static class ReportKey implements Comparable<ReportKey>{
 			Object slowdownsValue = formatValue(rrInput, reportKeyResult.slowdowns, reportKeyResult.severeSlowdowns);
 					
 			Object[] row = new Object[] { fromTo.getFirst(), fromTo.getSecond(), timeRange,
-					serviceId, reportKeyResult.output.reportKey,
-					getServiceValue(reportKeyResult.output.reportKey.name, serviceId, serviceIds),
+					serviceId, reportKeyResult.output.reportKey.name,
+					getServiceValue(getKeyName(reportKeyResult), serviceId, serviceIds),
 					newIssuesValue, regressionsValue, slowdownsValue,
 					reportKeyResult.newIssuesDesc, reportKeyResult.regressionsDesc, reportKeyResult.slowDownsDesc,
 					reportKeyResult.score,
@@ -1418,6 +1418,15 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		}
 
 		return result;
+	}
+	
+	private String getKeyName(ReportKeyResults reportKeyResult) {
+		
+		if (reportKeyResult.output.reportKey.isKey) {
+			return reportKeyResult.output.reportKey.name  + "*";
+		} else {
+			return reportKeyResult.output.reportKey.name;
+		}
 	}
 	
 	private String getPostfix(RelabilityReportInput input, double score) {
@@ -1544,10 +1553,12 @@ protected static class ReportKey implements Comparable<ReportKey>{
 				String seriesName;
 				String postfix = getPostfix(input, value);
 				
+				String name = getKeyName(reportKeyResult);
+				
 				if (postfix != null) {
-					seriesName = getServiceValue(reportKeyResult.output.reportKey.name + postfix, serviceId, serviceIds);
+					seriesName = getServiceValue(name + postfix, serviceId, serviceIds);
 				} else {
-					seriesName = getServiceValue(reportKeyResult.output.reportKey.name, serviceId, serviceIds);
+					seriesName = getServiceValue(name, serviceId, serviceIds);
 				}
 								
 				Series series = new Series();
