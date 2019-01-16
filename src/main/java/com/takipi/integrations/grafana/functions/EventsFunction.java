@@ -76,6 +76,14 @@ public class EventsFunction extends GrafanaFunction {
 		
 		private boolean equalLocations(Location a, Location b) {
 			
+			if (a == null) {
+				return b == null;
+			} 
+			
+			if (b == null) {
+				return false;
+			} 
+			
 			if (!Objects.equal(a.class_name, b.class_name)) {
 				return false;
 			}
