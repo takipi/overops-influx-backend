@@ -209,6 +209,11 @@ public abstract class GrafanaFunction
 			
 			Graph graph = graphResult.graphs.get(0);
 			
+			if (graph == null)
+			{
+				return null;
+			}
+			
 			if (!viewId.equals(graph.id))
 			{
 				return null;
