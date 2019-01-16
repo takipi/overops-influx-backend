@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.infra.Categories;
@@ -70,15 +71,18 @@ public class ServiceSettings {
 	
 	private boolean isMatch(Category a, Category b) {
 		
-		if ((a.labels == null) || (b.labels == null)) {
+		if ((CollectionUtil.safeIsEmpty(a.labels)) || (CollectionUtil.safeIsEmpty(b.labels))) {
 			return false;
 		}
 		
-		for (String labelA : a.labels) {
-			for (String labelB : b.labels) {
-				if (Objects.equals(labelA ,labelB)) {
-					return true;
-				}
+		for (String label : a.labels) {
+			
+			if (Strings.isNullOrEmpty(label)) {
+				continue;
+			}
+			
+			if (b.labels.contains(label)) {
+				return true;
 			}
 		}
 		
