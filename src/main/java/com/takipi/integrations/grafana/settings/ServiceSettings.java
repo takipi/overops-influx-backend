@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import com.google.common.collect.Lists;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.infra.Categories.Category;
@@ -16,7 +17,6 @@ import com.takipi.integrations.grafana.settings.input.ServiceSettingsData;
 public class ServiceSettings {
 	
 	private ServiceSettingsData data;
-	private boolean initialized;
 	private volatile Categories instance = null;
 	private String serviceId;
 	private ApiClient apiClient;
@@ -89,31 +89,31 @@ public class ServiceSettings {
 		
 		Categories defaultCategories = Categories.defaultCategories();
 		
-		if ((data.tiers == null) || (CollectionUtil.safeIsEmpty(data.tiers))) {
+		if (CollectionUtil.safeIsEmpty(data.tiers)) {
 			return defaultCategories;
 		}
 		
-		if ((instance == null) && (!initialized)) {
-			
+		if (instance == null) {
 			synchronized (Categories.class) {
-				if ((instance == null) && (!initialized)) {
-					
-					instance = new Categories();
-					instance.categories = new ArrayList<Categories.Category>(data.tiers);
+				if (instance == null) {
 					
 					for (Category tier : data.tiers) {
-						if ((tier.names == null) || (tier.names.size() == 0)) {
+						if (CollectionUtil.safeIsEmpty(tier.names)) {
 							for (Category defaultCategory : defaultCategories.categories) {
 								if (isMatch(tier, defaultCategory)) {
-									tier.names = defaultCategory.names;
+									tier.names = Lists.newArrayList(defaultCategory.names);
 									break;
 								}
 							}
 						}
 					}
 					
-					instance.categories.addAll(defaultCategories.categories);
-					initialized = true;
+					Categories newInstance = new Categories();
+					newInstance.categories = Lists.newArrayList(data.tiers);
+					
+					newInstance.categories.addAll(defaultCategories.categories);
+					
+					instance = newInstance;
 				}
 			}
 		}
