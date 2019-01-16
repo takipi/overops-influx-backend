@@ -181,7 +181,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "Chart the $graphType of the selected applications. If no applications are selected, any key applications defined in the Settings dashboard are selected. Otherwise the top $limit applications are selected.",
+      "description": "Chart the $graphType of the key applications. Key applications are marked with * and appear first followed by applications with the highest event volume up to limit of  $limit applications in total.",
       "fill": 1,
       "gridPos": {
         "h": 8,
@@ -732,7 +732,7 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "A report detailing score of the selected applications. If no applications are selected, any key applications defined in the Settings dashboard are selected. Otherwise the top $limit applications are selected. based on the weights set in the Settings dashboard.",
+      "description": "A report detailing score of the key applications. Key applications are marked with * and appear first followed by applications with the highest event volume up to limit of  $limit applications in total. based on the weights set in the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
         "h": 11,

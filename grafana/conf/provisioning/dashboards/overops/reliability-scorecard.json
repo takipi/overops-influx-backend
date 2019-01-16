@@ -149,7 +149,7 @@
         "valueName": "total"
       },
       "default_title_for_rows": "Metric",
-      "description": "Scores for the key application, as defined in the Settings dashboard. If no key applications are defined, the  $limit applications with the highest event volume are chosen.",
+      "description": "Scores for the key applications, as defined in the Settings dashboard. Key applications are marked with * and appear at the top of the list followed by applications with the highest event volume up to limit of  $limit applications in total.",
       "gridPos": {
         "h": 10,
         "w": 8,
@@ -233,7 +233,7 @@
         "valueName": "total"
       },
       "default_title_for_rows": "Metric",
-      "description": "Scores for the key code tiers, as defined in the Settings dashboard. If no key tiers are defined, the  $limit tiers with the highest event volume are chosen.",
+      "description": "Scores for the key code tiers, as defined in the Settings dashboard. Key code tiers are marked with * and appear at the top of the list followed by tiers with the highest event volume up to limit of  $limit tiers in total.",
       "gridPos": {
         "h": 10,
         "w": 8,
@@ -716,7 +716,7 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "A report detailing providing a weighted score or the key applications, as defined in the Settings dashboard. If no key applications are defined, the $limit applications with the highest event volume are chosen. Score weights set in the Settings dashboard.",
+      "description": "A report detailing providing a weighted score or the key applications, as defined in the Settings dashboard. Key applications are marked with * and appear at the top of the list followed by applications with the highest event volume up to limit of  $limit applications in total. Score weights set in the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
         "h": 11,
@@ -1137,7 +1137,7 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "A report detailing providing a weighted score or the key code tiers, as defined in the Settings dashboard. If no key tiers are defined, the $limit tiers with the highest event volume are chosen. Score weights set in the Settings dashboard.",
+      "description": "A report detailing providing a weighted score or the key code tiers, as defined in the Settings dashboard. Key code tiers are marked with * and appear at the top of the list followed by tiers with the highest event volume up to limit of  $limit tiers in total. Score weights set in the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
         "h": 11,
