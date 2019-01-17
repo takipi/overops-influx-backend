@@ -16,7 +16,11 @@ public class TimeUtil {
 	private static final String SO_FAR_WINDOW = "time >= ";
 	private static final String RANGE_WINDOW = "and time <= ";
 	private static final String MILLI_UNIT = "ms";
-
+	
+	public static final String MINUTE_POSTFIX = "m";
+	public static final String HOUR_POSTFIX = "h";
+	public static final String DAY_POSTFIX = "d";
+	
 	public static final String DEFAULT_TIME_RANGE_STR = "1d";
 	
 	private static final DateTimeFormatter fmt = ISODateTimeFormat.dateTime().withZoneUTC();
@@ -46,11 +50,11 @@ public class TimeUtil {
 		String result; 
 		
 		if (timeDelta > TimeUnit.DAYS.toMillis(1)) {
-			result = TimeUnit.MILLISECONDS.toDays(timeDelta) + "d";
+			result = TimeUnit.MILLISECONDS.toDays(timeDelta) + DAY_POSTFIX;
 		} else if (timeDelta > TimeUnit.HOURS.toMillis(1)) {
-			result = TimeUnit.MILLISECONDS.toHours(timeDelta) + "h";
+			result = TimeUnit.MILLISECONDS.toHours(timeDelta) + HOUR_POSTFIX;
 		} else {
-			result =  TimeUnit.MILLISECONDS.toMinutes(timeDelta) + "m";
+			result =  TimeUnit.MILLISECONDS.toMinutes(timeDelta) + MINUTE_POSTFIX;
 		}
 		
 		return result;
@@ -66,11 +70,11 @@ public class TimeUtil {
 		char timeUnit = timeWindowWithUnit.charAt(timeWindowWithUnit.length() - 1);
 
 		int delta = Integer.valueOf(timeWindow);
-		if (timeUnit == 'd') {
+		if (timeUnit == DAY_POSTFIX.charAt(0)) {
 			return delta * 24 * 60;
-		} else if (timeUnit == 'h') {
+		} else if (timeUnit == HOUR_POSTFIX.charAt(0)) {
 			return delta * 60;
-		} else if (timeUnit == 'm') {
+		} else if (timeUnit == MINUTE_POSTFIX.charAt(0)) {
 			return delta;
 		} else {
 			throw new IllegalStateException("Unknown time unit for " + timeWindowWithUnit);
@@ -196,7 +200,7 @@ public class TimeUtil {
 	
 	public static String getTimeUnit(String timeFilter) {
 		
-		if (!timeFilter.contains(LAST_TIME_WINDOW)) {
+		if ((timeFilter == null) || (!timeFilter.contains(LAST_TIME_WINDOW))) {
 			return null;
 		}
 		

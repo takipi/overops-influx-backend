@@ -18,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 22,
-  "iteration": 1547462463882,
+  "iteration": 1547722938032,
   "links": [
     {
       "icon": "external link",
@@ -60,12 +60,12 @@
         "null_color": "darkred",
         "null_value": "No data",
         "row_name": "",
-        "thresholds": "11,21,31,41,51,61,71,85,91",
+        "thresholds": "11,21,31,41,51,61,70,85,91",
         "transform_values": "_fa-square,red,1_ _fa-square,gray,9_|_fa-square,red,2_ _fa-square,gray,8_|_fa-square,red,3_ _fa-square,gray,7_|_fa-square,red,4_ _fa-square,gray,6_|_fa-square,red,5_ _fa-square,gray,5_|_fa-square,red,6_ _fa-square,gray,4_|_fa-square,red,7_ _fa-square,gray,3_|_fa-square,orange,8_ _fa-square,gray,2_|_fa-square,green,9_ _fa-square,gray,1_|_fa-square,green,10_ _fa-square,gray,0_",
         "valueName": "total"
       },
       "default_title_for_rows": "Metric",
-      "description": "Scores of the selected deployments. If no deployments are selected, the $limit most recent deployments are selected. Score weights are defined  in the Settings dashboard.",
+      "description": "Scores of the selected deployments. If no deployments are selected, the $limit most recent deployments are selected. Live deployments are marked with a *. Score weights are defined  in the Settings dashboard.",
       "gridPos": {
         "h": 10,
         "w": 8,
@@ -144,7 +144,7 @@
         "null_color": "darkred",
         "null_value": "No data",
         "row_name": "",
-        "thresholds": "11,21,31,41,51,61,71,85,91",
+        "thresholds": "11,21,31,41,51,61,70,85,91",
         "transform_values": "_fa-square,red,1_ _fa-square,gray,9_|_fa-square,red,2_ _fa-square,gray,8_|_fa-square,red,3_ _fa-square,gray,7_|_fa-square,red,4_ _fa-square,gray,6_|_fa-square,red,5_ _fa-square,gray,5_|_fa-square,red,6_ _fa-square,gray,4_|_fa-square,red,7_ _fa-square,gray,3_|_fa-square,orange,8_ _fa-square,gray,2_|_fa-square,green,9_ _fa-square,gray,1_|_fa-square,green,10_ _fa-square,gray,0_",
         "valueName": "total"
       },
@@ -228,7 +228,7 @@
         "null_color": "darkred",
         "null_value": "No data",
         "row_name": "",
-        "thresholds": "11,21,31,41,51,61,71,85,91",
+        "thresholds": "11,21,31,41,51,61,70,85,91",
         "transform_values": "_fa-square,red,1_ _fa-square,gray,9_|_fa-square,red,2_ _fa-square,gray,8_|_fa-square,red,3_ _fa-square,gray,7_|_fa-square,red,4_ _fa-square,gray,6_|_fa-square,red,5_ _fa-square,gray,5_|_fa-square,red,6_ _fa-square,gray,4_|_fa-square,red,7_ _fa-square,gray,3_|_fa-square,orange,8_ _fa-square,gray,2_|_fa-square,green,9_ _fa-square,gray,1_|_fa-square,green,10_ _fa-square,gray,0_",
         "valueName": "total"
       },
@@ -296,7 +296,7 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "A report detailing providing a weighted score of the selected deployments. If no deployments are selected, the $limit most recent deployments are selected. Score weights are defined  in the Settings dashboard.",
+      "description": "A report detailing providing a weighted score of the selected deployments. If no deployments are selected, the $limit most recent deployments are selected. Live deployments are marked with a *. Score weights are defined  in the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
         "h": 11,
@@ -327,7 +327,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "Score for  ${__cell} =  ${__cell_13}. $settingsPostfix. $drilldownPostfix",
+          "linkTooltip": "${__cell_13}. $settingsPostfix. $drilldownPostfix",
           "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-deployments=${__cell_4}&var-type=$tiers",
           "mappingType": 1,
           "pattern": "Name",
@@ -747,7 +747,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "Score for  ${__cell} =  ${__cell_13}. $settingsPostfix. $drilldownPostfix",
+          "linkTooltip": "${__cell_13}. $settingsPostfix. $drilldownPostfix",
           "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-applications=${__cell_4}&var-type=$tiers",
           "mappingType": 1,
           "pattern": "Name",
@@ -1168,7 +1168,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "Score for  ${__cell} =  ${__cell_13}. $settingsPostfix. $drilldownPostfix",
+          "linkTooltip": "${__cell_13}. $settingsPostfix. $drilldownPostfix",
           "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-type=-${__cell_4}&var-scoreType=Regressions",
           "mappingType": 1,
           "pattern": "Name",
@@ -1565,7 +1565,6 @@
       {
         "allValue": "None",
         "current": {
-          "selected": false,
           "tags": [],
           "text": "None",
           "value": [
@@ -1594,9 +1593,7 @@
         "allValue": "all",
         "current": {
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1644,7 +1641,9 @@
         "allValue": "all",
         "current": {
           "text": "All",
-          "value": "$__all"
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -1765,8 +1764,9 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "text": "10",
-          "value": "10"
+          "tags": [],
+          "text": "5",
+          "value": "5"
         },
         "hide": 0,
         "includeAll": false,
@@ -1775,12 +1775,12 @@
         "name": "limit",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "5",
             "value": "5"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "10",
             "value": "10"
           }
@@ -1870,5 +1870,5 @@
   "timezone": "",
   "title": "Reliability Scorecard",
   "uid": "lfqKXMfmz",
-  "version": 132
+  "version": 136
 }

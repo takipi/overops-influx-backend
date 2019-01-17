@@ -699,7 +699,7 @@ public class RegressionFunction extends EventsFunction
 		
 		Collection<GraphSliceTask> baselineGraphTasks = getGraphTasks(serviceId, viewId, baselinePoints, baselineInput, 
 				VolumeType.all, regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan),
-			regressionWindow.activeWindowStart, regressionInput.baselineTimespan, 0, false);
+			regressionWindow.activeWindowStart, regressionInput.baselineTimespan, regressionWindow.activeTimespan, false);
 		
 		int graphActiveTimespan;
 		
@@ -741,6 +741,7 @@ public class RegressionFunction extends EventsFunction
 		
 		GraphResult baselineGraphResult = new GraphResult();
 		baselineGraphResult.graphs = Collections.singletonList(baselineGraph);		
+		
 		
 		ApiCache.putEventGraph(apiClient, serviceId, input, VolumeType.all, null,
 				input.pointsWanted, 0, graphActiveTimespan, 0, Response.of(200, activeGraphResult));
@@ -868,8 +869,11 @@ public class RegressionFunction extends EventsFunction
 		RegressionInput regressionInput = regressionInputs.getFirst();
 		RegressionWindow regressionWindow = regressionInputs.getSecond();
 		
-		Map<String, EventResult> eventListMap = getEventMap(serviceId, input, timespan.getFirst(), timespan.getSecond(),
-				null, input.pointsWanted);
+		DateTime from = regressionWindow.activeWindowStart;
+		DateTime to = regressionWindow.activeWindowStart.plusMinutes(regressionInput.activeTimespan);
+		
+		Map<String, EventResult> eventListMap = getEventMap(serviceId, input,
+			from, to, null, input.pointsWanted);
 	
 		Graph baselineGraph;
 		Graph activeWindowGraph;
