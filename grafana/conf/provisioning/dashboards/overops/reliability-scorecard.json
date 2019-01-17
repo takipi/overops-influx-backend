@@ -18,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 22,
-  "iteration": 1547718351483,
+  "iteration": 1547722938032,
   "links": [
     {
       "icon": "external link",
@@ -65,7 +65,7 @@
         "valueName": "total"
       },
       "default_title_for_rows": "Metric",
-      "description": "Scores of the selected deployments. If no deployments are selected, the $limit most recent deployments are selected. Score weights are defined  in the Settings dashboard.",
+      "description": "Scores of the selected deployments. If no deployments are selected, the $limit most recent deployments are selected. Live deployments are marked with a *. Score weights are defined  in the Settings dashboard.",
       "gridPos": {
         "h": 10,
         "w": 8,
@@ -296,7 +296,7 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "A report detailing providing a weighted score of the selected deployments. If no deployments are selected, the $limit most recent deployments are selected. Score weights are defined  in the Settings dashboard.",
+      "description": "A report detailing providing a weighted score of the selected deployments. If no deployments are selected, the $limit most recent deployments are selected. Live deployments are marked with a *. Score weights are defined  in the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
         "h": 11,
@@ -327,7 +327,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "Score for  ${__cell} =  ${__cell_13}. $settingsPostfix. $drilldownPostfix",
+          "linkTooltip": "${__cell_13}. $settingsPostfix. $drilldownPostfix",
           "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-deployments=${__cell_4}&var-type=$tiers",
           "mappingType": 1,
           "pattern": "Name",
@@ -747,7 +747,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "Score for  ${__cell} =  ${__cell_13}. $settingsPostfix. $drilldownPostfix",
+          "linkTooltip": "${__cell_13}. $settingsPostfix. $drilldownPostfix",
           "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-applications=${__cell_4}&var-type=$tiers",
           "mappingType": 1,
           "pattern": "Name",
@@ -1168,7 +1168,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "Score for  ${__cell} =  ${__cell_13}. $settingsPostfix. $drilldownPostfix",
+          "linkTooltip": "${__cell_13}. $settingsPostfix. $drilldownPostfix",
           "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-type=-${__cell_4}&var-scoreType=Regressions",
           "mappingType": 1,
           "pattern": "Name",
@@ -1565,7 +1565,6 @@
       {
         "allValue": "None",
         "current": {
-          "selected": false,
           "tags": [],
           "text": "None",
           "value": [
@@ -1642,7 +1641,9 @@
         "allValue": "all",
         "current": {
           "text": "All",
-          "value": "$__all"
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -1689,7 +1690,9 @@
         "allValue": "All",
         "current": {
           "text": "All",
-          "value": "$__all"
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -1760,7 +1763,8 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
+          "selected": true,
+          "tags": [],
           "text": "5",
           "value": "5"
         },
@@ -1866,5 +1870,5 @@
   "timezone": "",
   "title": "Reliability Scorecard",
   "uid": "lfqKXMfmz",
-  "version": 134
+  "version": 136
 }

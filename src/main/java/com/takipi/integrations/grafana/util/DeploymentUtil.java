@@ -1,6 +1,7 @@
 package com.takipi.integrations.grafana.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -87,6 +88,17 @@ public class DeploymentUtil {
 		}
 		
 		return result;
+	}
+	
+	public static Collection<SummarizedDeployment> getDeployments(ApiClient apiClient, String serviceId, boolean active) {
+		
+		Response<DeploymentsResult> response = ApiCache.getDeployments(apiClient, serviceId, active);
+		
+		if ((response == null) || (response.data == null)) {
+			return Collections.emptyList();
+		}
+		
+		return response.data.deployments;
 	}
 	
 	public static Pair<String, List<String>> getActiveDeployment(ApiClient apiClient,

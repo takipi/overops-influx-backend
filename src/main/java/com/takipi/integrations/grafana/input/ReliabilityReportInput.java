@@ -102,6 +102,11 @@ public class ReliabilityReportInput extends RegressionsInput {
 		UniqueEvents,
 		
 		/**
+		 * chart the relative rate of events of the target app, deployment, tier
+		 */
+		EventRate,
+		
+		/**
 		 * chart the reliability score of the target app, deployment, tier
 		 */
 		Score;

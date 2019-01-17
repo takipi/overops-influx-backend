@@ -18,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 36,
-  "iteration": 1547242214784,
+  "iteration": 1547722845879,
   "links": [
     {
       "icon": "external link",
@@ -84,7 +84,7 @@
         },
         {
           "alias": "/.*(Y).$/",
-          "color": "#eab839"
+          "color": "#ed8128"
         },
         {
           "alias": "/.*(G).$/",
@@ -214,11 +214,11 @@
         },
         {
           "alias": "/.*(R).$/",
-          "color": "#e0752d"
+          "color": "#e24d42"
         },
         {
           "alias": "/.*(Y).$/",
-          "color": "#eab839"
+          "color": "#ed8128"
         },
         {
           "alias": "/.*(G).$/",
@@ -343,7 +343,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "Score for  ${__cell} =  ${__cell_13}. $settingsPostfix. $drilldownPostfix",
+          "linkTooltip": "${__cell_13}. $settingsPostfix. $drilldownPostfix",
           "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-deployments=${__cell_4}",
           "mappingType": 1,
           "pattern": "Name",
@@ -763,7 +763,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "Score for  ${__cell} =  ${__cell_13}. $settingsPostfix. $drilldownPostfix",
+          "linkTooltip": "${__cell_13}. $settingsPostfix. $drilldownPostfix",
           "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-applications=${__cell_4}",
           "mappingType": 1,
           "pattern": "Name",
@@ -1162,10 +1162,11 @@
       {
         "allValue": "all",
         "current": {
+          "selected": false,
           "tags": [],
-          "text": "All",
+          "text": "None",
           "value": [
-            "$__all"
+            "None"
           ]
         },
         "datasource": "OO",
@@ -1285,10 +1286,12 @@
         "allValue": "all",
         "current": {
           "text": "All",
-          "value": "$__all"
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": "OO",
-        "hide": 2,
+        "hide": 0,
         "includeAll": true,
         "label": "Type",
         "multi": true,
@@ -1385,7 +1388,7 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
+          "tags": [],
           "text": "Score",
           "value": "Score"
         },
@@ -1426,7 +1429,7 @@
             "value": "Severe Slowdowns"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "Event Volume",
             "value": "Event Volume"
           },
@@ -1437,17 +1440,23 @@
           },
           {
             "selected": false,
+            "text": "Event Rate",
+            "value": "Event Rate"
+          },
+          {
+            "selected": true,
             "text": "Score",
             "value": "Score"
           }
         ],
-        "query": "New Issues,Severe New Issues,Regressions,Severe Regressions,Slowdowns,Severe Slowdowns,Event Volume, Unique Events,Score",
+        "query": "New Issues,Severe New Issues,Regressions,Severe Regressions,Slowdowns,Severe Slowdowns,Event Volume, Unique Events,Event Rate,Score",
         "skipUrlSync": false,
         "type": "custom"
       },
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "Weights are defined in the Settings dashboard",
           "value": "Weights are defined in the Settings dashboard"
         },
@@ -1470,6 +1479,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "Click to drill down",
           "value": "Click to drill down"
         },
@@ -1492,6 +1502,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "70|85",
           "value": "70|85"
         },
@@ -1514,6 +1525,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "(R)|(Y)|(G)",
           "value": "(R)|(Y)|(G)"
         },
@@ -1568,5 +1580,5 @@
   "timezone": "",
   "title": "Reliability Trend",
   "uid": "82eIMSsmz",
-  "version": 26
+  "version": 33
 }

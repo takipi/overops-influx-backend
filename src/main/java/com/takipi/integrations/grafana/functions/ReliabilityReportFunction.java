@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Objects;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.data.deployment.SummarizedDeployment;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.result.event.EventResult;
@@ -93,7 +94,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		}
 	}
 	
-protected static class ReportKey implements Comparable<ReportKey>{
+	protected static class ReportKey implements Comparable<ReportKey>{
 		
 		protected String name;
 		protected boolean isKey;
@@ -132,6 +133,12 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		}
 	}
 	
+	protected static class KeyOutputEventVolume {
+		protected long volume;
+		protected int count;
+		protected double rate;
+	}
+	
 	protected static class ReportKeyOutput {
 		protected ReportKey reportKey;
 		protected RegressionKeyData regressionData;
@@ -156,8 +163,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		protected String description; 
 		protected double score;
 		protected String scoreDesc;
-		protected long volume;
-		protected int uniqueEvents;
+		protected KeyOutputEventVolume volume;
 		
 		protected ReportKeyResults(ReportKeyOutput output) {
 			this.output = output;	
@@ -654,12 +660,12 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		return result;
 	}
 
-	private static void sortDeployments(List<String> deps) {
-		deps.sort(new Comparator<String>() {
+	private static void sortDeployments(List<SummarizedDeployment> deps) {
+		deps.sort(new Comparator<SummarizedDeployment>() {
 
 			@Override
-			public int compare(String o1, String o2) {
-				return DeploymentUtil.compareDeployments(o1, o2);
+			public int compare(SummarizedDeployment o1, SummarizedDeployment o2) {
+				return DeploymentUtil.compareDeployments(o1.name, o2.name);
 			}
 		});
 
@@ -676,7 +682,8 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		return result;
 	}
 	
-	private Collection<ReportKey> getActiveDeployments(String serviceId, ReliabilityReportInput input) {
+	private Collection<ReportKey> getActiveDeployments(String serviceId, 
+		ReliabilityReportInput input, Pair<DateTime, DateTime> timespan) {
 
 		List<String> selectedDeployments = input.getDeployments(serviceId);
 		
@@ -684,25 +691,55 @@ protected static class ReportKey implements Comparable<ReportKey>{
 			return toReportKeys(selectedDeployments, false);
 		}
 		
-		List<String> activeDeps = ClientUtil.getDeployments(apiClient, serviceId, true);
+		List<ReportKey> result = new ArrayList<ReportKey>();
 
-		sortDeployments(activeDeps);
+		Collection<SummarizedDeployment> activeDeps = DeploymentUtil.getDeployments(apiClient, serviceId, true);
+			
+		List<SummarizedDeployment> sortedActive = new ArrayList<SummarizedDeployment>(activeDeps);
+		sortDeployments(sortedActive);
 
-		List<String> result = new ArrayList<String>();
-
-		for (int i = 0; i < Math.min(input.limit, activeDeps.size()); i++) {
-			result.add(activeDeps.get(i));
+		for (int i = 0; i < Math.min(input.limit, sortedActive.size()); i++) {
+			
+			SummarizedDeployment activeDep = sortedActive.get(i);
+			
+			if (activeDep.first_seen != null) {
+				DateTime firstSeen = TimeUtil.getDateTime(activeDep.first_seen);
+				if (firstSeen.isBefore(timespan.getFirst())) {
+					continue;
+				}
+			}
+			
+			result.add(new ReportKey(activeDep.name, true));
 		}
-
+		
 		if (input.limit - result.size() > 0) {
-			List<String> nonActiveDeps = ClientUtil.getDeployments(apiClient, serviceId, false);
-			sortDeployments(nonActiveDeps);
+			
+			Collection<SummarizedDeployment> nonActiveDeps = DeploymentUtil.getDeployments(apiClient, serviceId, false);
+			List<SummarizedDeployment> sortedNonActive = new ArrayList<SummarizedDeployment>(nonActiveDeps);
 
-			for (int i = 0; i < nonActiveDeps.size(); i++) {
-				String dep = nonActiveDeps.get(i);
+			sortDeployments(sortedNonActive);
+
+			for (int i = 0; i < sortedNonActive.size(); i++) {
+				SummarizedDeployment dep = sortedNonActive.get(i);
 				
-				if (!result.contains(dep)) {
-					result.add(dep);
+				if (dep.first_seen != null) {
+					DateTime firstSeen = TimeUtil.getDateTime(dep.first_seen);
+					if (firstSeen.isBefore(timespan.getFirst())) {
+						continue;
+					}
+				}
+				
+				boolean isLive = false;
+				
+				if (dep.last_seen != null) {
+					DateTime lastSeen = TimeUtil.getDateTime(dep.last_seen);
+					isLive = lastSeen.plusHours(1).isAfter(timespan.getSecond());
+				}
+		
+				ReportKey key = new ReportKey(dep.name, isLive);
+				
+				if (!result.contains(key)) {
+					result.add(key);
 				}
 				
 				if (result.size() >= input.limit) {
@@ -711,7 +748,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 			}
 		}
 
-		return toReportKeys(result, false);
+		return result;
 	}
 	
 	private Collection<ReportKey> getActiveKeys(String serviceId, ReliabilityReportInput regInput,
@@ -724,7 +761,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		switch (mode) {
 				
 			case Deployments:
-				keys = getActiveDeployments(serviceId, regInput);
+				keys = getActiveDeployments(serviceId, regInput, timeSpan);
 				break;
 					
 			case Tiers: 
@@ -801,7 +838,8 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		return result;
 	}
 	
-	public static Pair<Double, String> getScore(RegressionReportSettings reportSettings, 
+	public static Pair<Double, String> getScore(
+		ReliabilityReportInput input, RegressionReportSettings reportSettings, 
 		ReportKeyResults reportKeyResults) {
 		
 		RegressionOutput regressionOutput = reportKeyResults.output.regressionData.regressionOutput;
@@ -825,13 +863,14 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		double rawScore = (newEventsScore + severeNewEventScore + criticalRegressionsScore + regressionsScore) / scoreDays;
 		double resultScore = Math.max(100 - (weight * rawScore), 0);
 		
-		String description = getScoreDescription(reportSettings, reportKeyResults,
+		String description = getScoreDescription(input, reportSettings, reportKeyResults,
 				resultScore, scoreWindow);
 		
 		return Pair.of(resultScore, description);
 	}
 	
-	private static String getScoreDescription(RegressionReportSettings reportSettings,
+	private static String getScoreDescription(ReliabilityReportInput input,
+		RegressionReportSettings reportSettings,
 		ReportKeyResults reportKeyResults, double resultScore, int period) {
 		
 		StringBuilder result = new StringBuilder();
@@ -841,7 +880,17 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		
 		RegressionOutput regressionOutput = reportKeyResults.output.regressionData.regressionOutput;
 
-		result.append("100");
+		result.append("Score for ");
+		result.append(reportKeyResults.output.reportKey.name);
+		
+		if (input.getReportMode() == ReportMode.Deployments) {
+			result.append(", introduced ");
+			int activeTimespan = reportKeyResults.output.regressionData.regressionOutput.regressionInput.activeTimespan;
+			Date introduced = DateTime.now().minusMinutes(activeTimespan).toDate();
+			result.append(prettyTime.format(introduced));
+		}
+		
+		result.append(" = 100");
 		
 		int allIssuesCount = regressionOutput.newIssues + regressionOutput.severeNewIssues + 
 				regressionOutput.criticalRegressions + regressionOutput.regressions +
@@ -1309,7 +1358,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 			
 			if (reportKeyOutput.regressionData != null) {
 			
-				Pair<Double, String> scorePair = getScore(reportSettings, reportKeyResults);
+				Pair<Double, String> scorePair = getScore(input, reportSettings, reportKeyResults);
 				
 				reportKeyResults.score = scorePair.getFirst();
 				reportKeyResults.scoreDesc = scorePair.getSecond();
@@ -1317,13 +1366,8 @@ protected static class ReportKey implements Comparable<ReportKey>{
 				reportKeyResults.description = getDescription(reportKeyOutput.regressionData, 
 					reportKeyResults.newIssuesDesc, reportKeyResults.regressionsDesc, reportKeyResults.slowDownsDesc);
 					
-				 Pair<Long, Integer>  volumePair = getKeyOutputEventVolume(reportKeyOutput);
+				reportKeyResults.volume = getKeyOutputEventVolume(reportKeyOutput);
 				 
-				 if (volumePair != null) {
-					 reportKeyResults.volume = volumePair.getFirst().longValue();
-					 reportKeyResults.uniqueEvents = volumePair.getSecond().intValue();
-				 }
-				
 				result.add(reportKeyResults);
 			}			
 		}
@@ -1364,7 +1408,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		return results.subList(0,  limit);
 	}
 	
-	private Pair<Long, Integer> getKeyOutputEventVolume(ReportKeyOutput output) {
+	private KeyOutputEventVolume getKeyOutputEventVolume(ReportKeyOutput output) {
 		
 		Collection<EventResult> events = output.regressionData.regressionOutput.regressionInput.events;
 		
@@ -1372,18 +1416,29 @@ protected static class ReportKey implements Comparable<ReportKey>{
 			return null;
 		}
 		
-		int count = 0;
-		long volume = 0l;
-		
+	
+		KeyOutputEventVolume result = new KeyOutputEventVolume();
+
 		for (EventResult event : events) {
 			
 			if (event.stats != null) {
-				volume += event.stats.hits;
-				count++;
+				result.volume += event.stats.hits;
+				result.count++;
 			}	
 		}
+		if (result.volume > 0) {
+			
+			for (EventResult event : events) {
+				
+				if ((event.stats == null)  || (event.stats.invocations == 0)) {
+					continue;
+				}
+					
+				result.rate += (double)event.stats.hits / (double)event.stats.invocations / result.volume;
+			}
+		}
 		
-		return Pair.of(volume, count);
+		return result;
 	}
 	
 	private String getDescription(RegressionKeyData regressionData, String newErrorsDesc, 
@@ -1392,6 +1447,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		StringBuilder result = new StringBuilder();
 		
 		result.append(regressionData.reportKey);
+		
 		result.append(" over ");
 		
 		DateTime activeWindow = regressionData.regressionOutput.regressionInput.activeWindowStart;
@@ -1573,14 +1629,34 @@ protected static class ReportKey implements Comparable<ReportKey>{
 			case SevereRegressions: return reportKeyResult.criticalRegressions; 
 			case Slowdowns: return reportKeyResult.slowdowns + reportKeyResult.severeSlowdowns;
 			case SevereSlowdowns: return reportKeyResult.severeSlowdowns; 
-			case EventVolume: return reportKeyResult.volume; 
-			case UniqueEvents: return reportKeyResult.uniqueEvents;
+			
+			case EventVolume: 
+				if (reportKeyResult.volume != null) {
+					return reportKeyResult.volume.volume;
+				} else {
+					return 0;
+				}
+			
+			case UniqueEvents: 
+				if (reportKeyResult.volume != null) {
+					return reportKeyResult.volume.count;
+				} else {
+					return 0;
+				}
+			
+			case EventRate: 
+				if (reportKeyResult.volume != null) {
+					return reportKeyResult.volume.rate;
+				} else {
+					return 0;
+				}
+			
+			
 			case Score: return reportKeyResult.score; 
 		}
 		
 		return 0;
 	}
-	
 
 	private List<Series> processGraph(ReliabilityReportInput input) {
 
