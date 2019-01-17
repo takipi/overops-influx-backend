@@ -26,6 +26,7 @@ public class EventFilter
 	public static final String TERM = "<term>";
 	public static final String ARCHIVE = "Archive";
 	public static final String RESOLVED = "Resolved";
+	public static final String APP_CODE = "Application";
 	
 	private Collection<String> allowedTypes;
 	private Collection<String> types;
@@ -178,9 +179,12 @@ public class EventFilter
 		if (categoryTypes.size() == 0) 	{
 			return false;
 		}
+		
+		Set<String> originLabels = null;
+		Set<String> locationLabels = null;
 			
 		if (event.error_origin != null) {
-			Set<String> originLabels = categories.getCategories(event.error_origin.class_name);
+			originLabels = categories.getCategories(event.error_origin.class_name);
 			
 			if (matchLabels(originLabels)) {
 				return false;
@@ -188,11 +192,18 @@ public class EventFilter
 		}
 		
 		if (event.error_location != null) {
-			Set<String> locationLabels = categories.getCategories(event.error_location.class_name);
+			locationLabels = categories.getCategories(event.error_location.class_name);
 			
 			if (matchLabels(locationLabels)) {
 				return false;
 			}
+		}
+		
+		boolean hasCategories = (!CollectionUtil.safeIsEmpty(originLabels)) ||
+			(!CollectionUtil.safeIsEmpty(locationLabels));
+			
+		if ((categoryTypes.contains(APP_CODE)) && (!hasCategories)) {
+			return false;
 		}
 		
 		return true;

@@ -18,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 22,
-  "iteration": 1547462463882,
+  "iteration": 1547718351483,
   "links": [
     {
       "icon": "external link",
@@ -60,7 +60,7 @@
         "null_color": "darkred",
         "null_value": "No data",
         "row_name": "",
-        "thresholds": "11,21,31,41,51,61,71,85,91",
+        "thresholds": "11,21,31,41,51,61,70,85,91",
         "transform_values": "_fa-square,red,1_ _fa-square,gray,9_|_fa-square,red,2_ _fa-square,gray,8_|_fa-square,red,3_ _fa-square,gray,7_|_fa-square,red,4_ _fa-square,gray,6_|_fa-square,red,5_ _fa-square,gray,5_|_fa-square,red,6_ _fa-square,gray,4_|_fa-square,red,7_ _fa-square,gray,3_|_fa-square,orange,8_ _fa-square,gray,2_|_fa-square,green,9_ _fa-square,gray,1_|_fa-square,green,10_ _fa-square,gray,0_",
         "valueName": "total"
       },
@@ -144,7 +144,7 @@
         "null_color": "darkred",
         "null_value": "No data",
         "row_name": "",
-        "thresholds": "11,21,31,41,51,61,71,85,91",
+        "thresholds": "11,21,31,41,51,61,70,85,91",
         "transform_values": "_fa-square,red,1_ _fa-square,gray,9_|_fa-square,red,2_ _fa-square,gray,8_|_fa-square,red,3_ _fa-square,gray,7_|_fa-square,red,4_ _fa-square,gray,6_|_fa-square,red,5_ _fa-square,gray,5_|_fa-square,red,6_ _fa-square,gray,4_|_fa-square,red,7_ _fa-square,gray,3_|_fa-square,orange,8_ _fa-square,gray,2_|_fa-square,green,9_ _fa-square,gray,1_|_fa-square,green,10_ _fa-square,gray,0_",
         "valueName": "total"
       },
@@ -228,7 +228,7 @@
         "null_color": "darkred",
         "null_value": "No data",
         "row_name": "",
-        "thresholds": "11,21,31,41,51,61,71,85,91",
+        "thresholds": "11,21,31,41,51,61,70,85,91",
         "transform_values": "_fa-square,red,1_ _fa-square,gray,9_|_fa-square,red,2_ _fa-square,gray,8_|_fa-square,red,3_ _fa-square,gray,7_|_fa-square,red,4_ _fa-square,gray,6_|_fa-square,red,5_ _fa-square,gray,5_|_fa-square,red,6_ _fa-square,gray,4_|_fa-square,red,7_ _fa-square,gray,3_|_fa-square,orange,8_ _fa-square,gray,2_|_fa-square,green,9_ _fa-square,gray,1_|_fa-square,green,10_ _fa-square,gray,0_",
         "valueName": "total"
       },
@@ -1594,9 +1594,7 @@
         "allValue": "all",
         "current": {
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1691,9 +1689,7 @@
         "allValue": "All",
         "current": {
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1764,9 +1760,9 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "text": "10",
-          "value": "10"
+          "selected": false,
+          "text": "5",
+          "value": "5"
         },
         "hide": 0,
         "includeAll": false,
@@ -1775,12 +1771,12 @@
         "name": "limit",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "5",
             "value": "5"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "10",
             "value": "10"
           }
@@ -1870,5 +1866,5 @@
   "timezone": "",
   "title": "Reliability Scorecard",
   "uid": "lfqKXMfmz",
-  "version": 132
+  "version": 134
 }

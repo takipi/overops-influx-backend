@@ -38,6 +38,12 @@ public class BaselineWindowInput extends BaseEventVolumeInput
 	}
 	
 	/**
+	 * Control whether output is returned in minute format (e.g. "90m"), 
+	 * or if true in human readable format (e.g. "An hour an half ago").
+	 */
+	public boolean prettyFormat;
+	
+	/**
 	 * Set whether to return the combined value of the active, baseline window,
 	 * or their combined time span. Default is Active.
 	 */

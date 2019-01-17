@@ -23,6 +23,7 @@ import com.google.common.base.Objects;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
+import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventSlimResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
@@ -30,11 +31,12 @@ import com.takipi.api.client.util.client.ClientUtil;
 import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.performance.calc.PerformanceState;
 import com.takipi.api.client.util.regression.RateRegression;
-import com.takipi.api.client.util.regression.RegressionResult;
+import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
+import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionData;
 import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOutput;
 import com.takipi.integrations.grafana.functions.TransactionsListFunction.TransactionData;
 import com.takipi.integrations.grafana.functions.TransactionsListFunction.TransactionDataResult;
@@ -132,7 +134,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 	
 	protected static class ReportKeyOutput {
 		protected ReportKey reportKey;
-		protected RegressionData regressionData;
+		protected RegressionKeyData regressionData;
 		protected Collection<TransactionData> transactionDatas;
 		
 		protected ReportKeyOutput(ReportKey key) {
@@ -189,14 +191,17 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		}
 	}
 
-	public static class SlowdownAsyncTask extends BaseAsyncTask implements Callable<Object> {
+	public class SlowdownAsyncTask extends BaseAsyncTask implements Callable<Object> {
+		
+		protected String viewId;
 		protected TransactionsListFunction function;
 		protected ReportKey reportKey;
 		protected String serviceId;
 		protected BaseEventVolumeInput input;
 		protected Pair<DateTime, DateTime> timeSpan;
 
-		protected SlowdownAsyncTask(TransactionsListFunction function, ReportKey key, String serviceId, RegressionsInput input,
+		protected SlowdownAsyncTask(String serviceId, String viewId, TransactionsListFunction function, 
+				ReportKey key, RegressionsInput input,
 				Pair<DateTime, DateTime> timeSpan) {
 
 			this.function = function;
@@ -204,6 +209,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 			this.serviceId = serviceId;
 			this.input = input;
 			this.timeSpan = timeSpan;
+			this.viewId = viewId;
 		}
 
 		@Override
@@ -213,7 +219,25 @@ protected static class ReportKey implements Comparable<ReportKey>{
 
 			try {
 
-				TransactionDataResult transactionDataResult = function.getTransactionDatas(serviceId, timeSpan, input, false, 0);				
+				RegressionFunction regressionFunction = new RegressionFunction(apiClient);
+				Pair<RegressionInput, RegressionWindow> regPair = regressionFunction.getRegressionInput(serviceId, viewId, input, timeSpan);
+				
+				if (regPair == null) {
+					return new SlowdownAsyncResult(reportKey, Collections.emptyList());
+				}
+					
+				RegressionWindow regressionWindow = regPair.getSecond();
+				
+				DateTime to = DateTime.now();
+				DateTime from = to.minusMinutes(regressionWindow.activeTimespan);
+				Pair<DateTime, DateTime> activeWindow = Pair.of(from, to);
+				
+				Collection<TransactionGraph> transactionGraphs = getTransactionGraphs(input,
+						serviceId, viewId, activeWindow, input.getSearchText(), 
+						input.pointsWanted, regressionWindow.activeTimespan, 0);
+				
+				TransactionDataResult transactionDataResult = function.getTransactionDatas(
+						transactionGraphs, serviceId, viewId, timeSpan, input, false, 0);				
 				
 				SlowdownAsyncResult result;
 				
@@ -430,12 +454,15 @@ protected static class ReportKey implements Comparable<ReportKey>{
 				
 		for (EventResult event : eventsMap.values()) {
 						
+			boolean is3rdPartyCode = false;
+			
 			if (event.error_origin != null) {
 				
-				Set<String> originlabels = categories.getCategories(event.error_origin.class_name);
+				Set<String> originLabels = categories.getCategories(event.error_origin.class_name);
 				
-				if (originlabels != null) {
-					result.addAll(toReportKeys(originlabels, false));
+				if (!CollectionUtil.safeIsEmpty(originLabels)) {
+					result.addAll(toReportKeys(originLabels, false));
+					is3rdPartyCode = true; 
 				}
 			}
 			
@@ -443,9 +470,14 @@ protected static class ReportKey implements Comparable<ReportKey>{
 				
 				Set<String> locationLabels = categories.getCategories(event.error_location.class_name);
 				
-				if (locationLabels != null) {
+				if (!CollectionUtil.safeIsEmpty(locationLabels)) {
 					result.addAll(toReportKeys(locationLabels, false));
+					is3rdPartyCode = true; 
 				}
+			}
+			
+			if (!is3rdPartyCode) {
+				result.add(new ReportKey(EventFilter.APP_CODE, false));
 			}
 		}
 		
@@ -475,13 +507,13 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		return result;
 	}
 
-	protected static class RegressionData {
+	protected static class RegressionKeyData {
 
 		protected ReportKey reportKey;
 		protected RateRegression regression;
 		protected RegressionOutput regressionOutput;
 
-		protected RegressionData(RateRegression regression, ReportKey key,
+		protected RegressionKeyData(RateRegression regression, ReportKey key,
 				RegressionOutput regressionOutput) {
 
 			this.reportKey = key;
@@ -497,6 +529,12 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		List<ReportAsyncResult> result = new ArrayList<ReportAsyncResult>();
 				
 		ScoreType scoreType = input.getScoreType();
+		
+		String viewId = getViewId(serviceId, input.view);
+		
+		if (viewId == null) {
+			return Collections.emptyList();
+		}
 		
 		for (ReportKey reportKey : reportKeys) {
 			
@@ -520,8 +558,8 @@ protected static class ReportKey implements Comparable<ReportKey>{
 			}
 			
 			if ((scoreType == ScoreType.Combined) || (scoreType == ScoreType.Slowdowns)) {
-				tasks.add(new SlowdownAsyncTask(transactionsListFunction, 
-					reportKey, serviceId, transactionInput, timeSpan));
+				tasks.add(new SlowdownAsyncTask(serviceId, viewId, transactionsListFunction, 
+					reportKey, transactionInput, timeSpan));
 			}
 		}
 		
@@ -778,7 +816,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 	
 		double weight;
 		
-		if (reportKeyResults.output.reportKey.isKey && reportSettings.key_score_weight > 0) {
+		if ((reportKeyResults.output.reportKey.isKey) && (reportSettings.key_score_weight > 0)) {
 			weight = reportSettings.key_score_weight;
 		} else {
 			weight = reportSettings.score_weight;	
@@ -868,7 +906,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 					continue;
 				}
 				
-				RegressionData regressionData = new RegressionData(regressionOutput.rateRegression, asyncResult.key, 
+				RegressionKeyData regressionData = new RegressionKeyData(regressionOutput.rateRegression, asyncResult.key, 
 						regressionOutput);
 				
 				reportKeyOutput.regressionData = regressionData;
@@ -1102,19 +1140,27 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		return result.toString();
 	}
 	
-	private String getRegressionsDesc(RateRegression rateRegression, int regressionsSize,
+	private String getRegressionsDesc(RegressionOutput regressionOutput, int regressionsSize,
 		int severeRegressionsSize) {
 		
 		StringBuilder result = new StringBuilder();
 		
 		int size = 0;
-		
-		Collection<RegressionResult> regressions =  rateRegression.getSortedAllRegressions();
-		
-		for (RegressionResult regressionResult : regressions) {
+				
+		for (EventData eventData : regressionOutput.eventDatas) {
 			
-			double baseRate = (double) regressionResult.getBaselineHits() / (double) regressionResult.getBaselineInvocations();
-			double activeRate = (double) regressionResult.getEvent().stats.hits / (double) regressionResult.getEvent().stats.invocations;
+			if (!(eventData instanceof RegressionData)) {
+				continue;
+			}
+			
+			RegressionData regressionData = (RegressionData)eventData;
+			
+			if (regressionData.regression == null) {
+				continue;
+			}
+			
+			double baseRate = (double) regressionData.regression.getBaselineHits() / (double)  regressionData.regression.getBaselineInvocations();
+			double activeRate = (double) regressionData.event.stats.hits / (double) regressionData.event.stats.invocations;
 
 			int delta = (int)((activeRate - baseRate) * 100);
 			
@@ -1127,9 +1173,9 @@ protected static class ReportKey implements Comparable<ReportKey>{
 			
 			result.append("% "); 
 
-			result.append(regressionResult.getEvent().name);
+			result.append(regressionData.event.name);
 			result.append(" in ");
-			result.append(getSimpleClassName(regressionResult.getEvent().error_location.class_name));
+			result.append(getSimpleClassName(regressionData.event.error_location.class_name));
 						
 			size++;
 			
@@ -1247,7 +1293,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 				reportKeyResults.newIssuesDesc = getNewIssuesDesc(reportKeyOutput.regressionData.regressionOutput.rateRegression,
 					reportKeyResults.newIssues, reportKeyResults.severeNewIssues);
 					
-				reportKeyResults.regressionsDesc = getRegressionsDesc(reportKeyOutput.regressionData.regressionOutput.rateRegression,
+				reportKeyResults.regressionsDesc = getRegressionsDesc(reportKeyOutput.regressionData.regressionOutput,
 						reportKeyResults.regressions, reportKeyResults.criticalRegressions);
 
 			}
@@ -1340,7 +1386,7 @@ protected static class ReportKey implements Comparable<ReportKey>{
 		return Pair.of(volume, count);
 	}
 	
-	private String getDescription(RegressionData regressionData, String newErrorsDesc, 
+	private String getDescription(RegressionKeyData regressionData, String newErrorsDesc, 
 		String regressionDesc, String slowdownDesc) {
 		
 		StringBuilder result = new StringBuilder();
@@ -1393,15 +1439,16 @@ protected static class ReportKey implements Comparable<ReportKey>{
 			Pair<Object, Object> fromTo;
 			
 			if (regressionWindow != null) {
-				timeRange = TimeUtil.getTimeInterval(TimeUnit.MINUTES.toMillis(regressionWindow.activeTimespan));
+				timeRange = regressionWindow.activeTimespan + TimeUtil.MINUTE_POSTFIX;
+				DateTime from = regressionWindow.activeWindowStart;
 				DateTime to = regressionWindow.activeWindowStart.plusMinutes(regressionWindow.activeTimespan);
-				fromTo = Pair.of(regressionWindow.activeWindowStart, to);
+				fromTo = getTimeFilterPair(Pair.of(from, to), input.timeFilter);
+
 			} else {
 				fromTo = getTimeFilterPair(timeSpan, input.timeFilter);
 				timeRange = TimeUtil.getTimeRange(input.timeFilter);	
 			}
-			
-			
+					
 			Object newIssuesValue = formatValue(rrInput, reportKeyResult.newIssues, reportKeyResult.severeNewIssues);
 			Object regressionsValue = formatValue(rrInput, reportKeyResult.regressions, reportKeyResult.criticalRegressions);
 			Object slowdownsValue = formatValue(rrInput, reportKeyResult.slowdowns, reportKeyResult.severeSlowdowns);

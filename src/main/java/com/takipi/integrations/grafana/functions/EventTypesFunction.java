@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 
 import org.joda.time.DateTime;
 
@@ -20,6 +21,7 @@ import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings;
 import com.takipi.integrations.grafana.settings.input.GeneralSettings;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class EventTypesFunction extends EnvironmentVariableFunction {
 
@@ -71,6 +73,10 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 
 		DateTime to = DateTime.now();
 		DateTime from = to.minusDays(DEFAULT_TIME_DAYS);
+		
+		if (eventInput.timeFilter == null) {
+			eventInput.timeFilter = TimeUtil.getLastWindowTimeFilter(TimeUnit.DAYS.toMillis(DEFAULT_TIME_DAYS));
+		}
 		
 		Map<String, EventResult> events = getEventMap(serviceId, eventInput,
 			from, to, null);
@@ -142,6 +148,9 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 		}
 		
 		if (availTypes.contains(EventTypes.Tiers)) {
+			
+			appender.append(GroupSettings.toGroupName(EventFilter.APP_CODE));
+			
 			for (String categoryName : categoryNames) {
 				appender.append(GroupSettings.toGroupName(categoryName));
 			}
