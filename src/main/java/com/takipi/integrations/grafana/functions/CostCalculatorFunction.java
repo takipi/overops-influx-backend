@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +38,25 @@ public class CostCalculatorFunction extends GrafanaFunction {
 	protected static final String COST = "cost";
 	protected static final String COSTPCT = "costpct";
 	protected static final String COSTYRL = "costyrl";
+
+	public static class Factory implements FunctionFactory {
+
+		@Override
+		public GrafanaFunction create(ApiClient apiClient) {
+			return new CostCalculatorFunction(apiClient);
+		}
+
+		@Override
+		public Class<?> getInputClass() {
+			return CostCalculatorInput.class;
+		}
+
+		@Override
+		public String getName() {
+			return "costCalc";
+		}
+	}
+
 	
 	protected class EventData {
 		protected EventResult event;
@@ -45,8 +65,29 @@ public class CostCalculatorFunction extends GrafanaFunction {
 			this.event = event;
 		}
 		
+		private boolean equalLocations(Location a, Location b) {
+			
+			if (!Objects.equal(a.class_name, b.class_name)) {
+				return false;
+			}
+
+			if (!Objects.equal(a.method_name, b.method_name)) {
+				return false;
+			}
+
+			if (!Objects.equal(a.method_desc, b.method_desc)) {
+				return false;
+			}
+
+			return true;
+		}
+		
 		@Override
 		public boolean equals(Object obj) {
+			if (obj == null ||
+				(!(obj instanceof EventData))) {
+				return false;
+			}
 			
 			EventData other = (EventData)obj;
 			
@@ -54,11 +95,15 @@ public class CostCalculatorFunction extends GrafanaFunction {
 				return false;
 			}
 			
-			if (!Objects.equal(event.error_origin, other.event.error_origin)) {
+			if (!equalLocations(event.error_origin, other.event.error_origin)) {
 				return false;
 			}
 			
-			if (!Objects.equal(event.error_location, other.event.error_location)) {
+			if (!equalLocations(event.error_location, other.event.error_location)) {
+				return false;
+			}
+			
+			if (!Objects.equal(event.call_stack_group, other.event.call_stack_group)) {
 				return false;
 			}
 			
@@ -72,7 +117,17 @@ public class CostCalculatorFunction extends GrafanaFunction {
 				return super.hashCode();
 			}
 			
-			return event.error_location.hashCode();
+			return event.error_location.class_name.hashCode();
+		}
+		
+		@Override
+		public String toString()
+		{
+			if (event.entry_point != null) {
+				return event.entry_point.class_name;
+			}
+			
+			return super.toString();
 		}
 	}
 	
@@ -115,7 +170,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 				String str = (String) value;
 
 				if (str.length() > input.maxColumnLength) {
-					return str.substring(0, input.maxColumnLength);
+					return str.substring(0, input.maxColumnLength) + "...";
 
 				} else {
 					return str;
@@ -320,47 +375,28 @@ public class CostCalculatorFunction extends GrafanaFunction {
 
 	}
 
-	private Collection<FieldFormatter> getFieldFormatters(String columns) {
+	private Map<String, FieldFormatter> getFieldFormatters(String columns) {
 
 		if ((columns == null) || (columns.isEmpty())) {
 			throw new IllegalArgumentException("columns cannot be empty");
 		}
 
 		String[] columnsArray = ArrayUtil.safeSplitArray(columns, ARRAY_SEPERATOR, true);
-		List<FieldFormatter> result = new ArrayList<FieldFormatter>(columnsArray.length);
+		Map<String, FieldFormatter> result = new LinkedHashMap<String, FieldFormatter>(columnsArray.length);
 
-		for (int i = 0; i < columnsArray.length; i++) {
-			String column = columnsArray[i];
+		for (String column : columnsArray) {
 			FieldFormatter fieldFormatter = getFormatter(column);
-			result.add(fieldFormatter);
+			result.put(column, fieldFormatter);
 		}
 
 		return result;
-	}
-
-	public static class Factory implements FunctionFactory {
-
-		@Override
-		public GrafanaFunction create(ApiClient apiClient) {
-			return new CostCalculatorFunction(apiClient);
-		}
-
-		@Override
-		public Class<?> getInputClass() {
-			return CostCalculatorInput.class;
-		}
-
-		@Override
-		public String getName() {
-			return "costCalc";
-		}
 	}
 
 	public CostCalculatorFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
 	
-	protected Collection<EventData> getEventData(String serviceId, CostCalculatorInput input, 
+	protected List<EventData> getEventData(String serviceId, CostCalculatorInput input, 
 			Pair<DateTime, DateTime> timeSpan) {
 		
 		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, timeSpan.getFirst(), 
@@ -379,7 +415,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 		return result;
 	}
 	
-	protected Collection<EventData> mergeSimilarEvents(String serviceId, Collection<EventData> eventDatas) {
+	protected List<EventData> mergeSimilarEvents(String serviceId, List<EventData> eventDatas) {
 		
 		GeneralSettings settings = GrafanaSettings.getData(apiClient, serviceId).general;
 		
@@ -406,7 +442,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 		for (List<EventData> similarEventDatas : eventDataMap.values()) {
 			
 			if (similarEventDatas.size() > 1) {
-				result.add(mergeEventDatas(similarEventDatas));
+				result.addAll(mergeEventDatas(similarEventDatas));
 			} else {
 				result.add(similarEventDatas.get(0));
 			}
@@ -415,22 +451,56 @@ public class CostCalculatorFunction extends GrafanaFunction {
 		return result;
 	}
 	
-	protected EventData mergeEventDatas(List<EventData> eventDatas) {
+	private void mergeSimilarIds(EventResult target, EventResult source) {
 		
+		if (source == null) {
+			return;
+		}
+		
+		if (source.similar_event_ids != null) {
+			if (target.similar_event_ids != null) {
+				for (String similarId: source.similar_event_ids) {
+					if (!target.similar_event_ids.contains(similarId)) {
+						target.similar_event_ids.add(similarId);
+					}
+				}
+			} else {
+				target.similar_event_ids = new ArrayList<String>(source.similar_event_ids);	
+			}
+		} else if (target.similar_event_ids == null) {
+			target.similar_event_ids = new ArrayList<String>();
+		}
+		
+		if (!target.similar_event_ids.contains(source.id)) {
+			target.similar_event_ids.add(source.id);
+		}
+	}
+	
+	protected List<EventData> mergeEventDatas(List<EventData> eventDatas) {
+		
+		if (eventDatas.size() == 0) {
+			throw new IllegalArgumentException("eventDatas");
+		}
+
+		String jiraUrl = null;
 		Stats stats = new Stats();
+		
 		EventResult event = null;
 		
 		for (EventData eventData : eventDatas) {
-			
-			if (eventData.event.error_location.class_name.contains("DiskBac")) {
-				System.out.println();
-			}
-			
+		
 			stats.hits += eventData.event.stats.hits;
 			stats.invocations += eventData.event.stats.invocations;	
-			
+
 			if ((event == null) || (eventData.event.stats.hits > event.stats.hits)) {
+				mergeSimilarIds(eventData.event, event);
 				event = 	eventData.event;
+			} else {
+				mergeSimilarIds(event, eventData.event);
+			}
+			
+			if (event.jira_issue_url != null) {
+				jiraUrl = event.jira_issue_url;
 			}
 		}
 		
@@ -447,16 +517,41 @@ public class CostCalculatorFunction extends GrafanaFunction {
 		}
 		
 		clone.stats = stats;
-		return new EventData(event);
+		clone.jira_issue_url = jiraUrl;
+		return Collections.singletonList(new EventData(clone));
 	}
 
-	protected List<List<Object>> processServiceEvents(String serviceId, CostCalculatorInput input, Pair<DateTime, DateTime> timeSpan) {
+	
+	protected void sortEventDatas(List<EventData> eventDatas ) {
+	
+		eventDatas.sort(new Comparator<EventData>()
+		{
+			@Override
+			public int compare(EventData o1, EventData o2)
+			{
+				return (int)(o2.event.stats.hits - o1.event.stats.hits);
+			}
+		});
+	}
+	
+	/**
+	 * @param serviceIds - needed for children
+	 */
+	protected List<List<Object>> processServiceEvents(Collection<String> serviceIds, String serviceId, CostCalculatorInput input, Pair<DateTime, DateTime> timeSpan) {
 
-		Collection<FieldFormatter> formatters = getFieldFormatters(input.fields);
+		Map<String, FieldFormatter> formatters = getFieldFormatters(input.fields);
 		
-		Collection<EventData> eventDatas = getEventData(serviceId, input, timeSpan);
-		Collection<EventData> mergedDatas = mergeSimilarEvents(serviceId, eventDatas);
+		List<EventData> mergedDatas;
+		List<EventData> eventDatas = getEventData(serviceId, input, timeSpan);
+
+		if (input.hasTransactions()) {
+			mergedDatas = eventDatas;
+		} else {
+			mergedDatas = mergeSimilarEvents(serviceId, eventDatas);
+		}
 		
+		sortEventDatas(mergedDatas);
+			
 		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
 
 		List<List<Object>> result = new ArrayList<List<Object>>(mergedDatas.size());
@@ -477,7 +572,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 				continue;
 			}
 
-			outputObject = processEvent(serviceId, input, eventData, formatters, timeSpan);
+			outputObject = processEvent(serviceId, input, eventData, formatters.values(), timeSpan);
 
 			if (costFieldNr > -1  && costFieldNr < outputObject.size()  && 
 					outputObject.get(costFieldNr) instanceof Double &&
@@ -527,7 +622,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 			} else {
 				break;
 			}
-		};
+		}
 		
 		return sortedResult;
 
@@ -628,7 +723,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 		Collection<String> serviceIds = getServiceIds(input);
 
 		for (String serviceId : serviceIds) {
-			List<List<Object>> serviceEvents = processServiceEvents(serviceId, input, timeSpan);
+			List<List<Object>> serviceEvents = processServiceEvents(serviceIds, serviceId, input, timeSpan);
 			series.values.addAll(serviceEvents);
 		}
 
