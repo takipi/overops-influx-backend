@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 7,
-  "iteration": 1546519410583,
+  "iteration": 1547706117052,
   "links": [
     {
       "asDropdown": true,
@@ -47,7 +47,7 @@
   "panels": [
     {
       "aliasColors": {},
-      "bars": true,
+      "bars": false,
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
@@ -63,18 +63,20 @@
       "id": 36,
       "interval": "1h",
       "legend": {
+        "alignAsTable": false,
         "avg": false,
         "current": false,
         "max": false,
         "min": false,
+        "rightSide": false,
         "show": true,
         "total": false,
         "values": false
       },
-      "lines": false,
+      "lines": true,
       "linewidth": 1,
       "links": [],
-      "nullPointMode": "null as zero",
+      "nullPointMode": "null",
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -115,7 +117,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "splitGraph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"introducedBy\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",seriesName\":\"Times\", \"transactions\":\"$transactions\", \"limit\":\"$splitLimit\"})\n",
+          "query": "costSplitGraph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"introducedBy\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",seriesName\":\"Times\", \"transactions\":\"$transactions\",costData:{\"costHigherThan\":.0,\"costMatrix\":$costMatrix},\"limit\":\"$splitLimit\",\"graphTrendType\":\"BALANCE\"})\n",
           "rawQuery": true,
           "refId": "C",
           "resultFormat": "time_series",
@@ -159,7 +161,7 @@
           "decimals": null,
           "format": "short",
           "label": "",
-          "logBase": 10,
+          "logBase": 1,
           "max": null,
           "min": "0",
           "show": true
@@ -170,7 +172,7 @@
           "logBase": 10,
           "max": null,
           "min": null,
-          "show": true
+          "show": false
         }
       ],
       "yaxis": {
@@ -420,7 +422,7 @@
           "unit": "percentunit"
         },
         {
-          "alias": "Cost ($c)",
+          "alias": "Cost ($)",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -453,7 +455,7 @@
           "unit": "percentunit"
         },
         {
-          "alias": "Yearly ($c)",
+          "alias": "Yearly ($)",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -488,7 +490,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "costCalc({\"fields\":\"link,type,message,error_location,costpct,cost,costyrl\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":80,\"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\",\"costHigherThan\":.0,\"costMatrix\":$costMatrix,\"tableLimit\":$splitLimit})",
+          "query": "costCalc({\"fields\":\"link,type,message,error_location,costpct,cost,costyrl\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":80,\"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\",costData:{\"costHigherThan\":.0,\"costMatrix\":$costMatrix},\"tableLimit\":$splitLimit})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -795,5 +797,5 @@
   "timezone": "",
   "title": "Cost Analysis",
   "uid": "-lETtCsik",
-  "version": 22
+  "version": 42
 }
