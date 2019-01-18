@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 37,
-  "iteration": 1547721995339,
+  "iteration": 1547787096351,
   "links": [
     {
       "icon": "external link",
@@ -74,230 +74,12 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "The response time of the selected transactions overlaid on the number of calls (throughput) into them.",
+      "description": "The response time of the selected transactions in the selected timeframe ($activeWindowFmt) compared to the baseline ($baselineOnlyFmt). The left horizontal dashed line shows the avg response time within the baseline window, while the right base line represents the response time during the last $activeWindowFmt. The red vertical dashed line shows when the baseline ends and the active time window begins.",
       "fill": 0,
       "gridPos": {
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 0
-      },
-      "hideTimeOverride": true,
-      "id": 12,
-      "interval": "5m",
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null as zero",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [
-        {
-          "alias": "Throughput",
-          "color": "#9ac48a",
-          "fill": 2,
-          "linewidth": 0,
-          "yaxis": 2
-        },
-        {
-          "alias": "/^Response/",
-          "color": "#f2c96d"
-        },
-        {
-          "alias": "/^Active/",
-          "color": "#82b5d8",
-          "dashes": true
-        }
-      ],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "alias": "Throughput",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregate\":true,\"transactions\":\"$transactions\",\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\"})",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        },
-        {
-          "alias": "Response (ms)",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregate\":\"true\",\"transactions\":\"$transactions\",\"seriesName\":\"Response (ms)\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\",\"performanceStates\":\"$performanceStates\"})",
-          "rawQuery": true,
-          "refId": "B",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        },
-        {
-          "alias": "Active $timeRange Avg (ms)",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "transactionsAvgGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"aggregate\":\"false\",\"transactions\":\"$transactions\",\"seriesName\":\"Avg (ms)\", \"pointsWanted\":\"$transactionPointsWanted\", \"aggregate\":\"true\", \"searchText\":\"$searchText\",\"performanceStates\":\"$performanceStates\", \"timeWindow\":\"Active\"}) ",
-          "rawQuery": true,
-          "refId": "D",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": "$activeWindow",
-      "timeShift": null,
-      "title": "Avg Response: $activeWindowFmt",
-      "tooltip": {
-        "shared": true,
-        "sort": 2,
-        "value_type": "individual"
-      },
-      "transparent": false,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": "",
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "decimals": null,
-          "format": "short",
-          "label": "",
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {
-        ".avg_time": "#1f78c1"
-      },
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "OO",
-      "description": "The response time of the selected transactions in the selected timeframe ($activeWindowFmt) compared to the baseline ($baselineOnlyFmt)",
-      "fill": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
         "y": 0
       },
       "hideTimeOverride": true,
@@ -333,7 +115,7 @@
           "color": "#f2c96d"
         },
         {
-          "alias": "/^Active/",
+          "alias": "/^Last/",
           "color": "#82b5d8",
           "dashes": true
         },
@@ -464,7 +246,7 @@
           "tags": []
         },
         {
-          "alias": "Active $timeRange Avg (ms)",
+          "alias": "Last $activeWindowFmt Avg (ms)",
           "groupBy": [
             {
               "params": [
@@ -502,7 +284,7 @@
           "tags": []
         },
         {
-          "alias": "Baseline $baselineOnly Avg (ms)",
+          "alias": "Baseline $baselineOnlyFmt Avg (ms)",
           "groupBy": [
             {
               "params": [
@@ -561,6 +343,224 @@
       "yaxes": [
         {
           "decimals": null,
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "decimals": null,
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {
+        ".avg_time": "#1f78c1"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "OO",
+      "description": "The response time of the selected transactions overlaid on the number of calls (Throughput) into them during the last $activeWindowFmt. The dashed line represents the average response time during that time window.",
+      "fill": 0,
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "hideTimeOverride": true,
+      "id": 12,
+      "interval": "5m",
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null as zero",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "Throughput",
+          "color": "#9ac48a",
+          "fill": 2,
+          "linewidth": 0,
+          "yaxis": 2
+        },
+        {
+          "alias": "/^Response/",
+          "color": "#f2c96d"
+        },
+        {
+          "alias": "/^Last/",
+          "color": "#82b5d8",
+          "dashes": true
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "Throughput",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregate\":true,\"transactions\":\"$transactions\",\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\"})",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "alias": "Response (ms)",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregate\":\"true\",\"transactions\":\"$transactions\",\"seriesName\":\"Response (ms)\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\",\"performanceStates\":\"$performanceStates\"})",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "alias": "Last $activeWindowFmt Avg (ms)",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "transactionsAvgGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"aggregate\":\"false\",\"transactions\":\"$transactions\",\"seriesName\":\"Avg (ms)\", \"pointsWanted\":\"$transactionPointsWanted\", \"aggregate\":\"true\", \"searchText\":\"$searchText\",\"performanceStates\":\"$performanceStates\", \"timeWindow\":\"Active\"}) ",
+          "rawQuery": true,
+          "refId": "D",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": "$activeWindow",
+      "timeShift": null,
+      "title": "Last $activeWindowFmt",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "transparent": false,
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
           "format": "short",
           "label": "",
           "logBase": 1,
@@ -702,7 +702,7 @@
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 0,
           "link": true,
-          "linkTargetBlank": true,
+          "linkTargetBlank": false,
           "linkTooltip": "${__cell_2}. Thresholds are defined in the Settings dashboard. Click to drill-in.",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
@@ -739,7 +739,7 @@
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
           "link": true,
-          "linkTargetBlank": true,
+          "linkTargetBlank": false,
           "linkTooltip": "${__cell_2}}. Thresholds are defined in the Settings dashboard. Click to drill-in.",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
@@ -846,7 +846,7 @@
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 1,
           "link": true,
-          "linkTooltip": "The avg response time in the preceding $baselineOnly with ${__cell_5} calls",
+          "linkTooltip": "The avg response time in the $baselineOnlyFmt baseline with ${__cell_5} calls",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "baseline_avg",
@@ -1333,6 +1333,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "tags": [],
           "text": "7d",
           "value": "7d"
@@ -1551,5 +1552,5 @@
   "timezone": "",
   "title": "Slowdowns",
   "uid": "iHSORcymk",
-  "version": 65
+  "version": 67
 }

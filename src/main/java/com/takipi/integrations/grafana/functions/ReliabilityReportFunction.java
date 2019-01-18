@@ -695,55 +695,62 @@ public class ReliabilityReportFunction extends EventsFunction {
 
 		Collection<SummarizedDeployment> activeDeps = DeploymentUtil.getDeployments(apiClient, serviceId, true);
 			
-		List<SummarizedDeployment> sortedActive = new ArrayList<SummarizedDeployment>(activeDeps);
-		sortDeployments(sortedActive);
-
-		for (int i = 0; i < Math.min(input.limit, sortedActive.size()); i++) {
+		if (activeDeps != null) {
 			
-			SummarizedDeployment activeDep = sortedActive.get(i);
-			
-			if (activeDep.first_seen != null) {
-				DateTime firstSeen = TimeUtil.getDateTime(activeDep.first_seen);
-				if (firstSeen.isBefore(timespan.getFirst())) {
-					continue;
-				}
-			}
-			
-			result.add(new ReportKey(activeDep.name, true));
-		}
-		
-		if (input.limit - result.size() > 0) {
-			
-			Collection<SummarizedDeployment> nonActiveDeps = DeploymentUtil.getDeployments(apiClient, serviceId, false);
-			List<SummarizedDeployment> sortedNonActive = new ArrayList<SummarizedDeployment>(nonActiveDeps);
-
-			sortDeployments(sortedNonActive);
-
-			for (int i = 0; i < sortedNonActive.size(); i++) {
-				SummarizedDeployment dep = sortedNonActive.get(i);
+			List<SummarizedDeployment> sortedActive = new ArrayList<SummarizedDeployment>(activeDeps);
+			sortDeployments(sortedActive);
+	
+			for (int i = 0; i < Math.min(input.limit, sortedActive.size()); i++) {
 				
-				if (dep.first_seen != null) {
-					DateTime firstSeen = TimeUtil.getDateTime(dep.first_seen);
+				SummarizedDeployment activeDep = sortedActive.get(i);
+				
+				if (activeDep.first_seen != null) {
+					DateTime firstSeen = TimeUtil.getDateTime(activeDep.first_seen);
 					if (firstSeen.isBefore(timespan.getFirst())) {
 						continue;
 					}
 				}
 				
-				boolean isLive = false;
-				
-				if (dep.last_seen != null) {
-					DateTime lastSeen = TimeUtil.getDateTime(dep.last_seen);
-					isLive = lastSeen.plusHours(1).isAfter(timespan.getSecond());
-				}
+				result.add(new ReportKey(activeDep.name, true));
+			}
+		}
 		
-				ReportKey key = new ReportKey(dep.name, isLive);
-				
-				if (!result.contains(key)) {
-					result.add(key);
-				}
-				
-				if (result.size() >= input.limit) {
-					break;
+		if (input.limit - result.size() > 0) {
+			
+			Collection<SummarizedDeployment> nonActiveDeps = DeploymentUtil.getDeployments(apiClient, serviceId, false);
+			
+			if (nonActiveDeps != null) {
+			
+				List<SummarizedDeployment> sortedNonActive = new ArrayList<SummarizedDeployment>(nonActiveDeps);
+	
+				sortDeployments(sortedNonActive);
+	
+				for (int i = 0; i < sortedNonActive.size(); i++) {
+					SummarizedDeployment dep = sortedNonActive.get(i);
+					
+					if (dep.first_seen != null) {
+						DateTime firstSeen = TimeUtil.getDateTime(dep.first_seen);
+						if (firstSeen.isBefore(timespan.getFirst())) {
+							continue;
+						}
+					}
+					
+					boolean isLive = false;
+					
+					if (dep.last_seen != null) {
+						DateTime lastSeen = TimeUtil.getDateTime(dep.last_seen);
+						isLive = lastSeen.plusHours(1).isAfter(timespan.getSecond());
+					}
+			
+					ReportKey key = new ReportKey(dep.name, isLive);
+					
+					if (!result.contains(key)) {
+						result.add(key);
+					}
+					
+					if (result.size() >= input.limit) {
+						break;
+					}
 				}
 			}
 		}

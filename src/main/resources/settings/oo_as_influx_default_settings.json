@@ -49,28 +49,28 @@
 			},
 			
 			{
-				"name": " Messages",
+				"name": "Messages",
 				"values": [
 					"/^.*Message.*$/"
 				]
 			},
 			
 			{
-				"name": " Actors",
+				"name": "Actors",
 				"values": [
 					"/^.*Actor.*$/"
 				]
 			},
 			
 			{
-				"name": " Jobs",
+				"name": "Jobs",
 				"values": [
 					"/^.*Job.*$/"
 				]
 			},
 			
 			{
-				"name": " Restlets",
+				"name": "Restlets",
 				"values": [
 					"/^.*Restlet.*$/"
 				]
@@ -86,6 +86,13 @@
 
 	"applications": {
 		"groups": [
+		
+			//{
+			//	"name": "MyKeyApps1",
+			//	"values": [
+			//		"PaymentApp, Frontend, MessageBroker"
+			//	]
+			//}
 		]
 	},
 	
@@ -97,16 +104,19 @@
 		
 	"tiers": 
 		[
-			{
-				"names": [
-					"com.acme.mycode"
-				],
-				"labels": ["Mycode"]
-			},
+			//You can define your own set of packages as a key tier like so:
+			//{
+			//	"names": [
+			//		"com.acme.mycode"
+			//	],
+			//	"labels": ["My-code"]
+			//},
 			
-			{
-				"labels": ["AWS"]
-			}
+			//You can also define any 3rd party package defined here: https://git.io/fpPT0 
+			//as a key package, like so:
+			//{
+			//	"labels": ["AWS"]
+			//}
 		]
 	,
 		

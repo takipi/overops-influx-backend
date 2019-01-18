@@ -58,7 +58,7 @@ public class ApplicationsFunction extends EnvironmentVariableFunction {
 	}
 	
 	@Override
-	protected void sort(List<List<Object>> series)
+	protected void sortValues(List<List<Object>> series)
 	{
 		//do nothing
 	}

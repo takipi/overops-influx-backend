@@ -12,13 +12,11 @@ import org.joda.time.format.ISODateTimeFormat;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.deployment.SummarizedDeployment;
-import com.takipi.api.client.request.deployment.DeploymentsRequest;
-import com.takipi.api.client.result.deployment.DeploymentsResult;
-import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.DeploymentsGraphInput;
 import com.takipi.integrations.grafana.output.Series;
+import com.takipi.integrations.grafana.util.DeploymentUtil;
 
 public class DeploymentsAnnotation extends BaseGraphFunction {
 	
@@ -62,22 +60,15 @@ public class DeploymentsAnnotation extends BaseGraphFunction {
 		result.series.values = new ArrayList<List<Object>>();
 		result.volume = 1;
 		
-		DeploymentsRequest request = DeploymentsRequest.newBuilder().setServiceId(serviceId).setActive(false).build();
-
-		Response<DeploymentsResult> response = apiClient.get(request);
-
-		if ((response.isBadResponse()) || (response.data == null)) {
-			throw new IllegalStateException(
-					"Could not acquire deployments for service " + serviceId + " . Error " + response.responseCode);
-		}
+		Collection<SummarizedDeployment> deps = DeploymentUtil.getDeployments(apiClient, serviceId, false);
 		
-		if (response.data.deployments == null) {
+		if (deps == null) {
 			return Collections.emptyList();
 		}
 		
 		List<Pair<Long, String>> deployments = new ArrayList<Pair<Long, String>>();
 		
-		for (SummarizedDeployment dep : response.data.deployments) {
+		for (SummarizedDeployment dep : deps) {
 			
 			if (dep.first_seen == null) {
 				continue;

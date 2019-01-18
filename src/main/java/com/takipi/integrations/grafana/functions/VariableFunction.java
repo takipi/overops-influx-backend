@@ -15,11 +15,59 @@ public abstract class VariableFunction extends GrafanaFunction {
 
 	private static final String KEY = "key";
 	
-	protected static class VariableAppender {
-				protected Series series;
+	protected abstract static class VariableAppender {
 		
+		protected abstract void append(String value);
+		protected abstract void sort();
+	}
+			
+	protected class SeriesVariableAppender extends VariableAppender {
+		
+		protected Series series;
+		
+		protected SeriesVariableAppender(Series series) {
+			this.series = series;
+		}
+		
+		@Override
 		protected void append(String value) {
 			series.values.add(Arrays.asList(new Object[] {KEY, value}));
+		}
+		
+		@Override
+		protected void sort()
+		{
+			sortValues(series.values);	
+		}
+	}
+	
+	protected class CommaDelimVariableAppender extends VariableAppender {
+		
+		List<String> values;
+		
+		protected CommaDelimVariableAppender() {
+			this.values = new ArrayList<String>();
+		}
+		
+		@Override
+		protected void append(String value) {
+			
+			if (value != null) {
+				values.add(value.replace(GRAFANA_SEPERATOR, ""));
+			}
+		}
+		
+		@Override
+		protected void sort()
+		{
+			values.sort(new Comparator<String>()
+			{
+				@Override
+				public int compare(String o1, String o2)
+				{
+					return compareValues(o1, o2);
+				}
+			});
 		}
 	}
 	
@@ -43,7 +91,7 @@ public abstract class VariableFunction extends GrafanaFunction {
 		return compareValues(a, b);
 	}
 		
-	protected void sort(List<List<Object>> series) {
+	protected void sortValues(List<List<Object>> series) {
 		series.sort(new Comparator<Object>() {
 
 			@Override
@@ -69,15 +117,26 @@ public abstract class VariableFunction extends GrafanaFunction {
 		series.columns = Arrays.asList(new String[] { KEY_COLUMN, VALUE_COLUMN });
 		series.values = new ArrayList<List<Object>>();
 		
-		VariableAppender appender = new VariableAppender();
-		appender.series = series;
-				
+		VariableAppender appender;
+		
+		if (varInput.commaDelimited) {
+			appender = new CommaDelimVariableAppender();
+		} else {
+			appender = new SeriesVariableAppender(series);
+		}
+					
 		populateValues(functionInput, appender);
 		
 		if (varInput.sorted) {
-			sort(series.values);
+			appender.sort();
 		}
-				
+		
+		if (varInput.commaDelimited) {
+			String value = "value="+ String.join(GrafanaFunction.ARRAY_SEPERATOR_RAW, 
+				((CommaDelimVariableAppender)appender).values);
+			series.values.add(Arrays.asList(new Object[] {KEY, value}));
+		}
+					
 		return Collections.singletonList(series);
 	}	
 }
