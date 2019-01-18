@@ -38,6 +38,10 @@ public class DeploymentsFunction extends EnvironmentVariableFunction {
 
 		Collection<SummarizedDeployment> serviceDeps = DeploymentUtil.getDeployments(apiClient, serviceId, false);
 		
+		if (serviceDeps == null) {
+			return;
+		}
+		
 		for (SummarizedDeployment dep : serviceDeps) {
 
 			String depName = getServiceValue(dep.name, serviceId, serviceIds);

@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 28,
-  "iteration": 1547722950731,
+  "iteration": 1547787283552,
   "links": [
     {
       "icon": "external link",
@@ -823,7 +823,6 @@
       {
         "allValue": "*",
         "current": {
-          "tags": [],
           "text": "None",
           "value": [
             "None"
@@ -1073,6 +1072,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "tags": [],
           "text": "7d",
           "value": "7d"
