@@ -63,24 +63,22 @@ Output:
 
 ## OverOps Influx Backend Project
 
-In order to utilize the power of Grafana+Influx, this project introduces, and parses a new query language.
+In order to utilize the power of Grafana+Influx, this project introduces and parses a new query language.
 
 The solution has two components:
 
-1. A Java REST endpoint that works as an Influx `/query` API. This allows Grafana to use OverOps as a data source. Yaml configuration files for different modes of operation are located in the [datasources](/grafana/conf/provisioning/datasources) folder.
+1. A Java REST endpoint that works as an Influx `/query` API. This allows Grafana to use OverOps as a data source. Configuration files for Grafana are located in the [datasources](/grafana/conf/provisioning/datasources) folder.
 2. A set of Grafana dashboards that use a special query language in order to fetch OverOps related metrics. The dashboards json files are located in the [dashboards](grafana/conf/provisioning/dashboards/overops) folder.
 
 The project is bundled as part of the OverOps API Server, and can be run separately as a spring-boot uber jar.
 
 ### Functions
 
-Function inputs are defined in the [input](/src/main/java/com/takipi/integrations/grafana/input) folder. The functions themselves are in the [functions](src/main/java/com/takipi/integrations/grafana/functions) folder. Outputs are in the [output](src/main/java/com/takipi/integrations/grafana/output) folder.
+Function inputs are defined in the [input](/src/main/java/com/takipi/integrations/grafana/input) folder. Function inputs define our query language, which is used by Grafana to retrieve data to render dashboards. *Inputs are thoroughly documented, including examples and screenshots.*
 
-Function inputs define our query language used by Grafana to retrieve data to render dashboards. *This code is thoroughly documented, including examples and screenshots.*
+The functions themselves are in the [functions](src/main/java/com/takipi/integrations/grafana/functions) folder. The functions heavily utilize the [OverOps API Client](https://github.com/takipi/api-client) and [REST APIs](https://doc.overops.com/reference) to retrieve data from the OverOps API Server.
 
-The functions heavily utilize the [OverOps API Client](https://github.com/takipi/api-client) and [REST APIs](https://doc.overops.com/reference) to retrieve data from the OverOps API Server.
-
-Finally, the data is assembled and output as a JSON object resembling the output of the InfluxDB REST API, allowing for consumption by Grafana.
+Outputs are in the [output](src/main/java/com/takipi/integrations/grafana/output) folder. The data is assembled and output as a JSON object resembling the output of the InfluxDB REST API, allowing for consumption by Grafana.
 
 Let's look at two example functions: Regression Report and Deployments.
 
