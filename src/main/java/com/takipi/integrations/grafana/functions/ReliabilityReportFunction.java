@@ -704,8 +704,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 				
 				SummarizedDeployment activeDep = sortedActive.get(i);
 				
-				if (activeDep.first_seen != null) {
-					DateTime firstSeen = TimeUtil.getDateTime(activeDep.first_seen);
+				if (activeDep.last_seen != null) {
+					DateTime firstSeen = TimeUtil.getDateTime(activeDep.last_seen);
 					if (firstSeen.isBefore(timespan.getFirst())) {
 						continue;
 					}
@@ -728,8 +728,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 				for (int i = 0; i < sortedNonActive.size(); i++) {
 					SummarizedDeployment dep = sortedNonActive.get(i);
 					
-					if (dep.first_seen != null) {
-						DateTime firstSeen = TimeUtil.getDateTime(dep.first_seen);
+					if (dep.last_seen != null) {
+						DateTime firstSeen = TimeUtil.getDateTime(dep.last_seen);
 						if (firstSeen.isBefore(timespan.getFirst())) {
 							continue;
 						}
@@ -845,7 +845,22 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return result;
 	}
 	
-	public static Pair<Double, String> getScore(
+	private double getReportKeyWeight(RegressionReportSettings reportSettings, 
+			ReliabilityReportInput input, ReportKeyResults reportKeyResults) {
+		
+		if (input.getReportMode() == ReportMode.Deployments) {
+			return reportSettings.score_weight;	
+		}
+		
+		if ((reportKeyResults.output.reportKey.isKey) 
+		&& (reportSettings.key_score_weight > 0)) {
+			return reportSettings.key_score_weight;
+		} else {
+			return reportSettings.score_weight;	
+		}		
+	}
+	
+	private Pair<Double, String> getScore(
 		ReliabilityReportInput input, RegressionReportSettings reportSettings, 
 		ReportKeyResults reportKeyResults) {
 		
@@ -859,13 +874,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		int scoreWindow = getRegressionScoreWindow(regressionOutput);		
 		double scoreDays = Math.max(1, (double)scoreWindow / 60 / 24);
 	
-		double weight;
-		
-		if ((reportKeyResults.output.reportKey.isKey) && (reportSettings.key_score_weight > 0)) {
-			weight = reportSettings.key_score_weight;
-		} else {
-			weight = reportSettings.score_weight;	
-		}
+		double weight = getReportKeyWeight(reportSettings, input, reportKeyResults);
 		
 		double rawScore = (newEventsScore + severeNewEventScore + criticalRegressionsScore + regressionsScore) / scoreDays;
 		double resultScore = Math.max(100 - (weight * rawScore), 0);
@@ -876,7 +885,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return Pair.of(resultScore, description);
 	}
 	
-	private static String getScoreDescription(ReliabilityReportInput input,
+	private String getScoreDescription(ReliabilityReportInput input,
 		RegressionReportSettings reportSettings,
 		ReportKeyResults reportKeyResults, double resultScore, int period) {
 		
@@ -915,16 +924,12 @@ public class ReliabilityReportFunction extends EventsFunction {
 			addDeduction("slowdown", reportKeyResults.slowdowns, reportSettings.regression_score, deductions);
 			addDeduction("severe slowdown", reportKeyResults.severeSlowdowns, reportSettings.critical_regression_score, deductions);
 	
+			double weight = getReportKeyWeight(reportSettings, input, reportKeyResults);
+			
 			String deductionString = String.join(" + ", deductions);
 			result.append(deductionString);
 			result.append(") * ");
-			
-			if (reportKeyResults.output.reportKey.isKey && reportSettings.key_score_weight > 0) {
-				result.append(reportSettings.key_score_weight);
-			} else {
-				result.append(reportSettings.score_weight);
-			}
-			
+			result.append(weight);			
 			result.append(", avg over ");
 			result.append(duration);
 			result.append(" = ");
@@ -1505,7 +1510,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 				timeRange = regressionWindow.activeTimespan + TimeUtil.MINUTE_POSTFIX;
 				DateTime from = regressionWindow.activeWindowStart;
 				DateTime to = regressionWindow.activeWindowStart.plusMinutes(regressionWindow.activeTimespan);
-				fromTo = getTimeFilterPair(Pair.of(from, to), input.timeFilter);
+				fromTo = getTimeFilterPair(Pair.of(from, to), 
+					TimeUtil.getLastWindowMinTimeFilter(regressionWindow.activeTimespan));
 
 			} else {
 				fromTo = getTimeFilterPair(timeSpan, input.timeFilter);

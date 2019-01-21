@@ -267,5 +267,6 @@ public class FunctionParser {
 		registerFunction(new EnvironmentSettingsFunction.Factory());
 		registerFunction(new VariableRedirectFunction.Factory());
 		registerFunction(new SettingsVarFunction.Factory());
+		registerFunction(new LimitVariableFunction.Factory());
 	}
 }
