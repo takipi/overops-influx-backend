@@ -255,7 +255,7 @@ public class CostSplitGraphFunction extends LimitGraphFunction {
 					}
 					gdP.setValue(calculatedValue);
 				}
-				result.add(getGraphSeries(graphData, getServiceValue(graphData.key, serviceId, serviceIds)));
+				result.add(getGraphSeries(graphData, getServiceValue(graphData.key, serviceId, serviceIds), input));
 			}
 		}
 		return result;
