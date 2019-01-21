@@ -72,6 +72,11 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 		@Override
 		public boolean equals(Object obj) {
+			if (obj == null) {
+				return ((key == null) &&
+						(time == null));
+			}
+
 			GroupByKey other = (GroupByKey) obj;
 
 			if (!key.equals(other.key)) {

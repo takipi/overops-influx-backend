@@ -648,6 +648,11 @@ public class ApiCache {
 		@Override
 		public boolean equals(Object obj) {
 
+			if (obj == null) {
+				return ((input == null) &&
+						(apiClient == null));
+			}
+
 			RegresionWindowCacheLoader other = (RegresionWindowCacheLoader) obj;
 
 			if (!apiClient.getHostname().equals(other.apiClient.getHostname())) {
