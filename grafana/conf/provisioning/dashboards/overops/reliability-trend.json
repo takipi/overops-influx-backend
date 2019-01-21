@@ -18,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 36,
-  "iteration": 1547020121649,
+  "iteration": 1548032815502,
   "links": [
     {
       "icon": "external link",
@@ -27,7 +27,7 @@
       "title": "HELP",
       "tooltip": "Learn more about this dashboard",
       "type": "link",
-      "url": "https://doc.overops.com/docs/reliability-scorecard-dashboard"
+      "url": "https://doc.overops.com/docs/reliability-trends-dashboard"
     },
     {
       "asDropdown": true,
@@ -37,7 +37,6 @@
       "tags": [
         "OverOps"
       ],
-      "targetBlank": true,
       "type": "dashboards"
     }
   ],
@@ -48,8 +47,8 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "Chart the $graphType of the recent $limit deployments.",
-      "fill": 1,
+      "description": "Chart the $graphType of the selected deployments. If no deployments are selected, the last $limit deployments are chosen. Scores are based on the weights set in the Settings dashboard.",
+      "fill": 0,
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -66,8 +65,8 @@
         "total": false,
         "values": false
       },
-      "lines": false,
-      "linewidth": 1,
+      "lines": true,
+      "linewidth": 0,
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
@@ -77,6 +76,18 @@
       "seriesOverrides": [
         {
           "alias": "/.*/",
+          "color": "#9ac48a"
+        },
+        {
+          "alias": "/.*(R).$/",
+          "color": "#e24d42"
+        },
+        {
+          "alias": "/.*(Y).$/",
+          "color": "#ed8128"
+        },
+        {
+          "alias": "/.*(G).$/",
           "color": "#9ac48a"
         }
       ],
@@ -101,7 +112,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Graph\", \"mode\":\"Deployments\", \"limit\":\"$limit\", \"graphType\":\"$graphType\"})",
+          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Graph\", \"mode\":\"Deployments\", \"limit\":\"$limit\", \"graphType\":\"$graphType\", \"sortType\":\"Descending\", \"postfixes\":\" $postfixes\", \"thresholds\":\"$thresholds\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -170,7 +181,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "Chart the $graphType of the top $limit applications with the most errors.",
+      "description": "Chart the $graphType of the key applications. Key applications are marked with * and appear first followed by applications with the highest event volume up to limit of  $limit applications in total.",
       "fill": 1,
       "gridPos": {
         "h": 8,
@@ -200,6 +211,18 @@
         {
           "alias": "/.*/",
           "color": "#9ac48a"
+        },
+        {
+          "alias": "/.*(R).$/",
+          "color": "#e24d42"
+        },
+        {
+          "alias": "/.*(Y).$/",
+          "color": "#ed8128"
+        },
+        {
+          "alias": "/.*(G).$/",
+          "color": "#9ac48a"
         }
       ],
       "spaceLength": 10,
@@ -223,7 +246,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Graph\", \"mode\":\"Applications\", \"limit\":\"$limit\", \"graphType\":\"$graphType\"})",
+          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Graph\", \"mode\":\"Applications\", \"limit\":\"$limit\", \"graphType\":\"$graphType\",\"postfixes\":\" $postfixes\", \"thresholds\":\"$thresholds\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -289,10 +312,10 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "A report detailing providing a weighted score to the list of the last  $limit deployments based on the weights set in the Settings dashboard.",
+      "description": "A report detailing providing a weighted score of the selected deployments. If no deployments are selected, the $limit most recent deployments are selected. Live deployments are marked with a *. Score weights are defined  in the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
-        "h": 11,
+        "h": 10,
         "w": 12,
         "x": 0,
         "y": 8
@@ -320,8 +343,8 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "Score for  ${__cell} =  ${__cell_13}. $settingsPostfix. $drilldownPostfix",
-          "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-deployments=${__cell_4}",
+          "linkTooltip": "${__cell_13}. $settingsPostfix. $drilldownPostfix",
+          "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers&var-deployments=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "Name",
           "preserveFormat": false,
@@ -534,7 +557,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_9}. $drilldownPostfix",
-          "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-deployments=${__cell_4}",
+          "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers&var-deployments=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "NewIssues",
           "thresholds": [],
@@ -554,7 +577,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_10}. $drilldownPostfix",
-          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-deployments=${__cell_4}&var-timeRange=${__cell_2}",
+          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers&var-deployments=${__cell_4}&var-timeRange=${__cell_2}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "Regressions",
           "thresholds": [],
@@ -590,7 +613,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_11}. $drilldownPostfix",
-          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-deployments=${__cell_4}&var-timeRange=${__cell_2}",
+          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers&var-deployments=${__cell_4}&var-timeRange=${__cell_2}",
           "mappingType": 1,
           "pattern": "Slowdowns",
           "thresholds": [],
@@ -709,10 +732,10 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "A report detailing providing a weighted score to the list of the last  $limit applications based on the weights set in the Settings dashboard.",
+      "description": "A report detailing providing a weighted score or the key applications, as defined in the Settings dashboard. Key applications are marked with * and appear at the top of the list followed by applications with the highest event volume up to limit of  $limit applications in total. Score weights set in the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
-        "h": 11,
+        "h": 10,
         "w": 12,
         "x": 12,
         "y": 8
@@ -740,8 +763,8 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "Score for  ${__cell} =  ${__cell_13}. $settingsPostfix. $drilldownPostfix",
-          "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-applications=${__cell_4}",
+          "linkTooltip": "${__cell_13}. $settingsPostfix. $drilldownPostfix",
+          "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-deployments=$limitDeployments&var-servers=$limitServers&var-applications=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "Name",
           "preserveFormat": false,
@@ -955,7 +978,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_9}.  $drilldownPostfix",
-          "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-applications=${__cell_4}",
+          "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-deployments=$limitDeployments&var-servers=$limitServers&var-applications=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "NewIssues",
           "thresholds": [],
@@ -975,7 +998,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_10}.  $drilldownPostfix",
-          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-applications=${__cell_4}&var-timeRange=${__cell_2}",
+          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=${__cell_3}&var-deployments=$limitDeployments&var-servers=$limitServers&var-applications=${__cell_4}&var-timeRange=${__cell_2}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "Regressions",
           "thresholds": [],
@@ -1011,7 +1034,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_11}.  $drilldownPostfix",
-          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=${__cell_3}&var-servers=$servers&var-applications=${__cell_4}&var-timeRange=${__cell_2}",
+          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=${__cell_3}&var-deployments=$limitDeployments&var-servers=$limitServers&var-applications=${__cell_4}&var-timeRange=${__cell_2}",
           "mappingType": 1,
           "pattern": "Slowdowns",
           "thresholds": [],
@@ -1131,17 +1154,17 @@
   "refresh": false,
   "schemaVersion": 16,
   "style": "dark",
-  "tags": [],
+  "tags": [
+    "OverOps"
+  ],
   "templating": {
     "list": [
       {
         "allValue": "all",
         "current": {
-          "tags": [],
+          "selected": false,
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1164,6 +1187,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1188,6 +1212,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1212,6 +1237,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1219,7 +1245,7 @@
         "hide": 0,
         "includeAll": true,
         "label": "Deployments",
-        "multi": false,
+        "multi": true,
         "name": "deployments",
         "options": [],
         "query": "deployments({\"environments\":\"$environments\", \"sorted\":true})",
@@ -1263,7 +1289,7 @@
           "value": "$__all"
         },
         "datasource": "OO",
-        "hide": 2,
+        "hide": 0,
         "includeAll": true,
         "label": "Type",
         "multi": true,
@@ -1283,6 +1309,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1307,6 +1334,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -1332,8 +1360,9 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "text": "10",
-          "value": "10"
+          "tags": [],
+          "text": "5",
+          "value": "5"
         },
         "hide": 0,
         "includeAll": false,
@@ -1342,12 +1371,12 @@
         "name": "limit",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "5",
             "value": "5"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "10",
             "value": "10"
           }
@@ -1360,7 +1389,6 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "tags": [],
           "text": "Score",
           "value": "Score"
         },
@@ -1401,12 +1429,27 @@
             "value": "Severe Slowdowns"
           },
           {
+            "selected": false,
+            "text": "Event Volume",
+            "value": "Event Volume"
+          },
+          {
+            "selected": false,
+            "text": "Unique Events",
+            "value": "Unique Events"
+          },
+          {
+            "selected": false,
+            "text": "Event Rate",
+            "value": "Event Rate"
+          },
+          {
             "selected": true,
             "text": "Score",
             "value": "Score"
           }
         ],
-        "query": "New Issues,Severe New Issues,Regressions,Severe Regressions,Slowdowns,Severe Slowdowns,Score",
+        "query": "New Issues,Severe New Issues,Regressions,Severe Regressions,Slowdowns,Severe Slowdowns,Event Volume, Unique Events,Event Rate,Score",
         "skipUrlSync": false,
         "type": "custom"
       },
@@ -1453,6 +1496,146 @@
         "query": "Click to drill down",
         "skipUrlSync": false,
         "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "70|85",
+          "value": "70|85"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "thresholds",
+        "options": [
+          {
+            "selected": true,
+            "text": "70|85",
+            "value": "70|85"
+          }
+        ],
+        "query": "70|85",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "(R)|(Y)|(G)",
+          "value": "(R)|(Y)|(G)"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "postfixes",
+        "options": [
+          {
+            "selected": true,
+            "text": "(R)|(Y)|(G)",
+            "value": "(R)|(Y)|(G)"
+          }
+        ],
+        "query": "(R)|(Y)|(G)",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "limitApplications",
+        "options": [],
+        "query": "limitVariable({\"values\":\"$applications\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "limitDeployments",
+        "options": [],
+        "query": "limitVariable({\"values\":\"$deployments\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "limitServers",
+        "options": [],
+        "query": "limitVariable({\"values\":\"$servers\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "limitType",
+        "options": [],
+        "query": "limitVariable({\"values\":\"$type\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
@@ -1487,7 +1670,7 @@
     ]
   },
   "timezone": "",
-  "title": "Reliability Scorecard Simple",
+  "title": "Reliability Trend",
   "uid": "82eIMSsmz",
-  "version": 17
+  "version": 35
 }

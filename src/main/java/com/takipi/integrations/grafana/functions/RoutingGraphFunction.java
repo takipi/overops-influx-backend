@@ -26,6 +26,7 @@ import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class RoutingGraphFunction extends LimitGraphFunction {
+	
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -192,7 +193,8 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 		List<GraphSeries> result = new ArrayList<GraphSeries>();
 		
 		for (GraphData graphData : limitedGraphs) {
-			result.add(getGraphSeries(graphData, getServiceValue(graphData.key, serviceId, serviceIds)));	
+			result.add(getGraphSeries(graphData, getServiceValue(graphData.key, 
+				serviceId, serviceIds), input));	
 		}
 				
 		return result;

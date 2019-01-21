@@ -48,13 +48,7 @@ import com.takipi.integrations.grafana.util.EventLinkEncoder;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class RegressionFunction extends EventsFunction
-{
-	
-	private static String REG_DELTA = "regDelta";
-	private static String REGRESSION = "regression";
-	private static String SEVERITY = "severity";
-	private static String DESCRIPTION = "description";
-	
+{	
 	public static class Factory implements FunctionFactory
 	{
 		
@@ -256,7 +250,7 @@ public class RegressionFunction extends EventsFunction
 			
 			if (regData.regression != null)
 			{
-				return RegressionStringUtil.getRegressedEventRate(regData.regression);
+				return RegressionStringUtil.getRegressedEventRate(regData.regression, true);
 			}
 			else
 			{
@@ -304,16 +298,12 @@ public class RegressionFunction extends EventsFunction
 			switch (regData.type) {
 				
 				case NewIssues:
-					return Integer.valueOf(settings.new_event_score);
+				case Regressions:
+					return Integer.valueOf(1);
 					
 				case SevereNewIssues:
-					return Integer.valueOf(settings.severe_new_event_score);
-					
-				case Regressions:
-					return Integer.valueOf(settings.regression_score);
-					
 				case SevereRegressions:
-					return Integer.valueOf(settings.critical_regression_score);
+					return Integer.valueOf(2);
 				default:
 					break;
 			}
@@ -512,46 +502,45 @@ public class RegressionFunction extends EventsFunction
 	}
 	
 	@Override
-	protected FieldFormatter getFormatter(String column)
+	protected FieldFormatter getFormatter(String serviceId, String column)
 	{
 		
-		if (column.equals(REG_DELTA))
+		if (column.equals(RegressionsInput.REG_DELTA))
 		{
 			return new RegressionRateFormatter();
 		}
 		
-		if (column.equals(REGRESSION))
+		if (column.equals(RegressionsInput.REGRESSION))
 		{
 			return new RegressionFullRateFormatter();
 		}
 		
-		if (column.equals(SEVERITY))
+		if (column.equals(RegressionsInput.SEVERITY))
 		{
 			return new RegressionSeverityFormatter();
 		}
 		
-		if (column.equals(LINK))
+		if (column.equals(EventsInput.LINK))
 		{
 			return new RegressionLinkFormatter();
 		}
 		
-
 		if (column.equals(ViewInput.TIME_RANGE))
 		{
 			return new RegressionTimeRangeFormatter();
 		}
 		
-		if (column.equals(DESCRIPTION))
+		if (column.equals(RegressionsInput.REG_DESC))
 		{
 			return new RegressionDescriptionFormatter();
 		}
 		
-		return super.getFormatter(column);
+		return super.getFormatter(serviceId, column);
 	}
 	
 	public static class RegressionOutput
 	{	
-		public static RegressionOutput emptyOutput = new RegressionOutput(true);
+		public static final RegressionOutput emptyOutput = new RegressionOutput(true);
 		
 		public boolean empty;
 		
@@ -564,7 +553,7 @@ public class RegressionFunction extends EventsFunction
 		public List<EventData> eventDatas;
 		
 		protected double score;
-		long volume;
+		protected long volume;
 		
 		protected int slowdowns;
 		protected int severeSlowdowns;
@@ -706,7 +695,7 @@ public class RegressionFunction extends EventsFunction
 		
 		Collection<GraphSliceTask> baselineGraphTasks = getGraphTasks(serviceId, viewId, baselinePoints, baselineInput, 
 				VolumeType.all, regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan),
-			regressionWindow.activeWindowStart, regressionInput.baselineTimespan, 0, false);
+			regressionWindow.activeWindowStart, regressionInput.baselineTimespan, regressionWindow.activeTimespan, false);
 		
 		int graphActiveTimespan;
 		
@@ -748,6 +737,7 @@ public class RegressionFunction extends EventsFunction
 		
 		GraphResult baselineGraphResult = new GraphResult();
 		baselineGraphResult.graphs = Collections.singletonList(baselineGraph);		
+		
 		
 		ApiCache.putEventGraph(apiClient, serviceId, input, VolumeType.all, null,
 				input.pointsWanted, 0, graphActiveTimespan, 0, Response.of(200, activeGraphResult));
@@ -875,8 +865,11 @@ public class RegressionFunction extends EventsFunction
 		RegressionInput regressionInput = regressionInputs.getFirst();
 		RegressionWindow regressionWindow = regressionInputs.getSecond();
 		
-		Map<String, EventResult> eventListMap = getEventMap(serviceId, input, timespan.getFirst(), timespan.getSecond(),
-				null, input.pointsWanted);
+		DateTime from = regressionWindow.activeWindowStart;
+		DateTime to = regressionWindow.activeWindowStart.plusMinutes(regressionInput.activeTimespan);
+		
+		Map<String, EventResult> eventListMap = getEventMap(serviceId, input,
+			from, to, null, input.pointsWanted);
 	
 		Graph baselineGraph;
 		Graph activeWindowGraph;

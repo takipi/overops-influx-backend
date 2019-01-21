@@ -16,6 +16,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListenableFutureTask;
 import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.request.deployment.DeploymentsRequest;
 import com.takipi.api.client.request.event.EventRequest;
 import com.takipi.api.client.request.event.EventsRequest;
 import com.takipi.api.client.request.event.EventsSlimVolumeRequest;
@@ -23,6 +24,7 @@ import com.takipi.api.client.request.metrics.GraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsGraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsVolumeRequest;
 import com.takipi.api.client.request.view.ViewsRequest;
+import com.takipi.api.client.result.deployment.DeploymentsResult;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
 import com.takipi.api.client.result.metrics.GraphResult;
@@ -196,6 +198,50 @@ public class ApiCache {
 		}
 	}
 
+	protected static class DeploymentsCacheLoader extends ServiceCacheLoader {
+		
+		protected boolean active;
+		
+		public DeploymentsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, 
+			String serviceId, boolean active) {
+
+			super(apiClient, request, serviceId);
+			
+			this.active = active;
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+
+			if (!(obj instanceof DeploymentsCacheLoader)) {
+				return false;
+			}
+
+			if (!super.equals(obj)) {
+				return false;
+			}
+
+			DeploymentsCacheLoader other = (DeploymentsCacheLoader) obj;
+
+			if (active != other.active) {
+				return false;
+			}
+
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+			return super.hashCode();
+		}
+		
+		@Override
+		public String toString() {
+			return this.getClass().getSimpleName() + " active: " + active;
+		}
+
+	}
+	
 	protected static class ViewCacheLoader extends ServiceCacheLoader {
 
 		protected String viewName;
@@ -289,11 +335,17 @@ public class ApiCache {
 				return false;
 			}
 
-			if (!compare(input.getDeployments(serviceId), other.input.getDeployments(serviceId))) {
+			Collection<String> deps = input.getDeployments(serviceId);
+			Collection<String> otherDeps = other.input.getDeployments(serviceId);
+			
+			if (!compare(deps, otherDeps)) {
 				return false;
 			}
-
-			if (!compare(input.getServers(serviceId), other.input.getServers(serviceId))) {
+			
+			Collection<String> servers = input.getServers(serviceId);
+			Collection<String> otherServers = other.input.getServers(serviceId);
+			
+			if (!compare(servers, otherServers)) {
 				return false;
 			}
 
@@ -729,6 +781,16 @@ public class ApiCache {
 
 		ViewCacheLoader cacheKey = new ViewCacheLoader(apiClient, viewsRequest, serviceId, viewName);
 		Response<ViewsResult> response = (Response<ViewsResult>)getItem(cacheKey);
+
+		return response;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static Response<DeploymentsResult> getDeployments(ApiClient apiClient, String serviceId, boolean active) {
+
+		DeploymentsRequest request = DeploymentsRequest.newBuilder().setServiceId(serviceId).setActive(active).build();
+		DeploymentsCacheLoader cacheKey = new DeploymentsCacheLoader(apiClient, request, serviceId, active);
+		Response<DeploymentsResult> response = (Response<DeploymentsResult>)getItem(cacheKey);
 
 		return response;
 	}

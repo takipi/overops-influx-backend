@@ -1,5 +1,6 @@
 package com.takipi.integrations.grafana.functions;
 
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,6 +26,7 @@ import com.takipi.integrations.grafana.functions.TransactionsListFunction.Transa
 import com.takipi.integrations.grafana.functions.TransactionsListFunction.TransactionDataResult;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
+import com.takipi.integrations.grafana.input.FunctionInput.TimeFormat;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput.GraphType;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput.TimeWindow;
@@ -148,8 +150,10 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 						throw new IllegalStateException(timeWindow.toString());
 					
 				}
-							
-				result.graphs.add(graph);
+						
+				if (graph != null) {
+					result.graphs.add(graph);
+				}
 			}			
 		} else {
 			result.graphs = activeGraphs;
@@ -223,10 +227,10 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		for (TransactionGraph graph : graphs) {
 
 			if (input.volumeType.equals(GraphType.all)) {
-				result.add(createTransactionGraphSeries(serviceId, graph, GraphType.avg_time, serviceIds));
-				result.add(createTransactionGraphSeries(serviceId, graph, GraphType.invocations, serviceIds));
+				result.add(createTransactionGraphSeries(serviceId, graph, GraphType.avg_time, serviceIds, input));
+				result.add(createTransactionGraphSeries(serviceId, graph, GraphType.invocations, serviceIds, input));
 			} else {
-				result.add(createTransactionGraphSeries(serviceId, graph, input.volumeType, serviceIds));
+				result.add(createTransactionGraphSeries(serviceId, graph, input.volumeType, serviceIds, input));
 			}
 		}
 		
@@ -313,8 +317,10 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			TimeAvg timeAvg = entry.getValue();
 			
 			avgVolume += timeAvg.avgTime;
+			
+			Object timeValue = getTimeValue(time, input);
 	
-			result.add(Arrays.asList(new Object[] { time, Double.valueOf(timeAvg.avgTime) }));
+			result.add(Arrays.asList(new Object[] { timeValue, Double.valueOf(timeAvg.avgTime) }));
 		}
 
 		double volume;
@@ -368,8 +374,10 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			
 			Long time = entry.getKey();
 			Long value = entry.getValue();
+			
+			Object timeValue = getTimeValue(time, input);
 
-			result.add(Arrays.asList(new Object[] { time, value }));
+			result.add(Arrays.asList(new Object[] { timeValue, value }));
 			volume += value.longValue();
 		}
 
@@ -403,8 +411,8 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 
 	}
 
-	private GraphSeries createTransactionGraphSeries(String serviceId, TransactionGraph graph, GraphType volumeType,
-			Collection<String> serviceIds) {
+	private GraphSeries createTransactionGraphSeries(String serviceId, TransactionGraph graph, 
+			GraphType volumeType, Collection<String> serviceIds, TransactionsGraphInput input) {
 
 		Series series = new Series();
 		
@@ -413,21 +421,21 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		series.name = EMPTY_NAME;
 		series.columns = Arrays.asList(new String[] { TIME_COLUMN, tagName });
 
-		SeriesVolume seriesData = processGraphPoints(graph, volumeType);
+		SeriesVolume seriesData = processGraphPoints(graph, volumeType, input);
 
 		series.values = seriesData.values;
 
 		return GraphSeries.of(series, seriesData.volume);
 	}
 	
-	private SeriesVolume processGraphPoints(TransactionGraph graph, GraphType volumeType) {
+	private SeriesVolume processGraphPoints(TransactionGraph graph,
+		GraphType volumeType, TransactionsGraphInput input) {
 
 		long volume = 0;
 		List<List<Object>> values = new ArrayList<List<Object>>(graph.points.size());
 
 		for (GraphPoint gp : graph.points) {
 			
-			DateTime gpTime = ISODateTimeFormat.dateTimeParser().parseDateTime(gp.time);
 
 			double value;
 
@@ -438,7 +446,17 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			}
 
 			volume += value;
-			values.add(Arrays.asList(new Object[] { Long.valueOf(gpTime.getMillis()), value }));
+			
+			Object timeValue;
+			
+			if (input.getTimeFormat() == TimeFormat.EPOCH) {
+				DateTime gpTime = ISODateTimeFormat.dateTimeParser().parseDateTime(gp.time);
+				timeValue = Long.valueOf(gpTime.getMillis());
+			} else {
+				timeValue = gp.time;
+			}
+			
+			values.add(Arrays.asList(new Object[] {timeValue, value }));
 		}
 
 		return SeriesVolume.of(values, Long.valueOf(volume));

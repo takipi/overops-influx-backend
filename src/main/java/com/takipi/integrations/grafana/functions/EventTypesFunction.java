@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 
 import org.joda.time.DateTime;
 
@@ -15,10 +16,12 @@ import com.takipi.api.client.util.infra.Categories;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.EventTypesInput;
+import com.takipi.integrations.grafana.input.EventTypesInput.EventTypes;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings;
 import com.takipi.integrations.grafana.settings.input.GeneralSettings;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class EventTypesFunction extends EnvironmentVariableFunction {
 
@@ -71,13 +74,16 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 		DateTime to = DateTime.now();
 		DateTime from = to.minusDays(DEFAULT_TIME_DAYS);
 		
+		if (eventInput.timeFilter == null) {
+			eventInput.timeFilter = TimeUtil.getLastWindowTimeFilter(TimeUnit.DAYS.toMillis(DEFAULT_TIME_DAYS));
+		}
+		
 		Map<String, EventResult> events = getEventMap(serviceId, eventInput,
 			from, to, null);
 				
 		if (events == null) {
 			return;
 		}
-		
 		
 		Collection<String> types;
 		
@@ -133,16 +139,27 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 			}
 		}
 		
-		for (String type : eventTypes) {
-			appender.append(type);
+		Collection<EventTypes> availTypes = eventInput.getEventTypes(); 
+		
+		if (availTypes.contains(EventTypes.EventTypes)) {
+			for (String type : eventTypes) {
+				appender.append(type);
+			}
 		}
 		
-		for (String categoryName : categoryNames) {
-			appender.append(GroupSettings.toGroupName(categoryName));
+		if (availTypes.contains(EventTypes.Tiers)) {
+			
+			appender.append(GroupSettings.toGroupName(EventFilter.APP_CODE));
+			
+			for (String categoryName : categoryNames) {
+				appender.append(GroupSettings.toGroupName(categoryName));
+			}
 		}
 
-		for (String exceptionType : exceptionTypes) {
-			appender.append(EventFilter.EXCEPTION_PREFIX + exceptionType);
+		if (availTypes.contains(EventTypes.ExceptionTypes)) {
+			for (String exceptionType : exceptionTypes) {
+				appender.append(EventFilter.EXCEPTION_PREFIX + exceptionType);
+			}
 		}
 	}
 }

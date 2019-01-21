@@ -22,8 +22,16 @@ public abstract class BaseEnvironmentsInput extends VariableInput {
 	 */
 	public String environments;
 
+	public static int MAX_COMBINE_SERVICES = 3;
+	
+	/**
+	 * Control whether the information returned is limited to MAX_COMBINE_SERVICES,
+	 * or allows the user to selected an unlimited number of envs to query.
+	 */
+	public boolean unlimited;
+	
 	public static List<String> getServiceIds(String environments) {
-		if (!EnvironmentsFilterInput.hasFilter(environments)) {
+		if (!hasFilter(environments)) {
 			return Collections.emptyList();
 		}
 

@@ -60,4 +60,31 @@ package com.takipi.integrations.grafana.input;
  */
 public abstract class FunctionInput {
 
+	public enum TimeFormat {
+		
+		/**
+		 * Time stamps are returned in UNIX Epoch numeric format. This is the default format
+		 */
+		EPOCH,
+		
+		/**
+		 * Time stamps are returned in ISO format with UTZ Zone
+		 */
+		ISO_UTC
+	}
+	
+	/**
+	 * The time format in which any time stamps are returned when used in time series
+	 */
+	public TimeFormat timeFormat;
+	
+	public TimeFormat getTimeFormat() {
+		
+		if (timeFormat == null) {
+			return TimeFormat.EPOCH;
+		}
+		
+		return timeFormat;
+	}
+	
 }

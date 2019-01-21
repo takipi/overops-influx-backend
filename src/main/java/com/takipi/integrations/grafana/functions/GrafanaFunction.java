@@ -53,10 +53,10 @@ import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
+import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.EnvironmentsFilterInput;
-import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
@@ -66,10 +66,7 @@ import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public abstract class GrafanaFunction
-{
-	
-	private static int MAX_COMBINE_SERVICES = 3;
-	
+{	
 	public interface FunctionFactory
 	{
 		public GrafanaFunction create(ApiClient apiClient);
@@ -209,6 +206,11 @@ public abstract class GrafanaFunction
 			
 			Graph graph = graphResult.graphs.get(0);
 			
+			if (graph == null)
+			{
+				return null;
+			}
+			
 			if (!viewId.equals(graph.id))
 			{
 				return null;
@@ -250,6 +252,28 @@ public abstract class GrafanaFunction
 		String transactionName =
 				location.class_name + TRANS_DELIM + location.method_name + TRANS_DELIM + location.method_desc;
 		return transactionName;
+	}
+	
+	protected Object getTimeValue(long value, FunctionInput input) {
+		
+		switch (input.getTimeFormat()) {
+			
+			case EPOCH: return Long.valueOf(value);
+			case ISO_UTC: return TimeUtil.getDateTimeFromEpoch(value);
+		}
+		
+		throw new IllegalStateException();
+	}
+	
+	protected static Object getTimeValue(Long value, FunctionInput input) {
+		
+		switch (input.getTimeFormat()) {
+			
+			case EPOCH: return value;
+			case ISO_UTC: return TimeUtil.getDateTimeFromEpoch(value.longValue());
+		}
+		
+		throw new IllegalStateException();
 	}
 	
 	protected Pair<Object, Object> getTimeFilterPair(Pair<DateTime, DateTime> timeSpan, String timeFilter) {
@@ -382,7 +406,14 @@ public abstract class GrafanaFunction
 			return Collections.emptyList();
 		}
 		
-		List<String> result = serviceIds.subList(0, Math.min(MAX_COMBINE_SERVICES, serviceIds.size()));
+		List<String> result;
+		
+		if (input.unlimited) {
+			result = serviceIds;
+		} else {
+			result = serviceIds.subList(0, Math.min(BaseEnvironmentsInput.MAX_COMBINE_SERVICES, 
+				serviceIds.size()));
+		}
 		
 		result.remove(NONE);
 		

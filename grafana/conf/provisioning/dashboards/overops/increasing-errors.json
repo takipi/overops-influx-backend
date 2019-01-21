@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 28,
-  "iteration": 1547020052683,
+  "iteration": 1547787283552,
   "links": [
     {
       "icon": "external link",
@@ -59,7 +59,6 @@
       "tags": [
         "OverOps"
       ],
-      "targetBlank": true,
       "type": "dashboards"
     }
   ],
@@ -70,7 +69,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "Shows the relative rate of increasing errors, comparing them between the last $timeRange window and the preceding $baselineOnly baseline period, as denoted by the red annotation on the graph.",
+      "description": "Shows the relative rate of increasing errors, comparing them between the last $activeWindowFmt window and the preceding $baselineOnlyFmt baseline period, as denoted by the red annotation on the graph.",
       "fill": 0,
       "gridPos": {
         "h": 6,
@@ -145,7 +144,7 @@
       "thresholds": [],
       "timeFrom": "$baseline",
       "timeShift": null,
-      "title": "Errors / Calls Ratio  (Last $activeWindow vs. preceding $baselineOnly)",
+      "title": "Errors / Calls Ratio  (Last $activeWindowFmt vs. preceding $baselineOnlyFmt)",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -190,7 +189,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "Shows the volume of selected increasing errors, comparing them between the last $timeRange window and the preceding $baselineOnly baseline period, as denoted by the red annotation on the graph.",
+      "description": "Shows the volume of selected increasing errors, comparing them between the last $activeWindowFmt window and the preceding $baselineOnlyFmt baseline period, as denoted by the red annotation on the graph.",
       "fill": 0,
       "gridPos": {
         "h": 6,
@@ -313,7 +312,7 @@
       "thresholds": [],
       "timeFrom": "$baseline",
       "timeShift": null,
-      "title": "Volume (Last $activeWindow vs. preceding $baselineOnly)",
+      "title": "Volume (Last $activeWindowFmt vs. preceding $baselineOnlyFmt)",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -355,7 +354,7 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "Shows a list of increasing errors, comparing them between the last $timeRange window and the preceding $baselineOnly baseline period, as denoted by the red annotation on the graph.",
+      "description": "Shows a list of increasing errors, comparing them between the last $activeWindowFmt window and the preceding $baselineOnlyFmt baseline period, as denoted by the red annotation on the graph.",
       "fontSize": "100%",
       "gridPos": {
         "h": 16,
@@ -557,10 +556,10 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
-          "link": false,
+          "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "",
-          "linkUrl": "",
+          "linkTooltip": "${__cell_8}",
+          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Error location",
           "thresholds": [],
@@ -630,7 +629,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_1} in transaction ${__cell_2}, introduced by ${__cell_3}: Click for root cause (Event Id: ${__cell_6})",
+          "linkTooltip": "${__cell_2}: Click to drill -in.",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "TypeMessage",
@@ -649,10 +648,11 @@
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
           "link": true,
-          "linkTooltip": "${__cell_5}. Click to drill-down.",
+          "linkTargetBlank": true,
+          "linkTooltip": "${__cell_1}. Click to drill-down.",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
-          "pattern": "RegDelta",
+          "pattern": "Reg delta",
           "thresholds": [],
           "type": "number",
           "unit": "percent"
@@ -669,7 +669,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_7}",
+          "linkTooltip": "${__cell_3}",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Severity",
@@ -738,6 +738,22 @@
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Reg desc",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
         }
       ],
       "targets": [
@@ -758,7 +774,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressions({\"fields\":\"link,type,entry_point,introduced_by, severity,regression,id,description,typeMessage,error_location,stats.hits,rate,regDelta,first_seen\",  \"render\":\"Grid\", \"regressionTypes\":\"Regressions,SevereRegressions\", \"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"maxColumnLength\":90,\"pointsWanted\":\"$pointsWanted\",\"searchText\":\"$search\", \"eventLocations\":\"$increasingErrors\", \"types\":\"$type\"})",
+          "query": "regressions({\"fields\":\"link,regression,description,reg_desc,severity,typeMessage,stats.hits,rate,reg_delta,first_seen\",  \"render\":\"Grid\", \"regressionTypes\":\"Regressions,SevereRegressions\", \"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"maxColumnLength\":120,\"pointsWanted\":\"$pointsWanted\",\"searchText\":\"$search\", \"eventLocations\":\"$increasingErrors\", \"types\":\"$type\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1239,6 +1255,56 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "baselineOnlyFmt",
+        "options": [],
+        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Baseline\", \"prettyFormat\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "activeWindowFmt",
+        "options": [],
+        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Active\",\"prettyFormat\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
@@ -1275,5 +1341,5 @@
   "timezone": "",
   "title": "Increasing Errors",
   "uid": "WZ739NYmk",
-  "version": 96
+  "version": 109
 }

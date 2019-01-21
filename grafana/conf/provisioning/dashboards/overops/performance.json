@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 19,
-  "iteration": 1547020090707,
+  "iteration": 1548032795377,
   "links": [
     {
       "icon": "external link",
@@ -47,7 +47,6 @@
       "tags": [
         "OverOps"
       ],
-      "targetBlank": true,
       "title": "",
       "tooltip": "",
       "type": "dashboards",
@@ -1255,7 +1254,7 @@
           "unit": "short"
         },
         {
-          "alias": "Failure Rate",
+          "alias": "Failure Rate (%)",
           "colorMode": "value",
           "colors": [
             "rgba(50, 172, 45, 0.97)",
@@ -1263,7 +1262,7 @@
             "rgba(245, 54, 54, 0.9)"
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
+          "decimals": 0,
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_7}. Click to drill-down.",
@@ -1271,11 +1270,17 @@
           "mappingType": 1,
           "pattern": "error_rate",
           "thresholds": [
-            "0.01",
-            "0.05"
+            "1",
+            "5"
           ],
           "type": "number",
-          "unit": "percentunit"
+          "unit": "percent",
+          "valueMaps": [
+            {
+              "text": "< 1%",
+              "value": "0.009"
+            }
+          ]
         },
         {
           "alias": "Avg Response",
@@ -1306,7 +1311,7 @@
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 0,
           "link": true,
-          "linkTargetBlank": true,
+          "linkTargetBlank": false,
           "linkTooltip": "${__cell_1}. Thresholds are defined in the Settings dashboard. Click to drill-in.",
           "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-timeRange=${__cell_4}&var-transactions=${__cell_9}&var-performanceStates=OK%7CSLOWING%7CCRITICAL%7CNO_DATA",
           "mappingType": 1,
@@ -1334,7 +1339,7 @@
         },
         {
           "alias": "P",
-          "colorMode": null,
+          "colorMode": "value",
           "colors": [
             "rgba(50, 172, 45, 0.97)",
             "rgba(237, 129, 40, 0.89)",
@@ -1342,28 +1347,29 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
-          "link": true,
+          "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_1}. Thresholds are defined in the Settings dashboard. Click to drill-in.",
           "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-timeRange=${__cell_4}&var-transactions=${__cell_9}&var-performanceStates=OK%7CSLOWING%7CCRITICAL%7CNO_DATA",
           "mappingType": 1,
           "pattern": "slow_state",
           "thresholds": [
-            ""
+            "1",
+            "2"
           ],
           "type": "string",
           "unit": "short",
           "valueMaps": [
             {
-              "text": "✅",
+              "text": "✔",
               "value": "0"
             },
             {
-              "text": "⚠",
+              "text": "2",
               "value": "1"
             },
             {
-              "text": "❌",
+              "text": "1",
               "value": "2"
             }
           ]
@@ -1449,7 +1455,7 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 1,
-          "link": true,
+          "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "The avg response time in the baseline window with ${__cell_6} calls",
           "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-timeRange=${__cell_4}&var-transactions=${__cell_9}&var-performanceStates=OK%7CSLOWING%7CCRITICAL%7CNO_DATA",
@@ -1629,7 +1635,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1679,7 +1684,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1825,6 +1829,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "Logged Error,Uncaught Exception,HTTP Error",
           "value": "Logged Error,Uncaught Exception,HTTP Error"
         },
@@ -1954,5 +1959,5 @@
   "timezone": "",
   "title": "Performance",
   "uid": "Z40SpeJmz",
-  "version": 104
+  "version": 110
 }

@@ -1,10 +1,9 @@
 package com.takipi.integrations.grafana.functions;
 
 import java.util.Collection;
-import java.util.List;
 
 import com.takipi.api.client.ApiClient;
-import com.takipi.api.client.util.client.ClientUtil;
+import com.takipi.api.client.data.deployment.SummarizedDeployment;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.DeploymentsInput;
 import com.takipi.integrations.grafana.util.DeploymentUtil;
@@ -37,18 +36,15 @@ public class DeploymentsFunction extends EnvironmentVariableFunction {
 	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender) {
 
-		List<String> serviceDeps;
+		Collection<SummarizedDeployment> serviceDeps = DeploymentUtil.getDeployments(apiClient, serviceId, false);
 		
-		try {
-			serviceDeps = ClientUtil.getDeployments(apiClient, serviceId);
-		} catch (Exception e) {
-			System.err.println(e);
+		if (serviceDeps == null) {
 			return;
 		}
+		
+		for (SummarizedDeployment dep : serviceDeps) {
 
-		for (String dep : serviceDeps) {
-
-			String depName = getServiceValue(dep, serviceId, serviceIds);
+			String depName = getServiceValue(dep.name, serviceId, serviceIds);
 			appender.append(depName);
 		}
 	}

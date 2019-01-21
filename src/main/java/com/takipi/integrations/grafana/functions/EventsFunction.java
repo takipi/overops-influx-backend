@@ -6,18 +6,23 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import org.joda.time.DateTime;
+import org.ocpsoft.prettytime.PrettyTime;
 
 import com.google.common.base.Objects;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.Location;
 import com.takipi.api.client.data.event.Stats;
 import com.takipi.api.client.result.event.EventResult;
+import com.takipi.api.client.util.infra.Categories;
+import com.takipi.api.client.util.regression.RegressionStringUtil;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
@@ -36,13 +41,9 @@ public class EventsFunction extends GrafanaFunction {
 	private static final String STATS = Stats.class.getSimpleName().toLowerCase();
 	private static final String JIRA_LABEL = "JIRA";
 
-	protected static final String LINK = "link";
-	protected static final String RATE = "rate";
 	protected static final String FIRST_SEEN = "first_seen";
 	protected static final String LAST_SEEN = "last_seen";
 	protected static final String MESSAGE = "message";
-	protected static final String TYPE_MESSAGE = "typeMessage";
-	protected static final String JIRA_STATE = "jira_state";
 	protected static final String JIRA_ISSUE_URL = "jira_issue_url";
 	
 	private static final int MAX_JIRA_BATCH_SIZE = 10;
@@ -75,6 +76,14 @@ public class EventsFunction extends GrafanaFunction {
 		
 		private boolean equalLocations(Location a, Location b) {
 			
+			if (a == null) {
+				return b == null;
+			} 
+			
+			if (b == null) {
+				return false;
+			} 
+			
 			if (!Objects.equal(a.class_name, b.class_name)) {
 				return false;
 			}
@@ -92,11 +101,11 @@ public class EventsFunction extends GrafanaFunction {
 		
 		@Override
 		public boolean equals(Object obj) {
-			if (obj == null ||
-				(!(obj instanceof EventData))) {
+			
+			if (obj == null || (!(obj instanceof EventData))) {
 				return false;
 			}
-			
+				
 			EventData other = (EventData)obj;
 			
 			if (!Objects.equal(event.type, other.event.type)) {
@@ -249,7 +258,8 @@ public class EventsFunction extends GrafanaFunction {
 			}
 
 			if (value instanceof Location) {
-				return getSimpleClassName(((Location)value).class_name);
+				Location location = (Location)value;
+				return getSimpleClassName(location.class_name) + "." + location.method_name;
 			}
 
 			if (value instanceof List) {
@@ -341,6 +351,101 @@ public class EventsFunction extends GrafanaFunction {
 			}
 			
 			return "";
+		}
+	}
+	
+	protected class EventDescriptionFormatter extends FieldFormatter {
+
+		private Categories categories;
+		private PrettyTime prettyTime;
+		
+		protected EventDescriptionFormatter(Categories categories) {
+			this.categories = categories;
+			this.prettyTime = new PrettyTime();
+		}
+		
+		@Override
+		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
+				Pair<DateTime, DateTime> timeSpan) {
+
+			
+			StringBuilder result = new StringBuilder();
+			
+			result.append(eventData.event.type);
+			
+			if (eventData.event.error_location !=  null) {
+				result.append(" from ");
+				result.append(getSimpleClassName(eventData.event.error_location.class_name));
+				result.append(".");
+				result.append(eventData.event.error_location.method_name);
+			}
+			
+			if (eventData.event.entry_point !=  null) {
+				result.append(" in tansaction ");
+				result.append(getSimpleClassName(eventData.event.entry_point.class_name));
+			}
+			
+			Set<String> labels = null;
+			
+			if (categories != null) {
+				Set<String> originLabels;
+				
+				if (eventData.event.error_origin != null) {
+					originLabels = categories.getCategories(eventData.event.error_origin.class_name);
+				} else {
+					originLabels = null;
+				}
+						
+				Set<String> locationLabels;
+				
+				if (eventData.event.error_location != null) {
+					locationLabels = categories.getCategories(eventData.event.error_location.class_name);
+				} else {
+					locationLabels = null;	
+				}
+					
+				if (locationLabels != null) {
+						
+					if (originLabels != null) {
+						labels = new HashSet<>(locationLabels.size() + originLabels.size());
+						labels.addAll(locationLabels);
+						labels.addAll(originLabels);
+						
+					} else {
+						labels = locationLabels;
+					}
+				} 
+				else {
+					labels = originLabels;
+				}
+			}
+				
+			if (eventData.event.introduced_by != null) {
+				result.append(". Introduced by: ");
+				result.append(eventData.event.introduced_by);
+			} else {
+				result.append(". First seen: ");
+				DateTime firstSeen = TimeUtil.getDateTime(eventData.event.first_seen);
+				result.append(prettyTime.format(firstSeen.toDate()));	
+			}
+			
+			if (!CollectionUtil.safeIsEmpty(labels)) {
+				result.append(". Tier");
+				
+				if ((labels != null) && (labels.size() > 1)) {
+					result.append("s");
+				}
+				result.append(": ");
+				result.append(String.join(", ", labels));
+			}
+			
+			return result.toString();
+		}
+		
+		@Override
+		protected Object formatValue(Object value, EventsInput input)
+		{
+			return value;
 		}
 	}
 	
@@ -448,6 +553,11 @@ public class EventsFunction extends GrafanaFunction {
 
 			if (eventData.event.stats.invocations > 0) {
 				double rate = (double) eventData.event.stats.hits / (double) eventData.event.stats.invocations;
+				
+				if (rate > 10) {
+					return "> 1000%";
+				}
+								
 				return rate;
 			} else {
 				return "NA";
@@ -455,18 +565,33 @@ public class EventsFunction extends GrafanaFunction {
 		}
 
 	}
+	
+	protected static class RateDescFormatter extends FieldFormatter {
 
-	protected FieldFormatter getFormatter(String column) {
+		@Override
+		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
+				Pair<DateTime, DateTime> timeSpan) {
+
+			return RegressionStringUtil.getEventRate(eventData.event, true);
+		}
+
+	}
+
+	protected FieldFormatter getFormatter(String serviceId, String column) {
 		
-		if (column.equals(LINK)) {
+		if (column.equals(EventsInput.LINK)) {
 			return new LinkFormatter();
 		}
 
-		if (column.equals(RATE)) {
+		if (column.equals(EventsInput.RATE)) {
 			return new RateFormatter();
 		}
 		
-		if (column.equals(JIRA_STATE)) {
+		if (column.equals(EventsInput.RATE_DESC)) {
+			return new RateDescFormatter();
+		}	
+		
+		if (column.equals(EventsInput.JIRA_STATE)) {
 			return new JiraStateFormatter();
 		}
 		
@@ -474,10 +599,15 @@ public class EventsFunction extends GrafanaFunction {
 			return new MessageFormatter();
 		}
 		
-		if (column.equals(TYPE_MESSAGE)) {
+		if (column.equals(EventsInput.TYPE_MESSAGE)) {
 			return new TypeMessageFormatter();
 		}
 		
+		if (column.equals(EventsInput.DESCRIPTION)) {
+			Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();
+			return new EventDescriptionFormatter(categories);
+		}
+			
 		Field field = getReflectField(column);
 
 		if (column.equals(JIRA_ISSUE_URL)) {
@@ -496,7 +626,7 @@ public class EventsFunction extends GrafanaFunction {
 
 	}
 
-	private Map<String, FieldFormatter> getFieldFormatters(String columns) {
+	private Map<String, FieldFormatter> getFieldFormatters(String serviceId, String columns) {
 
 		if ((columns == null) || (columns.isEmpty())) {
 			throw new IllegalArgumentException("columns cannot be empty");
@@ -506,7 +636,7 @@ public class EventsFunction extends GrafanaFunction {
 		Map<String, FieldFormatter> result = new LinkedHashMap<String, FieldFormatter>(columnsArray.length);
 
 		for (String column : columnsArray) {
-			FieldFormatter fieldFormatter = getFormatter(column);
+			FieldFormatter fieldFormatter = getFormatter(serviceId, column);
 			result.put(column, fieldFormatter);
 		}
 
@@ -715,7 +845,7 @@ public class EventsFunction extends GrafanaFunction {
 	 */
 	protected List<List<Object>> processServiceEvents(Collection<String> serviceIds, String serviceId, EventsInput input, Pair<DateTime, DateTime> timeSpan) {
 
-		Map<String, FieldFormatter> formatters = getFieldFormatters(input.fields);
+		Map<String, FieldFormatter> formatters = getFieldFormatters(serviceId, input.fields);
 		
 		List<EventData> mergedDatas;
 		List<EventData> eventDatas = getEventData(serviceId, input, timeSpan);
@@ -733,7 +863,7 @@ public class EventsFunction extends GrafanaFunction {
 		List<List<Object>> result = new ArrayList<List<Object>>(mergedDatas.size());
 			
 		if ((formatters.containsKey(JIRA_ISSUE_URL)) 
-		|| (formatters.containsKey(JIRA_STATE))) {
+		|| (formatters.containsKey(EventsInput.JIRA_STATE))) {
 			updateJiraUrls(serviceId, eventDatas);
 		}
 		

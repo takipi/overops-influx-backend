@@ -22,10 +22,10 @@ package com.takipi.integrations.grafana.input;
  * 		"view":"$view","pointsWanted":"$pointsWanted", "transactionPointsWanted":"$transactionPointsWanted",
  * 		"types":"$type", "render":"Graph", "mode":"Deployments", "limit":"$limit",
  * 		"graphType":"$graphType"})
- * 
+ * ˙
  *  Screenshot: https://drive.google.com/file/d/1aEXcfTGC9OfNaJvsEeRptqp2o1czd0SW/view?usp=sharing
  */
-public class RelabilityReportInput extends RegressionsInput {
+public class ReliabilityReportInput extends RegressionsInput {
 	
 	/**
 	 * Control the set of events and filters on which to report
@@ -48,7 +48,12 @@ public class RelabilityReportInput extends RegressionsInput {
 		 * have the highest volume of events. If any key tiers are defiend in the Settings dashboard
 		 * they are used first.
 		 */
-		Tiers;
+		Tiers,
+		
+		/**
+		 * The report will return a a single row for the target event set
+		 */
+		Default;
 	}
 	
 	/**
@@ -87,6 +92,21 @@ public class RelabilityReportInput extends RegressionsInput {
 		SevereSlowdowns,
 		
 		/**
+		 * chart the volume of events of the target app, deployment, tier
+		 */
+		EventVolume,
+		
+		/**
+		 * chart the unique number of events of the target app, deployment, tier
+		 */
+		UniqueEvents,
+		
+		/**
+		 * chart the relative rate of events of the target app, deployment, tier
+		 */
+		EventRate,
+		
+		/**
 		 * chart the reliability score of the target app, deployment, tier
 		 */
 		Score;
@@ -102,18 +122,64 @@ public class RelabilityReportInput extends RegressionsInput {
 	 */
 	public ReportMode mode;
 	
+	public ReportMode getReportMode() {
+		
+		if (mode == null) {
+			return  ReportMode.Default;
+		}
+		
+		return mode;	
+	}
+	
+	/**
+	 * Control the type of events used to compute the report score
+	 *
+	 */
+	public enum ScoreType {
+		/**
+		 * Include regression analysis for new and increasing events
+		 */
+		Regressions, 
+		
+		/**
+		 * Include slowdown analysis 
+		 */
+		Slowdowns, 
+	
+		/**
+		 * Combine regression and slowdown analysis in the output (default)
+		 */
+		Combined
+	}
+	
+	public ScoreType scoreType;
+	
+	public ScoreType getScoreType() {
+		
+		if (scoreType == null) {
+			return ScoreType.Combined;
+		}
+		
+		return scoreType;
+	}
+	
 	/**
 	 * The max number of rows / time series points to return
 	 */
 	public int limit;
 	
 	/**
-	 * Obsolete
+	 * A comma delimited pair of numeric values used to define thresholds by which
+	 * to choose a postfix for a score series based on the values set in postfixes
 	 */
 	public String thresholds;
 	
 	/**
-	 * Obsolete
+	 * A comma delimited arrays of 3 postfix to be added to the series name. The post fix
+	 * is selected based on if the reliability score is smaller than, in between or greater than the upper
+	 * threshold. For example if this is set to "BAD,OK,GOOD" and thresholds is "70,85"
+	 * a score below 70 will have the postfix BAD added to the series name, 80 will be
+	 * OK and 90 will be GOOD 
 	 */
 	public String postfixes;
 	
@@ -136,4 +202,24 @@ public class RelabilityReportInput extends RegressionsInput {
 	 * for example: "%d issues"
 	 */
 	public String sevOnlyFormat;
+	
+	public enum SortType {
+		
+		Ascending,
+		
+		Descending,
+		
+		Default
+	}
+	
+	public SortType sortType;	
+	
+	public SortType getSortType() {
+		
+		if (sortType == null) {
+			return SortType.Default;
+		}
+		
+		return sortType;
+	}
 }

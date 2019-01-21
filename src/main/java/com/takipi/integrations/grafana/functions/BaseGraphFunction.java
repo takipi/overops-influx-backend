@@ -132,7 +132,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		return result;
 	}
 	
-	protected static GraphSeries getGraphSeries(GraphData graphData, String name) {
+	protected GraphSeries getGraphSeries(GraphData graphData, String name, FunctionInput input) {
 		
 		GraphSeries result = new GraphSeries();
 					
@@ -144,7 +144,8 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		result.volume = graphData.volume;
 			
 		for (Map.Entry<Long, Long> graphPoint : graphData.points.entrySet()) {				
-			result.series.values.add(Arrays.asList(new Object[] { graphPoint.getKey(), graphPoint.getValue() }));
+			Object timeValue = getTimeValue(graphPoint.getKey().longValue(), input);
+			result.series.values.add(Arrays.asList(new Object[] { timeValue, graphPoint.getValue() }));
 		}
 		
 		return result;
