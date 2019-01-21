@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
+import org.ocpsoft.prettytime.PrettyTime;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.deployment.SummarizedDeployment;
@@ -19,7 +20,7 @@ import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.util.DeploymentUtil;
 
 public class DeploymentsAnnotation extends BaseGraphFunction {
-	
+		
 	private static final String DEPLOY_SERIES_NAME = "deployments";
 	private static final int MAX_DEPLOY_ANNOTATIONS = 3;
 	
@@ -45,6 +46,62 @@ public class DeploymentsAnnotation extends BaseGraphFunction {
 		super(apiClient);
 	}
 	
+	private void sortDeployments(List<Pair<DateTime, String>> deployments) {
+		
+		deployments.sort(new Comparator<Pair<DateTime, String>>() {
+				
+			@Override
+			public int compare(Pair<DateTime, String> o1, Pair<DateTime, String> o2) {
+				
+				long delta = o2.getFirst().getMillis() - o1.getFirst().getMillis();
+				
+				if (delta > 0) {
+					return 1;
+				}
+				
+				if (delta < 0) {
+					return -1;
+				}
+				
+				return 0;
+			}
+		});		
+	}
+
+	
+	private void addDeployments(List<Pair<DateTime, String>> deployments, String serviceId, boolean active) {
+		
+		Collection<SummarizedDeployment> deps = DeploymentUtil.getDeployments(apiClient, serviceId, active);
+
+		if (deps == null) {
+			return;
+		}
+		
+		PrettyTime prettyTime = new PrettyTime();
+			
+		for (SummarizedDeployment dep : deps) {
+			
+			if (dep.first_seen == null) {
+				continue;
+			}
+			
+			DateTime firstSeen = ISODateTimeFormat.dateTime().withZoneUTC().parseDateTime(dep.first_seen);
+			StringBuilder value = new StringBuilder();
+			
+			value.append(dep.name);
+			value.append(": introduced ");
+			value.append(prettyTime.format(firstSeen.toDate()));
+			
+			if (dep.last_seen != null) {
+				DateTime lastSeen = ISODateTimeFormat.dateTime().withZoneUTC().parseDateTime(dep.last_seen);
+				value.append(", last seen ");
+				value.append(prettyTime.format(lastSeen.toDate()));
+			}
+			
+			deployments.add(Pair.of(firstSeen, value.toString()));		
+		}
+	}
+	
 	@Override
 	protected List<GraphSeries> processServiceGraph(Collection<String> serviceIds, String serviceId, String viewId, String viewName,
 			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
@@ -60,39 +117,17 @@ public class DeploymentsAnnotation extends BaseGraphFunction {
 		result.series.values = new ArrayList<List<Object>>();
 		result.volume = 1;
 		
-		Collection<SummarizedDeployment> deps = DeploymentUtil.getDeployments(apiClient, serviceId, false);
+		List<Pair<DateTime, String>> deployments = new ArrayList<Pair<DateTime, String>>();
 		
-		if (deps == null) {
-			return Collections.emptyList();
-		}
-		
-		List<Pair<Long, String>> deployments = new ArrayList<Pair<Long, String>>();
-		
-		for (SummarizedDeployment dep : deps) {
-			
-			if (dep.first_seen == null) {
-				continue;
-			}
-			
-			DateTime firstSeen = ISODateTimeFormat.dateTime().withZoneUTC().parseDateTime(dep.first_seen);
-			deployments.add(Pair.of(firstSeen.getMillis(), dep.name));
-			
-		}
-		
-		deployments.sort(new Comparator<Pair<Long, String>>() {
-			@Override
-			public int compare(Pair<Long, String> o1, Pair<Long, String> o2)
-			{
-				return (int)(o2.getFirst().longValue() - o1.getFirst().longValue());
-			}
-		});
+		addDeployments(deployments, serviceId, false);
+		sortDeployments(deployments);
 		
 		int maxDeployments = Math.min(deployments.size(), MAX_DEPLOY_ANNOTATIONS);
 		
 		for (int i = 0; i < maxDeployments; i++) {
-			Pair<Long, String> pair = deployments.get(i);
+			Pair<DateTime, String> pair = deployments.get(i);
 			
-			Object timeValue = getTimeValue(pair.getFirst(), input);
+			Object timeValue = getTimeValue(pair.getFirst().getMillis(), input);
 			
 			result.series.values.add(Arrays.asList(new Object[] {timeValue, 
 					getServiceValue(pair.getSecond(), serviceId, serviceIds) }));

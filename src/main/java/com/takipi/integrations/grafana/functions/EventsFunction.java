@@ -396,7 +396,13 @@ public class EventsFunction extends GrafanaFunction {
 					originLabels = null;
 				}
 						
-				Set<String> locationLabels = categories.getCategories(eventData.event.error_location.class_name);
+				Set<String> locationLabels;
+				
+				if (eventData.event.error_location != null) {
+					locationLabels = categories.getCategories(eventData.event.error_location.class_name);
+				} else {
+					locationLabels = null;	
+				}
 					
 				if (locationLabels != null) {
 						

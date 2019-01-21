@@ -298,16 +298,12 @@ public class RegressionFunction extends EventsFunction
 			switch (regData.type) {
 				
 				case NewIssues:
-					return Integer.valueOf(settings.new_event_score);
+				case Regressions:
+					return Integer.valueOf(1);
 					
 				case SevereNewIssues:
-					return Integer.valueOf(settings.severe_new_event_score);
-					
-				case Regressions:
-					return Integer.valueOf(settings.regression_score);
-					
 				case SevereRegressions:
-					return Integer.valueOf(settings.critical_regression_score);
+					return Integer.valueOf(2);
 				default:
 					break;
 			}

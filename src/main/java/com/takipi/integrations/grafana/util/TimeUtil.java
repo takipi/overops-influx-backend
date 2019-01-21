@@ -60,6 +60,10 @@ public class TimeUtil {
 		return result;
 	}
 	
+	public static String getLastWindowMinTimeFilter(int minDelta) {
+		return LAST_TIME_WINDOW + minDelta + MINUTE_POSTFIX;
+	}
+	
 	public static String getLastWindowTimeFilter(long timeDelta) {
 		return LAST_TIME_WINDOW + getTimeInterval(timeDelta);
 	}

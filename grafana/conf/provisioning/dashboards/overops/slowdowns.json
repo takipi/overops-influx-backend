@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 37,
-  "iteration": 1547787096351,
+  "iteration": 1548032060794,
   "links": [
     {
       "icon": "external link",
@@ -661,7 +661,7 @@
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 0,
           "link": true,
-          "linkTargetBlank": true,
+          "linkTargetBlank": false,
           "linkTooltip": "${__cell_7}. Click to drill-in",
           "linkUrl": "d/HYBPMdYik/errors?from=${__cell_3}&to=${__cell_4}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=${__cell_8}&var-type=$transactionFailureTypes",
           "mappingType": 1,
@@ -745,21 +745,22 @@
           "mappingType": 1,
           "pattern": "slow_state",
           "thresholds": [
-            ""
+            "1",
+            "2"
           ],
           "type": "string",
           "unit": "short",
           "valueMaps": [
             {
-              "text": "✅",
+              "text": "✔",
               "value": "0"
             },
             {
-              "text": "⚠",
+              "text": "2",
               "value": "1"
             },
             {
-              "text": "❌",
+              "text": "1",
               "value": "2"
             }
           ]
@@ -970,7 +971,6 @@
       {
         "allValue": "all",
         "current": {
-          "tags": [],
           "text": "None",
           "value": [
             "None"
@@ -1552,5 +1552,5 @@
   "timezone": "",
   "title": "Slowdowns",
   "uid": "iHSORcymk",
-  "version": 67
+  "version": 71
 }

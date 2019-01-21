@@ -115,7 +115,10 @@ public class RegressionsInput extends EventsInput
 	public static String REGRESSION = "regression";
 	
 	/**
-	 * Text value for the severity of the regression
+	 * Text value for the severity of the regression.
+	 * If the issue is severe = 2
+	 * If the issue is non-severe = 1;
+	 * If the issue is not new or regressed = 0;
 	 */
 	public static String SEVERITY = "severity";
 	
