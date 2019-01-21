@@ -80,7 +80,7 @@ public class FunctionParser {
 
 		int endIndex = trimmedQuery.lastIndexOf(')');
 
-		if (endIndex < endIndex) {
+		if (endIndex == -1) {
 			throw new IllegalArgumentException("Missing closing parenthesis: " + query);
 		}
 
