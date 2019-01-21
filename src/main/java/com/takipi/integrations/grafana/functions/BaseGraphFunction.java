@@ -37,6 +37,10 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		@Override
 		public boolean equals(Object obj)
 		{
+			if (obj == null) {
+				return key == null;
+			}
+
 			return Objects.equal(key, ((GraphData)obj).key);
 		}
 		
