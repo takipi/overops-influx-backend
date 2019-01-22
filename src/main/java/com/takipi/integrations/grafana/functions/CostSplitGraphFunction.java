@@ -130,11 +130,9 @@ public class CostSplitGraphFunction extends LimitGraphFunction {
 		Collection<CostGraphData> eventsCostVolume = new ArrayList<>();
 
 		eventsVolume.forEach((evk,evv)->{
-			CostGraphData ecvGD = new CostGraphData(evk, evv.getCostFactor());
-			ecvGD.volume = (long) (evv.volume 
-					// * evv.getCostFactor()
-					);
-			if (ecvGD.volume != 0L) {
+			if (evv.volume != 0L) {
+				CostGraphData ecvGD = new CostGraphData(evk, evv.getCostFactor());
+				ecvGD.volume = evv.volume;
 				eventsCostVolume.add(ecvGD);
 			}
 		});

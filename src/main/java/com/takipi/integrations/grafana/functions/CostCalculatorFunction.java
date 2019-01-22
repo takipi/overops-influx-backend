@@ -6,17 +6,22 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.joda.time.DateTime;
+import org.ocpsoft.prettytime.PrettyTime;
 
 import com.google.common.base.Objects;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.Location;
 import com.takipi.api.client.data.event.Stats;
 import com.takipi.api.client.result.event.EventResult;
+import com.takipi.api.client.util.infra.Categories;
+import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.CostCalculatorInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
@@ -31,7 +36,6 @@ public class CostCalculatorFunction extends GrafanaFunction {
 
 	private static final String STATS = Stats.class.getSimpleName().toLowerCase();
 
-	protected static final String LINK = "link";
 	protected static final String FIRST_SEEN = "first_seen";
 	protected static final String LAST_SEEN = "last_seen";
 	protected static final String MESSAGE = "message";
@@ -66,6 +70,14 @@ public class CostCalculatorFunction extends GrafanaFunction {
 		}
 		
 		private boolean equalLocations(Location a, Location b) {
+			
+			if (a == null) {
+				return b == null;
+			} 
+			
+			if (b == null) {
+				return false;
+			} 
 			
 			if (!Objects.equal(a.class_name, b.class_name)) {
 				return false;
@@ -239,6 +251,101 @@ public class CostCalculatorFunction extends GrafanaFunction {
 		}
 	}
 
+	protected class EventDescriptionFormatter extends FieldFormatter {
+
+		private Categories categories;
+		private PrettyTime prettyTime;
+		
+		protected EventDescriptionFormatter(Categories categories) {
+			this.categories = categories;
+			this.prettyTime = new PrettyTime();
+		}
+		
+		@Override
+		protected Object getValue(EventData eventData, String serviceId, CostCalculatorInput input,
+				Pair<DateTime, DateTime> timeSpan) {
+
+			
+			StringBuilder result = new StringBuilder();
+			
+			result.append(eventData.event.type);
+			
+			if (eventData.event.error_location !=  null) {
+				result.append(" from ");
+				result.append(getSimpleClassName(eventData.event.error_location.class_name));
+				result.append(".");
+				result.append(eventData.event.error_location.method_name);
+			}
+			
+			if (eventData.event.entry_point !=  null) {
+				result.append(" in tansaction ");
+				result.append(getSimpleClassName(eventData.event.entry_point.class_name));
+			}
+			
+			Set<String> labels = null;
+			
+			if (categories != null) {
+				Set<String> originLabels;
+				
+				if (eventData.event.error_origin != null) {
+					originLabels = categories.getCategories(eventData.event.error_origin.class_name);
+				} else {
+					originLabels = null;
+				}
+						
+				Set<String> locationLabels;
+				
+				if (eventData.event.error_location != null) {
+					locationLabels = categories.getCategories(eventData.event.error_location.class_name);
+				} else {
+					locationLabels = null;	
+				}
+					
+				if (locationLabels != null) {
+						
+					if (originLabels != null) {
+						labels = new HashSet<>(locationLabels.size() + originLabels.size());
+						labels.addAll(locationLabels);
+						labels.addAll(originLabels);
+						
+					} else {
+						labels = locationLabels;
+					}
+				} 
+				else {
+					labels = originLabels;
+				}
+			}
+				
+			if (eventData.event.introduced_by != null) {
+				result.append(". Introduced by: ");
+				result.append(eventData.event.introduced_by);
+			} else {
+				result.append(". First seen: ");
+				DateTime firstSeen = TimeUtil.getDateTime(eventData.event.first_seen);
+				result.append(prettyTime.format(firstSeen.toDate()));	
+			}
+			
+			if (!CollectionUtil.safeIsEmpty(labels)) {
+				result.append(". Tier");
+				
+				if ((labels != null) && (labels.size() > 1)) {
+					result.append("s");
+				}
+				result.append(": ");
+				result.append(String.join(", ", labels));
+			}
+			
+			return result.toString();
+		}
+		
+		@Override
+		protected Object formatValue(Object value, CostCalculatorInput input)
+		{
+			return value;
+		}
+	}
+	
 	protected class LinkFormatter extends FieldFormatter {
 
 		@Override
@@ -246,7 +353,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 				Pair<DateTime, DateTime> timeSpan) {
 
 			return EventLinkEncoder.encodeLink(apiClient, serviceId, input, eventData.event, 
-					timeSpan.getFirst(), timeSpan.getSecond());
+				timeSpan.getFirst(), timeSpan.getSecond());
 		}
 		
 		@Override
@@ -285,6 +392,33 @@ public class CostCalculatorFunction extends GrafanaFunction {
 			}			
 		}
 
+	}
+	
+	protected static class TypeMessageFormatter extends MessageFormatter {
+		
+		@Override
+		protected Object getValue(EventData eventData, String serviceId, CostCalculatorInput input,
+				Pair<DateTime, DateTime> timeSpan)
+		{
+			String type = TYPES_MAP.get(eventData.event.type);
+			Object value = super.getValue(eventData, serviceId, input, timeSpan);
+
+			String result;
+		
+			if (type != null) {
+				result = type + ": " + value;
+			} else {
+				result = value.toString();
+			}
+			
+			String location = formatLocation(eventData.event.error_location);
+			
+			if (result.length() + location.length() < input.maxColumnLength) {
+				result += " in " + location;
+			}
+			
+			return result;
+		}
 	}
 
 	protected static class CostFormatter extends FieldFormatter {
@@ -338,10 +472,10 @@ public class CostCalculatorFunction extends GrafanaFunction {
 		}
 
 	}
-	
-	protected FieldFormatter getFormatter(String column) {
+
+	protected FieldFormatter getFormatter(String serviceId, String column) {
 		
-		if (column.equals(LINK)) {
+		if (column.equals(CostCalculatorInput.LINK)) {
 			return new LinkFormatter();
 		}
 
@@ -351,7 +485,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 
 		if (column.equals(COSTPCT)) {
 			return new CostPctFormatter();
-		}		
+		}
 
 		if (column.equals(COSTYRL)) {
 			return new CostYrlFormatter();
@@ -361,6 +495,15 @@ public class CostCalculatorFunction extends GrafanaFunction {
 			return new MessageFormatter();
 		}
 		
+		if (column.equals(CostCalculatorInput.TYPE_MESSAGE)) {
+			return new TypeMessageFormatter();
+		}
+		
+		if (column.equals(CostCalculatorInput.DESCRIPTION)) {
+			Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();
+			return new EventDescriptionFormatter(categories);
+		}
+			
 		Field field = getReflectField(column);
 
 		if ((column.equals(FIRST_SEEN)) || (column.equals(LAST_SEEN))) {
@@ -375,7 +518,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 
 	}
 
-	private Map<String, FieldFormatter> getFieldFormatters(String columns) {
+	private Map<String, FieldFormatter> getFieldFormatters(String serviceId, String columns) {
 
 		if ((columns == null) || (columns.isEmpty())) {
 			throw new IllegalArgumentException("columns cannot be empty");
@@ -385,7 +528,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 		Map<String, FieldFormatter> result = new LinkedHashMap<String, FieldFormatter>(columnsArray.length);
 
 		for (String column : columnsArray) {
-			FieldFormatter fieldFormatter = getFormatter(column);
+			FieldFormatter fieldFormatter = getFormatter(serviceId, column);
 			result.put(column, fieldFormatter);
 		}
 
@@ -539,7 +682,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 	 */
 	protected List<List<Object>> processServiceEvents(Collection<String> serviceIds, String serviceId, CostCalculatorInput input, Pair<DateTime, DateTime> timeSpan) {
 
-		Map<String, FieldFormatter> formatters = getFieldFormatters(input.fields);
+		Map<String, FieldFormatter> formatters = getFieldFormatters(serviceId, input.fields);
 		
 		List<EventData> mergedDatas;
 		List<EventData> eventDatas = getEventData(serviceId, input, timeSpan);
