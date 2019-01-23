@@ -705,26 +705,36 @@ public class CostCalculatorFunction extends GrafanaFunction {
 		
 		List<Object> outputObject;
 		
-		for (EventData eventData : mergedDatas) {
+		if (costFieldNr > -1) {
+			for (EventData eventData : mergedDatas) {
+				
+				if (eventFilter.filter(eventData.event)) {
+					continue;
+				}
+	
+				if (eventData.event.stats.hits == 0) {
+					continue;
+				}
+	
+				outputObject = processEvent(serviceId, input, eventData, formatters.values(), timeSpan);
+	
+				if (outputObject != null) {
+					if (costFieldNr < outputObject.size()) {
+						Object costField = outputObject.get(costFieldNr);
+						
+						if (costField != null &&
+								costField instanceof Double) {
+							Double costDbl = (Double) costField;
+							
+							runningCostTotal += costDbl;
 			
-			if (eventFilter.filter(eventData.event)) {
-				continue;
+							if (costDbl <= input.costData.costHigherThan) {
+								result.add(outputObject);
+							}
+						}
+					}
+				}
 			}
-
-			if (eventData.event.stats.hits == 0) {
-				continue;
-			}
-
-			outputObject = processEvent(serviceId, input, eventData, formatters.values(), timeSpan);
-
-			if (costFieldNr > -1  && costFieldNr < outputObject.size()  && 
-					outputObject.get(costFieldNr) instanceof Double &&
-					outputObject.get(costFieldNr) != null) {
-				runningCostTotal += (double) outputObject.get(costFieldNr);
-			}
-
-			if (!postCostRowFilter(outputObject, input))
-				result.add(outputObject);
 		}
 		
 		final double costTotal = runningCostTotal;
@@ -771,16 +781,16 @@ public class CostCalculatorFunction extends GrafanaFunction {
 
 	}
 
-	private boolean postCostRowFilter(List<Object> outputObject, CostCalculatorInput input) {
-		List<String> col = getColumns(input.fields);
-		int costFieldNr = col.indexOf("Cost");
-		if (costFieldNr > -1  && costFieldNr < outputObject.size()  && outputObject.get(costFieldNr) instanceof Double)
-			if ((double) outputObject.get(costFieldNr) <= input.costData.costHigherThan) {
-				return true;
-			}
-		
-		return false;
-	}
+//	private boolean postCostRowFilter(List<Object> outputObject, CostCalculatorInput input) {
+//		List<String> col = getColumns(input.fields);
+//		int costFieldNr = col.indexOf("Cost");
+//		if (costFieldNr > -1  && costFieldNr < outputObject.size()  && outputObject.get(costFieldNr) instanceof Double)
+//			if ((double) outputObject.get(costFieldNr) <= input.costData.costHigherThan) {
+//				return true;
+//			}
+//		
+//		return false;
+//	}
 
 	protected List<String> getColumns(String fields) {
 
