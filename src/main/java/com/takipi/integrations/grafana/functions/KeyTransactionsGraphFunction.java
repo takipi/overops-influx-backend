@@ -2,6 +2,7 @@ package com.takipi.integrations.grafana.functions;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.takipi.api.client.ApiClient;
@@ -41,6 +42,10 @@ public class KeyTransactionsGraphFunction extends TransactionsGraphFunction
 	protected List<GraphSeries> processServiceGraph(String serviceId, TransactionsGraphInput input,
 			Collection<String> serviceIds, Collection<String> transactions, Collection<TransactionGraph> graphs)
 	{
+		if (!CollectionUtil.safeIsEmpty(transactions)) {
+			return Collections.emptyList();
+		}
+		
 		GroupSettings transactionGroups = GrafanaSettings.getData(apiClient, serviceId).transactions;
 		
 		if (transactionGroups == null) {
@@ -49,7 +54,7 @@ public class KeyTransactionsGraphFunction extends TransactionsGraphFunction
 	
 		List<GraphSeries> result;
 
-		if ((input.aggregate) || (CollectionUtil.safeIsEmpty(transactions))) { 
+		if (input.aggregate) { 
 			
 			result = new ArrayList<GraphSeries>();
 			

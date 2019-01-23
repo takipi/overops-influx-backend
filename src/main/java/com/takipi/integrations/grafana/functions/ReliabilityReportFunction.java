@@ -163,7 +163,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		protected String description; 
 		protected double score;
 		protected String scoreDesc;
-		protected KeyOutputEventVolume volume;
+		protected KeyOutputEventVolume volumeData;
 		
 		protected ReportKeyResults(ReportKeyOutput output) {
 			this.output = output;	
@@ -790,7 +790,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return keys;
 	}
 	
-	private static void addDeduction(String name, int value, int weight, List<String> deductions) {
+	private static void addDeduction(String name, int value, double weight, List<String> deductions) {
 		if (value == 0) {
 			return;
 		}
@@ -866,10 +866,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		RegressionOutput regressionOutput = reportKeyResults.output.regressionData.regressionOutput;
 		
-		int newEventsScore = regressionOutput.newIssues * reportSettings.new_event_score;
-		int severeNewEventScore = regressionOutput.severeNewIssues * reportSettings.severe_new_event_score;
-		int criticalRegressionsScore = (regressionOutput.criticalRegressions + reportKeyResults.severeSlowdowns) * reportSettings.critical_regression_score;
-		int regressionsScore = (regressionOutput.regressions + reportKeyResults.slowdowns) * reportSettings.regression_score;
+		double newEventsScore = regressionOutput.newIssues * reportSettings.new_event_score;
+		double severeNewEventScore = regressionOutput.severeNewIssues * reportSettings.severe_new_event_score;
+		double criticalRegressionsScore = (regressionOutput.criticalRegressions + reportKeyResults.severeSlowdowns) * reportSettings.critical_regression_score;
+		double regressionsScore = (regressionOutput.regressions + reportKeyResults.slowdowns) * reportSettings.regression_score;
 		
 		int scoreWindow = getRegressionScoreWindow(regressionOutput);		
 		double scoreDays = Math.max(1, (double)scoreWindow / 60 / 24);
@@ -1002,6 +1002,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 	private boolean getSortedAsc(SortType sortType, boolean defaultValue) {
 		
 		switch (sortType) {
+			
 			case Ascending: 
 				return true;
 				
@@ -1378,7 +1379,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 				reportKeyResults.description = getDescription(reportKeyOutput.regressionData, 
 					reportKeyResults.newIssuesDesc, reportKeyResults.regressionsDesc, reportKeyResults.slowDownsDesc);
 					
-				reportKeyResults.volume = getKeyOutputEventVolume(reportKeyOutput);
+				reportKeyResults.volumeData = getKeyOutputEventVolume(reportKeyOutput);
 				 
 				result.add(reportKeyResults);
 			}			
@@ -1507,7 +1508,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			Pair<Object, Object> fromTo;
 			
 			if (regressionWindow != null) {
-				timeRange = regressionWindow.activeTimespan + TimeUtil.MINUTE_POSTFIX;
+				timeRange = TimeUtil.getTimeRange(regressionWindow.activeTimespan);
 				DateTime from = regressionWindow.activeWindowStart;
 				DateTime to = regressionWindow.activeWindowStart.plusMinutes(regressionWindow.activeTimespan);
 				fromTo = getTimeFilterPair(Pair.of(from, to), 
@@ -1644,22 +1645,22 @@ public class ReliabilityReportFunction extends EventsFunction {
 			case SevereSlowdowns: return reportKeyResult.severeSlowdowns; 
 			
 			case EventVolume: 
-				if (reportKeyResult.volume != null) {
-					return reportKeyResult.volume.volume;
+				if (reportKeyResult.volumeData != null) {
+					return reportKeyResult.volumeData.volume;
 				} else {
 					return 0;
 				}
 			
 			case UniqueEvents: 
-				if (reportKeyResult.volume != null) {
-					return reportKeyResult.volume.count;
+				if (reportKeyResult.volumeData != null) {
+					return reportKeyResult.volumeData.count;
 				} else {
 					return 0;
 				}
 			
 			case EventRate: 
-				if (reportKeyResult.volume != null) {
-					return reportKeyResult.volume.rate;
+				if (reportKeyResult.volumeData != null) {
+					return reportKeyResult.volumeData.rate;
 				} else {
 					return 0;
 				}

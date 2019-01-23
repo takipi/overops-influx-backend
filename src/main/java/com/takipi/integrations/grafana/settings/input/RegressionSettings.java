@@ -8,11 +8,6 @@ import com.takipi.integrations.grafana.functions.GrafanaFunction;
 public class RegressionSettings {
 	
 	/**
-	 * The default active timespan used to compare the volume of a target event against its baseline
-	 */
-	public int active_timespan;
-	
-	/**
 	 * The minimal baseline time period to use when comparing an event's volume in the current time frame
 	 * and a baseline time frame
 	 */

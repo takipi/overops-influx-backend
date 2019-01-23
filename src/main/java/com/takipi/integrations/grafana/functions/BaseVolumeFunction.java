@@ -91,7 +91,7 @@ public abstract class BaseVolumeFunction extends GrafanaFunction {
 
 		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
 
-		Set<String> smiliarIds = new HashSet<String>();
+		Set<String> similarIds = new HashSet<String>();
 		
 		for (EventResult event : eventsMap.values()) {
 
@@ -112,12 +112,12 @@ public abstract class BaseVolumeFunction extends GrafanaFunction {
 				}
 			}
 			
-			if ((event.stats.hits > 0) && (!smiliarIds.contains(event.id))) {		
+			if ((event.stats.hits > 0) && (!similarIds.contains(event.id))) {		
 				result.count++;
 			}
 			
 			if (event.similar_event_ids != null) {
-				smiliarIds.addAll(event.similar_event_ids);
+				similarIds.addAll(event.similar_event_ids);
 			}
 		}
 

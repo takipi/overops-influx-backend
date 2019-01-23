@@ -295,6 +295,11 @@ public class EventFilter
 			return true;
 		}
 		
+		if ((event.introduced_by != null) && (event.introduced_by.toLowerCase().contains(s)))
+		{
+			return true;
+		}
+		
 		return false;
 	}
 	

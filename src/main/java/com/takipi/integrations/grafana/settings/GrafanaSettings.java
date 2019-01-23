@@ -17,6 +17,7 @@ import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.service.SummarizedService;
 import com.takipi.api.client.util.client.ClientUtil;
+import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.settings.input.ServiceSettingsData;
 
 public class GrafanaSettings {
@@ -30,6 +31,9 @@ public class GrafanaSettings {
 	
 	private static LoadingCache<SettingsCacheKey, ServiceSettings> settingsCache = null;
 	private static SettingsStorage settingsStorage = null;
+	
+	private static Object bundledSettingsLock = new Object();
+	private static Pair<ServiceSettingsData, String> bundledSettingsData ;
 	
 	protected static class SettingsCacheKey {
 		
@@ -88,20 +92,50 @@ public class GrafanaSettings {
 		 return serviceId + EXTENSION;
 	}
 	
-	private static String getBundledDefaultSettings() {
-		try {
-			InputStream stream = GrafanaSettings.class.getResourceAsStream(DEFAULT);
-
-			if (stream == null) {
-				return null;
+	private static Pair<ServiceSettingsData, String> getBundledDefaultSettings() {
+		
+		if (bundledSettingsData != null) {
+			return bundledSettingsData;
+		}
+		
+		String json;
+		
+		synchronized (bundledSettingsLock)
+		{
+			if (bundledSettingsData != null) {
+				return bundledSettingsData;
 			}
-
-			String result = IOUtils.toString(stream, Charset.defaultCharset());
-			stream.close();
 			
-			return result;
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
+			try {
+				InputStream stream = GrafanaSettings.class.getResourceAsStream(DEFAULT);
+
+				if (stream == null) {
+					return null;
+				}
+
+				json = IOUtils.toString(stream, Charset.defaultCharset());
+				stream.close();
+				
+				ServiceSettingsData settingsData = parseServiceSettings(json);
+				
+				bundledSettingsData = Pair.of(settingsData, json);
+				
+				checkNonNullSetting(settingsData.general, "general");
+				checkNonNullSetting(settingsData.regression, "regression");
+				checkNonNullSetting(settingsData.slowdown, "slowdown");
+				checkNonNullSetting(settingsData.regression_report, "regression_report");
+				
+			} catch (Exception e) {
+				throw new IllegalStateException(e);
+			}
+		}
+		
+		return bundledSettingsData;	
+	}
+	
+	private static void checkNonNullSetting(Object value, String name) {
+		if (value == null) {
+			throw new IllegalStateException("Missing default setting " + name);
 		}
 	}
 	
@@ -129,23 +163,86 @@ public class GrafanaSettings {
 							json = settingsStorage.getDefaultServiceSettings();
 						}
 						
-						if (json == null) {
-							json = getBundledDefaultSettings();
+						ServiceSettings result;
+						
+						if (json != null) {
+							result = parseServiceSettings(key.serviceId, key.apiClient, json);
+						} else {
+							Pair<ServiceSettingsData, String> bundledSettings = getBundledDefaultSettings();
+														
+							if (bundledSettings != null) {
+								result = getServiceSettings(key.serviceId, key.apiClient,
+									bundledSettings.getFirst(), bundledSettings.getSecond());
+							} else {
+								result = null;
+							}
 						}
 						
-						if (json == null) {
+						if (result == null) {
 							throw new IllegalStateException("Could not acquire settings for " + key.serviceId);
 						}
 						
-						ServiceSettings result = getServiceSettings(key.serviceId, key.apiClient, json);
-
+						validateSettings(result.getData());
+						
 						return result;
 					}
 				});
 	}
+	
+	private static void validateSettings(ServiceSettingsData serviceSettingsData) {
 		
-	private static ServiceSettings getServiceSettings(String serviceId, ApiClient apiClient, String json) {
-		ServiceSettingsData data = new Gson().fromJson(json, ServiceSettingsData.class);
+		Pair<ServiceSettingsData, String> bundledSettings = getBundledDefaultSettings();
+		
+		if (bundledSettings == null) {
+			return;
+		}
+		
+		ServiceSettingsData settingsData = bundledSettings.getFirst();
+		
+		if (serviceSettingsData.general == null) {
+			serviceSettingsData.general = settingsData.general;
+		}
+		
+		if (serviceSettingsData.general.transaction_points_wanted <= 0) {
+			serviceSettingsData.general.transaction_points_wanted = settingsData.general.transaction_points_wanted;
+		}
+		
+		if (serviceSettingsData.general.points_wanted <= 0) {
+			serviceSettingsData.general.points_wanted = settingsData.general.points_wanted;
+		}
+		
+		if (serviceSettingsData.regression == null) {
+			serviceSettingsData.regression = settingsData.regression;
+		}
+		
+		if (serviceSettingsData.regression.baseline_timespan_factor <= 0) {
+			serviceSettingsData.regression.baseline_timespan_factor = settingsData.regression.baseline_timespan_factor;
+		}
+		
+		if (serviceSettingsData.regression.min_baseline_timespan <= 0) {
+			serviceSettingsData.regression.min_baseline_timespan = settingsData.regression.min_baseline_timespan;
+		}
+		
+		if (serviceSettingsData.slowdown == null) {
+			serviceSettingsData.slowdown = settingsData.slowdown;
+		}
+		
+		if (serviceSettingsData.regression_report == null) {
+			serviceSettingsData.regression_report = settingsData.regression_report;
+		}
+	}
+	
+	private static ServiceSettingsData parseServiceSettings(String json) {
+		return new Gson().fromJson(json, ServiceSettingsData.class);
+	}
+	
+	private static ServiceSettings getServiceSettings(String serviceId, ApiClient apiClient, 
+		ServiceSettingsData data, String json) {
+		return new ServiceSettings(serviceId, apiClient, json, data);
+	}
+	
+	private static ServiceSettings parseServiceSettings(String serviceId, ApiClient apiClient, String json) {
+		ServiceSettingsData data = parseServiceSettings(json);
 		return new ServiceSettings(serviceId, apiClient, json, data);
 	}
 	
@@ -172,7 +269,7 @@ public class GrafanaSettings {
 
 	public static void saveServiceSettings(ApiClient apiClient, String serviceId, String json) {
 		
-		ServiceSettings settings =  getServiceSettings(serviceId, apiClient, json);
+		ServiceSettings settings =  parseServiceSettings(serviceId, apiClient, json);
 		
 		SettingsCacheKey key = new SettingsCacheKey(apiClient, serviceId);
 		
