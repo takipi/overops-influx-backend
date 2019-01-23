@@ -17,6 +17,7 @@ import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.service.SummarizedService;
 import com.takipi.api.client.util.client.ClientUtil;
+import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.settings.input.ServiceSettingsData;
 
 public class GrafanaSettings {
@@ -32,7 +33,7 @@ public class GrafanaSettings {
 	private static SettingsStorage settingsStorage = null;
 	
 	private static Object bundledSettingsLock = new Object();
-	private static ServiceSettingsData bundledSettingsData ;
+	private static Pair<ServiceSettingsData, String> bundledSettingsData ;
 	
 	protected static class SettingsCacheKey {
 		
@@ -91,7 +92,7 @@ public class GrafanaSettings {
 		 return serviceId + EXTENSION;
 	}
 	
-	private static ServiceSettingsData getBundledDefaultSettings() {
+	private static Pair<ServiceSettingsData, String> getBundledDefaultSettings() {
 		
 		if (bundledSettingsData != null) {
 			return bundledSettingsData;
@@ -115,12 +116,14 @@ public class GrafanaSettings {
 				json = IOUtils.toString(stream, Charset.defaultCharset());
 				stream.close();
 				
-				bundledSettingsData = parseServiceSettings(json);
+				ServiceSettingsData settingsData = parseServiceSettings(json);
 				
-				checkNonNullSetting(bundledSettingsData.general, "general");
-				checkNonNullSetting(bundledSettingsData.regression, "regression");
-				checkNonNullSetting(bundledSettingsData.slowdown, "slowdown");
-				checkNonNullSetting(bundledSettingsData.regression_report, "regression_report");
+				bundledSettingsData = Pair.of(settingsData, json);
+				
+				checkNonNullSetting(settingsData.general, "general");
+				checkNonNullSetting(settingsData.regression, "regression");
+				checkNonNullSetting(settingsData.slowdown, "slowdown");
+				checkNonNullSetting(settingsData.regression_report, "regression_report");
 				
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
@@ -165,10 +168,11 @@ public class GrafanaSettings {
 						if (json != null) {
 							result = parseServiceSettings(key.serviceId, key.apiClient, json);
 						} else {
-							ServiceSettingsData bundledSettings = getBundledDefaultSettings();
-							
+							Pair<ServiceSettingsData, String> bundledSettings = getBundledDefaultSettings();
+														
 							if (bundledSettings != null) {
-								result = getServiceSettings(key.serviceId, key.apiClient, bundledSettings, json);
+								result = getServiceSettings(key.serviceId, key.apiClient,
+									bundledSettings.getFirst(), bundledSettings.getSecond());
 							} else {
 								result = null;
 							}
@@ -187,38 +191,44 @@ public class GrafanaSettings {
 	
 	private static void validateSettings(ServiceSettingsData serviceSettingsData) {
 		
-		ServiceSettingsData bundledSettings = getBundledDefaultSettings();
+		Pair<ServiceSettingsData, String> bundledSettings = getBundledDefaultSettings();
+		
+		if (bundledSettings == null) {
+			return;
+		}
+		
+		ServiceSettingsData settingsData = bundledSettings.getFirst();
 		
 		if (serviceSettingsData.general == null) {
-			serviceSettingsData.general = bundledSettings.general;
+			serviceSettingsData.general = settingsData.general;
 		}
 		
 		if (serviceSettingsData.general.transaction_points_wanted <= 0) {
-			serviceSettingsData.general.transaction_points_wanted = bundledSettings.general.transaction_points_wanted;
+			serviceSettingsData.general.transaction_points_wanted = settingsData.general.transaction_points_wanted;
 		}
 		
 		if (serviceSettingsData.general.points_wanted <= 0) {
-			serviceSettingsData.general.points_wanted = bundledSettings.general.points_wanted;
+			serviceSettingsData.general.points_wanted = settingsData.general.points_wanted;
 		}
 		
 		if (serviceSettingsData.regression == null) {
-			serviceSettingsData.regression = bundledSettings.regression;
+			serviceSettingsData.regression = settingsData.regression;
 		}
 		
 		if (serviceSettingsData.regression.baseline_timespan_factor <= 0) {
-			serviceSettingsData.general.points_wanted = bundledSettings.regression.baseline_timespan_factor;
+			serviceSettingsData.regression.baseline_timespan_factor = settingsData.regression.baseline_timespan_factor;
 		}
 		
 		if (serviceSettingsData.regression.min_baseline_timespan <= 0) {
-			serviceSettingsData.general.points_wanted = bundledSettings.regression.min_baseline_timespan;
+			serviceSettingsData.regression.min_baseline_timespan = settingsData.regression.min_baseline_timespan;
 		}
 		
 		if (serviceSettingsData.slowdown == null) {
-			serviceSettingsData.slowdown = bundledSettings.slowdown;
+			serviceSettingsData.slowdown = settingsData.slowdown;
 		}
 		
 		if (serviceSettingsData.regression_report == null) {
-			serviceSettingsData.regression_report = bundledSettings.regression_report;
+			serviceSettingsData.regression_report = settingsData.regression_report;
 		}
 	}
 	
