@@ -648,10 +648,21 @@ public class ReliabilityReportFunction extends EventsFunction {
 			return result;
 		}
 		
-		List<VolumeOutput> appVolumes = getAppVolumes(serviceId, input, timeSpan, apps);
-		Collection<String> appsByVolume = limitVolumes(appVolumes, input.limit);
+		Collection<String> nonKeyApps;
 		
-		result = new ArrayList<ReportKey>(toReportKeys(appsByVolume, false));
+		if (input.queryAppVolumes) {
+			List<VolumeOutput> appVolumes = getAppVolumes(serviceId, input, timeSpan, apps);
+			nonKeyApps = limitVolumes(appVolumes, input.limit);
+		} else {
+			List<String> activeApps = new ArrayList<String>(apps);
+			Collections.sort(activeApps);
+			nonKeyApps =  activeApps; 
+		}
+		
+		result = new ArrayList<ReportKey>();
+		
+		result.addAll(toReportKeys(keyApps, true));
+		result.addAll(toReportKeys(nonKeyApps, false));
 		
 		if (result.size() > input.limit) {
 			return result.subList(0, input.limit);
