@@ -420,11 +420,17 @@ public class GroupByFunction extends BaseVolumeFunction {
 			break;
 
 		case location:
-			updateMap(map, request, event.error_location.prettified_name, time, value);
+			
+			if (event.error_location != null) {
+				updateMap(map, request, event.error_location.prettified_name, time, value);
+			}
 			break;
 
 		case entryPoint:
-			updateMap(map, request, event.entry_point.prettified_name, time, value);
+			
+			if (event.entry_point != null) {
+				updateMap(map, request, event.entry_point.prettified_name, time, value);
+			}
 			break;
 
 		case label:

@@ -325,6 +325,10 @@ public class EventFilter
 	
 	private boolean filterEventLocation(EventResult event) {
 		
+		if (event.error_location == null) {
+			return true;
+		}
+		
 		String eventSimpleClass = GrafanaFunction.getSimpleClassName(event.error_location.class_name);
 		
 		for (Pair<String, String> eventLocation : eventLocations) {

@@ -537,7 +537,7 @@ public class EventsFunction extends GrafanaFunction {
 			
 			String location = formatLocation(eventData.event.error_location);
 			
-			if (result.length() + location.length() < input.maxColumnLength) {
+			if ((location != null) && (result.length() + location.length() < input.maxColumnLength)) {
 				result += " in " + location;
 			}
 			

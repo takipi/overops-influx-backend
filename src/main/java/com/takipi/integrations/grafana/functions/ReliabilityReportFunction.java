@@ -1172,7 +1172,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		for (EventResult newEvent : newEvents) {
 			
-			if (newEvent.stats.hits > 0) {
+			if ((newEvent.error_location != null) && (newEvent.stats.hits > 0)) {
 				result.append(newEvent.name);
 				result.append(" in ");
 				result.append(getSimpleClassName(newEvent.error_location.class_name));
@@ -1236,8 +1236,11 @@ public class ReliabilityReportFunction extends EventsFunction {
 			result.append("% "); 
 
 			result.append(regressionData.event.name);
-			result.append(" in ");
-			result.append(getSimpleClassName(regressionData.event.error_location.class_name));
+			
+			if (regressionData.event.error_location != null) {
+				result.append(" in ");
+				result.append(getSimpleClassName(regressionData.event.error_location.class_name));
+			}
 						
 			size++;
 			

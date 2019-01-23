@@ -100,7 +100,7 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 
 				EventResult event = eventMap.get(gpc.id);
 
-				if ((event == null) || (event.error_origin == null) || (eventFilter.filter(event))) {
+				if ((event == null) || (event.error_location == null) || (event.error_origin == null) || (eventFilter.filter(event))) {
 					continue;
 				}
 
