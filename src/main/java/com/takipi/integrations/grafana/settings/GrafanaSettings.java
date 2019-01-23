@@ -31,6 +31,9 @@ public class GrafanaSettings {
 	private static LoadingCache<SettingsCacheKey, ServiceSettings> settingsCache = null;
 	private static SettingsStorage settingsStorage = null;
 	
+	private static Object bundledSettingsLock = new Object();
+	private static ServiceSettingsData bundledSettingsData ;
+	
 	protected static class SettingsCacheKey {
 		
 		protected ApiClient apiClient;
@@ -88,20 +91,48 @@ public class GrafanaSettings {
 		 return serviceId + EXTENSION;
 	}
 	
-	private static String getBundledDefaultSettings() {
-		try {
-			InputStream stream = GrafanaSettings.class.getResourceAsStream(DEFAULT);
-
-			if (stream == null) {
-				return null;
+	private static ServiceSettingsData getBundledDefaultSettings() {
+		
+		if (bundledSettingsData != null) {
+			return bundledSettingsData;
+		}
+		
+		String json;
+		
+		synchronized (bundledSettingsLock)
+		{
+			if (bundledSettingsData != null) {
+				return bundledSettingsData;
 			}
-
-			String result = IOUtils.toString(stream, Charset.defaultCharset());
-			stream.close();
 			
-			return result;
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
+			try {
+				InputStream stream = GrafanaSettings.class.getResourceAsStream(DEFAULT);
+
+				if (stream == null) {
+					return null;
+				}
+
+				json = IOUtils.toString(stream, Charset.defaultCharset());
+				stream.close();
+				
+				bundledSettingsData = parseServiceSettings(json);
+				
+				checkNonNullSetting(bundledSettingsData.general, "general");
+				checkNonNullSetting(bundledSettingsData.regression, "regression");
+				checkNonNullSetting(bundledSettingsData.slowdown, "slowdown");
+				checkNonNullSetting(bundledSettingsData.regression_report, "regression_report");
+				
+			} catch (Exception e) {
+				throw new IllegalStateException(e);
+			}
+		}
+		
+		return bundledSettingsData;	
+	}
+	
+	private static void checkNonNullSetting(Object value, String name) {
+		if (value == null) {
+			throw new IllegalStateException("Missing default setting " + name);
 		}
 	}
 	
@@ -129,23 +160,79 @@ public class GrafanaSettings {
 							json = settingsStorage.getDefaultServiceSettings();
 						}
 						
-						if (json == null) {
-							json = getBundledDefaultSettings();
+						ServiceSettings result;
+						
+						if (json != null) {
+							result = parseServiceSettings(key.serviceId, key.apiClient, json);
+						} else {
+							ServiceSettingsData bundledSettings = getBundledDefaultSettings();
+							
+							if (bundledSettings != null) {
+								result = getServiceSettings(key.serviceId, key.apiClient, bundledSettings, json);
+							} else {
+								result = null;
+							}
 						}
 						
-						if (json == null) {
+						if (result == null) {
 							throw new IllegalStateException("Could not acquire settings for " + key.serviceId);
 						}
 						
-						ServiceSettings result = getServiceSettings(key.serviceId, key.apiClient, json);
-
+						validateSettings(result.getData());
+						
 						return result;
 					}
 				});
 	}
+	
+	private static void validateSettings(ServiceSettingsData serviceSettingsData) {
 		
-	private static ServiceSettings getServiceSettings(String serviceId, ApiClient apiClient, String json) {
-		ServiceSettingsData data = new Gson().fromJson(json, ServiceSettingsData.class);
+		ServiceSettingsData bundledSettings = getBundledDefaultSettings();
+		
+		if (serviceSettingsData.general == null) {
+			serviceSettingsData.general = bundledSettings.general;
+		}
+		
+		if (serviceSettingsData.general.transaction_points_wanted <= 0) {
+			serviceSettingsData.general.transaction_points_wanted = bundledSettings.general.transaction_points_wanted;
+		}
+		
+		if (serviceSettingsData.general.points_wanted <= 0) {
+			serviceSettingsData.general.points_wanted = bundledSettings.general.points_wanted;
+		}
+		
+		if (serviceSettingsData.regression == null) {
+			serviceSettingsData.regression = bundledSettings.regression;
+		}
+		
+		if (serviceSettingsData.regression.baseline_timespan_factor <= 0) {
+			serviceSettingsData.general.points_wanted = bundledSettings.regression.baseline_timespan_factor;
+		}
+		
+		if (serviceSettingsData.regression.min_baseline_timespan <= 0) {
+			serviceSettingsData.general.points_wanted = bundledSettings.regression.min_baseline_timespan;
+		}
+		
+		if (serviceSettingsData.slowdown == null) {
+			serviceSettingsData.slowdown = bundledSettings.slowdown;
+		}
+		
+		if (serviceSettingsData.regression_report == null) {
+			serviceSettingsData.regression_report = bundledSettings.regression_report;
+		}
+	}
+	
+	private static ServiceSettingsData parseServiceSettings(String json) {
+		return new Gson().fromJson(json, ServiceSettingsData.class);
+	}
+	
+	private static ServiceSettings getServiceSettings(String serviceId, ApiClient apiClient, 
+		ServiceSettingsData data, String json) {
+		return new ServiceSettings(serviceId, apiClient, json, data);
+	}
+	
+	private static ServiceSettings parseServiceSettings(String serviceId, ApiClient apiClient, String json) {
+		ServiceSettingsData data = parseServiceSettings(json);
 		return new ServiceSettings(serviceId, apiClient, json, data);
 	}
 	
@@ -172,7 +259,7 @@ public class GrafanaSettings {
 
 	public static void saveServiceSettings(ApiClient apiClient, String serviceId, String json) {
 		
-		ServiceSettings settings =  getServiceSettings(serviceId, apiClient, json);
+		ServiceSettings settings =  parseServiceSettings(serviceId, apiClient, json);
 		
 		SettingsCacheKey key = new SettingsCacheKey(apiClient, serviceId);
 		

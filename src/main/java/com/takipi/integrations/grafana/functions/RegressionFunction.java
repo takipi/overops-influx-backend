@@ -415,7 +415,18 @@ public class RegressionFunction extends EventsFunction
 				
 				if ((r1.type == RegressionType.SevereNewIssues) ||
 					(r1.type == RegressionType.NewIssues)) {
-					return (int)(r2.event.stats.hits -  r1.event.stats.hits);
+							
+					if (r2.event.stats.hits - r1.event.stats.hits > 0) {
+						return -1;
+					}
+					
+					if (r1.event.stats.hits - r2.event.stats.hits > 0) {
+						return 1;
+					}
+					
+					if (r1.event.stats.hits - r2.event.stats.hits == 0) {
+						return 0;
+					}
 				}			
 				
 				if ((r1.type == RegressionType.SevereRegressions) ||

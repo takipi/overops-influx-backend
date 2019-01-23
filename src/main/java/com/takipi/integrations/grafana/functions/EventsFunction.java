@@ -374,14 +374,14 @@ public class EventsFunction extends GrafanaFunction {
 			result.append(eventData.event.type);
 			
 			if (eventData.event.error_location !=  null) {
-				result.append(" from ");
+				result.append(" in ");
 				result.append(getSimpleClassName(eventData.event.error_location.class_name));
 				result.append(".");
 				result.append(eventData.event.error_location.method_name);
 			}
 			
 			if (eventData.event.entry_point !=  null) {
-				result.append(" in tansaction ");
+				result.append(" from ");
 				result.append(getSimpleClassName(eventData.event.entry_point.class_name));
 			}
 			
@@ -421,7 +421,7 @@ public class EventsFunction extends GrafanaFunction {
 			}
 				
 			if (eventData.event.introduced_by != null) {
-				result.append(". Introduced by: ");
+				result.append(". New in: ");
 				result.append(eventData.event.introduced_by);
 			} else {
 				result.append(". First seen: ");

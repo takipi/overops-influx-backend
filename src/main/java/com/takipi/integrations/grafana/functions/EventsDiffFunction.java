@@ -22,6 +22,7 @@ import com.takipi.integrations.grafana.input.EventsDiffInput.DiffType;
 import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.Series;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class EventsDiffFunction extends EventsFunction
 {
@@ -147,15 +148,35 @@ public class EventsDiffFunction extends EventsFunction
 		targetInput.servers = eventsDiffInput.compareToServers;
 		targetInput.deployments = eventsDiffInput.compareToDeployments;
 		
+		String sourceTimeFilter;
+		Pair<DateTime, DateTime> sourceTimespan;
+
+		if ((eventsDiffInput.timeDiff != null) 
+		&& (!eventsDiffInput.timeDiff.equals(GrafanaFunction.NONE))) {
+			int offset = TimeUtil.parseInterval(eventsDiffInput.timeDiff);
+			sourceTimespan = Pair.of(timeSpan.getFirst().minusMinutes(offset),
+				timeSpan.getSecond().minusMinutes(offset));
+			sourceTimeFilter = TimeUtil.toTimeFilter(sourceTimespan.getFirst(), sourceTimespan.getSecond());
+		} else {
+			sourceTimeFilter = null;
+			sourceTimespan = timeSpan;
+		}
+		
+		
+		if (sourceTimeFilter != null) {
+			eventsDiffInput.timeFilter = sourceTimeFilter;
+		}
+		
 		if ((Objects.equal(input.getApplications(apiClient, serviceId), targetInput.getApplications(apiClient, serviceId))) 
 		&& (Objects.equal(input.getDeployments(serviceId), targetInput.getDeployments(serviceId))) 
-		&& (Objects.equal(input.getServers(serviceId), targetInput.getServers(serviceId)))) {
+		&& (Objects.equal(input.getServers(serviceId), targetInput.getServers(serviceId)))
+		&& (sourceTimeFilter == null)) {
 			return Collections.emptyList();
 		}
-				
+			
 		Collection<DiffType> diffTypes = eventsDiffInput.getDiffTypes();
 		
-		List<EventData> sourceEventDatas = super.getEventData(serviceId, input, timeSpan);
+		List<EventData> sourceEventDatas = super.getEventData(serviceId, input, sourceTimespan);
 		List<EventData> targetEventDatas = super.getEventData(serviceId, targetInput, timeSpan);
 		
 		Map<String, EventData> sourceEventDataMap = getEventDataMap(sourceEventDatas);
@@ -204,11 +225,18 @@ public class EventsDiffFunction extends EventsFunction
 		
 		return result;
 	}
-	
+		
 	@Override
-	protected List<EventData> mergeSimilarEvents(String serviceId, List<EventData> eventDatas)
+	protected List<EventData> mergeEventDatas(List<EventData> eventDatas)
 	{
-		return eventDatas;
+		for (EventData eventData : eventDatas) {
+			if (eventData instanceof DiffEventData) {
+				return eventDatas;
+			}
+			
+		}
+		
+		return super.mergeEventDatas(eventDatas);
 	}
 	
 	@Override

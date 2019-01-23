@@ -70,6 +70,14 @@ public class EventsDiffInput extends EventsInput
 	 */
 	public String diffTypes; 
 	
+	/**
+	 * A string describing a time unit to be used as an offset when comparing the filters.
+	 * For example setting 24h, will compare the current time window with a time window 
+	 * stating and ending 24h before
+	 */
+	
+	public String timeDiff;
+	
 	public static final String DIFF = "diff";
 	public static final String DIFF_DESC = "diff_desc";
 	

@@ -14,9 +14,11 @@
 		"event_types": "Logged Error,Uncaught Exception,Logged Warning,Swallowed Exception,HTTP Error,Caught Exception",
 		
 		//The default number of points to use when querying the OO REST api for event volume graphs
+		// if this value is removed or <= zero, the default value specified here is used
 		"points_wanted": 24,
 		
 		//The default number of points to use when querying the OO REST api for transaction call graphs
+		// if this value is removed or <= zero, the default value specified here is used
 		"transaction_points_wanted": 100,
 		
 		//A list of event types that each if found within the context of an entry point (transaction) call
@@ -162,10 +164,10 @@
 	//and if so, at what severity level.
 	"regression": {
 		
-		//The default active timespan used to compare the volume of a target event against its baseline
+		//The default active timespan (min) used to compare the volume of a target event against its baseline
 		"active_timespan": 1440,
 		
-		//The minimal baseline time period to use when comparing an event's volume in the current time frame
+		//The minimal baseline time period (min) to use when comparing an event's volume in the current time frame
 	 	//and a baseline time frame
 		"min_baseline_timespan": 20160,
 		
@@ -203,28 +205,28 @@
 		"apply_seasonality": true,
 		
 		//A comma delimited list of event types that if a new event is introduced within the active time frame
-	 	//whose type is contained in the list, it will be considered a severe new issues, regardless
+	 	//whose type is contained in the list, it will be considered a severe (p1) new issues, regardless
 	 	//of whether it exceeded the error_min_rate_threshold and error_min_volume_threshold settings. For example,
-	 	//a *new* NullPointerException may be considered severe, regardless of whether .or not it exceeded the minimal
+	 	//a *new* NullPointerException may be considered severe (p1), regardless of whether .or not it exceeded the minimal
 	 	//volume thresholds.
 		"critical_exception_types": "NullPointerException,IndexOutOfBoundsException,InvalidCastException,AssertionError"
 	},
 	
 	// The settings used to provide a high-level reliability score for target app, deployment, tier
-	//based on the number of severe and non severe new events, regressions and slowdowns occuring within it
+	//based on the number of severe (p1) and non severe (p2) new events, regressions and slowdowns occuring within it
 	//within the current time frame.
 	"regression_report": {
 		
 		//The number of points deducted for a new event 
 		"new_event_score": 1,
 		
-		//The number of points deducted for a regressed event
+		//The number of points deducted for a regressed (p2) event
 		"regression_score": 1,
 		
-		//The number of points deducted for a severe new event 
+		//The number of points deducted for a severe (p1) new event 
 		"severe_new_event_score": 2,
 		
-		//The number of points deducted for a severe regression or slowdown
+		//The number of points deducted for a severe (p1) regression or slowdown
 		"critical_regression_score": 2,
 		
 		//A factor applied to the score deduction of a new error, regression or slowdown. 

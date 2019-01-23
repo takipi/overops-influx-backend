@@ -18,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 36,
-  "iteration": 1548032815502,
+  "iteration": 1548234908894,
   "links": [
     {
       "icon": "external link",
@@ -732,7 +732,7 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "A report detailing providing a weighted score or the key applications, as defined in the Settings dashboard. Key applications are marked with * and appear at the top of the list followed by applications with the highest event volume up to limit of  $limit applications in total. Score weights set in the Settings dashboard.",
+      "description": "A report providing a weighted score of the key applications, as defined in the Settings dashboard. Key applications are marked with * and appear at the top of the list followed by applications with the highest event volume up to limit of  $limit applications in total. Score weights set in the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
         "h": 10,
@@ -1359,10 +1359,9 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "tags": [],
-          "text": "5",
-          "value": "5"
+          "selected": false,
+          "text": "10",
+          "value": "10"
         },
         "hide": 0,
         "includeAll": false,
@@ -1371,12 +1370,12 @@
         "name": "limit",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "5",
             "value": "5"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "10",
             "value": "10"
           }
@@ -1456,6 +1455,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "Weights are defined in the Settings dashboard",
           "value": "Weights are defined in the Settings dashboard"
         },
@@ -1478,6 +1478,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "Click to drill down",
           "value": "Click to drill down"
         },
@@ -1544,6 +1545,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -1568,6 +1570,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -1592,6 +1595,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -1616,6 +1620,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -1672,5 +1677,5 @@
   "timezone": "",
   "title": "Reliability Trend",
   "uid": "82eIMSsmz",
-  "version": 35
+  "version": 36
 }

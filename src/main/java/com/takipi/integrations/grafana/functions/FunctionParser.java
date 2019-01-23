@@ -80,7 +80,7 @@ public class FunctionParser {
 
 		int endIndex = trimmedQuery.lastIndexOf(')');
 
-		if (endIndex < endIndex) {
+		if (endIndex == -1) {
 			throw new IllegalArgumentException("Missing closing parenthesis: " + query);
 		}
 
@@ -219,6 +219,7 @@ public class FunctionParser {
 		registerFunction(new GroupByFunction.Factory());
 		registerFunction(new VolumeFunction.Factory());
 		registerFunction(new EventsDiffFunction.Factory());
+		registerFunction(new EventsDiffDescFunction.Factory());
 		
 		//Routing graphs
 		registerFunction(new CategoryFunction.Factory());

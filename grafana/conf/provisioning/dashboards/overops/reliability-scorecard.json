@@ -18,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 22,
-  "iteration": 1548032376126,
+  "iteration": 1548234851800,
   "links": [
     {
       "icon": "external link",
@@ -233,7 +233,7 @@
         "valueName": "total"
       },
       "default_title_for_rows": "Metric",
-      "description": "Scores for the key code tiers, as defined in the Settings dashboard. Key code tiers are marked with * and appear at the top of the list followed by tiers with the highest event volume up to limit of  $limit tiers in total.",
+      "description": "Score of code tiers, as defined in the Settings dashboard. Key code tiers are marked with * and appear at the top of the list followed by tiers with the highest event volume up to limit of  $limit tiers in total. 3rd party tiers are defined in git.io/fpPT0. Score weights set in the Settings dashboard.",
       "gridPos": {
         "h": 10,
         "w": 8,
@@ -716,7 +716,7 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "A report detailing providing a weighted score or the key applications, as defined in the Settings dashboard. Key applications are marked with * and appear at the top of the list followed by applications with the highest event volume up to limit of  $limit applications in total. Score weights set in the Settings dashboard.",
+      "description": "A report providing a weighted score of the key applications, as defined in the Settings dashboard. Key applications are marked with * and appear at the top of the list followed by applications with the highest event volume up to limit of  $limit applications in total. Score weights set in the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
         "h": 11,
@@ -1137,7 +1137,7 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "A report detailing providing a weighted score or the key code tiers, as defined in the Settings dashboard. Key code tiers are marked with * and appear at the top of the list followed by tiers with the highest event volume up to limit of  $limit tiers in total. Score weights set in the Settings dashboard.",
+      "description": "A report providing a weighted score of the key code tiers, as defined in the Settings dashboard. Key code tiers are marked with * and appear at the top of the list followed by tiers with the highest event volume up to limit of  $limit tiers in total. 3rd party tiers are defined in git.io/fpPT0. Score weights set in the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
         "h": 11,
@@ -1565,11 +1565,9 @@
       {
         "allValue": "None",
         "current": {
-          "tags": [],
+          "selected": true,
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1593,9 +1591,7 @@
         "allValue": "all",
         "current": {
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1715,6 +1711,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1739,6 +1736,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -1764,9 +1762,8 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "tags": [],
-          "text": "5",
-          "value": "5"
+          "text": "10",
+          "value": "10"
         },
         "hide": 0,
         "includeAll": false,
@@ -1966,5 +1963,5 @@
   "timezone": "",
   "title": "Reliability Scorecard",
   "uid": "lfqKXMfmz",
-  "version": 142
+  "version": 144
 }
