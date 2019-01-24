@@ -65,7 +65,7 @@
         "valueName": "total"
       },
       "default_title_for_rows": "Metric",
-      "description": "Scores of the selected deployments. If no deployments are selected, the $limit most recent deployments are selected. Live deployments are marked with a *. Score weights are defined  in the Settings dashboard.",
+      "description": "Scores of the selected deployments. If no deployments are selected, the $limit most recent deployments are selected. Live deployments are marked with a *. Score weights are defined in the Settings dashboard.",
       "gridPos": {
         "h": 10,
         "w": 8,
@@ -1762,8 +1762,8 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "text": "10",
-          "value": "10"
+          "text": "5",
+          "value": "5"
         },
         "hide": 0,
         "includeAll": false,
@@ -1931,7 +1931,7 @@
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-2d",
     "to": "now"
   },
   "timepicker": {

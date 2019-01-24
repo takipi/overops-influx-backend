@@ -367,6 +367,10 @@ public abstract class GrafanaFunction
 	
 	protected static String formatLocation(Location location)
 	{
+		if (location == null) {
+			return null;
+		}
+		
 		return getSimpleClassName(location.class_name) + QUALIFIED_DELIM + location.method_name;
 	}
 	

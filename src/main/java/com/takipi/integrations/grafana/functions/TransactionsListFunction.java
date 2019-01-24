@@ -162,7 +162,16 @@ public class TransactionsListFunction extends GrafanaFunction {
 		
 		for (int i = 0; i < size; i++) {
 			EventResult error = transactionData.errors.get(i);
+			
+			if (error.error_location == null) {
+				continue;
+			}
+				
 			String key = getSimpleClassName(error.error_location.class_name);
+			
+			if (key == null) {
+				continue;
+			}
 			
 			Long existing = values.get(key);
 			

@@ -1359,9 +1359,9 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
-          "text": "10",
-          "value": "10"
+          "selected": true,
+          "text": "5",
+          "value": "5"
         },
         "hide": 0,
         "includeAll": false,
@@ -1370,12 +1370,12 @@
         "name": "limit",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "5",
             "value": "5"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "10",
             "value": "10"
           }
@@ -1645,7 +1645,7 @@
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-2d",
     "to": "now"
   },
   "timepicker": {

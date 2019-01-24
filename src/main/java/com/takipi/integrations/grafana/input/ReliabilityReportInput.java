@@ -169,6 +169,12 @@ public class ReliabilityReportInput extends RegressionsInput {
 	public int limit;
 	
 	/**
+	 * Control whether non-key apps added to report are sorted by volume
+	 */
+	public boolean queryAppVolumes;
+	
+	
+	/**
 	 * A comma delimited pair of numeric values used to define thresholds by which
 	 * to choose a postfix for a score series based on the values set in postfixes
 	 */

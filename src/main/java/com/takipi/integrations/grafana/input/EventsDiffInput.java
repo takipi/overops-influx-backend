@@ -78,6 +78,14 @@ public class EventsDiffInput extends EventsInput
 	
 	public String timeDiff;
 	
+	/**
+	 * Define the top number of results
+	 */
+	public String limit;
+	
+	/**
+	 * Additional available fields
+	 */
 	public static final String DIFF = "diff";
 	public static final String DIFF_DESC = "diff_desc";
 	

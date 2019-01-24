@@ -648,10 +648,21 @@ public class ReliabilityReportFunction extends EventsFunction {
 			return result;
 		}
 		
-		List<VolumeOutput> appVolumes = getAppVolumes(serviceId, input, timeSpan, apps);
-		Collection<String> appsByVolume = limitVolumes(appVolumes, input.limit);
+		Collection<String> nonKeyApps;
 		
-		result = new ArrayList<ReportKey>(toReportKeys(appsByVolume, false));
+		if (input.queryAppVolumes) {
+			List<VolumeOutput> appVolumes = getAppVolumes(serviceId, input, timeSpan, apps);
+			nonKeyApps = limitVolumes(appVolumes, input.limit);
+		} else {
+			List<String> activeApps = new ArrayList<String>(apps);
+			Collections.sort(activeApps);
+			nonKeyApps =  activeApps; 
+		}
+		
+		result = new ArrayList<ReportKey>();
+		
+		result.addAll(toReportKeys(keyApps, true));
+		result.addAll(toReportKeys(nonKeyApps, false));
 		
 		if (result.size() > input.limit) {
 			return result.subList(0, input.limit);
@@ -1172,7 +1183,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		for (EventResult newEvent : newEvents) {
 			
-			if (newEvent.stats.hits > 0) {
+			if ((newEvent.error_location != null) && (newEvent.stats.hits > 0)) {
 				result.append(newEvent.name);
 				result.append(" in ");
 				result.append(getSimpleClassName(newEvent.error_location.class_name));
@@ -1236,8 +1247,11 @@ public class ReliabilityReportFunction extends EventsFunction {
 			result.append("% "); 
 
 			result.append(regressionData.event.name);
-			result.append(" in ");
-			result.append(getSimpleClassName(regressionData.event.error_location.class_name));
+			
+			if (regressionData.event.error_location != null) {
+				result.append(" in ");
+				result.append(getSimpleClassName(regressionData.event.error_location.class_name));
+			}
 						
 			size++;
 			
