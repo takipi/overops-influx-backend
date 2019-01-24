@@ -26,6 +26,7 @@ import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class EventsDiffFunction extends EventsFunction
 {
+	public final static String NO_DIFF = "0m";
 
 	public EventsDiffFunction(ApiClient apiClient)
 	{
@@ -152,7 +153,7 @@ public class EventsDiffFunction extends EventsFunction
 		Pair<DateTime, DateTime> sourceTimespan;
 
 		if ((eventsDiffInput.timeDiff != null) 
-		&& (!eventsDiffInput.timeDiff.equals(GrafanaFunction.NONE))) {
+		&& (!eventsDiffInput.timeDiff.equals(NO_DIFF))) {
 			int offset = TimeUtil.parseInterval(eventsDiffInput.timeDiff);
 			sourceTimespan = Pair.of(timeSpan.getFirst().minusMinutes(offset),
 				timeSpan.getSecond().minusMinutes(offset));
@@ -223,8 +224,13 @@ public class EventsDiffFunction extends EventsFunction
 			}
 		}
 		
-		return result;
-	}
+		if ((eventsDiffInput.limit == null) || (eventsDiffInput.limit.equals(ALL))) {
+			return result;		
+		}
+		
+		int limit = Integer.valueOf(eventsDiffInput.limit);
+		return result.subList(0, Math.min(result.size(), limit));
+	}	
 		
 	@Override
 	protected List<EventData> mergeEventDatas(List<EventData> eventDatas)
