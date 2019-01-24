@@ -43,7 +43,6 @@ public class EventsDiffDescFunction extends EnvironmentVariableFunction {
 		super(apiClient);
 	}
 	
-	
 	@Override
 	public List<Series> process(FunctionInput functionInput)
 	{
