@@ -11,6 +11,18 @@
         "name": "Annotations & Alerts",
         "showIn": 0,
         "type": "dashboard"
+      },
+      {
+        "datasource": "OO",
+        "enable": true,
+        "hide": true,
+        "iconColor": "#447ebc",
+        "limit": 100,
+        "name": "deployments",
+        "query": "deploymentsAnnotation({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"All Events\",\"timeFilter\":\"time >= now() - 14d\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\",\"seriesName\":\"Times\",\"graphCount\":3})",
+        "showIn": 0,
+        "tags": [],
+        "type": "tags"
       }
     ]
   },
@@ -18,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 22,
-  "iteration": 1548644673357,
+  "iteration": 1548705806608,
   "links": [
     {
       "icon": "external link",
@@ -1905,7 +1917,7 @@
       {
         "allValue": "None",
         "current": {
-          "selected": true,
+          "selected": false,
           "tags": [],
           "text": "None",
           "value": [
@@ -1934,9 +1946,7 @@
         "allValue": "all",
         "current": {
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2057,9 +2067,7 @@
         "allValue": "*",
         "current": {
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2130,7 +2138,7 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
+          "selected": true,
           "tags": [],
           "text": "5",
           "value": "5"
@@ -2301,6 +2309,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "3",
           "value": "3"
         },
@@ -2355,5 +2364,5 @@
   "timezone": "",
   "title": "Reliability Scorecard",
   "uid": "lfqKXMfmz",
-  "version": 146
+  "version": 147
 }
