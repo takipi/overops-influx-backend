@@ -97,7 +97,11 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 				}
 				
 				String key = formatLocation(event.error_location);
-
+				
+				if (key == null) {
+					continue;
+				}
+				
 				GraphData graphData = graphsData.get(key);
 
 				if (graphData == null) {
@@ -225,6 +229,11 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 			}
 			
 			String key = formatLocation(eventData.event.error_location);
+			
+			if (key == null) {
+				continue;
+			}
+			
 			GraphData graphData = graphsData.get(key);
 				
 			if (graphData != null) {

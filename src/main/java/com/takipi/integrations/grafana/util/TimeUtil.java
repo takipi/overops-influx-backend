@@ -60,8 +60,22 @@ public class TimeUtil {
 		return result;
 	}
 	
+	public static String getTimeRange(int min) {
+       
+		if (min % (24 * 60) == 0) {
+        		return (min / 24 / 60) + DAY_POSTFIX;
+        }
+		
+		if (min % (60) == 0) {
+    			return (min / 60) + HOUR_POSTFIX;
+		}
+		
+		return min + MINUTE_POSTFIX;
+ 
+	}
+	
 	public static String getLastWindowMinTimeFilter(int minDelta) {
-		return LAST_TIME_WINDOW + minDelta + MINUTE_POSTFIX;
+		return LAST_TIME_WINDOW + getTimeRange(minDelta);
 	}
 	
 	public static String getLastWindowTimeFilter(long timeDelta) {
@@ -215,5 +229,11 @@ public class TimeUtil {
 	
 	private static int getTimeDelta(String timeFilter) {
 		return parseInterval(getTimeUnit(timeFilter));
+	}
+	
+	public static String toTimeFilter(DateTime from, DateTime to) {
+		//return "time >= 1547455607608ms and time <= 1549702007608ms";
+		//time >= 1547456376515msand time <= 1547629176515ms
+		return SO_FAR_WINDOW + from.getMillis() + MILLI_UNIT + " " + RANGE_WINDOW + to.getMillis() + MILLI_UNIT;
 	}
 }

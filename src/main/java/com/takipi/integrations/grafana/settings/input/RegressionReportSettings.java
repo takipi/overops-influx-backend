@@ -20,22 +20,22 @@ public class RegressionReportSettings {
 	/**
 	 *  The number of points deducted for a new event 
 	 */
-	public int new_event_score;
+	public double new_event_score;
 	
 	/**
 	 *  The number of points deducted for a regressed event
 	 */
-	public int regression_score;
+	public double regression_score;
 	
 	/**
 	 *  The number of points deducted for a severe new event 
 	 */
-	public int severe_new_event_score;
+	public double severe_new_event_score;
 	
 	/**
 	 *  The number of points deducted for a severe regression or slowdown
 	 */
-	public int critical_regression_score;
+	public double critical_regression_score;
 	
 	/**
 	 * A factor applied to the score deduction of a new error, regression or slowdown. 

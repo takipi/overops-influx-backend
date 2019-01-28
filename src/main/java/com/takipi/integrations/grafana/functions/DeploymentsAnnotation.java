@@ -22,7 +22,7 @@ import com.takipi.integrations.grafana.util.DeploymentUtil;
 public class DeploymentsAnnotation extends BaseGraphFunction {
 		
 	private static final String DEPLOY_SERIES_NAME = "deployments";
-	private static final int MAX_DEPLOY_ANNOTATIONS = 3;
+	private static final int MAX_DEPLOY_ANNOTATIONS = 5;
 	
 	public static class Factory implements FunctionFactory {
 

@@ -100,7 +100,7 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 
 				EventResult event = eventMap.get(gpc.id);
 
-				if ((event == null) || (event.error_origin == null) || (eventFilter.filter(event))) {
+				if ((event == null) || (event.error_location == null) || (event.error_origin == null) || (eventFilter.filter(event))) {
 					continue;
 				}
 
@@ -176,13 +176,18 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 			limitedGraphs = getKeysTiersGraphData(graphsData, tiers);
 			
 			if (limitedGraphs.size() < limitInput.limit) {
+				
 				Collection<GraphData> additionalGraphs = getLimitedGraphData(graphsData.values(),
-					limitInput.limit - limitedGraphs.size());
+					limitInput.limit);
 				
 				for (GraphData graphData : additionalGraphs) {				
 					
 					if (!limitedGraphs.contains(graphData)) {
 						limitedGraphs.add(graphData);
+					}
+					
+					if (limitedGraphs.size() >=  limitInput.limit) {
+						break;
 					}
 				}
 			}
@@ -212,7 +217,7 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 			}
 		} 
 		
-		sortGraphData(result);
+		//sortGraphData(result);
 
 		return result;
 	}

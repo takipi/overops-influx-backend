@@ -295,6 +295,11 @@ public class EventFilter
 			return true;
 		}
 		
+		if ((event.introduced_by != null) && (event.introduced_by.toLowerCase().contains(s)))
+		{
+			return true;
+		}
+		
 		return false;
 	}
 	
@@ -319,6 +324,10 @@ public class EventFilter
 	}
 	
 	private boolean filterEventLocation(EventResult event) {
+		
+		if (event.error_location == null) {
+			return true;
+		}
 		
 		String eventSimpleClass = GrafanaFunction.getSimpleClassName(event.error_location.class_name);
 		

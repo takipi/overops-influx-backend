@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 20,
-  "iteration": 1547534780033,
+  "iteration": 1548235333131,
   "links": [
     {
       "icon": "external link",
@@ -890,6 +890,7 @@
               "type": "fill"
             }
           ],
+          "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
           "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"aggregate\":true,\"transactions\":\"$transactions\",\"seriesName\":\"Response (ms)\",\"pointsWanted\":\"$transactionPointsWanted\"})",
@@ -931,7 +932,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "keyTransactionsGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"aggregate\":\"true\",\"pointsWanted\":\"$transactionPointsWanted\"})",
+          "query": "keyTransactionsGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"aggregate\":\"true\",\"pointsWanted\":\"$transactionPointsWanted\", \"transactions\":\"$transactions\"})",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -1211,8 +1212,8 @@
       "description": "The number of new errors detected in the current timeframe. P1 marks events that exceeded min thresholds, or whose type is defined in the critical exception types list. Both values are editable via the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
-        "h": 7,
-        "w": 24,
+        "h": 9,
+        "w": 12,
         "x": 0,
         "y": 9
       },
@@ -1574,7 +1575,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressions({\"fields\":\"link,jira_issue_url,description,reg_desc,severity,typeMessage,stats.hits,rate,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":140, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"render\":\"Grid\",\"regressionTypes\":\"NewIssues,SevereNewIssues\"})\n",
+          "query": "regressions({\"fields\":\"link,jira_issue_url,description,reg_desc,severity,typeMessage,stats.hits,rate,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":60, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"render\":\"Grid\",\"regressionTypes\":\"NewIssues,SevereNewIssues\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1602,13 +1603,450 @@
     {
       "columns": [],
       "datasource": "OO",
+      "description": "A list of the top errors within the current filter set.",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 9
+      },
+      "id": 67,
+      "links": [
+        {
+          "dashboard": "Errors",
+          "includeVars": true,
+          "keepTime": true,
+          "title": "Errors",
+          "type": "dashboard",
+          "url": "/d/HYBPMdYik/errors"
+        }
+      ],
+      "pageSize": 50,
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": null,
+        "desc": false
+      },
+      "styles": [
+        {
+          "alias": "Root Cause",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "linkTargetBlank": true,
+          "linkTooltip": "Go to Root Cause",
+          "linkUrl": "",
+          "mappingType": 2,
+          "pattern": "Link",
+          "rangeMaps": [],
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short",
+          "valueMaps": []
+        },
+        {
+          "alias": "Times",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 1,
+          "link": true,
+          "linkTargetBlank": false,
+          "linkTooltip": "${__cell_1}. Click to drill-in.",
+          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
+          "mappingType": 1,
+          "pattern": "Hits",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "Entry Point",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "linkTargetBlank": true,
+          "linkTooltip": "",
+          "linkUrl": "",
+          "mappingType": 1,
+          "pattern": "Entry point",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "First Seen",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "linkTargetBlank": true,
+          "linkTooltip": "",
+          "linkUrl": "",
+          "mappingType": 1,
+          "pattern": "First seen",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "linkTargetBlank": true,
+          "linkTooltip": "",
+          "linkUrl": "",
+          "mappingType": 1,
+          "pattern": "Type",
+          "preserveFormat": false,
+          "sanitize": false,
+          "thresholds": [],
+          "type": "string",
+          "unit": "short",
+          "valueMaps": [
+            {
+              "text": "CEX",
+              "value": "Caught Exception"
+            },
+            {
+              "text": "SWL",
+              "value": "Swallowed Exception"
+            },
+            {
+              "text": "HTTP",
+              "value": "HTTP Error"
+            },
+            {
+              "text": "WRN",
+              "value": "Logged Warning"
+            },
+            {
+              "text": "TMR",
+              "value": "Timer"
+            },
+            {
+              "text": "UNC",
+              "value": "Uncaught Exception"
+            },
+            {
+              "text": "ERR",
+              "value": "Logged Error"
+            }
+          ]
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "linkTargetBlank": true,
+          "linkTooltip": "",
+          "linkUrl": "",
+          "mappingType": 1,
+          "pattern": "Name",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "Location",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": true,
+          "linkTargetBlank": true,
+          "linkTooltip": "${__cell_7}",
+          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
+          "mappingType": 1,
+          "pattern": "Error location",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": true,
+          "linkTargetBlank": true,
+          "linkTooltip": "${__cell_2}. Click to drill-in.",
+          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
+          "mappingType": 1,
+          "pattern": "Rate",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "percentunit"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": true,
+          "linkTargetBlank": true,
+          "linkTooltip": "${__cell_3}. Click to drill-in.",
+          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
+          "mappingType": 1,
+          "pattern": "Message",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "mappingType": 1,
+          "pattern": "Introduced by",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 2,
+          "pattern": "Jira issue url",
+          "rangeMaps": [],
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short",
+          "valueMaps": [
+            {
+              "text": "moo",
+              "value": "/.*/"
+            }
+          ]
+        },
+        {
+          "alias": "Tkt",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": true,
+          "linkTargetBlank": true,
+          "linkTooltip": "🔎",
+          "linkUrl": "http://${__cell_2:raw}",
+          "mappingType": 1,
+          "pattern": "Jira state",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short",
+          "valueMaps": [
+            {
+              "text": "🎟",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Id",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Invocations",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Rate desc",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Description",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "Message",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": true,
+          "linkTooltip": "${__cell_2}. Click to drill-in.",
+          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
+          "mappingType": 1,
+          "pattern": "TypeMessage",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "events({\"fields\":\"link,rate_desc,description,stats.hits,typeMessage\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":60, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\"})\n",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "title": "Top Errors",
+      "transform": "table",
+      "type": "table"
+    },
+    {
+      "columns": [],
+      "datasource": "OO",
       "description": "List transaction that have experienced a number of call calls taking more than the avg + stddev in the baseline timeframe (defined in the Settings dashboard).",
       "fontSize": "100%",
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 16
+        "y": 18
       },
       "id": 63,
       "links": [
@@ -1969,7 +2407,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 16
+        "y": 18
       },
       "id": 61,
       "links": [],
@@ -2384,12 +2822,9 @@
       {
         "allValue": "all",
         "current": {
-          "selected": false,
-          "tags": [],
+          "selected": true,
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2412,6 +2847,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2436,6 +2872,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2460,6 +2897,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2507,6 +2945,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2531,6 +2970,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2555,6 +2995,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -2579,6 +3020,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -2636,6 +3078,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "Logged Error|Uncaught Exception|HTTP Error",
           "value": "Logged Error|Uncaught Exception|HTTP Error"
         },
@@ -2660,6 +3103,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -2684,6 +3128,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -2730,7 +3175,7 @@
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-2d",
     "to": "now"
   },
   "timepicker": {
@@ -2753,5 +3198,5 @@
   "timezone": "",
   "title": "Reliability Analysis",
   "uid": "4DHQ63-ik",
-  "version": 211
+  "version": 215
 }

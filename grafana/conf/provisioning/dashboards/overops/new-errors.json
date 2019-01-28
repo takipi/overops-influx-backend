@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 29,
-  "iteration": 1547462874803,
+  "iteration": 1548664669181,
   "links": [
     {
       "icon": "external link",
@@ -47,13 +47,14 @@
       "tags": [
         "OverOps"
       ],
+      "targetBlank": true,
       "type": "dashboards"
     }
   ],
   "panels": [
     {
       "aliasColors": {},
-      "bars": true,
+      "bars": false,
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
@@ -77,12 +78,12 @@
         "total": false,
         "values": false
       },
-      "lines": false,
+      "lines": true,
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
-      "pointradius": 5,
+      "pointradius": 2,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [],
@@ -1027,5 +1028,5 @@
   "timezone": "",
   "title": "New Errors",
   "uid": "3NZ83NLik",
-  "version": 101
+  "version": 102
 }

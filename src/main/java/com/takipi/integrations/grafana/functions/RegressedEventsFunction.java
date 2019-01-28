@@ -51,7 +51,10 @@ public class RegressedEventsFunction extends EnvironmentVariableFunction
 		
 		for (RegressionResult regressionResult : regressionOutput.rateRegression.getSortedAllRegressions()) {
 			String value = formatLocation(regressionResult.getEvent().error_location);
-			appender.append(getServiceValue(value, serviceId, serviceIds));
+			
+			if (value != null) {
+				appender.append(getServiceValue(value, serviceId, serviceIds));
+			}
 		}
 	}
 	

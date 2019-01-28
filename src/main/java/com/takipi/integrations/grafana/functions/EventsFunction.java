@@ -374,14 +374,14 @@ public class EventsFunction extends GrafanaFunction {
 			result.append(eventData.event.type);
 			
 			if (eventData.event.error_location !=  null) {
-				result.append(" from ");
+				result.append(" in ");
 				result.append(getSimpleClassName(eventData.event.error_location.class_name));
 				result.append(".");
 				result.append(eventData.event.error_location.method_name);
 			}
 			
 			if (eventData.event.entry_point !=  null) {
-				result.append(" in tansaction ");
+				result.append(" from ");
 				result.append(getSimpleClassName(eventData.event.entry_point.class_name));
 			}
 			
@@ -421,7 +421,7 @@ public class EventsFunction extends GrafanaFunction {
 			}
 				
 			if (eventData.event.introduced_by != null) {
-				result.append(". Introduced by: ");
+				result.append(". New in: ");
 				result.append(eventData.event.introduced_by);
 			} else {
 				result.append(". First seen: ");
@@ -537,7 +537,7 @@ public class EventsFunction extends GrafanaFunction {
 			
 			String location = formatLocation(eventData.event.error_location);
 			
-			if (result.length() + location.length() < input.maxColumnLength) {
+			if ((location != null) && (result.length() + location.length() < input.maxColumnLength)) {
 				result += " in " + location;
 			}
 			
@@ -888,9 +888,12 @@ public class EventsFunction extends GrafanaFunction {
 
 	}
 
-	protected List<String> getColumns(String fields) {
+	/**
+	 * @param input - needed for children  
+	 */
+	protected List<String> getColumns(EventsInput input) {
 
-		String[] fieldArray = ArrayUtil.safeSplitArray(fields, ARRAY_SEPERATOR, true);
+		String[] fieldArray = ArrayUtil.safeSplitArray(input.fields, ARRAY_SEPERATOR, true);
 		List<String> result = new ArrayList<String>(fieldArray.length);
 
 		for (String field : fieldArray) {
@@ -967,7 +970,7 @@ public class EventsFunction extends GrafanaFunction {
 
 		series.name = SERIES_NAME;
 		series.values = new ArrayList<List<Object>>();
-		series.columns = getColumns(input.fields);
+		series.columns = getColumns(input);
 
 		Collection<String> serviceIds = getServiceIds(input);
 
