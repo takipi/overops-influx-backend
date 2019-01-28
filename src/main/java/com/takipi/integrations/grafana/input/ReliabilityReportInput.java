@@ -1,5 +1,8 @@
 package com.takipi.integrations.grafana.input;
 
+import java.util.Arrays;
+import java.util.List;
+
 /** 
  * A function returning a report for a a target set of applications, deployments or tiers (i.e. categories)
  * listing an possible new errors, increases (i.e. regressions) and slowdowns. The function can return
@@ -228,4 +231,106 @@ public class ReliabilityReportInput extends RegressionsInput {
 		
 		return sortType;
 	}
+	
+	public static final String PREV_DEP_NAME = "previousDepName";
+	
+	public static final String PREV_DEP_FROM = "previousDepFrom";			
+
+	public static final String PREV_DEP_STATE =  "previousDepState";
+	
+	/**
+	 * The list of fields returned by this function
+	 */
+	public static final List<String> FIELDS = Arrays.asList(
+			new String[] { 
+					
+					/**
+					 * Start of the active window for the report row
+					 */
+					ViewInput.FROM, 
+					
+					/**
+					 * end of the active window for the report row
+					 */
+					ViewInput.TO, 
+					
+					/**
+					 * Time range (e.g. 12h, 7d) for the report row
+					 */
+					ViewInput.TIME_RANGE, 
+					
+					/**
+					 * The env ID for this row
+					 */
+					"Service", 
+					
+					/**
+					 * The name of the target app/dep/tier
+					 */
+					"Key", 
+					
+					/**
+					 * The human-readable name  of the target app/dep/tier
+					 */
+					"Name",
+					
+					/**
+					 * if the row is a deployment, the name of the deployment to be diff against
+					 */
+					PREV_DEP_NAME,
+					
+					/**
+					 * if the row is a deployment, the start of the deployment to be diff against
+					 */
+					PREV_DEP_FROM,
+										
+					/**
+					* if the row is a deployment and a diff deployment exists = 1, otherwise 0
+					 */
+					PREV_DEP_STATE,
+					
+					
+					/**
+					 * Value of any new issues in this row
+					 */
+					"NewIssues", 
+					
+					/**
+					 * Value of any regressions in this row
+					 */
+					"Regressions", 
+					
+					/**
+					 * Value of any slowdowns in this row
+					 */
+					"Slowdowns", 
+					
+					/**
+					 * Text description of new issues in this row
+					 */
+					"NewIssuesDesc", 
+					
+					/**
+					 * Text description of regressions in this row
+					 */
+					"RegressionsDesc", 
+					
+					/**
+					 * Text description of slowdowns in this row
+					 */
+					"SlowdownsDesc", 
+					
+					/**
+					 * Reliability score for this row
+					 */
+					"Score", 
+					
+					/**
+					 * Text description of reliability score for this row
+					 */
+					"ScoreDesc"
+				});
+				
+			public final static List<String>PREV_DEP_FIELDS =
+				Arrays.asList(new String[]{PREV_DEP_NAME, PREV_DEP_FROM, PREV_DEP_STATE});
 }

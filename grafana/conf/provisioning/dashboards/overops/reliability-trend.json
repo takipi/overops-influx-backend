@@ -18,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 36,
-  "iteration": 1548234908894,
+  "iteration": 1548664646620,
   "links": [
     {
       "icon": "external link",
@@ -48,7 +48,7 @@
       "dashes": false,
       "datasource": "OO",
       "description": "Chart the $graphType of the selected deployments. If no deployments are selected, the last $limit deployments are chosen. Scores are based on the weights set in the Settings dashboard.",
-      "fill": 0,
+      "fill": 2,
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -65,8 +65,8 @@
         "total": false,
         "values": false
       },
-      "lines": true,
-      "linewidth": 0,
+      "lines": false,
+      "linewidth": 3,
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
@@ -93,7 +93,7 @@
       ],
       "spaceLength": 10,
       "stack": false,
-      "steppedLine": false,
+      "steppedLine": true,
       "targets": [
         {
           "groupBy": [
@@ -343,7 +343,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_13}. $settingsPostfix. $drilldownPostfix",
+          "linkTooltip": "${__cell_16}. $settingsPostfix. $drilldownPostfix",
           "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers&var-deployments=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "Name",
@@ -361,7 +361,7 @@
           "valueMaps": []
         },
         {
-          "alias": "Avg Score ",
+          "alias": "Avg Score",
           "colorMode": "cell",
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -556,7 +556,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_9}. $drilldownPostfix",
+          "linkTooltip": "${__cell_12}. $drilldownPostfix",
           "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers&var-deployments=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "NewIssues",
@@ -576,7 +576,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_10}. $drilldownPostfix",
+          "linkTooltip": "${__cell_13}. $drilldownPostfix",
           "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers&var-deployments=${__cell_4}&var-timeRange=${__cell_2}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "Regressions",
@@ -612,7 +612,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_11}. $drilldownPostfix",
+          "linkTooltip": "${__cell_14}. $drilldownPostfix",
           "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers&var-deployments=${__cell_4}&var-timeRange=${__cell_2}",
           "mappingType": 1,
           "pattern": "Slowdowns",
@@ -680,6 +680,68 @@
           "decimals": 2,
           "mappingType": 1,
           "pattern": "Service",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "previousDepName",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "Diff",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": true,
+          "linkTargetBlank": true,
+          "linkTooltip": "Compare against deployment ${__cell_6}",
+          "linkUrl": "d/CVCRTgwmz/event-diff?from=${__cell_7}&to=${__cell_1}&orgId=1&var-environments=${__cell_3}&var-applications=$limitApplications&var-compareToApplications=$limitApplications&var-servers=$limitServers&var-compareToServers=$limitServers&var-compareToDeployments=${__cell_4}&var-deployments=${__cell_6}&var-timeDiff=0m&var-type=$limitType",
+          "mappingType": 1,
+          "pattern": "previousDepState",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short",
+          "valueMaps": [
+            {
+              "text": "",
+              "value": "0"
+            },
+            {
+              "text": "↔",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "previousDepFrom",
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
@@ -1645,7 +1707,7 @@
     ]
   },
   "time": {
-    "from": "now-2d",
+    "from": "now-7d",
     "to": "now"
   },
   "timepicker": {
@@ -1677,5 +1739,5 @@
   "timezone": "",
   "title": "Reliability Trend",
   "uid": "82eIMSsmz",
-  "version": 36
+  "version": 37
 }
