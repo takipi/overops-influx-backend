@@ -309,29 +309,20 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			sortedAvgMap.put(epochTime, timeAvg);
 		}
 			
-		double avgVolume = 0;
+		long volume = 0;
 		
 		for (Map.Entry<Long, TimeAvg> entry : sortedAvgMap.entrySet()) {
 			
 			Long time = entry.getKey();
 			TimeAvg timeAvg = entry.getValue();
-			
-			avgVolume += timeAvg.avgTime;
-			
+						
+			volume += timeAvg.invocations;
 			Object timeValue = getTimeValue(time, input);
 	
 			result.add(Arrays.asList(new Object[] { timeValue, Double.valueOf(timeAvg.avgTime) }));
 		}
-
-		double volume;
 		
-		if (sortedAvgMap.size() > 0) {
-			volume = avgVolume / sortedAvgMap.size();
-		} else {
-			volume = 0;
-		}
-		
-		return SeriesVolume.of(result, (long)volume);
+		return SeriesVolume.of(result, volume);
 	}
 
 	private SeriesVolume getInvSeriesValues(Collection<TransactionGraph> graphs,

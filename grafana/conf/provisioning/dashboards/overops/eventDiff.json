@@ -28,17 +28,8 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 38,
-  "iteration": 1548289612836,
+  "iteration": 1548663485340,
   "links": [
-    {
-      "icon": "external link",
-      "tags": [],
-      "targetBlank": true,
-      "title": "HELP",
-      "tooltip": "Learn more about this dashboard",
-      "type": "link",
-      "url": "https://doc.overops.com/docs/event-diff-dashboard"
-    },
     {
       "asDropdown": true,
       "icon": "external link",
@@ -48,6 +39,15 @@
         "OverOps"
       ],
       "type": "dashboards"
+    },
+    {
+      "icon": "external link",
+      "tags": [],
+      "targetBlank": true,
+      "title": "HELP",
+      "tooltip": "Learn more about this dashboard",
+      "type": "link",
+      "url": "https://doc.overops.com/docs/event-diff-dashboard"
     }
   ],
   "panels": [
@@ -1438,7 +1438,6 @@
       {
         "allValue": "*",
         "current": {
-          "tags": [],
           "text": "All",
           "value": "$__all"
         },
@@ -1487,7 +1486,6 @@
       {
         "allValue": "*",
         "current": {
-          "tags": [],
           "text": "All",
           "value": "$__all"
         },
@@ -1664,7 +1662,6 @@
       {
         "allValue": "*",
         "current": {
-          "tags": [],
           "text": "All",
           "value": "$__all"
         },
@@ -1689,7 +1686,6 @@
       {
         "allValue": "All",
         "current": {
-          "tags": [],
           "text": "All",
           "value": "$__all"
         },
@@ -1715,9 +1711,7 @@
         "allValue": "All",
         "current": {
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1740,6 +1734,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "tags": [],
           "text": "0m",
           "value": "0m"
@@ -2026,5 +2021,5 @@
   "timezone": "",
   "title": "Event Diff",
   "uid": "CVCRTgwmz",
-  "version": 21
+  "version": 23
 }

@@ -451,7 +451,13 @@ public abstract class GrafanaFunction
 			
 		}
 		
-		String fullName = className + QUALIFIED_DELIM + methodName;
+		String fullName;
+		
+		if (methodName != null) {
+			fullName = className + QUALIFIED_DELIM + methodName;
+		} else {
+			fullName = className;
+		}
 		
 		for (Pattern pattern : filter.patterns)
 		{

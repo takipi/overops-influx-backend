@@ -888,9 +888,12 @@ public class EventsFunction extends GrafanaFunction {
 
 	}
 
-	protected List<String> getColumns(String fields) {
+	/**
+	 * @param input - needed for children  
+	 */
+	protected List<String> getColumns(EventsInput input) {
 
-		String[] fieldArray = ArrayUtil.safeSplitArray(fields, ARRAY_SEPERATOR, true);
+		String[] fieldArray = ArrayUtil.safeSplitArray(input.fields, ARRAY_SEPERATOR, true);
 		List<String> result = new ArrayList<String>(fieldArray.length);
 
 		for (String field : fieldArray) {
@@ -967,7 +970,7 @@ public class EventsFunction extends GrafanaFunction {
 
 		series.name = SERIES_NAME;
 		series.values = new ArrayList<List<Object>>();
-		series.columns = getColumns(input.fields);
+		series.columns = getColumns(input);
 
 		Collection<String> serviceIds = getServiceIds(input);
 

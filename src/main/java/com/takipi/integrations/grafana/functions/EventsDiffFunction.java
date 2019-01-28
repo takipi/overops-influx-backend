@@ -154,7 +154,15 @@ public class EventsDiffFunction extends EventsFunction
 
 		if ((eventsDiffInput.timeDiff != null) 
 		&& (!eventsDiffInput.timeDiff.equals(NO_DIFF))) {
-			int offset = TimeUtil.parseInterval(eventsDiffInput.timeDiff);
+			
+			int offset;
+			
+			if (NONE.equals(eventsDiffInput.timeDiff)) {
+				offset = 0;	
+			} else {
+				offset = TimeUtil.parseInterval(eventsDiffInput.timeDiff);
+			}
+			
 			sourceTimespan = Pair.of(timeSpan.getFirst().minusMinutes(offset),
 				timeSpan.getSecond().minusMinutes(offset));
 			sourceTimeFilter = TimeUtil.toTimeFilter(sourceTimespan.getFirst(), sourceTimespan.getSecond());

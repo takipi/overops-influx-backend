@@ -12,6 +12,7 @@ import com.takipi.integrations.grafana.input.TransactionsGraphInput;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings.Group;
+import com.takipi.integrations.grafana.settings.GroupSettings.GroupFilter;
 
 public class KeyTransactionsGraphFunction extends TransactionsGraphFunction
 {
@@ -59,8 +60,12 @@ public class KeyTransactionsGraphFunction extends TransactionsGraphFunction
 			result = new ArrayList<GraphSeries>();
 			
 			for (Group group : transactionGroups.getGroups()) {
-				GraphSeries groupSeries = createAggregateGraphSeries(serviceId, graphs, group.getFilter(),
-						input, serviceIds, getServiceValue(group.name, serviceId, serviceIds));
+				
+				GroupFilter groupFilter = group.getFilter();
+				String serviceValue = getServiceValue(group.name, serviceId, serviceIds);
+				
+				GraphSeries groupSeries = createAggregateGraphSeries(serviceId, graphs, groupFilter,
+						input, serviceIds, serviceValue);
 				
 				if (groupSeries.volume > 0) {
 					result.add(groupSeries);
@@ -68,6 +73,10 @@ public class KeyTransactionsGraphFunction extends TransactionsGraphFunction
 			}
 		} else {
 			result = createMultiGraphSeries(serviceId, graphs, input, serviceIds);
+		}
+		
+		if (input.limit > 0) {
+			return result.subList(0, Math.min(input.limit, result.size()));
 		}
 		
 		return result;
