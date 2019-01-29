@@ -219,7 +219,7 @@ public class FunctionParser {
 		registerFunction(new GroupByFunction.Factory());
 		registerFunction(new VolumeFunction.Factory());
 		registerFunction(new EventsDiffFunction.Factory());
-		registerFunction(new EventsDiffDescFunction.Factory());
+		// registerFunction(new EventsDiffDescFunction.Factory());
 		
 		//Routing graphs
 		registerFunction(new CategoryFunction.Factory());
