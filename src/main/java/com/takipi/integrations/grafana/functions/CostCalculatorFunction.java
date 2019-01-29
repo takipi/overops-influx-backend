@@ -728,7 +728,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 							
 							runningCostTotal += costDbl;
 			
-							if (costDbl <= input.costData.costHigherThan) {
+							if (costDbl >= input.costData.costHigherThan) {
 								result.add(outputObject);
 							}
 						}
