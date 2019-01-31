@@ -361,9 +361,9 @@ public abstract class GrafanaFunction
 		String result="";
 		
 		if (type != null && !type.isEmpty()) {
-				result += type;
+				result += TYPES_MAP.get(type) + QUALIFIED_DELIM;
 		}
-		result += QUALIFIED_DELIM + toQualified(className) + QUALIFIED_DELIM + methodName;
+		result += getSimpleClassName(className) + QUALIFIED_DELIM + methodName;
 		return result;
 	}
 	

@@ -8,8 +8,8 @@ public class CostData {
 	
 	public HashMap<String,Double> costMatrix = new HashMap<>();
 	
-	public double calculateCost(String eventType) {
-		double result = .0;
+	public Double calculateCost(String eventType) {
+		Double result = .0;
 		
 		if (eventType != null) {
 			String eventTypeIn = eventType.trim(); 

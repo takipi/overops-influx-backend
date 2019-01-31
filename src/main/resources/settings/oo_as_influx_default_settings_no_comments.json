@@ -97,5 +97,17 @@
 		"severe_new_event_score": 2,
 		"critical_regression_score": 2,
 		"score_weight": 2.5
+	},
+	"cost_calculator": {
+		"costHigherThan": 0.0,
+		"costMatrix": {
+			"Caught Exception": 0.00003,
+			"HTTP Error": 0.00003,
+			"Logged Error": 0.00003,
+			"Logged Warning": 0.00003,
+			"Swallowed Exception": 0.0000,
+			"Timer": 0.0000,
+			"": 0.0000
+		}
 	}
 }

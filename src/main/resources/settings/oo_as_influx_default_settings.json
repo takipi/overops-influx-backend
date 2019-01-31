@@ -234,5 +234,28 @@
 		
 		//A factor applied to the score deduction of a new error, regression or slowdown in a key app or tier. 
 		"key_score_weight": 5
+	},
+	
+	// The settings used for cost calculator.
+	"cost_calculator": {
+
+		"costHigherThan": 0.0,
+
+		"costMatrix": {
+
+			"Caught Exception": 0.00003,
+
+			"HTTP Error": 0.00003,
+
+			"Logged Error": 0.00003,
+
+			"Logged Warning": 0.00003,
+
+			"Swallowed Exception": 0.0000,
+
+			"Timer": 0.0000,
+
+			"": 0.0000
+		}
 	}
 }

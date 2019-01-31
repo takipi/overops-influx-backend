@@ -125,6 +125,7 @@ public class GrafanaSettings {
 				checkNonNullSetting(settingsData.regression, "regression");
 				checkNonNullSetting(settingsData.slowdown, "slowdown");
 				checkNonNullSetting(settingsData.regression_report, "regression_report");
+				checkNonNullSetting(settingsData.cost_calculator, "cost_calculator");
 				
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
@@ -230,6 +231,10 @@ public class GrafanaSettings {
 		
 		if (serviceSettingsData.regression_report == null) {
 			serviceSettingsData.regression_report = settingsData.regression_report;
+		}
+		
+		if (serviceSettingsData.cost_calculator == null) {
+			serviceSettingsData.cost_calculator = settingsData.cost_calculator;
 		}
 	}
 	

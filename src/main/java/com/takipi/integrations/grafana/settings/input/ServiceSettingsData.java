@@ -3,6 +3,7 @@ package com.takipi.integrations.grafana.settings.input;
 import java.util.List;
 
 import com.takipi.api.client.util.infra.Categories.Category;
+import com.takipi.integrations.grafana.input.CostData;
 import com.takipi.integrations.grafana.settings.GroupSettings;
 
 public class ServiceSettingsData
@@ -55,4 +56,9 @@ public class ServiceSettingsData
 	 * within the current time frame.
 	 */
 	public RegressionReportSettings regression_report;
+
+	/**
+	 * The settings are used for the cost calculator.
+	 */
+	public CostData cost_calculator;
 }

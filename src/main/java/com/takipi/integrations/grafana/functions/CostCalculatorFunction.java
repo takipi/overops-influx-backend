@@ -24,6 +24,7 @@ import com.takipi.api.client.util.infra.Categories;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.CostCalculatorInput;
+import com.takipi.integrations.grafana.input.CostData;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
@@ -193,12 +194,12 @@ public class CostCalculatorFunction extends GrafanaFunction {
 			return value;
 		}
 
-		protected abstract Object getValue(EventData eventData, String serviceId, CostCalculatorInput input,
+		protected abstract Object getValue(EventData eventData, ApiClient apiClient, String serviceId, CostCalculatorInput input,
 				Pair<DateTime, DateTime> timeSpan);
 
-		protected Object format(EventData eventData, String serviceId, CostCalculatorInput input, Pair<DateTime, DateTime> timeSpan) {
+		protected Object format(EventData eventData, ApiClient apiClient, String serviceId, CostCalculatorInput input, Pair<DateTime, DateTime> timeSpan) {
 
-			Object fieldValue = getValue(eventData, serviceId, input, timeSpan);
+			Object fieldValue = getValue(eventData, apiClient, serviceId, input, timeSpan);
 			return formatValue(fieldValue, input);
 		}
 	}
@@ -216,7 +217,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 		}
 
 		@Override
-		protected Object getValue(EventData eventData, String serviceId, CostCalculatorInput input,
+		protected Object getValue(EventData eventData, ApiClient apiClient, String serviceId, CostCalculatorInput input,
 				Pair<DateTime, DateTime> timeSpan) {
 			try {
 				Object target = getTarget(eventData);
@@ -262,7 +263,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 		}
 		
 		@Override
-		protected Object getValue(EventData eventData, String serviceId, CostCalculatorInput input,
+		protected Object getValue(EventData eventData, ApiClient apiClient, String serviceId, CostCalculatorInput input,
 				Pair<DateTime, DateTime> timeSpan) {
 
 			
@@ -349,7 +350,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 	protected class LinkFormatter extends FieldFormatter {
 
 		@Override
-		protected Object getValue(EventData eventData, String serviceId, CostCalculatorInput input,
+		protected Object getValue(EventData eventData, ApiClient apiClient, String serviceId, CostCalculatorInput input,
 				Pair<DateTime, DateTime> timeSpan) {
 
 			return EventLinkEncoder.encodeLink(apiClient, serviceId, input, eventData.event, 
@@ -365,7 +366,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 	protected static class MessageFormatter extends FieldFormatter {
 
 		@Override
-		protected Object getValue(EventData eventData, String serviceId, CostCalculatorInput input,
+		protected Object getValue(EventData eventData, ApiClient apiClient, String serviceId, CostCalculatorInput input,
 				Pair<DateTime, DateTime> timeSpan) {
 
 			boolean hasMessage = (eventData.event.message !=  null) 
@@ -397,11 +398,11 @@ public class CostCalculatorFunction extends GrafanaFunction {
 	protected static class TypeMessageFormatter extends MessageFormatter {
 		
 		@Override
-		protected Object getValue(EventData eventData, String serviceId, CostCalculatorInput input,
+		protected Object getValue(EventData eventData, ApiClient apiClient, String serviceId, CostCalculatorInput input,
 				Pair<DateTime, DateTime> timeSpan)
 		{
 			String type = TYPES_MAP.get(eventData.event.type);
-			Object value = super.getValue(eventData, serviceId, input, timeSpan);
+			Object value = super.getValue(eventData, apiClient, serviceId, input, timeSpan);
 
 			String result;
 		
@@ -424,29 +425,20 @@ public class CostCalculatorFunction extends GrafanaFunction {
 	protected static class CostFormatter extends FieldFormatter {
 
 		@Override
-		protected Object getValue(EventData eventData, String serviceId, CostCalculatorInput input,
+		protected Object getValue(EventData eventData, ApiClient apiClient, String serviceId, CostCalculatorInput input,
 				Pair<DateTime, DateTime> timeSpan) {
 
+			Double result = .0;
 			if (eventData.event.stats.hits == 0) {
 				return .0;
 			}
 
-			Double costPerHit = .0;
-			String type = (eventData.event.type == null) ? "" : eventData.event.type.trim();
-			
-			if (input.costData.costMatrix.containsKey(type)) {
-				costPerHit = input.costData.costMatrix.get(type);
-			} else if (input.costData.costMatrix.containsKey("")) {
-				costPerHit = input.costData.costMatrix.get("");
-			} 
-
-			if (costPerHit == null) {
-				return .0;
+			CostData costData = GrafanaSettings.getData(apiClient, serviceId).cost_calculator;
+			if (costData != null) {
+				result = costData.calculateCost(eventData.event.type)
+						* eventData.event.stats.hits;
 			}
-
-			double cost = (double) eventData.event.stats.hits * costPerHit;
-			
-			return cost;
+			return result;
 		}
 
 	}
@@ -454,7 +446,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 	protected static class CostPctFormatter extends FieldFormatter {
 
 		@Override
-		protected Object getValue(EventData eventData, String serviceId, CostCalculatorInput input,
+		protected Object getValue(EventData eventData, ApiClient apiClient, String serviceId, CostCalculatorInput input,
 				Pair<DateTime, DateTime> timeSpan) {
 
 			return .0;
@@ -465,7 +457,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 	protected static class CostYrlFormatter extends FieldFormatter {
 
 		@Override
-		protected Object getValue(EventData eventData, String serviceId, CostCalculatorInput input,
+		protected Object getValue(EventData eventData, ApiClient apiClient, String serviceId, CostCalculatorInput input,
 				Pair<DateTime, DateTime> timeSpan) {
 
 			return .0;
@@ -473,7 +465,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 
 	}
 
-	protected FieldFormatter getFormatter(String serviceId, String column) {
+	protected FieldFormatter getFormatter(ApiClient apiClient, String serviceId, String column) {
 		
 		if (column.equals(CostCalculatorInput.LINK)) {
 			return new LinkFormatter();
@@ -518,7 +510,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 
 	}
 
-	private Map<String, FieldFormatter> getFieldFormatters(String serviceId, String columns) {
+	private Map<String, FieldFormatter> getFieldFormatters(ApiClient apiClient, String serviceId, String columns) {
 
 		if ((columns == null) || (columns.isEmpty())) {
 			throw new IllegalArgumentException("columns cannot be empty");
@@ -528,7 +520,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 		Map<String, FieldFormatter> result = new LinkedHashMap<String, FieldFormatter>(columnsArray.length);
 
 		for (String column : columnsArray) {
-			FieldFormatter fieldFormatter = getFormatter(serviceId, column);
+			FieldFormatter fieldFormatter = getFormatter(apiClient, serviceId, column);
 			result.put(column, fieldFormatter);
 		}
 
@@ -539,7 +531,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 		super(apiClient);
 	}
 	
-	protected List<EventData> getEventData(String serviceId, CostCalculatorInput input, 
+	protected List<EventData> getEventData(ApiClient apiClient, String serviceId, CostCalculatorInput input, 
 			Pair<DateTime, DateTime> timeSpan) {
 		
 		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, timeSpan.getFirst(), 
@@ -680,12 +672,15 @@ public class CostCalculatorFunction extends GrafanaFunction {
 	/**
 	 * @param serviceIds - needed for children
 	 */
-	protected List<List<Object>> processServiceEvents(Collection<String> serviceIds, String serviceId, CostCalculatorInput input, Pair<DateTime, DateTime> timeSpan) {
+	protected List<List<Object>> processServiceEvents(Collection<String> serviceIds, ApiClient apiClient, String serviceId, CostCalculatorInput input, Pair<DateTime, DateTime> timeSpan) {
 
-		Map<String, FieldFormatter> formatters = getFieldFormatters(serviceId, input.fields);
+		Map<String, FieldFormatter> formatters = getFieldFormatters(apiClient, serviceId, input.fields);
 		
 		List<EventData> mergedDatas;
-		List<EventData> eventDatas = getEventData(serviceId, input, timeSpan);
+		
+		CostData costSettings = GrafanaSettings.getData(apiClient, serviceId).cost_calculator;
+
+		List<EventData> eventDatas = getEventData(apiClient, serviceId, input, timeSpan);
 
 		if (input.hasTransactions()) {
 			mergedDatas = eventDatas;
@@ -728,7 +723,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 							
 							runningCostTotal += costDbl;
 			
-							if (costDbl >= input.costData.costHigherThan) {
+							if (costDbl >= costSettings.costHigherThan) {
 								result.add(outputObject);
 							}
 						}
@@ -825,7 +820,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 
 		for (FieldFormatter formatter : formatters) {
 
-			Object objectValue = formatter.format(eventData, serviceId, input, timeSpan);
+			Object objectValue = formatter.format(eventData, apiClient, serviceId, input, timeSpan);
 			result.add(objectValue);
 		}
 
@@ -876,7 +871,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 		Collection<String> serviceIds = getServiceIds(input);
 
 		for (String serviceId : serviceIds) {
-			List<List<Object>> serviceEvents = processServiceEvents(serviceIds, serviceId, input, timeSpan);
+			List<List<Object>> serviceEvents = processServiceEvents(serviceIds, apiClient, serviceId, input, timeSpan);
 			series.values.addAll(serviceEvents);
 		}
 
