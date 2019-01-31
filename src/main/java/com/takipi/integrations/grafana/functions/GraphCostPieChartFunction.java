@@ -19,19 +19,12 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Objects;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.Location;
-import com.takipi.api.client.data.metrics.Graph;
-import com.takipi.api.client.data.metrics.Graph.GraphPoint;
-import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
 import com.takipi.api.client.result.event.EventResult;
-import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.Pair;
-import com.takipi.integrations.grafana.functions.CostCalculatorFunction.EventData;
-import com.takipi.integrations.grafana.input.CostCalculatorInput;
 import com.takipi.integrations.grafana.input.CostData;
 import com.takipi.integrations.grafana.input.GraphCostLimitInput;
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
-import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class GraphCostPieChartFunction extends CostSplitGraphFunction {
 
@@ -238,202 +231,36 @@ public class GraphCostPieChartFunction extends CostSplitGraphFunction {
 		LinkedHashMap<String,Double> sortedRes = eventYrlCostTotal.entrySet().stream().sorted(Collections.reverseOrder(Entry.comparingByValue())).collect(Collectors.toMap(Entry::getKey, Entry::getValue,
                 (e1, e2) -> e1, LinkedHashMap::new));
 		
+		
 		LinkedHashMap<String,Double> trimmedSortedRes = new LinkedHashMap<>();
 
 		{
 			double runningTot=.0;
-			int i = 0;
 			for (Entry<String, Double> entry : sortedRes.entrySet()) {
+
 				runningTot += entry.getValue();
-				i++;
 				trimmedSortedRes.put(entry.getKey(), entry.getValue());
 				if (runningTot >= targetYrlTablelimit) {
 					break;
 				}
 			}
 			
-			if (i < sortedRes.size() -1) {
-				trimmedSortedRes.put("Others", runningYrlCostTotal - runningTot);
+			if (trimmedSortedRes.size() < sortedRes.size()) {
+				trimmedSortedRes.put("CombinedSmallerItems", runningYrlCostTotal - runningTot);
 			}
 		}
 		
-//		Graph graph = getEventsGraph(serviceId, viewId, input.pointsWanted, input, input.volumeType,
-//				timeSpan.getFirst(), timeSpan.getSecond());
-//
-//		if (graph == null) {
-//			return Collections.emptyList();		
-//		}
-//
-//
-//		Map<String, CostGraphData> eventsVolume = new HashMap<>();
-//
-//		for (GraphPoint gp : graph.points) {
-//
-//			if (gp.contributors == null) {
-//				continue;
-//			}
-//
-//			for (GraphPointContributor gpc : gp.contributors) {
-//				EventResult event = eventMap.get(gpc.id);
-//
-//				if ((event == null) || (eventFilter.filter(event))) {
-//					continue;
-//				}
-//
-//
-//				if (event.error_location == null)
-//				{
-//					logger.warn("Event {} does not have error location!", event.id);
-//					continue;
-//				}
-//
-//				CostData costSettings = GrafanaSettings.getData(apiClient, serviceId).cost_calculator;
-//				Double evCost = costSettings.calculateCost(event.type);
-//
-//				if (evCost != .0) {
-//					String key = getTypeAndSimpleClassName(event.type,event.error_location.class_name, event.error_location.method_name);
-//
-//					CostGraphData graphData = eventsVolume.get(key);
-//
-//					if (graphData == null) {
-//						graphData = new CostGraphData(key, evCost);
-//						eventsVolume.put(key, graphData);
-//					}
-//
-//					graphData.volume += gpc.stats.hits;
-//				}
-//			}
-//		}
-//
-//		Collection<CostGraphData> eventsCostVolume = new ArrayList<>();
-//
-//		eventsVolume.forEach((evk,evv)->{
-//			if (evv.volume != 0L) {
-//				CostGraphData ecvGD = new CostGraphData(evk, evv.getCostFactor());
-//				ecvGD.volume = evv.volume;
-//				eventsCostVolume.add(ecvGD);
-//			}
-//		});
-//
-//		Collection<CostGraphData> limitedGraphs = getLimitedPercentageGraphData(eventsCostVolume, limitInput.limit);
-//
-//		Map<String, GraphData> graphsData = new HashMap<String, GraphData>();
-//
-//		for (GraphData graphData : limitedGraphs) {
-//			graphsData.put(graphData.key, graphData);
-//		}
-//
-//		List<GraphData> matchingGraphs = new ArrayList<GraphData>();
-//
-//		for (GraphPoint gp : graph.points) {
-//
-//			DateTime gpTime = TimeUtil.getDateTime(gp.time);
-//			Long epochTime = Long.valueOf(gpTime.getMillis());
-//
-//			if (gp.contributors == null) {
-//
-//				for (GraphData graphData : limitedGraphs) {
-//					graphData.points.put(epochTime, 0l);
-//				}
-//
-//				continue;
-//			}
-//
-//			matchingGraphs.clear();
-//
-//			for (GraphPointContributor gpc : gp.contributors) {
-//				EventResult event = eventMap.get(gpc.id);
-//
-//				if ((event == null) || (eventFilter.filter(event))) {
-//					continue;
-//				}
-//
-//				if (event.error_location == null)
-//				{
-//					logger.warn("Event {} does not have error location!", event.id);
-//					continue;
-//				}
-//
-//				long pointValue;
-//
-//				if (input.volumeType.equals(VolumeType.invocations)) {
-//					pointValue = gpc.stats.invocations;
-//				} else {
-//					pointValue = gpc.stats.hits;
-//				}
-//
-//				String key = getTypeAndSimpleClassName(event.type,event.error_location.class_name, event.error_location.method_name);
-//
-//				GraphData graphData = graphsData.get(key);
-//
-//				if (graphData == null) {
-//					continue;
-//				}
-//
-//				graphData.volume += pointValue;
-//
-//				Long newValue;
-//				Long existingValue = graphData.points.get(epochTime);
-//
-//				if (existingValue != null) {
-//					newValue = Long.valueOf(pointValue + existingValue.longValue());
-//				} else {
-//					newValue = Long.valueOf(pointValue);
-//				}
-//
-//				graphData.points.put(epochTime, newValue);
-//				matchingGraphs.add(graphData);
-//			}
-//
-//			for (GraphData graphData : limitedGraphs) {
-//
-//				if (!matchingGraphs.contains(graphData)) {
-//					graphData.points.put(epochTime, 0l);
-//				}
-//			}	
-//		}
-
 		List<GraphSeries> result = new ArrayList<GraphSeries>();
 
-//		Long epochTimeNow = Long.valueOf(DateTime.now().getMillis());
-//
-//		String graphTrendCalc = "AVG";	// This serves as default and uses AVG function
-//		if (limitInput.graphTrendType != null && !limitInput.graphTrendType.isEmpty()) {
-//			String gtt = limitInput.graphTrendType.trim().toUpperCase();
-//			if (gtt.equals("SPOT") || gtt.equals("BALANCE")) {
-//				graphTrendCalc = gtt;
-//			}
-//		}
-//
-//		//TODO simplify the used cal with ENUM etc.
-//		for (CostGraphData graphData : limitedGraphs) {
-//
-//			if (graphData.volume > 0) {
-//				Double gdCost = graphData.getCostFactor();
-//				Long valueAccumulator = 0l;
-//				Long accumulatorEntries = 0l;
-//				Long calculatedValue= 0l;
-//				for (Map.Entry<Long,Long> gdP : graphData.points.entrySet()) {
-//					if (graphTrendCalc.equals("SPOT")) {
-//						calculatedValue = (long) (gdP.getValue() * gdCost);
-//					} else {
-//						valueAccumulator += gdP.getValue();
-//						++accumulatorEntries;
-//						if (gdP.getKey() <= epochTimeNow) {
-//							if (graphTrendCalc.equals("BALANCE")) {
-//								calculatedValue = (long) (valueAccumulator * gdCost);						// Total have balance so far
-//							} else {
-//								calculatedValue = (long) (valueAccumulator / accumulatorEntries * gdCost);	// AVG from beginning to point
-//							}
-//						} else {
-//							calculatedValue = 0l;
-//						}
-//					}
-//					gdP.setValue(calculatedValue);
-//				}
-//				result.add(getGraphSeries(graphData, getServiceValue(graphData.key, serviceId, serviceIds), input));
-//			}
-//		}
+		Long epochTimeNow = Long.valueOf(DateTime.now().getMillis());
+
+		GraphData graphData = new GraphData("");
+		graphData.volume = 1;
+		for (Entry<String,Double>  res : trimmedSortedRes.entrySet()) {
+				
+				graphData.points.put(epochTimeNow, res.getValue().longValue());				
+				result.add(getGraphSeries(graphData, res.getKey(), input));
+		}		
 		return result;
 	}
 
