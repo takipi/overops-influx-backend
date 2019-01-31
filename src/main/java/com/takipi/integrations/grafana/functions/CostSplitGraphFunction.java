@@ -27,7 +27,7 @@ import com.takipi.integrations.grafana.util.TimeUtil;
 public class CostSplitGraphFunction extends LimitGraphFunction {
 	private static final Logger logger = LoggerFactory.getLogger(CostSplitGraphFunction.class); 
 
-	private class CostGraphData extends GraphData {
+	protected class CostGraphData extends GraphData {
 
 		private Double costFactor;
 		
@@ -234,7 +234,7 @@ public class CostSplitGraphFunction extends LimitGraphFunction {
 		for (CostGraphData graphData : limitedGraphs) {
 
 			if (graphData.volume > 0) {
-				Double gdCost = graphData.costFactor;
+				Double gdCost = graphData.getCostFactor();
 				Long valueAccumulator = 0l;
 				Long accumulatorEntries = 0l;
 				Long calculatedValue= 0l;
