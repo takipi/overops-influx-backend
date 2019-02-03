@@ -1,0 +1,39 @@
+
+dependencies {
+	compile (
+		"javax.ws.rs:javax.ws.rs-api:2.1",
+		"org.apache.tomcat.embed:tomcat-embed-core:8.5.34"
+	)
+
+	if (rootProject.hasProperty("localApiClient") &&
+		"$rootProject.localApiClient" == "true") {
+      		println "Compiling overops as influx with project api-client"
+
+		compile (
+			project(":api-client"),
+			project(":api-client-util"),
+      		)
+	} else {
+		println "Compiling overops as influx with maven api-client"
+
+		compile (
+		        "com.takipi:api-client:2.11.1",
+			"com.takipi:api-client-util:2.11.1",
+		)
+	}
+}
+
+apply plugin: 'java'
+
+compileJava {
+	sourceCompatibility = 1.8
+	targetCompatibility = 1.8
+}
+
+if (project.ext.has("backendJavac")) {
+  compileJava {
+    options.forkOptions.executable = project.ext.get("backendJavac")
+  }
+}
+
+
