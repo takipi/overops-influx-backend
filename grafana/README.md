@@ -11,24 +11,26 @@ When setting up Grafana, choose the approach which best describes your architect
 
 ## Installation (assumes no Grafana)
 1. Get Grafana:   
-`wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana-5.3.4.linux-amd64.tar.gz`
+`wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana-5.4.3.linux-amd64.tar.gz`
 2. Unpack it to `/opt`
-3. Change to user: `chown -R ubuntu:ubuntu /opt/grafana-5.3.4`
-4. Override `grafana` folder here in the repo onto `/opt/grafana-5.3.4` to override conf provisioning code and public assets.
+3. Change to user: `chown -R ubuntu:ubuntu /opt/grafana-5.4.3`
+4. Override `grafana` folder here in the repo onto `/opt/grafana-5.4.3` to override conf provisioning code and public assets.
 
 ## Installing plugins
 1. Get Boom table plugin:  
-`wget https://grafana.com/api/plugins/yesoreyeram-boomtable-panel/versions/0.4.6/download`
-2. Unpack it to `<GRAFANA_HOME>/data/plugins`
+`wget https://grafana.com/api/plugins/yesoreyeram-boomtable-panel/versions/0.5.0/download`
+2. Get the Pie Chart plugin:
+`wget https://grafana.com/api/plugins/grafana-piechart-panel/versions/1.3.4/download`
+3. Unpack them to `<GRAFANA_HOME>/data/plugins`
 
 ## Setup Datasource
 Based on the chosen architecture, rename one of the templates in `conf/provisioning/datasources` as `conf/provisioning/datasources/oo.yaml` 
 
 ## Setup Grafana (when proxying)
 
-1. Edit `/opt/grafana-5.3.4/conf/custom.ini` and make sure the `root_url` points to the correct OverOps server
+1. Edit `/opt/grafana-5.4.3/conf/custom.ini` and make sure the `root_url` points to the correct OverOps server
 2. In the provisioning folder, replace `${TAKIPI_HOST_URL}` and `${TAKIPI_API_URL}` in yaml and json files
 
 ### Run Grafana
-1. `cd /opt/grafana-5.3.4`
+1. `cd /opt/grafana-5.4.3`
 2. `nohup bin/grafana-server web &`
