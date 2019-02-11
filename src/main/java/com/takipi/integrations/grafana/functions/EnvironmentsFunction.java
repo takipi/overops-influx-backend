@@ -35,11 +35,11 @@ public class EnvironmentsFunction extends VariableFunction {
 	@Override
 	protected int compareValues(String o1, String o2)
 	{
-		if (NONE.toLowerCase().equals(o1)) {
+		if (NONE.equals(o1)) {
 			return 1;
 		}
 		
-		if (NONE.toLowerCase().equals(o2)) {
+		if (NONE.equals(o2)) {
 			return 1;
 		}
 		

@@ -12,6 +12,6 @@ package com.takipi.integrations.grafana.input;
  *
  * Screenshot: https://drive.google.com/open?id=1y_AneI6seWBF2GQxZDNXFYFB7Ku-0LBv
  */
-public class TransactionsInput extends ViewInput {
+public class TransactionsInput extends BaseEventVolumeInput {
 	
 }

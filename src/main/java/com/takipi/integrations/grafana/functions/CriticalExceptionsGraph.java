@@ -16,42 +16,41 @@ import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
 import com.takipi.api.client.result.event.EventResult;
-import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.input.GraphLimitInput;
-import com.takipi.integrations.grafana.input.RoutingGraphInput;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
+import com.takipi.integrations.grafana.settings.input.RegressionSettings;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
-public class RoutingGraphFunction extends LimitGraphFunction {
+public class CriticalExceptionsGraph extends LimitGraphFunction {
 	
 	public static class Factory implements FunctionFactory {
 
 		@Override
 		public GrafanaFunction create(ApiClient apiClient) {
-			return new RoutingGraphFunction(apiClient);
+			return new CriticalExceptionsGraph(apiClient);
 		}
 
 		@Override
 		public Class<?> getInputClass() {
-			return RoutingGraphInput.class;
+			return GraphLimitInput.class;
 		}
 
 		@Override
 		public String getName() {
-			return "routingGraph";
+			return "criticalExceptionsGraph";
 		}
 	}
 
-	public RoutingGraphFunction(ApiClient apiClient) {
+	public CriticalExceptionsGraph(ApiClient apiClient) {
 		super(apiClient);
 	}
 
 	@Override
 	protected List<GraphSeries> processGraphSeries(Collection<String> serviceIds,
-			String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
+			String serviceId, String viewName, String viewId, Pair<DateTime, DateTime> timeSpan,
 			GraphInput input) {
 		
 		GraphLimitInput limitInput = (GraphLimitInput)input;
@@ -70,15 +69,25 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 			return Collections.emptyList();		
 		}
 		
-		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
+		EventFilter eventFilter = getEventFilter(serviceId, input, timeSpan);
 
+		if (eventFilter == null) {
+			return Collections.emptyList();		
+		}
+		
 		Set<GraphData> graphsInPoint = new HashSet<GraphData>();
 		Map<String, GraphData> graphsData = new HashMap<String, GraphData>();
 		
 		Long key = null;
 		Long lastKey = null;
 		
-		Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();		
+		RegressionSettings regressionSettings = GrafanaSettings.getData(apiClient, serviceId).regression;
+		
+		if (regressionSettings == null) {
+			return Collections.emptyList();
+		}
+		
+		Collection<String> criticalExceptionTypes = regressionSettings.getCriticalExceptionTypes();
 		
 		for (GraphPoint gp : graph.points) {
 
@@ -103,24 +112,11 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 				if ((event == null) || (event.error_location == null) || (event.error_origin == null) || (eventFilter.filter(event))) {
 					continue;
 				}
-
-				Set<String> originLabels = categories.getCategories(event.error_origin.class_name);
-				Set<String> locationLabels = categories.getCategories(event.error_location.class_name);
-
-				if ((originLabels == null) && (locationLabels == null)) {
+				
+				if (!criticalExceptionTypes.contains(event.name)) {
 					continue;
 				}
-				
-				Set<String> labels = new HashSet<String>();
-				
-				if (originLabels != null)  {
-					labels.addAll(originLabels);
-				}
-				
-				if (locationLabels != null) {
-					labels.addAll(locationLabels);
-				}
-				
+						
 				long pointValue;
 				
 				if (input.volumeType.equals(VolumeType.invocations)) {
@@ -129,34 +125,31 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 					pointValue = gpc.stats.hits;
 				}
 
-				for (String label : labels) {
-					GraphData graphData = graphsData.get(label);
+				GraphData graphData = graphsData.get(event.name);
 					
-					if (graphData == null) {
-						graphData = new GraphData(label);
+				if (graphData == null) {
+					graphData = new GraphData(event.name);
 						
-						if (lastKey != null) {
-							graphData.points.put(lastKey, Long.valueOf(0l));
-
-						}
-						
-						graphsData.put(label, graphData);
+					if (lastKey != null) {
+						graphData.points.put(lastKey, Long.valueOf(0l));
 					}
+						
+					graphsData.put(event.name, graphData);
+				}
 								
-					Long currValue = graphData.points.get(key);
-					Long newValue;
+				Long currValue = graphData.points.get(key);
+				Long newValue;
 					
-					if (currValue == null) {
-						newValue = Long.valueOf(pointValue);
-					} else {
-						newValue = Long.valueOf(currValue.longValue() + pointValue);
-					}
+				if (currValue == null) {
+					newValue = Long.valueOf(pointValue);
+				} else {
+					newValue = Long.valueOf(currValue.longValue() + pointValue);
+				}
 					
-					graphData.points.put(key, newValue);
-					graphData.volume += newValue;
+				graphData.points.put(key, newValue);
+				graphData.volume += newValue;
 					
-					graphsInPoint.add(graphData);
-				}	
+				graphsInPoint.add(graphData);
 			}
 			
 			for (GraphData graphData : graphsData.values()) {
@@ -167,58 +160,36 @@ public class RoutingGraphFunction extends LimitGraphFunction {
 			
 			graphsInPoint.clear();	
 		}
-		
-		Collection<String> tiers = GrafanaSettings.getServiceSettings(apiClient, serviceId).getTierNames();
-		
-		List<GraphData> limitedGraphs = null;
-		
-		if (tiers != null) {
-			limitedGraphs = getKeysTiersGraphData(graphsData, tiers);
-			
-			if (limitedGraphs.size() < limitInput.limit) {
 				
-				Collection<GraphData> additionalGraphs = getLimitedGraphData(graphsData.values(),
-					limitInput.limit);
-				
-				for (GraphData graphData : additionalGraphs) {				
-					
-					if (!limitedGraphs.contains(graphData)) {
-						limitedGraphs.add(graphData);
-					}
-					
-					if (limitedGraphs.size() >=  limitInput.limit) {
-						break;
-					}
-				}
-			}
-		}  else {
-			limitedGraphs = getLimitedGraphData(graphsData.values(), limitInput.limit);
-		}
-		
 		List<GraphSeries> result = new ArrayList<GraphSeries>();
 		
-		for (GraphData graphData : limitedGraphs) {
-			result.add(getGraphSeries(graphData, getServiceValue(graphData.key, 
-				serviceId, serviceIds), input));	
+		if (limitInput.limit == 0) {
+		
+			for (GraphData graphData : graphsData.values()) {
+				result.add(getGraphSeries(graphData, getServiceValue(graphData.key, 
+					serviceId, serviceIds), input));	
+			}
+		} else {
+			
+			int size = Math.min(limitInput.limit, criticalExceptionTypes.size());
+			
+			for (String criticalExceptionType : criticalExceptionTypes) {
+				
+				GraphData graphData = graphsData.get(criticalExceptionType);
+				
+				if (graphData == null) {
+					continue;
+				}
+				
+				result.add(getGraphSeries(graphData, getServiceValue(graphData.key, 
+						serviceId, serviceIds), input));	
+				
+				if (result.size() >= size) {
+					break;
+				}
+			}
 		}
 				
-		return result;
-	}
-	
-	private List<GraphData> getKeysTiersGraphData(Map<String, GraphData> graphsData, Collection<String> tiers) {
-		
-		List<GraphData> result = new ArrayList<GraphData>();
-		
-		for (String keyTier : tiers) {
-			GraphData graphData = graphsData.get(keyTier);
-			
-			if (graphData != null) {
-				result.add(graphData);
-			}
-		} 
-		
-		//sortGraphData(result);
-
 		return result;
 	}
 }

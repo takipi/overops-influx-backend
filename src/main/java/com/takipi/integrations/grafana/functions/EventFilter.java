@@ -20,7 +20,7 @@ import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class EventFilter
 {
-	
+	public static final String CRITICAL_EXCEPTIONS = "Critical Exceptions";
 	public static final String CATEGORY_PREFIX = "-";
 	public static final String EXCEPTION_PREFIX = "--";
 	public static final String TERM = "<term>";
@@ -102,10 +102,12 @@ public class EventFilter
 				} 
 				else if (GroupSettings.isGroup(type))
 				{
-					result.categoryTypes.add(type.substring(CATEGORY_PREFIX.length()));
+					result.categoryTypes.add(GroupSettings.fromGroupName(type));
 				}
 				else {
-					result.eventTypes.add(type);
+					if (!type.equals(GrafanaFunction.ALL)) {
+						result.eventTypes.add(type);
+					}
 				}
 			}
 		}

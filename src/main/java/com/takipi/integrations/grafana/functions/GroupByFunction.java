@@ -268,7 +268,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 					return null;
 				}
 				
-				EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
+				EventFilter eventFilter = getEventFilter(serviceId, input, timeSpan);
 
 				List<Pair<DateTime, DateTime>> intervals = getTimeSpans(input);
 
@@ -587,8 +587,12 @@ public class GroupByFunction extends BaseVolumeFunction {
 		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, timespan.getFirst(),
 				timespan.getSecond(), input.volumeType, input.pointsWanted);
 
-		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
+		EventFilter eventFilter = getEventFilter(serviceId, input, timespan);
 
+		if (eventFilter == null) {
+			return;
+		}
+		
 		Graph graph = response.data.graphs.get(0);
 
 		for (GraphPoint gp : graph.points) {
@@ -651,7 +655,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 		}
 
 		if (response.data != null) {
-			updateMap(map, serviceId, key, timespan.getFirst(), response.data.events, input);
+			updateMap(map, serviceId, key, timespan, response.data.events, input);
 		}
 	}
 
@@ -695,14 +699,20 @@ public class GroupByFunction extends BaseVolumeFunction {
 		return result;
 	}
 
-	private void updateMap(Map<GroupByKey, GroupByVolume> map, String serviceId, String key, DateTime time,
+	private void updateMap(Map<GroupByKey, GroupByVolume> map, String serviceId, String key, 
+			Pair<DateTime, DateTime> timespan,
 			List<EventResult> events, GroupByInput input) {
 
 		if (events == null) {
 			return;
 		}
 
-		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
+		EventFilter eventFilter = getEventFilter(serviceId, input, timespan);
+		
+		if (eventFilter == null) {
+			return;
+		}
+		
 		Pattern pattern = input.getPatternFilter();
 
 		for (EventResult event : events) {
@@ -727,7 +737,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 				}
 			}
 
-			updateMap(map, input, key, time, value);
+			updateMap(map, input, key, timespan.getFirst(), value);
 		}
 	}
 

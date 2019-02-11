@@ -83,6 +83,8 @@ public class CategoryFunction extends GraphFunction {
 	@Override
 	protected List<Series> processSeries(List<GraphSeries> series, BaseGraphInput input) {
 		
+		sortSeriesByName(series);
+		
 		CategoryInput categoryInput = (CategoryInput)input;
 		List<Series> output = super.processSeries(series, input);
 		
@@ -91,9 +93,7 @@ public class CategoryFunction extends GraphFunction {
 		}
 		
 		List<Series> result = limitSeries(series, categoryInput.limit);
-		
-		sortByName(result);
-		
+				
 		return result;
 	}
 	

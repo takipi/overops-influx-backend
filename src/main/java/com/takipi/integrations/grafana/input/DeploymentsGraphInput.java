@@ -30,5 +30,5 @@ public class DeploymentsGraphInput extends GraphInput{
 	/**
 	 * A limit on the number of graphs or deployment annotations that will be returned by this function
 	 */
-	public int graphCount;
+	public int limit;
 }

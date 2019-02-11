@@ -1,6 +1,7 @@
 package com.takipi.integrations.grafana.input;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import com.google.common.base.Objects;
 
@@ -41,11 +42,13 @@ public class ViewInput extends EnvironmentsFilterInput {
 	
 	public Collection<String> getTransactions(String serviceId) {
 
-		if ((transactions == null) || (transactions.length() == 0)) {
-			return null;
+		if (!hasTransactions()) {
+			return Collections.emptyList();
 		}
 
-		return getServiceFilters(transactions, serviceId, true);
+		Collection<String> result = getServiceFilters(transactions, serviceId, true);
+		
+		return result;
 	}
 	
 	@Override
@@ -61,9 +64,9 @@ public class ViewInput extends EnvironmentsFilterInput {
 		
 		ViewInput other = (ViewInput)obj;
 		
-		return Objects.equal(other.view, other.view) 
-				&& Objects.equal(other.transactions, other.transactions)
-				&& Objects.equal(other.timeFilter, other.timeFilter);
+		return Objects.equal(view, other.view) 
+				&& Objects.equal(transactions, other.transactions)
+				&& Objects.equal(timeFilter, other.timeFilter);
 	}
 	
 	@Override

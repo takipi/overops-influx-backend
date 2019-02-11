@@ -503,7 +503,12 @@ public class EventsFunction extends GrafanaFunction {
 				if (hasMessage) {
 					result.append(": ");
 					result.append(eventData.event.message);
-				}	
+				} else {
+					if (eventData.event.error_location != null) {
+						result.append(" in ");
+						result.append(formatLocation(eventData.event.error_location));
+					}
+				}
 				
 				return result.toString();
 			} else {
@@ -858,8 +863,12 @@ public class EventsFunction extends GrafanaFunction {
 		
 		sortEventDatas(mergedDatas);
 			
-		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
+		EventFilter eventFilter = getEventFilter(serviceId, input, timeSpan);
 
+		if (eventFilter == null) {
+			return Collections.emptyList();
+		}
+		
 		List<List<Object>> result = new ArrayList<List<Object>>(mergedDatas.size());
 			
 		if ((formatters.containsKey(JIRA_ISSUE_URL)) 

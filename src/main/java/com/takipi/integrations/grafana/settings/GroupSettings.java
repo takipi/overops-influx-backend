@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Objects;
+import com.takipi.common.util.CollectionUtil;
 import com.takipi.integrations.grafana.functions.EventFilter;
 import com.takipi.integrations.grafana.functions.GrafanaFunction;
 
@@ -19,6 +20,11 @@ public class GroupSettings
 		
 		public Collection<String> values;
 		public Collection<Pattern> patterns;
+		
+		public boolean isEmpty() {
+			return CollectionUtil.safeIsEmpty(values) 
+				&& (CollectionUtil.safeIsEmpty(patterns));
+		}
 		
 		public static GroupFilter from(Collection<String> values) {
 			
@@ -105,7 +111,16 @@ public class GroupSettings
 		
 		return groups;
 	}
+	
+	public static String fromGroupName(String value) {
 		
+		if ((value == null) || (!isGroup(value))) {
+			return value;
+		}
+		
+		return value.substring(EventFilter.CATEGORY_PREFIX.length());
+	}
+	
 	public static String toGroupName(String value) {
 		return EventFilter.CATEGORY_PREFIX + value;
 	}
@@ -135,6 +150,27 @@ public class GroupSettings
 	
 	public GroupFilter getAllGroupFilter() {
 		return GroupFilter.from(expandList(getAllGroupValues()));
+	}
+	
+	public Collection<String> getAllGroupNames(boolean includePrefix) {
+		
+		List<String> result = new ArrayList<String>();
+
+		if (groups == null) {
+			return Collections.emptyList();
+		}
+		
+		for (Group group : groups) {
+			
+			if (includePrefix) {
+				result.add(toGroupName(group.name));
+
+			} else {
+				result.add(group.name);
+			}
+		}
+		
+		return result;
 	}
 	
 	public Collection<String>getAllGroupValues() {

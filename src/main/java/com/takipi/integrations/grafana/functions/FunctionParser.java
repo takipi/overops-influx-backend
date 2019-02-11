@@ -224,9 +224,12 @@ public class FunctionParser {
 		//Routing graphs
 		registerFunction(new CategoryFunction.Factory());
 		registerFunction(new TypesGraph.Factory());
-		registerFunction(new RoutingGraphFunction.Factory());
+		registerFunction(new TiersGraphFunction.Factory());
 		registerFunction(new SplitGraphFunction.Factory());
-		
+		registerFunction(new AppsGraphFunction.Factory());
+		registerFunction(new CriticalExceptionsGraph.Factory());
+
+
 		//regression functions
 		registerFunction(new RegressionFunction.Factory());
 		registerFunction(new ReliabilityReportFunction.Factory());
@@ -234,7 +237,6 @@ public class FunctionParser {
 		registerFunction(new BaselineWindowFunction.Factory());
 		registerFunction(new BaselineAnnotationFunction.Factory());
 		registerFunction(new RegressedEventsFunction.Factory());
-
 
 		//deployment functions
 		registerFunction(new DeploymentsGraphFunction.Factory());
@@ -250,7 +252,8 @@ public class FunctionParser {
 		registerFunction(new TransactionAvgGraphFunction.Factory());
 		registerFunction(new SlowTransactionsFunction.Factory());
 		registerFunction(new TransactionsDiffFunction.Factory());
-	
+		registerFunction(new TransactionsEventsGraphFunction.Factory());
+
 		//variable filter functions
 		registerFunction(new EnvironmentsFunction.Factory());
 		registerFunction(new ApplicationsFunction.Factory());

@@ -89,8 +89,12 @@ public abstract class BaseVolumeFunction extends GrafanaFunction {
 			return result;
 		}
 
-		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
+		EventFilter eventFilter = getEventFilter(serviceId, input, timeSpan);
 
+		if (eventFilter == null) {
+			return result;
+		}
+		
 		Set<String> similarIds = new HashSet<String>();
 		
 		for (EventResult event : eventsMap.values()) {

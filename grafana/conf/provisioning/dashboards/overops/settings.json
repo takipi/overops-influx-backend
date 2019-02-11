@@ -18,22 +18,11 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 23,
-  "iteration": 1546729553456,
+  "iteration": 1549870042070,
   "links": [
-    {
-      "icon": "external link",
-      "tags": [],
-      "targetBlank": true,
-      "title": "HELP",
-      "tooltip": "Learn more about this dashboard",
-      "type": "link",
-      "url": "https://doc.overops.com/docs/reliability-dashboards-overview"
-    },
     {
       "asDropdown": true,
       "icon": "external link",
-      "includeVars": true,
-      "keepTime": true,
       "tags": [
         "OverOps"
       ],
@@ -42,9 +31,9 @@
   ],
   "panels": [
     {
-      "content": "<script>\n\n\nvar internalTakipiAjax = function(type, url, contentType, data, onSuccess, onFailure, retryLimit, async, onProgress, isReadOnly, crossDomain, forceAjaxRequest)\n{\n   \n    var requestData = {\n        \"type\": type,\n        \"url\": url,\n        \"contentType\": contentType,\n        \"async\": async,\n        \"crossDomain\": !!crossDomain,\n        \"retryCount\": 0,\n        \"retryLimit\": ((retryLimit != undefined) ? retryLimit : 0),\n        \"success\": function(data) {\n            if (onSuccess)\n            {\n                onSuccess(data);\n            }\n        },\n        \"error\": function(data) {\n            this.retryCount++;\n            \n            if (this.retryCount <= this.retryLimit)\n            {\n                $.ajax(this);\n                return;\n            }\n            \n            if (onFailure)\n            {\n                onFailure(data);\n            }\n        }\n    };\n    \n    console.log(data);\n    \n    if (data)\n    {\n      requestData[\"data\"] = JSON.stringify(data);\n    }\n\n    return $.ajax(requestData);\n};\n\nfunction HideLabel() {\n  $(\"saved\").style.display = \"none\";\n}\n\nfunction applySettings() {\n    var value = $(\"textarea.env\").val() + \"=\" + $(\"textarea.area\").val();\n    internalTakipiAjax(\"POST\", \"/app/grafana/settings\", \"text/plain;charset=UTF-8\", value, \n    \n    function(data) {\n      alert(data);\n      \n    }, \n    function(data) {alert(\"Unexpected error saving settings\");},\n    0, true, null, false)\n}\n</script>\n\n<style type=\"text/css\">\n    .area {\n        diplay: block;\n        width:100%;\n        height:90%;\n        font-size: 15px;\n        background-color: black;\n    }\n    \n    .button {\n        text-align:right;\n        padding-top:10px;\n        float:right;\n    }\n    \n    .saved {\n        text-align:left;\n        float:left;\n    }\n    \n    .button {\n        padding:10px 20px;\n        color:black;\n    }\n    \n    .env {\n        display: none;\n    }\n</style>\n\n<textarea class=\"area\">$settings</textarea>\n<textarea class=\"env\">$environments</textarea>\n\n<div class=\"button\">\n<button class=\"button\" onclick=\"applySettings()\">Apply</button>\n</div>\n\n\n\n  </div>\n</div>\n</div>",
+      "content": "<script>\n\n\nfunction openSettings() {\n  \n  var redir = $(\"textarea.redirect\").val();\n  var env = $(\"textarea.environments\").val();\n  var redirApiHost = $(\"textarea.redirApiHost\").val();\n\n  \n  if ((env == \"\") || (env == \"None\") || (redirApiHost == \"\")) {\n    return;\n  }\n  \n  var split = env.split(\":\");\n  \n  var url = redirApiHost + \"/settings/environments/\";\n  \n  var envId;\n  \n  if (split.length > 1) {\n    url = url + split[0] + \"/\";\n    envId = split[1].trim();\n  } else {\n     envId = split[0].trim();  \n  }\n  \n  url = url + \"dashboards?id=\" + envId;\n  \n  console.log(url);\n  \n  if (redir == \"true\") {\n   window.location.replace(url);\n  }\n}\n\nopenSettings();\n\n</script>\n\n<style type=\"text/css\">\n    \n    .button {\n        text-align:left;\n        padding-top:10px;\n        float:left;\n    }\n    \n    \n    .button {\n        padding:10px 20px;\n        color:black;\n    }\n    \n     .environments {\n        visibility:hidden;\n    }\n    \n     .redirect {\n        visibility:hidden;\n    }\n    \n      .redirApiHost {\n        visibility:hidden;\n    }\n    \n    .button {\n        visibility:hidden;\n    }\n    \n</style>\n\n<textarea class=\"environments\">$environments</textarea>\n<textarea class=\"redirect\">$redirect</textarea>\n<textarea class=\"redirApiHost\">$redirApiHost</textarea>\n\n\n\n<div class=\"button\">\n<button class=\"button\" onclick=\"openSettings()\">Open Settings</button>\n</div>\n\n(Choose an environment and set Redirect to true)\n\n  </div>\n</div>\n</div>",
       "gridPos": {
-        "h": 16,
+        "h": 3,
         "w": 24,
         "x": 0,
         "y": 0
@@ -65,9 +54,8 @@
   "templating": {
     "list": [
       {
-        "allValue": "*",
+        "allValue": null,
         "current": {
-          "selected": true,
           "text": "None",
           "value": "None"
         },
@@ -78,7 +66,7 @@
         "multi": false,
         "name": "environments",
         "options": [],
-        "query": "environments({\"sorted\":\"true\"})",
+        "query": "environments({\"sorted\":true})",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -92,19 +80,46 @@
       {
         "allValue": null,
         "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
+          "selected": false,
+          "text": "true",
+          "value": "true"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Redirect",
+        "multi": false,
+        "name": "redirect",
+        "options": [
+          {
+            "selected": true,
+            "text": "true",
+            "value": "true"
+          },
+          {
+            "selected": false,
+            "text": "false",
+            "value": "false"
+          }
+        ],
+        "query": "true,false",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "https://app.overops.com",
+          "value": "https://app.overops.com"
         },
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
-        "label": "Settings",
+        "label": null,
         "multi": false,
-        "name": "settings",
+        "name": "redirApiHost",
         "options": [],
-        "query": "environmentSettings({\"environments\":\"$environments\"})",
-        "refresh": 2,
+        "query": "apiHost({\"type\":\"FullURL\"})",
+        "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -149,5 +164,5 @@
   "timezone": "",
   "title": "Settings",
   "uid": "mTGNNTfiz",
-  "version": 22
+  "version": 133
 }
