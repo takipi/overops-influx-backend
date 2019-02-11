@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 7,
-  "iteration": 1548135421081,
+  "iteration": 1549920892143,
   "links": [
     {
       "icon": "external link",
@@ -61,7 +61,7 @@
       "fill": 0,
       "gridPos": {
         "h": 9,
-        "w": 24,
+        "w": 14,
         "x": 0,
         "y": 0
       },
@@ -145,6 +145,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "$type",
       "tooltip": {
@@ -183,6 +184,83 @@
         "align": false,
         "alignLevel": null
       }
+    },
+    {
+      "aliasColors": {},
+      "breakPoint": "25%",
+      "cacheTimeout": null,
+      "combine": {
+        "label": "Others",
+        "threshold": "0"
+      },
+      "datasource": "OO",
+      "decimals": null,
+      "fontSize": "80%",
+      "format": "currencyUSD",
+      "gridPos": {
+        "h": 9,
+        "w": 10,
+        "x": 14,
+        "y": 0
+      },
+      "id": 39,
+      "interval": null,
+      "legend": {
+        "header": "",
+        "percentage": true,
+        "show": true,
+        "sort": "total",
+        "sortDesc": true,
+        "values": true
+      },
+      "legendType": "Under graph",
+      "links": [],
+      "maxDataPoints": 3,
+      "nullPointMode": "connected",
+      "pieType": "pie",
+      "strokeWidth": 1,
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "graphCostPie({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",\"transactions\":\"$transactions\",\"limit\":\"$splitLimit\", \"searchText\":\"$search\",\"graphTrendType\":\"$graphType\"})",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "title": "Yearly Cost per Exception(Type+Location) ($)",
+      "type": "grafana-piechart-panel",
+      "valueName": "total"
     },
     {
       "columns": [],
@@ -504,7 +582,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "costCalc({\"fields\":\"link,type,message,error_location,costpct,cost,costyrl\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":120,\"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\",\"searchText\":\"$search\",costData:{\"costHigherThan\":.0,\"costMatrix\":$costMatrix},\"tableLimit\":$splitLimit})\n",
+          "query": "costCalc({\"fields\":\"link,type,error_location,message,costpct,cost,costyrl\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":120,\"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\",\"searchText\":\"$search\",costData:{\"costHigherThan\":.0,\"costMatrix\":$costMatrix},\"tableLimit\":$splitLimit})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -541,14 +619,15 @@
       {
         "allValue": "None",
         "current": {
-          "selected": false,
           "tags": [],
-          "text": "None",
+          "text": "None + OverOps Prod: S6295",
           "value": [
-            "None"
+            "None",
+            "OverOps Prod: S6295"
           ]
         },
         "datasource": "OO",
+        "definition": "",
         "hide": 0,
         "includeAll": false,
         "label": "Env",
@@ -573,6 +652,7 @@
           "value": "$__all"
         },
         "datasource": "OO",
+        "definition": "",
         "hide": 0,
         "includeAll": true,
         "label": "Apps",
@@ -597,6 +677,7 @@
           "value": "$__all"
         },
         "datasource": "OO",
+        "definition": "",
         "hide": 0,
         "includeAll": true,
         "label": "Servers",
@@ -621,6 +702,7 @@
           "value": "$__all"
         },
         "datasource": "OO",
+        "definition": "",
         "hide": 0,
         "includeAll": true,
         "label": "Type",
@@ -645,6 +727,7 @@
           "value": "$__all"
         },
         "datasource": "OO",
+        "definition": "",
         "hide": 0,
         "includeAll": true,
         "label": "Deployments",
@@ -669,6 +752,7 @@
           "value": "$__all"
         },
         "datasource": "OO",
+        "definition": "",
         "hide": 0,
         "includeAll": true,
         "label": "Transactions",
@@ -693,6 +777,7 @@
           "value": "24"
         },
         "datasource": "OO",
+        "definition": "",
         "hide": 2,
         "includeAll": false,
         "label": "Points Wanted",
@@ -752,7 +837,7 @@
             "value": "5"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "10",
             "value": "10"
           },
@@ -777,7 +862,7 @@
             "value": "66"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "75",
             "value": "75"
           },
@@ -844,6 +929,7 @@
           "value": "app.overops.com"
         },
         "datasource": "OO",
+        "definition": "",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -868,6 +954,7 @@
           "value": "443"
         },
         "datasource": "OO",
+        "definition": "",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -899,12 +986,12 @@
         "name": "graphType",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "AVG",
             "value": "AVG"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "BALANCE",
             "value": "BALANCE"
           },
@@ -951,7 +1038,7 @@
     ]
   },
   "timezone": "",
-  "title": "Cost Analysis",
-  "uid": "lETtCsiz",
-  "version": 85
+  "title": "Logging Calculator",
+  "uid": "-lETtCsik",
+  "version": 64
 }
