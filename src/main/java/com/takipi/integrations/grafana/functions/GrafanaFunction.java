@@ -76,9 +76,9 @@ import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings.GroupFilter;
-import com.takipi.integrations.grafana.settings.ServiceSettings;
 import com.takipi.integrations.grafana.settings.input.GeneralSettings;
 import com.takipi.integrations.grafana.settings.input.SlowdownSettings;
+import com.takipi.integrations.grafana.settings.ServiceSettings;
 import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
@@ -334,6 +334,14 @@ public abstract class GrafanaFunction
 		
 		protected abstract Comparator<Map.Entry<TransactionKey, TransactionData>> getComparator(TransactionDataResult transactionDataResult);
 		
+		/**
+		 * @param key - needed for children
+		 * @param data 
+		 */
+		protected boolean includeTransaction(TransactionKey key, TransactionData data) {
+			return true;
+		}
+		
 		protected Collection<String> getTransactions(TransactionDataResult transactionDataResult) {
 			
 			if ((transactionDataResult == null) || (transactionDataResult.items.size() == 0)) {
@@ -350,9 +358,17 @@ public abstract class GrafanaFunction
 			
 			List<String> result = new ArrayList<String>(size);
 			
-			for (int i = 0; i < size; i++) {
-				Map.Entry<TransactionKey, TransactionData> entry = sortedTransactionDatas.get(i);
+			for (Map.Entry<TransactionKey, TransactionData> entry : sortedTransactionDatas) {
+				
+				if (!includeTransaction(entry.getKey(), entry.getValue())) {
+					continue;
+				}
+				
 				result.add(getSimpleClassName(entry.getKey().className));
+				
+				if (result.size() >= size) {
+					break;
+				}
 			}
 	
 			return result;
@@ -468,6 +484,18 @@ public abstract class GrafanaFunction
 			}
 			
 			return super.getTransactions(transactionDataResult);
+		}
+		
+		
+		@Override
+		protected boolean includeTransaction(TransactionKey key, TransactionData data) {
+			
+			if ((data.state == PerformanceState.CRITICAL) 
+			|| (data.state == PerformanceState.SLOWING)) {
+				return true;
+			}
+			
+			return false;
 		}
 		
 		@Override
@@ -756,11 +784,12 @@ public abstract class GrafanaFunction
 		
 		BaseEventVolumeInput baselineInput;
 		
-		if (input.hasDeployments()) {
+		if ((input.hasDeployments()) || (input.hasTransactions())) {
 			Gson gson = new Gson();
 			String json = gson.toJson(input);
 			baselineInput = gson.fromJson(json, input.getClass());
 			baselineInput.deployments = null;
+			baselineInput.transactions = null;
 		} else {
 			baselineInput = input;
 		}
@@ -1167,6 +1196,17 @@ public abstract class GrafanaFunction
 			Pair<DateTime, DateTime> timeSpan, String searchText,
 			int pointsWanted, int activeTimespan, int baselineTimespan) {
 		
+		GroupFilter transactionsFilter = null;
+		
+		if (input.hasTransactions())
+		{			
+			transactionsFilter = getTransactionsFilter(serviceId, input, timeSpan);
+
+			if (transactionsFilter == null) {
+				return Collections.emptyList();
+			}
+		}
+		
 		Pair<String, String> fromTo = TimeUtil.toTimespan(timeSpan);
 		
 		TransactionsGraphRequest.Builder builder = TransactionsGraphRequest.newBuilder().setServiceId(serviceId)
@@ -1190,12 +1230,6 @@ public abstract class GrafanaFunction
 		if ((input.hasTransactions() || (searchText != null)))
 		{
 			result = new ArrayList<TransactionGraph>(response.data.graphs.size());
-			
-			GroupFilter transactionsFilter = getTransactionsFilter(serviceId, input, timeSpan);
-
-			if (transactionsFilter == null) {
-				return Collections.emptyList();
-			}
 			
 			for (TransactionGraph transaction : response.data.graphs)
 			{

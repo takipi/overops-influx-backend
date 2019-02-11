@@ -682,12 +682,18 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return result;
 	}
 
-	private static void sortDeployments(List<SummarizedDeployment> deps) {
+	private static void sortDeploymentNames(List<SummarizedDeployment> deps, boolean desc) {
 		deps.sort(new Comparator<SummarizedDeployment>() {
 
 			@Override
 			public int compare(SummarizedDeployment o1, SummarizedDeployment o2) {
-				return DeploymentUtil.compareDeployments(o1.name, o2.name);
+				
+				if (desc) {
+					return DeploymentUtil.compareDeployments(o1.name, o2.name);
+				} else {
+					return DeploymentUtil.compareDeployments(o2.name, o1.name);
+
+				}
 			}
 		});
 
@@ -707,20 +713,43 @@ public class ReliabilityReportFunction extends EventsFunction {
 	private Collection<ReportKey> getActiveDeployments(String serviceId, 
 		ReliabilityReportInput input, Pair<DateTime, DateTime> timespan) {
 
+		List<ReportKey> result = new ArrayList<ReportKey>();
 		List<String> selectedDeployments = input.getDeployments(serviceId);
 		
 		if (!CollectionUtil.safeIsEmpty(selectedDeployments)) {
-			return toReportKeys(selectedDeployments, false);
+			
+			Collection<SummarizedDeployment> allDeps = DeploymentUtil.getDeployments(apiClient, serviceId, false);
+			
+			List<SummarizedDeployment> sortedDeps = new ArrayList<SummarizedDeployment>(allDeps);
+			sortDeploymentNames(sortedDeps, false);
+						
+			for (String selectedDeployment :  selectedDeployments) {
+				
+				SummarizedDeployment prev = null;
+				
+				for (int i = 0; i < sortedDeps.size(); i++) {
+					
+					SummarizedDeployment dep = sortedDeps.get(i);
+					
+					if ((i > 0) && (dep.name.equals(selectedDeployment))) {
+						prev = sortedDeps.get(i -1);
+						break;
+					}
+				}
+				
+				result.add(new DeploymentReportKey(selectedDeployment, false, prev));
+			}
+			
+			return result;
+			
 		}
 		
-		List<ReportKey> result = new ArrayList<ReportKey>();
-
 		Collection<SummarizedDeployment> activeDeps = DeploymentUtil.getDeployments(apiClient, serviceId, true);
 			
 		if (activeDeps != null) {
 			
 			List<SummarizedDeployment> sortedActive = new ArrayList<SummarizedDeployment>(activeDeps);
-			sortDeployments(sortedActive);
+			sortDeploymentNames(sortedActive, true);
 	
 			for (int i = 0; i < Math.min(input.limit, sortedActive.size()); i++) {
 				
@@ -753,9 +782,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 				List<SummarizedDeployment> sortedNonActive = new ArrayList<SummarizedDeployment>(nonActiveDeps);
 	
-				sortDeployments(sortedNonActive);
-	
-				
+				sortDeploymentNames(sortedNonActive, true);
+			
 				for (int i = 0; i < sortedNonActive.size(); i++) {
 					
 					boolean canAdd = true;
@@ -1038,7 +1066,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		if (regInput.getReportMode() == ReportMode.Deployments) {
 			boolean sortAsc = getSortedAsc(regInput.getSortType(), true);
 			List<ReportKeyOutput> sorted = new ArrayList<ReportKeyOutput>(reportKeyOutputMap.values());
-			sortDeployments(sorted, sortAsc);
+			sortDeploymentKeys(sorted, sortAsc);
 			result = sorted;
 		} else {
 			
@@ -1069,7 +1097,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		}
 	}
 	
-	private void sortDeployments(List<ReportKeyOutput> scores, boolean asc) {
+	private void sortDeploymentKeys(List<ReportKeyOutput> scores, boolean asc) {
 		scores.sort(new Comparator<ReportKeyOutput>() {
 
 			@Override

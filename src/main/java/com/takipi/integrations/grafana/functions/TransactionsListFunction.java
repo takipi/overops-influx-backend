@@ -251,7 +251,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 					result = "<1%";
 				}
 			} else {
-				result = Math.round(errorRate * 100);
+				result = Math.min(Math.round(errorRate * 100), 100f);
 			}
 		} else {
 			result = Double.valueOf(0);

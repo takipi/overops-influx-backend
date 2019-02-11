@@ -72,6 +72,27 @@
 			},
 			
 			{
+				"name": "Runners",
+				"values": [
+					"/^.*Runner.*$/"
+				]
+			},
+			
+			{
+				"name": "Threads",
+				"values": [
+					"/^.*Thread.*$/"
+				]
+			},
+			
+			{
+				"name": "Loggers",
+				"values": [
+					"/^.*Logger.*$/"
+				]
+			},
+			
+			{
 				"name": "Restlets",
 				"values": [
 					"/^.*Restlet.*$/"
@@ -87,15 +108,15 @@
 	//on any new errors, regressions and slowdowns within them as a single logical unit.
 
 	"applications": {
-		"groups": [
-		
-			//{
-			//	"name": "MyKeyApps1",
-			//	"values": [
-			//		"PaymentApp, Frontend, MessageBroker"
-			//	]
-			//}
-		]
+		//"groups": [
+		//
+		//	{
+		//		"name": "MyCriticalApps",
+		//		"values": [
+		//			"payment, checkout, card_processing"
+		//		]
+		//	}
+		//]
 	},
 	
 	 //A list of pattern groups that defined key high level packages groups that can be specifically 

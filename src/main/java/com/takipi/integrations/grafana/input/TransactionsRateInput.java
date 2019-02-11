@@ -46,6 +46,12 @@ public class TransactionsRateInput extends TransactionsVolumeInput
 	 * The types of events to include in the denominator of the function's return value
 	 */
 	public TransactionFilterType filter;
+	
+	/**
+	 * whether to limit the rate to 100. The rate could be greater in case a logged error for example
+	 * happens more than once per transaction as in the case of a retry loop.
+	 */
+	public boolean allowExcceed100;
 
 
 }
