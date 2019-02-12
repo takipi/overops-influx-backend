@@ -112,7 +112,9 @@ public class DeploymentsAnnotation extends BaseGraphFunction {
 	@Override
 	protected List<GraphSeries> processServiceGraph(Collection<String> serviceIds, String serviceId, String viewId, String viewName,
 			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
-					
+			
+		DeploymentsGraphInput dgInput = (DeploymentsGraphInput)input;
+		
 		Series series = new Series();
 		
 		String name = getServiceValue(DEPLOY_SERIES_NAME, serviceId, serviceIds);
@@ -134,7 +136,8 @@ public class DeploymentsAnnotation extends BaseGraphFunction {
 		if (!CollectionUtil.safeIsEmpty(selectedDeployments)) {
 			maxDeployments = deployments.size();
 		} else {
-			maxDeployments = Math.min(deployments.size(), MAX_DEPLOY_ANNOTATIONS);
+			maxDeployments = Math.min(deployments.size(),
+				Math.max(MAX_DEPLOY_ANNOTATIONS, dgInput.limit));
 		}
 		
 		for (int i = 0; i < maxDeployments; i++) {
