@@ -41,4 +41,18 @@ public class EventsDiffDescInput extends EventsDiffInput
 		
 		return descType;
 	}
+	
+	/**
+	 * The diff type being described
+	 */
+	public DiffType diffType;
+	
+	public DiffType getDiffType() {
+		
+		if (diffType == null) {
+			return DiffType.New;			
+		}
+		
+		return diffType;
+	}
 }

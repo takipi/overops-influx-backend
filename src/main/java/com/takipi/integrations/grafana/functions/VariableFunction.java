@@ -76,7 +76,7 @@ public abstract class VariableFunction extends GrafanaFunction {
 	}
 
 	protected String getStringValue(Object o) {
-		return o.toString().toLowerCase();
+		return o.toString();//.toLowerCase();
 	}
 	
 	protected int compareValues(String o1, String o2) {

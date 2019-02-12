@@ -5,10 +5,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.joda.time.DateTime;
+
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.transaction.TransactionGraph;
-import com.takipi.common.util.CollectionUtil;
+import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput;
+import com.takipi.integrations.grafana.input.TransactionsGraphInput.AggregateMode;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings.Group;
@@ -41,21 +44,22 @@ public class KeyTransactionsGraphFunction extends TransactionsGraphFunction
 	
 	@Override
 	protected List<GraphSeries> processServiceGraph(String serviceId, TransactionsGraphInput input,
-			Collection<String> serviceIds, Collection<String> transactions, Collection<TransactionGraph> graphs)
+			Collection<String> serviceIds, Pair<DateTime, DateTime> timespan,  
+			Collection<TransactionGraph> graphs)
 	{
-		if (!CollectionUtil.safeIsEmpty(transactions)) {
+		if (!input.hasTransactions()) {
 			return Collections.emptyList();
 		}
 		
 		GroupSettings transactionGroups = GrafanaSettings.getData(apiClient, serviceId).transactions;
 		
 		if (transactionGroups == null) {
-			return super.processServiceGraph(serviceId, input, serviceIds, transactions, graphs);
+			return super.processServiceGraph(serviceId, input, serviceIds, timespan, graphs);
 		}
 	
 		List<GraphSeries> result;
 
-		if (input.aggregate) { 
+		if (input.getAggregateMode() == AggregateMode.Yes) { 
 			
 			result = new ArrayList<GraphSeries>();
 			
@@ -72,7 +76,8 @@ public class KeyTransactionsGraphFunction extends TransactionsGraphFunction
 				}
 			}
 		} else {
-			result = createMultiGraphSeries(serviceId, graphs, input, serviceIds);
+			GroupFilter groupFilter = getTransactionsFilter(serviceId, input, timespan);
+			result = createMultiGraphSeries(serviceId, graphs, input, groupFilter, serviceIds);
 		}
 		
 		if (input.limit > 0) {

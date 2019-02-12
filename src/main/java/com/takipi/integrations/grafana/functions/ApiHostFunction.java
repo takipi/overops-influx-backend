@@ -36,8 +36,12 @@ public class ApiHostFunction extends VariableFunction
 		}
 	}
 	
+	private String cleanSaaSPrefix(String host) {
+		return host.replaceAll(SAAS_API, SAAS_APP);
+	}
+	
 	private String cleanHost(String host) {
-		return host.replaceAll(SAAS_API, SAAS_APP).replaceAll(HTTP, "").replaceAll(HTTPS, "");
+		return cleanSaaSPrefix(host).replaceAll(HTTP, "").replaceAll(HTTPS, "");
 	}
 
 	@Override
@@ -59,6 +63,10 @@ public class ApiHostFunction extends VariableFunction
 			String value = null;
 			
 			switch (type) {
+				
+				case FullURL: 
+					value = cleanSaaSPrefix(hostName);
+					break;
 				
 				case URL: 
 					value = cleanHost(hostName);

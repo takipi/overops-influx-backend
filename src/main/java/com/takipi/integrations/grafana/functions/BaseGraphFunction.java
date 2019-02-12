@@ -14,10 +14,12 @@ import org.joda.time.DateTime;
 
 import com.google.common.base.Objects;
 import com.takipi.api.client.ApiClient;
+import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.Series;
+import com.takipi.integrations.grafana.settings.GroupSettings;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public abstract class BaseGraphFunction extends GrafanaFunction {
@@ -48,13 +50,19 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 	}
 	
 	protected static class GraphSeries {
+		
 		protected Series series;
 		protected long volume;
-		
-		protected static GraphSeries of(Series series, long volume) {
+		protected String name; 
+			
+		protected static GraphSeries of(Series series, long volume, String name) {
+			
 			GraphSeries result = new GraphSeries();
+			
 			result.series = series;
 			result.volume = volume;
+			result.name = name;
+			
 			return result;
 		}
 	}
@@ -118,13 +126,20 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 
 	@Override
 	protected String getSeriesName(BaseGraphInput input, String seriesName, 
-		Object volumeType, String serviceId, Collection<String> serviceIds) {
+		String serviceId, Collection<String> serviceIds) {
+		
 		String tagName;
 		
 		if (seriesName != null) {
 			tagName = seriesName;
 		} else {
-			tagName = volumeType.toString();	
+			Collection<String> types = input.getTypes(apiClient, serviceId);
+			
+			if (!CollectionUtil.safeIsEmpty(types)) {
+				tagName = String.join(ARRAY_SEPERATOR_RAW + " ", types);
+			} else {
+				tagName = input.view;
+			}
 		}
 				
 		String result = getServiceValue(tagName, serviceId, serviceIds);
@@ -133,27 +148,31 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 	}
 	
 	protected GraphSeries getGraphSeries(GraphData graphData, String name, FunctionInput input) {
+							
+		Series series = new Series();
 		
-		GraphSeries result = new GraphSeries();
-					
-		result.series = new Series();
+		String cleanName = cleanSeriesName(name);
 		
-		result.series.name = EMPTY_NAME;
-		result.series.columns = Arrays.asList(new String[] { TIME_COLUMN, name });
-		result.series.values = new ArrayList<List<Object>>();
-		result.volume = graphData.volume;
+		series.name = EMPTY_NAME;
+		series.columns = Arrays.asList(new String[] { TIME_COLUMN, cleanName });
+		series.values = new ArrayList<List<Object>>();
+		
+		long volume = graphData.volume;
 			
 		for (Map.Entry<Long, Long> graphPoint : graphData.points.entrySet()) {				
 			Object timeValue = getTimeValue(graphPoint.getKey().longValue(), input);
-			result.series.values.add(Arrays.asList(new Object[] { timeValue, graphPoint.getValue() }));
+			series.values.add(Arrays.asList(new Object[] { timeValue, graphPoint.getValue() }));
 		}
 		
-		return result;
+		return GraphSeries.of(series, volume, cleanName);
 	}
 	
 	protected List<Series> limitSeries(List<GraphSeries> series, int limit) {
 		
 		List<GraphSeries> limitedGraphSeries = limitGraphSeries(series, limit);
+		
+		sortSeriesByName(limitedGraphSeries);
+		
 		List<Series> result = new ArrayList<Series>(limitedGraphSeries.size());
 		
 		for (GraphSeries graphSeries : limitedGraphSeries) {
@@ -188,6 +207,26 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 			@Override
 			public int compare(GraphSeries o1, GraphSeries o2) {
 				return (int)(o2.volume - o1.volume);
+			}
+		});
+	}
+	
+	protected String cleanSeriesName(String name) {	
+		String result = GroupSettings.fromGroupName(name.trim());	
+		return result;
+	}
+	
+	protected void sortSeriesByName(List<GraphSeries> series) {
+		
+		series.sort(new Comparator<GraphSeries>() {
+
+			@Override
+			public int compare(GraphSeries o1, GraphSeries o2) {
+						
+				String s1 = cleanSeriesName(o1.name);
+				String s2 = cleanSeriesName(o2.name);
+
+				return s1.compareTo(s2);
 			}
 		});
 	}
@@ -249,29 +288,18 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		}
 	}
 
-	protected void sortByName(List<Series> seriesList) {
-
-		seriesList.sort(new Comparator<Series>() {
-
-			@Override
-			public int compare(Series o1, Series o2) {
-				return o1.name.compareTo(o2.name);
-			}
-		});
-	}
-
 	/**
 	 * @param input - needed by child classes 
 	 */
 	protected List<Series> processSeries(List<GraphSeries> series, BaseGraphInput input) {
 
+		sortSeriesByName(series);
+		
 		List<Series> result = new ArrayList<Series>();
 
 		for (GraphSeries entry : series) {
 			result.add(entry.series);
 		}
-
-		sortByName(result);
 
 		return result;
 	}

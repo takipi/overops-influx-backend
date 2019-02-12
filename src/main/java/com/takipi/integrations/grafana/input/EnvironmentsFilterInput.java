@@ -43,6 +43,11 @@ public abstract class EnvironmentsFilterInput extends BaseEnvironmentsInput {
 	}
 	
 	public Collection<String> getApplications(ApiClient apiClient, String serviceId) {
+		return getApplications(apiClient, serviceId, true);
+	}
+	
+	public Collection<String> getApplications(ApiClient apiClient, String serviceId,
+		boolean expandGroups) {
 		
 		List<String> apps = getServiceFilters(applications, serviceId, true);
 		
@@ -52,7 +57,7 @@ public abstract class EnvironmentsFilterInput extends BaseEnvironmentsInput {
 			
 		Collection<String> result;
 		
-		if (apiClient != null) {			
+		if ((apiClient != null) && (expandGroups)) {			
 			GroupSettings groupSettings = GrafanaSettings.getData(apiClient, serviceId).applications;
 			
 			if (groupSettings != null) {
@@ -88,9 +93,9 @@ public abstract class EnvironmentsFilterInput extends BaseEnvironmentsInput {
 		
 		EnvironmentsFilterInput other = (EnvironmentsFilterInput)obj;
 		
-		return Objects.equal(other.applications, other.applications) 
-				&& Objects.equal(other.deployments, other.deployments)
-				&& Objects.equal(other.servers, other.servers);
+		return Objects.equal(applications, other.applications) 
+				&& Objects.equal(deployments, other.deployments)
+				&& Objects.equal(servers, other.servers);
 	}
 	
 }

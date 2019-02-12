@@ -760,8 +760,9 @@ public class RegressionFunction extends EventsFunction
 		
 	}
 	
-	private Pair<Collection<EventResult>, Long> getEventList(String serviceId, Map<String, EventResult> eventListMap,
-			Graph activeWindowGraph, EventFilterInput input)
+	private Pair<Collection<EventResult>, Long> getEventList(String serviceId, 
+			Map<String, EventResult> eventListMap, Pair<DateTime, DateTime> timespan,
+			Graph activeWindowGraph, BaseEventVolumeInput input)
 	{
 		long volume = 0;
 		
@@ -786,7 +787,11 @@ public class RegressionFunction extends EventsFunction
 			}
 		}
 		
-		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
+		EventFilter eventFilter = getEventFilter(serviceId, input, timespan);
+		
+		if (eventFilter == null) {
+			return Pair.of(Collections.emptyList(), Long.valueOf(0l));
+		}
 		
 		Map<String, EventResult> filteredEvents = new HashMap<String, EventResult>();
 		
@@ -903,7 +908,8 @@ public class RegressionFunction extends EventsFunction
 			return RegressionOutput.emptyOutput;
 		}
 		
-		Pair<Collection<EventResult>, Long> eventsPair = getEventList(serviceId, eventListMap, activeWindowGraph, input);
+		Pair<Collection<EventResult>, Long> eventsPair = getEventList(serviceId, 
+			eventListMap, timespan, activeWindowGraph, input);
 		
 		Collection<EventResult> events = eventsPair.getFirst();
 		long volume = eventsPair.getSecond().longValue();

@@ -1,6 +1,8 @@
 package com.takipi.integrations.grafana.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -16,6 +18,8 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListenableFutureTask;
 import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.data.application.SummarizedApplication;
+import com.takipi.api.client.request.application.ApplicationsRequest;
 import com.takipi.api.client.request.deployment.DeploymentsRequest;
 import com.takipi.api.client.request.event.EventRequest;
 import com.takipi.api.client.request.event.EventsRequest;
@@ -24,6 +28,7 @@ import com.takipi.api.client.request.metrics.GraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsGraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsVolumeRequest;
 import com.takipi.api.client.request.view.ViewsRequest;
+import com.takipi.api.client.result.application.ApplicationsResult;
 import com.takipi.api.client.result.deployment.DeploymentsResult;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
@@ -239,7 +244,49 @@ public class ApiCache {
 		public String toString() {
 			return this.getClass().getSimpleName() + " active: " + active;
 		}
+	}
+	
+	protected static class ApplicationsCacheLoader extends ServiceCacheLoader {
+		
+		protected boolean active;
+		
+		public ApplicationsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, 
+			String serviceId, boolean active) {
 
+			super(apiClient, request, serviceId);
+			
+			this.active = active;
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+
+			if (!(obj instanceof ApplicationsCacheLoader)) {
+				return false;
+			}
+
+			if (!super.equals(obj)) {
+				return false;
+			}
+
+			ApplicationsCacheLoader other = (ApplicationsCacheLoader) obj;
+
+			if (active != other.active) {
+				return false;
+			}
+
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+			return super.hashCode();
+		}
+		
+		@Override
+		public String toString() {
+			return this.getClass().getSimpleName() + " active: " + active;
+		}
 	}
 	
 	protected static class ViewCacheLoader extends ServiceCacheLoader {
@@ -793,6 +840,31 @@ public class ApiCache {
 		Response<DeploymentsResult> response = (Response<DeploymentsResult>)getItem(cacheKey);
 
 		return response;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static Response<ApplicationsResult> getApplications(ApiClient apiClient, String serviceId, boolean active) {
+
+		ApplicationsRequest request = ApplicationsRequest.newBuilder().setServiceId(serviceId).setActive(active).build();
+		ApplicationsCacheLoader cacheKey = new ApplicationsCacheLoader(apiClient, request, serviceId, active);
+		Response<ApplicationsResult> response = (Response<ApplicationsResult>)getItem(cacheKey);
+
+		return response;
+	}
+	
+	public static Collection<String> getApplicationNames(ApiClient apiClient, String serviceId, boolean active) {
+
+		Response<ApplicationsResult> response = getApplications(apiClient, serviceId, active);
+		
+		List<String> result = new ArrayList<String>();
+		
+		if ((response.data != null) && (response.data.applications != null)) {
+			for (SummarizedApplication app : response.data.applications) {
+				result.add(app.name);
+			}
+		}
+		
+		return result;
 	}
 	
 	public static Response<TransactionsVolumeResult> getTransactionsVolume(ApiClient apiClient, String serviceId,

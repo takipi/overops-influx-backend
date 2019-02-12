@@ -78,7 +78,14 @@ public class TransactionsRateFunction extends TransactionsVolumeFunction {
 		EventVolume result = new EventVolume();
 		
 		if (transactionVolume.sum > 0) {
-			result.sum = eventVolume.sum / transactionVolume.sum ;
+			
+			double value = eventVolume.sum / transactionVolume.sum ;
+			
+			if ((trInput.allowExcceed100) && (result.sum > 1)) {
+				result.sum = 1f;
+			} else {
+				result.sum = value;
+			}	
 		}
 		
 		return result;

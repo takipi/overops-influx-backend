@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.TreeSet;
 
 import com.takipi.api.client.ApiClient;
-import com.takipi.api.client.util.client.ClientUtil;
 import com.takipi.integrations.grafana.input.ApplicationsInput;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings.Group;
+import com.takipi.integrations.grafana.util.ApiCache;
 
 public class ApplicationsFunction extends EnvironmentVariableFunction {
 
@@ -50,11 +50,11 @@ public class ApplicationsFunction extends EnvironmentVariableFunction {
 			}
 		}
 				
-		Collection<String> liveApps = addApps(input, serviceId, serviceIds,
-			ClientUtil.getApplications(apiClient, serviceId, true), appender, null);
-		
-		addApps(input, serviceId, serviceIds,
-				ClientUtil.getApplications(apiClient, serviceId, false), appender, liveApps);
+		Collection<String> activeApps = ApiCache.getApplicationNames(apiClient, serviceId, true);
+		Collection<String> nonActiveApps = ApiCache.getApplicationNames(apiClient, serviceId, false);
+
+		Collection<String> apps = addApps(input, serviceId, serviceIds, activeApps, appender, null);		
+		addApps(input, serviceId, serviceIds, nonActiveApps, appender, apps);
 	}
 	
 	@Override

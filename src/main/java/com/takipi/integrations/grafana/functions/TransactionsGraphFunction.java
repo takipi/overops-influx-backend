@@ -22,17 +22,15 @@ import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.GraphFunction.SeriesVolume;
-import com.takipi.integrations.grafana.functions.TransactionsListFunction.TransactionData;
-import com.takipi.integrations.grafana.functions.TransactionsListFunction.TransactionDataResult;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
-import com.takipi.integrations.grafana.input.FunctionInput.TimeFormat;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput;
+import com.takipi.integrations.grafana.input.TransactionsGraphInput.AggregateMode;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput.GraphType;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput.TimeWindow;
 import com.takipi.integrations.grafana.input.TransactionsListInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.settings.GrafanaSettings;
+import com.takipi.integrations.grafana.settings.GroupSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings.GroupFilter;
 
 public class TransactionsGraphFunction extends BaseGraphFunction {
@@ -112,9 +110,8 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		if ((input.performanceStates != null) || (!TimeWindow.Active.equals(timeWindow))) {	
 			
 			Collection<PerformanceState> performanceStates = TransactionsListInput.getStates(input.performanceStates);
-			TransactionsListFunction transactionsFunction = new TransactionsListFunction(apiClient);
 			
-			TransactionDataResult transactionDataResult = transactionsFunction.getTransactionDatas(activeGraphs, 
+			TransactionDataResult transactionDataResult = getTransactionDatas(activeGraphs, 
 				serviceId, viewId, timeSpan, input, false, 0);
 			
 			if (transactionDataResult == null) {
@@ -158,7 +155,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		} else {
 			result.graphs = activeGraphs;
 		}
-		
+				
 		return result;
 	}
 	
@@ -168,7 +165,6 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
 
 		TransactionsGraphInput tgInput = (TransactionsGraphInput) input;
-		Collection<String> transactions = getTransactions(serviceId, tgInput, timeSpan);
 		
 		TransactionGraphsResult transactionGraphs = getTransactionsGraphs(serviceId, viewId, timeSpan, tgInput, pointsWanted);
 		
@@ -177,55 +173,132 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		}
 		
 		List<GraphSeries> result = processServiceGraph(serviceId, tgInput, 
-				serviceIds, transactions, transactionGraphs.graphs);
+				serviceIds, timeSpan, transactionGraphs.graphs);
+		
+		//sortSeriesByName(series);
 	
 		return result;
 	}
     
+    private String getSeriesName(TransactionsGraphInput input, 
+    		String serviceId, Collection<String> serviceIds,Collection<String> transactions) {
+    	
+    		String value;
+    		boolean useSeriesName;
+    		
+    		if (input.seriesName != null) {
+    			if (input.getAggregateMode() == AggregateMode.Yes) {
+    				useSeriesName = true;
+    			} else {
+        			useSeriesName = CollectionUtil.safeIsEmpty(transactions);
+    			}
+    		} else {
+    			useSeriesName = false;
+    		}
+    		
+    		if (useSeriesName) {
+    			value = input.seriesName;
+    		} else {
+    			if (transactions != null) {
+    				value = String.join(ARRAY_SEPERATOR_RAW, transactions);
+    			} else {
+    				value = input.volumeType.toString();
+    			}
+    		}
+    		
+    		String result = getSeriesName(input, value, serviceId, serviceIds); 
+    		
+    		return result;
+    }
+   
 	protected List<GraphSeries> processServiceGraph(String serviceId, 
-			TransactionsGraphInput input, Collection<String> serviceIds, Collection<String> transactions,
-			Collection<TransactionGraph> graphs) {
+			TransactionsGraphInput input, Collection<String> serviceIds,
+			Pair<DateTime, DateTime> timespan,  Collection<TransactionGraph> graphs) {
     	
 		List<GraphSeries> result;
 
-		GroupFilter transactionsFilter = GrafanaSettings.getServiceSettings(apiClient, serviceId).getTransactionsFilter(transactions);
+		GroupFilter transactionsFilter = getTransactionsFilter(serviceId, input, timespan);
+
+		AggregateMode aggregateMode = input.getAggregateMode();
 		
-		if ((input.aggregate) || (CollectionUtil.safeIsEmpty(transactions))) { 
+		if ((aggregateMode == AggregateMode.Yes) || (!input.hasTransactions())) { 
 			
-			String seriesName = getSeriesName(input, input.seriesName, input.volumeType, serviceId, serviceIds);
+			String seriesName = getSeriesName(input, serviceId, serviceIds, 
+				null);
+			
 			result = Collections.singletonList(createAggregateGraphSeries(serviceId, graphs, transactionsFilter,
-					input, serviceIds,seriesName));
+					input, serviceIds, seriesName));
+			
+		} else if (aggregateMode == AggregateMode.No) {
+			
+			result = createMultiGraphSeries(serviceId, graphs, input, 
+				transactionsFilter, serviceIds);
+			
+		} else if (aggregateMode == AggregateMode.Auto) { 
+			
+			Collection<String> transactions = input.getTransactions(serviceId);
+			
+			List<String> transactionGroups = new ArrayList<String>(transactions.size());
+			List<String> singleTransactions = new ArrayList<String>(transactions.size());
+					
+			for (String transaction : transactions) {
+				
+				if (GroupSettings.isGroup(transaction)) {
+					transactionGroups.add(transaction);	
+				} else {
+					singleTransactions.add(transaction);
+				}
+			}
+			
+			result = new ArrayList<GraphSeries>();
+			
+			for (String transactionGroup : transactionGroups) {
+				
+				GroupFilter groupsFilter = getTransactionsFilter(serviceId, input, timespan,
+					Collections.singletonList(transactionGroup));
+				
+				if (groupsFilter == null) {
+					continue;
+				}
+				
+				String seriesName = getSeriesName(input, serviceId, serviceIds, 
+					Collections.singleton(GroupSettings.fromGroupName(transactionGroup)));
+				
+				result.add(createAggregateGraphSeries(serviceId, graphs, groupsFilter,
+						input, serviceIds,seriesName));
+			}
+			
+			if (singleTransactions.size() > 0) {
+				
+				GroupFilter singleTransactionsFilter = getTransactionsFilter(serviceId, input, timespan,
+					singleTransactions);
+				
+				if ((singleTransactionsFilter != null) && (!singleTransactionsFilter.isEmpty())) {
+					result.addAll(createMultiGraphSeries(serviceId, graphs, input, 
+							singleTransactionsFilter, serviceIds));
+				}
+			}
 		} else {
-			result = createMultiGraphSeries(serviceId, graphs, input, serviceIds);
+			throw new IllegalStateException(String.valueOf(aggregateMode));
 		}
 		
 		return result;
     }
     
-    /**
-	 * @param timeSpan - needed for children  
-	 */
-    protected Collection<String> getTransactions(String serviceId, TransactionsGraphInput input,
-    		Pair<DateTime, DateTime> timeSpan) {
-    		
-    		Collection<String> result;
-
-		if (input.hasTransactions()) {
-			result = input.getTransactions(serviceId);
-		} else {
-			result = null;
-		}
-		
-		return result;
-    }
-
 	protected List<GraphSeries> createMultiGraphSeries(String serviceId, Collection<TransactionGraph> graphs,
-			TransactionsGraphInput input, Collection<String> serviceIds) {
+			TransactionsGraphInput input, GroupFilter transactionFilter, Collection<String> serviceIds) {
 
 		List<GraphSeries> result = new ArrayList<GraphSeries>();
 		
 		for (TransactionGraph graph : graphs) {
 
+			Pair<String, String> nameAndMethod = getFullNameAndMethod(graph.name);
+			
+			if (filterTransaction(transactionFilter, input.searchText, nameAndMethod.getFirst(), nameAndMethod.getSecond()))
+			{
+				continue;
+			}
+			
 			if (input.volumeType.equals(GraphType.all)) {
 				result.add(createTransactionGraphSeries(serviceId, graph, GraphType.avg_time, serviceIds, input));
 				result.add(createTransactionGraphSeries(serviceId, graph, GraphType.invocations, serviceIds, input));
@@ -394,11 +467,13 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			seriesValues = getInvSeriesValues(graphs, transactionFilter, input);
 		}
 
+		String cleanSeriesName = cleanSeriesName(seriesName);
+		
 		series.name = EMPTY_NAME;
-		series.columns = Arrays.asList(new String[] { TIME_COLUMN, seriesName });
+		series.columns = Arrays.asList(new String[] { TIME_COLUMN, cleanSeriesName });
 		series.values = seriesValues.values;
 
-		return GraphSeries.of(series, seriesValues.volume);
+		return GraphSeries.of(series, seriesValues.volume, cleanSeriesName);
 
 	}
 
@@ -408,26 +483,27 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		Series series = new Series();
 		
 		String tagName = getServiceValue(getTransactionName(graph.name, true), serviceId, serviceIds);
-		
+		String cleanTagName = cleanSeriesName(tagName);
+
 		series.name = EMPTY_NAME;
-		series.columns = Arrays.asList(new String[] { TIME_COLUMN, tagName });
+		series.columns = Arrays.asList(new String[] { TIME_COLUMN, cleanTagName });
 
 		SeriesVolume seriesData = processGraphPoints(graph, volumeType, input);
 
 		series.values = seriesData.values;
 
-		return GraphSeries.of(series, seriesData.volume);
+		return GraphSeries.of(series, seriesData.volume, cleanTagName);
 	}
 	
 	private SeriesVolume processGraphPoints(TransactionGraph graph,
 		GraphType volumeType, TransactionsGraphInput input) {
 
-		long volume = 0;
-		List<List<Object>> values = new ArrayList<List<Object>>(graph.points.size());
-
+		double volume = 0;
+		
+		Map<DateTime, Double> values = new TreeMap<DateTime, Double>();
+		
 		for (GraphPoint gp : graph.points) {
-			
-
+		
 			double value;
 
 			if (volumeType.equals(GraphType.avg_time)) {
@@ -435,22 +511,30 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			} else {
 				value = gp.stats.invocations;
 			}
+			
+			DateTime gpTime = ISODateTimeFormat.dateTimeParser().parseDateTime(gp.time);
 
 			volume += value;
+						
+			Double existingValue = values.get(gpTime);
 			
-			Object timeValue;
-			
-			if (input.getTimeFormat() == TimeFormat.EPOCH) {
-				DateTime gpTime = ISODateTimeFormat.dateTimeParser().parseDateTime(gp.time);
-				timeValue = Long.valueOf(gpTime.getMillis());
+			if (existingValue != null) {
+				values.put(gpTime, existingValue.doubleValue() + value);
 			} else {
-				timeValue = gp.time;
+				values.put(gpTime, value);
+
 			}
+		}
+		
+		List<List<Object>> points = new ArrayList<List<Object>>(values.size());
+		
+		for (Map.Entry<DateTime, Double> entry : values.entrySet()) {
 			
-			values.add(Arrays.asList(new Object[] {timeValue, value }));
+			Object timeValue = getTimeValue(entry.getKey().getMillis(), input);
+			points.add(Arrays.asList(new Object[] {timeValue, entry.getValue() }));
 		}
 
-		return SeriesVolume.of(values, Long.valueOf(volume));
+		return SeriesVolume.of(points, Long.valueOf((long)volume));
 	}
 	
 	@Override

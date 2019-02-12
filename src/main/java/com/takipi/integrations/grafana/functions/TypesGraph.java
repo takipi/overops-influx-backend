@@ -50,7 +50,7 @@ public class TypesGraph extends GraphFunction {
 	}
 
 	@Override
-	protected String getSeriesName(BaseGraphInput input, String seriesName, Object volumeType, String serviceId,
+	protected String getSeriesName(BaseGraphInput input, String seriesName,String serviceId,
 			Collection<String> serviceIds) {
 		return getServiceValue(input.types, serviceId, serviceIds);
 	}
@@ -76,7 +76,7 @@ public class TypesGraph extends GraphFunction {
 				continue;
 			}
 
-			Collection<String> types = input.getTypes();
+			Collection<String> types = input.getTypes(apiClient, serviceId);
 			
 			if (types != null) {
 				for (String type : types) {

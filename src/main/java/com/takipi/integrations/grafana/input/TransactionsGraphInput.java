@@ -16,7 +16,7 @@ package com.takipi.integrations.grafana.input;
 public class TransactionsGraphInput extends BaseGraphInput {
 	
 	/**
-	 * Control the Y valiue of the return time series data.
+	 * Control the Y value of the return time series data.
 	 *
 	 */
 	public enum GraphType {
@@ -41,11 +41,40 @@ public class TransactionsGraphInput extends BaseGraphInput {
 	 */
 	public GraphType volumeType;
 	
+	public enum AggregateMode {
+		
+		/**
+		 * aggregate the selected transactions into one series
+		 */
+		Yes,
+		
+		/**
+		 * split the selected transactions into multiple series
+		 */
+		No,
+		
+		/**
+		 * aggregate the selected transactions into one series
+		 * if the selection is a group or top transaction filter, otherwise split
+		 */
+		Auto
+	}
+	
+	public AggregateMode getAggregateMode() {
+		
+		if (aggregateMode == null) {
+			return AggregateMode.Auto;
+		}
+		
+		return aggregateMode;
+	}
+		
+	
 	/**
 	 * Controls whether the time series Y values for the matching transactions are merged into a single
 	 * aggregate series.
 	 */
-	public boolean aggregate;
+	public AggregateMode aggregateMode;
 	
 	/**
 	 * Control the max number of separate time series returned by this function if aggregate is set to false

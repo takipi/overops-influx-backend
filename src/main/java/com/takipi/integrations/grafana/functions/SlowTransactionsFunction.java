@@ -12,8 +12,6 @@ import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.util.performance.calc.PerformanceState;
 import com.takipi.common.util.Pair;
-import com.takipi.integrations.grafana.functions.TransactionsListFunction.TransactionData;
-import com.takipi.integrations.grafana.functions.TransactionsListFunction.TransactionDataResult;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.SlowTransactionsInput;
@@ -61,9 +59,7 @@ public class SlowTransactionsFunction extends EnvironmentVariableFunction
 		Collection<TransactionGraph> activeGraphs = getTransactionGraphs(input, serviceId, 
 				viewId, timeSpan, input.getSearchText(), input.pointsWanted, 0, 0);
 		
-		TransactionsListFunction transactionsFunction = new TransactionsListFunction(apiClient);
-		
-		TransactionDataResult transactionDataResult = transactionsFunction.getTransactionDatas(activeGraphs,
+		TransactionDataResult transactionDataResult = getTransactionDatas(activeGraphs,
 			serviceId, viewId, timeSpan, input, false, 0);
 			
 		if (transactionDataResult == null) {
