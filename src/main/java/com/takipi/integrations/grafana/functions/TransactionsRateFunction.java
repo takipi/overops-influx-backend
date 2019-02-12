@@ -81,10 +81,10 @@ public class TransactionsRateFunction extends TransactionsVolumeFunction {
 			
 			double value = eventVolume.sum / transactionVolume.sum ;
 			
-			if ((trInput.allowExcceed100) && (result.sum > 1)) {
+			if (trInput.allowExcceed100) {
 				result.sum = 1f;
 			} else {
-				result.sum = value;
+				result.sum = Math.min(value, 1f);
 			}	
 		}
 		

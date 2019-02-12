@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 19,
-  "iteration": 1549869915134,
+  "iteration": 1549989940775,
   "links": [
     {
       "icon": "external link",
@@ -544,7 +544,7 @@
           "dashboard": "Errors",
           "includeVars": true,
           "keepTime": true,
-          "params": "var-type=$failureTypes",
+          "params": "var-type=$transactionFailureTypes",
           "targetBlank": true,
           "title": "Errors",
           "type": "absolute",
@@ -1956,5 +1956,5 @@
   "timezone": "",
   "title": "Performance",
   "uid": "Z40SpeJmz",
-  "version": 114
+  "version": 115
 }
