@@ -544,7 +544,7 @@
           "dashboard": "Errors",
           "includeVars": true,
           "keepTime": true,
-          "params": "var-type=$transactionFailureTypes",
+          "params": "",
           "targetBlank": true,
           "title": "Errors",
           "type": "absolute",
@@ -1956,5 +1956,5 @@
   "timezone": "",
   "title": "Performance",
   "uid": "Z40SpeJmz",
-  "version": 115
+  "version": 116
 }
