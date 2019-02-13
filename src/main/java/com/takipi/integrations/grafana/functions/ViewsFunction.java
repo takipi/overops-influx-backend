@@ -37,7 +37,8 @@ public class ViewsFunction extends EnvironmentVariableFunction {
 	}
 
 	@Override
-	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
+	protected void populateServiceValues(BaseEnvironmentsInput input, 
+			Collection<String> serviceIds, String serviceId,
 			VariableAppender appender) {
 
 		if (!(input instanceof ViewsInput)) {
@@ -45,6 +46,10 @@ public class ViewsFunction extends EnvironmentVariableFunction {
 		}
 		
 		ViewsInput viewsInput = (ViewsInput)input;
+				
+		if (viewsInput.defaultView != null) {
+			appender.append(viewsInput.defaultView);
+		} 
 		
 		if (viewsInput.category != null) {
 			
@@ -56,7 +61,10 @@ public class ViewsFunction extends EnvironmentVariableFunction {
 			
 			for (ViewInfo view : category.views) {
 				String viewName = getServiceValue(view.name, serviceId, serviceIds);	
-				appender.append(viewName);
+				
+				if (!viewName.equals(viewsInput.defaultView)) {
+					appender.append(viewName);
+				}
 			}
 		} else {
 			
@@ -64,7 +72,10 @@ public class ViewsFunction extends EnvironmentVariableFunction {
 			
 			for (SummarizedView view : serviceViews.values()) {
 				String viewName = getServiceValue(view.name, serviceId, serviceIds);	
-				appender.append(viewName);
+				
+				if (!viewName.equals(viewsInput.defaultView)) {
+					appender.append(viewName);
+				}
 			}
 		}		
 	}

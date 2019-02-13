@@ -95,7 +95,7 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction
 		if (appGroups != null) {
 			
 			for (Group group : appGroups.getGroups()) {
-				keyApps.add(GroupSettings.toGroupName(group.name));
+				keyApps.add(group.toGroupName());
 			}
 		}
 			

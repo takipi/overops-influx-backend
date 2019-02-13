@@ -122,7 +122,12 @@ public class GroupSettings
 	}
 	
 	public static String toGroupName(String value) {
-		return EventFilter.CATEGORY_PREFIX + value;
+		
+		if (!isGroup(value)) {
+			return EventFilter.CATEGORY_PREFIX + value;
+		} else {
+			return value;
+		}
 	}
 	
 	public static boolean isGroup(String name) {

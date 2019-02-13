@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 36,
-  "iteration": 1549932144402,
+  "iteration": 1550029536455,
   "links": [
     {
       "asDropdown": true,
@@ -304,7 +304,7 @@
         }
       ],
       "spaceLength": 10,
-      "stack": false,
+      "stack": true,
       "steppedLine": false,
       "targets": [
         {
@@ -510,7 +510,7 @@
         }
       ],
       "spaceLength": 10,
-      "stack": false,
+      "stack": true,
       "steppedLine": false,
       "targets": [
         {
@@ -647,11 +647,8 @@
         "allValue": "all",
         "current": {
           "selected": true,
-          "tags": [],
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -746,9 +743,8 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "text": "All Events",
-          "value": "All Events"
+          "text": "",
+          "value": ""
         },
         "hide": 2,
         "includeAll": false,
@@ -757,7 +753,7 @@
         "name": "view",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "All Events",
             "value": "All Events"
           }
@@ -793,6 +789,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1120,7 +1117,7 @@
     ]
   },
   "time": {
-    "from": "now-14d",
+    "from": "now-14h",
     "to": "now"
   },
   "timepicker": {
@@ -1152,5 +1149,5 @@
   "timezone": "",
   "title": "Reliability Review",
   "uid": "82eIMSsmz",
-  "version": 56
+  "version": 58
 }

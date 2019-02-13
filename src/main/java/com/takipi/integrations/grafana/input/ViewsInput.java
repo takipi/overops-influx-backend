@@ -7,11 +7,16 @@ package com.takipi.integrations.grafana.input;
  * 		views({"environments":"$environments", "sorted":true, "category":"Tiers"})	
  *
  */
-public abstract class ViewsInput extends BaseEnvironmentsInput {
+public class ViewsInput extends BaseEnvironmentsInput {
 	
 	/**
 	 * An optional category name containing the views to return. If no value is provided all
 	 * views within the selected environments are returned.
 	 */
 	public String category;
+	
+	/**
+	 * Name of default view to use if none selected
+	 */
+	public String defaultView;
 }

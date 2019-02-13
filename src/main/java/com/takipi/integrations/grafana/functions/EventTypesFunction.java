@@ -161,7 +161,7 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 
 		if (availTypes.contains(EventTypes.ExceptionTypes)) {
 			for (String exceptionType : exceptionTypes) {
-				appender.append(EventFilter.EXCEPTION_PREFIX + exceptionType);
+				appender.append(EventFilter.toExceptionFilter(exceptionType));
 			}
 		}
 	}

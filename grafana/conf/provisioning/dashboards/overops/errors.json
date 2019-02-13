@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 31,
-  "iteration": 1549869790892,
+  "iteration": 1550029515247,
   "links": [
     {
       "icon": "external link",
@@ -683,6 +683,7 @@
       {
         "allValue": "None",
         "current": {
+          "selected": true,
           "text": "None",
           "value": "None"
         },
@@ -707,6 +708,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -731,6 +733,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -755,6 +758,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -767,6 +771,32 @@
         "options": [],
         "query": "deployments({\"environments\":\"$environments\", \"sorted\":true})",
         "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 0,
+        "includeAll": false,
+        "label": "View",
+        "multi": false,
+        "name": "view",
+        "options": [],
+        "query": "views({\"environments\":\"$environments\",\"sorted\":false, \"defaultView\":\"All Events\"})",
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -801,8 +831,42 @@
         "useTags": false
       },
       {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "3",
+          "value": "3"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "label": "Split Top",
+        "multi": false,
+        "name": "splitLimit",
+        "options": [
+          {
+            "selected": true,
+            "text": "3",
+            "value": "3"
+          },
+          {
+            "selected": false,
+            "text": "5",
+            "value": "5"
+          },
+          {
+            "selected": false,
+            "text": "1",
+            "value": "1"
+          }
+        ],
+        "query": "3,5,1",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -827,6 +891,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -875,61 +940,6 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "text": "3",
-          "value": "3"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Split Top",
-        "multi": false,
-        "name": "splitLimit",
-        "options": [
-          {
-            "selected": true,
-            "text": "3",
-            "value": "3"
-          },
-          {
-            "selected": false,
-            "text": "5",
-            "value": "5"
-          },
-          {
-            "selected": false,
-            "text": "1",
-            "value": "1"
-          }
-        ],
-        "query": "3,5,1",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "All Events",
-          "value": "All Events"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "View",
-        "multi": false,
-        "name": "view",
-        "options": [
-          {
-            "selected": true,
-            "text": "All Events",
-            "value": "All Events"
-          }
-        ],
-        "query": "All Events",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -954,6 +964,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -978,7 +989,7 @@
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {
@@ -1010,5 +1021,5 @@
   "timezone": "",
   "title": "Errors",
   "uid": "HYBPMdYik",
-  "version": 90
+  "version": 93
 }

@@ -373,7 +373,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 	}
 
 	private ReliabilityReportInput getInput(ReliabilityReportInput reportInput, 
-		String name, boolean mustCopy) {
+		String serviceId, String name, boolean mustCopy) {
 		
 		ReportMode mode = reportInput.getReportMode();
 		
@@ -396,7 +396,25 @@ public class ReliabilityReportFunction extends EventsFunction {
 				break;
 				
 			case Tiers:
-				result.types = GroupSettings.toGroupName(name);
+				List<String> types = new ArrayList<String>();
+				Collection<String> inputTypes = reportInput.getTypes(apiClient, serviceId);
+				
+				if (inputTypes != null) {
+					for (String type : inputTypes) {
+						
+						if (EventFilter.isExceptionFilter(type)) {
+							types.add(type);
+						} else if (GroupSettings.isGroup(type)) {
+							continue;
+						} else {
+							types.add(type);
+						}
+					}
+				}
+				
+				types.add(GroupSettings.toGroupName(name));
+					
+				result.types = String.join(GrafanaFunction.ARRAY_SEPERATOR_RAW, types);
 				break;
 			
 			case Applications:
@@ -442,6 +460,11 @@ public class ReliabilityReportFunction extends EventsFunction {
 		if (!CollectionUtil.safeIsEmpty(types)) {
 						
 			for (String type : types) {
+				
+				if (EventFilter.isExceptionFilter(type)) {
+					continue;
+				}
+				
 				if (GroupSettings.isGroup(type)) {
 					String name = GroupSettings.fromGroupName(type);
 					boolean isKey = CollectionUtil.safeContains(keyTiers, name);
@@ -508,7 +531,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
 
 		for (String app : apps) {
-			RegressionsInput appInput = getInput(input, app, false);
+			RegressionsInput appInput = getInput(input, serviceId, app, false);
 			tasks.add(new AppVolumeAsyncTask(appInput, serviceId, app, timeSpan));
 		}
 
@@ -558,8 +581,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			RegressionFunction regressionFunction = new RegressionFunction(apiClient);
 
-			RegressionsInput regressionsInput = getInput(input, reportKey.name, false);
-			RegressionsInput transactionInput = getInput(input, reportKey.name, true);
+			RegressionsInput regressionsInput = getInput(input, serviceId, reportKey.name, false);
+			RegressionsInput transactionInput = getInput(input, serviceId, reportKey.name, true);
 
 			transactionInput.pointsWanted = input.transactionPointsWanted;
 			
@@ -683,6 +706,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 	}
 
 	private static void sortDeploymentNames(List<SummarizedDeployment> deps, boolean desc) {
+		
 		deps.sort(new Comparator<SummarizedDeployment>() {
 
 			@Override
