@@ -10,6 +10,7 @@ import com.takipi.api.client.data.view.ViewInfo;
 import com.takipi.api.client.util.category.CategoryUtil;
 import com.takipi.api.client.util.view.ViewUtil;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
+import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.ViewsInput;
 
 public class ViewsFunction extends EnvironmentVariableFunction {
@@ -34,6 +35,21 @@ public class ViewsFunction extends EnvironmentVariableFunction {
 
 	public ViewsFunction(ApiClient apiClient) {
 		super(apiClient);
+	}
+	
+	@Override
+	protected int compareValues(FunctionInput input, String o1, String o2) {
+		ViewsInput viewsInput = (ViewsInput)input;
+		
+		if (o2.equals(viewsInput.defaultView)) {
+			return 1;
+		}
+		
+		if (o1.equals(viewsInput.defaultView)) {
+			return 1;
+		}
+		
+		return super.compareValues(viewsInput, o1, o2);
 	}
 
 	@Override

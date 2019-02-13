@@ -7,6 +7,7 @@ import java.util.TreeSet;
 import com.takipi.api.client.ApiClient;
 import com.takipi.integrations.grafana.input.ApplicationsInput;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
+import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings.Group;
@@ -58,7 +59,7 @@ public class ApplicationsFunction extends EnvironmentVariableFunction {
 	}
 	
 	@Override
-	protected void sortValues(List<List<Object>> series)
+	protected void sortValues(FunctionInput input, List<List<Object>> series)
 	{
 		//do nothing
 	}

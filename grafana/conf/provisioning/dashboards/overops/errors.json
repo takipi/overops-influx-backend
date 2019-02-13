@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 31,
-  "iteration": 1550029515247,
+  "iteration": 1550030480504,
   "links": [
     {
       "icon": "external link",
@@ -683,9 +683,12 @@
       {
         "allValue": "None",
         "current": {
-          "selected": true,
+          "selected": false,
+          "tags": [],
           "text": "None",
-          "value": "None"
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -708,7 +711,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -733,7 +735,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -758,7 +759,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -784,7 +784,6 @@
         "allValue": null,
         "current": {
           "isNone": true,
-          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -795,7 +794,7 @@
         "multi": false,
         "name": "view",
         "options": [],
-        "query": "views({\"environments\":\"$environments\",\"sorted\":false, \"defaultView\":\"All Events\"})",
+        "query": "views({\"environments\":\"$environments\",\"sorted\":true, \"defaultView\":\"All Events\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -866,7 +865,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -891,7 +889,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -989,7 +986,7 @@
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-7d",
     "to": "now"
   },
   "timepicker": {
@@ -1021,5 +1018,5 @@
   "timezone": "",
   "title": "Errors",
   "uid": "HYBPMdYik",
-  "version": 93
+  "version": 95
 }

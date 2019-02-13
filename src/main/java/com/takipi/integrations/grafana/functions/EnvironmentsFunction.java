@@ -33,7 +33,7 @@ public class EnvironmentsFunction extends VariableFunction {
 	}
 	
 	@Override
-	protected int compareValues(String o1, String o2)
+	protected int compareValues(FunctionInput input, String o1, String o2)
 	{
 		if (NONE.equals(o1)) {
 			return 1;
@@ -43,7 +43,7 @@ public class EnvironmentsFunction extends VariableFunction {
 			return 1;
 		}
 		
-		return super.compareValues(o1, o2);
+		return super.compareValues(input, o1, o2);
 	}
 	
 	@Override
