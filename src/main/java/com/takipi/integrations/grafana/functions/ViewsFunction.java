@@ -1,7 +1,9 @@
 package com.takipi.integrations.grafana.functions;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.category.Category;
@@ -62,9 +64,12 @@ public class ViewsFunction extends EnvironmentVariableFunction {
 		}
 		
 		ViewsInput viewsInput = (ViewsInput)input;
-				
+			
+		Set<String> views = new HashSet<String>();
+
 		if (viewsInput.defaultView != null) {
 			appender.append(viewsInput.defaultView);
+			views.add(viewsInput.defaultView);
 		} 
 		
 		if (viewsInput.category != null) {
@@ -76,10 +81,12 @@ public class ViewsFunction extends EnvironmentVariableFunction {
 			}
 			
 			for (ViewInfo view : category.views) {
-				String viewName = getServiceValue(view.name, serviceId, serviceIds);	
 				
-				if (!viewName.equals(viewsInput.defaultView)) {
+				String viewName = view.name;	
+				
+				if (!views.contains(viewName)) {
 					appender.append(viewName);
+					views.add(viewName);
 				}
 			}
 		} else {
@@ -87,10 +94,12 @@ public class ViewsFunction extends EnvironmentVariableFunction {
 			Map<String, SummarizedView> serviceViews = ViewUtil.getServiceViewsByName(apiClient, serviceId);
 			
 			for (SummarizedView view : serviceViews.values()) {
-				String viewName = getServiceValue(view.name, serviceId, serviceIds);	
 				
-				if (!viewName.equals(viewsInput.defaultView)) {
+				String viewName = view.name;	
+				
+				if (!views.contains(viewName)) {
 					appender.append(viewName);
+					views.add(viewName);
 				}
 			}
 		}		
