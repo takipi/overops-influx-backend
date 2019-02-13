@@ -169,7 +169,7 @@ public abstract class EventFilterInput extends ViewInput
 					Collection<String> criticalExceptionTypes = regressionSettings.getCriticalExceptionTypes();
 					
 					for (String criticalExceptionType : criticalExceptionTypes) {
-						result.add(EventFilter.EXCEPTION_PREFIX + criticalExceptionType);
+						result.add(EventFilter.toExceptionFilter(criticalExceptionType));
 					}
 				}
 			} else {

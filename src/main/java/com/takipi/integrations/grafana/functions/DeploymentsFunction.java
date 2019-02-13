@@ -6,6 +6,7 @@ import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.deployment.SummarizedDeployment;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.DeploymentsInput;
+import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.util.DeploymentUtil;
 
 public class DeploymentsFunction extends EnvironmentVariableFunction {
@@ -50,7 +51,7 @@ public class DeploymentsFunction extends EnvironmentVariableFunction {
 	}
 
 	@Override
-	protected int compareValues(String o1, String o2) {
+	protected int compareValues(FunctionInput input, String o1, String o2) {
 		return DeploymentUtil.compareDeployments(o1, o2);
 	}
 }

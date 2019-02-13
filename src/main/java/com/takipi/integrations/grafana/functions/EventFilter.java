@@ -43,6 +43,29 @@ public class EventFilter
 	private List<String> eventTypes;
 	private List<String> categoryTypes;
 	
+	public static String toExceptionFilter(String value) {
+		
+		if (!isExceptionFilter(value)) {
+			return EventFilter.EXCEPTION_PREFIX + value;
+		} else { 
+			return value;
+		}
+	}
+	
+	public static boolean isExceptionFilter(String name) {
+		return name.startsWith(EventFilter.EXCEPTION_PREFIX);
+	}
+	
+	public static String fromExceptionFilter(String value) {
+		
+		if ((value == null) || (!isExceptionFilter(value))) {
+			return value;
+		}
+		
+		return value.substring(EventFilter.EXCEPTION_PREFIX.length());
+	}
+	
+	
 	public static EventFilter of(Collection<String> types, Collection<String> allowedTypes,
 			Collection<String> introducedBy, Collection<String> eventLocations, GroupFilter transactionsFilter,
 			Collection<String> labels, String labelsRegex, String firstSeen, Categories categories,
@@ -96,9 +119,9 @@ public class EventFilter
 		{
 			for (String type : types)
 			{
-				if (type.startsWith(EXCEPTION_PREFIX))
+				if (isExceptionFilter(type))
 				{
-					result.exceptionTypes.add(type.substring(EXCEPTION_PREFIX.length()));
+					result.exceptionTypes.add(fromExceptionFilter(type));
 				} 
 				else if (GroupSettings.isGroup(type))
 				{

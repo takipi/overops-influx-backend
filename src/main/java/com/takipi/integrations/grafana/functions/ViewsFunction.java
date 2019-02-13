@@ -10,6 +10,7 @@ import com.takipi.api.client.data.view.ViewInfo;
 import com.takipi.api.client.util.category.CategoryUtil;
 import com.takipi.api.client.util.view.ViewUtil;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
+import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.ViewsInput;
 
 public class ViewsFunction extends EnvironmentVariableFunction {
@@ -35,9 +36,25 @@ public class ViewsFunction extends EnvironmentVariableFunction {
 	public ViewsFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
+	
+	@Override
+	protected int compareValues(FunctionInput input, String o1, String o2) {
+		ViewsInput viewsInput = (ViewsInput)input;
+		
+		if (o2.equals(viewsInput.defaultView)) {
+			return 1;
+		}
+		
+		if (o1.equals(viewsInput.defaultView)) {
+			return 1;
+		}
+		
+		return super.compareValues(viewsInput, o1, o2);
+	}
 
 	@Override
-	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
+	protected void populateServiceValues(BaseEnvironmentsInput input, 
+			Collection<String> serviceIds, String serviceId,
 			VariableAppender appender) {
 
 		if (!(input instanceof ViewsInput)) {
@@ -45,6 +62,10 @@ public class ViewsFunction extends EnvironmentVariableFunction {
 		}
 		
 		ViewsInput viewsInput = (ViewsInput)input;
+				
+		if (viewsInput.defaultView != null) {
+			appender.append(viewsInput.defaultView);
+		} 
 		
 		if (viewsInput.category != null) {
 			
@@ -56,7 +77,10 @@ public class ViewsFunction extends EnvironmentVariableFunction {
 			
 			for (ViewInfo view : category.views) {
 				String viewName = getServiceValue(view.name, serviceId, serviceIds);	
-				appender.append(viewName);
+				
+				if (!viewName.equals(viewsInput.defaultView)) {
+					appender.append(viewName);
+				}
 			}
 		} else {
 			
@@ -64,7 +88,10 @@ public class ViewsFunction extends EnvironmentVariableFunction {
 			
 			for (SummarizedView view : serviceViews.values()) {
 				String viewName = getServiceValue(view.name, serviceId, serviceIds);	
-				appender.append(viewName);
+				
+				if (!viewName.equals(viewsInput.defaultView)) {
+					appender.append(viewName);
+				}
 			}
 		}		
 	}

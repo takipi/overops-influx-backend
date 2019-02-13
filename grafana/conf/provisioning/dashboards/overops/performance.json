@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 19,
-  "iteration": 1549989940775,
+  "iteration": 1550029439069,
   "links": [
     {
       "icon": "external link",
@@ -1586,14 +1586,12 @@
         "allValue": "all",
         "current": {
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
         "includeAll": false,
-        "label": "Environments",
+        "label": "Env",
         "multi": true,
         "name": "environments",
         "options": [],
@@ -1612,14 +1610,12 @@
         "allValue": "*",
         "current": {
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
-        "label": "Applications",
+        "label": "Apps",
         "multi": true,
         "name": "applications",
         "options": [],
@@ -1686,9 +1682,7 @@
         "allValue": "*",
         "current": {
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1782,9 +1776,8 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "text": "All Events",
-          "value": "All Events"
+          "text": "",
+          "value": ""
         },
         "hide": 2,
         "includeAll": false,
@@ -1793,7 +1786,7 @@
         "name": "view",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "All Events",
             "value": "All Events"
           }
@@ -1876,6 +1869,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -1900,6 +1894,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -1924,7 +1919,7 @@
     ]
   },
   "time": {
-    "from": "now-2d",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {
@@ -1956,5 +1951,5 @@
   "timezone": "",
   "title": "Performance",
   "uid": "Z40SpeJmz",
-  "version": 116
+  "version": 118
 }

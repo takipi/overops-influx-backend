@@ -240,7 +240,6 @@ public class FunctionParser {
 
 		//deployment functions
 		registerFunction(new DeploymentsGraphFunction.Factory());
-		registerFunction(new DeploymentNameFunction.Factory());
 		registerFunction(new DeploymentsAnnotation.Factory());
 				
 		//transaction functions

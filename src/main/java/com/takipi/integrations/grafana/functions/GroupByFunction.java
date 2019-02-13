@@ -467,7 +467,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 				}
 			} 
 			
-			List<String> liveApps = new ArrayList<String>(ClientUtil.getApplications(apiClient, serviceId));
+			List<String> liveApps = new ArrayList<String>(ClientUtil.getApplications(apiClient, serviceId, true));
 
 			liveApps.sort(new Comparator<String>() {
 
@@ -635,19 +635,35 @@ public class GroupByFunction extends BaseVolumeFunction {
 		if (input.hasDeployments()) {
 			deployments = input.getDeployments(serviceId);
 		} else {
-			Pair<String, List<String>> depResult = DeploymentUtil.getActiveDeployment(apiClient, input,
-				serviceId, input.limit);
+			List<String> activeDeps =  new ArrayList<String>(
+				ClientUtil.getDeployments(apiClient, serviceId, true));
 			
-			deployments = new ArrayList<String>(depResult.getSecond().size() + 1);
+			DeploymentUtil.sortDeployments(activeDeps);
 			
-			deployments.add(depResult.getFirst());
-			deployments.addAll(depResult.getSecond());
+			if ((input.limit > 0) && (activeDeps.size() < input.limit)) {
+				
+				List<String> allDeps =  new ArrayList<String>(
+						ClientUtil.getDeployments(apiClient, serviceId, false));			
+			
+				DeploymentUtil.sortDeployments(allDeps);
+								
+				for (String dep : allDeps) {
+					if (!activeDeps.contains(dep)) {
+						activeDeps.add(dep);						
+					}
+					
+					if (activeDeps.size() >= input.limit) {
+						break;
+					}
+				}				
+			}
+			
+			deployments = activeDeps;
 		}
-			
+				
 		int size;
 		
 		if (input.limit > 0) {
-			DeploymentUtil.sortDeployments(deployments);
 			size = Math.min(deployments.size(), input.limit);
 		} else {
 			size = deployments.size();
@@ -862,7 +878,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 		return series;
 	}
 
-	private static Collection<SeriesResult> processGroupResults(GroupByInput input,
+	private static Map<String, SeriesResult> processGroupResults(GroupByInput input,
 			Map<String, GroupResult> groupResults, Collection<String> serviceIds) {
 
 		Map<String, SeriesResult> resultMap = new HashMap<String, SeriesResult>();
@@ -897,7 +913,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 			}
 		}
 
-		return resultMap.values();
+		return resultMap;
 	}
 
 	private static Collection<AggregationType> getColumnTypes(GroupByInput input) {
@@ -958,13 +974,13 @@ public class GroupByFunction extends BaseVolumeFunction {
 		series.values.add(Arrays.asList(values));
 	}
 
-	private List<SeriesResult> process(GroupByInput input, Collection<String> services, Pair<DateTime, DateTime> timeSpan) {
+	private Map<String, SeriesResult> process(GroupByInput input, Collection<String> services, Pair<DateTime, DateTime> timeSpan) {
 
-		List<SeriesResult> result = new ArrayList<SeriesResult>();
+		Map<String, SeriesResult> result = new HashMap<String, SeriesResult>();
 
 		for (String serviceId : services) {
 			Map<String, GroupResult> groupResults = processServiceGroupBy(serviceId, input, timeSpan);
-			result.addAll(processGroupResults(input, groupResults, services));
+			result.putAll(processGroupResults(input, groupResults, services));
 		}
 
 		return result;
@@ -983,61 +999,75 @@ public class GroupByFunction extends BaseVolumeFunction {
 		Collection<String> serviceIds = getServiceIds(input);
 
 		Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(input.timeFilter);
-		List<SeriesResult> output = process(input, serviceIds, timespan);
-
+		Map<String, SeriesResult> seriesMap = process(input, serviceIds, timespan);
+		
+		List<Map.Entry<String, SeriesResult>> sorted = new ArrayList<Map.Entry<String, SeriesResult>>(seriesMap.entrySet());
+		
 		int limit;
 
+		switch (input.field) {
+			
+			case deployment:
+				sortSeries(sorted, true);
+				break;
+				
+			case server:
+			case application:
+				sortSeries(sorted, false);
+				break;
+			
+			default:
+				sortOutputByValue(sorted);
+				
+		}
+		 
 		if (input.limit > 0) {
-			limit = Math.min(input.limit, output.size());
-			sortOutputByValue(output);
-
+			limit = Math.min(input.limit, sorted.size());
 		} else {
-			limit = output.size();
-			sortOutputByTag(output);
+			limit = sorted.size();
 		}
 
 		List<Series> result = new ArrayList<Series>();
 
 		for (int i = 0; i < limit; i++) {
-			result.add(output.get(i).series);
-		}
-
-		if (input.limit > 0) {
-			Collections.reverse(result);
+			result.add(sorted.get(i).getValue().series);
 		}
 
 		return result;
 	}
 
-	private void sortOutputByValue(List<SeriesResult> output) {
-		output.sort(new Comparator<SeriesResult>() {
+	private void sortOutputByValue(List<Map.Entry<String, SeriesResult>> output) {
+		
+		output.sort(new Comparator<Map.Entry<String, SeriesResult>>() {
 
 			@Override
-			public int compare(SeriesResult p1, SeriesResult p2) {
-				if ((p1.maxValue == null) || (p2.maxValue == null)) {
+			public int compare(Map.Entry<String, SeriesResult> p1, Map.Entry<String, SeriesResult> p2) {
+				
+				if ((p1.getValue().maxValue == null) || (p2.getValue().maxValue == null)) {
 					return 0;
 				}
 
-				int result = p2.maxValue.compareTo(p1.maxValue);
+				int result = p2.getValue().maxValue.compareTo(p1.getValue().maxValue);
 
 				return result;
 			}
 		});
 	}
 
-	private void sortOutputByTag(List<SeriesResult> output) {
-		output.sort(new Comparator<SeriesResult>() {
+	private void sortSeries(List<Map.Entry<String, SeriesResult>> output, boolean byDep) {
+		
+		output.sort(new Comparator<Map.Entry<String, SeriesResult>>() {
 			
 			@Override
-			public int compare(SeriesResult p1, SeriesResult p2) {
-				if ((p1.series.tags == null) || (p2.series.tags == null)) {
-					return 0;
+			public int compare(Map.Entry<String, SeriesResult> p1, Map.Entry<String, SeriesResult> p2) {
+
+				int result;
+				
+				if (byDep) {
+					result = DeploymentUtil.compareDeployments(p2.getKey(), p1.getKey());
+				} else {
+					result = p1.getKey().compareTo(p2.getKey());
 				}
-
-				String tag1 = p1.series.tags.get(0);
-				String tag2 = p2.series.tags.get(0);
-
-				int result = tag1.compareTo(tag2);
 
 				return result;
 			}
