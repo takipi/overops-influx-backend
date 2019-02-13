@@ -1,5 +1,7 @@
 
-// Used by OverOps tomcat server
+// This project can be run either as a standalone or as part of another servlet container
+//
+// 	The following config allows another servlet container to configure jvm compiler, version etc
 //
 if (project.ext.has("backendJavac")) {
 	compileJava {
@@ -7,11 +9,16 @@ if (project.ext.has("backendJavac")) {
 	}
 }
 
+compileJava {
+	sourceCompatibility = 1.8
+	targetCompatibility = 1.8
+}
+
 ext {
 	disableIDEWarnings = true
 }
 //
-// END
+// End
 
 dependencies {
 	compileOnly (
