@@ -47,15 +47,12 @@ public class BaselineAnnotationFunction extends BaseGraphFunction {
 			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
 	
 		BaselineAnnotationInput baInput = (BaselineAnnotationInput)input;
+				
+		Series series = new Series();
 		
-		GraphSeries result = new GraphSeries();
-		
-		result.series = new Series();
-		
-		result.series.name = EMPTY_NAME;
-		result.series.columns = Arrays.asList(new String[] { TIME_COLUMN, baInput.text });
-		result.series.values = new ArrayList<List<Object>>();
-		result.volume = 1;
+		series.name = EMPTY_NAME;
+		series.columns = Arrays.asList(new String[] { TIME_COLUMN, baInput.text });
+		series.values = new ArrayList<List<Object>>();
 		
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
 		Pair<RegressionInput, RegressionWindow> inputPair = regressionFunction.getRegressionInput(serviceId, viewId, input, timeSpan);
@@ -73,9 +70,9 @@ public class BaselineAnnotationFunction extends BaseGraphFunction {
 		
 		String text = String.format(baInput.text, baselineWindow, activeWindow);
 		
-		result.series.values.add(Arrays.asList(new Object[] { timeValue, getServiceValue(text, serviceId, serviceIds) }));
+		series.values.add(Arrays.asList(new Object[] { timeValue, getServiceValue(text, serviceId, serviceIds) }));
 		
-		return Collections.singletonList(result);
+		return Collections.singletonList(GraphSeries.of(series, 1, baInput.text));
 	}
 
 		

@@ -13,6 +13,7 @@ import org.ocpsoft.prettytime.PrettyTime;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.deployment.SummarizedDeployment;
+import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.DeploymentsGraphInput;
@@ -69,7 +70,8 @@ public class DeploymentsAnnotation extends BaseGraphFunction {
 	}
 
 	
-	private void addDeployments(List<Pair<DateTime, String>> deployments, String serviceId, boolean active) {
+	private void addDeployments(Collection<String> selectedDeployments , List<Pair<DateTime, 
+		String>> deployments, String serviceId, boolean active) {
 		
 		Collection<SummarizedDeployment> deps = DeploymentUtil.getDeployments(apiClient, serviceId, active);
 
@@ -78,11 +80,16 @@ public class DeploymentsAnnotation extends BaseGraphFunction {
 		}
 		
 		PrettyTime prettyTime = new PrettyTime();
-			
+					
 		for (SummarizedDeployment dep : deps) {
 			
 			if (dep.first_seen == null) {
 				continue;
+			}
+			
+			if ((!CollectionUtil.safeIsEmpty(selectedDeployments)) && 
+				(!selectedDeployments.contains(dep.name))) {
+				continue;	
 			}
 			
 			DateTime firstSeen = ISODateTimeFormat.dateTime().withZoneUTC().parseDateTime(dep.first_seen);
@@ -106,33 +113,42 @@ public class DeploymentsAnnotation extends BaseGraphFunction {
 	protected List<GraphSeries> processServiceGraph(Collection<String> serviceIds, String serviceId, String viewId, String viewName,
 			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
 			
-		GraphSeries result = new GraphSeries();
+		DeploymentsGraphInput dgInput = (DeploymentsGraphInput)input;
 		
-		result.series = new Series();
+		Series series = new Series();
 		
-		result.series.name = EMPTY_NAME;
-		result.series.columns = Arrays.asList(new String[] { TIME_COLUMN, 
-			getServiceValue(DEPLOY_SERIES_NAME, serviceId, serviceIds) });
+		String name = getServiceValue(DEPLOY_SERIES_NAME, serviceId, serviceIds);
 		
-		result.series.values = new ArrayList<List<Object>>();
-		result.volume = 1;
+		series.name = EMPTY_NAME;
+		series.columns = Arrays.asList(new String[] { TIME_COLUMN, name});
+		
+		series.values = new ArrayList<List<Object>>();
 		
 		List<Pair<DateTime, String>> deployments = new ArrayList<Pair<DateTime, String>>();
 		
-		addDeployments(deployments, serviceId, false);
+		Collection<String> selectedDeployments = input.getDeployments(serviceId);
+
+		addDeployments(selectedDeployments, deployments, serviceId, false);
 		sortDeployments(deployments);
 		
-		int maxDeployments = Math.min(deployments.size(), MAX_DEPLOY_ANNOTATIONS);
+		int maxDeployments;
+		
+		if (!CollectionUtil.safeIsEmpty(selectedDeployments)) {
+			maxDeployments = deployments.size();
+		} else {
+			maxDeployments = Math.min(deployments.size(),
+				Math.max(MAX_DEPLOY_ANNOTATIONS, dgInput.limit));
+		}
 		
 		for (int i = 0; i < maxDeployments; i++) {
 			Pair<DateTime, String> pair = deployments.get(i);
 			
 			Object timeValue = getTimeValue(pair.getFirst().getMillis(), input);
 			
-			result.series.values.add(Arrays.asList(new Object[] {timeValue, 
+			series.values.add(Arrays.asList(new Object[] {timeValue, 
 					getServiceValue(pair.getSecond(), serviceId, serviceIds) }));
 		}
 		
-		return Collections.singletonList(result);
+		return Collections.singletonList(GraphSeries.of(series, 1, name));
 	}
 }

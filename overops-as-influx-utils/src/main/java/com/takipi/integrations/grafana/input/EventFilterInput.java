@@ -1,16 +1,15 @@
 package com.takipi.integrations.grafana.input;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import com.takipi.api.client.ApiClient;
-import com.takipi.api.client.util.infra.Categories;
 import com.takipi.integrations.grafana.functions.EventFilter;
 import com.takipi.integrations.grafana.functions.GrafanaFunction;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
-import com.takipi.integrations.grafana.settings.GroupSettings.GroupFilter;
-import com.takipi.integrations.grafana.settings.input.GeneralSettings;
+import com.takipi.integrations.grafana.settings.input.RegressionSettings;
 
 /**
  * The base function input used to include / exclude event objects matching a specific criteria
@@ -123,7 +122,7 @@ public abstract class EventFilterInput extends ViewInput
 			return true;
 		}
 		
-		if ((transactions != null) && (transactions.length() > 0))
+		if (hasTransactions())
 		{
 			return true;
 		}
@@ -147,7 +146,7 @@ public abstract class EventFilterInput extends ViewInput
 		return getServiceFilters(introducedBy, serviceId, true);
 	}
 	
-	public Collection<String> getTypes()
+	public Collection<String> getTypes(ApiClient apiClient, String serviceId)
 	{
 		
 		if (!hasFilter(types))
@@ -158,21 +157,29 @@ public abstract class EventFilterInput extends ViewInput
 		String value = types.replace(GrafanaFunction.ARRAY_SEPERATOR_RAW,
 				GrafanaFunction.GRAFANA_SEPERATOR_RAW);
 		
-		return getServiceFilters(value, null, true);
-	}
-	
-	public static Collection<String> toArray(String value)
-	{
-		if (value == null)
-		{
-			return Collections.emptyList();
+		List<String> result = new ArrayList<String>();
+		Collection<String> types = getServiceFilters(value, null, true);
+		
+		for (String type : types) {
+			
+			if (EventFilter.CRITICAL_EXCEPTIONS.equals(type)) {
+				RegressionSettings regressionSettings = GrafanaSettings.getData(apiClient, serviceId).regression;
+				
+				if (regressionSettings != null) {
+					Collection<String> criticalExceptionTypes = regressionSettings.getCriticalExceptionTypes();
+					
+					for (String criticalExceptionType : criticalExceptionTypes) {
+						result.add(EventFilter.toExceptionFilter(criticalExceptionType));
+					}
+				}
+			} else {
+				result.add(type);
+			}
 		}
 		
-		String[] types = value.split(GrafanaFunction.ARRAY_SEPERATOR);
-		return Arrays.asList(types);
-		
+		return result;
 	}
-	
+		
 	public Collection<String> geLabels(String serviceId)
 	{
 		
@@ -182,44 +189,5 @@ public abstract class EventFilterInput extends ViewInput
 		}
 		
 		return getServiceFilters(labels, serviceId, true);
-	}
-	
-	public EventFilter getEventFilter(ApiClient apiClient, String serviceId)
-	{
-		
-		Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();
-		
-		Collection<String> transactions = getTransactions(serviceId);
-		GroupFilter transactionsFilter = GrafanaSettings.getServiceSettings(apiClient, serviceId).getTransactionsFilter(transactions);
-
-		Collection<String> allowedTypes;
-		
-		if (this.allowedTypes != null)
-		{
-			if (GrafanaFunction.VAR_ALL.contains(this.allowedTypes)) {
-				allowedTypes = Collections.emptyList();
-			} else {
-				allowedTypes = toArray(this.allowedTypes);
-			}
-		}
-		else
-		{
-			GeneralSettings generalSettings = GrafanaSettings.getData(apiClient, serviceId).general;
-			
-			if (generalSettings != null)
-			{
-				allowedTypes = generalSettings.getDefaultTypes();
-			}
-			else
-			{
-				allowedTypes = Collections.emptyList();
-			}
-		}
-		
-		Collection<String> eventLocations = getServiceFilters(this.eventLocations, serviceId, true);
-	
-		return EventFilter.of(getTypes(), allowedTypes, getIntroducedBy(serviceId), eventLocations, transactionsFilter,
-				geLabels(serviceId), labelsRegex, firstSeen, categories, searchText, transactionSearchText);
-	}
-	
+	}	
 }

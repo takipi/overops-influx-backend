@@ -152,7 +152,7 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 	
 	@Override
 	protected List<GraphSeries> processGraphSeries(Collection<String> servieIds, 
-			String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
+			String serviceId, String viewName, String viewId, Pair<DateTime, DateTime> timeSpan,
 			GraphInput input) {
  		
 		RegressionGraphInput rgInput = (RegressionGraphInput)input;
@@ -179,7 +179,11 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 		List<EventData> eventDatas = regressionFunction.processRegression(rgInput, regressionOutput.regressionInput,
 			regressionOutput.rateRegression, includeNew, includeRegressions);
 		
-		EventFilter eventFilter = rgInput.getEventFilter(apiClient, serviceId);
+		EventFilter eventFilter = getEventFilter(serviceId, rgInput, timeSpan);
+		
+		if (eventFilter == null) {
+			return Collections.emptyList();	
+		}
 		
 		List<EventData> filteredEventData = new ArrayList<EventData>(eventDatas.size());
 		

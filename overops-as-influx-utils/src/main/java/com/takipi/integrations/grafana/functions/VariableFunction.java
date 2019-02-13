@@ -18,7 +18,7 @@ public abstract class VariableFunction extends GrafanaFunction {
 	protected abstract static class VariableAppender {
 		
 		protected abstract void append(String value);
-		protected abstract void sort();
+		protected abstract void sort(FunctionInput input);
 	}
 			
 	protected class SeriesVariableAppender extends VariableAppender {
@@ -35,9 +35,9 @@ public abstract class VariableFunction extends GrafanaFunction {
 		}
 		
 		@Override
-		protected void sort()
+		protected void sort(FunctionInput input)
 		{
-			sortValues(series.values);	
+			sortValues(input, series.values);	
 		}
 	}
 	
@@ -58,14 +58,14 @@ public abstract class VariableFunction extends GrafanaFunction {
 		}
 		
 		@Override
-		protected void sort()
+		protected void sort(FunctionInput input)
 		{
 			values.sort(new Comparator<String>()
 			{
 				@Override
 				public int compare(String o1, String o2)
 				{
-					return compareValues(o1, o2);
+					return compareValues(input, o1, o2);
 				}
 			});
 		}
@@ -76,27 +76,31 @@ public abstract class VariableFunction extends GrafanaFunction {
 	}
 
 	protected String getStringValue(Object o) {
-		return o.toString().toLowerCase();
+		return o.toString();//.toLowerCase();
 	}
 	
-	protected int compareValues(String o1, String o2) {
+	/**
+	 * @param input  
+	 */
+	protected int compareValues(FunctionInput input, String o1, String o2) {
 		return o1.compareTo(o2);
 	}
 	
 	@SuppressWarnings("unchecked")
-	private int compareListValues(Object o1, Object o2) {
+	private int compareListValues(FunctionInput input, Object o1, Object o2) {
 		String a = getStringValue(((List<Object>) o1).get(1));
 		String b = getStringValue(((List<Object>) o2).get(1));
 
-		return compareValues(a, b);
+		return compareValues(input, a, b);
 	}
 		
-	protected void sortValues(List<List<Object>> series) {
+	protected void sortValues(FunctionInput input, List<List<Object>> series) {
+		
 		series.sort(new Comparator<Object>() {
 
 			@Override
 			public int compare(Object o1, Object o2) {
-				return compareListValues(o1, o2);
+				return compareListValues(input, o1, o2);
 			}
 		});
 	}
@@ -128,7 +132,7 @@ public abstract class VariableFunction extends GrafanaFunction {
 		populateValues(functionInput, appender);
 		
 		if (varInput.sorted) {
-			appender.sort();
+			appender.sort(functionInput);
 		}
 		
 		if (varInput.commaDelimited) {

@@ -76,12 +76,12 @@ public class ReliabilityReportInput extends RegressionsInput {
 		/**
 		 * chart the number of increasing errors 
 		 */
-		Regressions, 
+		ErrorIncreases, 
 		
 		/**
 		 * chart the number of severe increasing errors 
 		 */
-		SevereRegressions,
+		SevereErrorIncreases,
 		
 
 		/**
@@ -97,17 +97,17 @@ public class ReliabilityReportInput extends RegressionsInput {
 		/**
 		 * chart the volume of events of the target app, deployment, tier
 		 */
-		EventVolume,
+		ErrorVolume,
 		
 		/**
 		 * chart the unique number of events of the target app, deployment, tier
 		 */
-		UniqueEvents,
+		UniqueErrors,
 		
 		/**
 		 * chart the relative rate of events of the target app, deployment, tier
 		 */
-		EventRate,
+		ErrorRate,
 		
 		/**
 		 * chart the reliability score of the target app, deployment, tier

@@ -59,10 +59,17 @@ public class GraphFunction extends BaseGraphFunction {
 	public GraphFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
-
 	@Override
 	protected List<GraphSeries> processServiceGraph(Collection<String> serviceIds, String serviceId, String viewId, String viewName,
 			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
+		
+		return doProcessServiceGraph(serviceIds, serviceId,
+			viewId, input, timeSpan, pointsWanted);
+	}
+
+	protected List<GraphSeries> doProcessServiceGraph(Collection<String> serviceIds, String serviceId, 
+			String viewId, BaseGraphInput input, 
+			Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
 
 		GraphInput graphInput = (GraphInput) input;
 
@@ -74,12 +81,14 @@ public class GraphFunction extends BaseGraphFunction {
 		}
 		
 		Series series = new Series();
-
-		String tagName = getSeriesName(input, input.seriesName, viewName, serviceId, serviceIds);
+				
+		String tagName = getSeriesName(input, input.seriesName, serviceId, serviceIds);
+		String cleanTagName = cleanSeriesName(tagName);
+		
 		SeriesVolume seriesData = processGraphPoints(serviceId, viewId, timeSpan, graph, graphInput);
 
 		series.name = EMPTY_NAME;
-		series.columns = Arrays.asList(new String[] { TIME_COLUMN, tagName });
+		series.columns = Arrays.asList(new String[] { TIME_COLUMN, cleanTagName });
 		
 		if ((graphInput.condense) && (seriesData.values.size() > pointsWanted) &&
 			(graphInput.getTimeFormat() == TimeFormat.EPOCH)) {
@@ -87,8 +96,8 @@ public class GraphFunction extends BaseGraphFunction {
 		} else {
 			series.values = seriesData.values;
 		}
-
-		return Collections.singletonList(GraphSeries.of(series, seriesData.volume));
+		
+		return Collections.singletonList(GraphSeries.of(series, seriesData.volume, cleanTagName));
 
 	}
 	
@@ -163,7 +172,11 @@ public class GraphFunction extends BaseGraphFunction {
 		if (input.hasEventFilter()) {
 			eventMap = getEventMap(serviceId, input, timeSpan.getFirst(), timeSpan.getSecond(),
 				input.volumeType, input.pointsWanted);
-			eventFilter = input.getEventFilter(apiClient, serviceId);
+			eventFilter = getEventFilter(serviceId, input, timeSpan);
+			
+			if (eventFilter == null) {
+				return SeriesVolume.of(values, volume);
+			}
 
 		} else {
 			eventMap= null;

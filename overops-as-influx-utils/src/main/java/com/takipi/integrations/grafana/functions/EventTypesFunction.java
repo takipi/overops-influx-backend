@@ -102,7 +102,7 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 		Set<String> eventTypes = new HashSet<String>();
 		Set<String> exceptionTypes = new TreeSet<String>();
 		Set<String> categoryNames = new TreeSet<String>();
-	
+			
 		Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();
 
 		for (EventResult event : events.values()) {
@@ -142,6 +142,9 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 		Collection<EventTypes> availTypes = eventInput.getEventTypes(); 
 		
 		if (availTypes.contains(EventTypes.EventTypes)) {
+			
+			appender.append(EventFilter.CRITICAL_EXCEPTIONS);
+
 			for (String type : eventTypes) {
 				appender.append(type);
 			}
@@ -158,7 +161,7 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 
 		if (availTypes.contains(EventTypes.ExceptionTypes)) {
 			for (String exceptionType : exceptionTypes) {
-				appender.append(EventFilter.EXCEPTION_PREFIX + exceptionType);
+				appender.append(EventFilter.toExceptionFilter(exceptionType));
 			}
 		}
 	}

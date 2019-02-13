@@ -21,26 +21,14 @@
         "showIn": 0,
         "tags": [],
         "type": "tags"
-      },
-      {
-        "datasource": "OO",
-        "enable": true,
-        "hide": true,
-        "iconColor": "rgba(255, 96, 96, 1)",
-        "limit": 100,
-        "name": "baseline",
-        "query": "baselineAnnotation({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"text\":\"<- baseline %s | active window %s  ->\"})",
-        "showIn": 0,
-        "tags": [],
-        "type": "tags"
       }
     ]
   },
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 37,
-  "iteration": 1548032060794,
+  "id": 19,
+  "iteration": 1550029439069,
   "links": [
     {
       "icon": "external link",
@@ -49,7 +37,7 @@
       "title": "HELP",
       "tooltip": "Learn more about this dashboard",
       "type": "link",
-      "url": "https://doc.overops.com/docs/slowdowns-dashboard"
+      "url": "https://doc.overops.com/docs/performance-dashboard"
     },
     {
       "asDropdown": true,
@@ -67,70 +55,69 @@
   ],
   "panels": [
     {
-      "aliasColors": {
-        ".avg_time": "#1f78c1"
-      },
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
       "datasource": "OO",
-      "description": "The response time of the selected transactions in the selected timeframe ($activeWindowFmt) compared to the baseline ($baselineOnlyFmt). The left horizontal dashed line shows the avg response time within the baseline window, while the right base line represents the response time during the last $activeWindowFmt. The red vertical dashed line shows when the baseline ends and the active time window begins.",
-      "fill": 0,
+      "decimals": 2,
+      "description": "The number of calls into the selected transactions within the selected timeframe.",
+      "format": "short",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
       "gridPos": {
-        "h": 7,
-        "w": 12,
+        "h": 2,
+        "w": 4,
         "x": 0,
         "y": 0
       },
-      "hideTimeOverride": true,
-      "id": 13,
-      "interval": "5m",
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
+      "id": 17,
+      "interval": null,
       "links": [],
-      "nullPointMode": "null as zero",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [
+      "mappingType": 1,
+      "mappingTypes": [
         {
-          "alias": "Throughput",
-          "color": "#9ac48a",
-          "fill": 2,
-          "linewidth": 0,
-          "yaxis": 2
+          "name": "value to text",
+          "value": 1
         },
         {
-          "alias": "Response (ms)",
-          "color": "#f2c96d"
-        },
-        {
-          "alias": "/^Last/",
-          "color": "#82b5d8",
-          "dashes": true
-        },
-        {
-          "alias": "/^Baseline/",
-          "color": "#f9934e",
-          "dashes": true
+          "name": "range to text",
+          "value": 2
         }
       ],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
       "targets": [
         {
-          "alias": "Throughput",
+          "alias": "",
           "groupBy": [
             {
               "params": [
@@ -145,10 +132,9 @@
               "type": "fill"
             }
           ],
-          "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregate\":true,\"transactions\":\"$transactions\",\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\",\"performanceStates\":\"$performanceStates\"})",
+          "query": "transactionsVolume({\"type\":\"sum\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"transactions\":\"$transactions\", \"searchText\":\"$searchText\",\"pointsWanted\":\"$transactionPointsWanted\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -167,9 +153,439 @@
             ]
           ],
           "tags": []
+        }
+      ],
+      "thresholds": "75,175",
+      "title": "Total Transactions",
+      "transparent": false,
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "OO",
+      "decimals": null,
+      "description": "The average response time of the selected transactions.",
+      "format": "locale",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 4,
+        "x": 4,
+        "y": 0
+      },
+      "id": 20,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
         },
         {
-          "alias": "Response (ms)",
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "alias": "",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "transactionsVolume({\"type\":\"avg\",\"volumeType\":\"avg\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"transactions\":\"$transactions\", \"searchText\":\"$searchText\",\"pointsWanted\":\"$transactionPointsWanted\"})",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "10,20",
+      "title": "Avg Response Time (ms)",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": true,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "OO",
+      "decimals": 0,
+      "description": "The number of selected transactions whose avg time has increased by more than the critical slowdown threshold (as defined in the Settings dashboard) compared to the baseline period.",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 4,
+        "x": 8,
+        "y": 0
+      },
+      "id": 18,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "alias": "",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"renderMode\":\"SingleStat\",\"types\":\"$failureTypes\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$transactionPointsWanted\",\"performanceStates\":\"CRITICAL\", \"searchText\":\"$searchText\"})",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "1,3",
+      "title": "Slow Transactions",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": true,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "OO",
+      "decimals": null,
+      "description": "The number of selected transactions whose avg time has increased by more than the slowdown threshold (as defined in the Settings dashboard) compared to the baseline period.",
+      "format": "short",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 4,
+        "x": 12,
+        "y": 0
+      },
+      "id": 21,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "alias": "",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"renderMode\":\"SingleStat\",\"types\":\"$failureTypes\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$transactionPointsWanted\",\"performanceStates\":\"SLOWING\",\"searchText\":\"$searchText\" })",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "2,4",
+      "title": "Slowing Transactions",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": true,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "OO",
+      "decimals": 2,
+      "description": "The rate of $transactionFailureTypes and the number of calls into the selected transactions. Transaction failure types are defined in the Settings dashboard.",
+      "format": "percentunit",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 4,
+        "x": 16,
+        "y": 0
+      },
+      "id": 36,
+      "interval": null,
+      "links": [
+        {
+          "dashboard": "Errors",
+          "includeVars": true,
+          "keepTime": true,
+          "params": "",
+          "targetBlank": true,
+          "title": "Errors",
+          "type": "absolute",
+          "url": "d/HYBPMdYik/errors"
+        }
+      ],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "alias": "",
           "groupBy": [
             {
               "params": [
@@ -187,123 +603,9 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregate\":\"true\",\"transactions\":\"$transactions\",\"seriesName\":\"Avg Response (ms)\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\",\"performanceStates\":\"$performanceStates\"})",
+          "query": "transactionsRate({\"type\":\"sum\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\",  \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"filter\":\"events\",\"searchText\":\"$searchText\", \"transactionSearchText\":\"$searchText\",\"pointsWanted\":\"$pointsWanted\"})",
           "rawQuery": true,
-          "refId": "B",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        },
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": true,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "transactionsAvgGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"aggregate\":\"false\",\"transactions\":\"$transactions\",\"seriesName\":\"Avg (ms)\", \"pointsWanted\":\"$transactionPointsWanted\", \"aggregate\":\"true\", \"searchText\":\"$searchText\",\"performanceStates\":\"$performanceStates\"}) ",
-          "rawQuery": true,
-          "refId": "D",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        },
-        {
-          "alias": "Last $activeWindowFmt Avg (ms)",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "transactionsAvgGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"aggregate\":\"false\",\"transactions\":\"$transactions\",\"seriesName\":\"Avg (ms)\", \"pointsWanted\":\"$transactionPointsWanted\", \"aggregate\":\"true\", \"searchText\":\"$searchText\",\"performanceStates\":\"$performanceStates\", \"timeWindow\":\"Active\"}) ",
-          "rawQuery": true,
-          "refId": "C",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        },
-        {
-          "alias": "Baseline $baselineOnlyFmt Avg (ms)",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "transactionsAvgGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"aggregate\":\"false\",\"transactions\":\"$transactions\",\"seriesName\":\"Avg (ms)\", \"pointsWanted\":\"$transactionPointsWanted\", \"aggregate\":\"true\", \"searchText\":\"$searchText\",\"performanceStates\":\"$performanceStates\", \"timeWindow\":\"Baseline\"}) ",
-          "rawQuery": true,
-          "refId": "E",
+          "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
@@ -322,48 +624,142 @@
           "tags": []
         }
       ],
-      "thresholds": [],
-      "timeFrom": "$baseline",
-      "timeShift": null,
-      "title": "Last $activeWindowFmt vs $baselineOnlyFmt baseline",
-      "tooltip": {
-        "shared": true,
-        "sort": 2,
-        "value_type": "individual"
-      },
-      "transparent": false,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
+      "thresholds": "0.01,0.05",
+      "title": "Failure %",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
         {
-          "decimals": null,
-          "format": "short",
-          "label": "",
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "decimals": null,
-          "format": "short",
-          "label": "",
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
         }
       ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
+      "valueName": "avg"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "OO",
+      "description": "The number of $transactionFailureTypes that occured in the selected transactions. Failure types are defined in the Settings dashboard.",
+      "format": "short",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 4,
+        "x": 20,
+        "y": 0
+      },
+      "id": 37,
+      "interval": null,
+      "links": [
+        {
+          "dashboard": "Errors",
+          "includeVars": true,
+          "keepTime": true,
+          "params": "var-type=$failureTypes",
+          "targetBlank": true,
+          "title": "Errors",
+          "type": "absolute",
+          "url": "d/HYBPMdYik/errors"
+        }
+      ],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "alias": "",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "volume({\"type\":\"sum\",\"volumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"transactionSearchText\":\"$searchText\",\"pointsWanted\":\"$pointsWanted\"})",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "25,50",
+      "title": "Failed Requests",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
     },
     {
       "aliasColors": {
@@ -373,13 +769,13 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "The response time of the selected transactions overlaid on the number of calls (Throughput) into them during the last $activeWindowFmt. The dashed line represents the average response time during that time window.",
+      "description": "The response time of the selected transactions overlaid on the number of calls (throughput) into them.",
       "fill": 0,
       "gridPos": {
         "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 0
+        "w": 13,
+        "x": 0,
+        "y": 2
       },
       "hideTimeOverride": true,
       "id": 12,
@@ -403,19 +799,19 @@
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "Throughput",
+          "alias": "/^.Throughput/",
           "color": "#9ac48a",
           "fill": 2,
           "linewidth": 0,
           "yaxis": 2
         },
         {
-          "alias": "/^Response/",
+          "alias": "/^.Response/",
           "color": "#f2c96d"
         },
         {
-          "alias": "/^Last/",
-          "color": "#82b5d8",
+          "alias": "/^.Avg/",
+          "color": "#70dbed",
           "dashes": true
         }
       ],
@@ -424,7 +820,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "Throughput",
+          "alias": "",
           "groupBy": [
             {
               "params": [
@@ -442,7 +838,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregate\":true,\"transactions\":\"$transactions\",\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\"})",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregateMode\":Yes,\"transactions\":\"$transactions\",\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -463,7 +859,7 @@
           "tags": []
         },
         {
-          "alias": "Response (ms)",
+          "alias": "",
           "groupBy": [
             {
               "params": [
@@ -481,7 +877,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregate\":\"true\",\"transactions\":\"$transactions\",\"seriesName\":\"Response (ms)\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\",\"performanceStates\":\"$performanceStates\"})",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregate\":\"true\",\"transactions\":\"$transactions\",\"seriesName\":\"Response (ms)\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\"})",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -502,7 +898,6 @@
           "tags": []
         },
         {
-          "alias": "Last $activeWindowFmt Avg (ms)",
           "groupBy": [
             {
               "params": [
@@ -520,7 +915,45 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsAvgGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"aggregate\":\"false\",\"transactions\":\"$transactions\",\"seriesName\":\"Avg (ms)\", \"pointsWanted\":\"$transactionPointsWanted\", \"aggregate\":\"true\", \"searchText\":\"$searchText\",\"performanceStates\":\"$performanceStates\", \"timeWindow\":\"Active\"}) ",
+          "query": "keyTransactionsGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"aggregate\":\"true\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\"})",
+          "rawQuery": true,
+          "refId": "C",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "transactionsAvgGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"aggregate\":\"false\",\"transactions\":\"$transactions\",\"seriesName\":\"Avg (ms)\", \"pointsWanted\":\"$transactionPointsWanted\", \"aggregateMode\":\"Yes\", \"searchText\":\"$searchText\", \"timeWindow\":\"Active\"}) ",
           "rawQuery": true,
           "refId": "D",
           "resultFormat": "time_series",
@@ -542,9 +975,9 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": "$activeWindow",
+      "timeFrom": null,
       "timeShift": null,
-      "title": "Last $activeWindowFmt",
+      "title": "Average Response",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -584,6 +1017,176 @@
       }
     },
     {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "OO",
+      "description": "All transaction failure types: $transactionFailureText. Click on a transaction's failure rate below to drill down into its errors. The error types defined as failures are defined in the Settings dashboard.",
+      "fill": 0,
+      "gridPos": {
+        "h": 7,
+        "w": 11,
+        "x": 13,
+        "y": 2
+      },
+      "hideTimeOverride": false,
+      "id": 38,
+      "interval": "1h",
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "/^.Throughput/",
+          "color": "#7eb26d",
+          "fill": 2,
+          "linewidth": 0,
+          "yaxis": 2
+        },
+        {
+          "alias": "/^.Failures/"
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregateMode\":Yes,\"transactions\":\"$transactions\",\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\"})",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "alias": "",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$transactionFailureTypes\",\"seriesName\":\"Failures\", \"transactions\":\"$transactions\", \"transactionSearchText\":\"$searchText\"})\n",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Transactions Failures",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
       "columns": [],
       "datasource": "OO",
       "description": "The list of selected transactions and their details.",
@@ -592,7 +1195,7 @@
         "h": 11,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 9
       },
       "id": 8,
       "links": [],
@@ -600,8 +1203,8 @@
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 1,
-        "desc": true
+        "col": null,
+        "desc": false
       },
       "styles": [
         {
@@ -639,7 +1242,7 @@
             "rgba(50, 172, 45, 0.97)"
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 0,
+          "decimals": 1,
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
@@ -651,7 +1254,7 @@
           "unit": "short"
         },
         {
-          "alias": "Failure Rate",
+          "alias": "Failure Rate (%)",
           "colorMode": "value",
           "colors": [
             "rgba(50, 172, 45, 0.97)",
@@ -661,9 +1264,9 @@
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 0,
           "link": true,
-          "linkTargetBlank": false,
-          "linkTooltip": "${__cell_7}. Click to drill-in",
-          "linkUrl": "d/HYBPMdYik/errors?from=${__cell_3}&to=${__cell_4}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=${__cell_8}&var-type=$transactionFailureTypes",
+          "linkTargetBlank": true,
+          "linkTooltip": "${__cell_7}. Click to drill-down.",
+          "linkUrl": "d/HYBPMdYik/errors?from=${__cell_2}&to=${__cell_3}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=${__cell_9}&var-type=$transactionFailureTypes",
           "mappingType": 1,
           "pattern": "error_rate",
           "thresholds": [
@@ -671,7 +1274,13 @@
             "5"
           ],
           "type": "number",
-          "unit": "percent"
+          "unit": "percent",
+          "valueMaps": [
+            {
+              "text": "< 1%",
+              "value": "0.009"
+            }
+          ]
         },
         {
           "alias": "Avg Response",
@@ -703,8 +1312,8 @@
           "decimals": 0,
           "link": true,
           "linkTargetBlank": false,
-          "linkTooltip": "${__cell_2}. Thresholds are defined in the Settings dashboard. Click to drill-in.",
-          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
+          "linkTooltip": "${__cell_1}. Thresholds are defined in the Settings dashboard. Click to drill-in.",
+          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-timeRange=${__cell_4}&var-transactions=${__cell_9}&var-performanceStates=OK%7CSLOWING%7CCRITICAL%7CNO_DATA",
           "mappingType": 1,
           "pattern": "transaction",
           "thresholds": [],
@@ -738,10 +1347,10 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
-          "link": true,
-          "linkTargetBlank": false,
-          "linkTooltip": "${__cell_2}}. Thresholds are defined in the Settings dashboard. Click to drill-in.",
-          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
+          "link": false,
+          "linkTargetBlank": true,
+          "linkTooltip": "${__cell_1}. Thresholds are defined in the Settings dashboard. Click to drill-in.",
+          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-timeRange=${__cell_4}&var-transactions=${__cell_9}&var-performanceStates=OK%7CSLOWING%7CCRITICAL%7CNO_DATA",
           "mappingType": 1,
           "pattern": "slow_state",
           "thresholds": [
@@ -776,9 +1385,9 @@
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
           "link": true,
-          "linkTargetBlank": false,
+          "linkTargetBlank": true,
           "linkTooltip": "${__cell_2}",
-          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
+          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-timeRange=${__cell_5}&var-transactions=${__cell_8}&var-performanceStates=OK|SLOWING|CRITICAL",
           "mappingType": 1,
           "pattern": "slow_delta",
           "thresholds": [
@@ -846,9 +1455,10 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 1,
-          "link": true,
-          "linkTooltip": "The avg response time in the $baselineOnlyFmt baseline with ${__cell_5} calls",
-          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
+          "link": false,
+          "linkTargetBlank": true,
+          "linkTooltip": "The avg response time in the baseline window with ${__cell_6} calls",
+          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-timeRange=${__cell_4}&var-transactions=${__cell_9}&var-performanceStates=OK%7CSLOWING%7CCRITICAL%7CNO_DATA",
           "mappingType": 1,
           "pattern": "baseline_avg",
           "thresholds": [],
@@ -898,6 +1508,22 @@
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
           "mappingType": 1,
+          "pattern": "timeRange",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
           "pattern": "error_description",
           "thresholds": [],
           "type": "hidden",
@@ -922,7 +1548,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"fields\":\"link,slow_state,delta_description,from,to,baseline_calls,active_calls,error_description,transaction,invocations,avg_response,baseline_avg,error_rate,errors\",\"renderMode\":\"Grid\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"searchText\":\"$searchText\", \"pointsWanted\":\"$transactionPointsWanted\", \"eventPointsWanted\":\"$pointsWanted\",\"performanceStates\":\"$performanceStates\"})",
+          "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"fields\":\"link,delta_description,from,to,timeRange,baseline_calls,active_calls,error_description,slow_state,transaction,invocations,avg_response,baseline_avg,error_rate,errors\",\"renderMode\":\"Grid\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"searchText\":\"$searchText\", \"pointsWanted\":\"$transactionPointsWanted\",\"eventPointsWanted\":\"$pointsWanted\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -946,40 +1572,26 @@
       "title": "",
       "transform": "table",
       "type": "table"
-    },
-    {
-      "content": "<script>\n\nfunction hide(name) {\n  var element = document.getElementsByClassName(name);\n  \n  if ((element) && (element.length == 1)) {\n    element[0].style.display = 'none';\n  }\n\n}\n\nfunction hideButtons() {\n  hide(\"btn navbar-button gf-timepicker-nav-btn\");\n  hide(\"navbar-buttons navbar-buttons--zoom\");\n  hide(\"btn navbar-button navbar-button--zoom\");\n}\n\nhideButtons();\n\n</script>\n\n\n",
-      "gridPos": {
-        "h": 1,
-        "w": 1,
-        "x": 0,
-        "y": 18
-      },
-      "id": 15,
-      "links": [],
-      "mode": "html",
-      "title": "",
-      "type": "text"
     }
   ],
   "refresh": false,
   "schemaVersion": 16,
   "style": "dark",
-  "tags": [],
+  "tags": [
+    "OverOps"
+  ],
   "templating": {
     "list": [
       {
         "allValue": "all",
         "current": {
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
         "includeAll": false,
-        "label": "Environments",
+        "label": "Env",
         "multi": true,
         "name": "environments",
         "options": [],
@@ -998,19 +1610,41 @@
         "allValue": "*",
         "current": {
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
-        "label": "Applications",
+        "label": "Apps",
         "multi": true,
         "name": "applications",
         "options": [],
         "query": "applications({\"environments\":\"$environments\",\"sorted\":\"true\"})",
         "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": "all",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "OO",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Deployments",
+        "multi": false,
+        "name": "deployments",
+        "options": [],
+        "query": "deployments({\"environments\":\"$environments\", \"sorted\":true})",
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -1029,31 +1663,7 @@
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
-        "label": "Deployments",
-        "multi": false,
-        "name": "deployments",
-        "options": [],
-        "query": "deployments({\"environments\":\"$environments\", \"sorted\":true})",
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": "All",
-        "current": {
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "OO",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Servers",
+        "label": "Server Groups",
         "multi": true,
         "name": "servers",
         "options": [],
@@ -1081,7 +1691,7 @@
         "multi": true,
         "name": "transactions",
         "options": [],
-        "query": "slowTransactions({\"environments\":\"$environments\",\"applications\":\"$applications\",\"deployments\":\"$deployments\",\"servers\":\"$servers\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"sorted\":\"true\", \"pointsWanted\":\"$transactionPointsWanted\", \"performanceStates\":\"$performanceStates\"})",
+        "query": "transactions({\"environments\":\"$environments\",\"view\":\"All Events\",\"timeFilter\":\"time >= now() - 7d\",\"sorted\":\"true\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1166,9 +1776,8 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "text": "All Events",
-          "value": "All Events"
+          "text": "",
+          "value": ""
         },
         "hide": 2,
         "includeAll": false,
@@ -1177,35 +1786,12 @@
         "name": "view",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "All Events",
             "value": "All Events"
           }
         ],
         "query": "All Events",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "<term>",
-          "value": "<term>"
-        },
-        "hide": 0,
-        "includeAll": false,
-        "label": "Search",
-        "multi": false,
-        "name": "searchText",
-        "options": [
-          {
-            "selected": true,
-            "text": "<term>",
-            "value": "<term>"
-          }
-        ],
-        "query": "<term>",
         "skipUrlSync": false,
         "type": "custom"
       },
@@ -1260,6 +1846,30 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
+          "text": "<term>",
+          "value": "<term>"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Search",
+        "multi": false,
+        "name": "searchText",
+        "options": [
+          {
+            "selected": true,
+            "text": "<term>",
+            "value": "<term>"
+          }
+        ],
+        "query": "<term>",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -1284,6 +1894,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -1304,223 +1915,11 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
-        "hide": 2,
-        "includeAll": false,
-        "label": null,
-        "multi": false,
-        "name": "baseline",
-        "options": [],
-        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Combined\"})",
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "tags": [],
-          "text": "7d",
-          "value": "7d"
-        },
-        "hide": 0,
-        "includeAll": false,
-        "label": "Last",
-        "multi": false,
-        "name": "timeRange",
-        "options": [
-          {
-            "selected": false,
-            "text": "30m",
-            "value": "30m"
-          },
-          {
-            "selected": false,
-            "text": "1h",
-            "value": "1h"
-          },
-          {
-            "selected": false,
-            "text": "4h",
-            "value": "4h"
-          },
-          {
-            "selected": false,
-            "text": "8h",
-            "value": "8h"
-          },
-          {
-            "selected": false,
-            "text": "24h",
-            "value": "24h"
-          },
-          {
-            "selected": false,
-            "text": "2d",
-            "value": "2d"
-          },
-          {
-            "selected": true,
-            "text": "7d",
-            "value": "7d"
-          },
-          {
-            "selected": false,
-            "text": "14d",
-            "value": "14d"
-          },
-          {
-            "selected": false,
-            "text": "30d",
-            "value": "30d"
-          }
-        ],
-        "query": "30m,1h,4h,8h,24h,2d,7d,14d,30d",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "SLOWING|CRITICAL",
-          "value": "SLOWING|CRITICAL"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": null,
-        "multi": false,
-        "name": "performanceStates",
-        "options": [
-          {
-            "selected": true,
-            "text": "SLOWING|CRITICAL",
-            "value": "SLOWING|CRITICAL"
-          }
-        ],
-        "query": "SLOWING|CRITICAL",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
-        "hide": 2,
-        "includeAll": false,
-        "label": null,
-        "multi": false,
-        "name": "baselineOnly",
-        "options": [],
-        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Baseline\"})",
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
-        "hide": 2,
-        "includeAll": false,
-        "label": null,
-        "multi": false,
-        "name": "activeWindow",
-        "options": [],
-        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Active\"})",
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
-        "hide": 2,
-        "includeAll": false,
-        "label": null,
-        "multi": false,
-        "name": "baselineOnlyFmt",
-        "options": [],
-        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Baseline\", \"prettyFormat\":\"true\"})",
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
-        "hide": 2,
-        "includeAll": false,
-        "label": null,
-        "multi": false,
-        "name": "activeWindowFmt",
-        "options": [],
-        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Active\", \"prettyFormat\":\"true\"})",
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
       }
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {
@@ -1550,7 +1949,7 @@
     ]
   },
   "timezone": "",
-  "title": "Slowdowns",
-  "uid": "iHSORcymk",
-  "version": 71
+  "title": "Performance",
+  "uid": "Z40SpeJmz",
+  "version": 118
 }

@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.metrics.Graph;
@@ -23,7 +21,6 @@ import com.takipi.integrations.grafana.input.GraphLimitInput;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class SplitGraphFunction extends LimitGraphFunction {
-	private static final Logger logger = LoggerFactory.getLogger(SplitGraphFunction.class); 
 	
 	public static class Factory implements FunctionFactory {
 
@@ -49,7 +46,7 @@ public class SplitGraphFunction extends LimitGraphFunction {
 
 	@Override
 	protected List<GraphSeries> processGraphSeries(Collection<String> serviceIds,
-			String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
+			String serviceId, String viewName, String viewId, Pair<DateTime, DateTime> timeSpan,
 			GraphInput input) {
 		GraphLimitInput limitInput = (GraphLimitInput)input;
 
@@ -67,7 +64,11 @@ public class SplitGraphFunction extends LimitGraphFunction {
 			return Collections.emptyList();		
 		}
 		
-		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
+		EventFilter eventFilter = getEventFilter(serviceId, input, timeSpan);
+		
+		if (eventFilter == null) {
+			return Collections.emptyList();		
+		}
 		
 		Map<String, GraphData> eventsVolume = new HashMap<String, GraphData>();
 		
@@ -84,9 +85,7 @@ public class SplitGraphFunction extends LimitGraphFunction {
 					continue;
 				}
 				
-				if (event.error_location == null)
-				{
-					logger.warn("Event {} does not have error location!", event.id);
+				if (event.error_location == null) {
 					continue;
 				}
 				
@@ -136,9 +135,7 @@ public class SplitGraphFunction extends LimitGraphFunction {
 					continue;
 				}
 				
-				if (event.error_location == null)
-				{
-					logger.warn("Event {} does not have error location!", event.id);
+				if (event.error_location == null) {
 					continue;
 				}
 				

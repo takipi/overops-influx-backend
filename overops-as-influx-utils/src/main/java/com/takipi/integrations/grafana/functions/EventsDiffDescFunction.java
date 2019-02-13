@@ -67,7 +67,7 @@ public class EventsDiffDescFunction extends EnvironmentVariableFunction {
 		String timeDiff, boolean enclose) {
 		
 		if (enclose) {
-			value.append("(");
+			value.append("{");
 		}
 		
 		if ((CollectionUtil.safeIsEmpty(apps)) && (CollectionUtil.safeIsEmpty(deps)) 
@@ -116,7 +116,7 @@ public class EventsDiffDescFunction extends EnvironmentVariableFunction {
 		}
 		
 		if (enclose) {
-			value.append(")");
+			value.append("}");
 		}
 	}
 	
@@ -153,7 +153,7 @@ public class EventsDiffDescFunction extends EnvironmentVariableFunction {
 		return result.toString();
 	}
 	
-	private String getCombinedDesc(EventsDiffInput input, String serviceId) {
+	private String getCombinedDesc(EventsDiffDescInput input, String serviceId) {
 				
 		String json = new Gson().toJson(input);
 		EventsInput targetInput =  new Gson().fromJson(json, input.getClass());
@@ -171,21 +171,41 @@ public class EventsDiffDescFunction extends EnvironmentVariableFunction {
 		Collection<String> srvA = input.getServers(serviceId);
 		Collection<String> srvB = targetInput.getServers(serviceId);
 		
-		boolean hadTimeDiff = (input.timeDiff != null) 
-		|| (!input.timeDiff.equals(EventsDiffFunction.NO_DIFF));
+		boolean noTimeDiff = (input.timeDiff == null) 
+		|| (input.timeDiff.equals(EventsDiffFunction.NO_DIFF))
+		|| (input.timeDiff.equals(GrafanaFunction.NONE));
 		
 		if ((Objects.equal(appsA, appsB)) 
 		&& (Objects.equal(depsA, depsB)) 
 		&& (Objects.equal(srvA, srvB))
-		&& (!hadTimeDiff)) { 
+		&& (noTimeDiff)) { 
 			return "Select filters from group A to compare with group B";
 		}
 		
 		StringBuilder result = new StringBuilder();
 		
+		switch (input.getDiffType()) {
+			
+			case New: {
+				result.append("Only in ");
+				break;
+				
+			}
+			
+			case Increasing: {
+				result.append("Inc in ");
+				break;
+				
+			}
+			
+			default:
+				throw new IllegalStateException(String.valueOf(input.getDiffType()));
+				
+		}
+		
 		addGroup(result, appsB, depsB, srvB, null, true);
 
-		result.append(" vs. ");
+		result.append(" compared to ");
 
 		addGroup(result, appsA, depsA, srvA, input.timeDiff, true);
 		

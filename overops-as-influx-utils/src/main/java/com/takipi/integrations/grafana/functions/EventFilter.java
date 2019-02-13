@@ -20,7 +20,7 @@ import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class EventFilter
 {
-	
+	public static final String CRITICAL_EXCEPTIONS = "Critical Exceptions";
 	public static final String CATEGORY_PREFIX = "-";
 	public static final String EXCEPTION_PREFIX = "--";
 	public static final String TERM = "<term>";
@@ -42,6 +42,29 @@ public class EventFilter
 	private List<String> exceptionTypes;
 	private List<String> eventTypes;
 	private List<String> categoryTypes;
+	
+	public static String toExceptionFilter(String value) {
+		
+		if (!isExceptionFilter(value)) {
+			return EventFilter.EXCEPTION_PREFIX + value;
+		} else { 
+			return value;
+		}
+	}
+	
+	public static boolean isExceptionFilter(String name) {
+		return name.startsWith(EventFilter.EXCEPTION_PREFIX);
+	}
+	
+	public static String fromExceptionFilter(String value) {
+		
+		if ((value == null) || (!isExceptionFilter(value))) {
+			return value;
+		}
+		
+		return value.substring(EventFilter.EXCEPTION_PREFIX.length());
+	}
+	
 	
 	public static EventFilter of(Collection<String> types, Collection<String> allowedTypes,
 			Collection<String> introducedBy, Collection<String> eventLocations, GroupFilter transactionsFilter,
@@ -96,16 +119,18 @@ public class EventFilter
 		{
 			for (String type : types)
 			{
-				if (type.startsWith(EXCEPTION_PREFIX))
+				if (isExceptionFilter(type))
 				{
-					result.exceptionTypes.add(type.substring(EXCEPTION_PREFIX.length()));
+					result.exceptionTypes.add(fromExceptionFilter(type));
 				} 
 				else if (GroupSettings.isGroup(type))
 				{
-					result.categoryTypes.add(type.substring(CATEGORY_PREFIX.length()));
+					result.categoryTypes.add(GroupSettings.fromGroupName(type));
 				}
 				else {
-					result.eventTypes.add(type);
+					if (!type.equals(GrafanaFunction.ALL)) {
+						result.eventTypes.add(type);
+					}
 				}
 			}
 		}

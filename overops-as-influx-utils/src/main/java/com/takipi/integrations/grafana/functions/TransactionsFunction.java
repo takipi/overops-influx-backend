@@ -14,8 +14,9 @@ import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.transaction.Transaction;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
+import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
+import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.TransactionsInput;
-import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings.Group;
@@ -47,7 +48,22 @@ public class TransactionsFunction extends EnvironmentVariableFunction {
 	}
 	
 	@Override
-	protected int compareValues(String o1, String o2) {
+	protected int compareValues(FunctionInput input, String o1, String o2) {
+		
+		int i1 = GrafanaFunction.TOP_TRANSACTION_FILTERS.indexOf(o1);
+		int i2 = GrafanaFunction.TOP_TRANSACTION_FILTERS.indexOf(o2);
+	
+		if (i2 != -1) {
+			if (i1 != -1) {
+				return i2 - i1;
+			} else {
+				return 1;
+			}
+		} else {
+			if (i1 != -1) {
+				return -1;
+			}
+		}
 		
 		if (GroupSettings.isGroup(o1.toString())) {
 			return -1;
@@ -57,14 +73,24 @@ public class TransactionsFunction extends EnvironmentVariableFunction {
 			return 1;
 		}
 		
-		return super.compareValues(o1, o2);
+		return super.compareValues(input, o1, o2);
+	}
+	
+	@Override
+	protected void populateValues(FunctionInput input, VariableAppender appender)
+	{
+		for (String topTransactionFilter : GrafanaFunction.TOP_TRANSACTION_FILTERS) {
+			appender.append(topTransactionFilter);	
+		}
+		
+		super.populateValues(input, appender);
 	}
 
 	@Override
 	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender) {
 		
-		ViewInput viewInput = (ViewInput)input;
+		BaseEventVolumeInput viewInput = (BaseEventVolumeInput)input;
 		Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(viewInput.timeFilter);
 
 		String viewId = getViewId(serviceId, viewInput.view);
@@ -73,7 +99,8 @@ public class TransactionsFunction extends EnvironmentVariableFunction {
 			return;
 		}
 		
-		Collection<Transaction> transactions = getTransactions(serviceId, viewId, timespan, viewInput, null);
+		Collection<Transaction> transactions = getTransactions(serviceId, viewId, timespan, 
+			viewInput, null);
 		
 		if (transactions == null) {
 			return;

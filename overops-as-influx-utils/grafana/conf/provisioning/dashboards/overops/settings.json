@@ -1,0 +1,170 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "limit": 100,
+        "name": "Annotations & Alerts",
+        "showIn": 0,
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": 23,
+  "iteration": 1550041140796,
+  "links": [
+    {
+      "asDropdown": true,
+      "icon": "external link",
+      "tags": [
+        "OverOps"
+      ],
+      "type": "dashboards"
+    }
+  ],
+  "panels": [
+    {
+      "content": "<script>\n\n\nfunction openSettings() {\n  \n  var redir = $(\"textarea.redirect\").val();\n  var env = $(\"textarea.environments\").val();\n  var redirApiHost = $(\"textarea.redirApiHost\").val();\n\n  \n  if ((env == \"\") || (env == \"None\") || (redirApiHost == \"\")) {\n    return;\n  }\n  \n  console.log(env);\n\n  var targetEnv;\n  \n  if (env.indexOf(\",\") != -1) {\n      var noParen = env.replace(\"{\", \"\");\n      var envs = noParen.split(\",\")\n      targetEnv = envs[0];\n  } else {\n      targetEnv = env;\n  }\n\n  var split = targetEnv.split(\":\");\n  var url = redirApiHost + \"/settings/environments/\";\n  \n  var envId;\n  \n  if (split.length > 1) {\n    url = url + split[0] + \"/\";\n    envId = split[1].trim();\n  } else {\n     envId = split[0].trim();  \n  }\n  \n  url = url + \"dashboards?id=\" + envId;\n  \n  console.log(url);\n  \n  if (redir == \"true\") {\n   window.location.replace(url);\n  }\n}\n\nopenSettings();\n\n</script>\n\n<style type=\"text/css\">\n    \n    .button {\n        text-align:left;\n        padding-top:10px;\n        float:left;\n    }\n    \n    \n    .button {\n        padding:10px 20px;\n        color:black;\n    }\n    \n     .environments {\n        visibility:hidden;\n    }\n    \n     .redirect {\n        visibility:hidden;\n    }\n    \n      .redirApiHost {\n        visibility:hidden;\n    }\n    \n    .button {\n        visibility:hidden;\n    }\n    \n</style>\n\n<textarea class=\"environments\">$environments</textarea>\n<textarea class=\"redirect\">$redirect</textarea>\n<textarea class=\"redirApiHost\">$redirApiHost</textarea>\n\n\n\n<div class=\"button\">\n<button class=\"button\" onclick=\"openSettings()\">Open Settings</button>\n</div>\n\n(Choose an environment and set Redirect to true)\n\n  </div>\n</div>\n</div>",
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 54,
+      "links": [],
+      "mode": "html",
+      "title": "",
+      "type": "text"
+    }
+  ],
+  "refresh": false,
+  "schemaVersion": 16,
+  "style": "dark",
+  "tags": [
+    "OverOps"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "None",
+          "value": "None"
+        },
+        "datasource": "OO",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Env",
+        "multi": false,
+        "name": "environments",
+        "options": [],
+        "query": "environments({\"sorted\":true})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "true",
+          "value": "true"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Redirect",
+        "multi": false,
+        "name": "redirect",
+        "options": [
+          {
+            "selected": true,
+            "text": "true",
+            "value": "true"
+          },
+          {
+            "selected": false,
+            "text": "false",
+            "value": "false"
+          }
+        ],
+        "query": "true,false",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "https://app.overops.com",
+          "value": "https://app.overops.com"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "redirApiHost",
+        "options": [],
+        "query": "apiHost({\"type\":\"FullURL\"})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
+  },
+  "time": {
+    "from": "now-14h",
+    "to": "now"
+  },
+  "timepicker": {
+    "hidden": true,
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
+  },
+  "timezone": "",
+  "title": "Settings",
+  "uid": "mTGNNTfiz",
+  "version": 148
+}

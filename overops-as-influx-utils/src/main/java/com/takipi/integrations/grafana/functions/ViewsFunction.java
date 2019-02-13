@@ -1,7 +1,9 @@
 package com.takipi.integrations.grafana.functions;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.category.Category;
@@ -10,6 +12,7 @@ import com.takipi.api.client.data.view.ViewInfo;
 import com.takipi.api.client.util.category.CategoryUtil;
 import com.takipi.api.client.util.view.ViewUtil;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
+import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.ViewsInput;
 
 public class ViewsFunction extends EnvironmentVariableFunction {
@@ -35,9 +38,25 @@ public class ViewsFunction extends EnvironmentVariableFunction {
 	public ViewsFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
+	
+	@Override
+	protected int compareValues(FunctionInput input, String o1, String o2) {
+		ViewsInput viewsInput = (ViewsInput)input;
+		
+		if (o2.equals(viewsInput.defaultView)) {
+			return 1;
+		}
+		
+		if (o1.equals(viewsInput.defaultView)) {
+			return 1;
+		}
+		
+		return super.compareValues(viewsInput, o1, o2);
+	}
 
 	@Override
-	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
+	protected void populateServiceValues(BaseEnvironmentsInput input, 
+			Collection<String> serviceIds, String serviceId,
 			VariableAppender appender) {
 
 		if (!(input instanceof ViewsInput)) {
@@ -45,6 +64,13 @@ public class ViewsFunction extends EnvironmentVariableFunction {
 		}
 		
 		ViewsInput viewsInput = (ViewsInput)input;
+			
+		Set<String> views = new HashSet<String>();
+
+		if (viewsInput.defaultView != null) {
+			appender.append(viewsInput.defaultView);
+			views.add(viewsInput.defaultView);
+		} 
 		
 		if (viewsInput.category != null) {
 			
@@ -55,16 +81,26 @@ public class ViewsFunction extends EnvironmentVariableFunction {
 			}
 			
 			for (ViewInfo view : category.views) {
-				String viewName = getServiceValue(view.name, serviceId, serviceIds);	
-				appender.append(viewName);
+				
+				String viewName = view.name;	
+				
+				if (!views.contains(viewName)) {
+					appender.append(viewName);
+					views.add(viewName);
+				}
 			}
 		} else {
 			
 			Map<String, SummarizedView> serviceViews = ViewUtil.getServiceViewsByName(apiClient, serviceId);
 			
 			for (SummarizedView view : serviceViews.values()) {
-				String viewName = getServiceValue(view.name, serviceId, serviceIds);	
-				appender.append(viewName);
+				
+				String viewName = view.name;	
+				
+				if (!views.contains(viewName)) {
+					appender.append(viewName);
+					views.add(viewName);
+				}
 			}
 		}		
 	}

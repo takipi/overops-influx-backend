@@ -15,6 +15,6 @@ package com.takipi.integrations.grafana.input;
  * Screenshot: https://drive.google.com/file/d/1qBk94hF_3hPaAH-52rmX5FdbGrM-hVJD/view?usp=sharing
 
  */
-public class RoutingGraphInput extends GraphLimitInput {
+public class TiersGraphInput extends GraphLimitInput {
 	
 }
