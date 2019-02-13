@@ -76,12 +76,12 @@ public class ReliabilityReportInput extends RegressionsInput {
 		/**
 		 * chart the number of increasing errors 
 		 */
-		Regressions, 
+		ErrorIncreases, 
 		
 		/**
 		 * chart the number of severe increasing errors 
 		 */
-		SevereRegressions,
+		SevereErrorIncreases,
 		
 
 		/**

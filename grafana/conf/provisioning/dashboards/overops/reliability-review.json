@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 36,
-  "iteration": 1550029536455,
+  "iteration": 1550041402452,
   "links": [
     {
       "asDropdown": true,
@@ -646,9 +646,12 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
+          "selected": false,
+          "tags": [],
           "text": "None",
-          "value": "None"
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -743,8 +746,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "",
-          "value": ""
+          "selected": false,
+          "text": "All Events",
+          "value": "All Events"
         },
         "hide": 2,
         "includeAll": false,
@@ -753,7 +757,7 @@
         "name": "view",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "All Events",
             "value": "All Events"
           }
@@ -766,7 +770,9 @@
         "allValue": "all",
         "current": {
           "text": "All",
-          "value": "$__all"
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -789,7 +795,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -838,7 +843,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "tags": [],
           "text": "Error Volume",
           "value": "Error Volume"
@@ -861,13 +865,13 @@
           },
           {
             "selected": false,
-            "text": "Regressions",
-            "value": "Regressions"
+            "text": "Error Increases",
+            "value": "Error Increases"
           },
           {
             "selected": false,
-            "text": "Severe Regressions",
-            "value": "Severe Regressions"
+            "text": "Severe Error Increases",
+            "value": "Severe Error Increases"
           },
           {
             "selected": false,
@@ -895,7 +899,7 @@
             "value": "Error Rate"
           }
         ],
-        "query": "New Issues,Severe New Issues,Regressions,Severe Regressions,Slowdowns,Severe Slowdowns,Error Volume, Unique Errors,Error Rate",
+        "query": "New Issues,Severe New Issues,Error Increases,Severe Error Increases,Slowdowns,Severe Slowdowns,Error Volume, Unique Errors,Error Rate",
         "skipUrlSync": false,
         "type": "custom"
       },
@@ -1043,6 +1047,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -1117,7 +1122,7 @@
     ]
   },
   "time": {
-    "from": "now-14h",
+    "from": "now-14d",
     "to": "now"
   },
   "timepicker": {
@@ -1149,5 +1154,5 @@
   "timezone": "",
   "title": "Reliability Review",
   "uid": "82eIMSsmz",
-  "version": 58
+  "version": 59
 }

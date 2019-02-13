@@ -1799,8 +1799,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			case NewIssues: return reportKeyResult.newIssues + reportKeyResult.severeNewIssues;
 			case SevereNewIssues: return reportKeyResult.severeNewIssues; 
-			case Regressions: return reportKeyResult.regressions + reportKeyResult.criticalRegressions;
-			case SevereRegressions: return reportKeyResult.criticalRegressions; 
+			case ErrorIncreases: return reportKeyResult.regressions + reportKeyResult.criticalRegressions;
+			case SevereErrorIncreases: return reportKeyResult.criticalRegressions; 
 			case Slowdowns: return reportKeyResult.slowdowns + reportKeyResult.severeSlowdowns;
 			case SevereSlowdowns: return reportKeyResult.severeSlowdowns; 
 			
