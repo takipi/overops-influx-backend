@@ -9,5 +9,5 @@
 
 rootProject.name = 'test'
 
-include "overops-as-influx-utils"
-include "overops-as-influx-main"
+include "standalone"
+include "core"

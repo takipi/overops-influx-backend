@@ -3,32 +3,17 @@ dependencies {
 		"org.springframework.boot:spring-boot-starter-web",
 		"org.apache.commons:commons-lang3:3.7",
 		"org.ocpsoft.prettytime:prettytime:4.0.2.Final",
-		project(":overops-as-influx-utils")
+		project(":core")
 	)
 }
 
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
-if (project.ext.has("backendJavac")) {
-  compileJava {
-    options.forkOptions.executable = project.ext.get("backendJavac")
-  }
-}
-
-compileJava {
-  sourceCompatibility = 1.8
-  targetCompatibility = 1.8
-}
-
 jar {
-        enabled = true
-}
-
-ext {
-  disableIDEWarnings = true
+	enabled = true
 }
 
 bootJar {
-        classifier = 'uber'
+	classifier = 'uber'
 }

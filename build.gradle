@@ -1,35 +1,36 @@
-subprojects {
-	apply plugin: "java"
-	apply plugin: 'eclipse'
-	apply plugin: 'idea'
-	compileJava {
-  		sourceCompatibility = 1.8
-  		targetCompatibility = 1.8
-	}
-
-	repositories {
-    		mavenLocal()
-    		mavenCentral()
-	}
-
-	sourceCompatibility = 1.8
-	targetCompatibility = 1.8
-
-	dependencies {
-    		compile(
-			"com.google.guava:guava:20.0",
-      			"org.slf4j:slf4j-api:1.7.25",
-		)
-
-		testCompile("junit:junit")
-	}
-}
-
 buildscript {
 	repositories {
 		mavenCentral()
 	}
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.5.RELEASE")
+	}
+}
+
+subprojects {
+	apply plugin: "java"
+	apply plugin: 'eclipse'
+	apply plugin: 'idea'
+	
+	compileJava {
+		sourceCompatibility = 1.8
+		targetCompatibility = 1.8
+	}
+
+	repositories {
+		mavenLocal()
+		mavenCentral()
+	}
+
+	sourceCompatibility = 1.8
+	targetCompatibility = 1.8
+
+	dependencies {
+			compile(
+			"com.google.guava:guava:20.0",
+			"org.slf4j:slf4j-api:1.7.25",
+		)
+
+		testCompile("junit:junit")
 	}
 }
