@@ -156,10 +156,9 @@ public class GraphCostPieChartFunction extends CostSplitGraphFunction {
 	}
 	
 	@Override
-	protected List<GraphSeries> processGraphSeries(Collection<String> serviceIds,
-			String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
-			GraphInput input) {
-		GraphCostLimitInput limitInput = (GraphCostLimitInput)input;
+	protected List<GraphSeries> processGraphSeries(Collection<String> serviceIds, String serviceId, String viewId,
+			Pair<DateTime, DateTime> timeSpan, GraphInput input) {
+		GraphCostLimitInput limitInput = (GraphCostLimitInput) input;
 
 		List<EventData> eventDatas = getEventData(apiClient, serviceId, limitInput, timeSpan);
 
@@ -169,14 +168,14 @@ public class GraphCostPieChartFunction extends CostSplitGraphFunction {
 
 		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
 
-		HashMap<String,Long> runningHitsCostTotal= new HashMap<>();
-		
-		HashMap<String,Long> eventHitsTotal= new HashMap<>();
-		
+		HashMap<String, Long> runningHitsCostTotal = new HashMap<>();
+
+		HashMap<String, Long> eventHitsTotal = new HashMap<>();
+
 		CostData costSettings = GrafanaSettings.getData(apiClient, serviceId).cost_calculator;
-		
+
 		for (EventData evD : eventDatas) {
-			
+
 			EventResult eventData = evD.getEvent();
 
 			if (eventFilter.filter(eventData)) {
@@ -187,55 +186,55 @@ public class GraphCostPieChartFunction extends CostSplitGraphFunction {
 				continue;
 			}
 
+			if (costSettings.calculateCost(eventData.type) == .0) {
+				continue;
+			}
 
-			if ((eventData.type != null) && !eventData.type.trim().isEmpty()) {
+			runningHitsCostTotal.put(getTypesMap().get(eventData.type),
+					eventData.stats.hits + runningHitsCostTotal.getOrDefault(eventData.type, 0l));
 
-				if (costSettings.calculateCost(eventData.type) == .0) {
-					continue;
-				}
+			if ((eventData.error_location.prettified_name != null)
+					&& !eventData.error_location.prettified_name.trim().isEmpty()) {
 
-				runningHitsCostTotal.put(eventData.type, eventData.stats.hits + runningHitsCostTotal.getOrDefault(eventData.type, 0l));
-				
-				if ((eventData.error_location.prettified_name != null) && !eventData.error_location.prettified_name.trim().isEmpty()) {
+				String keyEvData = getTypesMap().get(eventData.type) + QUALIFIED_DELIM
+						+ eventData.error_location.prettified_name;
 
-					String keyEvData = eventData.type + QUALIFIED_DELIM + eventData.error_location.prettified_name;
+				eventHitsTotal.put(keyEvData, eventData.stats.hits + eventHitsTotal.getOrDefault(keyEvData, 0l));
 
-					eventHitsTotal.put(keyEvData, eventData.stats.hits + eventHitsTotal.getOrDefault(keyEvData, 0l));
-		
-				}
 			}
 		}
-		
+
 		long intervalLen = timeSpan.getSecond().getMillis() - timeSpan.getFirst().getMillis() + 1L;
 		long millisInYr = timeSpan.getSecond().getMillis() - timeSpan.getSecond().minusYears(1).getMillis();
 		double intervalFactor = 1.0 * millisInYr / intervalLen;
 
 		SortedMap<String, Double> costPerType = new TreeMap<>();
-		
+
 		Double runningCostTotal = .0;
 		for (Entry<String, Long> hitGroup : runningHitsCostTotal.entrySet()) {
 			Double typeCost = costSettings.calculateCost(hitGroup.getKey());
 			runningCostTotal += typeCost * hitGroup.getValue();
-			
+
 			costPerType.put(hitGroup.getKey(), typeCost);
 		}
-		
+
 		Double runningYrlCostTotal = runningCostTotal * intervalFactor;
 
-		final double targetYrlTablelimit = runningYrlCostTotal * Math.min(100.0,Math.max(.01,limitInput.limit)) / 100.0;
+		final double targetYrlTablelimit = runningYrlCostTotal * Math.min(100.0, Math.max(.01, limitInput.limit))
+				/ 100.0;
 
-		HashMap<String,Double> eventYrlCostTotal = new HashMap<>();
-		
-		eventHitsTotal.forEach((k,v) -> eventYrlCostTotal.put(k, searchCost(k,costPerType) * v * intervalFactor ));
-		
-		LinkedHashMap<String,Double> sortedRes = eventYrlCostTotal.entrySet().stream().sorted(Collections.reverseOrder(Entry.comparingByValue())).collect(Collectors.toMap(Entry::getKey, Entry::getValue,
-                (e1, e2) -> e1, LinkedHashMap::new));
-		
-		
-		LinkedHashMap<String,Double> trimmedSortedRes = new LinkedHashMap<>();
+		HashMap<String, Double> eventYrlCostTotal = new HashMap<>();
+
+		eventHitsTotal.forEach((k, v) -> eventYrlCostTotal.put(k, searchCost(k, costPerType) * v * intervalFactor));
+
+		LinkedHashMap<String, Double> sortedRes = eventYrlCostTotal.entrySet().stream()
+				.sorted(Collections.reverseOrder(Entry.comparingByValue()))
+				.collect(Collectors.toMap(Entry::getKey, Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+
+		LinkedHashMap<String, Double> trimmedSortedRes = new LinkedHashMap<>();
 
 		{
-			double runningTot=.0;
+			double runningTot = .0;
 			for (Entry<String, Double> entry : sortedRes.entrySet()) {
 
 				runningTot += entry.getValue();
@@ -244,32 +243,32 @@ public class GraphCostPieChartFunction extends CostSplitGraphFunction {
 					break;
 				}
 			}
-			
+
 			if (trimmedSortedRes.size() < sortedRes.size()) {
 				trimmedSortedRes.put("CombinedSmallerItems", runningYrlCostTotal - runningTot);
 			}
 		}
-		
+
 		List<GraphSeries> result = new ArrayList<GraphSeries>();
 
 		Long epochTimeNow = Long.valueOf(DateTime.now().getMillis());
 
 		GraphData graphData = new GraphData("");
 		graphData.volume = 1;
-		for (Entry<String,Double>  res : trimmedSortedRes.entrySet()) {
-				
-				graphData.points.put(epochTimeNow, res.getValue().longValue());				
-				result.add(getGraphSeries(graphData, res.getKey(), input));
-		}		
+		for (Entry<String, Double> res : trimmedSortedRes.entrySet()) {
+
+			graphData.points.put(epochTimeNow, res.getValue().longValue());
+			result.add(getGraphSeries(graphData, res.getKey(), input));
+		}
 		return result;
 	}
 
 	private double searchCost(String eventTypePlusLocation, SortedMap<String, Double> costPerType) {
-		String evType = eventTypePlusLocation.substring(0,eventTypePlusLocation.indexOf(QUALIFIED_DELIM));
+		String evType = eventTypePlusLocation.substring(0, eventTypePlusLocation.indexOf(QUALIFIED_DELIM));
 		SortedMap<String, Double> mySubMap = costPerType.subMap(evType, evType + Character.MAX_VALUE);
 		String mySearch = mySubMap.firstKey();
 		return mySubMap.get(mySearch);
-		
+
 	}
 
 }

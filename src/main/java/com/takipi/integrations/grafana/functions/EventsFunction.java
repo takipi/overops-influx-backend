@@ -524,7 +524,7 @@ public class EventsFunction extends GrafanaFunction {
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
 				Pair<DateTime, DateTime> timeSpan)
 		{
-			String type = TYPES_MAP.get(eventData.event.type);
+			String type = getTypesMap().get(eventData.event.type);
 			Object value = super.getValue(eventData, serviceId, input, timeSpan);
 
 			String result;

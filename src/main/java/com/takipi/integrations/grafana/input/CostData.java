@@ -1,6 +1,7 @@
 package com.takipi.integrations.grafana.input;
 
 import java.util.HashMap;
+import com.takipi.integrations.grafana.functions.GrafanaFunction;
 
 public class CostData {
 
@@ -24,4 +25,9 @@ public class CostData {
 				
 		return result;
 	}
+
+	public Double calculateAbbrCost(String eventTypeAbbr) {
+		return calculateCost(GrafanaFunction.getTypesMapSpecular().get(eventTypeAbbr));
+	}
+
 }

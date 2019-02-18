@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.Executor;
@@ -112,8 +113,6 @@ public abstract class GrafanaFunction
 	protected static final DateTimeFormatter dateTimeFormatter = ISODateTimeFormat.dateTime().withZoneUTC();
 	protected static final DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
-	protected static final Map<String, String> TYPES_MAP;
-	
 	protected static final String LOGGED_ERROR = "Logged Error";
 	protected static final String LOGGED_WARNING = "Logged Warning";
 	protected static final String CAUGHT_EXCEPTION = "Caught Exception";
@@ -121,6 +120,9 @@ public abstract class GrafanaFunction
 	protected static final String SWALLOWED_EXCEPTION = "Swallowed Exception";
 	protected static final String TIMER = "Timer";
 	protected static final String HTTP_ERROR = "HTTP Error";
+
+	private static final Map<String, String> TYPES_MAP;
+	private static final Map<String, String> TYPES_MAP_SPECULAR;	
 
 	static
 	{
@@ -132,9 +134,23 @@ public abstract class GrafanaFunction
 		TYPES_MAP.put(UNCAUGHT_EXCEPTION, "UNC");
 		TYPES_MAP.put(SWALLOWED_EXCEPTION, "SWL");
 		TYPES_MAP.put(TIMER, "TMR");
-		TYPES_MAP.put(HTTP_ERROR, "HTTP");	
+		TYPES_MAP.put(HTTP_ERROR, "HTTP");
+
+		TYPES_MAP_SPECULAR = new HashMap<>();	
+		for (Entry<String, String> rec : GrafanaFunction.getTypesMap().entrySet())
+			TYPES_MAP_SPECULAR.put(rec.getValue(),rec.getKey());
+		
 	}
 	
+
+	public static Map<String, String> getTypesMap() {
+		return TYPES_MAP;
+	}
+
+	public static Map<String, String> getTypesMapSpecular() {
+		return TYPES_MAP_SPECULAR;
+	}
+
 	private static final int END_SLICE_POINT_COUNT = 2;
 	private static final int NO_GRAPH_SLICE = -1;
 	
@@ -361,7 +377,7 @@ public abstract class GrafanaFunction
 		String result="";
 		
 		if (type != null && !type.isEmpty()) {
-				result += TYPES_MAP.get(type) + QUALIFIED_DELIM;
+				result += getTypesMap().get(type) + QUALIFIED_DELIM;
 		}
 		result += getSimpleClassName(className) + QUALIFIED_DELIM + methodName;
 		return result;
@@ -372,7 +388,7 @@ public abstract class GrafanaFunction
 		String result="";
 		
 		if (type != null && !type.trim().isEmpty()) {
-			String typeAbbrv = TYPES_MAP.get(type.trim());
+			String typeAbbrv = getTypesMap().get(type.trim());
 			if (typeAbbrv != null && !typeAbbrv.isEmpty()) {
 				result = typeAbbrv;
 			} else {
@@ -1155,4 +1171,5 @@ public abstract class GrafanaFunction
 	}
 	
 	public abstract List<Series> process(FunctionInput functionInput);
+
 }

@@ -401,7 +401,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 		protected Object getValue(EventData eventData, ApiClient apiClient, String serviceId, CostCalculatorInput input,
 				Pair<DateTime, DateTime> timeSpan)
 		{
-			String type = TYPES_MAP.get(eventData.event.type);
+			String type = getTypesMap().get(eventData.event.type);
 			Object value = super.getValue(eventData, apiClient, serviceId, input, timeSpan);
 
 			String result;
