@@ -9,6 +9,7 @@ import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOu
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.RegressedEventsInput;
 import com.takipi.integrations.grafana.input.RegressionsInput;
+import com.takipi.integrations.grafana.util.ApiCache;
 
 public class RegressedEventsFunction extends EnvironmentVariableFunction
 {
@@ -43,8 +44,10 @@ public class RegressedEventsFunction extends EnvironmentVariableFunction
 		RegressionsInput rgInput = new Gson().fromJson(json, RegressionsInput.class);
 		
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
-		RegressionOutput regressionOutput = regressionFunction.executeRegression(serviceId, rgInput);
 		
+		RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient, 
+			serviceId, rgInput, regressionFunction, false, true);
+				
 		if (regressionOutput == null) {
 			return;
 		}

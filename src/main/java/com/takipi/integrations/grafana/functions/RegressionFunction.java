@@ -615,7 +615,7 @@ public class RegressionFunction extends EventsFunction
 	
 	public Pair<RegressionInput, RegressionWindow> getRegressionInput(String serviceId, String viewId,
 			EventFilterInput input,
-			Pair<DateTime, DateTime> timeSpan)
+			Pair<DateTime, DateTime> timeSpan, boolean newOnly)
 	{
 		
 		RegressionSettings regressionSettings = getRegressionSettings(serviceId);
@@ -656,9 +656,11 @@ public class RegressionFunction extends EventsFunction
 		regressionInput.minVolumeThreshold = regressionSettings.error_min_volume_threshold;
 		regressionInput.minErrorRateThreshold = regressionSettings.error_min_rate_threshold;
 		
-		regressionInput.regressionDelta = regressionSettings.error_regression_delta;
-		regressionInput.criticalRegressionDelta = regressionSettings.error_critical_regression_delta;
-		regressionInput.applySeasonality = regressionSettings.apply_seasonality;
+		if (!newOnly) {
+			regressionInput.regressionDelta = regressionSettings.error_regression_delta;
+			regressionInput.criticalRegressionDelta = regressionSettings.error_critical_regression_delta;
+			regressionInput.applySeasonality = regressionSettings.apply_seasonality;
+		}
 		
 		return Pair.of(regressionInput, regressionWindow);
 		
@@ -666,7 +668,7 @@ public class RegressionFunction extends EventsFunction
 	
 	private Pair<Graph, Graph> getRegressionGraphs(String serviceId, String viewId,
 			RegressionInput regressionInput, RegressionWindow regressionWindow,
-			BaseEventVolumeInput input)
+			BaseEventVolumeInput input, boolean newOnly)
 	{
 		
 		int ratioBaselinePoints = (regressionInput.baselineTimespan / regressionWindow.activeTimespan) * 2;
@@ -704,9 +706,15 @@ public class RegressionFunction extends EventsFunction
 		
 		//This section needs to be refactored into its own blocking / synch cache loader 
 		
-		Collection<GraphSliceTask> baselineGraphTasks = getGraphTasks(serviceId, viewId, baselinePoints, baselineInput, 
+		Collection<GraphSliceTask> baselineGraphTasks;
+		
+		if (!newOnly) {
+			baselineGraphTasks = getGraphTasks(serviceId, viewId, baselinePoints, baselineInput, 
 				VolumeType.all, regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan),
-			regressionWindow.activeWindowStart, regressionInput.baselineTimespan, regressionWindow.activeTimespan, false);
+				regressionWindow.activeWindowStart, regressionInput.baselineTimespan, regressionWindow.activeTimespan, false);
+		} else {
+			baselineGraphTasks = null;
+		}
 		
 		int graphActiveTimespan;
 		
@@ -721,7 +729,10 @@ public class RegressionFunction extends EventsFunction
 		
 		List<GraphSliceTask> graphTasks = new ArrayList<GraphSliceTask>(); 
 		
-		graphTasks.addAll(baselineGraphTasks);
+		if (baselineGraphTasks != null) {
+			graphTasks.addAll(baselineGraphTasks);
+		}
+		
 		graphTasks.addAll(activeGraphTasks);
 		
 		Collection<GraphSliceTaskResult> graphSliceTaskResults = executeGraphTasks(graphTasks, false);
@@ -731,7 +742,7 @@ public class RegressionFunction extends EventsFunction
 	
 		for (GraphSliceTaskResult graphSliceTaskResult : graphSliceTaskResults) {
 			
-			if (baselineGraphTasks.contains(graphSliceTaskResult.task)) {
+			if (CollectionUtil.safeContains(baselineGraphTasks, graphSliceTaskResult.task)) {
 				baseLineGraphResults.add(graphSliceTaskResult);
 			}
 			
@@ -744,17 +755,19 @@ public class RegressionFunction extends EventsFunction
 		Graph activeWindowGraph = mergeGraphs(activeGraphResults);		
 		
 		GraphResult activeGraphResult = new GraphResult();
-		activeGraphResult.graphs = Collections.singletonList(activeWindowGraph);		
-		
-		GraphResult baselineGraphResult = new GraphResult();
-		baselineGraphResult.graphs = Collections.singletonList(baselineGraph);		
-		
+		activeGraphResult.graphs = Collections.singletonList(activeWindowGraph);	
 		
 		ApiCache.putEventGraph(apiClient, serviceId, input, VolumeType.all, null,
 				input.pointsWanted, 0, graphActiveTimespan, 0, Response.of(200, activeGraphResult));
 		
-		ApiCache.putEventGraph(apiClient, serviceId, baselineInput, VolumeType.all, null,
-				input.pointsWanted, regressionInput.baselineTimespan, 0, 0, Response.of(200, baselineGraphResult));
+		if (baselineGraph != null) {
+		
+			GraphResult baselineGraphResult = new GraphResult();
+			baselineGraphResult.graphs = Collections.singletonList(baselineGraph);		
+		
+			ApiCache.putEventGraph(apiClient, serviceId, baselineInput, VolumeType.all, null,
+					input.pointsWanted, regressionInput.baselineTimespan, 0, 0, Response.of(200, baselineGraphResult));
+		}
 		
 		return Pair.of(baselineGraph, activeWindowGraph);
 		
@@ -859,7 +872,7 @@ public class RegressionFunction extends EventsFunction
 		return result;
 	}
 		
-	public RegressionOutput executeRegression(String serviceId, BaseEventVolumeInput input)
+	public RegressionOutput executeRegression(String serviceId, BaseEventVolumeInput input, boolean newOnly)
 	{
 		String viewId = getViewId(serviceId, input.view);
 		
@@ -871,7 +884,7 @@ public class RegressionFunction extends EventsFunction
 		Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(input.timeFilter);
 		
 		Pair<RegressionInput, RegressionWindow> regressionInputs =
-				getRegressionInput(serviceId, viewId, input, timespan);
+				getRegressionInput(serviceId, viewId, input, timespan, newOnly);
 		
 		if (regressionInputs == null)
 		{
@@ -892,8 +905,8 @@ public class RegressionFunction extends EventsFunction
 		
 		if (eventListMap != null)
 		{
-			Pair<Graph, Graph> regressionGraphs =
-					getRegressionGraphs(serviceId, viewId, regressionInput, regressionWindow, input);
+			Pair<Graph, Graph> regressionGraphs = getRegressionGraphs(serviceId, 
+				viewId, regressionInput, regressionWindow, input, newOnly);
 			
 			baselineGraph = regressionGraphs.getFirst();
 			activeWindowGraph = regressionGraphs.getSecond();
@@ -902,9 +915,11 @@ public class RegressionFunction extends EventsFunction
 			activeWindowGraph = null;		
 		}
 		
-		if ((baselineGraph == null) ||	(activeWindowGraph == null) || (baselineGraph.points == null) ||
-			(activeWindowGraph.points == null))
-		{
+		if ((activeWindowGraph == null) ||	(activeWindowGraph.points == null)) {
+			return RegressionOutput.emptyOutput;
+		}
+		
+		if ((!newOnly) && (((baselineGraph == null) || (baselineGraph.points == null)))) {
 			return RegressionOutput.emptyOutput;
 		}
 		
@@ -1017,7 +1032,15 @@ public class RegressionFunction extends EventsFunction
 	
 	public RegressionOutput runRegression(String serviceId, EventFilterInput regInput)
 	{
-		RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient, serviceId, regInput, this, true);
+		RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient, 
+			serviceId, regInput, this, false, true);
+		return regressionOutput;
+	}
+	
+	public RegressionOutput runRegression(String serviceId, EventFilterInput regInput, boolean newOnly)
+	{
+		RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient, 
+			serviceId, regInput, this, newOnly, true);
 		return regressionOutput;
 	}
 	
