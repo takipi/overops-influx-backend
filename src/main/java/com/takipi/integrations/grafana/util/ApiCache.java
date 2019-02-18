@@ -758,6 +758,7 @@ public class ApiCache {
 	
 	protected static class RegressionCacheLoader extends EventsCacheLoader {
 
+		protected boolean newOnly;
 		protected RegressionFunction function;
 
 		@Override
@@ -796,15 +797,20 @@ public class ApiCache {
 			if (!Objects.equal(eventInput.eventLocations, otherInput.eventLocations)) {
 				return false;
 			}
+			
+			if (!newOnly != other.newOnly) {
+				return false;
+			}
 
 			return true;
 		}
 
 		public RegressionCacheLoader(ApiClient apiClient, String serviceId, ViewInput input,
-				RegressionFunction function) {
+				RegressionFunction function, boolean newOnly) {
 
 			super(apiClient, null, serviceId, input, null);
 			this.function = function;
+			this.newOnly = newOnly;
 		}
 	}
 
@@ -990,9 +996,9 @@ public class ApiCache {
 	}
 	
 	public static RegressionOutput getRegressionOutput(ApiClient apiClient, String serviceId, 
-		EventFilterInput input, RegressionFunction function, boolean load) {
+		EventFilterInput input, RegressionFunction function, boolean newOnly, boolean load) {
 			
-		RegressionCacheLoader key = new RegressionCacheLoader(apiClient, serviceId, input, function);
+		RegressionCacheLoader key = new RegressionCacheLoader(apiClient, serviceId, input, function, newOnly);
 		
 		if (load) {
 			try
@@ -1020,7 +1026,8 @@ public class ApiCache {
 				
 				@Override
 				public RegressionOutput load(RegressionCacheLoader key) {
-					return key.function.executeRegression(key.serviceId, (BaseEventVolumeInput)key.input);
+					return key.function.executeRegression(key.serviceId, 
+						(BaseEventVolumeInput)key.input, key.newOnly);
 				}
 			});
 
