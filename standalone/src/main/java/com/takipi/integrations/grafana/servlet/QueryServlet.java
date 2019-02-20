@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.takipi.integrations.grafana.servlet.ServletUtil.Auth;
 import com.takipi.integrations.grafana.util.QueryUtil;
 
-@WebServlet(name="QueryServlet", urlPatterns="/query") // May be override by web.xml!
+@WebServlet(name="QueryServlet", urlPatterns="/query")
 public class QueryServlet extends HttpServlet {
 	private static final Logger logger = LoggerFactory.getLogger(QueryServlet.class);
 
