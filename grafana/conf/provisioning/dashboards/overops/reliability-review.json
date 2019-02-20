@@ -15,7 +15,7 @@
       {
         "datasource": "OO",
         "enable": true,
-        "hide": false,
+        "hide": true,
         "iconColor": "#0a50a1",
         "limit": 100,
         "name": "Mark Deployments",
@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 36,
-  "iteration": 1550041402452,
+  "iteration": 1550456963748,
   "links": [
     {
       "asDropdown": true,
@@ -41,30 +41,17 @@
         "OverOps"
       ],
       "type": "dashboards"
-    },
-    {
-      "icon": "external link",
-      "tags": [],
-      "targetBlank": true,
-      "title": "HELP",
-      "tooltip": "Learn more about this dashboard",
-      "type": "link",
-      "url": "https://doc.overops.com/docs/reliability-trends-dashboard"
     }
   ],
   "panels": [
     {
       "aliasColors": {},
-      "breakPoint": "50%",
-      "cacheTimeout": null,
-      "combine": {
-        "label": "Others",
-        "threshold": 0
-      },
+      "bars": true,
+      "dashLength": 10,
+      "dashes": false,
       "datasource": "OO",
       "description": "Chart the $graphType of the selected deployments. If no deployments are selected, the last $limit deployments are chosen. Scores are based on the weights set in the Settings dashboard. Deployments that are live are marked with an *.",
-      "fontSize": "100%",
-      "format": "short",
+      "fill": 1,
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -72,13 +59,21 @@
         "y": 0
       },
       "id": 80,
-      "interval": null,
+      "interval": "1d",
       "legend": {
-        "percentage": true,
-        "show": true,
-        "values": true
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "hideEmpty": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": false,
+        "total": false,
+        "values": false
       },
-      "legendType": "Right side",
+      "lines": false,
+      "linewidth": 1,
       "links": [
         {
           "dashboard": "Errors",
@@ -90,12 +85,53 @@
           "url": "/d/HYBPMdYik/errors"
         }
       ],
-      "maxDataPoints": 3,
-      "nullPointMode": "connected",
-      "pieType": "pie",
-      "strokeWidth": 1,
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "Throughput",
+          "bars": false,
+          "color": "rgb(109, 111, 178)",
+          "fill": 2,
+          "lines": true,
+          "linewidth": 0,
+          "yaxis": 2
+        },
+        {
+          "alias": ".Logged Warning",
+          "lines": false,
+          "stack": true
+        },
+        {
+          "alias": ".Swallowed Exception",
+          "lines": false,
+          "stack": true
+        },
+        {
+          "alias": ".Logged Error",
+          "lines": false,
+          "stack": true
+        },
+        {
+          "alias": ".Uncaught Exception",
+          "lines": false,
+          "stack": true
+        },
+        {
+          "alias": ".HTTP Error",
+          "lines": false,
+          "stack": true
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
       "targets": [
         {
+          "alias": "Throughput",
           "groupBy": [
             {
               "params": [
@@ -110,9 +146,49 @@
               "type": "fill"
             }
           ],
+          "hide": true,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Graph\", \"mode\":\"Deployments\", \"limit\":\"$limit\", \"graphType\":\"$graphType\", \"sortType\":\"Descending\", \"postfixes\":\" $postfixes\", \"thresholds\":\"$thresholds\"})",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"All Events\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"aggregate\":true,\"seriesName\":\"Throughput\",\"pointsWanted\":7})\n",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "alias": "",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Graph\", \"mode\":\"Deployments\", \"limit\":\"$limit\", \"graphType\":\"$graphType\", \"sortType\":\"Descending\", \"postfixes\":\" $postfixes\", \"thresholds\":\"$thresholds\",\"scoreType\":\"NewOnly\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -133,36 +209,79 @@
           "tags": []
         }
       ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeShift": null,
       "title": "Deployments KPI: $graphType",
-      "type": "grafana-piechart-panel",
-      "valueName": "current"
+      "tooltip": {
+        "shared": false,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "series",
+        "name": null,
+        "show": true,
+        "values": [
+          "total"
+        ]
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "decimals": null,
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
-      "breakPoint": "50%",
-      "cacheTimeout": null,
-      "combine": {
-        "label": "Others",
-        "threshold": 0
-      },
+      "bars": true,
+      "dashLength": 10,
+      "dashes": false,
       "datasource": "OO",
       "description": "Chart the $graphType of the key applications. Key applications are marked with * and appear first followed by live applications up to limit of  $limit applications in total.",
-      "fontSize": "100%",
-      "format": "short",
+      "fill": 1,
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 12,
         "y": 0
       },
-      "id": 79,
-      "interval": null,
+      "id": 84,
+      "interval": "1d",
       "legend": {
-        "percentage": true,
-        "show": true,
-        "values": true
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "hideEmpty": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": false,
+        "total": false,
+        "values": false
       },
-      "legendType": "Right side",
+      "lines": false,
+      "linewidth": 1,
       "links": [
         {
           "dashboard": "Errors",
@@ -174,12 +293,53 @@
           "url": "/d/HYBPMdYik/errors"
         }
       ],
-      "maxDataPoints": 3,
-      "nullPointMode": "connected",
-      "pieType": "pie",
-      "strokeWidth": 1,
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "Throughput",
+          "bars": false,
+          "color": "rgb(109, 111, 178)",
+          "fill": 2,
+          "lines": true,
+          "linewidth": 0,
+          "yaxis": 2
+        },
+        {
+          "alias": ".Logged Warning",
+          "lines": false,
+          "stack": true
+        },
+        {
+          "alias": ".Swallowed Exception",
+          "lines": false,
+          "stack": true
+        },
+        {
+          "alias": ".Logged Error",
+          "lines": false,
+          "stack": true
+        },
+        {
+          "alias": ".Uncaught Exception",
+          "lines": false,
+          "stack": true
+        },
+        {
+          "alias": ".HTTP Error",
+          "lines": false,
+          "stack": true
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
       "targets": [
         {
+          "alias": "Throughput",
           "groupBy": [
             {
               "params": [
@@ -194,9 +354,49 @@
               "type": "fill"
             }
           ],
+          "hide": true,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Graph\", \"mode\":\"Applications\", \"limit\":\"$limit\", \"graphType\":\"$graphType\",\"postfixes\":\" $postfixes\", \"thresholds\":\"$thresholds\"})",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"All Events\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"aggregate\":true,\"seriesName\":\"Throughput\",\"pointsWanted\":7})\n",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "alias": "",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Graph\", \"mode\":\"Applications\", \"limit\":\"$limit\", \"graphType\":\"$graphType\",\"postfixes\":\" $postfixes\", \"thresholds\":\"$thresholds\", \"scoreType\":\"NewOnly\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -217,9 +417,48 @@
           "tags": []
         }
       ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeShift": null,
       "title": "Apps KPI: $graphType",
-      "type": "grafana-piechart-panel",
-      "valueName": "current"
+      "tooltip": {
+        "shared": false,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "series",
+        "name": null,
+        "show": true,
+        "values": [
+          "total"
+        ]
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "decimals": null,
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
@@ -304,7 +543,7 @@
         }
       ],
       "spaceLength": 10,
-      "stack": true,
+      "stack": false,
       "steppedLine": false,
       "targets": [
         {
@@ -389,7 +628,7 @@
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Error Volume by Deployment",
+      "title": "Deployments Errors: Trend",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -510,7 +749,7 @@
         }
       ],
       "spaceLength": 10,
-      "stack": true,
+      "stack": false,
       "steppedLine": false,
       "targets": [
         {
@@ -595,7 +834,7 @@
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Error Volume by App",
+      "title": "App Errors: Trend",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -646,7 +885,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": false,
           "tags": [],
           "text": "None",
           "value": [
@@ -770,9 +1008,7 @@
         "allValue": "all",
         "current": {
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -864,26 +1100,6 @@
             "value": "Severe New Issues"
           },
           {
-            "selected": false,
-            "text": "Error Increases",
-            "value": "Error Increases"
-          },
-          {
-            "selected": false,
-            "text": "Severe Error Increases",
-            "value": "Severe Error Increases"
-          },
-          {
-            "selected": false,
-            "text": "Slowdowns",
-            "value": "Slowdowns"
-          },
-          {
-            "selected": false,
-            "text": "Severe Slowdowns",
-            "value": "Severe Slowdowns"
-          },
-          {
             "selected": true,
             "text": "Error Volume",
             "value": "Error Volume"
@@ -899,7 +1115,7 @@
             "value": "Error Rate"
           }
         ],
-        "query": "New Issues,Severe New Issues,Error Increases,Severe Error Increases,Slowdowns,Severe Slowdowns,Error Volume, Unique Errors,Error Rate",
+        "query": "New Issues,Severe New Issues,Error Volume, Unique Errors,Error Rate",
         "skipUrlSync": false,
         "type": "custom"
       },
@@ -1047,7 +1263,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -1072,7 +1287,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -1154,5 +1368,5 @@
   "timezone": "",
   "title": "Reliability Review",
   "uid": "82eIMSsmz",
-  "version": 59
+  "version": 61
 }

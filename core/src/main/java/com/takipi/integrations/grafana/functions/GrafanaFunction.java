@@ -854,7 +854,8 @@ public abstract class GrafanaFunction
 			Map<TransactionKey, TransactionData> transactionDatas) {
 	
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
-		Pair<RegressionInput, RegressionWindow> result = regressionFunction.getRegressionInput(serviceId, viewId, input, timeSpan);
+		Pair<RegressionInput, RegressionWindow> result = regressionFunction.getRegressionInput(serviceId, 
+				viewId, input, timeSpan, false);
 		
 		if (result == null) {
 			return null;

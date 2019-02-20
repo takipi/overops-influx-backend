@@ -139,6 +139,12 @@ public class ReliabilityReportInput extends RegressionsInput {
 	 *
 	 */
 	public enum ScoreType {
+		
+		/**
+		 * Include regression analysis for new events only
+		 */
+		NewOnly, 
+		
 		/**
 		 * Include regression analysis for new and increasing events
 		 */

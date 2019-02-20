@@ -223,7 +223,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 			try {
 
 				RegressionFunction regressionFunction = new RegressionFunction(apiClient);
-				Pair<RegressionInput, RegressionWindow> regPair = regressionFunction.getRegressionInput(serviceId, viewId, input, timeSpan);
+				Pair<RegressionInput, RegressionWindow> regPair = regressionFunction.getRegressionInput(serviceId, 
+					viewId, input, timeSpan, false);
 				
 				if (regPair == null) {
 					return new SlowdownAsyncResult(reportKey, Collections.emptyList());
@@ -269,15 +270,17 @@ public class ReliabilityReportFunction extends EventsFunction {
 		protected String serviceId;
 		protected RegressionsInput input;
 		protected Pair<DateTime, DateTime> timeSpan;
+		protected boolean newOnly;
 
 		protected RegressionAsyncTask(RegressionFunction function, ReportKey key, String serviceId, RegressionsInput input,
-				Pair<DateTime, DateTime> timeSpan) {
+				Pair<DateTime, DateTime> timeSpan, boolean newOnly) {
 
 			this.function = function;
 			this.reportKey = key;
 			this.serviceId = serviceId;
 			this.input = input;
 			this.timeSpan = timeSpan;
+			this.newOnly = newOnly;
 		}
 
 		@Override
@@ -287,7 +290,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 
 			try {
 
-				RegressionOutput output = function.runRegression(serviceId, input); 
+				RegressionOutput output = function.runRegression(serviceId, input, newOnly); 
 				RegressionAsyncResult result = new RegressionAsyncResult(reportKey, output);
 				
 				return result;
@@ -588,18 +591,33 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			if ((scoreType == ScoreType.Combined) || (scoreType == ScoreType.Regressions)) {
 
-				RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient, serviceId, regressionsInput, regressionFunction, false);
+				RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient, 
+					serviceId, regressionsInput, regressionFunction, false, false);
 						
 				if (regressionOutput != null) {
 					result.add(new RegressionAsyncResult(reportKey, regressionOutput));
 				} else {
-					tasks.add(new RegressionAsyncTask(regressionFunction, reportKey, serviceId, regressionsInput, timeSpan));
+					tasks.add(new RegressionAsyncTask(regressionFunction, 
+						reportKey, serviceId, regressionsInput, timeSpan, false));
 				}
 			}
 			
 			if ((scoreType == ScoreType.Combined) || (scoreType == ScoreType.Slowdowns)) {
 				tasks.add(new SlowdownAsyncTask(serviceId, viewId,  
 					reportKey, transactionInput, timeSpan));
+			}
+			
+			if (scoreType == ScoreType.NewOnly) {
+
+				RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient, 
+					serviceId, regressionsInput, regressionFunction, true, false);
+						
+				if (regressionOutput != null) {
+					result.add(new RegressionAsyncResult(reportKey, regressionOutput));
+				} else {
+					tasks.add(new RegressionAsyncTask(regressionFunction, 
+						reportKey, serviceId, regressionsInput, timeSpan, true));
+				}
 			}
 		}
 		

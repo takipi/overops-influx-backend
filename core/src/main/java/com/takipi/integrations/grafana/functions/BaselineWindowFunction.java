@@ -55,7 +55,8 @@ public class BaselineWindowFunction extends EnvironmentVariableFunction
 		Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(bwInput.timeFilter);
 		
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
-		Pair<RegressionInput, RegressionWindow> inputPair = regressionFunction.getRegressionInput(serviceId, viewId, bwInput, timespan);
+		Pair<RegressionInput, RegressionWindow> inputPair = regressionFunction.getRegressionInput(serviceId, 
+			viewId, bwInput, timespan, false);
 		
 		int time;
 		
