@@ -39,15 +39,6 @@
         "OverOps"
       ],
       "type": "dashboards"
-    },
-    {
-      "icon": "external link",
-      "tags": [],
-      "targetBlank": true,
-      "title": "HELP",
-      "tooltip": "Learn more about this dashboard",
-      "type": "link",
-      "url": "https://doc.overops.com/docs/event-diff-dashboard"
     }
   ],
   "panels": [

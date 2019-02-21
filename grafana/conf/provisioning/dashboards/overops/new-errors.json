@@ -31,15 +31,6 @@
   "iteration": 1549869882069,
   "links": [
     {
-      "icon": "external link",
-      "tags": [],
-      "targetBlank": true,
-      "title": "HELP",
-      "tooltip": "Learn more about this dashboard",
-      "type": "link",
-      "url": "https://doc.overops.com/docs/new-errors-dashboard"
-    },
-    {
       "asDropdown": true,
       "icon": "external link",
       "includeVars": true,
