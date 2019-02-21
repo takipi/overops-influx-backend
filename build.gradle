@@ -26,11 +26,11 @@ subprojects {
 	targetCompatibility = 1.8
 
 	dependencies {
-			compile(
+		compile(
 			"com.google.guava:guava:20.0",
 			"org.slf4j:slf4j-api:1.7.25",
 		)
 
-		testCompile("junit:junit")
+		testCompile("junit:junit:4.12")
 	}
 }
