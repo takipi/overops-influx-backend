@@ -89,7 +89,7 @@
           "targetBlank": true,
           "title": "Reliability Scorecard",
           "type": "absolute",
-          "url": "/d/lfqKXMfmz/reliability-scorecard"
+          "url": "d/lfqKXMfmz/reliability-scorecard"
         }
       ],
       "mappingType": 1,
@@ -1041,7 +1041,7 @@
           "targetBlank": true,
           "title": "Errors",
           "type": "dashboard",
-          "url": "/d/HYBPMdYik/errors"
+          "url": "d/HYBPMdYik/errors"
         }
       ],
       "nullPointMode": "null",
@@ -1486,7 +1486,7 @@
           "targetBlank": true,
           "title": "Errors",
           "type": "absolute",
-          "url": "/d/HYBPMdYik/errors"
+          "url": "d/HYBPMdYik/errors"
         }
       ],
       "nullPointMode": "null",
@@ -1707,7 +1707,7 @@
           "targetBlank": true,
           "title": "Errors",
           "type": "absolute",
-          "url": "/d/HYBPMdYik/errors"
+          "url": "d/HYBPMdYik/errors"
         }
       ],
       "nullPointMode": "null",
@@ -1927,7 +1927,7 @@
           "targetBlank": true,
           "title": "Errors",
           "type": "absolute",
-          "url": "/d/HYBPMdYik/errors"
+          "url": "d/HYBPMdYik/errors"
         }
       ],
       "nullPointMode": "null",
