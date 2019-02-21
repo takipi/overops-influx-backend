@@ -21,7 +21,7 @@ import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.Location;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.common.util.Pair;
-import com.takipi.integrations.grafana.input.CostData;
+import com.takipi.integrations.grafana.input.CostSettings;
 import com.takipi.integrations.grafana.input.GraphCostLimitInput;
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
@@ -172,7 +172,7 @@ public class GraphCostPieChartFunction extends CostSplitGraphFunction {
 
 		HashMap<String, Long> eventHitsTotal = new HashMap<>();
 
-		CostData costSettings = GrafanaSettings.getData(apiClient, serviceId).cost_calculator;
+		CostSettings costSettings = GrafanaSettings.getData(apiClient, serviceId).cost_calculator;
 
 		for (EventData evD : eventDatas) {
 

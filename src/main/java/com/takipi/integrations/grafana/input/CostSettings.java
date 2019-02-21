@@ -3,7 +3,7 @@ package com.takipi.integrations.grafana.input;
 import java.util.HashMap;
 import com.takipi.integrations.grafana.functions.GrafanaFunction;
 
-public class CostData {
+public class CostSettings {
 
 	public Double costHigherThan;
 	

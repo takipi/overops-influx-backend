@@ -20,7 +20,7 @@ import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
-import com.takipi.integrations.grafana.input.CostData;
+import com.takipi.integrations.grafana.input.CostSettings;
 import com.takipi.integrations.grafana.input.GraphCostLimitInput;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
@@ -112,7 +112,7 @@ public class CostSplitGraphFunction extends LimitGraphFunction {
 					continue;
 				}
 
-				CostData costSettings = GrafanaSettings.getData(apiClient, serviceId).cost_calculator;
+				CostSettings costSettings = GrafanaSettings.getData(apiClient, serviceId).cost_calculator;
 				Double evCost = costSettings.calculateCost(event.type);
 
 				if (evCost != .0) {

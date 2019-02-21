@@ -24,7 +24,7 @@ import com.takipi.api.client.util.infra.Categories;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.CostCalculatorInput;
-import com.takipi.integrations.grafana.input.CostData;
+import com.takipi.integrations.grafana.input.CostSettings;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
@@ -433,7 +433,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 				return .0;
 			}
 
-			CostData costData = GrafanaSettings.getData(apiClient, serviceId).cost_calculator;
+			CostSettings costData = GrafanaSettings.getData(apiClient, serviceId).cost_calculator;
 			if (costData != null) {
 				result = costData.calculateCost(eventData.event.type)
 						* eventData.event.stats.hits;
@@ -678,7 +678,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 		
 		List<EventData> mergedDatas;
 		
-		CostData costSettings = GrafanaSettings.getData(apiClient, serviceId).cost_calculator;
+		CostSettings costSettings = GrafanaSettings.getData(apiClient, serviceId).cost_calculator;
 
 		List<EventData> eventDatas = getEventData(apiClient, serviceId, input, timeSpan);
 
