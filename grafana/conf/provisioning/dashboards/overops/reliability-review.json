@@ -630,7 +630,7 @@
       "timeShift": null,
       "title": "Deployments Errors: Trend",
       "tooltip": {
-        "shared": true,
+        "shared": false,
         "sort": 2,
         "value_type": "individual"
       },
@@ -836,7 +836,7 @@
       "timeShift": null,
       "title": "App Errors: Trend",
       "tooltip": {
-        "shared": true,
+        "shared": false,
         "sort": 2,
         "value_type": "individual"
       },
