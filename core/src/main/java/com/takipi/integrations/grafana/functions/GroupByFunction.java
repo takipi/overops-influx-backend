@@ -568,6 +568,11 @@ public class GroupByFunction extends BaseVolumeFunction {
 		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, timespan.getFirst(),
 				timespan.getSecond(), input.volumeType, input.pointsWanted);
 
+		if (eventsMap == null) {
+			return;
+		}
+		
+		
 		EventFilter eventFilter = getEventFilter(serviceId, input, timespan);
 
 		if (eventFilter == null) {
