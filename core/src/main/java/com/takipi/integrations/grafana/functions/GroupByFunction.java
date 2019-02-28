@@ -571,8 +571,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 		if (eventsMap == null) {
 			return;
 		}
-		
-		
+			
 		EventFilter eventFilter = getEventFilter(serviceId, input, timespan);
 
 		if (eventFilter == null) {

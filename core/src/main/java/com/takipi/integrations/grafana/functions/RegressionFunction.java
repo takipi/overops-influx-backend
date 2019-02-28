@@ -18,8 +18,6 @@ import com.google.common.base.Objects;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.metrics.Graph;
-import com.takipi.api.client.data.metrics.Graph.GraphPoint;
-import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.metrics.GraphResult;
 import com.takipi.api.client.util.regression.RateRegression;
@@ -566,9 +564,6 @@ public class RegressionFunction extends EventsFunction
 		protected double score;
 		protected long volume;
 		
-		protected int slowdowns;
-		protected int severeSlowdowns;
-		
 		protected int severeNewIssues;
 		protected int newIssues;
 		
@@ -772,54 +767,6 @@ public class RegressionFunction extends EventsFunction
 		return Pair.of(baselineGraph, activeWindowGraph);
 		
 	}
-	
-	private Pair<Collection<EventResult>, Long> getEventList(String serviceId, 
-			Map<String, EventResult> eventListMap, Pair<DateTime, DateTime> timespan,
-			Graph activeWindowGraph, BaseEventVolumeInput input)
-	{
-		long volume = 0;
-		
-		for (GraphPoint gp : activeWindowGraph.points)
-		{
-			
-			if (gp.contributors == null)
-			{
-				continue;
-			}
-			
-			for (GraphPointContributor gpc : gp.contributors)
-			{		
-				EventResult event = eventListMap.get(gpc.id);
-				
-				if (event != null)
-				{
-					event.stats.invocations += gpc.stats.invocations;
-					event.stats.hits += gpc.stats.hits;
-					volume += gpc.stats.hits;
-				}
-			}
-		}
-		
-		EventFilter eventFilter = getEventFilter(serviceId, input, timespan);
-		
-		if (eventFilter == null) {
-			return Pair.of(Collections.emptyList(), Long.valueOf(0l));
-		}
-		
-		Map<String, EventResult> filteredEvents = new HashMap<String, EventResult>();
-		
-		for (EventResult event : eventListMap.values())
-		{	
-			if (eventFilter.filter(event))
-			{
-				continue;
-			}
-			
-			filteredEvents.put(event.id, event);
-		}
-		
-		return Pair.of(filteredEvents.values(), Long.valueOf(volume));
-	}
 		
 	protected RegressionOutput createRegressionOutput(EventFilterInput input,
 			RegressionInput regressionInput, RegressionWindow regressionWindow,
@@ -923,7 +870,7 @@ public class RegressionFunction extends EventsFunction
 			return RegressionOutput.emptyOutput;
 		}
 		
-		Pair<Collection<EventResult>, Long> eventsPair = getEventList(serviceId, 
+		Pair<Collection<EventResult>, Long> eventsPair = applyGraphToEvents(serviceId, 
 			eventListMap, timespan, activeWindowGraph, input);
 		
 		Collection<EventResult> events = eventsPair.getFirst();
@@ -931,6 +878,18 @@ public class RegressionFunction extends EventsFunction
 		
 		regressionInput.events = events;
 		regressionInput.baselineGraph = baselineGraph;
+				
+		RegressionOutput result = executeRegression(input, regressionInput, 
+			regressionWindow, eventListMap, volume, baselineGraph, activeWindowGraph);
+				
+		return result;
+	}
+	
+	
+	public RegressionOutput executeRegression(BaseEventVolumeInput input, 
+			RegressionInput regressionInput, RegressionWindow regressionWindow, 
+			Map<String, EventResult> eventListMap, long volume,
+			Graph baselineGraph, Graph activeWindowGraph) {
 		
 		regressionInput.validate();
 		

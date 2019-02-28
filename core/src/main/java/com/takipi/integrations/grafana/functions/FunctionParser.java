@@ -229,7 +229,6 @@ public class FunctionParser {
 		registerFunction(new AppsGraphFunction.Factory());
 		registerFunction(new CriticalExceptionsGraph.Factory());
 
-
 		//regression functions
 		registerFunction(new RegressionFunction.Factory());
 		registerFunction(new ReliabilityReportFunction.Factory());
@@ -237,6 +236,8 @@ public class FunctionParser {
 		registerFunction(new BaselineWindowFunction.Factory());
 		registerFunction(new BaselineAnnotationFunction.Factory());
 		registerFunction(new RegressedEventsFunction.Factory());
+		registerFunction(new ReliabilityKpiGraphFunction.Factory());
+
 
 		//deployment functions
 		registerFunction(new DeploymentsGraphFunction.Factory());
