@@ -967,47 +967,57 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return result;
 	}
 	
-	private double getReportKeyWeight(RegressionReportSettings reportSettings, 
-			ReliabilityReportInput input, ReportKeyResults reportKeyResults) {
+	private static double getReportKeyWeight(RegressionReportSettings reportSettings, 
+			ReportMode reportMode, boolean isKey) {
 		
-		if (input.getReportMode() == ReportMode.Deployments) {
+		if (reportMode == ReportMode.Deployments) {
 			return reportSettings.score_weight;	
 		}
 		
-		if ((reportKeyResults.output.reportKey.isKey) 
-		&& (reportSettings.key_score_weight > 0)) {
+		if ((isKey) && (reportSettings.key_score_weight > 0)) {
 			return reportSettings.key_score_weight;
 		} else {
 			return reportSettings.score_weight;	
 		}		
 	}
 	
-	private Pair<Double, String> getScore(
+	public static Pair<Double, Integer> getScore(
+			RegressionOutput regressionOutput, RegressionReportSettings reportSettings, 
+			int newEvents, int severeNewEvents, int regressions, int severeRegressions,
+			int slowdowns, int severeSlowdowns, boolean isKey, ReportMode reportMode) {
+		
+		double newEventsScore = newEvents * reportSettings.new_event_score;
+		double severeNewEventScore = severeNewEvents * reportSettings.severe_new_event_score;
+		double criticalRegressionsScore = (severeRegressions + severeSlowdowns) * reportSettings.critical_regression_score;
+		double regressionsScore = (regressions + slowdowns) * reportSettings.regression_score;
+		
+		int scoreWindow = getRegressionScoreWindow(regressionOutput);		
+		double scoreDays = Math.max(1, (double)scoreWindow / 60 / 24);
+	
+		double weight = getReportKeyWeight(reportSettings, reportMode, isKey);
+		
+		double rawScore = (newEventsScore + severeNewEventScore + criticalRegressionsScore + regressionsScore) / scoreDays;
+		double resultScore = Math.max(100 - (weight * rawScore), 0);
+		
+		return Pair.of(resultScore, scoreWindow);
+	}
+
+	
+	private Pair<Double, Integer> getScore(
 		ReliabilityReportInput input, RegressionReportSettings reportSettings, 
 		ReportKeyResults reportKeyResults) {
 		
 		RegressionOutput regressionOutput = reportKeyResults.output.regressionData.regressionOutput;
 		
-		double newEventsScore = regressionOutput.newIssues * reportSettings.new_event_score;
-		double severeNewEventScore = regressionOutput.severeNewIssues * reportSettings.severe_new_event_score;
-		double criticalRegressionsScore = (regressionOutput.criticalRegressions + reportKeyResults.severeSlowdowns) * reportSettings.critical_regression_score;
-		double regressionsScore = (regressionOutput.regressions + reportKeyResults.slowdowns) * reportSettings.regression_score;
-		
-		int scoreWindow = getRegressionScoreWindow(regressionOutput);		
-		double scoreDays = Math.max(1, (double)scoreWindow / 60 / 24);
-	
-		double weight = getReportKeyWeight(reportSettings, input, reportKeyResults);
-		
-		double rawScore = (newEventsScore + severeNewEventScore + criticalRegressionsScore + regressionsScore) / scoreDays;
-		double resultScore = Math.max(100 - (weight * rawScore), 0);
-		
-		String description = getScoreDescription(input, reportSettings, reportKeyResults,
-				resultScore, scoreWindow);
-		
-		return Pair.of(resultScore, description);
+		return getScore(regressionOutput, reportSettings, 
+				regressionOutput.newIssues, regressionOutput.severeNewIssues, 
+				regressionOutput.regressions, regressionOutput.criticalRegressions, 
+				reportKeyResults.slowdowns, reportKeyResults.severeSlowdowns, 
+				reportKeyResults.output.reportKey.isKey, input.getReportMode());
+
 	}
 	
-	private String getScoreDescription(ReliabilityReportInput input,
+	private String getScoreDescription(ReportMode reportMode,
 		RegressionReportSettings reportSettings,
 		ReportKeyResults reportKeyResults, double resultScore, int period) {
 		
@@ -1021,7 +1031,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		result.append("Score for ");
 		result.append(reportKeyResults.output.reportKey.name);
 		
-		if (input.getReportMode() == ReportMode.Deployments) {
+		if (reportMode == ReportMode.Deployments) {
 			result.append(", introduced ");
 			int activeTimespan = reportKeyResults.output.regressionData.regressionOutput.regressionInput.activeTimespan;
 			Date introduced = DateTime.now().minusMinutes(activeTimespan).toDate();
@@ -1046,7 +1056,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			addDeduction("slowdown", reportKeyResults.slowdowns, reportSettings.regression_score, deductions);
 			addDeduction("severe slowdown", reportKeyResults.severeSlowdowns, reportSettings.critical_regression_score, deductions);
 	
-			double weight = getReportKeyWeight(reportSettings, input, reportKeyResults);
+			double weight = getReportKeyWeight(reportSettings, reportMode, reportKeyResults.output.reportKey.isKey);
 			
 			String deductionString = String.join(" + ", deductions);
 			result.append(deductionString);
@@ -1496,10 +1506,12 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			if (reportKeyOutput.regressionData != null) {
 			
-				Pair<Double, String> scorePair = getScore(input, reportSettings, reportKeyResults);
+				Pair<Double, Integer> scorePair = getScore(input, reportSettings, reportKeyResults);
 				
 				reportKeyResults.score = scorePair.getFirst();
-				reportKeyResults.scoreDesc = scorePair.getSecond();
+				
+				reportKeyResults.scoreDesc = getScoreDescription(input.getReportMode(), reportSettings, reportKeyResults,
+						reportKeyResults.score, scorePair.getSecond());
 				
 				reportKeyResults.description = getDescription(reportKeyOutput.regressionData, 
 					reportKeyResults.newIssuesDesc, reportKeyResults.regressionsDesc, reportKeyResults.slowDownsDesc);

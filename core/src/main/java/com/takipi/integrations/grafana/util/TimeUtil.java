@@ -232,8 +232,6 @@ public class TimeUtil {
 	}
 	
 	public static String toTimeFilter(DateTime from, DateTime to) {
-		//return "time >= 1547455607608ms and time <= 1549702007608ms";
-		//time >= 1547456376515msand time <= 1547629176515ms
 		return SO_FAR_WINDOW + from.getMillis() + MILLI_UNIT + " " + RANGE_WINDOW + to.getMillis() + MILLI_UNIT;
 	}
 }
