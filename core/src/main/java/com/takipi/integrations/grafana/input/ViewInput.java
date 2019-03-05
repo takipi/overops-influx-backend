@@ -31,10 +31,22 @@ public class ViewInput extends EnvironmentsFilterInput {
 	 */
 	public String timeFilter;
 	
-	
+	/**
+	 * A field name for the start of the active window for the report row
+	 */
 	public static final String FROM = "from";
+	
+	/**
+	 * A field name for the end of the active window for the report row
+	 */
 	public static final String TO = "to";
+	
+	/**
+	 *A field name for the Time range (e.g. 12h, 7d) for the report row
+	 */
 	public static final String TIME_RANGE = "timeRange";
+	
+	
 	
 	public boolean hasTransactions() {
 		return hasFilter(transactions);

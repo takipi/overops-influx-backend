@@ -1,6 +1,11 @@
 package com.takipi.integrations.grafana.input;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
+import com.takipi.integrations.grafana.functions.GrafanaFunction;
+import com.takipi.integrations.grafana.util.ArrayUtil;
 
 /**
  * This function populates a table containing information about a list of events. 
@@ -25,6 +30,11 @@ public class EventsInput extends BaseEventVolumeInput {
 	 * Additional available fields described below.
 	 */
 	public String fields;
+	
+	public List<String> getFields() {
+		String[] array = ArrayUtil.safeSplitArray(fields, GrafanaFunction.ARRAY_SEPERATOR, true);
+		return Arrays.asList(array);
+	}
 	
 	/**
 	 * A link to the event's ARC analysis

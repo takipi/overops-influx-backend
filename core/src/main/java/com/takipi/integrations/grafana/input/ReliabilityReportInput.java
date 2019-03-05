@@ -42,6 +42,14 @@ public class ReliabilityReportInput extends RegressionsInput {
 		Applications, 
 		
 		/**
+		 * The report will return a row for each application in the environment with additional
+		 * information about throughput and failure rates. The report
+		 * will list up to <limit> apps, sorted by the apps who have the highest volume of events
+		 */
+		Apps_Extended, 
+		
+		
+		/**
 		 * The report will return a row for the last <limit> deployments in the target envs.
 		 */
 		Deployments, 
@@ -238,105 +246,233 @@ public class ReliabilityReportInput extends RegressionsInput {
 		return sortType;
 	}
 	
+	/**
+	 *  An optional comma delimited list of types to be used to calculate
+	 *  failure types in extended app reporting mode. If no value if provided the types value
+	 *  is used.
+	 *  
+	 */
+	public String failureTypes;
+	
+	public String getFailureTypes() {
+		
+		if (failureTypes == null) {
+			return types;
+		}
+		
+		return failureTypes;
+	}
+	
+	/**
+	 * Below are the constants describing the field supported by this function for each of the available 
+	 * report modes
+	 */
+	
+	/**
+	 * The field name  for the env ID for this row
+	 */
+	
+	public static final String SERVICE = "Service";
+
+	/**
+	 * The field for the name of the target app/dep/tier
+	 */
+	public static final String KEY = "Key";
+
+	/**
+	 * The field name for the human-readable name  of the target app/dep/tier
+	 */
+	public static final String NAME = "Name";
+
+	/**
+	 * The field name of the row is a deployment, the name of the deployment to be diff against
+	 */
+	
 	public static final String PREV_DEP_NAME = "previousDepName";
 	
+	/**
+	 * The field name of the row is a deployment, the start of the deployment to be diff against
+	 */
 	public static final String PREV_DEP_FROM = "previousDepFrom";			
 
+	/**
+	* The field name of the row is a deployment and a diff deployment exists = 1, otherwise 0
+	 */
 	public static final String PREV_DEP_STATE =  "previousDepState";
 	
 	/**
-	 * The list of fields returned by this function
+	 * The field name of the row is a Value of any new issues in this row
 	 */
-	public static final List<String> FIELDS = Arrays.asList(
-			new String[] { 
-					
-					/**
-					 * Start of the active window for the report row
-					 */
-					ViewInput.FROM, 
-					
-					/**
-					 * end of the active window for the report row
-					 */
-					ViewInput.TO, 
-					
-					/**
-					 * Time range (e.g. 12h, 7d) for the report row
-					 */
-					ViewInput.TIME_RANGE, 
-					
-					/**
-					 * The env ID for this row
-					 */
-					"Service", 
-					
-					/**
-					 * The name of the target app/dep/tier
-					 */
-					"Key", 
-					
-					/**
-					 * The human-readable name  of the target app/dep/tier
-					 */
-					"Name",
-					
-					/**
-					 * if the row is a deployment, the name of the deployment to be diff against
-					 */
-					PREV_DEP_NAME,
-					
-					/**
-					 * if the row is a deployment, the start of the deployment to be diff against
-					 */
-					PREV_DEP_FROM,
-										
-					/**
-					* if the row is a deployment and a diff deployment exists = 1, otherwise 0
-					 */
-					PREV_DEP_STATE,
-					
-					
-					/**
-					 * Value of any new issues in this row
-					 */
-					"NewIssues", 
-					
-					/**
-					 * Value of any regressions in this row
-					 */
-					"Regressions", 
-					
-					/**
-					 * Value of any slowdowns in this row
-					 */
-					"Slowdowns", 
-					
-					/**
-					 * Text description of new issues in this row
-					 */
-					"NewIssuesDesc", 
-					
-					/**
-					 * Text description of regressions in this row
-					 */
-					"RegressionsDesc", 
-					
-					/**
-					 * Text description of slowdowns in this row
-					 */
-					"SlowdownsDesc", 
-					
-					/**
-					 * Reliability score for this row
-					 */
-					"Score", 
-					
-					/**
-					 * Text description of reliability score for this row
-					 */
-					"ScoreDesc"
-				});
-				
-			public final static List<String>PREV_DEP_FIELDS =
-				Arrays.asList(new String[]{PREV_DEP_NAME, PREV_DEP_FROM, PREV_DEP_STATE});
+	public static final String NEW_ISSUES = "NewIssues";
+	
+	/**
+	 * The field name of the value of any regressions in this row
+	 */
+	public static final String REGRESSIONS = "Regressions";
+	
+	/**
+	 * The field name of the value of any slowdowns in this row
+	 */
+	public static final String SLOWDOWNS = "Slowdowns"; 
+	
+	/**
+	 * The field name of the Text description of new issues in this row
+	 */
+	public static final String NEW_ISSUES_DESC = "NewIssuesDesc";
+	
+	/**
+	 * The field name of the Text description of regressions in this row
+	 */
+	public static final String REGRESSIONS_DESC = "RegressionsDesc";
+	
+	/**
+	 * The field name of the Text description of slowdowns in this row
+	 */
+	public static final String SLOWDOWNS_DESC = "SlowdownsDesc";
+	
+	/**
+	 * The field name of the Reliability score for this row
+	 */
+	public static final String SCORE = "Score"; 
+	
+	/**
+	 * The field name of the Text description of reliability score for this row
+	 */
+	public static final String SCORE_DESC = "ScoreDesc";
+	
+	/**
+	 * Field name of transaction volume for this row
+	 */
+	public static final String TRANSACTION_VOLUME = "TransactionVolume";
+
+
+	/**
+	 * Field name of transaction avg response for this row
+	 */
+	public static final String TRANSACTION_AVG_RESPONSE = "TransactionAvgResponse";
+
+	/**
+	 * Field name of transaction avg response delta for this row
+	 */
+	public static final String TRANSACTION_RESPONSE_DELTA = "TransactionResponseDelta";
+	
+	
+	/**
+	 * Field name of transaction failure volume
+	 */
+	public static final String TRANSACTION_FAILURES = "TransactionFailures";
+	
+	/**
+	 * Field name of transaction failure rate for this row
+	 */
+	public static final String TRANSACTION_FAIL_RATE = "TransactionFailRate";
+	
+	/**
+	 * Field name of transaction failure delta rate for this row
+	 */
+	public static final String TRANSACTION_FAIL_RATE_DELTA = "TransactionFailRateDelta";
+
+	/**
+	 * Field name of error volume for this row
+	 */
+	public static final String ERROR_VOLUME = "ErrorVolume";
+
+	/**
+	 * Field name of error count for this row
+	 */
+	public static final String ERROR_COUNT = "ErrorCount";
+	
+	/**
+	 * Field name of performance state. 0 if no slowdown, 1 if slowdowns exist, 2 is severe slowdowns exist
+	 */
+	public static final String PERF_STATE = "PerfState";
+	
+	public enum PerfState {
+		OK,
+		SLOWING,
+		CRITICAL
+	}
+	
+	/**
+	 * The min delta between the base transaction response time and failure rate
+	 * for which values are returned for TRANSACTION_RESPONSE_DELTA and TRANSACTION_FAIL_RATE_DELTA
+	 * fields. For example, if the base avg response for a target app was 100ms, and the current response time 
+	 * is 105ms, this value needs to be greater than 0.05 for a value to be treated
+	 * as exceeding the min rate delta threshold and be returned 
+	 */
+	public double minThresholDelta;
+	
+	
+	/**
+	 * The list of default fields returned for dep reporting
+	 */
+	public static final List<String> DEP_FIELDS = Arrays.asList(
+		new String[] { 	
+			ViewInput.FROM,
+			ViewInput.TO, 
+			ViewInput.TIME_RANGE, 
+			SERVICE, 
+			KEY, 
+			NAME, 
+			PREV_DEP_NAME, 
+			PREV_DEP_FROM, 
+			PREV_DEP_STATE,
+			NEW_ISSUES, 
+			REGRESSIONS, 
+			SLOWDOWNS, 
+			NEW_ISSUES_DESC, 
+			REGRESSIONS_DESC, 
+			SLOWDOWNS_DESC,
+			SCORE, 
+			SCORE_DESC	
+		});
+	
+	/**
+	 * The list of default fields returned for app / tier reporting
+	 */
+	public static final List<String> APP_FIELDS = Arrays.asList(
+		new String[] { 	
+			ViewInput.FROM, 
+			ViewInput.TO, 
+		 	ViewInput.TIME_RANGE, 
+		 	SERVICE, 
+		 	KEY, 
+		 	NAME, 
+			NEW_ISSUES, 
+		  	REGRESSIONS, 
+		 	SLOWDOWNS, 
+		 	NEW_ISSUES_DESC, 
+		 	REGRESSIONS_DESC, 
+			SLOWDOWNS_DESC,
+		 	SCORE, 
+		 	SCORE_DESC	
+		});
+	
+	/**
+	 * The list of default fields returned for extended app reporting
+	 */
+	public static final List<String> APP_EXT_FIELDS = Arrays.asList(
+		 new String[] { 	
+			ViewInput.FROM, 
+			ViewInput.TO, 
+			ViewInput.TIME_RANGE, 
+			SERVICE, 
+			KEY, 
+			NAME, 
+			NEW_ISSUES_DESC, 
+			REGRESSIONS_DESC, 
+			SLOWDOWNS_DESC,
+			SCORE_DESC,	
+			TRANSACTION_VOLUME,
+			TRANSACTION_AVG_RESPONSE,
+		 	TRANSACTION_FAIL_RATE, 
+		 	TRANSACTION_FAILURES,
+		 	NEW_ISSUES, 
+		  	REGRESSIONS, 
+		 	SLOWDOWNS, 
+		 	PERF_STATE,
+		 	ERROR_VOLUME, 
+		 	ERROR_COUNT,
+			SCORE
+		});
 }

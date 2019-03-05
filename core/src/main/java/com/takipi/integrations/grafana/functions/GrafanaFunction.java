@@ -833,7 +833,7 @@ public abstract class GrafanaFunction
 		return result;
 	}
 	
-	private TransactionData getEventTransactionData(Map<TransactionKey, TransactionData> transactions, EventResult event) {
+	protected TransactionData getEventTransactionData(Map<TransactionKey, TransactionData> transactions, EventResult event) {
 	
 		TransactionKey classOnlyKey = TransactionKey.of(event.entry_point.class_name, null);
 		TransactionData result = transactions.get(classOnlyKey);
