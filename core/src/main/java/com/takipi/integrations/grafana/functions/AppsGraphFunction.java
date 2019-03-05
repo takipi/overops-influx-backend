@@ -76,7 +76,7 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction
 		super(apiClient);
 	}
 		
-	private Collection<String> getApplications(String serviceId, 
+	public Collection<String> getApplications(String serviceId, 
 		EnvironmentsFilterInput input, int limit) {
 
 		Collection<String> result;

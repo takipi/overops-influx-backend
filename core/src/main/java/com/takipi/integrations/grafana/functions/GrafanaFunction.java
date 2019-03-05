@@ -958,10 +958,10 @@ public abstract class GrafanaFunction
 				if (transaction.currTimer == null) {
 					transaction.currTimer = event;
 				} else {
-					DateTime evrntFirstSeen = TimeUtil.getDateTime(event.first_seen);
+					DateTime eventFirstSeen = TimeUtil.getDateTime(event.first_seen);
 					DateTime timerFirstSeen = TimeUtil.getDateTime(transaction.currTimer.first_seen);
 					
-					long eventDelta = timeSpan.getSecond().getMillis() - evrntFirstSeen.getMillis();
+					long eventDelta = timeSpan.getSecond().getMillis() - eventFirstSeen.getMillis();
 					long timerDelta = timeSpan.getSecond().getMillis() - timerFirstSeen.getMillis();
 
 					if (eventDelta < timerDelta) {
@@ -1530,6 +1530,54 @@ public abstract class GrafanaFunction
 				event.stats.invocations += gpc.stats.invocations;
 			}
 		}
+	}
+	
+	protected Pair<Collection<EventResult>, Long> applyGraphToEvents(String serviceId, 
+			Map<String, EventResult> eventListMap, Pair<DateTime, DateTime> timespan,
+			Graph graph, BaseEventVolumeInput input)
+	{
+		EventFilter eventFilter = getEventFilter(serviceId, input, timespan);
+		
+		if (eventFilter == null) {
+			return Pair.of(Collections.emptyList(), Long.valueOf(0l));
+		}
+		
+		long volume = 0;
+		
+		for (GraphPoint gp : graph.points)
+		{
+			
+			if (gp.contributors == null)
+			{
+				continue;
+			}
+			
+			for (GraphPointContributor gpc : gp.contributors)
+			{		
+				EventResult event = eventListMap.get(gpc.id);
+				
+				if (event != null)
+				{
+					event.stats.invocations += gpc.stats.invocations;
+					event.stats.hits += gpc.stats.hits;
+					volume += gpc.stats.hits;
+				}
+			}
+		}
+		
+		Map<String, EventResult> filteredEvents = new HashMap<String, EventResult>();
+		
+		for (EventResult event : eventListMap.values())
+		{	
+			if (eventFilter.filter(event))
+			{
+				continue;
+			}
+			
+			filteredEvents.put(event.id, event);
+		}
+		
+		return Pair.of(filteredEvents.values(), Long.valueOf(volume));
 	}
 	
 	private Collection<EventResult> getEventListFromGraph(String serviceId, String viewId, ViewInput input,
