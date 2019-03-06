@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 22,
-  "iteration": 1549870019255,
+  "iteration": 1551852411702,
   "links": [
     {
       "asDropdown": true,
@@ -1726,6 +1726,8 @@
       {
         "allValue": "None",
         "current": {
+          "selected": false,
+          "tags": [],
           "text": "None",
           "value": [
             "None"
@@ -2139,7 +2141,7 @@
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-1d",
     "to": "now"
   },
   "timepicker": {
@@ -2171,5 +2173,5 @@
   "timezone": "",
   "title": "Reliability Scorecard",
   "uid": "lfqKXMfmz",
-  "version": 152
+  "version": 154
 }

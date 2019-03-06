@@ -1831,11 +1831,9 @@ public abstract class GrafanaFunction
 		}
 	}
 	
-	protected SummarizedView getView(String serviceId, String viewName)
-	{
+	protected SummarizedView getView(String serviceId, String viewName) {
 		
-		if (viewName.startsWith(GRAFANA_VAR_PREFIX))
-		{
+		if ((viewName.length() == 0) || (viewName.startsWith(GRAFANA_VAR_PREFIX))) {
 			return null;
 		}
 		

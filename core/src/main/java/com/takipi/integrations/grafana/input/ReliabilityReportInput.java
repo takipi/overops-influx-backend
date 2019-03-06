@@ -387,11 +387,16 @@ public class ReliabilityReportInput extends RegressionsInput {
 	 */
 	public static final String PERF_STATE = "PerfState";
 	
-	public enum PerfState {
+	public enum ReliabilityState {
 		OK,
-		SLOWING,
+		WARN,
 		CRITICAL
 	}
+	
+	/**
+	 * Field name of performance state. 0 if no slowdown, 1 if slowdowns exist, 2 is severe slowdowns exist
+	 */
+	public static final String ERROR_STATE = "ErrorState";
 	
 	/**
 	 * The min delta between the base transaction response time and failure rate
@@ -467,6 +472,7 @@ public class ReliabilityReportInput extends RegressionsInput {
 			TRANSACTION_AVG_RESPONSE,
 		 	TRANSACTION_FAIL_RATE, 
 		 	TRANSACTION_FAILURES,
+		 	ERROR_STATE,
 		 	NEW_ISSUES, 
 		  	REGRESSIONS, 
 		 	SLOWDOWNS, 

@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 38,
-  "iteration": 1549869823791,
+  "iteration": 1551852526227,
   "links": [
     {
       "asDropdown": true,
@@ -1380,6 +1380,7 @@
       {
         "allValue": "None",
         "current": {
+          "selected": true,
           "text": "None",
           "value": "None"
         },
@@ -1404,8 +1405,8 @@
       {
         "allValue": "*",
         "current": {
-          "text": "All",
-          "value": "$__all"
+          "text": "all",
+          "value": "all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1452,8 +1453,8 @@
       {
         "allValue": "*",
         "current": {
-          "text": "All",
-          "value": "$__all"
+          "text": "all",
+          "value": "all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2003,7 +2004,7 @@
     ]
   },
   "time": {
-    "from": "now-2d",
+    "from": "now-1d",
     "to": "now"
   },
   "timepicker": {
@@ -2035,5 +2036,5 @@
   "timezone": "",
   "title": "Event Diff",
   "uid": "CVCRTgwmz",
-  "version": 25
+  "version": 27
 }

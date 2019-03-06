@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,7 +47,7 @@ import com.takipi.integrations.grafana.input.RegressionsInput;
 import com.takipi.integrations.grafana.input.RegressionsInput.RenderMode;
 import com.takipi.integrations.grafana.input.ReliabilityReportInput;
 import com.takipi.integrations.grafana.input.ReliabilityReportInput.GraphType;
-import com.takipi.integrations.grafana.input.ReliabilityReportInput.PerfState;
+import com.takipi.integrations.grafana.input.ReliabilityReportInput.ReliabilityState;
 import com.takipi.integrations.grafana.input.ReliabilityReportInput.ReportMode;
 import com.takipi.integrations.grafana.input.ReliabilityReportInput.ScoreType;
 import com.takipi.integrations.grafana.input.ReliabilityReportInput.SortType;
@@ -1443,7 +1442,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			result.append(getSlowdownRate(transactionData));
 			result.append(" ");
 			result.append(getTransactionName(transactionData.graph.name, false));
-						
+			result.append("(P1)");			
 			index++;
 			
 			if ((index < severeSlowdowns.size()) || (slowdowns.size() > 0)) {
@@ -1648,7 +1647,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		ReliabilityReportInput failureInput = gson.fromJson(json, input.getClass());
 		failureInput.types = input.getFailureTypes(); 
 	
-		EventFilter result = getEventFilter(serviceId, input, timespan);
+		EventFilter result = getEventFilter(serviceId, failureInput, timespan);
 		
 		return result;
 	}
@@ -1735,9 +1734,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 		long transactionVolume = 0;
 		long baseTransactions = 0;
 
+		int eventCount = 0;
 		long errorVolume = 0;
-
-		Set<String> errorIds = new HashSet<String>();
 
 		double avgTimeNum = 0;
 		double avgTimeDenom = 0;
@@ -1747,28 +1745,29 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		long failures = 0;
 		long baseFailures = 0;
+			
+		Map<String, EventResult> eventListMap = reportKeyResult.output.regressionData.regressionOutput.eventListMap;
+
+		if (failureFilter != null) {
+			
+			for (EventResult event : eventListMap.values()) {
 				
+				if (failureFilter.filter(event)) {
+					continue;
+				}
+				
+				failures += event.stats.hits;	
+				eventCount++;
+			}
+		}
+	
 		for (TransactionData transactionData : reportKeyResult.output.transactionMap.values()) {
 			
 			errorVolume += transactionData.errorsHits;
 			
 			transactionVolume += transactionData.stats.invocations;
 			baseTransactions += transactionData.baselineInvocations;
-			
-			if (transactionData.errors != null) {
-				
-				for (EventResult event : transactionData.errors) {
 					
-					errorIds.add(event.id);
-	
-					if ((failureFilter == null) || (failureFilter.filter(event))) {
-						continue;
-					}
-					
-					failures += event.stats.hits;						
-				}
-			}
-							
 			avgTimeNum += transactionData.stats.avg_time * transactionData.stats.invocations;
 			avgTimeDenom += transactionData.stats.invocations;
 			
@@ -1779,7 +1778,6 @@ public class ReliabilityReportFunction extends EventsFunction {
 		if ((failures > 0) && (failureFilter != null)) {
 			
 			Graph baseGraph = reportKeyResult.output.regressionData.regressionOutput.baseVolumeGraph;
-			Map<String, EventResult> eventListMap = reportKeyResult.output.regressionData.regressionOutput.eventListMap;
 						
 			for (GraphPoint gp : baseGraph.points) {
 				
@@ -1822,14 +1820,24 @@ public class ReliabilityReportFunction extends EventsFunction {
 			baseFailRate = 0;
 		}
 		
-		PerfState perfState;
+		ReliabilityState perfState;
 		
-		if (reportKeyResult.severeSlowdowns > 0) {
-			perfState = PerfState.CRITICAL; 
+		if (reportKeyResult.severeSlowdowns > 1) {
+			perfState = ReliabilityState.CRITICAL; 
 		} else if (reportKeyResult.slowdowns > 0) {
-			perfState = PerfState.SLOWING; 
+			perfState = ReliabilityState.WARN; 
 		} else {
-			perfState = PerfState.OK; 
+			perfState = ReliabilityState.OK; 
+		}
+		
+		ReliabilityState errorState;
+		
+		if (reportKeyResult.criticalRegressions > 1) {
+			errorState = ReliabilityState.CRITICAL; 
+		} else if (reportKeyResult.regressions > 0) {
+			errorState = ReliabilityState.WARN; 
+		} else {
+			errorState = ReliabilityState.OK; 
 		}
 			
 		Pair<Double, String> responsePair = formatDelta(avgTimeDenom, avgTimeNum, baseAvgTimeDenom, baseAvgTimeNum, input);
@@ -1841,12 +1849,13 @@ public class ReliabilityReportFunction extends EventsFunction {
 		setRowValue(fields, ReliabilityReportInput.TRANSACTION_AVG_RESPONSE, row, responseValue);
 		
 		setRowValue(fields, ReliabilityReportInput.PERF_STATE, row, perfState.ordinal());
+		setRowValue(fields, ReliabilityReportInput.ERROR_STATE, row, errorState.ordinal());
 		
 		setRowValue(fields, ReliabilityReportInput.TRANSACTION_FAILURES, row, failuresValue);
 		setRowValue(fields, ReliabilityReportInput.TRANSACTION_FAIL_RATE, row, failRate);
 		
 		setRowValue(fields, ReliabilityReportInput.ERROR_VOLUME, row, errorVolume);
-		setRowValue(fields, ReliabilityReportInput.ERROR_COUNT, row, errorIds.size());	
+		setRowValue(fields, ReliabilityReportInput.ERROR_COUNT, row, eventCount);	
 	}
 	
 	private void addDepCompareFields(List<String> fields, List<Object> row, 
