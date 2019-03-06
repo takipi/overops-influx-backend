@@ -30,8 +30,19 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 43,
-  "iteration": 1551852333658,
-  "links": [],
+  "iteration": 1551854293617,
+  "links": [
+    {
+      "asDropdown": true,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [
+        "OverOps"
+      ],
+      "type": "dashboards"
+    }
+  ],
   "panels": [
     {
       "content": "<!DOCTYPE html>\n<html>\n<head>\n</head>\n<body>\n\n<script>\n\n\nfunction openOO() {\n  \n  var apiHost = $(\"textarea.apiHost\").val();\n \n  console.log(\"apiHost = \" +  apiHost);\n\n  console.log(apiHost);\n  \n  window.location.replace(apiHost);\n}\n\n\n</script>\n\n<style type=\"text/css\">\n    \n     .apiHost {\n        visibility:hidden;\n    }\n    \n    \n</style>\n\n\n<body>\n\n<img src=\"data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53%0D%0AMy5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NC45NSA1MC4yIj4KICA8ZGVmcz4KICAgIDxz%0D%0AdHlsZT4KICAgICAgLmNscy0xIHsKICAgICAgICBmaWxsOiAjNTViMWUzOwogICAgICB9CgogICAg%0D%0AICAuY2xzLTIgewogICAgICAgIGZpbGw6ICM0OTQ5NDk7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAg%0D%0APC9kZWZzPgogIDx0aXRsZT5zeW1ib2w8L3RpdGxlPgogIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0i%0D%0ATTI0LjUsMzcuNThjMi4yMy0xNC4xOCw1LjM5LTE3LjkxLDE0LjcxLTE3LjkxLDYuNDIsMCw5LjMx%0D%0ALDIuMzIsOS41Nyw4LjMySDU4LjdjLS41Ny0xMS02LjU2LTE2LTE3Ljg5LTE2SDEzLjc1bDkuODIs%0D%0AMy45NGMtNC45MiwzLjc4LTcuNiwxMC42Mi05LjE2LDIxQTYwLjY4LDYwLjY4LDAsMCwwLDEzLjgy%0D%0ALDQzSDIzLjg4QzI0LDQxLDI0LjIxLDM5LjQ4LDI0LjUsMzcuNThaIiB0cmFuc2Zvcm09InRyYW5z%0D%0AbGF0ZSgtMTMuNzUgLTEyKSIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTQ4LDM2LjZjLTIu%0D%0AMTYsMTQtNS42MywxOC4wNy0xNC42NCwxOC4wNy02LjI5LDAtOS4xMi0xLjY4LTkuNTYtNy42OGgt%0D%0AMTBjLjc1LDExLDcuMjYsMTUuMiwxOS4zLDE1LjIsMTUuNDksMCwyMi4xMS01Ljc4LDI1LTI0Ljg5%0D%0AQTUwLjE2LDUwLjE2LDAsMCwwLDU4LjY1LDMyaC0xMEM0OC40OCwzMyw0OC4yOCwzNC45MSw0OCwz%0D%0ANi42WiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTEzLjc1IC0xMikiLz4KPC9zdmc+Cg==\" onclick=\"javascript:openOO()\"  alt=\"OverOps\" style=\"width:25%;margin-top: 16px;\">\n<textarea class=\"apiHost\">$apiHost</textarea>\n</body>\n\n</body>\n</html>\n\n\n\n",
@@ -1389,9 +1400,7 @@
         "allValue": "None",
         "current": {
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1532,6 +1541,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -1867,6 +1877,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -1891,7 +1902,7 @@
     ]
   },
   "time": {
-    "from": "now-1d",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {
@@ -1923,5 +1934,5 @@
   "timezone": "",
   "title": "Home",
   "uid": "lg0U4qriz",
-  "version": 71
+  "version": 72
 }

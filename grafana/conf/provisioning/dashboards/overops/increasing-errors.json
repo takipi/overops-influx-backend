@@ -40,8 +40,17 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 28,
-  "iteration": 1551852587259,
+  "iteration": 1551853442553,
   "links": [
+    {
+      "icon": "dashboard",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "tooltip": "Home",
+      "type": "link",
+      "url": "/d/lg0U4qriz/home"
+    },
     {
       "asDropdown": true,
       "icon": "external link",
@@ -1254,5 +1263,5 @@
   "timezone": "",
   "title": "Increasing Errors",
   "uid": "WZ739NYmk",
-  "version": 113
+  "version": 114
 }

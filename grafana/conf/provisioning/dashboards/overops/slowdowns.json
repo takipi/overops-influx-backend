@@ -40,8 +40,17 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 37,
-  "iteration": 1551852619290,
+  "iteration": 1551854226831,
   "links": [
+    {
+      "icon": "dashboard",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "tooltip": "Home",
+      "type": "link",
+      "url": "/d/lg0U4qriz/home"
+    },
     {
       "asDropdown": true,
       "icon": "dashboard",
@@ -1465,5 +1474,5 @@
   "timezone": "",
   "title": "Slowdowns",
   "uid": "iHSORcymk",
-  "version": 78
+  "version": 79
 }

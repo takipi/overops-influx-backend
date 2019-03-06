@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 38,
-  "iteration": 1551852526227,
+  "iteration": 1551854260666,
   "links": [
     {
       "asDropdown": true,
@@ -39,6 +39,15 @@
         "OverOps"
       ],
       "type": "dashboards"
+    },
+    {
+      "icon": "dashboard",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "tooltip": "Home",
+      "type": "link",
+      "url": "/d/lg0U4qriz/home"
     }
   ],
   "panels": [
@@ -1405,8 +1414,9 @@
       {
         "allValue": "*",
         "current": {
-          "text": "all",
-          "value": "all"
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1429,6 +1439,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1453,8 +1464,9 @@
       {
         "allValue": "*",
         "current": {
-          "text": "all",
-          "value": "all"
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1477,6 +1489,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1501,6 +1514,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1558,7 +1572,7 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "All Events",
           "value": "All Events"
         },
@@ -1581,6 +1595,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -1605,6 +1620,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -1811,6 +1827,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "Logged Error|Uncaught Exception|HTTP Error",
           "value": "Logged Error|Uncaught Exception|HTTP Error"
         },
@@ -1841,6 +1858,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -2004,7 +2022,7 @@
     ]
   },
   "time": {
-    "from": "now-1d",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {
@@ -2036,5 +2054,5 @@
   "timezone": "",
   "title": "Event Diff",
   "uid": "CVCRTgwmz",
-  "version": 27
+  "version": 29
 }

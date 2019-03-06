@@ -30,8 +30,17 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 39,
-  "iteration": 1551852454259,
+  "iteration": 1551854194359,
   "links": [
+    {
+      "icon": "dashboard",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "tooltip": "Home",
+      "type": "link",
+      "url": "/d/lg0U4qriz/home"
+    },
     {
       "asDropdown": true,
       "icon": "external link",
@@ -2198,6 +2207,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2245,10 +2255,9 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2297,6 +2306,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -2321,6 +2331,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -2517,5 +2528,5 @@
   "timezone": "",
   "title": "Site Reliability",
   "uid": "nxdE2gXmk",
-  "version": 12
+  "version": 13
 }
