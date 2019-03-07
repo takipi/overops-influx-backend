@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 43,
-  "iteration": 1551952473845,
+  "iteration": 1551952473849,
   "links": [],
   "panels": [
     {
@@ -941,7 +941,7 @@
       "description": "A report detailing providing a weighted score of the selected deployments. If no deployments are selected, the $limit most recent deployments are selected. Live deployments are marked with a *. Score weights are defined  in the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
-        "h": 14,
+        "h": 8,
         "w": 12,
         "x": 12,
         "y": 3
@@ -1417,6 +1417,266 @@
       "title": "Deployments",
       "transform": "table",
       "type": "table"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "OO",
+      "description": "Chart errors according to key code tiers (e.g. AWS, SQL, Tomcat,..). Key code tiers are defined in the Settings dashboard. If no key tiers are defined, then 3rd party code tiers (as defined in  https://git.io/fpPT0) with the most errors are charted.",
+      "fill": 0,
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 11
+      },
+      "hideTimeOverride": false,
+      "id": 111,
+      "interval": "1h",
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "dashboard": "Site Reliability",
+          "includeVars": true,
+          "keepTime": true,
+          "targetBlank": true,
+          "title": "Site Reliability",
+          "type": "absolute",
+          "url": "/d/nxdE2gXmk/site-reliability"
+        }
+      ],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "/^.Throughput/",
+          "color": "#7eb26d",
+          "fill": 2,
+          "linewidth": 0,
+          "yaxis": 2
+        },
+        {
+          "alias": "Times",
+          "color": "#1f78c1",
+          "linewidth": 2
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\",\"transactions\":\"$transactions\"})",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "alias": "Times",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": true,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",seriesName\":\"Times\", \"transactions\":\"$transactions\"})\n",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "routingGraph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",\"transactions\":\"$transactions\", \"limit\":\"$splitLimit\"})\n",
+          "rawQuery": true,
+          "refId": "C",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "alias": "Critical Exceptions",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"Critical Exceptions\",\"transactions\":\"$transactions\", \"limit\":\"$splitLimit\"})\n",
+          "rawQuery": true,
+          "refId": "D",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Exceptions By Tier",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "transparent": false,
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "short",
+          "label": "",
+          "logBase": 10,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": "",
+          "logBase": 10,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     }
   ],
   "refresh": false,
@@ -1428,9 +1688,10 @@
       {
         "allValue": "None",
         "current": {
-          "selected": true,
           "text": "None",
-          "value": "None"
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -1453,7 +1714,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1478,7 +1738,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1594,7 +1853,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1619,7 +1877,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -1718,7 +1975,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -1743,7 +1999,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -1768,7 +2023,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -1793,7 +2047,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -1841,7 +2094,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "Logged Error|Uncaught Exception|HTTP Error",
           "value": "Logged Error|Uncaught Exception|HTTP Error"
         },
@@ -1866,7 +2118,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "now-1d",
           "value": "now-1d"
         },
@@ -1891,7 +2142,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "now",
           "value": "now"
         },
@@ -1916,7 +2166,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "https://app.overops.com",
           "value": "https://app.overops.com"
         },
@@ -1973,5 +2222,5 @@
   "timezone": "",
   "title": "Home",
   "uid": "lg0U4qriz",
-  "version": 142
+  "version": 146
 }
