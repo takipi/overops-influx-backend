@@ -192,8 +192,7 @@ public class GraphFunction extends BaseGraphFunction {
 			} else {
 				DateTime gpTime = TimeUtil.getDateTime(gp.time);
 				timeValue = Long.valueOf(gpTime.getMillis());
-			}
-			
+			}	
 
 			if (gp.contributors == null) {
 				values.add(Arrays.asList(new Object[] {timeValue , Long.valueOf(0l) }));

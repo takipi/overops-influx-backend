@@ -18,6 +18,7 @@ import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.DeploymentsGraphInput;
+import com.takipi.integrations.grafana.input.EnvironmentsFilterInput;
 import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
@@ -74,7 +75,7 @@ public class DeploymentsGraphFunction extends GraphFunction {
 		return result;
 	}
 
-	private Collection<String> getDeployments(String serviceId, DeploymentsGraphInput input) {
+	public Collection<String> getDeployments(String serviceId, 	EnvironmentsFilterInput input, int limit) {
 		
 		Collection<String> selectedDeployments = input.getDeployments(serviceId);
 		
@@ -88,7 +89,7 @@ public class DeploymentsGraphFunction extends GraphFunction {
 			return Collections.emptyList();
 		}
 		
-		if ((input.limit == 0) || (input.limit > response.data.deployments.size())) {
+		if ((limit == 0) || (limit > response.data.deployments.size())) {
 			return getDeployementNames(response.data.deployments);
 		}
 		
@@ -128,7 +129,7 @@ public class DeploymentsGraphFunction extends GraphFunction {
 		});
 		
 		return getDeployementNames(sorted.subList(0, 
-			Math.min(input.limit,sorted.size())));
+			Math.min(limit,sorted.size())));
 	}
 	
 	
@@ -148,7 +149,7 @@ public class DeploymentsGraphFunction extends GraphFunction {
 				continue;
 			}
 
-			Collection<String> deployments = getDeployments(serviceId, dgInput);
+			Collection<String> deployments = getDeployments(serviceId, dgInput, dgInput.limit);
 			
 			for (String deployment : deployments) {
 				result.add(new GraphAsyncTask(serviceId, viewId, input.view, 
