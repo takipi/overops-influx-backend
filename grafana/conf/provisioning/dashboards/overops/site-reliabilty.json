@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 39,
-  "iteration": 1551951873916,
+  "iteration": 1551952994852,
   "links": [
     {
       "icon": "dashboard",
@@ -83,13 +83,13 @@
       "interval": null,
       "links": [
         {
-          "dashboard": "Reliability Scorecard",
+          "dashboard": "Reliability Analysis",
           "includeVars": true,
           "keepTime": true,
           "targetBlank": true,
-          "title": "Reliability Scorecard",
+          "title": "Reliability Analysis",
           "type": "absolute",
-          "url": "d/lfqKXMfmz/reliability-scorecard"
+          "url": "/d/4DHQ63-ik/reliability-analysis"
         }
       ],
       "mappingType": 1,
@@ -2135,8 +2135,11 @@
         "allValue": "all",
         "current": {
           "selected": true,
+          "tags": [],
           "text": "None",
-          "value": "None"
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -2159,7 +2162,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2184,7 +2186,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2209,7 +2210,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2257,7 +2257,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2282,7 +2281,6 @@
       {
         "allValue": "All",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2307,7 +2305,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -2332,7 +2329,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -2506,7 +2502,7 @@
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-1d",
     "to": "now"
   },
   "timepicker": {
@@ -2529,5 +2525,5 @@
   "timezone": "",
   "title": "Site Reliability",
   "uid": "nxdE2gXmk",
-  "version": 15
+  "version": 17
 }
