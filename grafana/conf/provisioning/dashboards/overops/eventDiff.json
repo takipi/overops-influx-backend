@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 38,
-  "iteration": 1551854260666,
+  "iteration": 1551951695296,
   "links": [
     {
       "asDropdown": true,
@@ -1487,29 +1487,27 @@
         "useTags": false
       },
       {
-        "allValue": "*",
+        "allValue": null,
         "current": {
           "selected": true,
           "text": "All",
-          "value": "$__all"
+          "value": "All"
         },
-        "datasource": "OO",
         "hide": 2,
-        "includeAll": true,
+        "includeAll": false,
         "label": "Transactions",
-        "multi": true,
+        "multi": false,
         "name": "transactions",
-        "options": [],
-        "query": "transactions({\"environments\":\"$environments\",\"view\":\"All Events\",\"timeFilter\":\"time >= now() - 7d\",\"sorted\":\"true\"})",
-        "refresh": 1,
-        "regex": "",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "All"
+          }
+        ],
+        "query": "All",
         "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
+        "type": "custom"
       },
       {
         "allValue": null,
@@ -1572,9 +1570,8 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
-          "text": "All Events",
-          "value": "All Events"
+          "text": "",
+          "value": ""
         },
         "hide": 2,
         "includeAll": false,
@@ -1583,7 +1580,7 @@
         "name": "view",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "All Events",
             "value": "All Events"
           }
@@ -1727,8 +1724,8 @@
         "multi": true,
         "name": "type",
         "options": [],
-        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"All Events\"})",
-        "refresh": 1,
+        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\", \"timeFilter\":\"$timeFilter\"})",
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -1804,7 +1801,7 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
+          "selected": true,
           "text": "<term>",
           "value": "<term>"
         },
@@ -1827,7 +1824,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "Logged Error|Uncaught Exception|HTTP Error",
           "value": "Logged Error|Uncaught Exception|HTTP Error"
         },
@@ -1858,7 +1854,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -2022,7 +2017,7 @@
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-1d",
     "to": "now"
   },
   "timepicker": {
@@ -2054,5 +2049,5 @@
   "timezone": "",
   "title": "Event Diff",
   "uid": "CVCRTgwmz",
-  "version": 29
+  "version": 33
 }

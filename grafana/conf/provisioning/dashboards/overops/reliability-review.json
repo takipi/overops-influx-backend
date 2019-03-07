@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 36,
-  "iteration": 1551854164620,
+  "iteration": 1551951824081,
   "links": [
     {
       "icon": "dashboard",
@@ -474,8 +474,9 @@
       {
         "allValue": "all",
         "current": {
-          "text": "all",
-          "value": "all"
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -498,8 +499,9 @@
       {
         "allValue": "all",
         "current": {
-          "text": "all",
-          "value": "all"
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -581,7 +583,7 @@
         "multi": true,
         "name": "type",
         "options": [],
-        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\"})",
+        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\", \"timeFilter\":\"$timeFilter\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -657,12 +659,12 @@
         "name": "limit",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "5",
             "value": "5"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "10",
             "value": "10"
           }
@@ -930,7 +932,7 @@
     ]
   },
   "time": {
-    "from": "now-1d",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {
@@ -962,5 +964,5 @@
   "timezone": "",
   "title": "Reliability Review",
   "uid": "82eIMSsmz",
-  "version": 65
+  "version": 67
 }

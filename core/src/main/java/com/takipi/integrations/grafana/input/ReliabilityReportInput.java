@@ -399,6 +399,11 @@ public class ReliabilityReportInput extends RegressionsInput {
 	public static final String ERROR_STATE = "ErrorState";
 	
 	/**
+	 * Field name of overall reliability state.
+	 */
+	public static final String RELIABILITY_STATE = "ReliabilityState";
+	
+	/**
 	 * The min delta between the base transaction response time and failure rate
 	 * for which values are returned for TRANSACTION_RESPONSE_DELTA and TRANSACTION_FAIL_RATE_DELTA
 	 * fields. For example, if the base avg response for a target app was 100ms, and the current response time 
@@ -472,13 +477,15 @@ public class ReliabilityReportInput extends RegressionsInput {
 			TRANSACTION_AVG_RESPONSE,
 		 	TRANSACTION_FAIL_RATE, 
 		 	TRANSACTION_FAILURES,
-		 	ERROR_STATE,
+		 	TRANSACTION_FAIL_RATE_DELTA,
 		 	NEW_ISSUES, 
 		  	REGRESSIONS, 
 		 	SLOWDOWNS, 
 		 	PERF_STATE,
+		 	ERROR_STATE,
 		 	ERROR_VOLUME, 
 		 	ERROR_COUNT,
+		 	RELIABILITY_STATE,
 			SCORE
 		});
 }

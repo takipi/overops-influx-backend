@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.joda.time.DateTime;
 
+import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
@@ -150,15 +151,32 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 		}
 	}
 	
+	private RegressionGraphInput getGraphInput(GraphInput input) {
+		
+		RegressionGraphInput result;
+		RegressionGraphInput rgInput = (RegressionGraphInput)input;
+
+		if (rgInput.timeFilterVar != null) {
+			Gson gson = new Gson();
+			result = gson.fromJson(gson.toJson(rgInput), rgInput.getClass());
+			Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(rgInput.timeFilterVar);
+			result.timeFilter = TimeUtil.getTimeFilter(timespan);
+		} else {
+			result = rgInput;
+		}
+		
+		return result;
+	}
+	
 	@Override
 	protected List<GraphSeries> processGraphSeries(Collection<String> servieIds, 
 			String serviceId, String viewName, String viewId, Pair<DateTime, DateTime> timeSpan,
 			GraphInput input) {
  		
-		RegressionGraphInput rgInput = (RegressionGraphInput)input;
+		RegressionGraphInput graphInput = getGraphInput(input);
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
 		
-		RegressionOutput regressionOutput = regressionFunction.runRegression(serviceId, rgInput);
+		RegressionOutput regressionOutput = regressionFunction.runRegression(serviceId, graphInput);
 
 		if ((regressionOutput == null) || (regressionOutput.rateRegression == null) 
 			||  (regressionOutput.regressionInput == null)) {
@@ -168,7 +186,7 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 		boolean includeNew;
 		boolean includeRegressions;
 		
-		if ((rgInput.regressionType == null) || (rgInput.regressionType == RegressionType.Regressions)) {
+		if ((graphInput.regressionType == null) || (graphInput.regressionType == RegressionType.Regressions)) {
 			includeNew = false;
 			includeRegressions = true;
 		} else {
@@ -176,10 +194,10 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 			includeRegressions = false;
 		}
 		
-		List<EventData> eventDatas = regressionFunction.processRegression(rgInput, regressionOutput.regressionInput,
+		List<EventData> eventDatas = regressionFunction.processRegression(graphInput, regressionOutput.regressionInput,
 			regressionOutput.rateRegression, includeNew, includeRegressions);
 		
-		EventFilter eventFilter = getEventFilter(serviceId, rgInput, timeSpan);
+		EventFilter eventFilter = getEventFilter(serviceId, graphInput, timeSpan);
 		
 		if (eventFilter == null) {
 			return Collections.emptyList();	
@@ -199,15 +217,15 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 		Map<String, GraphData> graphsData = new HashMap<String, GraphData>();
 
 		if (regressionOutput.baseVolumeGraph != null) {
-			appendGraphToMap(graphsData, filteredEventData, regressionOutput.baseVolumeGraph, rgInput);
+			appendGraphToMap(graphsData, filteredEventData, regressionOutput.baseVolumeGraph, graphInput);
 		}
 		
 		if (regressionOutput.activeVolumeGraph != null) {
-			appendGraphToMap(graphsData, filteredEventData, regressionOutput.activeVolumeGraph, rgInput);
+			appendGraphToMap(graphsData, filteredEventData, regressionOutput.activeVolumeGraph, graphInput);
 		}
 			
 		List<GraphSeries> result = getGraphSeries(servieIds, serviceId, graphsData, 
-			eventDatas, rgInput, includeRegressions);
+			eventDatas, graphInput, includeRegressions);
 				
 		return result;
 	}

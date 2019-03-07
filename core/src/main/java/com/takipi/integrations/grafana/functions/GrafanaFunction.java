@@ -93,6 +93,8 @@ public abstract class GrafanaFunction
 		public String getName();
 	}
 	
+	protected static final String ALL_EVENTS = "All Events";
+	
 	protected static final String RESOVED = "Resolved";
 	protected static final String HIDDEN = "Hidden";
 	
@@ -1870,8 +1872,16 @@ public abstract class GrafanaFunction
 		}
 	}
 	
-	protected String getViewId(String serviceId, String viewName)
+	protected String getViewId(String serviceId, String name)
 	{
+		String viewName;
+		
+		if ((name != null) && (!name.isEmpty())) { 
+			viewName = name;
+		} else {
+			viewName = ALL_EVENTS;
+		}
+		
 		SummarizedView view = getView(serviceId, viewName);
 		
 		if (view == null)

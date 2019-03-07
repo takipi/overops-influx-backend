@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 29,
-  "iteration": 1551853541869,
+  "iteration": 1551951757540,
   "links": [
     {
       "icon": "dashboard",
@@ -1028,5 +1028,5 @@
   "timezone": "",
   "title": "New Errors",
   "uid": "3NZ83NLik",
-  "version": 105
+  "version": 106
 }

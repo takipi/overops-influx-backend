@@ -61,4 +61,6 @@ public class RegressionGraphInput extends GraphLimitInput
 		 */
 		Percentage
 	}
+	
+	public String timeFilterVar;
 }

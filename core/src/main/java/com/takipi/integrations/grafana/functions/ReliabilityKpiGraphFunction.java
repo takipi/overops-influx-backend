@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
@@ -361,12 +362,12 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		return Pair.of(baselineGraph, activeGraph);
 	}
 		
-	private Map<DateTime, KpiInterval> processSlowdowns(String serviceId,
+	private NavigableMap<DateTime, KpiInterval> processSlowdowns(String serviceId,
 			String viewId, ReliabilityKpiGraphInput input, 
 			Collection<Pair<DateTime, DateTime>> periods, Collection<TransactionGraph> graphs) {
 		
 		if (graphs == null) {
-			return Collections.emptyMap();
+			return Collections.emptyNavigableMap();
 		}
 
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
@@ -377,7 +378,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			throw new IllegalStateException("Missing slowdown settings for " + serviceId);
 		}
 		
-		Map<DateTime, KpiInterval> result = new TreeMap<DateTime, KpiInterval>();
+		NavigableMap<DateTime, KpiInterval> result = new TreeMap<DateTime, KpiInterval>();
 		
 		for (Pair<DateTime, DateTime> period : periods) {
 			
@@ -566,28 +567,28 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		return result;	
 	}
 	
-	private Map<DateTime, KpiInterval> processRegressions(String serviceId,
+	private NavigableMap<DateTime, KpiInterval> processRegressions(String serviceId,
 			String viewId, ReliabilityKpiGraphInput input, ReliabilityKpi kpi,
 			Pair<DateTime, DateTime> timespan,
 			Collection<Pair<DateTime, DateTime>> periods, GraphResultData graphData) {
 		
 		if (graphData == null) {
-			return Collections.emptyMap();
+			return Collections.emptyNavigableMap();
 		}
 		
 		if (graphData.eventListMap == null) {
-			return Collections.emptyMap();
+			return Collections.emptyNavigableMap();
 		}
 				
 		if (graphData.graph == null) {
-			return Collections.emptyMap();
+			return Collections.emptyNavigableMap();
 		}
 		
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
 		
 		boolean newOnly = (kpi == ReliabilityKpi.NewErrors) || (kpi == ReliabilityKpi.SevereNewErrors);
 		
-		Map<DateTime, KpiInterval> result = new TreeMap<DateTime, KpiInterval>();
+		NavigableMap<DateTime, KpiInterval> result = new TreeMap<DateTime, KpiInterval>();
 
 		for (Pair<DateTime, DateTime> period : periods) {
 			
@@ -750,13 +751,13 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			}
 		}
 		
-		Map<DateTime, KpiInterval> regressionIntervals = processRegressions(serviceId, 
+		NavigableMap<DateTime, KpiInterval> regressionIntervals = processRegressions(serviceId, 
 				viewId, input, kpi, timespan, periods, graphResult);
 		
-		Map<DateTime, KpiInterval> slowdownIntervals = processSlowdowns(serviceId, 
+		NavigableMap<DateTime, KpiInterval> slowdownIntervals = processSlowdowns(serviceId, 
 				viewId, input, periods, graphs);
 		
-		Map<DateTime, KpiInterval> intervals = getScoreIntervals(serviceId, 
+		NavigableMap<DateTime, KpiInterval> intervals = getScoreIntervals(serviceId, 
 			isKey, regressionIntervals, slowdownIntervals);
 		
 		KpiInterval aggregate;
@@ -764,6 +765,8 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		if (input.aggregate) {
 			aggregate = aggregateScores(intervals);
 		} else {
+			KpiInterval lastInterval = intervals.lastEntry().getValue();
+			intervals.put(timespan.getSecond(), lastInterval);
 			aggregate = null;
 		}
 		
@@ -901,7 +904,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		return Collections.singletonList(GraphSeries.of(series, intervals.size(), app));
 	}
 	
-	private Map<DateTime, KpiInterval> getScoreIntervals(String serviceId, 
+	private NavigableMap<DateTime, KpiInterval> getScoreIntervals(String serviceId, 
 		boolean isKey, Map<DateTime, KpiInterval> regressionIntervals, 
 		Map<DateTime, KpiInterval> slowdownIntervals) {
 		
@@ -911,7 +914,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			throw new IllegalStateException("Unable to acquire regression report settings for " + serviceId);
 		}	
 		
-		Map<DateTime, KpiInterval> result = new TreeMap<DateTime, KpiInterval>();
+		NavigableMap<DateTime, KpiInterval> result = new TreeMap<DateTime, KpiInterval>();
 		
 		for (Map.Entry<DateTime, KpiInterval> entry : regressionIntervals.entrySet()) {
 			

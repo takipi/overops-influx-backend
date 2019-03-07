@@ -327,6 +327,42 @@ public class RegressionFunction extends EventsFunction
 		}
 	}
 	
+	protected class RegressionFromFormatter  extends FieldFormatter
+	{
+		
+		@Override
+		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
+				Pair<DateTime, DateTime> timeSpan)
+		{
+			if (input.timeFilter == null) {
+				return null;
+			}
+			
+			Pair<Object, Object> fromTo = getTimeFilterPair(timeSpan, input.timeFilter);
+								
+			return fromTo.getFirst();
+		}
+	}
+	
+	protected class RegressionToFormatter extends FieldFormatter
+	{
+		
+		@Override
+		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
+				Pair<DateTime, DateTime> timeSpan)
+		{
+			if (input.timeFilter == null) {
+				return null;
+			}
+			
+			Pair<Object, Object> fromTo = getTimeFilterPair(timeSpan, input.timeFilter);
+								
+			return fromTo.getSecond();
+		}
+	}
+	
+
+	
 	protected static class RegressionDescriptionFormatter extends FieldFormatter
 	{
 		
@@ -537,6 +573,16 @@ public class RegressionFunction extends EventsFunction
 		if (column.equals(ViewInput.TIME_RANGE))
 		{
 			return new RegressionTimeRangeFormatter();
+		}
+		
+		if (column.equals(ViewInput.FROM))
+		{
+			return new RegressionFromFormatter();
+		}
+		
+		if (column.equals(ViewInput.TO))
+		{
+			return new RegressionToFormatter();
 		}
 		
 		if (column.equals(RegressionsInput.REG_DESC))

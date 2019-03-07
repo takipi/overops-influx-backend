@@ -13,6 +13,7 @@ import java.util.TreeMap;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 
+import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.data.transaction.TransactionGraph.GraphPoint;
@@ -32,6 +33,7 @@ import com.takipi.integrations.grafana.input.TransactionsListInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GroupSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings.GroupFilter;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionsGraphFunction extends BaseGraphFunction {
 
@@ -159,12 +161,28 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		return result;
 	}
 	
+	private TransactionsGraphInput getInput(TransactionsGraphInput input) {
+		
+		TransactionsGraphInput result;
+
+		if (input.timeFilterVar != null) {
+			Gson gson = new Gson();
+			result = gson.fromJson(gson.toJson(input), input.getClass());
+			Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(input.timeFilterVar);
+			result.timeFilter = TimeUtil.getTimeFilter(timespan);
+		} else {
+			result = input;
+		}
+		
+		return result;
+	}
+	
     @Override
 	protected List<GraphSeries> processServiceGraph( Collection<String> serviceIds, 
 			String serviceId, String viewId, String viewName,
 			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
 
-		TransactionsGraphInput tgInput = (TransactionsGraphInput) input;
+		TransactionsGraphInput tgInput = (TransactionsGraphInput)(input);
 		
 		TransactionGraphsResult transactionGraphs = getTransactionsGraphs(serviceId, viewId, timeSpan, tgInput, pointsWanted);
 		
@@ -556,7 +574,9 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		if (!(functionInput instanceof TransactionsGraphInput)) {
 			throw new IllegalArgumentException("functionInput");
 		}
-
-		return super.process(functionInput);
+		
+		TransactionsGraphInput input = getInput((TransactionsGraphInput)functionInput);
+		
+		return super.process(input);
 	}
 }

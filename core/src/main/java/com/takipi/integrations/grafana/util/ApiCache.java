@@ -359,10 +359,25 @@ public class ApiCache {
 
 			return true;
 		}
+		
+		private boolean compareTimeFilters(String t1, String t2) {
+			
+			String tu1 = TimeUtil.getTimeUnit(t1);
+			String tu2 = TimeUtil.getTimeUnit(t2);
+			
+			if ((tu1 == null) || (tu2 == null)) {
+				return t1.equals(t2);
+			}
+			
+			int ti1 = TimeUtil.parseInterval(tu1);
+			int ti2 = TimeUtil.parseInterval(tu2);
+
+			return ti1 == ti2;
+		}
 
 		@Override
 		public boolean equals(Object obj) {
-
+		
 			if (!(obj instanceof ViewInputCacheLoader)) {
 				return false;
 			}
@@ -374,7 +389,7 @@ public class ApiCache {
 			ViewInputCacheLoader other = (ViewInputCacheLoader) obj;
 			
 			if ((input.timeFilter != null) && (other.input.timeFilter != null) &&
-				(!Objects.equal(input.timeFilter, other.input.timeFilter))) {
+				(!compareTimeFilters(input.timeFilter, other.input.timeFilter))) {
 				return false;
 			}
 

@@ -273,6 +273,8 @@ public class FunctionParser {
 		registerFunction(new SettingsVarFunction.Factory());
 		registerFunction(new LimitVariableFunction.Factory());
 		registerFunction(new FromToVariableFunction.Factory());
+		registerFunction(new TimeFilterFunction.Factory());
+
 
 	}
 }
