@@ -30,8 +30,17 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 20,
-  "iteration": 1549869936422,
+  "iteration": 1551951803231,
   "links": [
+    {
+      "icon": "dashboard",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "tooltip": "Home",
+      "type": "link",
+      "url": "/d/lg0U4qriz/home"
+    },
     {
       "asDropdown": true,
       "icon": "external link",
@@ -554,7 +563,16 @@
       },
       "id": 54,
       "interval": null,
-      "links": [],
+      "links": [
+        {
+          "dashboard": "Increasing Errors",
+          "includeVars": true,
+          "keepTime": true,
+          "title": "Increasing Errors",
+          "type": "absolute",
+          "url": "/d/WZ739NYmk/increasing-errors"
+        }
+      ],
       "mappingType": 1,
       "mappingTypes": [
         {
@@ -1768,7 +1786,7 @@
           "link": true,
           "linkTargetBlank": false,
           "linkTooltip": "Jump to Slow Transaction Analysis",
-          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-timeRange=${__cell_3}&var-transactions=${__cell_6}",
+          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&from=${__cell_1}&to=${__cell_2}&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-transactions=${__cell_6}",
           "mappingType": 1,
           "pattern": "transaction",
           "thresholds": [],
@@ -2163,7 +2181,7 @@
           "link": true,
           "linkTargetBlank": false,
           "linkTooltip": "${__cell_3}: Click to drill-in.",
-          "linkUrl": "d/WZ739NYmk/increasing-errors?var-timeRange=${__cell_2}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=$transactions&var-type=$type&var-increasingErrors=${__cell_6}",
+          "linkUrl": "d/WZ739NYmk/increasing-errors?from=${__cell_7}&to=${__cell_8}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=$transactions&var-type=$type&var-increasingErrors=${__cell_6}",
           "mappingType": 1,
           "pattern": "TypeMessage",
           "thresholds": [],
@@ -2200,7 +2218,7 @@
           "decimals": 0,
           "link": true,
           "linkTooltip": "${__cell_4}",
-          "linkUrl": "d/WZ739NYmk/increasing-errors?var-timeRange=${__cell_2}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=$transactions&var-type=$type&var-increasingErrors=${__cell_6}",
+          "linkUrl": "d/WZ739NYmk/increasing-errors?from=${__cell_7}&to=${__cell_8}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=$transactions&var-type=$type&var-increasingErrors=${__cell_6}",
           "mappingType": 1,
           "pattern": "Severity",
           "thresholds": [
@@ -2322,6 +2340,38 @@
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "From",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "To",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
         }
       ],
       "targets": [
@@ -2342,7 +2392,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressions({\"fields\":\"link,type,timeRange,description,reg_desc,regression,error_location,severity,typeMessage,stats.hits,rate,reg_delta,first_seen\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":55, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"render\":\"Grid\",\"regressionTypes\":\"Regressions,SevereRegressions\"})\n",
+          "query": "regressions({\"fields\":\"link,type,timeRange,description,reg_desc,regression,error_location,from,to,severity,typeMessage,stats.hits,rate,reg_delta,first_seen\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":55, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"render\":\"Grid\",\"regressionTypes\":\"Regressions,SevereRegressions\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -2371,16 +2421,17 @@
   "refresh": false,
   "schemaVersion": 16,
   "style": "dark",
-  "tags": [],
+  "tags": [
+    "OverOps"
+  ],
   "templating": {
     "list": [
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2403,6 +2454,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2427,6 +2479,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2451,10 +2504,9 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2477,7 +2529,7 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "All Events",
           "value": "All Events"
         },
@@ -2510,8 +2562,8 @@
         "multi": true,
         "name": "type",
         "options": [],
-        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\"})",
-        "refresh": 1,
+        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\",\"timeFilter\":\"$timeFilter\"})",
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -2524,6 +2576,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2534,8 +2587,8 @@
         "multi": true,
         "name": "transactions",
         "options": [],
-        "query": "transactions({\"environments\":\"$environments\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - 7d\",\"sorted\":\"true\"})",
-        "refresh": 1,
+        "query": "transactions({\"environments\":\"$environments\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"sorted\":\"true\"})",
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -2548,6 +2601,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -2572,6 +2626,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -2629,6 +2684,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "Logged Error|Uncaught Exception|HTTP Error",
           "value": "Logged Error|Uncaught Exception|HTTP Error"
         },
@@ -2653,6 +2709,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -2677,6 +2734,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -2723,7 +2781,7 @@
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {
@@ -2746,5 +2804,5 @@
   "timezone": "",
   "title": "Reliability Analysis",
   "uid": "4DHQ63-ik",
-  "version": 220
+  "version": 228
 }

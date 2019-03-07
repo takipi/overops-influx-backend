@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.joda.time.DateTime;
 
+import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.transaction.Transaction;
 import com.takipi.common.util.Pair;
@@ -86,11 +87,30 @@ public class TransactionsFunction extends EnvironmentVariableFunction {
 		super.populateValues(input, appender);
 	}
 
+	private BaseEventVolumeInput getInput(BaseEnvironmentsInput input) {
+		
+		BaseEventVolumeInput beInput = (BaseEventVolumeInput)input;
+		
+		Gson gson = new Gson();
+		String json = gson.toJson(input);
+		
+		BaseEventVolumeInput result = gson.fromJson(json, beInput.getClass());
+		
+		if (beInput.timeFilter != null) {
+			Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(beInput.timeFilter);
+			result.timeFilter = TimeUtil.getTimeFilter(timespan);	
+		} 
+		
+		return result;
+		
+	}
+	
 	@Override
 	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender) {
 		
-		BaseEventVolumeInput viewInput = (BaseEventVolumeInput)input;
+		BaseEventVolumeInput viewInput = getInput(input);
+		
 		Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(viewInput.timeFilter);
 
 		String viewId = getViewId(serviceId, viewInput.view);

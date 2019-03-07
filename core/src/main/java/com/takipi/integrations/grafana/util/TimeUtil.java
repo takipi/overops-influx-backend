@@ -112,6 +112,7 @@ public class TimeUtil {
 	}
 
 	public static int getStartDateTimeIndex(List<Pair<DateTime, DateTime>> intervals, String value) {
+		
 		DateTime dateTime = TimeUtil.getDateTime(value);
 
 		for (int i = 0; i < intervals.size(); i++) {
@@ -130,6 +131,28 @@ public class TimeUtil {
 		return -1;
 	}
 
+	public static String getTimeFilter(Pair<DateTime, DateTime> timespan) {
+		
+		DateTime now = DateTime.now();
+
+		long toDelta =  now.getMillis() - timespan.getSecond().getMillis();
+		
+		String result;
+		long toMinDelta = TimeUnit.MILLISECONDS.toMinutes(toDelta);
+		
+		if (toMinDelta < 1) {
+			long fromDelta = timespan.getSecond().getMillis() - timespan.getFirst().getMillis();
+			long minDelta = TimeUnit.MILLISECONDS.toMinutes(fromDelta);
+				
+			String timeRange = TimeUtil.getTimeRange((int)minDelta);
+			result = LAST_TIME_WINDOW + timeRange;	
+		} else {
+			result = toTimeFilter(timespan.getFirst(), timespan.getSecond());	
+		}
+		
+		return result;
+	}
+	
 	public static Pair<DateTime, DateTime> getTimeFilter(String timeFilter) {
 		if ((timeFilter == null) || (timeFilter.isEmpty())) {
 			throw new IllegalArgumentException("timeFilter cannot be empty");

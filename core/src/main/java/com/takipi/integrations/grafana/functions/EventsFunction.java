@@ -32,7 +32,6 @@ import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.input.GeneralSettings;
 import com.takipi.integrations.grafana.util.ApiCache;
-import com.takipi.integrations.grafana.util.ArrayUtil;
 import com.takipi.integrations.grafana.util.EventLinkEncoder;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
@@ -631,16 +630,11 @@ public class EventsFunction extends GrafanaFunction {
 
 	}
 
-	private Map<String, FieldFormatter> getFieldFormatters(String serviceId, String columns) {
+	private Map<String, FieldFormatter> getFieldFormatters(String serviceId, Collection<String> columns) {
+		
+		Map<String, FieldFormatter> result = new LinkedHashMap<String, FieldFormatter>(columns.size());
 
-		if ((columns == null) || (columns.isEmpty())) {
-			throw new IllegalArgumentException("columns cannot be empty");
-		}
-
-		String[] columnsArray = ArrayUtil.safeSplitArray(columns, ARRAY_SEPERATOR, true);
-		Map<String, FieldFormatter> result = new LinkedHashMap<String, FieldFormatter>(columnsArray.length);
-
-		for (String column : columnsArray) {
+		for (String column : columns) {
 			FieldFormatter fieldFormatter = getFormatter(serviceId, column);
 			result.put(column, fieldFormatter);
 		}
@@ -850,7 +844,7 @@ public class EventsFunction extends GrafanaFunction {
 	 */
 	protected List<List<Object>> processServiceEvents(Collection<String> serviceIds, String serviceId, EventsInput input, Pair<DateTime, DateTime> timeSpan) {
 
-		Map<String, FieldFormatter> formatters = getFieldFormatters(serviceId, input.fields);
+		Map<String, FieldFormatter> formatters = getFieldFormatters(serviceId, input.getFields());
 		
 		List<EventData> mergedDatas;
 		List<EventData> eventDatas = getEventData(serviceId, input, timeSpan);
@@ -902,10 +896,10 @@ public class EventsFunction extends GrafanaFunction {
 	 */
 	protected List<String> getColumns(EventsInput input) {
 
-		String[] fieldArray = ArrayUtil.safeSplitArray(input.fields, ARRAY_SEPERATOR, true);
-		List<String> result = new ArrayList<String>(fieldArray.length);
+		List<String> fields = input.getFields();
+		List<String> result = new ArrayList<String>(fields.size());
 
-		for (String field : fieldArray) {
+		for (String field : fields) {
 
 			String fieldValue;
 

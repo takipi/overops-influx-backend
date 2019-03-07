@@ -30,8 +30,18 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 22,
-  "iteration": 1549870019255,
+  "iteration": 1551951843796,
   "links": [
+    {
+      "icon": "dashboard",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "title": "",
+      "tooltip": "Home",
+      "type": "link",
+      "url": "/d/lg0U4qriz/home"
+    },
     {
       "asDropdown": true,
       "icon": "external link",
@@ -564,7 +574,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_13}. $drilldownPostfix",
-          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers&var-deployments=${__cell_4}&var-timeRange=${__cell_2}&var-type=$limitType",
+          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&from=${__cell_0}&to=${__cell_1}&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers&var-deployments=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "Regressions",
           "thresholds": [],
@@ -600,7 +610,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_14}. $drilldownPostfix",
-          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers&var-deployments=${__cell_4}&var-timeRange=${__cell_2}",
+          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&from=${__cell_0}&to=${__cell_1}&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers&var-deployments=${__cell_4}",
           "mappingType": 1,
           "pattern": "Slowdowns",
           "thresholds": [],
@@ -1047,7 +1057,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_10}.  $drilldownPostfix",
-          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=${__cell_3}&var-deployments=$limitDeployments&var-servers=$limitServers&var-applications=${__cell_4}&var-timeRange=${__cell_2}&var-type=$limitType",
+          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&from=${__cell_0}&to=${__cell_1}&var-environments=${__cell_3}&var-deployments=$limitDeployments&var-servers=$limitServers&var-applications=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "Regressions",
           "thresholds": [],
@@ -1083,7 +1093,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_11}.  $drilldownPostfix",
-          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=${__cell_3}&var-deployments=$limitDeployments&var-servers=$limitServers&var-applications=${__cell_4}&var-timeRange=${__cell_2}",
+          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&from=${__cell_0}&to=${__cell_1}&var-environments=${__cell_3}&var-deployments=$limitDeployments&var-servers=$limitServers&var-applications=${__cell_4}",
           "mappingType": 1,
           "pattern": "Slowdowns",
           "thresholds": [],
@@ -1514,7 +1524,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_10}. $drilldownPostfix",
-          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&var-environments=${__cell_3}&var-applications=$limitApplications&var-deployments=$limitDeployments&var-servers=$limitServers&var-type=-${__cell_4}&var-timeRange=${__cell_2}",
+          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&from=${__cell_0}&to=${__cell_1}&var-environments=${__cell_3}&var-applications=$limitApplications&var-deployments=$limitDeployments&var-servers=$limitServers&var-type=-${__cell_4}",
           "mappingType": 1,
           "pattern": "Regressions",
           "thresholds": [],
@@ -1726,10 +1736,9 @@
       {
         "allValue": "None",
         "current": {
+          "selected": true,
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1752,6 +1761,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1776,6 +1786,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1800,6 +1811,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1847,10 +1859,9 @@
       {
         "allValue": "All",
         "current": {
+          "selected": true,
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1859,7 +1870,7 @@
         "multi": true,
         "name": "type",
         "options": [],
-        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\"})",
+        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\", \"timeFilter\":\"$timeFilter\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1883,7 +1894,7 @@
         "multi": true,
         "name": "transactions",
         "options": [],
-        "query": "transactions({\"environments\":\"$environments\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - 7d\",\"sorted\":\"true\"})",
+        "query": "transactions({\"environments\":\"$environments\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"sorted\":\"true\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1897,6 +1908,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1921,6 +1933,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -1945,10 +1958,9 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "tags": [],
-          "text": "5",
-          "value": "5"
+          "selected": false,
+          "text": "10",
+          "value": "10"
         },
         "hide": 0,
         "includeAll": false,
@@ -1957,12 +1969,12 @@
         "name": "limit",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "5",
             "value": "5"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "10",
             "value": "10"
           }
@@ -2020,6 +2032,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -2044,6 +2057,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -2068,6 +2082,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -2092,6 +2107,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -2139,7 +2155,7 @@
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {
@@ -2171,5 +2187,5 @@
   "timezone": "",
   "title": "Reliability Scorecard",
   "uid": "lfqKXMfmz",
-  "version": 152
+  "version": 163
 }

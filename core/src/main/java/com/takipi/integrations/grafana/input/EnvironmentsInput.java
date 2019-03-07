@@ -12,5 +12,4 @@ package com.takipi.integrations.grafana.input;
 *
 */
 public class EnvironmentsInput extends BaseEnvironmentsInput {
-	
 }

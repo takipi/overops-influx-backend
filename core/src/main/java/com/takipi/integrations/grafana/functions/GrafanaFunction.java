@@ -93,6 +93,8 @@ public abstract class GrafanaFunction
 		public String getName();
 	}
 	
+	protected static final String ALL_EVENTS = "All Events";
+	
 	protected static final String RESOVED = "Resolved";
 	protected static final String HIDDEN = "Hidden";
 	
@@ -833,7 +835,7 @@ public abstract class GrafanaFunction
 		return result;
 	}
 	
-	private TransactionData getEventTransactionData(Map<TransactionKey, TransactionData> transactions, EventResult event) {
+	protected TransactionData getEventTransactionData(Map<TransactionKey, TransactionData> transactions, EventResult event) {
 	
 		TransactionKey classOnlyKey = TransactionKey.of(event.entry_point.class_name, null);
 		TransactionData result = transactions.get(classOnlyKey);
@@ -1831,11 +1833,9 @@ public abstract class GrafanaFunction
 		}
 	}
 	
-	protected SummarizedView getView(String serviceId, String viewName)
-	{
+	protected SummarizedView getView(String serviceId, String viewName) {
 		
-		if (viewName.startsWith(GRAFANA_VAR_PREFIX))
-		{
+		if ((viewName.length() == 0) || (viewName.startsWith(GRAFANA_VAR_PREFIX))) {
 			return null;
 		}
 		
@@ -1872,8 +1872,16 @@ public abstract class GrafanaFunction
 		}
 	}
 	
-	protected String getViewId(String serviceId, String viewName)
+	protected String getViewId(String serviceId, String name)
 	{
+		String viewName;
+		
+		if ((name != null) && (!name.isEmpty())) { 
+			viewName = name;
+		} else {
+			viewName = ALL_EVENTS;
+		}
+		
 		SummarizedView view = getView(serviceId, viewName);
 		
 		if (view == null)

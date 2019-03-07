@@ -28,8 +28,17 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 19,
-  "iteration": 1550029439069,
+  "iteration": 1551951780148,
   "links": [
+    {
+      "icon": "dashboard",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "tooltip": "Home",
+      "type": "link",
+      "url": "/d/lg0U4qriz/home"
+    },
     {
       "asDropdown": true,
       "icon": "dashboard",
@@ -302,7 +311,16 @@
       },
       "id": 18,
       "interval": null,
-      "links": [],
+      "links": [
+        {
+          "dashboard": "Slowdowns",
+          "includeVars": true,
+          "keepTime": true,
+          "title": "Slowdowns",
+          "type": "absolute",
+          "url": "/d/iHSORcymk/slowdowns"
+        }
+      ],
       "mappingType": 1,
       "mappingTypes": [
         {
@@ -416,7 +434,16 @@
       },
       "id": 21,
       "interval": null,
-      "links": [],
+      "links": [
+        {
+          "dashboard": "Slowdowns",
+          "includeVars": true,
+          "keepTime": true,
+          "title": "Slowdowns",
+          "type": "absolute",
+          "url": "/d/iHSORcymk/slowdowns"
+        }
+      ],
       "mappingType": 1,
       "mappingTypes": [
         {
@@ -1304,7 +1331,7 @@
           "link": true,
           "linkTargetBlank": false,
           "linkTooltip": "${__cell_1}. Thresholds are defined in the Settings dashboard. Click to drill-in.",
-          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-timeRange=${__cell_4}&var-transactions=${__cell_9}&var-performanceStates=OK%7CSLOWING%7CCRITICAL%7CNO_DATA",
+          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&from=${__cell_2}&to=${__cell_3}&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-transactions=${__cell_9}&var-performanceStates=OK%7CSLOWING%7CCRITICAL%7CNO_DATA",
           "mappingType": 1,
           "pattern": "transaction",
           "thresholds": [],
@@ -1576,6 +1603,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "None",
           "value": "None"
         },
@@ -1600,6 +1628,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1624,6 +1653,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1648,6 +1678,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1672,6 +1703,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1682,7 +1714,7 @@
         "multi": true,
         "name": "transactions",
         "options": [],
-        "query": "transactions({\"environments\":\"$environments\",\"view\":\"All Events\",\"timeFilter\":\"time >= now() - 7d\",\"sorted\":\"true\"})",
+        "query": "transactions({\"environments\":\"$environments\",\"view\":\"All Events\",\"timeFilter\":\"$timeFilter\",\"sorted\":\"true\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1696,6 +1728,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1720,6 +1753,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -1767,8 +1801,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "",
-          "value": ""
+          "selected": true,
+          "text": "All Events",
+          "value": "All Events"
         },
         "hide": 2,
         "includeAll": false,
@@ -1777,7 +1812,7 @@
         "name": "view",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "All Events",
             "value": "All Events"
           }
@@ -1942,5 +1977,5 @@
   "timezone": "",
   "title": "Performance",
   "uid": "Z40SpeJmz",
-  "version": 118
+  "version": 127
 }

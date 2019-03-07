@@ -2,14 +2,18 @@ package com.takipi.integrations.grafana.functions;
 
 import java.util.Collection;
 
+import org.joda.time.DateTime;
+
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.regression.RegressionResult;
+import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOutput;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.RegressedEventsInput;
 import com.takipi.integrations.grafana.input.RegressionsInput;
 import com.takipi.integrations.grafana.util.ApiCache;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class RegressedEventsFunction extends EnvironmentVariableFunction
 {
@@ -40,8 +44,13 @@ public class RegressedEventsFunction extends EnvironmentVariableFunction
 	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender)
 	{
-		String json = new Gson().toJson(input);
-		RegressionsInput rgInput = new Gson().fromJson(json, RegressionsInput.class);
+		RegressedEventsInput reInput = (RegressedEventsInput)input;
+		Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(reInput.timeFilter);
+		
+		Gson gson = new Gson();
+		String json = gson.toJson(input);
+		RegressionsInput rgInput = gson.fromJson(json, RegressionsInput.class);
+		rgInput.timeFilter = TimeUtil.getTimeFilter(timespan);
 		
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
 		
