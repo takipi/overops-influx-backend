@@ -92,6 +92,8 @@ public class CostSplitGraphFunction extends LimitGraphFunction {
 
 		Map<String, CostGraphData> eventsVolume = new HashMap<>();
 
+		CostSettings costSettings = GrafanaSettings.getData(apiClient, serviceId).cost_calculator;
+
 		for (GraphPoint gp : graph.points) {
 
 			if (gp.contributors == null) {
@@ -112,7 +114,6 @@ public class CostSplitGraphFunction extends LimitGraphFunction {
 					continue;
 				}
 
-				CostSettings costSettings = GrafanaSettings.getData(apiClient, serviceId).cost_calculator;
 				Double evCost = costSettings.calculateCost(event.type);
 
 				if (evCost != .0) {

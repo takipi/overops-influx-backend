@@ -191,7 +191,7 @@ public class GraphCostPieChartFunction extends CostSplitGraphFunction {
 			}
 
 			runningHitsCostTotal.put(getTypesMap().get(eventData.type),
-					eventData.stats.hits + runningHitsCostTotal.getOrDefault(eventData.type, 0l));
+					eventData.stats.hits + runningHitsCostTotal.getOrDefault(getTypesMap().get(eventData.type), 0l));
 
 			if ((eventData.error_location.prettified_name != null)
 					&& !eventData.error_location.prettified_name.trim().isEmpty()) {
@@ -212,7 +212,7 @@ public class GraphCostPieChartFunction extends CostSplitGraphFunction {
 
 		Double runningCostTotal = .0;
 		for (Entry<String, Long> hitGroup : runningHitsCostTotal.entrySet()) {
-			Double typeCost = costSettings.calculateCost(hitGroup.getKey());
+			Double typeCost = costSettings.calculateAbbrCost(hitGroup.getKey());
 			runningCostTotal += typeCost * hitGroup.getValue();
 
 			costPerType.put(hitGroup.getKey(), typeCost);
@@ -235,16 +235,21 @@ public class GraphCostPieChartFunction extends CostSplitGraphFunction {
 
 		{
 			double runningTot = .0;
+			final int MAX_SLICES = 6;
+			int i = 0;
+			Double totItem = .0;
 			for (Entry<String, Double> entry : sortedRes.entrySet()) {
-
-				runningTot += entry.getValue();
-				trimmedSortedRes.put(entry.getKey(), entry.getValue());
-				if (runningTot >= targetYrlTablelimit) {
+				totItem = entry.getValue();
+				i++;
+				if (i>MAX_SLICES || totItem < 1.0 || runningTot >= targetYrlTablelimit) {
 					break;
+				} else {
+					runningTot += totItem;
+					trimmedSortedRes.put(entry.getKey(), totItem);					
 				}
 			}
 
-			if (trimmedSortedRes.size() < sortedRes.size()) {
+			if ((runningYrlCostTotal - runningTot > 1.0) && (trimmedSortedRes.size() < sortedRes.size())) {
 				trimmedSortedRes.put("CombinedSmallerItems", runningYrlCostTotal - runningTot);
 			}
 		}

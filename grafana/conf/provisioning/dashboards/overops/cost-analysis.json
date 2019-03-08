@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 7,
-  "iteration": 1549920892143,
+  "iteration": 1552030262066,
   "links": [
     {
       "icon": "external link",
@@ -57,7 +57,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "This graph shows the number of calls into transactions containing the selected events (Throughput). Overlaid on this are the top $splitLimit selected errors and the overall volume of all events (Times).",
+      "description": "This graph shows the stacked details of  $splitLimit% exceptions cost. You can use: \n- SPOT to see the cost at a given time; \n- BALANCE to see the total cost up to the time; \n- AVG to see the average value of cost up to that time since start. \n\nYou can also select the exception(s) set you want to be displayed in the graph using the legend.",
       "fill": 0,
       "gridPos": {
         "h": 9,
@@ -81,6 +81,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "paceLength": 10,
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -122,7 +123,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "costSplitGraph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",\"transactions\":\"$transactions\",\"limit\":\"$splitLimit\", \"searchText\":\"$search\",\"costData\":{\"costHigherThan\":.0,\"costMatrix\":$costMatrix},\"graphTrendType\":\"$graphType\"})\n",
+          "query": "costSplitGraph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",\"transactions\":\"$transactions\",\"limit\":\"$splitLimit\", \"searchText\":\"$search\",\"graphTrendType\":\"$graphType\"})\n",
           "rawQuery": true,
           "refId": "C",
           "resultFormat": "time_series",
@@ -147,7 +148,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "$type",
+      "title": "Stacked costs per exception(s)",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -195,6 +196,7 @@
       },
       "datasource": "OO",
       "decimals": null,
+      "description": "The biggest cost contributors (up to 6 different entries + a total reminder labelled \"CombinedSmallerItems\") for the period in exam.\n\nThe cost presented here are: \n- Yearly cost\n- Cost %\n\nPlease use the legend to enable/disable the desired slices set.",
       "fontSize": "80%",
       "format": "currencyUSD",
       "gridPos": {
@@ -235,6 +237,7 @@
               "type": "fill"
             }
           ],
+          "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
           "query": "graphCostPie({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",\"transactions\":\"$transactions\",\"limit\":\"$splitLimit\", \"searchText\":\"$search\",\"graphTrendType\":\"$graphType\"})",
@@ -265,7 +268,7 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "A list of all unique errors in the selected time frame and filter set.",
+      "description": "A list of all unique exceptions costs in the selected time frame and filter set with:\n- Cost % - the percentage of the overall cost\n- Cost - the actual cost over the all period\n- Yearly - the cost this exception will generate over 1 year time",
       "fontSize": "100%",
       "gridPos": {
         "h": 13,
@@ -279,8 +282,8 @@
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": null,
-        "desc": false
+        "col": 2,
+        "desc": true
       },
       "styles": [
         {
@@ -304,66 +307,6 @@
           "type": "hidden",
           "unit": "short",
           "valueMaps": []
-        },
-        {
-          "alias": "Times",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 0,
-          "link": false,
-          "linkTargetBlank": true,
-          "linkTooltip": "",
-          "linkUrl": "",
-          "mappingType": 1,
-          "pattern": "Hits",
-          "thresholds": [],
-          "type": "number",
-          "unit": "none"
-        },
-        {
-          "alias": "Entry Point",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": false,
-          "linkTargetBlank": true,
-          "linkTooltip": "",
-          "linkUrl": "",
-          "mappingType": 1,
-          "pattern": "Entry point",
-          "thresholds": [],
-          "type": "hidden",
-          "unit": "short"
-        },
-        {
-          "alias": "First Seen",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": false,
-          "linkTargetBlank": true,
-          "linkTooltip": "",
-          "linkUrl": "",
-          "mappingType": 1,
-          "pattern": "First seen",
-          "thresholds": [],
-          "type": "number",
-          "unit": "short"
         },
         {
           "alias": "",
@@ -418,26 +361,6 @@
           ]
         },
         {
-          "alias": "",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": false,
-          "linkTargetBlank": true,
-          "linkTooltip": "",
-          "linkUrl": "",
-          "mappingType": 1,
-          "pattern": "Name",
-          "thresholds": [],
-          "type": "number",
-          "unit": "short"
-        },
-        {
           "alias": "Location",
           "colorMode": null,
           "colors": [
@@ -449,8 +372,8 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_7}",
-          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
+          "linkTooltip": "$ ${__cell_5} -- on yearly base $ ${__cell_6}",
+          "linkUrl": "https://$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Error location",
           "thresholds": [],
@@ -469,49 +392,12 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_3}. Click to drill-in.",
-          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
-          "mappingType": 1,
-          "pattern": "Rate",
-          "thresholds": [],
-          "type": "number",
-          "unit": "percentunit"
-        },
-        {
-          "alias": "",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": true,
-          "linkTargetBlank": true,
-          "linkTooltip": "${__cell_4}. Click to drill-in.",
-          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
+          "linkTooltip": "Click to drill-in.",
+          "linkUrl": "https://$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Message",
           "thresholds": [],
           "type": "number",
-          "unit": "short"
-        },
-        {
-          "alias": "",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": false,
-          "mappingType": 1,
-          "pattern": "Introduced by",
-          "thresholds": [],
-          "type": "hidden",
           "unit": "short"
         },
         {
@@ -580,6 +466,7 @@
               "type": "fill"
             }
           ],
+          "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
           "query": "costCalc({\"fields\":\"link,type,error_location,message,costpct,cost,costyrl\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":120,\"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\",\"searchText\":\"$search\",costData:{\"costHigherThan\":.0,\"costMatrix\":$costMatrix},\"tableLimit\":$splitLimit})\n",
@@ -603,13 +490,13 @@
           "tags": []
         }
       ],
-      "title": "",
+      "title": "Costs details per Exception",
       "transform": "table",
       "type": "table"
     }
   ],
   "refresh": false,
-  "schemaVersion": 16,
+  "schemaVersion": 18,
   "style": "dark",
   "tags": [
     "OverOps"
@@ -620,9 +507,8 @@
         "allValue": "None",
         "current": {
           "tags": [],
-          "text": "None + OverOps Prod: S6295",
+          "text": "OverOps Prod: S6295",
           "value": [
-            "None",
             "OverOps Prod: S6295"
           ]
         },
@@ -822,8 +708,8 @@
         "allValue": null,
         "current": {
           "tags": [],
-          "text": "10",
-          "value": "10"
+          "text": "100",
+          "value": "100"
         },
         "hide": 0,
         "includeAll": false,
@@ -862,7 +748,7 @@
             "value": "66"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "75",
             "value": "75"
           },
@@ -872,7 +758,7 @@
             "value": "90"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "100",
             "value": "100"
           }
@@ -929,7 +815,7 @@
           "value": "app.overops.com"
         },
         "datasource": "OO",
-        "definition": "",
+        "definition": "apiHost({\"type\":\"URL_NO_PORT\"})",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -976,8 +862,8 @@
         "allValue": null,
         "current": {
           "tags": [],
-          "text": "AVG",
-          "value": "AVG"
+          "text": "BALANCE",
+          "value": "BALANCE"
         },
         "hide": 0,
         "includeAll": false,
@@ -986,14 +872,14 @@
         "name": "graphType",
         "options": [
           {
-            "selected": false,
-            "text": "AVG",
-            "value": "AVG"
-          },
-          {
             "selected": true,
             "text": "BALANCE",
             "value": "BALANCE"
+          },
+          {
+            "selected": false,
+            "text": "AVG",
+            "value": "AVG"
           },
           {
             "selected": false,
@@ -1001,7 +887,7 @@
             "value": "SPOT"
           }
         ],
-        "query": "AVG,BALANCE,SPOT",
+        "query": "BALANCE,AVG,SPOT",
         "skipUrlSync": false,
         "type": "custom"
       }
@@ -1040,5 +926,5 @@
   "timezone": "",
   "title": "Logging Calculator",
   "uid": "-lETtCsik",
-  "version": 64
+  "version": 92
 }
