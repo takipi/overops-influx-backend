@@ -112,7 +112,9 @@ public abstract class GrafanaFunction
 
 	public static final String GRAFANA_SEPERATOR = Pattern.quote(GRAFANA_SEPERATOR_RAW);
 	public static final String ARRAY_SEPERATOR = Pattern.quote(ARRAY_SEPERATOR_RAW);
-	public static final String SERVICE_SEPERATOR = ": ";
+	
+	public static final String SERVICE_SEPERATOR_RAW = ":";
+	public static final String SERVICE_SEPERATOR = SERVICE_SEPERATOR_RAW + " ";
 	public static final String GRAFANA_VAR_PREFIX = "$";
 	
 	public static final String ALL = "All";
