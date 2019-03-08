@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 38,
-  "iteration": 1548663485340,
+  "iteration": 1549869823791,
   "links": [
     {
       "asDropdown": true,
@@ -39,15 +39,6 @@
         "OverOps"
       ],
       "type": "dashboards"
-    },
-    {
-      "icon": "external link",
-      "tags": [],
-      "targetBlank": true,
-      "title": "HELP",
-      "tooltip": "Learn more about this dashboard",
-      "type": "link",
-      "url": "https://doc.overops.com/docs/event-diff-dashboard"
     }
   ],
   "panels": [
@@ -912,7 +903,7 @@
           "tags": []
         }
       ],
-      "title": "New: $eventsDiffDesc",
+      "title": "$newEventsDiffDesc",
       "transform": "table",
       "type": "table"
     },
@@ -1373,7 +1364,7 @@
           "tags": []
         }
       ],
-      "title": "Increasing",
+      "title": "$incEventsDiffDesc",
       "transform": "table",
       "type": "table"
     }
@@ -1389,7 +1380,6 @@
       {
         "allValue": "None",
         "current": {
-          "tags": [],
           "text": "None",
           "value": "None"
         },
@@ -1401,30 +1391,6 @@
         "name": "environments",
         "options": [],
         "query": "environments({\"sorted\":true})",
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": "all",
-        "current": {
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "OO",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Type",
-        "multi": true,
-        "name": "type",
-        "options": [],
-        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"All Events\"})",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -1468,11 +1434,11 @@
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
-        "label": "Servers A",
-        "multi": true,
-        "name": "servers",
+        "label": "Dep A",
+        "multi": false,
+        "name": "deployments",
         "options": [],
-        "query": "servers({\"environments\":\"$environments\",\"sorted\":true})",
+        "query": "deployments({\"environments\":\"$environments\", \"sorted\":true})",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -1492,11 +1458,11 @@
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
-        "label": "Dep A",
-        "multi": false,
-        "name": "deployments",
+        "label": "Servers A",
+        "multi": true,
+        "name": "servers",
         "options": [],
-        "query": "deployments({\"environments\":\"$environments\", \"sorted\":true})",
+        "query": "servers({\"environments\":\"$environments\",\"sorted\":true})",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -1732,10 +1698,33 @@
         "useTags": false
       },
       {
+        "allValue": "all",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "OO",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Type",
+        "multi": true,
+        "name": "type",
+        "options": [],
+        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"All Events\"})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
         "allValue": null,
         "current": {
           "selected": true,
-          "tags": [],
           "text": "0m",
           "value": "0m"
         },
@@ -1890,9 +1879,34 @@
         "includeAll": false,
         "label": null,
         "multi": false,
-        "name": "eventsDiffDesc",
+        "name": "newEventsDiffDesc",
         "options": [],
         "query": "eventsDiffDesc({\"view\":\"$view\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\", \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"compareToApplications\":\"$compareToApplications\", \"compareToDeployments\":\"$compareToDeployments\",\"compareToServers\":\"$compareToServers\",\"timeDiff\":\"$timeDiff\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "incEventsDiffDesc",
+        "options": [],
+        "query": "eventsDiffDesc({\"view\":\"$view\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\", \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"compareToApplications\":\"$compareToApplications\", \"compareToDeployments\":\"$compareToDeployments\",\"compareToServers\":\"$compareToServers\",\"timeDiff\":\"$timeDiff\", \"diffType\":\"Increasing\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1989,7 +2003,7 @@
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-2d",
     "to": "now"
   },
   "timepicker": {
@@ -2021,5 +2035,5 @@
   "timezone": "",
   "title": "Event Diff",
   "uid": "CVCRTgwmz",
-  "version": 23
+  "version": 25
 }

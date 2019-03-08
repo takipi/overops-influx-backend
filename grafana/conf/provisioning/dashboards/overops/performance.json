@@ -28,17 +28,8 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 19,
-  "iteration": 1548032795377,
+  "iteration": 1550029439069,
   "links": [
-    {
-      "icon": "external link",
-      "tags": [],
-      "targetBlank": true,
-      "title": "HELP",
-      "tooltip": "Learn more about this dashboard",
-      "type": "link",
-      "url": "https://doc.overops.com/docs/performance-dashboard"
-    },
     {
       "asDropdown": true,
       "icon": "dashboard",
@@ -544,7 +535,7 @@
           "dashboard": "Errors",
           "includeVars": true,
           "keepTime": true,
-          "params": "var-type=$failureTypes",
+          "params": "",
           "targetBlank": true,
           "title": "Errors",
           "type": "absolute",
@@ -838,7 +829,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregate\":true,\"transactions\":\"$transactions\",\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\"})",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregateMode\":Yes,\"transactions\":\"$transactions\",\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -912,7 +903,7 @@
               "type": "fill"
             }
           ],
-          "hide": true,
+          "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
           "query": "keyTransactionsGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"aggregate\":\"true\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\"})",
@@ -953,7 +944,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsAvgGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"aggregate\":\"false\",\"transactions\":\"$transactions\",\"seriesName\":\"Avg (ms)\", \"pointsWanted\":\"$transactionPointsWanted\", \"aggregate\":\"true\", \"searchText\":\"$searchText\", \"timeWindow\":\"Active\"}) ",
+          "query": "transactionsAvgGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"aggregate\":\"false\",\"transactions\":\"$transactions\",\"seriesName\":\"Avg (ms)\", \"pointsWanted\":\"$transactionPointsWanted\", \"aggregateMode\":\"Yes\", \"searchText\":\"$searchText\", \"timeWindow\":\"Active\"}) ",
           "rawQuery": true,
           "refId": "D",
           "resultFormat": "time_series",
@@ -1085,7 +1076,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregate\":true,\"transactions\":\"$transactions\",\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\"})",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregateMode\":Yes,\"transactions\":\"$transactions\",\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\"})",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -1585,14 +1576,13 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "None",
           "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
         "includeAll": false,
-        "label": "Environments",
+        "label": "Env",
         "multi": true,
         "name": "environments",
         "options": [],
@@ -1610,14 +1600,13 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
-        "label": "Applications",
+        "label": "Apps",
         "multi": true,
         "name": "applications",
         "options": [],
@@ -1659,14 +1648,13 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
-        "label": "Servers",
+        "label": "Server Groups",
         "multi": true,
         "name": "servers",
         "options": [],
@@ -1708,7 +1696,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1733,7 +1720,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -1781,9 +1767,8 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "text": "All Events",
-          "value": "All Events"
+          "text": "",
+          "value": ""
         },
         "hide": 2,
         "includeAll": false,
@@ -1792,7 +1777,7 @@
         "name": "view",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "All Events",
             "value": "All Events"
           }
@@ -1804,7 +1789,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "Logged Error|Uncaught Exception|HTTP Error",
           "value": "Logged Error|Uncaught Exception|HTTP Error"
         },
@@ -1829,7 +1813,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "Logged Error,Uncaught Exception,HTTP Error",
           "value": "Logged Error,Uncaught Exception,HTTP Error"
         },
@@ -1927,7 +1910,7 @@
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {
@@ -1959,5 +1942,5 @@
   "timezone": "",
   "title": "Performance",
   "uid": "Z40SpeJmz",
-  "version": 110
+  "version": 118
 }

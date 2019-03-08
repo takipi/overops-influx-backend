@@ -40,17 +40,8 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 28,
-  "iteration": 1547787283552,
+  "iteration": 1549869843245,
   "links": [
-    {
-      "icon": "external link",
-      "tags": [],
-      "targetBlank": true,
-      "title": "HELP",
-      "tooltip": "Learn more about this dashboard",
-      "type": "link",
-      "url": "https://doc.overops.com/docs/increasing-errors-dashboard"
-    },
     {
       "asDropdown": true,
       "icon": "external link",
@@ -879,7 +870,7 @@
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
-        "label": "Servers",
+        "label": "Server Groups",
         "multi": true,
         "name": "servers",
         "options": [],
@@ -1341,5 +1332,5 @@
   "timezone": "",
   "title": "Increasing Errors",
   "uid": "WZ739NYmk",
-  "version": 109
+  "version": 110
 }

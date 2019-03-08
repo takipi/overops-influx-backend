@@ -28,17 +28,8 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 31,
-  "iteration": 1547463287960,
+  "iteration": 1550030480504,
   "links": [
-    {
-      "icon": "external link",
-      "tags": [],
-      "targetBlank": true,
-      "title": "HELP",
-      "tooltip": "Learn more about this dashboard",
-      "type": "link",
-      "url": "https://doc.overops.com/docs/unique-errors-dashboard"
-    },
     {
       "asDropdown": true,
       "icon": "external link",
@@ -47,6 +38,7 @@
       "tags": [
         "OverOps"
       ],
+      "targetBlank": false,
       "type": "dashboards"
     }
   ],
@@ -122,7 +114,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregate\":true,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\"})",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\"})",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -740,12 +732,61 @@
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
-        "label": "Servers",
+        "label": "Server Groups",
         "multi": true,
         "name": "servers",
         "options": [],
         "query": "servers({\"environments\":\"$environments\",\"sorted\":true})",
         "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": "*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "OO",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Deployments",
+        "multi": false,
+        "name": "deployments",
+        "options": [],
+        "query": "deployments({\"environments\":\"$environments\", \"sorted\":true})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 0,
+        "includeAll": false,
+        "label": "View",
+        "multi": false,
+        "name": "view",
+        "options": [],
+        "query": "views({\"environments\":\"$environments\",\"sorted\":true, \"defaultView\":\"All Events\"})",
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -780,28 +821,37 @@
         "useTags": false
       },
       {
-        "allValue": "*",
+        "allValue": null,
         "current": {
-          "text": "All",
-          "value": "$__all"
+          "selected": true,
+          "text": "3",
+          "value": "3"
         },
-        "datasource": "OO",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Deployments",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Split Top",
         "multi": false,
-        "name": "deployments",
-        "options": [],
-        "query": "deployments({\"environments\":\"$environments\", \"sorted\":true})",
-        "refresh": 1,
-        "regex": "",
+        "name": "splitLimit",
+        "options": [
+          {
+            "selected": true,
+            "text": "3",
+            "value": "3"
+          },
+          {
+            "selected": false,
+            "text": "5",
+            "value": "5"
+          },
+          {
+            "selected": false,
+            "text": "1",
+            "value": "1"
+          }
+        ],
+        "query": "3,5,1",
         "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
+        "type": "custom"
       },
       {
         "allValue": "*",
@@ -878,61 +928,6 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "text": "3",
-          "value": "3"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Split Top",
-        "multi": false,
-        "name": "splitLimit",
-        "options": [
-          {
-            "selected": true,
-            "text": "3",
-            "value": "3"
-          },
-          {
-            "selected": false,
-            "text": "5",
-            "value": "5"
-          },
-          {
-            "selected": false,
-            "text": "1",
-            "value": "1"
-          }
-        ],
-        "query": "3,5,1",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "All Events",
-          "value": "All Events"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "View",
-        "multi": false,
-        "name": "view",
-        "options": [
-          {
-            "selected": true,
-            "text": "All Events",
-            "value": "All Events"
-          }
-        ],
-        "query": "All Events",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -957,6 +952,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -1013,5 +1009,5 @@
   "timezone": "",
   "title": "Errors",
   "uid": "HYBPMdYik",
-  "version": 85
+  "version": 95
 }

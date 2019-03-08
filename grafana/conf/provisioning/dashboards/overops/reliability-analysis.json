@@ -30,17 +30,8 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 20,
-  "iteration": 1548235333131,
+  "iteration": 1549869936422,
   "links": [
-    {
-      "icon": "external link",
-      "tags": [],
-      "targetBlank": true,
-      "title": "HELP",
-      "tooltip": "Learn more about this dashboard",
-      "type": "link",
-      "url": "https://doc.overops.com/docs/reliability-analysis-dashboard"
-    },
     {
       "asDropdown": true,
       "icon": "external link",
@@ -418,7 +409,7 @@
     {
       "cacheTimeout": null,
       "colorBackground": false,
-      "colorValue": false,
+      "colorValue": true,
       "colors": [
         "#299c46",
         "rgba(237, 129, 40, 0.89)",
@@ -523,7 +514,7 @@
           "tags": []
         }
       ],
-      "thresholds": "",
+      "thresholds": "5,15",
       "title": "New Errors",
       "type": "singlestat",
       "valueFontSize": "80%",
@@ -539,7 +530,7 @@
     {
       "cacheTimeout": null,
       "colorBackground": false,
-      "colorValue": false,
+      "colorValue": true,
       "colors": [
         "#299c46",
         "rgba(237, 129, 40, 0.89)",
@@ -635,7 +626,7 @@
           "tags": []
         }
       ],
-      "thresholds": "",
+      "thresholds": "5,15",
       "title": "Error Increases",
       "type": "singlestat",
       "valueFontSize": "80%",
@@ -773,449 +764,15 @@
       "valueName": "avg"
     },
     {
-      "aliasColors": {
-        ".avg_time": "#1f78c1"
-      },
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "OO",
-      "description": "The response time of the selected transactions overlaid on the number of calls (throughput) into them.",
-      "fill": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 0,
-        "y": 2
-      },
-      "hideTimeOverride": true,
-      "id": 65,
-      "interval": "5m",
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [
-        {
-          "dashboard": "d/Z40SpeJmz/performance",
-          "includeVars": true,
-          "keepTime": true,
-          "targetBlank": true,
-          "title": "Performance",
-          "type": "absolute",
-          "url": "d/Z40SpeJmz/performance"
-        }
-      ],
-      "nullPointMode": "null as zero",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [
-        {
-          "alias": "/^.Throughput/",
-          "color": "#9ac48a",
-          "fill": 2,
-          "linewidth": 0,
-          "yaxis": 2
-        },
-        {
-          "alias": "/^.Response/",
-          "color": "#f2c96d"
-        }
-      ],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "alias": "",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"aggregate\":true,\"transactions\":\"$transactions\",\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\"})",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        },
-        {
-          "alias": "",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"aggregate\":true,\"transactions\":\"$transactions\",\"seriesName\":\"Response (ms)\",\"pointsWanted\":\"$transactionPointsWanted\"})",
-          "rawQuery": true,
-          "refId": "C",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        },
-        {
-          "alias": "",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "keyTransactionsGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"aggregate\":\"true\",\"pointsWanted\":\"$transactionPointsWanted\", \"transactions\":\"$transactions\"})",
-          "rawQuery": true,
-          "refId": "B",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Average Response",
-      "tooltip": {
-        "shared": true,
-        "sort": 2,
-        "value_type": "individual"
-      },
-      "transparent": false,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": "",
-          "logBase": 10,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "decimals": null,
-          "format": "short",
-          "label": "",
-          "logBase": 10,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "OO",
-      "description": "See errors in key code tiers. Key code tiers can be defined in the Settings dashboard. If no key tiers are defined, then the code tiers with the most errors are shown as defined by: https://git.io/fpPT0",
-      "fill": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 2
-      },
-      "hideTimeOverride": false,
-      "id": 64,
-      "interval": "1h",
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [
-        {
-          "alias": "/^.Throughput/",
-          "color": "#7eb26d",
-          "fill": 2,
-          "linewidth": 0,
-          "yaxis": 2
-        },
-        {
-          "alias": "Times",
-          "color": "#1f78c1",
-          "linewidth": 2
-        }
-      ],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "alias": "",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregate\":true,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\",\"transactions\":\"$transactions\"})",
-          "rawQuery": true,
-          "refId": "B",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        },
-        {
-          "alias": "Times",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": true,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",seriesName\":\"Times\", \"transactions\":\"$transactions\"})\n",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        },
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "routingGraph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",\"transactions\":\"$transactions\", \"limit\":\"$splitLimit\"})\n",
-          "rawQuery": true,
-          "refId": "C",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Errors By Tier",
-      "tooltip": {
-        "shared": true,
-        "sort": 2,
-        "value_type": "individual"
-      },
-      "transparent": false,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": null,
-          "format": "short",
-          "label": "",
-          "logBase": 10,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": "",
-          "logBase": 10,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
       "columns": [],
       "datasource": "OO",
       "description": "The number of new errors detected in the current timeframe. P1 marks events that exceeded min thresholds, or whose type is defined in the critical exception types list. Both values are editable via the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
-        "h": 9,
+        "h": 8,
         "w": 12,
         "x": 0,
-        "y": 9
+        "y": 2
       },
       "id": 50,
       "links": [
@@ -1606,10 +1163,10 @@
       "description": "A list of the top errors within the current filter set.",
       "fontSize": "100%",
       "gridPos": {
-        "h": 9,
+        "h": 8,
         "w": 12,
         "x": 12,
-        "y": 9
+        "y": 2
       },
       "id": 67,
       "links": [
@@ -1619,7 +1176,7 @@
           "keepTime": true,
           "title": "Errors",
           "type": "dashboard",
-          "url": "/d/HYBPMdYik/errors"
+          "url": "d/HYBPMdYik/errors"
         }
       ],
       "pageSize": 50,
@@ -2043,10 +1600,10 @@
       "description": "List transaction that have experienced a number of call calls taking more than the avg + stddev in the baseline timeframe (defined in the Settings dashboard).",
       "fontSize": "100%",
       "gridPos": {
-        "h": 8,
+        "h": 7,
         "w": 12,
         "x": 0,
-        "y": 18
+        "y": 10
       },
       "id": 63,
       "links": [
@@ -2404,10 +1961,10 @@
       "description": "Errors whose rate (i.e. times / calls) has increased the most. The thresholds to control what is considered an increase are available via the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
-        "h": 8,
+        "h": 7,
         "w": 12,
         "x": 12,
-        "y": 18
+        "y": 10
       },
       "id": 61,
       "links": [],
@@ -2814,17 +2371,16 @@
   "refresh": false,
   "schemaVersion": 16,
   "style": "dark",
-  "tags": [
-    "OverOps"
-  ],
+  "tags": [],
   "templating": {
     "list": [
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "None",
-          "value": "None"
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -2847,7 +2403,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2872,14 +2427,13 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
-        "label": "Servers",
+        "label": "Server Groups",
         "multi": true,
         "name": "servers",
         "options": [],
@@ -2897,9 +2451,10 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
-          "value": "$__all"
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -2945,7 +2500,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2970,7 +2524,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2995,7 +2548,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -3020,7 +2572,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -3078,7 +2629,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "Logged Error|Uncaught Exception|HTTP Error",
           "value": "Logged Error|Uncaught Exception|HTTP Error"
         },
@@ -3103,7 +2653,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -3128,7 +2677,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -3175,7 +2723,7 @@
     ]
   },
   "time": {
-    "from": "now-2d",
+    "from": "now-7d",
     "to": "now"
   },
   "timepicker": {
@@ -3198,5 +2746,5 @@
   "timezone": "",
   "title": "Reliability Analysis",
   "uid": "4DHQ63-ik",
-  "version": 215
+  "version": 220
 }
