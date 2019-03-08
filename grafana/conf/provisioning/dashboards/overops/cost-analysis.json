@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 7,
-  "iteration": 1552030262066,
+  "iteration": 1552065858663,
   "links": [
     {
       "icon": "external link",
@@ -507,9 +507,9 @@
         "allValue": "None",
         "current": {
           "tags": [],
-          "text": "OverOps Prod: S6295",
+          "text": "None",
           "value": [
-            "OverOps Prod: S6295"
+            "None"
           ]
         },
         "datasource": "OO",
@@ -708,8 +708,8 @@
         "allValue": null,
         "current": {
           "tags": [],
-          "text": "100",
-          "value": "100"
+          "text": "66",
+          "value": "66"
         },
         "hide": 0,
         "includeAll": false,
@@ -743,7 +743,7 @@
             "value": "50"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "66",
             "value": "66"
           },
@@ -758,7 +758,7 @@
             "value": "90"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "100",
             "value": "100"
           }
@@ -926,5 +926,5 @@
   "timezone": "",
   "title": "Logging Calculator",
   "uid": "-lETtCsik",
-  "version": 92
+  "version": 95
 }

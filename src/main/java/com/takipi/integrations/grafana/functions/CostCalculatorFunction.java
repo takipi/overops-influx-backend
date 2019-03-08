@@ -279,7 +279,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 			}
 			
 			if (eventData.event.entry_point !=  null) {
-				result.append(" in tansaction ");
+				result.append(" in transaction ");
 				result.append(getSimpleClassName(eventData.event.entry_point.class_name));
 			}
 			
