@@ -37,7 +37,7 @@
       "tags": [],
       "tooltip": "Home",
       "type": "link",
-      "url": "/d/lg0U4qriz/home"
+      "url": "d/lg0U4qriz/home"
     },
     {
       "asDropdown": true,
@@ -318,7 +318,7 @@
           "keepTime": true,
           "title": "Slowdowns",
           "type": "absolute",
-          "url": "/d/iHSORcymk/slowdowns"
+          "url": "d/iHSORcymk/slowdowns"
         }
       ],
       "mappingType": 1,
@@ -441,7 +441,7 @@
           "keepTime": true,
           "title": "Slowdowns",
           "type": "absolute",
-          "url": "/d/iHSORcymk/slowdowns"
+          "url": "d/iHSORcymk/slowdowns"
         }
       ],
       "mappingType": 1,

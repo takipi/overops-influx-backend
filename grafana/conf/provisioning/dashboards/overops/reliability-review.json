@@ -40,7 +40,7 @@
       "title": "",
       "tooltip": "Home",
       "type": "link",
-      "url": "/d/lg0U4qriz/home"
+      "url": "d/lg0U4qriz/home"
     },
     {
       "asDropdown": true,
@@ -92,7 +92,7 @@
           "targetBlank": true,
           "title": "Errors",
           "type": "absolute",
-          "url": "/d/HYBPMdYik/errors"
+          "url": "d/HYBPMdYik/errors"
         }
       ],
       "nullPointMode": "null",
@@ -301,7 +301,7 @@
           "targetBlank": true,
           "title": "Errors",
           "type": "absolute",
-          "url": "/d/HYBPMdYik/errors"
+          "url": "d/HYBPMdYik/errors"
         }
       ],
       "nullPointMode": "null",

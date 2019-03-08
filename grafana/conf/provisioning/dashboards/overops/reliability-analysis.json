@@ -39,7 +39,7 @@
       "tags": [],
       "tooltip": "Home",
       "type": "link",
-      "url": "/d/lg0U4qriz/home"
+      "url": "d/lg0U4qriz/home"
     },
     {
       "asDropdown": true,
@@ -570,7 +570,7 @@
           "keepTime": true,
           "title": "Increasing Errors",
           "type": "absolute",
-          "url": "/d/WZ739NYmk/increasing-errors"
+          "url": "d/WZ739NYmk/increasing-errors"
         }
       ],
       "mappingType": 1,

@@ -39,7 +39,7 @@
       "tags": [],
       "tooltip": "Home",
       "type": "link",
-      "url": "/d/lg0U4qriz/home"
+      "url": "d/lg0U4qriz/home"
     },
     {
       "asDropdown": true,
@@ -89,7 +89,7 @@
           "targetBlank": true,
           "title": "Reliability Analysis",
           "type": "absolute",
-          "url": "/d/4DHQ63-ik/reliability-analysis"
+          "url": "d/4DHQ63-ik/reliability-analysis"
         }
       ],
       "mappingType": 1,
@@ -580,7 +580,7 @@
           "keepTime": true,
           "title": "Increasing Errors",
           "type": "absolute",
-          "url": "/d/WZ739NYmk/increasing-errors"
+          "url": "d/WZ739NYmk/increasing-errors"
         }
       ],
       "mappingType": 1,
