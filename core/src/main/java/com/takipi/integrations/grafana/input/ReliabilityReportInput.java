@@ -124,6 +124,11 @@ public class ReliabilityReportInput extends RegressionsInput {
 	}
 	
 	/**
+	 * Control whether to report only on live deployment in Deployment report mode
+	 */
+	public boolean liveDeploymentsOnly;
+	
+	/**
 	 * The specific value to chart
 	 */
 	public String graphType;
@@ -264,6 +269,23 @@ public class ReliabilityReportInput extends RegressionsInput {
 	}
 	
 	/**
+	 * The diff reliability state calculated for an app in extended reporting mode
+	 * this applies to slowdown, new, increasing and transaction fail rate states 
+	 *
+	 */
+	public enum ReliabilityState {
+		OK,
+		Warning,
+		Severe
+	}
+	
+	/**
+	 * the min transaction fail rate above which to calc the transction fail rate  
+	 */
+	public double minFailRate;
+	
+	
+	/**
 	 * Below are the constants describing the field supported by this function for each of the available 
 	 * report modes
 	 */
@@ -387,12 +409,6 @@ public class ReliabilityReportInput extends RegressionsInput {
 	 */
 	public static final String PERF_STATE = "PerfState";
 	
-	public enum ReliabilityState {
-		OK,
-		WARN,
-		CRITICAL
-	}
-	
 	/**
 	 * Field name of performance state. 0 if no slowdown, 1 if slowdowns exist, 2 is severe slowdowns exist
 	 */
@@ -404,19 +420,21 @@ public class ReliabilityReportInput extends RegressionsInput {
 	public static final String RELIABILITY_STATE = "ReliabilityState";
 	
 	/**
-	 * The min delta between the base transaction response time and failure rate
-	 * for which values are returned for TRANSACTION_RESPONSE_DELTA and TRANSACTION_FAIL_RATE_DELTA
-	 * fields. For example, if the base avg response for a target app was 100ms, and the current response time 
-	 * is 105ms, this value needs to be greater than 0.05 for a value to be treated
-	 * as exceeding the min rate delta threshold and be returned 
+	 * Field name of transaction failure rate description
 	 */
-	public double minThresholDelta;
+	public static final String TRANSACTION_FAIL_DESC = "FailureDesc";
+	
+	/**
+	 * Field name of the an app reliability state description
+	 */
+	public static final String RELIABILITY_DESC = "RelabilityDesc";
 	
 	
+
 	/**
 	 * The list of default fields returned for dep reporting
 	 */
-	public static final List<String> DEP_FIELDS = Arrays.asList(
+	public static final List<String> DEFAULT_DEP_FIELDS = Arrays.asList(
 		new String[] { 	
 			ViewInput.FROM,
 			ViewInput.TO, 
@@ -440,7 +458,7 @@ public class ReliabilityReportInput extends RegressionsInput {
 	/**
 	 * The list of default fields returned for app / tier reporting
 	 */
-	public static final List<String> APP_FIELDS = Arrays.asList(
+	public static final List<String> DEFAULT_APP_FIELDS = Arrays.asList(
 		new String[] { 	
 			ViewInput.FROM, 
 			ViewInput.TO, 
@@ -461,18 +479,21 @@ public class ReliabilityReportInput extends RegressionsInput {
 	/**
 	 * The list of default fields returned for extended app reporting
 	 */
-	public static final List<String> APP_EXT_FIELDS = Arrays.asList(
+	public static final List<String> DEFAULT_APP_EXT_FIELDS = Arrays.asList(
 		 new String[] { 	
 			ViewInput.FROM, 
 			ViewInput.TO, 
 			ViewInput.TIME_RANGE, 
 			SERVICE, 
 			KEY, 
-			NAME, 
+		 	RELIABILITY_STATE,
 			NEW_ISSUES_DESC, 
 			REGRESSIONS_DESC, 
 			SLOWDOWNS_DESC,
 			SCORE_DESC,	
+			TRANSACTION_FAIL_DESC,
+			RELIABILITY_DESC,
+			NAME, 
 			TRANSACTION_VOLUME,
 			TRANSACTION_AVG_RESPONSE,
 		 	TRANSACTION_FAIL_RATE, 
@@ -485,7 +506,6 @@ public class ReliabilityReportInput extends RegressionsInput {
 		 	ERROR_STATE,
 		 	ERROR_VOLUME, 
 		 	ERROR_COUNT,
-		 	RELIABILITY_STATE,
 			SCORE
 		});
 }

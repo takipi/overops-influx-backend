@@ -134,7 +134,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		if (seriesName != null) {
 			tagName = seriesName;
 		} else {
-			Collection<String> types = input.getTypes(apiClient, serviceId);
+			Collection<String> types = input.getTypes(apiClient, serviceId, false);
 			
 			if (!CollectionUtil.safeIsEmpty(types)) {
 				tagName = String.join(ARRAY_SEPERATOR_RAW + " ", types);

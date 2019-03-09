@@ -257,4 +257,23 @@ public class TimeUtil {
 	public static String toTimeFilter(DateTime from, DateTime to) {
 		return SO_FAR_WINDOW + from.getMillis() + MILLI_UNIT + " " + RANGE_WINDOW + to.getMillis() + MILLI_UNIT;
 	}
+	
+	public static String getTimeRange(Pair<DateTime, DateTime> timespan) {
+		
+		String result;
+		
+		long toDelta =  DateTime.now().getMillis() - timespan.getSecond().getMillis();
+
+		if (TimeUnit.MILLISECONDS.toMinutes(toDelta) < 1) {
+			
+			long fromDelta = timespan.getSecond().getMillis() - timespan.getFirst().getMillis();
+			long minDelta = TimeUnit.MILLISECONDS.toMinutes(fromDelta);
+				
+			result = TimeUtil.getTimeRange((int)minDelta);	
+		} else {
+			result = null;
+		}
+		
+		return result;
+	}
 }
