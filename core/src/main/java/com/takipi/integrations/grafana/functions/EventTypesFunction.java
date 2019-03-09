@@ -10,10 +10,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.joda.time.DateTime;
 
+import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.util.infra.Categories;
 import com.takipi.common.util.CollectionUtil;
+import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.EventTypesInput;
 import com.takipi.integrations.grafana.input.EventTypesInput.EventTypes;
@@ -58,28 +60,45 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 
 		super.populateValues(input, appender);
 	}
+	
+	private EventTypesInput getEventTypesInput(BaseEnvironmentsInput input) {
+		
+		EventTypesInput eventInput = (EventTypesInput) input;
+
+		Gson gson = new Gson();
+		String json = gson.toJson(eventInput);
+		
+		EventTypesInput result = gson.fromJson(json, eventInput.getClass());
+		
+		if (eventInput.timeFilter != null) {
+			Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(eventInput.timeFilter);
+			result.timeFilter = TimeUtil.getTimeFilter(timespan);	
+		} else {			
+			result.timeFilter  = TimeUtil.getLastWindowTimeFilter(TimeUnit.DAYS.toMillis(DEFAULT_TIME_DAYS));
+		}
+		
+		return result;
+		
+	}
 
 	@Override
 	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender) {
 
-		EventTypesInput eventInput = (EventTypesInput) input;
-
+		EventTypesInput evInput = (EventTypesInput) input;
+		EventTypesInput eventInput = getEventTypesInput(evInput);
+				
 		String viewId = getViewId(serviceId, eventInput.view);
 
 		if (viewId == null) {
 			return;
 		}
-
-		DateTime to = DateTime.now();
-		DateTime from = to.minusDays(DEFAULT_TIME_DAYS);
 		
-		if (eventInput.timeFilter == null) {
-			eventInput.timeFilter = TimeUtil.getLastWindowTimeFilter(TimeUnit.DAYS.toMillis(DEFAULT_TIME_DAYS));
-		}
+		Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(eventInput.timeFilter);
+
 		
 		Map<String, EventResult> events = getEventMap(serviceId, eventInput,
-			from, to, null);
+				timespan.getFirst(), timespan.getSecond(), null);
 				
 		if (events == null) {
 			return;
@@ -109,7 +128,7 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 			
 			DateTime firstSeen = dateTimeFormatter.parseDateTime(event.first_seen);
 			
-			if ((eventInput.newOnly) && (firstSeen.plusDays(DEFAULT_TIME_DAYS).getMillis() < to.getMillis())) {
+			if ((eventInput.newOnly) && (!firstSeen.isAfter(timespan.getFirst()))) {
 				continue;
 			}
 			

@@ -56,7 +56,7 @@ public class EnvironmentsFunction extends VariableFunction {
 		for (SummarizedService service : services) {
 			
 			String cleanServiceName = service.name.replace(ARRAY_SEPERATOR_RAW, "").
-				replace(GRAFANA_SEPERATOR_RAW, "").replace(SERVICE_SEPERATOR, "");
+				replace(GRAFANA_SEPERATOR_RAW, "");//replace(SERVICE_SEPERATOR_RAW, "");
 			
 			String value = getServiceValue(cleanServiceName, service.id);
 			

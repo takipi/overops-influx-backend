@@ -28,8 +28,17 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 29,
-  "iteration": 1549869882069,
+  "iteration": 1551951757540,
   "links": [
+    {
+      "icon": "dashboard",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "tooltip": "Home",
+      "type": "link",
+      "url": "d/lg0U4qriz/home"
+    },
     {
       "asDropdown": true,
       "icon": "external link",
@@ -987,7 +996,7 @@
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {
@@ -1019,5 +1028,5 @@
   "timezone": "",
   "title": "New Errors",
   "uid": "3NZ83NLik",
-  "version": 103
+  "version": 106
 }

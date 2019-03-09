@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 38,
-  "iteration": 1549869823791,
+  "iteration": 1551951695296,
   "links": [
     {
       "asDropdown": true,
@@ -39,6 +39,15 @@
         "OverOps"
       ],
       "type": "dashboards"
+    },
+    {
+      "icon": "dashboard",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "tooltip": "Home",
+      "type": "link",
+      "url": "d/lg0U4qriz/home"
     }
   ],
   "panels": [
@@ -1380,6 +1389,7 @@
       {
         "allValue": "None",
         "current": {
+          "selected": true,
           "text": "None",
           "value": "None"
         },
@@ -1404,6 +1414,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1428,6 +1439,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1452,6 +1464,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1474,32 +1487,32 @@
         "useTags": false
       },
       {
-        "allValue": "*",
+        "allValue": null,
         "current": {
+          "selected": true,
           "text": "All",
-          "value": "$__all"
+          "value": "All"
         },
-        "datasource": "OO",
         "hide": 2,
-        "includeAll": true,
+        "includeAll": false,
         "label": "Transactions",
-        "multi": true,
+        "multi": false,
         "name": "transactions",
-        "options": [],
-        "query": "transactions({\"environments\":\"$environments\",\"view\":\"All Events\",\"timeFilter\":\"time >= now() - 7d\",\"sorted\":\"true\"})",
-        "refresh": 1,
-        "regex": "",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "All"
+          }
+        ],
+        "query": "All",
         "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
+        "type": "custom"
       },
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1557,9 +1570,8 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "text": "All Events",
-          "value": "All Events"
+          "text": "",
+          "value": ""
         },
         "hide": 2,
         "includeAll": false,
@@ -1568,7 +1580,7 @@
         "name": "view",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "All Events",
             "value": "All Events"
           }
@@ -1580,6 +1592,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -1604,6 +1617,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -1710,8 +1724,8 @@
         "multi": true,
         "name": "type",
         "options": [],
-        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"All Events\"})",
-        "refresh": 1,
+        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\", \"timeFilter\":\"$timeFilter\"})",
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -1787,7 +1801,7 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
+          "selected": true,
           "text": "<term>",
           "value": "<term>"
         },
@@ -2003,7 +2017,7 @@
     ]
   },
   "time": {
-    "from": "now-2d",
+    "from": "now-1d",
     "to": "now"
   },
   "timepicker": {
@@ -2035,5 +2049,5 @@
   "timezone": "",
   "title": "Event Diff",
   "uid": "CVCRTgwmz",
-  "version": 25
+  "version": 33
 }

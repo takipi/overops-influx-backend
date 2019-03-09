@@ -51,12 +51,13 @@ public abstract class BaseEnvironmentsInput extends VariableInput {
 			
 			String service = serviceIds[i];
 			String value = service.replace("(", "").replace(")", "");
-			String[] parts = value.split(GrafanaFunction.SERVICE_SEPERATOR);
+			
+			String[] parts = value. split(GrafanaFunction.SERVICE_SEPERATOR);
 
 			String serviceId;
 			
 			if (parts.length > 1) {
-				serviceId = parts[1];
+				serviceId = parts[parts.length - 1];
 			} else {
 				serviceId = value;
 			}

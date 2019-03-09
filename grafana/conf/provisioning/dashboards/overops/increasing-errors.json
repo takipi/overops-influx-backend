@@ -17,7 +17,7 @@
         "iconColor": "#1f78c1",
         "limit": 100,
         "name": "deployments",
-        "query": "deploymentsAnnotation({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"All Events\",\"timeFilter\":\"time >= now() - 90d\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\",\"seriesName\":\"Times\",\"graphCount\":3})",
+        "query": "deploymentsAnnotation({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"All Events\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\",\"seriesName\":\"Times\",\"graphCount\":3})",
         "showIn": 0,
         "tags": [],
         "type": "tags"
@@ -29,7 +29,7 @@
         "iconColor": "rgba(255, 96, 96, 1)",
         "limit": 100,
         "name": "baseline",
-        "query": "baselineAnnotation({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"text\":\"<- baseline %s | active window %s  ->\"})",
+        "query": "baselineAnnotation({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"text\":\"<- baseline %s | active window %s  ->\"})",
         "showIn": 0,
         "tags": [],
         "type": "tags"
@@ -40,8 +40,17 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 28,
-  "iteration": 1549869843245,
+  "iteration": 1551951730144,
   "links": [
+    {
+      "icon": "dashboard",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "tooltip": "Home",
+      "type": "link",
+      "url": "d/lg0U4qriz/home"
+    },
     {
       "asDropdown": true,
       "icon": "external link",
@@ -111,7 +120,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\",\"limit\":$splitLimit, \"searchText\":\"$search\",\"eventLocations\":\"$increasingErrors\",\"graphType\":\"Percentage\", \"types\":\"$type\"})\n\n",
+          "query": "regressionGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\",\"limit\":$splitLimit, \"searchText\":\"$search\",\"eventLocations\":\"$increasingErrors\",\"graphType\":\"Percentage\", \"types\":\"$type\",\"timeFilterVar\":\"$timeFilterVar\"})\n\n",
           "rawQuery": true,
           "refId": "I",
           "resultFormat": "time_series",
@@ -240,7 +249,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\",\"limit\":$splitLimit, \"searchText\":\"$search\", \"graphType\":\"Absolute\",\"eventLocations\":\"$increasingErrors\", \"types\":\"$type\"})\n\n",
+          "query": "regressionGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\",\"limit\":$splitLimit, \"searchText\":\"$search\", \"graphType\":\"Absolute\",\"eventLocations\":\"$increasingErrors\", \"types\":\"$type\",\"timeFilterVar\":\"$timeFilterVar\"})\n\n",
           "rawQuery": true,
           "refId": "I",
           "resultFormat": "time_series",
@@ -348,7 +357,7 @@
       "description": "Shows a list of increasing errors, comparing them between the last $activeWindowFmt window and the preceding $baselineOnlyFmt baseline period, as denoted by the red annotation on the graph.",
       "fontSize": "100%",
       "gridPos": {
-        "h": 16,
+        "h": 11,
         "w": 24,
         "x": 0,
         "y": 6
@@ -765,7 +774,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressions({\"fields\":\"link,regression,description,reg_desc,severity,typeMessage,stats.hits,rate,reg_delta,first_seen\",  \"render\":\"Grid\", \"regressionTypes\":\"Regressions,SevereRegressions\", \"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"maxColumnLength\":120,\"pointsWanted\":\"$pointsWanted\",\"searchText\":\"$search\", \"eventLocations\":\"$increasingErrors\", \"types\":\"$type\"})",
+          "query": "regressions({\"fields\":\"link,regression,description,reg_desc,severity,typeMessage,stats.hits,rate,reg_delta,first_seen\",  \"render\":\"Grid\", \"regressionTypes\":\"Regressions,SevereRegressions\", \"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"maxColumnLength\":120,\"pointsWanted\":\"$pointsWanted\",\"searchText\":\"$search\", \"eventLocations\":\"$increasingErrors\", \"types\":\"$type\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -789,20 +798,6 @@
       "title": "",
       "transform": "table",
       "type": "table"
-    },
-    {
-      "content": "<script>\n\nfunction hide(name) {\n  var element = document.getElementsByClassName(name);\n  \n  if ((element) && (element.length == 1)) {\n    element[0].style.display = 'none';\n  }\n\n}\n\nfunction hideButtons() {\n  hide(\"btn navbar-button gf-timepicker-nav-btn\");\n  hide(\"navbar-buttons navbar-buttons--zoom\");\n  hide(\"btn navbar-button navbar-button--zoom\");\n}\n\nhideButtons();\n\n</script>\n\n\n",
-      "gridPos": {
-        "h": 1,
-        "w": 1,
-        "x": 0,
-        "y": 22
-      },
-      "id": 38,
-      "links": [],
-      "mode": "html",
-      "title": "",
-      "type": "text"
     }
   ],
   "refresh": false,
@@ -898,8 +893,8 @@
         "multi": true,
         "name": "type",
         "options": [],
-        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\"})",
-        "refresh": 1,
+        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\", \"timeFilter\":\"$timeFilter\"})",
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -1026,7 +1021,7 @@
         "multi": true,
         "name": "increasingErrors",
         "options": [],
-        "query": "increasingErrors({\"timeFilter\":\"time >= now() - $timeRange\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\"})",
+        "query": "increasingErrors({\"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1057,70 +1052,6 @@
           }
         ],
         "query": "<term>",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "tags": [],
-          "text": "7d",
-          "value": "7d"
-        },
-        "hide": 0,
-        "includeAll": false,
-        "label": "Last",
-        "multi": false,
-        "name": "timeRange",
-        "options": [
-          {
-            "selected": false,
-            "text": "30m",
-            "value": "30m"
-          },
-          {
-            "selected": false,
-            "text": "1h",
-            "value": "1h"
-          },
-          {
-            "selected": false,
-            "text": "4h",
-            "value": "4h"
-          },
-          {
-            "selected": false,
-            "text": "8h",
-            "value": "8h"
-          },
-          {
-            "selected": false,
-            "text": "24h",
-            "value": "24h"
-          },
-          {
-            "selected": false,
-            "text": "2d",
-            "value": "2d"
-          },
-          {
-            "selected": true,
-            "text": "7d",
-            "value": "7d"
-          },
-          {
-            "selected": false,
-            "text": "14d",
-            "value": "14d"
-          },
-          {
-            "selected": false,
-            "text": "30d",
-            "value": "30d"
-          }
-        ],
-        "query": "30m,1h,4h,8h,24h,2d,7d,14d,30d",
         "skipUrlSync": false,
         "type": "custom"
       },
@@ -1186,7 +1117,7 @@
         "multi": false,
         "name": "baseline",
         "options": [],
-        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Combined\"})",
+        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Combined\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1211,7 +1142,7 @@
         "multi": false,
         "name": "baselineOnly",
         "options": [],
-        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Baseline\"})",
+        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Baseline\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1236,7 +1167,7 @@
         "multi": false,
         "name": "activeWindow",
         "options": [],
-        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Active\"})",
+        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Active\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1261,7 +1192,7 @@
         "multi": false,
         "name": "baselineOnlyFmt",
         "options": [],
-        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Baseline\", \"prettyFormat\":\"true\"})",
+        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Baseline\", \"prettyFormat\":\"true\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1286,7 +1217,31 @@
         "multi": false,
         "name": "activeWindowFmt",
         "options": [],
-        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Active\",\"prettyFormat\":\"true\"})",
+        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Active\",\"prettyFormat\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "time >= 1551865333954ms and time <= 1551951733954ms",
+          "value": "time >= 1551865333954ms and time <= 1551951733954ms"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "timeFilterVar",
+        "options": [],
+        "query": "timeFilter({\"timeFilter\":\"$timeFilter\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1300,7 +1255,7 @@
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {
@@ -1332,5 +1287,5 @@
   "timezone": "",
   "title": "Increasing Errors",
   "uid": "WZ739NYmk",
-  "version": 110
+  "version": 119
 }

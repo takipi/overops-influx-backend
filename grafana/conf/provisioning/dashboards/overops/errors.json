@@ -28,8 +28,18 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 31,
-  "iteration": 1550030480504,
+  "iteration": 1551951655048,
   "links": [
+    {
+      "icon": "dashboard",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "title": "",
+      "tooltip": "Home",
+      "type": "link",
+      "url": "d/lg0U4qriz/home"
+    },
     {
       "asDropdown": true,
       "icon": "external link",
@@ -809,8 +819,8 @@
         "multi": true,
         "name": "type",
         "options": [],
-        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\"})",
-        "refresh": 1,
+        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\", \"timeFilter\":\"$timeFilter\"})",
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -866,8 +876,8 @@
         "multi": true,
         "name": "transactions",
         "options": [],
-        "query": "transactions({\"environments\":\"$environments\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - 7d\",\"sorted\":\"true\"})",
-        "refresh": 1,
+        "query": "transactions({\"environments\":\"$environments\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"sorted\":\"true\"})",
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -927,7 +937,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -952,7 +961,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -977,7 +985,7 @@
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-1d",
     "to": "now"
   },
   "timepicker": {
@@ -1009,5 +1017,5 @@
   "timezone": "",
   "title": "Errors",
   "uid": "HYBPMdYik",
-  "version": 95
+  "version": 104
 }

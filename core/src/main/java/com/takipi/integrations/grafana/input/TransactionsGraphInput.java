@@ -123,4 +123,6 @@ public class TransactionsGraphInput extends BaseGraphInput {
 		
 		return result;
 	}
+	
+	public String timeFilterVar;
 }
