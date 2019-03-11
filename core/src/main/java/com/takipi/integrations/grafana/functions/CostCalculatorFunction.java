@@ -776,17 +776,6 @@ public class CostCalculatorFunction extends GrafanaFunction {
 
 	}
 
-//	private boolean postCostRowFilter(List<Object> outputObject, CostCalculatorInput input) {
-//		List<String> col = getColumns(input.fields);
-//		int costFieldNr = col.indexOf("Cost");
-//		if (costFieldNr > -1  && costFieldNr < outputObject.size()  && outputObject.get(costFieldNr) instanceof Double)
-//			if ((double) outputObject.get(costFieldNr) <= input.costData.costHigherThan) {
-//				return true;
-//			}
-//		
-//		return false;
-//	}
-
 	protected List<String> getColumns(String fields) {
 
 		String[] fieldArray = ArrayUtil.safeSplitArray(fields, ARRAY_SEPERATOR, true);

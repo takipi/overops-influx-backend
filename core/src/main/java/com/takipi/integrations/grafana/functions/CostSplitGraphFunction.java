@@ -70,8 +70,8 @@ public class CostSplitGraphFunction extends LimitGraphFunction {
 
 	@Override
 	protected List<GraphSeries> processGraphSeries(Collection<String> serviceIds,
-			String serviceId, String viewName, String viewId, Pair<DateTime, DateTime> timeSpan,
-			GraphInput input) {
+			String serviceId, String viewName, String viewId,
+			Pair<DateTime, DateTime> timeSpan, GraphInput input) {
 		GraphCostLimitInput limitInput = (GraphCostLimitInput)input;
 
 		Map<String, EventResult> eventMap = getEventMap(serviceId, input, timeSpan.getFirst(), timeSpan.getSecond(),
@@ -89,6 +89,10 @@ public class CostSplitGraphFunction extends LimitGraphFunction {
 		}
 
 		EventFilter eventFilter = getEventFilter(serviceId, input, timeSpan);
+
+		if (eventFilter == null) {
+			return Collections.emptyList();		
+		}
 
 		Map<String, CostGraphData> eventsVolume = new HashMap<>();
 

@@ -169,6 +169,10 @@ public class GraphCostPieChartFunction extends CostSplitGraphFunction {
 
 		EventFilter eventFilter = getEventFilter(serviceId, input, timeSpan);
 
+		if (eventFilter == null) {
+			return Collections.emptyList();		
+		}
+
 		HashMap<String, Long> runningHitsCostTotal = new HashMap<>();
 
 		HashMap<String, Long> eventHitsTotal = new HashMap<>();
