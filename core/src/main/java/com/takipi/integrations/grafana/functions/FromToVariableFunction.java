@@ -1,7 +1,5 @@
 package com.takipi.integrations.grafana.functions;
 
-import java.util.concurrent.TimeUnit;
-
 import org.joda.time.DateTime;
 
 import com.takipi.api.client.ApiClient;
@@ -39,26 +37,20 @@ public class FromToVariableFunction extends VariableFunction {
 	protected void populateValues(FunctionInput input, VariableAppender appender) {
 		
 		FromToInput ftInput = (FromToInput)input;
-			
 		FromToType fromToType = ftInput.getFromToType();
 		
-		DateTime now = DateTime.now();
 		Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(ftInput.timeFilter);
-		
-		long toDelta =  now.getMillis() - timespan.getSecond().getMillis();
-		
+				
 		String value;
 		
-		if (TimeUnit.MILLISECONDS.toMinutes(toDelta) < 1) {
+		String timeRange = TimeUtil.getTimeRange(timespan);
+		
+		if (timeRange != null) {
 			
 			if (fromToType == FromToType.To) {
 				value = "now";
 			} else {
-				long fromDelta = timespan.getSecond().getMillis() - timespan.getFirst().getMillis();
-				long minDelta = TimeUnit.MILLISECONDS.toMinutes(fromDelta);
-				
-				String timeRange = TimeUtil.getTimeRange((int)minDelta);
-				
+			
 				value = "now-" + timeRange;	
 			}	
 		} else {

@@ -32,6 +32,7 @@ import com.takipi.api.client.data.event.Stats;
 import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
+import com.takipi.api.client.data.process.Jvm;
 import com.takipi.api.client.data.transaction.Transaction;
 import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.data.view.SummarizedView;
@@ -49,6 +50,7 @@ import com.takipi.api.client.result.event.EventsResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
 import com.takipi.api.client.result.event.EventsVolumeResult;
 import com.takipi.api.client.result.metrics.GraphResult;
+import com.takipi.api.client.result.process.JvmsResult;
 import com.takipi.api.client.result.transaction.TransactionsGraphResult;
 import com.takipi.api.client.result.transaction.TransactionsVolumeResult;
 import com.takipi.api.client.result.view.ViewsResult;
@@ -76,9 +78,9 @@ import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings.GroupFilter;
+import com.takipi.integrations.grafana.settings.ServiceSettings;
 import com.takipi.integrations.grafana.settings.input.GeneralSettings;
 import com.takipi.integrations.grafana.settings.input.SlowdownSettings;
-import com.takipi.integrations.grafana.settings.ServiceSettings;
 import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
@@ -1322,6 +1324,83 @@ public abstract class GrafanaFunction
 		
 		return getServiceValue(input.view, serviceId, serviceIds);
 	}
+	
+	protected void sortApplicationsByProcess(String serviceId, List<String> apps, 
+		Collection<String> serversFilter, Collection<String> deploymentsFilter) {
+		
+		Response<JvmsResult> response =  ApiCache.getProcesses(apiClient, serviceId, true);
+		
+		if ((response == null) || (response.isBadResponse()) || (response.data == null) ||
+			(response.data.clients == null)) {
+			return;
+		}
+		
+		Map<String, Integer> processMap = new HashMap<String, Integer>();
+		
+		for (Jvm jvm : response.data.clients) {
+			
+			if (jvm.pids == null) {
+				continue;
+			}
+			
+			if ((!CollectionUtil.safeIsEmpty(serversFilter)) &&
+				(!serversFilter.contains(jvm.machine_name))) {
+				continue;
+			}
+			
+			if ((!CollectionUtil.safeIsEmpty(deploymentsFilter)) &&
+				(!deploymentsFilter.contains(jvm.deployment_name))) {
+					continue;
+				}
+			
+			Integer newValue;
+			Integer existingValue = processMap.get(jvm.application_name);
+			
+			if (existingValue != null) {
+				newValue = existingValue.intValue() + jvm.pids.size();
+			} else {
+				newValue = jvm.pids.size();
+			}
+			
+			processMap.put(jvm.application_name, newValue);
+		}
+		
+		apps.sort(new Comparator<String>()
+		{
+
+			@Override
+			public int compare(String o1, String o2)
+			{
+				Integer a1 = processMap.get(o1);
+				Integer a2 = processMap.get(o2);
+				
+				int i1;
+				int i2;
+				
+				if (a1 != null) {
+					i1 = a1.intValue();
+				} else {
+					i1 = 0;
+				}
+				
+				if (a2 != null) {
+					i2 = a2.intValue();
+				} else {
+					i2 = 0;
+				}
+				
+				int delta = i2 -i1;
+				
+				if (delta != 0) {
+					return delta;
+				}
+					
+				return o1.compareTo(o2);
+			}
+		});
+		
+	}
+	
 	
 	protected Graph getEventsGraph(String serviceId, String viewId, int pointsCount,
 			ViewInput input, VolumeType volumeType, DateTime from, DateTime to) {
