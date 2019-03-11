@@ -284,6 +284,10 @@ public class ReliabilityReportInput extends RegressionsInput {
 	 */
 	public double minFailRate;
 	
+	public String statusPrefixes;
+	
+	public String scoreRanges;
+
 	
 	/**
 	 * Below are the constants describing the field supported by this function for each of the available 
@@ -405,16 +409,6 @@ public class ReliabilityReportInput extends RegressionsInput {
 	public static final String ERROR_COUNT = "ErrorCount";
 	
 	/**
-	 * Field name of performance state. 0 if no slowdown, 1 if slowdowns exist, 2 is severe slowdowns exist
-	 */
-	public static final String PERF_STATE = "PerfState";
-	
-	/**
-	 * Field name of performance state. 0 if no slowdown, 1 if slowdowns exist, 2 is severe slowdowns exist
-	 */
-	public static final String ERROR_STATE = "ErrorState";
-	
-	/**
 	 * Field name of overall reliability state.
 	 */
 	public static final String RELIABILITY_STATE = "ReliabilityState";
@@ -429,6 +423,11 @@ public class ReliabilityReportInput extends RegressionsInput {
 	 */
 	public static final String RELIABILITY_DESC = "RelabilityDesc";
 	
+	/**
+	 * Field name of the an app reliability state description
+	 */
+	public static final String STATUS_NAME = "StatusName";
+	
 	
 
 	/**
@@ -441,18 +440,18 @@ public class ReliabilityReportInput extends RegressionsInput {
 			ViewInput.TIME_RANGE, 
 			SERVICE, 
 			KEY, 
-			NAME, 
+			NEW_ISSUES_DESC, 
+			REGRESSIONS_DESC, 
+			SLOWDOWNS_DESC,
+			SCORE_DESC,
 			PREV_DEP_NAME, 
 			PREV_DEP_FROM, 
+			NAME,
 			PREV_DEP_STATE,
 			NEW_ISSUES, 
 			REGRESSIONS, 
 			SLOWDOWNS, 
-			NEW_ISSUES_DESC, 
-			REGRESSIONS_DESC, 
-			SLOWDOWNS_DESC,
-			SCORE, 
-			SCORE_DESC	
+			SCORE, 		
 		});
 	
 	/**
@@ -465,15 +464,15 @@ public class ReliabilityReportInput extends RegressionsInput {
 		 	ViewInput.TIME_RANGE, 
 		 	SERVICE, 
 		 	KEY, 
-		 	NAME, 
-			NEW_ISSUES, 
-		  	REGRESSIONS, 
-		 	SLOWDOWNS, 
 		 	NEW_ISSUES_DESC, 
 		 	REGRESSIONS_DESC, 
 			SLOWDOWNS_DESC,
-		 	SCORE, 
-		 	SCORE_DESC	
+		 	SCORE_DESC,
+		 	NAME, 
+			NEW_ISSUES, 
+		  	REGRESSIONS, 
+		 	SLOWDOWNS, 		 	
+		 	SCORE
 		});
 	
 	/**
@@ -494,18 +493,17 @@ public class ReliabilityReportInput extends RegressionsInput {
 			TRANSACTION_FAIL_DESC,
 			RELIABILITY_DESC,
 			NAME, 
+			STATUS_NAME,
 			TRANSACTION_VOLUME,
 			TRANSACTION_AVG_RESPONSE,
-		 	TRANSACTION_FAIL_RATE, 
-		 	TRANSACTION_FAILURES,
-		 	TRANSACTION_FAIL_RATE_DELTA,
 		 	NEW_ISSUES, 
 		  	REGRESSIONS, 
 		 	SLOWDOWNS, 
-		 	PERF_STATE,
-		 	ERROR_STATE,
 		 	ERROR_VOLUME, 
 		 	ERROR_COUNT,
-			SCORE
+			SCORE,
+			TRANSACTION_FAIL_RATE, 
+		 	TRANSACTION_FAILURES,
+		 	TRANSACTION_FAIL_RATE_DELTA
 		});
 }

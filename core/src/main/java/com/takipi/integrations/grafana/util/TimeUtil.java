@@ -62,12 +62,14 @@ public class TimeUtil {
 	
 	public static String getTimeRange(int min) {
        
-		if (min % (24 * 60) == 0) {
-        		return (min / 24 / 60) + DAY_POSTFIX;
-        }
+		//if (min % (24 * 60) == 0) {
+        //		double days = (double)(min) / 24 / 60;
+		//	return String.valueOf(Math.round(days)) + DAY_POSTFIX;
+        //}
 		
-		if (min % (60) == 0) {
-    			return (min / 60) + HOUR_POSTFIX;
+		if (min % 60 == 0) {
+    			double hours = (double)(min) / 60;
+			return String.valueOf(Math.round(hours)) + HOUR_POSTFIX;
 		}
 		
 		return min + MINUTE_POSTFIX;
@@ -140,7 +142,7 @@ public class TimeUtil {
 		String result;
 		long toMinDelta = TimeUnit.MILLISECONDS.toMinutes(toDelta);
 		
-		if (toMinDelta < 1) {
+		if (toMinDelta <= 2) {
 			long fromDelta = timespan.getSecond().getMillis() - timespan.getFirst().getMillis();
 			long minDelta = TimeUnit.MILLISECONDS.toMinutes(fromDelta);
 				
