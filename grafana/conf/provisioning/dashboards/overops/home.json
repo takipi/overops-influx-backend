@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 43,
-  "iteration": 1552319129314,
+  "iteration": 1552319129318,
   "links": [],
   "panels": [
     {
@@ -979,7 +979,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"$timeFilterLimit\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Grid\", \"mode\":\"Apps_Extended\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"minFailRate\":0.0005, \"failureTypes\":\"$transactionFailureTypes\", \"statusPrefixes2\":\"✅ ,⚠ ,❌ \", \"scoreRanges\":\"70,85\",  \"statusPrefixes\":\"💚  ,💛 ,❤️ \"})",
+          "query": "regressionReport({\"timeFilter\":\"$timeFilterLimit\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Grid\", \"mode\":\"Apps_Extended\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"minFailRate\":0.0005, \"failureTypes\":\"$transactionFailureTypes\", \"statusPrefixes2\":\"✅ ,⚠ ,❌ \", \"scoreRanges\":\"70,85\",  \"statusPrefixes\":\"✅ ,⚠️ ,❌ \"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -2340,5 +2340,5 @@
   "timezone": "",
   "title": "Home",
   "uid": "lg0U4qriz",
-  "version": 199
+  "version": 205
 }

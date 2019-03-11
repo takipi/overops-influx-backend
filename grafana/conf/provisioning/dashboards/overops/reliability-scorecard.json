@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 22,
-  "iteration": 1552318762212,
+  "iteration": 1552325860967,
   "links": [
     {
       "icon": "dashboard",
@@ -1736,7 +1736,6 @@
       {
         "allValue": "None",
         "current": {
-          "selected": true,
           "tags": [],
           "text": "None",
           "value": [
@@ -1765,7 +1764,9 @@
         "allValue": "all",
         "current": {
           "text": "All",
-          "value": "$__all"
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -1881,28 +1882,26 @@
         "useTags": false
       },
       {
-        "allValue": "*",
+        "allValue": null,
         "current": {
           "text": "All",
-          "value": "$__all"
+          "value": "All"
         },
-        "datasource": "OO",
-        "hide": 0,
-        "includeAll": true,
+        "hide": 2,
+        "includeAll": false,
         "label": "Transactions",
-        "multi": true,
+        "multi": false,
         "name": "transactions",
-        "options": [],
-        "query": "transactions({\"environments\":\"$environments\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"sorted\":\"true\"})",
-        "refresh": 2,
-        "regex": "",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "All"
+          }
+        ],
+        "query": "All",
         "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
+        "type": "custom"
       },
       {
         "allValue": null,
@@ -1956,8 +1955,9 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "text": "10",
-          "value": "10"
+          "tags": [],
+          "text": "5",
+          "value": "5"
         },
         "hide": 0,
         "includeAll": false,
@@ -1966,12 +1966,12 @@
         "name": "limit",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "5",
             "value": "5"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "10",
             "value": "10"
           }
@@ -2053,6 +2053,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -2181,5 +2182,5 @@
   "timezone": "",
   "title": "Reliability Scorecard",
   "uid": "lfqKXMfmz",
-  "version": 169
+  "version": 172
 }
