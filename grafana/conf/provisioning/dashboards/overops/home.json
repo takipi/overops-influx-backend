@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 43,
-  "iteration": 1552283670723,
+  "iteration": 1552274261281,
   "links": [],
   "panels": [
     {
@@ -706,7 +706,7 @@
           "unit": "percentunit"
         },
         {
-          "alias": "Fail Rate (%)",
+          "alias": "Failures (%)",
           "colorMode": "value",
           "colors": [
             "rgba(50, 172, 45, 0.97)",
@@ -729,12 +729,12 @@
           "unit": "percentunit"
         },
         {
-          "alias": "Δ%",
-          "colorMode": null,
+          "alias": "Fail Δ%",
+          "colorMode": "value",
           "colors": [
-            "rgba(245, 54, 54, 0.9)",
+            "rgba(50, 172, 45, 0.97)",
             "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
+            "rgba(245, 54, 54, 0.9)"
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
@@ -744,8 +744,11 @@
           "linkUrl": "d/nxdE2gXmk/site-reliability?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-deployments=$limitDeployments&var-servers=$limitServers&var-applications=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "TransactionFailRateDelta",
-          "thresholds": [],
-          "type": "string",
+          "thresholds": [
+            "0.5",
+            "1"
+          ],
+          "type": "number",
           "unit": "percentunit"
         },
         {
@@ -976,7 +979,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"$timeFilterLimit\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Grid\", \"mode\":\"Apps_Extended\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"minFailRate\":0.0005, \"failureTypes\":\"$transactionFailureTypes\", \"statusPrefixes\":\"🔵 ,🉑 ,🔴 \", \"scoreRanges\":\"70,85\"})",
+          "query": "regressionReport({\"timeFilter\":\"$timeFilterLimit\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Grid\", \"mode\":\"Apps_Extended\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"minFailRate\":0.0005, \"failureTypes\":\"$transactionFailureTypes\", \"statusPrefixes\":\"✅ ,⚠ ,❌ \", \"scoreRanges\":\"70,85\",  \"statusPrefixes2\":\"🔵 ,🉑 ,🔴 \"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1754,9 +1757,10 @@
       {
         "allValue": "None",
         "current": {
-          "selected": true,
           "text": "None",
-          "value": "None"
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -1779,7 +1783,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1804,7 +1807,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1829,9 +1831,8 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
-          "text": "All",
-          "value": "All"
+          "text": "*",
+          "value": "*"
         },
         "hide": 2,
         "includeAll": false,
@@ -1840,7 +1841,7 @@
         "name": "deployments",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "All",
             "value": "All"
           }
@@ -1921,7 +1922,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1946,7 +1946,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -1971,9 +1970,9 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
-          "text": "10",
-          "value": "10"
+          "selected": true,
+          "text": "5",
+          "value": "5"
         },
         "hide": 0,
         "includeAll": false,
@@ -1982,12 +1981,12 @@
         "name": "limit",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "5",
             "value": "5"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "10",
             "value": "10"
           }
@@ -2045,7 +2044,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -2070,7 +2068,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -2095,7 +2092,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -2120,7 +2116,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -2344,5 +2339,5 @@
   "timezone": "",
   "title": "Home",
   "uid": "lg0U4qriz",
-  "version": 192
+  "version": 195
 }
