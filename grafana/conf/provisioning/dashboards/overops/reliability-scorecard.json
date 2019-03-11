@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 22,
-  "iteration": 1551951843796,
+  "iteration": 1552318762212,
   "links": [
     {
       "icon": "dashboard",
@@ -340,7 +340,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_16}. $settingsPostfix. $drilldownPostfix",
+          "linkTooltip": "${__cell_8}. $settingsPostfix. $drilldownPostfix",
           "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers&var-deployments=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "Name",
@@ -553,7 +553,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_12}. $drilldownPostfix",
+          "linkTooltip": "${__cell_5}. $drilldownPostfix",
           "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers&var-deployments=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "NewIssues",
@@ -573,7 +573,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_13}. $drilldownPostfix",
+          "linkTooltip": "${__cell_6}. $drilldownPostfix",
           "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&from=${__cell_0}&to=${__cell_1}&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers&var-deployments=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "Regressions",
@@ -609,7 +609,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_14}. $drilldownPostfix",
+          "linkTooltip": "${__cell_7}. $drilldownPostfix",
           "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&from=${__cell_0}&to=${__cell_1}&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers&var-deployments=${__cell_4}",
           "mappingType": 1,
           "pattern": "Slowdowns",
@@ -709,8 +709,8 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "Compare against deployment ${__cell_6}",
-          "linkUrl": "d/CVCRTgwmz/event-diff?from=${__cell_7}&to=${__cell_1}&orgId=1&var-environments=${__cell_3}&var-applications=$limitApplications&var-compareToApplications=$limitApplications&var-servers=$limitServers&var-compareToServers=$limitServers&var-compareToDeployments=${__cell_4}&var-deployments=${__cell_6}&var-timeDiff=0m&var-type=$limitType",
+          "linkTooltip": "Compare against deployment ${__cell_9}",
+          "linkUrl": "d/CVCRTgwmz/event-diff?from=${__cell_10}&to=${__cell_1}&orgId=1&var-environments=${__cell_3}&var-applications=$limitApplications&var-compareToApplications=$limitApplications&var-servers=$limitServers&var-compareToServers=$limitServers&var-compareToDeployments=${__cell_4}&var-deployments=${__cell_9}&var-timeDiff=0m&var-type=$limitType",
           "mappingType": 1,
           "pattern": "previousDepState",
           "thresholds": [],
@@ -822,7 +822,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_13}. $settingsPostfix. $drilldownPostfix",
+          "linkTooltip": "${__cell_8}. $settingsPostfix. $drilldownPostfix",
           "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-deployments=$limitDeployments&var-servers=$limitServers&var-applications=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "Name",
@@ -1036,7 +1036,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_9}.  $drilldownPostfix",
+          "linkTooltip": "${__cell_5}.  $drilldownPostfix",
           "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-deployments=$limitDeployments&var-servers=$limitServers&var-applications=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "NewIssues",
@@ -1056,7 +1056,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_10}.  $drilldownPostfix",
+          "linkTooltip": "${__cell_6}.  $drilldownPostfix",
           "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&from=${__cell_0}&to=${__cell_1}&var-environments=${__cell_3}&var-deployments=$limitDeployments&var-servers=$limitServers&var-applications=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "Regressions",
@@ -1092,7 +1092,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_11}.  $drilldownPostfix",
+          "linkTooltip": "${__cell_7}.  $drilldownPostfix",
           "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&from=${__cell_0}&to=${__cell_1}&var-environments=${__cell_3}&var-deployments=$limitDeployments&var-servers=$limitServers&var-applications=${__cell_4}",
           "mappingType": 1,
           "pattern": "Slowdowns",
@@ -1291,7 +1291,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_13}. $settingsPostfix. $drilldownPostfix",
+          "linkTooltip": "${__cell_8}. $settingsPostfix. $drilldownPostfix",
           "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$limitServers&var-applications=$limitApplications&var-deployments=$limitDeployments&var-type=-${__cell_4}&var-scoreType=Regressions",
           "mappingType": 1,
           "pattern": "Name",
@@ -1469,7 +1469,7 @@
           "decimals": 0,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_6}",
+          "linkTooltip": "${__cell_7}",
           "linkUrl": "d/Z40SpeJmz/performance?from=${__cell_0}&${__cell_1}&application-reliability?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=${__cell_3}",
           "mappingType": 1,
           "pattern": "Slowdowns",
@@ -1503,7 +1503,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_9}. $drilldownPostfix",
+          "linkTooltip": "${__cell_5}. $drilldownPostfix",
           "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-applications=$limitApplications&var-deployments=$limitDeployments&var-servers=$limitServers&var-type=-${__cell_4}",
           "mappingType": 1,
           "pattern": "NewIssues",
@@ -1523,7 +1523,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_10}. $drilldownPostfix",
+          "linkTooltip": "${__cell_6}. $drilldownPostfix",
           "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&from=${__cell_0}&to=${__cell_1}&var-environments=${__cell_3}&var-applications=$limitApplications&var-deployments=$limitDeployments&var-servers=$limitServers&var-type=-${__cell_4}",
           "mappingType": 1,
           "pattern": "Regressions",
@@ -1737,8 +1737,11 @@
         "allValue": "None",
         "current": {
           "selected": true,
+          "tags": [],
           "text": "None",
-          "value": "None"
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -1761,7 +1764,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1786,7 +1788,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1811,7 +1812,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1859,7 +1859,6 @@
       {
         "allValue": "All",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1908,7 +1907,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1933,7 +1931,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -1958,7 +1955,7 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "10",
           "value": "10"
         },
@@ -2032,7 +2029,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -2057,7 +2053,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -2107,7 +2102,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -2187,5 +2181,5 @@
   "timezone": "",
   "title": "Reliability Scorecard",
   "uid": "lfqKXMfmz",
-  "version": 163
+  "version": 169
 }

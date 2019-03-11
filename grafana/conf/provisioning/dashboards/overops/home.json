@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 43,
-  "iteration": 1552274261281,
+  "iteration": 1552319129306,
   "links": [],
   "panels": [
     {
@@ -707,7 +707,7 @@
         },
         {
           "alias": "Failures (%)",
-          "colorMode": "value",
+          "colorMode": null,
           "colors": [
             "rgba(50, 172, 45, 0.97)",
             "rgba(237, 129, 40, 0.89)",
@@ -979,7 +979,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"$timeFilterLimit\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Grid\", \"mode\":\"Apps_Extended\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"minFailRate\":0.0005, \"failureTypes\":\"$transactionFailureTypes\", \"statusPrefixes\":\"✅ ,⚠ ,❌ \", \"scoreRanges\":\"70,85\",  \"statusPrefixes2\":\"🔵 ,🉑 ,🔴 \"})",
+          "query": "regressionReport({\"timeFilter\":\"$timeFilterLimit\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Grid\", \"mode\":\"Apps_Extended\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"minFailRate\":0.0005, \"failureTypes\":\"$transactionFailureTypes\", \"statusPrefixes2\":\"✅ ,⚠ ,❌ \", \"scoreRanges\":\"70,85\",  \"statusPrefixes\":\"🔵 ,🉑 ,🔴 \"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1831,8 +1831,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "*",
-          "value": "*"
+          "selected": false,
+          "text": "All",
+          "value": "All"
         },
         "hide": 2,
         "includeAll": false,
@@ -1841,7 +1842,7 @@
         "name": "deployments",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "All",
             "value": "All"
           }
@@ -1970,9 +1971,9 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "text": "5",
-          "value": "5"
+          "selected": false,
+          "text": "10",
+          "value": "10"
         },
         "hide": 0,
         "includeAll": false,
@@ -1981,12 +1982,12 @@
         "name": "limit",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "5",
             "value": "5"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "10",
             "value": "10"
           }
@@ -2339,5 +2340,5 @@
   "timezone": "",
   "title": "Home",
   "uid": "lg0U4qriz",
-  "version": 195
+  "version": 196
 }
