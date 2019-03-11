@@ -80,6 +80,9 @@ public class QueryServlet extends HttpServlet {
 					df.format(secs) + " secs: " + json.substring(0, Math.min(1000, json.length())));
 		}
 
+		// needed so emoji chars properly encoded when returned by query
+		response.setCharacterEncoding("UTF-8");
+		
 		response.getWriter().append(json);
 	}
 
