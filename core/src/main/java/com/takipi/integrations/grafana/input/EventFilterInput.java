@@ -146,7 +146,11 @@ public abstract class EventFilterInput extends ViewInput
 		return getServiceFilters(introducedBy, serviceId, true);
 	}
 	
-	public Collection<String> getTypes(ApiClient apiClient, String serviceId)
+	public Collection<String> getTypes(ApiClient apiClient, String serviceId) {
+		return getTypes(apiClient, serviceId, true);
+	}
+
+	public Collection<String> getTypes(ApiClient apiClient, String serviceId, boolean expandCriticalTypes)
 	{
 		
 		if (!hasFilter(types))
@@ -162,7 +166,7 @@ public abstract class EventFilterInput extends ViewInput
 		
 		for (String type : types) {
 			
-			if (EventFilter.CRITICAL_EXCEPTIONS.equals(type)) {
+			if ((expandCriticalTypes) && (EventFilter.CRITICAL_EXCEPTIONS.equals(type))) {
 				RegressionSettings regressionSettings = GrafanaSettings.getData(apiClient, serviceId).regression;
 				
 				if (regressionSettings != null) {

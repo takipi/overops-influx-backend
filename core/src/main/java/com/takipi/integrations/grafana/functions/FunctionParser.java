@@ -274,7 +274,6 @@ public class FunctionParser {
 		registerFunction(new LimitVariableFunction.Factory());
 		registerFunction(new FromToVariableFunction.Factory());
 		registerFunction(new TimeFilterFunction.Factory());
-
-
+		registerFunction(new ConvertToArrayFunction.Factory());
 	}
 }

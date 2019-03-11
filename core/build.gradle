@@ -38,8 +38,8 @@ dependencies {
 		println "Compiling overops as influx with maven api-client"
 
 		compile (
-			"com.takipi:api-client:2.11.1",
-			"com.takipi:api-client-util:2.11.1",
+			"com.takipi:api-client:2.16.0",
+			"com.takipi:api-client-util:2.16.0",
 		)
 	}
 }

@@ -62,12 +62,14 @@ public class TimeUtil {
 	
 	public static String getTimeRange(int min) {
        
-		if (min % (24 * 60) == 0) {
-        		return (min / 24 / 60) + DAY_POSTFIX;
-        }
+		//if (min % (24 * 60) == 0) {
+        //		double days = (double)(min) / 24 / 60;
+		//	return String.valueOf(Math.round(days)) + DAY_POSTFIX;
+        //}
 		
-		if (min % (60) == 0) {
-    			return (min / 60) + HOUR_POSTFIX;
+		if (min % 60 == 0) {
+    			double hours = (double)(min) / 60;
+			return String.valueOf(Math.round(hours)) + HOUR_POSTFIX;
 		}
 		
 		return min + MINUTE_POSTFIX;
@@ -140,7 +142,7 @@ public class TimeUtil {
 		String result;
 		long toMinDelta = TimeUnit.MILLISECONDS.toMinutes(toDelta);
 		
-		if (toMinDelta < 1) {
+		if (toMinDelta <= 2) {
 			long fromDelta = timespan.getSecond().getMillis() - timespan.getFirst().getMillis();
 			long minDelta = TimeUnit.MILLISECONDS.toMinutes(fromDelta);
 				
@@ -256,5 +258,24 @@ public class TimeUtil {
 	
 	public static String toTimeFilter(DateTime from, DateTime to) {
 		return SO_FAR_WINDOW + from.getMillis() + MILLI_UNIT + " " + RANGE_WINDOW + to.getMillis() + MILLI_UNIT;
+	}
+	
+	public static String getTimeRange(Pair<DateTime, DateTime> timespan) {
+		
+		String result;
+		
+		long toDelta =  DateTime.now().getMillis() - timespan.getSecond().getMillis();
+
+		if (TimeUnit.MILLISECONDS.toMinutes(toDelta) < 1) {
+			
+			long fromDelta = timespan.getSecond().getMillis() - timespan.getFirst().getMillis();
+			long minDelta = TimeUnit.MILLISECONDS.toMinutes(fromDelta);
+				
+			result = TimeUtil.getTimeRange((int)minDelta);	
+		} else {
+			result = null;
+		}
+		
+		return result;
 	}
 }

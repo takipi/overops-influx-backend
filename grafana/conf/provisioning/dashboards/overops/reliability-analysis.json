@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 20,
-  "iteration": 1551951803231,
+  "iteration": 1552169408724,
   "links": [
     {
       "icon": "dashboard",
@@ -197,13 +197,14 @@
       "links": [
         {
           "dashUri": "db/performance",
-          "dashboard": "Performance",
+          "dashboard": "Errors",
           "includeVars": true,
           "keepTime": true,
+          "params": "$failureTypesArray",
           "targetBlank": true,
-          "title": "Performance",
-          "type": "absolute",
-          "url": "d/Z40SpeJmz/performance"
+          "title": "Errors",
+          "type": "dashboard",
+          "url": "/d/HYBPMdYik/errors"
         }
       ],
       "mappingType": 1,
@@ -570,7 +571,7 @@
           "keepTime": true,
           "title": "Increasing Errors",
           "type": "absolute",
-          "url": "d/WZ739NYmk/increasing-errors"
+          "url": "/d/WZ739NYmk/increasing-errors"
         }
       ],
       "mappingType": 1,
@@ -2454,7 +2455,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2479,7 +2479,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2504,7 +2503,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2529,9 +2527,8 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
-          "text": "All Events",
-          "value": "All Events"
+          "text": "",
+          "value": ""
         },
         "hide": 2,
         "includeAll": false,
@@ -2540,7 +2537,7 @@
         "name": "view",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "All Events",
             "value": "All Events"
           }
@@ -2576,7 +2573,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2626,7 +2622,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -2684,7 +2679,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "Logged Error|Uncaught Exception|HTTP Error",
           "value": "Logged Error|Uncaught Exception|HTTP Error"
         },
@@ -2777,11 +2771,35 @@
         "query": "Combined",
         "skipUrlSync": false,
         "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "var-type=Logged Error&var-type=Uncaught Exception&var-type=HTTP Error&",
+          "value": "var-type=Logged Error&var-type=Uncaught Exception&var-type=HTTP Error&"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "failureTypesArray",
+        "options": [],
+        "query": "convertToArray({\"array\":\"$transactionFailureTypes\", \"prefix\":\"var-type=\", \"postfix\":\"&\"})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-1d",
     "to": "now"
   },
   "timepicker": {
@@ -2804,5 +2822,5 @@
   "timezone": "",
   "title": "Reliability Analysis",
   "uid": "4DHQ63-ik",
-  "version": 228
+  "version": 231
 }

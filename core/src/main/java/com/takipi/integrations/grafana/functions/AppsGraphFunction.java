@@ -2,7 +2,6 @@ package com.takipi.integrations.grafana.functions;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import com.google.gson.Gson;
@@ -79,7 +78,7 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction
 	public Collection<String> getApplications(String serviceId, 
 		EnvironmentsFilterInput input, int limit) {
 
-		Collection<String> result;
+		List<String> result;
 		Collection<String> selectedApps = input.getApplications(apiClient, serviceId, false);
 		
 		if (!CollectionUtil.safeIsEmpty(selectedApps)) {
@@ -104,8 +103,10 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction
 		}
 		
 		List<String> activeApps = new ArrayList<String>(ApiCache.getApplicationNames(apiClient, serviceId, true));  
-		Collections.sort(activeApps);
-
+		
+		sortApplicationsByProcess(serviceId, activeApps,
+			input.getServers(serviceId), input.getDeployments(serviceId));	
+		
 		result = new ArrayList<String>(keyApps.size() + activeApps.size());
 		result.addAll(keyApps);
 
@@ -125,6 +126,8 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction
 			result.addAll(activeApps);
 		}	
 
+		result.sort(null);
+		
 		return result;
 	}
 	
