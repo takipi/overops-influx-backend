@@ -690,7 +690,7 @@ public class CostCalculatorFunction extends GrafanaFunction {
 		
 		sortEventDatas(mergedDatas);
 			
-		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
+		EventFilter eventFilter = getEventFilter(serviceId, input, timeSpan);
 
 		List<List<Object>> result = new ArrayList<List<Object>>(mergedDatas.size());
 				

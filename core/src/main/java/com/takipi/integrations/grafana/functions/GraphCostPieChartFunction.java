@@ -156,7 +156,8 @@ public class GraphCostPieChartFunction extends CostSplitGraphFunction {
 	}
 	
 	@Override
-	protected List<GraphSeries> processGraphSeries(Collection<String> serviceIds, String serviceId, String viewId,
+	protected List<GraphSeries> processGraphSeries(Collection<String> serviceIds,
+			String serviceId, String viewName, String viewId,
 			Pair<DateTime, DateTime> timeSpan, GraphInput input) {
 		GraphCostLimitInput limitInput = (GraphCostLimitInput) input;
 
@@ -166,7 +167,7 @@ public class GraphCostPieChartFunction extends CostSplitGraphFunction {
 			return Collections.emptyList();
 		}
 
-		EventFilter eventFilter = input.getEventFilter(apiClient, serviceId);
+		EventFilter eventFilter = getEventFilter(serviceId, input, timeSpan);
 
 		HashMap<String, Long> runningHitsCostTotal = new HashMap<>();
 
