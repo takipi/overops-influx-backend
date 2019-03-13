@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 44,
-  "iteration": 1552445120493,
+  "iteration": 1552451353835,
   "links": [
     {
       "asDropdown": true,
@@ -463,7 +463,7 @@
     },
     {
       "aliasColors": {},
-      "bars": true,
+      "bars": false,
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
@@ -489,7 +489,7 @@
         "total": false,
         "values": false
       },
-      "lines": false,
+      "lines": true,
       "linewidth": 1,
       "links": [
         {
@@ -853,15 +853,13 @@
       {
         "allValue": "all",
         "current": {
-          "tags": [],
+          "selected": false,
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
-        "includeAll": true,
+        "includeAll": false,
         "label": "Env",
         "multi": true,
         "name": "environments",
@@ -952,7 +950,7 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "All Events",
           "value": "All Events"
         },
@@ -1047,7 +1045,7 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
+          "selected": true,
           "text": "Score",
           "value": "Score"
         },
@@ -1115,10 +1113,9 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "tags": [],
-          "text": "5",
-          "value": "5"
+          "selected": false,
+          "text": "10",
+          "value": "10"
         },
         "hide": 0,
         "includeAll": false,
@@ -1127,12 +1124,12 @@
         "name": "limit",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "5",
             "value": "5"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "10",
             "value": "10"
           }
@@ -1144,6 +1141,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "Weights are defined in the Settings dashboard",
           "value": "Weights are defined in the Settings dashboard"
         },
@@ -1166,6 +1164,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "Click to drill down",
           "value": "Click to drill down"
         },
@@ -1188,6 +1187,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "70|85",
           "value": "70|85"
         },
@@ -1210,6 +1210,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "(R)|(Y)|(G)",
           "value": "(R)|(Y)|(G)"
         },
@@ -1360,5 +1361,5 @@
   "timezone": "",
   "title": "Reliability Review Adv",
   "uid": "NmADICjik",
-  "version": 5
+  "version": 7
 }
