@@ -1317,7 +1317,7 @@ public class RegressionFunction extends EventsFunction {
 			throw new IllegalArgumentException("functionInput");
 		}
 		
-		RegressionsInput regInput = (RegressionsInput)functionInput;
+		RegressionsInput regInput = (RegressionsInput)getInput((ViewInput)functionInput);
 		
 		if (regInput.render == null) {
 			throw new IllegalStateException("Missing render mode");
