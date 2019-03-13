@@ -8,6 +8,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
 import com.google.common.cache.CacheBuilder;
@@ -21,6 +23,9 @@ import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.settings.input.ServiceSettingsData;
 
 public class GrafanaSettings {
+	
+	private static final Logger logger = LoggerFactory.getLogger(GrafanaSettings.class);
+	
 	public static final String OO_AS_INFLUX = "oo-as-influx";
 	
 	public static final String EXTENSION = ".json";
@@ -154,28 +159,35 @@ public class GrafanaSettings {
 					
 					@Override
 					public ServiceSettings load(SettingsCacheKey key) {
+						
 						authService(key.apiClient, key.serviceId);
 						
 						String name = getServiceJsonName(key.serviceId);
-						String json = settingsStorage.getServiceSettings(name);
+						String serviceJson = settingsStorage.getServiceSettings(name);
 						
-						if (json == null) {
-							json = settingsStorage.getDefaultServiceSettings();
-						}
+						ServiceSettings result = null;
 						
-						ServiceSettings result;
+						if (serviceJson != null) {	
+							result = parseServiceSettings(key.serviceId, key.apiClient, serviceJson, false);
+							
+							if (result == null) {
+								
+								String defaultJson = settingsStorage.getDefaultServiceSettings();
+								
+								if (defaultJson != null) {
+									result = parseServiceSettings(key.serviceId, key.apiClient, defaultJson, false);
+								}
+							}
+						} 
 						
-						if (json != null) {
-							result = parseServiceSettings(key.serviceId, key.apiClient, json);
-						} else {
+						if (result == null) {
+							
 							Pair<ServiceSettingsData, String> bundledSettings = getBundledDefaultSettings();
 														
 							if (bundledSettings != null) {
 								result = getServiceSettings(key.serviceId, key.apiClient,
 									bundledSettings.getFirst(), bundledSettings.getSecond());
-							} else {
-								result = null;
-							}
+							} 
 						}
 						
 						if (result == null) {
@@ -241,9 +253,26 @@ public class GrafanaSettings {
 		return new ServiceSettings(serviceId, apiClient, json, data);
 	}
 	
-	private static ServiceSettings parseServiceSettings(String serviceId, ApiClient apiClient, String json) {
-		ServiceSettingsData data = parseServiceSettings(json);
-		return new ServiceSettings(serviceId, apiClient, json, data);
+	private static ServiceSettings parseServiceSettings(String serviceId, 
+		ApiClient apiClient, String json, boolean allowThrow) {
+		
+		ServiceSettingsData data;
+		ServiceSettings result;
+		
+		try {
+			data = parseServiceSettings(json);
+			result = new ServiceSettings(serviceId, apiClient, json, data);
+		} catch (Exception e) {
+			
+			if (allowThrow) {
+				throw e;
+			} else {
+				result = null;
+				logger.error("Could not parse settings for service " + serviceId + " = " + json, e);
+			}
+		}
+		
+		return result;
 	}
 	
 	public static ServiceSettingsData getData(ApiClient apiClient, String serviceId) {
@@ -269,7 +298,7 @@ public class GrafanaSettings {
 
 	public static void saveServiceSettings(ApiClient apiClient, String serviceId, String json) {
 		
-		ServiceSettings settings =  parseServiceSettings(serviceId, apiClient, json);
+		ServiceSettings settings = parseServiceSettings(serviceId, apiClient, json, true);
 		
 		SettingsCacheKey key = new SettingsCacheKey(apiClient, serviceId);
 		
