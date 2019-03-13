@@ -1,6 +1,5 @@
 package com.takipi.integrations.grafana.functions;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -39,7 +38,6 @@ import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
-import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionData;
 import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOutput;
 import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
@@ -65,9 +63,6 @@ public class ReliabilityReportFunction extends EventsFunction {
 	private static final Logger logger = LoggerFactory.getLogger(ReliabilityReportFunction.class);
 	
 	private static final int MAX_ITEMS_DESC = 3; 
-
-	private static final DecimalFormat singleDigitFormatter = new DecimalFormat("#.#");
-	private static final DecimalFormat doubleDigitFormatter = new DecimalFormat("#.####");
 
 	public static class Factory implements FunctionFactory {
 		
@@ -753,7 +748,9 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		Collection<String> activeApps = ApiCache.getApplicationNames(apiClient, serviceId, true);
 		
-		if (keyApps.size() + activeApps.size() < input.limit) {
+		int appSize = keyApps.size() + activeApps.size();
+		
+		if ((appSize > 0) && (appSize < input.limit)) {
 			
 			reportKeys = new ArrayList<ReportKey>(keyApps.size() + activeApps.size());
 			
@@ -1101,8 +1098,14 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		RegressionOutput regressionOutput = reportKeyResults.output.regressionData.regressionOutput;
 
-		result.append("Score for ");
-		result.append(reportKeyResults.output.reportKey.name);
+		result.append("Score ");
+		
+		String keyName = reportKeyResults.output.reportKey.name;
+		
+		if ((keyName != null) && (keyName.length() > 0)) {
+			result.append(" for ");
+			result.append(keyName);
+		}
 		
 		ReportMode reportMode = input.getReportMode();
 		
@@ -1262,7 +1265,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			throw new IllegalArgumentException("functionInput");
 		}
 
-		ReliabilityReportInput input = (ReliabilityReportInput) functionInput;
+		ReliabilityReportInput input = (ReliabilityReportInput)getInput((ViewInput)functionInput);
 
 		if (input.render == null) {
 			throw new IllegalStateException("Missing render mode");
@@ -1276,21 +1279,23 @@ public class ReliabilityReportFunction extends EventsFunction {
 				return super.process(input);	
 			case SingleStat:
 				return processSingleStat(input);	
+			case SingleStatDesc:
+				return processSingleStat(input);	
 			default:
 				throw new IllegalStateException("Unsupported render mode " + input.render); 
 		}
 	}
 	
-	private double getServiceSingleStat(String serviceId, Pair<DateTime, DateTime> timeSpan, ReliabilityReportInput input)
+	private Object getServiceSingleStat(Collection<String> serviceIds, String serviceId, Pair<DateTime, DateTime> timeSpan, ReliabilityReportInput input)
 	{
 		Collection<ReportKeyOutput> reportKeyOutputs = executeReport(serviceId, input, timeSpan);
 		Collection<ReportKeyResults> reportKeyResults = getReportResults(serviceId, input, reportKeyOutputs);
 		
-		double result;
+		Object result;
 		
 		if (reportKeyResults.size() > 0) {
 			ReportKeyResults reportKeyResult = reportKeyResults.iterator().next();
-			result = reportKeyResult.score;
+			result = getReportKeyValue(serviceIds, serviceId, timeSpan, input, reportKeyResult);
 		} else {
 			result = 0;
 		}
@@ -1298,20 +1303,42 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return result;
 	}
 	
-	private double getSingleStat(Collection<String> serviceIds, Pair<DateTime, DateTime> timeSpan, ReliabilityReportInput input)
+	private Object getSingleStat(Collection<String> serviceIds, Pair<DateTime, DateTime> timeSpan, 
+		ReliabilityReportInput input)
 	{	
 		if (CollectionUtil.safeIsEmpty(serviceIds)) {
 			return 0;
 		}
 		
-		double sum = 0;
+		List<Object> serviceValues = new ArrayList<Object>(serviceIds.size());
 		
-		for (String serviceId : serviceIds)
-		{
-			sum += getServiceSingleStat(serviceId, timeSpan, input);
+		for (String serviceId : serviceIds) {
+			Object serviceValue = getServiceSingleStat(serviceIds, serviceId, timeSpan, input);
+			serviceValues.add(serviceValue);
 		}
 		
-		double result = sum / serviceIds.size();
+		Object result;
+		
+		if (serviceValues.size() == 1) {
+			result = serviceValues.iterator().next();
+		} else {
+			int count = 0;
+			double sum = 0;
+
+			for (Object serviceValue : serviceValues) {
+				
+				if (serviceValue instanceof Double) {
+					sum += (Double)serviceValue;
+					count++;
+				}
+			}
+			
+			if (count > 0) {
+				result = sum / count;
+			} else {
+				result = 0;
+			}
+		}
 		
 		return result;
 	}
@@ -1368,177 +1395,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return result;
 	}
 
-	private String getNewIssuesDesc(RateRegression rateRegression, int newIssues,
-			int severeNewIssues) {
-		
-		StringBuilder result = new StringBuilder();
-		
-		int size = 0;
-		
-		Collection<EventResult> newEvents =  rateRegression.getSortedAllNewEvents();
-		
-		for (EventResult newEvent : newEvents) {
-			
-			if ((newEvent.error_location != null) && (newEvent.stats.hits > 0)) {
-				result.append(newEvent.name);
-				result.append(" in ");
-				result.append(getSimpleClassName(newEvent.error_location.class_name));
-				
-				size++;
-			} else {
-				continue;
-			}
-				
-			if (size == MAX_ITEMS_DESC) {
-				break;
-			} else {
-				if (size < newIssues + severeNewIssues) {
-					result.append(", ");
-				}
-			}
-		}
-		
-		int remaining = newIssues + severeNewIssues - size;
-		
-		if (remaining > 0) {
-			result.append("\nand ");
-			result.append(remaining);
-			result.append(" more");
-		}
-		
-		return result.toString();
-	}
 	
-	private String getRegressionsDesc(RegressionOutput regressionOutput, int regressionsSize,
-		int severeRegressionsSize) {
 		
-		StringBuilder result = new StringBuilder();
-		
-		int size = 0;
-				
-		for (EventData eventData : regressionOutput.eventDatas) {
-			
-			if (!(eventData instanceof RegressionData)) {
-				continue;
-			}
-			
-			RegressionData regressionData = (RegressionData)eventData;
-			
-			if (regressionData.regression == null) {
-				continue;
-			}
-			
-			double baseRate = (double) regressionData.regression.getBaselineHits() / (double)  regressionData.regression.getBaselineInvocations();
-			double activeRate = (double) regressionData.event.stats.hits / (double) regressionData.event.stats.invocations;
-
-			int delta = (int)((activeRate - baseRate) * 100);
-			
-			if (delta < 1000) {
-				result.append("+"); 
-				result.append(delta);
-			} else {
-				result.append(">1000"); 
-			}
-			
-			result.append("% "); 
-
-			result.append(regressionData.event.name);
-			
-			if (regressionData.event.error_location != null) {
-				result.append(" in ");
-				result.append(getSimpleClassName(regressionData.event.error_location.class_name));
-			}
-						
-			size++;
-			
-			if (size == MAX_ITEMS_DESC) {
-				break;
-			} else {
-				if (size < regressionsSize + severeRegressionsSize) {
-					result.append(", ");
-				}
-			}
-		}
-		
-		int remaining = regressionsSize + severeRegressionsSize - size;
-		
-		if (remaining > 0) {
-			result.append("\nand ");
-			result.append(remaining);
-			result.append(" more");
-		}
-		
-		return result.toString();
-	}
-	
-	private String getSlowdownRate(TransactionData transactionData) {
-		return Math.round(transactionData.stats.avg_time / transactionData.baselineAvg * 100) + "%";
-	}
-	
-	private String getSlowdownsDesc(Collection<TransactionData> transactionDatas, 
-		int slowdownsSize, int severeSlowdownsSize) {
-		
-		StringBuilder result = new StringBuilder();
-					
-		List<TransactionData> slowdowns = new ArrayList<TransactionData>();
-		List<TransactionData> severeSlowdowns = new ArrayList<TransactionData>();
-		
-		for (TransactionData transactionData : transactionDatas) {
-			
-			if (transactionData.state == PerformanceState.CRITICAL) {
-				severeSlowdowns.add(transactionData);
-			} else if (transactionData.state == PerformanceState.SLOWING) {
-				slowdowns.add(transactionData);	
-			}
-			
-			if (severeSlowdowns.size() + slowdowns.size() >= MAX_ITEMS_DESC) {
-				break;
-			}
-		}
-		
-		int index = 0;
-		
-		for (TransactionData transactionData : severeSlowdowns) {
-		
-			result.append("+");
-			result.append(getSlowdownRate(transactionData));
-			result.append(" ");
-			result.append(getTransactionName(transactionData.graph.name, false));
-			result.append("(P1)");			
-			index++;
-			
-			if ((index < severeSlowdowns.size()) || (slowdowns.size() > 0)) {
-				result.append(", ");
-			}
-		}
-		
-		index = 0;
-		
-		for (TransactionData transactionData : slowdowns) {
-			
-			result.append("+");
-			result.append(getSlowdownRate(transactionData));
-			result.append(" ");
-			result.append(getTransactionName(transactionData.graph.name, false));
-		
-			index++;
-		
-			if (index < slowdowns.size()) {
-				result.append(", ");
-			}
-		}
-		
-		int remaining = slowdowns.size() + severeSlowdowns.size() - severeSlowdownsSize -  slowdownsSize;
-		
-		if (remaining > 0) {
-			result.append(" and ");
-			result.append(remaining);
-			result.append(" more");
-		}
-		
-		return result.toString();
-	}
-	
 	private Collection<ReportKeyResults> getReportResults(String serviceId, 
 			ReliabilityReportInput input, Collection<ReportKeyOutput> reportKeyOutputs) {
 		
@@ -1562,11 +1420,11 @@ public class ReliabilityReportFunction extends EventsFunction {
 				reportKeyResults.criticalRegressions = reportKeyOutput.regressionData.regressionOutput.criticalRegressions;
 				reportKeyResults.regressions = reportKeyOutput.regressionData.regressionOutput.regressions;
 				
-				reportKeyResults.newIssuesDesc = getNewIssuesDesc(reportKeyOutput.regressionData.regressionOutput.rateRegression,
-					reportKeyResults.newIssues, reportKeyResults.severeNewIssues);
+				reportKeyResults.newIssuesDesc = RegressionFunction.getNewIssuesDesc(
+					reportKeyOutput.regressionData.regressionOutput, MAX_ITEMS_DESC);
 					
-				reportKeyResults.regressionsDesc = getRegressionsDesc(reportKeyOutput.regressionData.regressionOutput,
-						reportKeyResults.regressions, reportKeyResults.criticalRegressions);
+				reportKeyResults.regressionsDesc = RegressionFunction.getRegressionsDesc(
+						reportKeyOutput.regressionData.regressionOutput, MAX_ITEMS_DESC);
 
 			}
 			
@@ -1575,8 +1433,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 				Pair<Integer, Integer> slowdownPair = getSlowdowns(reportKeyOutput.transactionMap.values());
 				reportKeyResults.slowdowns = slowdownPair.getFirst().intValue();
 				reportKeyResults.severeSlowdowns = slowdownPair.getSecond().intValue();
-				reportKeyResults.slowDownsDesc = getSlowdownsDesc(reportKeyOutput.transactionMap.values(),
-						reportKeyResults.slowdowns, reportKeyResults.severeSlowdowns);
+				reportKeyResults.slowDownsDesc = TransactionsListFunction.getSlowdownsDesc(reportKeyOutput.transactionMap.values(), 
+					null, MAX_ITEMS_DESC);
 			}
 			
 			if (reportKeyOutput.regressionData != null) {
@@ -1597,7 +1455,9 @@ public class ReliabilityReportFunction extends EventsFunction {
 			}			
 		}
 		
-		if ((input.render != RenderMode.SingleStat) && (input.limit < result.size())) {
+		boolean isSingleStat = (input.render != RenderMode.SingleStat) || (input.render != RenderMode.SingleStatDesc);
+		
+		if ((!isSingleStat) && (input.limit < result.size())) {
 			return limitByScore(result, input.limit);
 		}
 		
@@ -1714,8 +1574,20 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return result;
 	}
 	
-	private String formatMilli(Double mill) {
-		return singleDigitFormatter.format(mill.doubleValue()) + "ms";
+	private ReliabilityState getReliabilityState(RegressionInput regressionInput, double deltaValue) {
+		
+		ReliabilityState result;
+		
+		if (deltaValue > regressionInput.criticalRegressionDelta) {
+			result = ReliabilityState.Severe;
+		} else if (deltaValue > regressionInput.regressionDelta) {
+			result = ReliabilityState.Warning;
+		} else {
+			result = ReliabilityState.OK;
+		}
+
+		return result;
+		
 	}
 	
 	private Pair<ReliabilityState, Double> getReliabilityState(double baseAvg, double avg,  
@@ -1724,17 +1596,9 @@ public class ReliabilityReportFunction extends EventsFunction {
 		ReliabilityState state;
 		double deltaValue;
 		
-		if (baseAvg > 0) {
-			
+		if (baseAvg > 0) {	
 			deltaValue = (avg - baseAvg) / baseAvg;
-			
-			if (deltaValue > regressionInput.criticalRegressionDelta) {
-				state = ReliabilityState.Severe;
-			} else if (deltaValue > regressionInput.regressionDelta) {
-				state = ReliabilityState.Warning;
-			} else {
-				state = ReliabilityState.OK;
-			}			
+			state = getReliabilityState(regressionInput, deltaValue);					
 		} else {
 			deltaValue = 0;
 			state = ReliabilityState.OK;
@@ -1794,36 +1658,6 @@ public class ReliabilityReportFunction extends EventsFunction {
 		String deltaStr = formatRateDelta(statePair.getFirst(), true, statePair.getSecond());
 		
 		return Pair.of(avg, deltaStr);
-	}
-	
-	private static String formatRate(double value, boolean doubleDigit) {
-		
-		DecimalFormat df;
-		
-		if (doubleDigit) {
-			df = doubleDigitFormatter;
-		} else {
-			df = singleDigitFormatter; 
-		}
-		
-		return df.format(value * 100) + "%";
-	}
-	
-	private static String formatLongValue(long value) {
-		
-		if (value > 1000000000) {
-			return singleDigitFormatter.format(value / 1000000000.0) + " Bil";
-		}
-		
-		if (value > 1000000) {
-			return singleDigitFormatter.format(value / 1000000.0) + " Mil";
-		}
-		
-		if (value > 1000) {
-			return singleDigitFormatter.format(value / 1000.0) + "K";
-		}
-			
-		return String.valueOf(value);
 	}
 	
 	private AppFailureData getAppFailureData(String serviceId, 
@@ -1921,24 +1755,28 @@ public class ReliabilityReportFunction extends EventsFunction {
 		}
 	
 		result.failRateState = failurePair.getFirst();
-		result.failureRateDelta = failurePair.getSecond();//formatRateDelta(result.failRateState, false, failurePair.getSecond());
+		result.failureRateDelta = Math.max(0f, failurePair.getSecond());
 
 		result.scoreState = getScoreState(input, reportKeyResult.score);
 		
 		result.reliabilityState = combineStates(result.failRateState , result.scoreState);
 		
-		parseAppReliabilityDescs(result, reportKeyResult, input, 
+		Pair<String, String> descsPair = getReliabilityDescs(result, reportKeyResult, input, 
 			transactionData, failureData, baseFailRate);
 		
+		result.relabilityDesc = descsPair.getFirst();
+		result.failureRateDesc = descsPair.getSecond();
+
 		return result;
 	}
 	
-	private void parseAppReliabilityDescs(AppReliabilityData reliabilityData,
+	private Pair<String, String> getReliabilityDescs(AppReliabilityData reliabilityData,
 		ReportKeyResults reportKeyResult,ReliabilityReportInput input,
 		AppTransactionData transactionData, AppFailureData failureData,
 		double baseFailRate) {
 	
 		StringBuilder failDelta = new StringBuilder();
+		
 		failDelta.append(formatRate(reliabilityData.failRate, true));
 		
 		StringBuilder failureDesc = new StringBuilder();
@@ -1950,18 +1788,12 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			failDelta.append(" up from ");
 			failDelta.append(formatRate(baseFailRate, true));
-			
-			failureDesc.append(failDelta);	
-		} else {
-			reliabilityData.failureRateDelta = 0;
-			failureDesc.append(failDelta);
 		}
 		
+		failureDesc.append(failDelta);
 		failureDesc.append(") in ");
 		failureDesc.append(formatLongValue(transactionData.transactionVolume));
 		failureDesc.append(" transactions");
-
-		reliabilityData.failureRateDesc = failureDesc.toString();
 		
 		StringBuilder relabilityDesc = new StringBuilder();
 		
@@ -1973,15 +1805,13 @@ public class ReliabilityReportFunction extends EventsFunction {
 			relabilityDesc.append(failDelta);		
 		} 
 		
-		if (reliabilityData.scoreState != ReliabilityState.OK) {
 			
-			if (reliabilityData.failRateState != ReliabilityState.OK) {
-				relabilityDesc.append(". ");
-			}
-			
-			relabilityDesc.append("Score = ");
-			relabilityDesc.append(reportKeyResult.score);
+		if (reliabilityData.failRateState != ReliabilityState.OK) {
+			relabilityDesc.append(". ");
 		}
+			
+		relabilityDesc.append("Score = ");
+		relabilityDesc.append(reportKeyResult.score);
 		
 		if (reliabilityData.reliabilityState != ReliabilityState.OK) {
 			String timeRange = TimeUtil.getTimeRange(input.timeFilter);
@@ -1991,10 +1821,9 @@ public class ReliabilityReportFunction extends EventsFunction {
 				relabilityDesc.append(timeRange);
 			}
 		}
-		
-		reliabilityData.relabilityDesc = relabilityDesc.toString();
+					
+		return Pair.of(relabilityDesc.toString(), failureDesc.toString());
 	}
-
 		
 	private AppTransactionData getAppTransactionData(ReportKeyResults reportKeyResult) {
 		
@@ -2048,7 +1877,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		int low = Integer.valueOf(parts[0]);
 		int high = Integer.valueOf(parts[1]);
 		
-		if (score > high) {
+		if (score >= high) {
 			return ReliabilityState.OK;
 		}
 		
@@ -2059,20 +1888,34 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return ReliabilityState.Warning;
 	}
 	
-	private String getAppStatusName(ReliabilityReportInput input, 
-		ReliabilityState state, String name) {
+	private String getStatusPrefix(ReliabilityReportInput input, 
+		ReliabilityState state) {
 		
 		if (input.statusPrefixes == null) {
-			return "";
+			return null;
 		}
 		
 		String[] parts = input.statusPrefixes.split(ARRAY_SEPERATOR);
 		
 		if (parts.length != 3) {
+			return null;
+		}
+		
+		String result = parts[state.ordinal()];	
+		
+		return result;
+		
+	}
+	
+	private String getAppStatusName(ReliabilityReportInput input, 
+		ReliabilityState state, String name) {
+		
+		String prefix = getStatusPrefix(input, state);
+		
+		if (prefix == null) {
 			return "";
 		}
 		
-		String prefix = parts[state.ordinal()];	
 		String result =  prefix + name;
 		
 		return result;
@@ -2089,6 +1932,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		AppReliabilityData appReliabilityData = getAppReliabilityData(reportKeyResult, input, appTransactionsData, appFailureData);
 			
 		String appStatusName = getAppStatusName(input, appReliabilityData.reliabilityState, serviceName);
+		Object failRateDelta = getFailRateDelta(input, appReliabilityData, false);
 		
 		row.set(ReliabilityReportInput.STATUS_NAME, appStatusName);
 
@@ -2097,7 +1941,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		row.set(ReliabilityReportInput.TRANSACTION_FAILURES, appFailureData.failures);
 		row.set(ReliabilityReportInput.TRANSACTION_FAIL_RATE, appReliabilityData.failRate);
-		row.set(ReliabilityReportInput.TRANSACTION_FAIL_RATE_DELTA, getEmptyDoubleValue(appReliabilityData.failureRateDelta));
+		row.set(ReliabilityReportInput.TRANSACTION_FAIL_RATE_DELTA, failRateDelta);
 		row.set(ReliabilityReportInput.TRANSACTION_FAIL_DESC, appReliabilityData.failureRateDesc);
 
 		row.set(ReliabilityReportInput.ERROR_VOLUME, appTransactionsData.errorVolume);
@@ -2105,15 +1949,6 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		row.set(ReliabilityReportInput.RELIABILITY_STATE, appReliabilityData.reliabilityState.ordinal());	
 		row.set(ReliabilityReportInput.RELIABILITY_DESC, appReliabilityData.relabilityDesc);	
-	}
-	
-	private static Object getEmptyDoubleValue(double value) {
-		
-		if (value == 0) {
-			return "";
-		}
-		
-		return value;
 	}
 	
 	private void addDepCompareFields(ReportRow row, 
@@ -2240,13 +2075,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		}
 	}
 	
-	private String getPostfix(ReliabilityReportInput input, double score) {
-		
-		GraphType graphType = getGraphType(input);
-		
-		if (graphType != GraphType.Score) {
-			return null;
-		}
+	private String getPostfix(ReliabilityReportInput input, double value) {
 		
 		if (input.thresholds == null) {
 			return null;
@@ -2275,11 +2104,11 @@ public class ReliabilityReportFunction extends EventsFunction {
 			return null;
 		}
 
-		if (score < min) {
+		if (value < min) {
 			return postfixes[0];
 		}
 		
-		if (score < max) {
+		if (value < max) {
 			return postfixes[1];
 		}
 		
@@ -2320,7 +2149,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return result;
 	}
 	
-	private double getGraphValue(ReliabilityReportInput input, ReportKeyResults reportKeyResult) {
+	private Object getReportKeyValue(Collection<String> serviceIds, String serviceId, Pair<DateTime, DateTime> timeSpan,
+		ReliabilityReportInput input, ReportKeyResults reportKeyResult) {
 		
 		GraphType graphType = getGraphType(input);
 
@@ -2358,11 +2188,89 @@ public class ReliabilityReportFunction extends EventsFunction {
 					return 0;
 				}
 			
+			case FailRateDelta: 
+				
+				if (serviceIds.size() == 1) {
+					return getFailRateDelta(serviceId, 	timeSpan, input, reportKeyResult);
+				} else {
+					return 0;
+				}
 			
+			case FailRateDesc: return getFailRateDesc(serviceIds, serviceId, 
+					timeSpan, input, reportKeyResult);
+			
+			case ScoreDesc: return reportKeyResult.scoreDesc; 
+	
 			case Score: return reportKeyResult.score; 
 		}
 		
 		return 0;
+	}
+	
+	private AppReliabilityData getAppReliabilityData(String serviceId, 
+			Pair<DateTime, DateTime> timespan, ReliabilityReportInput input, ReportKeyResults reportKeyResult) {
+		
+		AppFailureData appFailureData = getAppFailureData(serviceId, input, timespan, reportKeyResult);
+		AppTransactionData appTransactionsData = getAppTransactionData(reportKeyResult);
+		
+		AppReliabilityData result = getAppReliabilityData(reportKeyResult, input, appTransactionsData, appFailureData);
+				
+		return result;
+	}
+	
+	private Object getFailRateDesc(Collection<String> serviceIds, String serviceId, 
+			Pair<DateTime, DateTime> timespan, ReliabilityReportInput input, ReportKeyResults reportKeyResult) {
+			
+		if (serviceIds.size() > 1) {
+			return 0;
+		}
+			
+		AppReliabilityData appReliabilityData = getAppReliabilityData(serviceId, timespan, input, reportKeyResult);
+		
+		String result = appReliabilityData.failureRateDesc;
+			
+		return result;
+	}
+	
+	private Object getFailRateDelta(String serviceId, Pair<DateTime, DateTime> timespan, 
+			ReliabilityReportInput input, ReportKeyResults reportKeyResult) {
+		
+		AppReliabilityData appReliabilityData = getAppReliabilityData(serviceId, timespan, input, reportKeyResult);
+		Object result = getFailRateDelta(input, appReliabilityData, true);
+		
+		return result;
+	}
+	
+	private Object getFailRateDelta(ReliabilityReportInput input, AppReliabilityData appReliabilityData,
+			boolean stringFormat) {
+		
+		if (appReliabilityData.failureRateDelta == 0) {
+			return "";
+		}
+		
+		String statusPrefix = getStatusPrefix(input, appReliabilityData.failRateState);
+		
+		Object result;
+	
+		String rateStr;
+			
+		if (appReliabilityData.failureRateDelta > 1) {
+			rateStr = "Δ>100%";	 
+		} else {		
+			if (stringFormat) {
+				rateStr = "+" + formatRate(appReliabilityData.failureRateDelta, true);
+			} else {
+				rateStr = null;
+			}
+		}
+		
+		if (rateStr != null) {
+			result = String.format("(%s %s)", rateStr, statusPrefix);
+		} else {
+			result = appReliabilityData.failureRateDelta;
+		}
+		
+		return result;
 	}
 
 	private List<Series> processGraph(ReliabilityReportInput input) {
@@ -2379,10 +2287,16 @@ public class ReliabilityReportFunction extends EventsFunction {
 
 			for (ReportKeyResults reportKeyResult : reportKeyResults) {
 
-				double value = getGraphValue(input, reportKeyResult);
+				Object keyValue = getReportKeyValue(serviceIds, serviceId, timeSpan, input, reportKeyResult);
 				
 				String seriesName;
-				String postfix = getPostfix(input, value);
+				String postfix;
+				
+				if (keyValue instanceof Double) {
+					postfix = getPostfix(input, (Double)keyValue);
+				} else {
+					postfix = null;
+				}
 				
 				String name = getKeyName(reportKeyResult);
 				
@@ -2398,7 +2312,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 				series.name = EMPTY_NAME;
 				series.columns = Arrays.asList(new String[] { TIME_COLUMN, seriesName });
 				series.values
-						.add(Arrays.asList(new Object[] { timeSpan.getFirst().getMillis(), value }));
+						.add(Arrays.asList(new Object[] { timeSpan.getSecond().getMillis(), keyValue }));
 
 				result.add(series);
 			}

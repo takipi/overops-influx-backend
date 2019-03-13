@@ -118,9 +118,26 @@ public class ReliabilityReportInput extends RegressionsInput {
 		ErrorRate,
 		
 		/**
+		 * chart the transaction failure rate delta
+		 */
+		
+		FailRateDelta,
+		
+		/**
+		 * chart the transaction failure rate delta description
+		 */
+		FailRateDesc,
+		
+		
+		/**
 		 * chart the reliability score of the target app, deployment, tier
 		 */
-		Score;
+		Score,
+		
+		/**
+		 * chart the score desc of the target app, deployment, tier
+		 */
+		ScoreDesc
 	}
 	
 	/**
@@ -287,7 +304,6 @@ public class ReliabilityReportInput extends RegressionsInput {
 	public String statusPrefixes;
 	
 	public String scoreRanges;
-
 	
 	/**
 	 * Below are the constants describing the field supported by this function for each of the available 
