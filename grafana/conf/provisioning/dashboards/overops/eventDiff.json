@@ -891,7 +891,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "eventsDiff({\"fields\":\"link,jira_issue_url,rate_desc,description,diff_desc,diff,type,message,stats.hits,rate,first_seen,introduced_by,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":100, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"compareToApplications\":\"$compareToApplications\", \"compareToDeployments\":\"$compareToDeployments\",\"compareToServers\":\"$compareToServers\", \"timeDiff\":\"$timeDiff\",\"diffTypes\":\"New\", \"limit\":\"$limit\"})\n",
+          "query": "eventsDiff({\"fields\":\"link,jira_issue_url,rate_desc,description,diff_desc,diff,type,message,stats.hits,rate,first_seen,introduced_by,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":100, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"compareToApplications\":\"$compareToApplications\", \"compareToDeployments\":\"$compareToDeployments\",\"compareToServers\":\"$compareToServers\", \"timeDiff\":\"$timeDiff\",\"diffTypes\":\"New\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1352,7 +1352,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "eventsDiff({\"fields\":\"link,jira_issue_url,rate_desc,diff_desc,type,diff,description,message,stats.hits,rate,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":100, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"compareToApplications\":\"$compareToApplications\", \"compareToDeployments\":\"$compareToDeployments\",\"compareToServers\":\"$compareToServers\", \"timeDiff\":\"$timeDiff\", \"diffTypes\":\"Increasing\", \"limit\":\"$limit\"})\n",
+          "query": "eventsDiff({\"fields\":\"link,jira_issue_url,rate_desc,diff_desc,type,diff,description,message,stats.hits,rate,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":100, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"compareToApplications\":\"$compareToApplications\", \"compareToDeployments\":\"$compareToDeployments\",\"compareToServers\":\"$compareToServers\", \"timeDiff\":\"$timeDiff\", \"diffTypes\":\"Increasing\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1390,6 +1390,7 @@
         "allValue": "None",
         "current": {
           "selected": true,
+          "tags": [],
           "text": "None",
           "value": "None"
         },
@@ -1414,7 +1415,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1439,7 +1439,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1464,7 +1463,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1512,7 +1510,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1570,8 +1567,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "",
-          "value": ""
+          "selected": false,
+          "text": "All Events",
+          "value": "All Events"
         },
         "hide": 2,
         "includeAll": false,
@@ -1580,7 +1578,7 @@
         "name": "view",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "All Events",
             "value": "All Events"
           }
@@ -1592,7 +1590,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -1617,7 +1614,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -1980,44 +1976,11 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "tags": [],
-          "text": "10",
-          "value": "10"
-        },
-        "hide": 0,
-        "includeAll": false,
-        "label": "Top",
-        "multi": false,
-        "name": "limit",
-        "options": [
-          {
-            "selected": false,
-            "text": "5",
-            "value": "5"
-          },
-          {
-            "selected": true,
-            "text": "10",
-            "value": "10"
-          },
-          {
-            "selected": false,
-            "text": "All",
-            "value": "All"
-          }
-        ],
-        "query": "5,10,All",
-        "skipUrlSync": false,
-        "type": "custom"
       }
     ]
   },
   "time": {
-    "from": "now-1d",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {
@@ -2049,5 +2012,5 @@
   "timezone": "",
   "title": "Event Diff",
   "uid": "CVCRTgwmz",
-  "version": 33
+  "version": 35
 }

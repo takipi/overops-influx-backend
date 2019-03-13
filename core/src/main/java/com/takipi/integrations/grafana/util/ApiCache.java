@@ -417,7 +417,10 @@ public class ApiCache {
 			int ti1 = TimeUtil.parseInterval(tu1);
 			int ti2 = TimeUtil.parseInterval(tu2);
 
-			return ti1 == ti2;
+			boolean result = ti1 == ti2;
+			
+			return result;
+			
 		}
 
 		@Override

@@ -95,6 +95,9 @@ public abstract class GrafanaFunction
 		public String getName();
 	}
 	
+	private static final DecimalFormat singleDigitFormatter = new DecimalFormat("#.#");
+	private static final DecimalFormat doubleDigitFormatter = new DecimalFormat("#.####");
+
 	protected static final String ALL_EVENTS = "All Events";
 	
 	protected static final String RESOVED = "Resolved";
@@ -1449,16 +1452,20 @@ public abstract class GrafanaFunction
 		int effectivePoints;
 		List<SliceRequest> sliceRequests;
 		
+		
 		if ((sync) || ((days < 3) || (days > 14))) // This is just a starting point
 		{
+		
 			effectivePoints = pointsCount;
 			sliceRequests = Collections.singletonList(new SliceRequest(from, to, pointsCount));
-		}
+		
+	}
 		else
 		{
 			effectivePoints = (pointsCount / days) + 1;
 			sliceRequests = getTimeSlices(from, to, days, effectivePoints);	
 		}
+		
 		
 		List<GraphSliceTask> tasks = Lists.newArrayList();
 		
@@ -1973,6 +1980,60 @@ public abstract class GrafanaFunction
 		return view.id;
 	}
 	
+	protected ViewInput getInput(ViewInput input) {
+						
+		if (!input.varTimeFilter) {
+			return input;
+		}
+		
+		Gson gson = new Gson();
+		String json = gson.toJson(input);
+		
+		ViewInput result = gson.fromJson(json, input.getClass());
+		
+		if (input.timeFilter != null) {
+			Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(input.timeFilter);
+			result.timeFilter = TimeUtil.getTimeFilter(timespan);	
+		} 
+		
+		return result;
+		
+	}
+	
+	protected static String formatLongValue(long value) {
+		
+		if (value > 1000000000) {
+			return singleDigitFormatter.format(value / 1000000000.0) + " Bil";
+		}
+		
+		if (value > 1000000) {
+			return singleDigitFormatter.format(value / 1000000.0) + " Mil";
+		}
+		
+		if (value > 1000) {
+			return singleDigitFormatter.format(value / 1000.0) + "K";
+		}
+			
+		return String.valueOf(value);
+	}
+	
+	protected String formatMilli(Double mill) {
+		return singleDigitFormatter.format(mill.doubleValue()) + "ms";
+	}
+	
+	protected static String formatRate(double value, boolean doubleDigit) {
+		
+		DecimalFormat df;
+		
+		if (doubleDigit) {
+			df = doubleDigitFormatter;
+		} else {
+			df = singleDigitFormatter; 
+		}
+		
+		return df.format(value * 100) + "%";
+	} 
+
 	protected List<Series> createSingleStatSeries(Pair<DateTime, DateTime> timespan, Object singleStat)
 	{
 		

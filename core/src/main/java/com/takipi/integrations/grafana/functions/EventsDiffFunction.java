@@ -138,8 +138,9 @@ public class EventsDiffFunction extends EventsFunction
 	}
 		
 	@Override
-	protected List<EventData> getEventData(String serviceId, EventsInput input, Pair<DateTime, DateTime> timeSpan)
-	{
+	protected List<EventData> getEventData(String serviceId, EventsInput input, 
+		Pair<DateTime, DateTime> timeSpan) {
+		
 		EventsDiffInput eventsDiffInput = (EventsDiffInput)input;
 		
 		String json = new Gson().toJson(input);
@@ -169,8 +170,7 @@ public class EventsDiffFunction extends EventsFunction
 		} else {
 			sourceTimeFilter = null;
 			sourceTimespan = timeSpan;
-		}
-		
+		}	
 		
 		if (sourceTimeFilter != null) {
 			eventsDiffInput.timeFilter = sourceTimeFilter;
@@ -197,7 +197,7 @@ public class EventsDiffFunction extends EventsFunction
 			EventData sourceEventData = sourceEventDataMap.get(targetEventData.event.id); 
 			
 			if (sourceEventData != null) {
-				
+					
 				if (!diffTypes.contains(DiffType.Increasing)) {
 					continue;
 				}
@@ -226,18 +226,15 @@ public class EventsDiffFunction extends EventsFunction
 					}
 				}
 				
-				if (!foundSimiliarId) {
-					result.add(targetEventData);
+				if (foundSimiliarId) {
+					continue;
 				}
+				
+				result.add(targetEventData);	
 			}
 		}
 		
-		if ((eventsDiffInput.limit == null) || (eventsDiffInput.limit.equals(ALL))) {
-			return result;		
-		}
-		
-		int limit = Integer.valueOf(eventsDiffInput.limit);
-		return result.subList(0, Math.min(result.size(), limit));
+		return result;
 	}	
 		
 	@Override

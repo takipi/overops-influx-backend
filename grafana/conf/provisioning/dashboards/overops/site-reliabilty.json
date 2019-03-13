@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 39,
-  "iteration": 1552168827931,
+  "iteration": 1552449900535,
   "links": [
     {
       "icon": "dashboard",
@@ -87,9 +87,9 @@
           "includeVars": true,
           "keepTime": true,
           "targetBlank": true,
-          "title": "Reliability Analysis",
-          "type": "absolute",
-          "url": "d/4DHQ63-ik/reliability-analysis"
+          "title": "Reliability Analysis. $scoreDesc",
+          "type": "dashboard",
+          "url": "/d/4DHQ63-ik/reliability-analysis"
         }
       ],
       "mappingType": 1,
@@ -212,7 +212,7 @@
           "keepTime": true,
           "params": "$failureTypesArray",
           "targetBlank": true,
-          "title": "Errors",
+          "title": "Transaction Failures. $failRateDesc",
           "type": "absolute",
           "url": "d/HYBPMdYik/errors"
         }
@@ -231,8 +231,8 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
+      "postfix": " $failRateDelta",
+      "postfixFontSize": "30%",
       "prefix": "",
       "prefixFontSize": "50%",
       "rangeMaps": [
@@ -336,7 +336,7 @@
           "includeVars": true,
           "keepTime": true,
           "targetBlank": true,
-          "title": "Performance",
+          "title": "Performance. $slowdownsDesc",
           "type": "absolute",
           "url": "d/Z40SpeJmz/performance"
         }
@@ -458,7 +458,7 @@
           "includeVars": true,
           "keepTime": true,
           "targetBlank": true,
-          "title": "New Errors",
+          "title": "New Errors. $newErrorsDesc",
           "type": "absolute",
           "url": "d/3NZ83NLik/new-errors"
         }
@@ -579,7 +579,7 @@
           "dashboard": "Increasing Errors",
           "includeVars": true,
           "keepTime": true,
-          "title": "Increasing Errors",
+          "title": "Increasing Errors. $incErrorsDesc",
           "type": "absolute",
           "url": "/d/WZ739NYmk/increasing-errors"
         }
@@ -702,7 +702,7 @@
           "includeVars": true,
           "keepTime": true,
           "targetBlank": true,
-          "title": "Unique Errors",
+          "title": "Unique Errors. Volume = $errorsDesc errors.",
           "type": "absolute",
           "url": "d/HYBPMdYik/errors"
         }
@@ -2135,9 +2135,11 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
+          "tags": [],
           "text": "None",
-          "value": "None"
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -2303,7 +2305,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -2328,7 +2329,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -2386,7 +2386,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "Logged Error|Uncaught Exception|HTTP Error",
           "value": "Logged Error|Uncaught Exception|HTTP Error"
         },
@@ -2411,7 +2410,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -2436,7 +2434,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -2461,6 +2458,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "Combined",
           "value": "Combined"
         },
@@ -2483,6 +2481,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "Critical Types",
           "value": "Critical Types"
         },
@@ -2505,7 +2504,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "var-type=Logged Error&var-type=Uncaught Exception&var-type=HTTP Error&",
           "value": "var-type=Logged Error&var-type=Uncaught Exception&var-type=HTTP Error&"
         },
@@ -2526,11 +2524,192 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "failRateDelta",
+        "options": [],
+        "query": "regressionReport({\"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$transactionFailureTypes\", \"render\":\"SingleStat\", \"scoreType\":\"$scoreType\", \"graphType\":\"FailRateDelta\",\"statusPrefixes\":\"✅,⚠️,❌\", \"varTimeFilter\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "failRateDesc",
+        "options": [],
+        "query": "regressionReport({\"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$transactionFailureTypes\", \"render\":\"SingleStat\", \"scoreType\":\"$scoreType\", \"graphType\":\"FailRateDesc\",\"statusPrefixes\":\"✅,⚠️,❌\",\"varTimeFilter\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "scoreDesc",
+        "options": [],
+        "query": "regressionReport({\"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"SingleStat\", \"scoreType\":\"$scoreType\", \"graphType\":\"ScoreDesc\",\"statusPrefixes\":\"✅,⚠️,❌\", \"varTimeFilter\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "slowdownsDesc",
+        "options": [],
+        "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"renderMode\":\"SingleStatDesc\",\"types\":\"$failureTypes\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$transactionPointsWanted\",\"performanceStates\":\"CRITICAL\", \"varTimeFilter\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "newErrorsDesc",
+        "options": [],
+        "query": "regressions({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"render\":\"SingleStatDesc\", \"regressionTypes\":\"NewIssues,SevereNewIssues\", \"varTimeFilter\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "incErrorsDesc",
+        "options": [],
+        "query": "regressions({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"render\":\"SingleStatDesc\", \"regressionTypes\":\"Regressions,SevereRegressions\", \"varTimeFilter\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "0",
+          "value": "0"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "errorsDesc",
+        "options": [],
+        "query": "volume({\"type\":\"sum\",\"volumeType\":\"hits\",\"eventVolumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\",\"types\":\"$type\",\"transactions\":\"$transactions\",\"filter\":\"events\", \"pointsWanted\":\"$pointsWanted\", \"varTimeFilter\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
   "time": {
-    "from": "now-1d",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {
@@ -2553,5 +2732,5 @@
   "timezone": "",
   "title": "Site Reliability",
   "uid": "nxdE2gXmk",
-  "version": 23
+  "version": 34
 }

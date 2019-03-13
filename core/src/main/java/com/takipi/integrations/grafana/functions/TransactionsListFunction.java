@@ -20,6 +20,7 @@ import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.TransactionsListInput;
+import com.takipi.integrations.grafana.input.TransactionsListInput.RenderMode;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
@@ -31,7 +32,8 @@ import com.takipi.integrations.grafana.util.TimeUtil;
 public class TransactionsListFunction extends GrafanaFunction {
 		
 	private static final String MISSING_TIMER_LINK = "missing-timer-event";
-	
+	private static final int MAX_ITEMS_DESC = 5; 
+
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -379,6 +381,35 @@ public class TransactionsListFunction extends GrafanaFunction {
 		return result;
 	}
 	
+	private String getSingleStatDesc(Collection<String> serviceIds, 
+			TransactionsListInput input, Pair<DateTime, DateTime> timeSpan,
+			Collection<PerformanceState> states) {
+			
+		StringBuilder result = new StringBuilder();
+			
+		for (String serviceId : serviceIds) {				
+			
+			TransactionDataResult transactionDataResult = getTransactionDatas(serviceId,
+					timeSpan, input, false, 0);
+
+			String serviceDesc = getSlowdownsDesc(transactionDataResult.items.values(), 
+				states, MAX_ITEMS_DESC);
+			
+			if (serviceIds.size() > 1) {
+				result.append(serviceId);
+				result.append(" = ");
+			}
+			
+			result.append(serviceDesc);
+			
+			if (serviceIds.size() > 1) {
+				result.append(". ");
+			}
+		}
+			
+		return result.toString();
+	}
+	
 	private List<Series> processSingleStat(TransactionsListInput input, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds) {
 				
 		if (CollectionUtil.safeIsEmpty(serviceIds))
@@ -411,6 +442,21 @@ public class TransactionsListFunction extends GrafanaFunction {
 		return createSingleStatSeries(timeSpan, singleStatText);
 	}
 
+	private List<Series> processSingleStatDesc(TransactionsListInput input, 
+		Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds) {
+		
+		if (CollectionUtil.safeIsEmpty(serviceIds))
+		{
+			return Collections.emptyList();
+		}
+						
+		Collection<PerformanceState> performanceStates = TransactionsListInput.getStates(input.performanceStates);
+		
+		String singleStatDesc = getSingleStatDesc(serviceIds, input, timeSpan, performanceStates);
+		
+		return createSingleStatSeries(timeSpan, singleStatDesc);
+	}
+	
 	private List<Series> processGrid(TransactionsListInput input, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds) {
 		
 		Series series = new Series();
@@ -435,6 +481,122 @@ public class TransactionsListFunction extends GrafanaFunction {
 		return Collections.singletonList(series);
 	}
 	
+	private static String getSlowdownRateStr(TransactionData transactionData) {
+		return Math.round(getSlowdownRate(transactionData) * 100) + "%";
+	}
+	
+	private static double getSlowdownRate(TransactionData transactionData) {
+		return transactionData.stats.avg_time / transactionData.baselineAvg;
+	}
+	
+	public static String getSlowdownsDesc(Collection<TransactionData> transactionDatas,
+		Collection<PerformanceState> states, int maxSize) {
+		
+		StringBuilder result = new StringBuilder();
+					
+		List<TransactionData> slowdowns = new ArrayList<TransactionData>();
+		List<TransactionData> severeSlowdowns = new ArrayList<TransactionData>();
+		
+		int slowdownsSize = 0;
+		
+		for (TransactionData transactionData : transactionDatas) {
+			
+			if ((states != null) && (!states.contains(transactionData.state))) {
+				continue;
+			}
+			
+			if (transactionData.state == PerformanceState.OK) {
+				continue;
+			}
+			
+			slowdownsSize++;
+			
+			if (severeSlowdowns.size() + slowdowns.size() >= maxSize) {
+				continue;
+			}
+						
+			if (transactionData.state == PerformanceState.CRITICAL) {
+				severeSlowdowns.add(transactionData);
+			} else if (transactionData.state == PerformanceState.SLOWING) {
+				slowdowns.add(transactionData);	
+			}	
+		}
+		
+		int index = 0;
+		
+		Collection<TransactionData> sortedSevereSlowdons = getTransactionSortedByDelta(severeSlowdowns);
+	
+		for (TransactionData transactionData : sortedSevereSlowdons) {
+		
+			result.append("+");
+			result.append(getSlowdownRateStr(transactionData));
+			result.append(" ");
+			result.append(getTransactionName(transactionData.graph.name, false));
+			result.append("(P1)");			
+			index++;
+			
+			if ((index < severeSlowdowns.size()) || (slowdowns.size() > 0)) {
+				result.append(", ");
+			}
+		}
+		
+		index = 0;
+		
+		Collection<TransactionData> sortedSlowdons = getTransactionSortedByDelta(slowdowns);
+		
+		for (TransactionData transactionData : sortedSlowdons) {
+			
+			result.append("+");
+			result.append(getSlowdownRateStr(transactionData));
+			result.append(" ");
+			result.append(getTransactionName(transactionData.graph.name, false));
+		
+			index++;
+		
+			if (index < slowdowns.size()) {
+				result.append(", ");
+			}
+		}
+		
+		int remaining = slowdowns.size() + severeSlowdowns.size() - slowdownsSize;
+		
+		if (remaining > 0) {
+			result.append(" and ");
+			result.append(remaining);
+			result.append(" more");
+		}
+		
+		return result.toString();
+	}
+	
+	private static Collection<TransactionData> getTransactionSortedByDelta(Collection<TransactionData> transactionDatas) {
+		
+		List<TransactionData> result = new  ArrayList<TransactionData>(transactionDatas);
+		
+		result.sort(new Comparator<TransactionData>()
+		{
+
+			@Override
+			public int compare(TransactionData o1, TransactionData o2)
+			{
+				double r1 = getSlowdownRate(o1);
+				double r2 = getSlowdownRate(o2);
+
+				if (r2 > r1) {
+					return 1;
+				}
+				
+				if (r2 < r1) {
+					return -1;
+				}
+				
+				return 0;
+			}
+		});
+		
+		return result;
+	}
+	
 	@Override
 	public List<Series> process(FunctionInput functionInput)
 	{
@@ -442,9 +604,9 @@ public class TransactionsListFunction extends GrafanaFunction {
 		if (!(functionInput instanceof TransactionsListInput)) {
 			throw new IllegalArgumentException("functionInput");
 		}
-
-		TransactionsListInput input = (TransactionsListInput) functionInput;
 		
+		TransactionsListInput input = (TransactionsListInput)getInput((ViewInput)functionInput);
+
 		if (input.renderMode == null)
 		{
 			throw new IllegalStateException("Missing render mode");
@@ -453,13 +615,21 @@ public class TransactionsListFunction extends GrafanaFunction {
 		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
 		Collection<String> serviceIds = getServiceIds(input);
 		
-		switch (input.renderMode)
+		RenderMode renderMode = input.getRenderMore();
+		
+		switch (renderMode)
 		{
 			case Grid:
 				return processGrid(input, timeSpan, serviceIds);
 				
-			default:
+			case SingleStat:
 				return processSingleStat(input, timeSpan, serviceIds);
+				
+			case SingleStatDesc:
+				return processSingleStatDesc(input, timeSpan, serviceIds);
+				
+			default:
+				throw new IllegalStateException(String.valueOf(renderMode));
 			
 		}
 	}

@@ -45,32 +45,28 @@ import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.EventLinkEncoder;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
-public class RegressionFunction extends EventsFunction
-{	
-	public static class Factory implements FunctionFactory
-	{
+public class RegressionFunction extends EventsFunction {	
+	private static final int MAX_ITEMS_DESC = 5; 
+
+	public static class Factory implements FunctionFactory {
 		
 		@Override
-		public GrafanaFunction create(ApiClient apiClient)
-		{
+		public GrafanaFunction create(ApiClient apiClient) {
 			return new RegressionFunction(apiClient);
 		}
 		
 		@Override
-		public Class<?> getInputClass()
-		{
+		public Class<?> getInputClass() {
 			return RegressionsInput.class;
 		}
 		
 		@Override
-		public String getName()
-		{
+		public String getName() {
 			return "regressions";
 		}
 	}
 	
-	protected class RegressionData extends EventData
-	{
+	protected class RegressionData extends EventData {
 		
 		protected RegressionType type;
 		protected RegressionResult regression;
@@ -450,15 +446,17 @@ public class RegressionFunction extends EventsFunction
 				if ((r1.type == RegressionType.SevereNewIssues) ||
 					(r1.type == RegressionType.NewIssues)) {
 							
-					if (r2.event.stats.hits - r1.event.stats.hits > 0) {
-						return -1;
-					}
+					long delta = r2.event.stats.hits - r1.event.stats.hits;
 					
-					if (r1.event.stats.hits - r2.event.stats.hits > 0) {
+					if (delta > 0) {
 						return 1;
 					}
 					
-					if (r1.event.stats.hits - r2.event.stats.hits == 0) {
+					if (delta < 0) {
+						return -1;
+					}
+					
+					if (delta == 0) {
 						return 0;
 					}
 				}			
@@ -1084,6 +1082,118 @@ public class RegressionFunction extends EventsFunction
 		
 		return result;
 	}
+	
+	public static String getNewIssuesDesc(RegressionOutput regressionOutput, int maxIssuesSize) {
+		
+		StringBuilder result = new StringBuilder();
+		
+		int size = 0;
+		int issuesSize = regressionOutput.newIssues + regressionOutput.severeNewIssues;
+				
+		for (EventData eventData : regressionOutput.eventDatas) {
+			
+			if (!(eventData instanceof RegressionData)) {
+				continue;
+			}
+			
+			RegressionData regressionData = (RegressionData)eventData;
+			
+			if (regressionData.regression != null) {
+				continue;
+			}
+			
+			EventResult newEvent = regressionData.event;
+			
+			if ((newEvent.error_location != null) && (newEvent.stats.hits > 0)) {
+				result.append(newEvent.name);
+				result.append(" in ");
+				result.append(getSimpleClassName(newEvent.error_location.class_name));
+				size++;
+			} else {
+				continue;
+			}
+				
+			if (size == maxIssuesSize) {
+				break;
+			} else {
+				if (size < issuesSize) {
+					result.append(", ");
+				}
+			}
+		}
+		
+		int remaining = issuesSize - size;
+		
+		if (remaining > 0) {
+			result.append("\nand ");
+			result.append(remaining);
+			result.append(" more");
+		}
+		
+		return result.toString();
+	}
+	
+	public static String getRegressionsDesc(RegressionOutput regressionOutput, int maxItems) {
+		
+		StringBuilder result = new StringBuilder();
+		
+		int size = 0;
+		int regressionsSize = regressionOutput.regressions + regressionOutput.criticalRegressions;
+				
+		for (EventData eventData : regressionOutput.eventDatas) {
+			
+			if (!(eventData instanceof RegressionData)) {
+				continue;
+			}
+			
+			RegressionData regressionData = (RegressionData)eventData;
+			
+			if (regressionData.regression == null) {
+				continue;
+			}
+			
+			double baseRate = (double) regressionData.regression.getBaselineHits() / (double)  regressionData.regression.getBaselineInvocations();
+			double activeRate = (double) regressionData.event.stats.hits / (double) regressionData.event.stats.invocations;
+
+			int delta = (int)((activeRate - baseRate) * 100);
+			
+			if (delta < 1000) {
+				result.append("+"); 
+				result.append(delta);
+			} else {
+				result.append(">1000"); 
+			}
+			
+			result.append("% "); 
+
+			result.append(regressionData.event.name);
+			
+			if (regressionData.event.error_location != null) {
+				result.append(" in ");
+				result.append(getSimpleClassName(regressionData.event.error_location.class_name));
+			}
+						
+			size++;
+			
+			if (size == maxItems) {
+				break;
+			} else {
+				if (size < regressionsSize) {
+					result.append(", ");
+				}
+			}
+		}
+		
+		int remaining = regressionsSize - size;
+		
+		if (remaining > 0) {
+			result.append("\nand ");
+			result.append(remaining);
+			result.append(" more");
+		}
+		
+		return result.toString();
+	}
 		
 	private double getServiceSingleStat(String serviceId, RegressionsInput input)
 	{
@@ -1122,15 +1232,9 @@ public class RegressionFunction extends EventsFunction
 		
 		Collection<String> serviceIds = getServiceIds(input);
 		
-		if (CollectionUtil.safeIsEmpty(serviceIds))
-		{
+		if (CollectionUtil.safeIsEmpty(serviceIds)) {
 			return Collections.emptyList();
 		}
-		
-		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
-		
-		Object singleStatText;
-		double singleStatValue = getSingleStat(serviceIds, input);
 		
 		Collection<RegressionType> regressionTypes = input.getRegressionTypes();
 
@@ -1138,20 +1242,20 @@ public class RegressionFunction extends EventsFunction
 			return Collections.emptyList();
 		}
 		
+		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
 		
-		if (input.singleStatFormat != null)
-		{
-			if (singleStatValue > 0)
-			{
+		Object singleStatText;
+		double singleStatValue = getSingleStat(serviceIds, input);
+			
+		if (input.singleStatFormat != null) {
+			
+			if (singleStatValue > 0) {
 				singleStatText = String.format(input.singleStatFormat, String.valueOf((int)singleStatValue));
-			}
-			else
-			{
+			} else {
 				singleStatText = EMPTY_POSTFIX;
 			}
 		}
-		else
-		{
+		else {
 			singleStatText = Integer.valueOf((int)singleStatValue);
 		}
 		
@@ -1159,33 +1263,81 @@ public class RegressionFunction extends EventsFunction
 		return createSingleStatSeries(timeSpan, singleStatText);
 	}
 	
-	@Override
-	public List<Series> process(FunctionInput functionInput)
-	{
+	private List<Series> processSingleStatDesc(RegressionsInput input) {
 		
-		if (!(functionInput instanceof RegressionsInput))
-		{
+		Collection<String> serviceIds = getServiceIds(input);
+		
+		if (CollectionUtil.safeIsEmpty(serviceIds)) {
+			return Collections.emptyList();
+		}
+		
+		Collection<RegressionType> regressionTypes = input.getRegressionTypes();
+
+		if (regressionTypes == null) {
+			return Collections.emptyList();
+		}
+		
+		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
+		
+		StringBuilder result = new StringBuilder();
+
+		for (String serviceId : serviceIds) {
+			
+			RegressionOutput regressionOutput = runRegression(serviceId, input);
+
+			String value;
+			
+			if ((regressionTypes.contains(RegressionType.NewIssues)) 
+			|| (regressionTypes.contains(RegressionType.SevereNewIssues))) {
+				value = getNewIssuesDesc(regressionOutput, MAX_ITEMS_DESC);
+			} else {
+				value = getRegressionsDesc(regressionOutput, MAX_ITEMS_DESC);
+
+			}
+				
+			if (serviceIds.size() > 1) {
+				result.append(serviceId);
+				result.append(" = ");
+			}
+				
+			result.append(value);
+			
+			if (serviceIds.size() > 1) {
+				result.append(". ");
+			}
+		}
+			
+		return createSingleStatSeries(timeSpan, result.toString());
+	}
+	
+	@Override
+	public List<Series> process(FunctionInput functionInput) {
+		
+		if (!(functionInput instanceof RegressionsInput)) {
 			throw new IllegalArgumentException("functionInput");
 		}
 		
-		RegressionsInput regInput = (RegressionsInput)functionInput;
+		RegressionsInput regInput = (RegressionsInput)getInput((ViewInput)functionInput);
 		
-		if (regInput.render == null)
-		{
+		if (regInput.render == null) {
 			throw new IllegalStateException("Missing render mode");
 		}
 		
-		switch (regInput.render)
-		{
+		switch (regInput.render) {
 			case Grid:
 				return super.process(functionInput);
 			
 			case Graph:
 				throw new IllegalStateException("Graph not supported");
 				
-			default:
+			case SingleStat:
 				return processSingleStat(regInput);
+				
+			case SingleStatDesc:
+				return processSingleStatDesc(regInput);
 			
+			default: 
+				throw new IllegalStateException(String.valueOf(regInput.render));
 		}
 	}
 }

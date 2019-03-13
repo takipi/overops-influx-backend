@@ -36,6 +36,7 @@ public class TransactionsListInput extends BaseGraphInput {
 	public enum RenderMode
 	{
 		SingleStat,
+		SingleStatDesc,
 		Grid
 	}
 	
@@ -114,6 +115,15 @@ public class TransactionsListInput extends BaseGraphInput {
 	 * Control whether to return a list of rows or a single aggregated stat by this function
 	 */
 	public RenderMode renderMode;
+	
+	public RenderMode getRenderMore() {
+		
+		if (renderMode == null) {
+			return RenderMode.SingleStat;
+		}
+		
+		return renderMode;	
+	}
 	
 	/**
 	 * A String format to be used when formatting the result of a single stat function call. 

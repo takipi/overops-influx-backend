@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 43,
-  "iteration": 1552319129318,
+  "iteration": 1552422691753,
   "links": [],
   "panels": [
     {
@@ -102,7 +102,7 @@
         }
       ],
       "mode": "html",
-      "title": "QA Scorecard",
+      "title": "Scorecard",
       "type": "text"
     },
     {
@@ -480,7 +480,7 @@
           "link": true,
           "linkTargetBlank": false,
           "linkTooltip": "${__cell_6}.  Click to drill into the New Errors dashboard for ${__cell_4}",
-          "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-deployments=$limitDeployments&var-servers=$limitServers&var-applications=${__cell_4}",
+          "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$limitServers&var-applications=${__cell_4}",
           "mappingType": 1,
           "pattern": "NewIssues",
           "thresholds": [],
@@ -500,7 +500,7 @@
           "link": true,
           "linkTargetBlank": false,
           "linkTooltip": "${__cell_7}.  Click to drill into Increasing Errors for ${__cell_4}",
-          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&from=${__cell_0}&to=${__cell_1}&var-environments=${__cell_3}&var-deployments=$limitDeployments&var-servers=$limitServers&var-applications=${__cell_4}&var-type=$limitType",
+          "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&from=${__cell_0}&to=${__cell_1}&var-environments=${__cell_3}&var-servers=$limitServers&var-applications=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "Regressions",
           "thresholds": [],
@@ -536,7 +536,7 @@
           "link": true,
           "linkTargetBlank": false,
           "linkTooltip": "${__cell_8}.  $drilldownPostfix",
-          "linkUrl": "d/Z40SpeJmz/performance?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-deployments=$limitDeployments&var-servers=$limitServers&var-applications=${__cell_4}",
+          "linkUrl": "d/Z40SpeJmz/performance?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$limitServers&var-applications=${__cell_4}",
           "mappingType": 1,
           "pattern": "Slowdowns",
           "thresholds": [],
@@ -718,7 +718,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_10}. Failure types are defined the Settings dashboard. Click to drill into Site Reliability for ${__cell_4}",
-          "linkUrl": "d/nxdE2gXmk/site-reliability?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-deployments=$limitDeployments&var-servers=$limitServers&var-applications=${__cell_4}&var-type=$limitType",
+          "linkUrl": "d/nxdE2gXmk/site-reliability?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$limitServers&var-applications=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "TransactionFailRate",
           "thresholds": [
@@ -945,7 +945,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_11}. Click to drill down into ${__cell_12}",
-          "linkUrl": "d/nxdE2gXmk/site-reliability?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-deployments=$limitDeployments&var-servers=$limitServers&var-applications=${__cell_4}&var-type=$limitType",
+          "linkUrl": "d/nxdE2gXmk/site-reliability?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$limitServers&var-applications=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "StatusName",
           "preserveFormat": false,
@@ -979,7 +979,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"$timeFilterLimit\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Grid\", \"mode\":\"Apps_Extended\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"minFailRate\":0.0005, \"failureTypes\":\"$transactionFailureTypes\", \"statusPrefixes2\":\"✅ ,⚠ ,❌ \", \"scoreRanges\":\"70,85\",  \"statusPrefixes\":\"✅ ,⚠️ ,❌ \"})",
+          "query": "regressionReport({\"timeFilter\":\"$timeFilterLimit\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Grid\", \"mode\":\"Apps_Extended\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"minFailRate\":0.0005, \"failureTypes\":\"$transactionFailureTypes\", \"statusPrefixes2\":\"✅ ,⚠ ,❌ \", \"scoreRanges\":\"70,85\",  \"statusPrefixes\":\"✅,⚠️,❌\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1831,9 +1831,8 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
-          "text": "All",
-          "value": "All"
+          "text": "v4.0.2202",
+          "value": "v4.0.2202"
         },
         "hide": 2,
         "includeAll": false,
@@ -1842,7 +1841,7 @@
         "name": "deployments",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "All",
             "value": "All"
           }
@@ -1971,9 +1970,9 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
-          "text": "10",
-          "value": "10"
+          "selected": true,
+          "text": "5",
+          "value": "5"
         },
         "hide": 0,
         "includeAll": false,
@@ -1982,12 +1981,12 @@
         "name": "limit",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "5",
             "value": "5"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "10",
             "value": "10"
           }
@@ -2069,8 +2068,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "All",
-          "value": "All"
+          "text": "v4.0.2202",
+          "value": "v4.0.2202"
         },
         "datasource": "OO",
         "hide": 2,
@@ -2340,5 +2339,5 @@
   "timezone": "",
   "title": "Home",
   "uid": "lg0U4qriz",
-  "version": 205
+  "version": 209
 }
