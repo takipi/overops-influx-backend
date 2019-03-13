@@ -831,20 +831,30 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			Collection<SummarizedDeployment> allDeps = DeploymentUtil.getDeployments(apiClient, serviceId, false);
 			
-			List<SummarizedDeployment> sortedDeps = new ArrayList<SummarizedDeployment>(allDeps);
-			sortDeploymentNames(sortedDeps, false);
+			List<SummarizedDeployment> sortedDeps;
+			
+			if (allDeps != null) {
+				sortedDeps = new ArrayList<SummarizedDeployment>(allDeps);
+				sortDeploymentNames(sortedDeps, false);
+
+			} else {
+				sortedDeps = null;
+			}
 						
 			for (String selectedDeployment :  selectedDeployments) {
 				
 				SummarizedDeployment prev = null;
 				
-				for (int i = 0; i < sortedDeps.size(); i++) {
-					
-					SummarizedDeployment dep = sortedDeps.get(i);
-					
-					if ((i > 0) && (dep.name.equals(selectedDeployment))) {
-						prev = sortedDeps.get(i -1);
-						break;
+				if (sortedDeps != null) {
+						
+					for (int i = 0; i < sortedDeps.size(); i++) {
+						
+						SummarizedDeployment dep = sortedDeps.get(i);
+						
+						if ((i > 0) && (dep.name.equals(selectedDeployment))) {
+							prev = sortedDeps.get(i -1);
+							break;
+						}
 					}
 				}
 				
@@ -2145,24 +2155,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			return null;
 		}
 		
-		String actualGraphType;
-		String graphType = input.graphType.replace(" ", "");
-		
-		// This should be temporary due to naming inconsistency.
-		// We really need to streamline our naming for KPIs.
-		//
-		switch (graphType)
-		{
-			case "NewErrors":				actualGraphType = "NewIssues"; break;
-			case "SevereNewErrors":			actualGraphType = "SevereNewIssues"; break;
-			case "IncreasingErrors":		actualGraphType = "ErrorIncreases"; break;
-			case "SevereIncreasingErrors":	actualGraphType = "SevereErrorIncreases"; break;
-			case "ErrorCount":				actualGraphType = "UniqueErrors"; break;
-			
-			default: actualGraphType = graphType;
-		}
-		
-		GraphType result = GraphType.valueOf(actualGraphType);
+		GraphType result = GraphType.valueOf(input.graphType.replace(" ", ""));
 		return result;
 	}
 	
