@@ -2286,7 +2286,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			rateStr = "Δ>100%";	 
 		} else {		
 			if (stringFormat) {
-				rateStr = "+" + formatRate(appReliabilityData.failureRateDelta, true);
+				rateStr = "+" + formatRate(appReliabilityData.failureRateDelta, false);
 			} else {
 				rateStr = null;
 			}
