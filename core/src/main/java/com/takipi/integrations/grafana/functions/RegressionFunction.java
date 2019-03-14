@@ -40,7 +40,7 @@ import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.input.RegressionReportSettings;
 import com.takipi.integrations.grafana.settings.input.RegressionSettings;
-import com.takipi.integrations.grafana.util.ApiCache;
+import com.takipi.integrations.grafana.util.RegressionCache;
 import com.takipi.integrations.grafana.util.EventLinkEncoder;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
@@ -669,7 +669,7 @@ public class RegressionFunction extends EventsFunction {
 		
 		regressionInput.baselineTimespan = regressionSettings.min_baseline_timespan;
 		
-		RegressionWindow regressionWindow = ApiCache.getRegressionWindow(apiClient, regressionInput);
+		RegressionWindow regressionWindow = RegressionCache.getRegressionWindow(apiClient, regressionInput);
 		
 		if ((!CollectionUtil.safeIsEmpty(regressionInput.deployments)) && (!regressionWindow.deploymentFound))
 		{
@@ -1022,14 +1022,14 @@ public class RegressionFunction extends EventsFunction {
 	
 	public RegressionOutput runRegression(String serviceId, EventFilterInput regInput)
 	{
-		RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient, 
+		RegressionOutput regressionOutput = RegressionCache.getRegressionOutput(apiClient, 
 			serviceId, regInput, this, false, true);
 		return regressionOutput;
 	}
 	
 	public RegressionOutput runRegression(String serviceId, EventFilterInput regInput, boolean newOnly)
 	{
-		RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient, 
+		RegressionOutput regressionOutput = RegressionCache.getRegressionOutput(apiClient, 
 			serviceId, regInput, this, newOnly, true);
 		return regressionOutput;
 	}

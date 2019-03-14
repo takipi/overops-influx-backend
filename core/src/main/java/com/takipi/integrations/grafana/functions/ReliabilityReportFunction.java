@@ -55,7 +55,7 @@ import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings;
 import com.takipi.integrations.grafana.settings.input.RegressionReportSettings;
-import com.takipi.integrations.grafana.util.ApiCache;
+import com.takipi.integrations.grafana.util.RegressionCache;
 import com.takipi.integrations.grafana.util.DeploymentUtil;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
@@ -647,7 +647,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			if ((scoreType == ScoreType.Combined) || (scoreType == ScoreType.Regressions)) {
 
-				RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient, 
+				RegressionOutput regressionOutput = RegressionCache.getRegressionOutput(apiClient, 
 					serviceId, regressionsInput, regressionFunction, false, false);
 						
 				if (regressionOutput != null) {
@@ -665,7 +665,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			if (scoreType == ScoreType.NewOnly) {
 
-				RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient, 
+				RegressionOutput regressionOutput = RegressionCache.getRegressionOutput(apiClient, 
 					serviceId, regressionsInput, regressionFunction, true, false);
 						
 				if (regressionOutput != null) {
