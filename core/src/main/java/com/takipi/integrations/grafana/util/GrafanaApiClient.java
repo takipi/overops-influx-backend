@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.RemoteApiClient;
 import com.takipi.api.client.observe.LoggingObserver;
+import com.takipi.integrations.grafana.cache.CachedApiClient;
 import com.takipi.integrations.grafana.servlet.ServletUtil.Auth;
 
 public class GrafanaApiClient
@@ -71,7 +72,7 @@ public class GrafanaApiClient
 			builder.addObserver(LoggingObserver.create(false));
 		}
 		
-		return builder.build();
+		return CachedApiClient.create(builder.build());
 	}
 	
 	private static int getApiTimeout()

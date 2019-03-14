@@ -30,6 +30,7 @@ import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventSlimResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
+import com.takipi.api.client.util.client.ClientUtil;
 import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.performance.calc.PerformanceState;
 import com.takipi.api.client.util.regression.RateRegression;
@@ -746,7 +747,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			return toReportKeys(keyApps, true);
 		}
 		
-		Collection<String> activeApps = ApiCache.getApplicationNames(apiClient, serviceId, true);
+		Collection<String> activeApps = ClientUtil.getApplications(apiClient, serviceId, true);
 		
 		int appSize = keyApps.size() + activeApps.size();
 		
