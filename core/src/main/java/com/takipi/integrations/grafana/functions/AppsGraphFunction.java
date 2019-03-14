@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.util.client.ClientUtil;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
@@ -16,7 +17,6 @@ import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings.Group;
-import com.takipi.integrations.grafana.util.ApiCache;
 
 public class AppsGraphFunction extends BaseServiceCompositeFunction
 {
@@ -102,7 +102,7 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction
 			return keyApps.subList(0, limit);
 		}
 		
-		List<String> activeApps = new ArrayList<String>(ApiCache.getApplicationNames(apiClient, serviceId, true));  
+		List<String> activeApps = new ArrayList<String>(ClientUtil.getApplications(apiClient, serviceId, true));  
 		
 		sortApplicationsByProcess(serviceId, activeApps,
 			input.getServers(serviceId), input.getDeployments(serviceId));	

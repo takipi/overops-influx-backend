@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.deployment.SummarizedDeployment;
+import com.takipi.api.client.request.deployment.DeploymentsRequest;
 import com.takipi.api.client.result.deployment.DeploymentsResult;
 import com.takipi.api.core.url.UrlClient.Response;
 
@@ -26,9 +27,11 @@ public class DeploymentUtil {
 	
 	public static Collection<SummarizedDeployment> getDeployments(ApiClient apiClient, String serviceId, boolean active) {
 		
-		Response<DeploymentsResult> response = ApiCache.getDeployments(apiClient, serviceId, active);
+		DeploymentsRequest request = DeploymentsRequest.newBuilder().setServiceId(serviceId).setActive(active).build();
+
+		Response<DeploymentsResult> response = apiClient.get(request);
 		
-		if ((response == null) || (response.data == null)) {
+		if ((response == null) || (response.isBadResponse()) || (response.data == null) || (response.data.deployments == null)) {
 			return Collections.emptyList();
 		}
 		

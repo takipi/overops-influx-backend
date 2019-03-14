@@ -41,6 +41,7 @@ import com.takipi.api.client.request.ViewTimeframeRequest;
 import com.takipi.api.client.request.event.EventsRequest;
 import com.takipi.api.client.request.event.EventsSlimVolumeRequest;
 import com.takipi.api.client.request.metrics.GraphRequest;
+import com.takipi.api.client.request.process.JvmsRequest;
 import com.takipi.api.client.request.transaction.TransactionsGraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsVolumeRequest;
 import com.takipi.api.client.request.view.ViewsRequest;
@@ -1330,7 +1331,7 @@ public abstract class GrafanaFunction
 	protected void sortApplicationsByProcess(String serviceId, List<String> apps, 
 		Collection<String> serversFilter, Collection<String> deploymentsFilter) {
 		
-		Response<JvmsResult> response =  ApiCache.getProcesses(apiClient, serviceId, true);
+		Response<JvmsResult> response = apiClient.get(JvmsRequest.newBuilder().setServiceId(serviceId).setConnected(true).build());
 		
 		if ((response == null) || (response.isBadResponse()) || (response.data == null) ||
 			(response.data.clients == null)) {

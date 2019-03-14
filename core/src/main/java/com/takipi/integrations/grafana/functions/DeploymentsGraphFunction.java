@@ -20,6 +20,7 @@ import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.DeploymentsGraphInput;
 import com.takipi.integrations.grafana.input.EnvironmentsFilterInput;
 import com.takipi.integrations.grafana.util.ApiCache;
+import com.takipi.integrations.grafana.util.DeploymentUtil;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class DeploymentsGraphFunction extends GraphFunction {
@@ -83,17 +84,17 @@ public class DeploymentsGraphFunction extends GraphFunction {
 			return selectedDeployments;
 		}
 		
-		Response<DeploymentsResult> response = ApiCache.getDeployments(apiClient, serviceId, false);
+		Collection<SummarizedDeployment> deployments = DeploymentUtil.getDeployments(apiClient, serviceId, false);
 		
-		if ((response == null) || (response.data == null) || (response.data.deployments == null)) {
+		if (CollectionUtil.safeIsEmpty(deployments)) {
 			return Collections.emptyList();
 		}
 		
-		if ((limit == 0) || (limit > response.data.deployments.size())) {
-			return getDeployementNames(response.data.deployments);
+		if ((limit == 0) || (limit > deployments.size())) {
+			return getDeployementNames(deployments);
 		}
 		
-		List<SummarizedDeployment> sorted = new ArrayList<>(response.data.deployments);
+		List<SummarizedDeployment> sorted = new ArrayList<>(deployments);
 		
 		sorted.sort(new Comparator<SummarizedDeployment>()
 		{

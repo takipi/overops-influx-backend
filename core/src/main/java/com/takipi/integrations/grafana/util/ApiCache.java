@@ -1,8 +1,6 @@
 package com.takipi.integrations.grafana.util;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -18,23 +16,16 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListenableFutureTask;
 import com.takipi.api.client.ApiClient;
-import com.takipi.api.client.data.application.SummarizedApplication;
-import com.takipi.api.client.request.application.ApplicationsRequest;
-import com.takipi.api.client.request.deployment.DeploymentsRequest;
 import com.takipi.api.client.request.event.EventRequest;
 import com.takipi.api.client.request.event.EventsRequest;
 import com.takipi.api.client.request.event.EventsSlimVolumeRequest;
 import com.takipi.api.client.request.metrics.GraphRequest;
-import com.takipi.api.client.request.process.JvmsRequest;
 import com.takipi.api.client.request.transaction.TransactionsGraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsVolumeRequest;
 import com.takipi.api.client.request.view.ViewsRequest;
-import com.takipi.api.client.result.application.ApplicationsResult;
-import com.takipi.api.client.result.deployment.DeploymentsResult;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
 import com.takipi.api.client.result.metrics.GraphResult;
-import com.takipi.api.client.result.process.JvmsResult;
 import com.takipi.api.client.result.transaction.TransactionsGraphResult;
 import com.takipi.api.client.result.transaction.TransactionsVolumeResult;
 import com.takipi.api.client.result.view.ViewsResult;
@@ -202,135 +193,6 @@ public class ApiCache {
 		@Override
 		public String toString() {
 			return this.getClass().getSimpleName() + ": " + Id;
-		}
-	}
-
-	protected static class DeploymentsCacheLoader extends ServiceCacheLoader {
-		
-		protected boolean active;
-		
-		public DeploymentsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, 
-			String serviceId, boolean active) {
-
-			super(apiClient, request, serviceId);
-			
-			this.active = active;
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-
-			if (!(obj instanceof DeploymentsCacheLoader)) {
-				return false;
-			}
-
-			if (!super.equals(obj)) {
-				return false;
-			}
-
-			DeploymentsCacheLoader other = (DeploymentsCacheLoader) obj;
-
-			if (active != other.active) {
-				return false;
-			}
-
-			return true;
-		}
-
-		@Override
-		public int hashCode() {
-			return super.hashCode();
-		}
-		
-		@Override
-		public String toString() {
-			return this.getClass().getSimpleName() + " active: " + active;
-		}
-	}
-	
-	protected static class ProcessesCacheLoader extends ServiceCacheLoader {
-		
-		protected boolean active;
-		
-		public ProcessesCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, 
-			String serviceId, boolean active) {
-
-			super(apiClient, request, serviceId);
-			
-			this.active = active;
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-
-			if (!(obj instanceof ProcessesCacheLoader)) {
-				return false;
-			}
-
-			if (!super.equals(obj)) {
-				return false;
-			}
-
-			ProcessesCacheLoader other = (ProcessesCacheLoader) obj;
-
-			if (active != other.active) {
-				return false;
-			}
-
-			return true;
-		}
-
-		@Override
-		public int hashCode() {
-			return super.hashCode();
-		}
-		
-		@Override
-		public String toString() {
-			return this.getClass().getSimpleName() + " active: " + active;
-		}
-	}
-	
-	protected static class ApplicationsCacheLoader extends ServiceCacheLoader {
-		
-		protected boolean active;
-		
-		public ApplicationsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, 
-			String serviceId, boolean active) {
-
-			super(apiClient, request, serviceId);
-			
-			this.active = active;
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-
-			if (!(obj instanceof ApplicationsCacheLoader)) {
-				return false;
-			}
-
-			if (!super.equals(obj)) {
-				return false;
-			}
-
-			ApplicationsCacheLoader other = (ApplicationsCacheLoader) obj;
-
-			if (active != other.active) {
-				return false;
-			}
-
-			return true;
-		}
-
-		@Override
-		public int hashCode() {
-			return super.hashCode();
-		}
-		
-		@Override
-		public String toString() {
-			return this.getClass().getSimpleName() + " active: " + active;
 		}
 	}
 	
@@ -899,51 +761,6 @@ public class ApiCache {
 		Response<ViewsResult> response = (Response<ViewsResult>)getItem(cacheKey);
 
 		return response;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static Response<DeploymentsResult> getDeployments(ApiClient apiClient, String serviceId, boolean active) {
-
-		DeploymentsRequest request = DeploymentsRequest.newBuilder().setServiceId(serviceId).setActive(active).build();
-		DeploymentsCacheLoader cacheKey = new DeploymentsCacheLoader(apiClient, request, serviceId, active);
-		Response<DeploymentsResult> response = (Response<DeploymentsResult>)getItem(cacheKey);
-
-		return response;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static Response<JvmsResult> getProcesses(ApiClient apiClient, String serviceId, boolean connected) {
-
-		JvmsRequest request = JvmsRequest.newBuilder().setServiceId(serviceId).setConnected(connected).build();
-		ProcessesCacheLoader cacheKey = new ProcessesCacheLoader(apiClient, request, serviceId, connected);
-		Response<JvmsResult> response = (Response<JvmsResult>)getItem(cacheKey);
-
-		return response;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static Response<ApplicationsResult> getApplications(ApiClient apiClient, String serviceId, boolean active) {
-
-		ApplicationsRequest request = ApplicationsRequest.newBuilder().setServiceId(serviceId).setActive(active).build();
-		ApplicationsCacheLoader cacheKey = new ApplicationsCacheLoader(apiClient, request, serviceId, active);
-		Response<ApplicationsResult> response = (Response<ApplicationsResult>)getItem(cacheKey);
-
-		return response;
-	}
-	
-	public static Collection<String> getApplicationNames(ApiClient apiClient, String serviceId, boolean active) {
-
-		Response<ApplicationsResult> response = getApplications(apiClient, serviceId, active);
-		
-		List<String> result = new ArrayList<String>();
-		
-		if ((response.data != null) && (response.data.applications != null)) {
-			for (SummarizedApplication app : response.data.applications) {
-				result.add(app.name);
-			}
-		}
-		
-		return result;
 	}
 	
 	public static Response<TransactionsVolumeResult> getTransactionsVolume(ApiClient apiClient, String serviceId,
