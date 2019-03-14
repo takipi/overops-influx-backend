@@ -1,9 +1,7 @@
 package com.takipi.integrations.grafana.util;
 
 import java.util.Collection;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -13,8 +11,6 @@ import com.google.common.base.Objects;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListenableFutureTask;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionUtil;
@@ -22,7 +18,6 @@ import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.request.intf.ApiGetRequest;
 import com.takipi.api.core.url.UrlClient.Response;
-import com.takipi.integrations.grafana.functions.GrafanaThreadPool;
 import com.takipi.integrations.grafana.functions.RegressionFunction;
 import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOutput;
 import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
@@ -425,20 +420,6 @@ public class ApiCache {
 			this.newOnly = newOnly;
 		}
 	}
-
-	private static Response<?> getItem(BaseCacheLoader key) {
-		try {
-			Response<?> result = queryCache.get(key);
-			
-			if (result.isBadResponse()) {
-				queryCache.invalidate(key);
-			} 
-			
-			return result;
-		} catch (ExecutionException e) {
-			throw new IllegalStateException(e);
-		}
-	}
 	
 	public static RegressionWindow getRegressionWindow(ApiClient apiClient, RegressionInput input) {
 
@@ -500,37 +481,4 @@ public class ApiCache {
 					return result;
 				}
 			});
-
-	private static final LoadingCache<BaseCacheLoader, Response<?>> queryCache = CacheBuilder.newBuilder()
-			.maximumSize(CACHE_SIZE)
-			.expireAfterAccess(CACHE_REFRESH_RETENTION, TimeUnit.MINUTES)
-			.refreshAfterWrite(CACHE_REFRESH_RETENTION, TimeUnit.MINUTES)
-			.build(new CacheLoader<BaseCacheLoader, Response<?>>() {
-				
-				@Override
-				public Response<?> load(BaseCacheLoader key) {
-					
-					Response<?> result = key.load();
-					return result;
-				}
-				
-				@Override
-				public ListenableFuture<Response<?>> reload(final BaseCacheLoader key, Response<?> prev) {
-		              
-					ListenableFutureTask<Response<?>> task = ListenableFutureTask.create(new Callable<Response<?>>() {
-		                
-						@Override
-						public Response<?> call() {
-		                     return key.load();
-		                   }
-		                });
-		                 
-		                Executor executor = GrafanaThreadPool.getQueryExecutor(key.apiClient);
-		                executor.execute(task);
-		                
-		                return task;
-		               
-		             }
-			});
-
 }
