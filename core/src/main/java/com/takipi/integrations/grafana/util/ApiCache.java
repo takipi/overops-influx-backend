@@ -16,13 +16,11 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListenableFutureTask;
 import com.takipi.api.client.ApiClient;
-import com.takipi.api.client.request.event.EventRequest;
 import com.takipi.api.client.request.event.EventsRequest;
 import com.takipi.api.client.request.event.EventsSlimVolumeRequest;
 import com.takipi.api.client.request.metrics.GraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsGraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsVolumeRequest;
-import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
 import com.takipi.api.client.result.metrics.GraphResult;
 import com.takipi.api.client.result.transaction.TransactionsGraphResult;
@@ -139,58 +137,6 @@ public class ApiCache {
 		@Override
 		public int hashCode() {
 			return super.hashCode() ^ serviceId.hashCode();
-		}
-	}
-	
-	protected static class EventCacheLoader extends ServiceCacheLoader {
-
-		protected String Id;
-
-		public EventCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, String Id) {
-
-			super(apiClient, request, serviceId);
-			this.Id = Id;
-		}
-		
-		@Override
-		protected boolean printDuration()
-		{
-			return false;
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-
-			if (!(obj instanceof EventCacheLoader)) {
-				return false;
-			}
-
-			if (!super.equals(obj)) {
-				return false;
-			}
-
-			EventCacheLoader other = (EventCacheLoader) obj;
-
-			if (!Objects.equal(Id, other.Id)) {
-				return false;
-			}
-
-			return true;
-		}
-
-		@Override
-		public int hashCode() {
-
-			if (Id == null) {
-				return super.hashCode();
-			}
-
-			return super.hashCode() ^ Id.hashCode();
-		}
-		
-		@Override
-		public String toString() {
-			return this.getClass().getSimpleName() + ": " + Id;
 		}
 	}
 	
@@ -805,18 +751,6 @@ public class ApiCache {
 		return response;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static Response<EventResult> getEvent(ApiClient apiClient, String serviceId,
-			String Id) {
-
-		EventRequest.Builder builder = EventRequest.newBuilder().setServiceId(serviceId).setEventId(Id);
-		
-		EventCacheLoader cacheKey = new EventCacheLoader(apiClient, builder.build(), serviceId, Id);
-		Response<EventResult> response = (Response<EventResult>) ApiCache.getItem(cacheKey);
-		
-		return response;
-	}
-
 	public static RegressionWindow getRegressionWindow(ApiClient apiClient, RegressionInput input) {
 
 		try {

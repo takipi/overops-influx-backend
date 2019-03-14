@@ -20,6 +20,7 @@ import com.google.common.base.Objects;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.Location;
 import com.takipi.api.client.data.event.Stats;
+import com.takipi.api.client.request.event.EventRequest;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.regression.RegressionStringUtil;
@@ -158,9 +159,9 @@ public class EventsFunction extends GrafanaFunction {
 			this.events = events;
 		}
 
-		private String getJiraUrl(String serviceId, String Id) {
+		private String getJiraUrl(String serviceId, String id) {
 			
-			Response<EventResult> response = ApiCache.getEvent(apiClient, serviceId, Id);
+			Response<EventResult> response = apiClient.get(EventRequest.newBuilder().setServiceId(serviceId).setEventId(id).build());
 			
 			if ((response == null) || (response.data == null)) {
 				return null;
