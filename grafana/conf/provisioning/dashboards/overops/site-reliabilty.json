@@ -84,7 +84,7 @@
       "links": [
         {
           "dashboard": "Reliability Analysis",
-          "includeVars": false,
+          "includeVars": true,
           "keepTime": true,
           "targetBlank": true,
           "title": "Reliability Analysis. $s",
