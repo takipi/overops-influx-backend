@@ -12,7 +12,7 @@ import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOu
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.RegressedEventsInput;
 import com.takipi.integrations.grafana.input.RegressionsInput;
-import com.takipi.integrations.grafana.util.ApiCache;
+import com.takipi.integrations.grafana.util.RegressionCache;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class RegressedEventsFunction extends EnvironmentVariableFunction
@@ -54,7 +54,7 @@ public class RegressedEventsFunction extends EnvironmentVariableFunction
 		
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
 		
-		RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient, 
+		RegressionOutput regressionOutput = RegressionCache.getRegressionOutput(apiClient, 
 			serviceId, rgInput, regressionFunction, false, true);
 				
 		if (regressionOutput == null) {

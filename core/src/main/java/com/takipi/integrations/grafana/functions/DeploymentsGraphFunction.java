@@ -12,14 +12,11 @@ import org.joda.time.DateTime;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.deployment.SummarizedDeployment;
-import com.takipi.api.client.result.deployment.DeploymentsResult;
-import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.DeploymentsGraphInput;
 import com.takipi.integrations.grafana.input.EnvironmentsFilterInput;
-import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.DeploymentUtil;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
