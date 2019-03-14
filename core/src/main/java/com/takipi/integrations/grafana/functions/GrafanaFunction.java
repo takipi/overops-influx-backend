@@ -219,8 +219,7 @@ public abstract class GrafanaFunction
 		@Override
 		public Object call() throws Exception
 		{			
-			Response<GraphResult> response = ApiCache.getEventGraph(apiClient, serviceId, input, volumeType,
-					builder.build(), pointsWanted, baselineWindow, activeWindow, windowSlice);
+			Response<GraphResult> response = apiClient.get(builder.build());
 			
 			if (response.isBadResponse())
 			{
@@ -662,13 +661,17 @@ public abstract class GrafanaFunction
 		return result;
 	}
 	
-	protected void validateResponse(Response<?> response)
+	protected boolean validateResponse(Response<?> response)
 	{
-		if ((response.isBadResponse()) || (response.data == null))
+		if ((response.isOK()) &&
+			(response.data != null))
 		{
-			System.err.println("EventsResult code " + response.responseCode);
+			return true;
 		}
 		
+		System.err.println("EventsResult code " + response.responseCode);
+		
+		return false;
 	}
 	
 	protected static String formatLocation(String className, String method)
@@ -1706,8 +1709,7 @@ public abstract class GrafanaFunction
 		
 		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);
 		
-		Response<EventsSlimVolumeResult> response =
-				ApiCache.getEventVolume(apiClient, serviceId, input, volumeType, builder.build());
+		Response<EventsSlimVolumeResult> response = apiClient.get(builder.build());
 		
 		validateResponse(response);
 		
@@ -1741,25 +1743,19 @@ public abstract class GrafanaFunction
 		}
 	}
 	
-	private Collection<EventResult> getEventList(String serviceId, String viewId, ViewInput input, DateTime from,
-			DateTime to)
+	private Collection<EventResult> getEventList(String serviceId, String viewId, ViewInput input, DateTime from, DateTime to)
 	{
 		EventsRequest.Builder builder = EventsRequest.newBuilder().setRaw(true);
 		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);
 		
-		Response<?> response = ApiCache.getEventList(apiClient, serviceId, input, builder.build());
-		validateResponse(response);
+		Response<EventsResult> response = apiClient.get(builder.build());
 		
-		List<EventResult> events;
-		
-		if (response.data instanceof EventsResult)
-		{
-			events = ((EventsResult)(response.data)).events;
-		}
-		else
+		if (!validateResponse(response))
 		{
 			return null;
 		}
+		
+		List<EventResult> events = response.data.events;
 		
 		if (events == null)
 		{

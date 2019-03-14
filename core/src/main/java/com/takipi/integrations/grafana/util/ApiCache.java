@@ -16,13 +16,8 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListenableFutureTask;
 import com.takipi.api.client.ApiClient;
-import com.takipi.api.client.request.event.EventsRequest;
-import com.takipi.api.client.request.event.EventsSlimVolumeRequest;
-import com.takipi.api.client.request.metrics.GraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsGraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsVolumeRequest;
-import com.takipi.api.client.result.event.EventsSlimVolumeResult;
-import com.takipi.api.client.result.metrics.GraphResult;
 import com.takipi.api.client.result.transaction.TransactionsGraphResult;
 import com.takipi.api.client.result.transaction.TransactionsVolumeResult;
 import com.takipi.api.client.util.regression.RegressionInput;
@@ -305,111 +300,6 @@ public class ApiCache {
 		}
 	}
 	
-	protected static class SlimVolumeCacheLoader extends VolumeCacheLoader {
-		
-		public SlimVolumeCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
-				VolumeType volumeType) {
-
-			super(apiClient, request, serviceId, input, volumeType);
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-
-			if (!(obj instanceof SlimVolumeCacheLoader)) {
-				return false;
-			}
-
-			if (!super.equals(obj)) {
-				return false;
-			}
-
-			return true;
-		}
-	}
-
-
-	protected static class EventsCacheLoader extends VolumeCacheLoader {
-		
-		public EventsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
-				VolumeType volumeType) {
-
-			super(apiClient, request, serviceId, input, volumeType);
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-
-			if (!(obj instanceof EventsCacheLoader)) {
-				return false;
-			}
-
-			if (!super.equals(obj)) {
-				return false;
-			}
-
-			return true;
-		}
-	}
-
-	protected static class GraphCacheLoader extends VolumeCacheLoader {
-		protected int pointsWanted;
-		protected int activeWindow;
-		protected int baselineWindow;
-		protected int windowSlice;
-
-		@Override
-		public boolean equals(Object obj) {
-			if (!(obj instanceof GraphCacheLoader)) {
-				return false;
-			}
-
-			if (!super.equals( obj)) {
-				return false;
-			}
-
-			GraphCacheLoader other = (GraphCacheLoader) obj;
-
-			if (pointsWanted != other.pointsWanted) {
-				return false;
-			}
-			
-			if (activeWindow != other.activeWindow) {
-				return false;
-			}
-			
-			if (baselineWindow != other.baselineWindow) {
-				return false;
-			}
-			
-
-			if (windowSlice != other.windowSlice) {
-				return false;
-			}
-
-			return true;
-		}
-
-		public GraphCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
-				VolumeType volumeType, int pointsWanted, int baselineWindow, int activeWindow, int windowSlice) {
-
-			super(apiClient, request, serviceId, input, volumeType);
-			this.pointsWanted = pointsWanted;
-			this.activeWindow = activeWindow;
-			this.baselineWindow = baselineWindow;
-			this.windowSlice = windowSlice;
-		}
-		
-		@Override
-		public String toString()
-		{
-			String result = super.toString() + " pw: " + pointsWanted + " aw: " 
-				+ activeWindow + " bw: " + baselineWindow + " slc: " + windowSlice;
-			
-			return result;
-		}
-	}
-	
 	protected static class TransactionsCacheLoader extends ViewInputCacheLoader {
 		protected int baselineTimespan;
 		protected int activeTimespan;
@@ -579,7 +469,7 @@ public class ApiCache {
 		}
 	}
 	
-	protected static class RegressionCacheLoader extends EventsCacheLoader {
+	protected static class RegressionCacheLoader extends VolumeCacheLoader {
 
 		protected boolean newOnly;
 		protected RegressionFunction function;
@@ -663,73 +553,6 @@ public class ApiCache {
 		TransactionsCacheLoader cacheKey = new TransactionsCacheLoader(apiClient, request, serviceId, input, activeTimespan, baselineTimespan);
 		Response<TransactionsVolumeResult> response = (Response<TransactionsVolumeResult>)getItem(cacheKey);
 
-		return response;
-	}
-
-	@SuppressWarnings("unchecked")
-	public static Response<GraphResult> getEventGraph(ApiClient apiClient, String serviceId,
-			ViewInput input, VolumeType volumeType, GraphRequest request, int pointsWanted,
-			int baselineWindow, int activeWindow, int windowSlice) {
-
-		GraphCacheLoader cacheKey = new GraphCacheLoader(apiClient, request, serviceId, input, volumeType, 
-			pointsWanted, baselineWindow, activeWindow, windowSlice);
-		Response<GraphResult> response = (Response<GraphResult>) getItem(cacheKey);
-
-		return response;
-	}
-	
-	public static void putEventGraph(ApiClient apiClient, String serviceId,
-			ViewInput input, VolumeType volumeType, GraphRequest request, int pointsWanted,
-			int baselineWindow, int activeWindow, int windowSlice, Response<GraphResult> graphResult) {
-
-		GraphCacheLoader cacheKey = new GraphCacheLoader(apiClient, request, serviceId, input, volumeType, 
-			pointsWanted, baselineWindow, activeWindow, windowSlice);
-		
-		queryCache.put(cacheKey, graphResult);
-	}
-
-	@SuppressWarnings("unchecked")
-	public static Response<EventsSlimVolumeResult> getEventVolume(ApiClient apiClient, String serviceId, 
-			ViewInput input, VolumeType volumeType, EventsSlimVolumeRequest request) {
-
-		SlimVolumeCacheLoader cacheKey = new SlimVolumeCacheLoader(apiClient, request, serviceId, input, volumeType);
-		Response<EventsSlimVolumeResult> response = (Response<EventsSlimVolumeResult>)getItem(cacheKey);
-		return response;
-	}
-
-	private static Response<?> getEventList(ApiClient apiClient, String serviceId, 
-			ViewInput input, EventsRequest request, VolumeType volumeType, boolean load) {
-		
-		EventsCacheLoader cacheKey = new EventsCacheLoader(apiClient, request, serviceId, input, volumeType);		
-		Response<?> response;
-		
-		if (load) {
-			response = getItem(cacheKey);
-		} else {
-			response = queryCache.getIfPresent(cacheKey);
-		}
-	
-		return response;
-	}
-	
-	public static Response<?> getEventList(ApiClient apiClient, String serviceId, 
-			ViewInput input, EventsRequest request) {
-		
-		Response<?> response;
-		
-		for (VolumeType volumeType : VolumeType.values()) {
-			
-			response = getEventList(apiClient, serviceId, 
-					input, request,volumeType, false);
-			
-			if ((response != null)  && (response.data != null)) {
-				return response;
-			}
-		}
-		
-		response = getEventList(apiClient, serviceId, 
-				input, request,null, true);
-		
 		return response;
 	}
 	

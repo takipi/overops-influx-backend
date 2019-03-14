@@ -27,7 +27,6 @@ import com.takipi.api.client.util.regression.RegressionStringUtil;
 import com.takipi.api.client.util.regression.RegressionUtil;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
-import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
@@ -795,18 +794,6 @@ public class RegressionFunction extends EventsFunction {
 		
 		GraphResult activeGraphResult = new GraphResult();
 		activeGraphResult.graphs = Collections.singletonList(activeWindowGraph);	
-		
-		ApiCache.putEventGraph(apiClient, serviceId, input, VolumeType.all, null,
-				input.pointsWanted, 0, graphActiveTimespan, 0, Response.of(200, activeGraphResult));
-		
-		if (baselineGraph != null) {
-		
-			GraphResult baselineGraphResult = new GraphResult();
-			baselineGraphResult.graphs = Collections.singletonList(baselineGraph);		
-		
-			ApiCache.putEventGraph(apiClient, serviceId, baselineInput, VolumeType.all, null,
-					input.pointsWanted, regressionInput.baselineTimespan, 0, 0, Response.of(200, baselineGraphResult));
-		}
 		
 		return Pair.of(baselineGraph, activeWindowGraph);
 		
