@@ -1601,12 +1601,12 @@ public class ReliabilityReportFunction extends EventsFunction {
 	}
 	
 	private Pair<ReliabilityState, Double> getReliabilityState(double baseAvg, double avg,  
-		RegressionInput regressionInput) {
+		long volume, RegressionInput regressionInput) {
 				
 		ReliabilityState state;
 		double deltaValue;
 		
-		if (baseAvg > 0) {	
+		if ((baseAvg > 0) && (volume > regressionInput.minVolumeThreshold)) {	
 			deltaValue = (avg - baseAvg) / baseAvg;
 			state = getReliabilityState(regressionInput, deltaValue);					
 		} else {
@@ -1645,7 +1645,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 	}
 	
 	private Pair<Double, String> getAvgResponseState(double denom, double num, 
-		double baseDenom, double baseNum, 
+		double baseDenom, double baseNum, long volume, 
 		RegressionInput regressionInput) {
 		
 		double avg;
@@ -1664,7 +1664,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			baseAvg = 0;
 		}
 		
-		Pair<ReliabilityState, Double> statePair = getReliabilityState(baseAvg, avg, regressionInput);
+		Pair<ReliabilityState, Double> statePair = getReliabilityState(baseAvg, avg, volume, regressionInput);
 		String deltaStr = formatRateDelta(statePair.getFirst(), true, statePair.getSecond());
 		
 		return Pair.of(avg, deltaStr);
@@ -1758,7 +1758,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 		Pair<ReliabilityState, Double> failurePair;
 		
 		if (result.failRate > input.minFailRate) {
-			failurePair = getReliabilityState(baseFailRate, result.failRate, regressionInput);
+			failurePair = getReliabilityState(baseFailRate, result.failRate,
+				transactionData.transactionVolume, regressionInput);
 
 		} else {
 			failurePair = Pair.of(ReliabilityState.OK, Double.valueOf(0));
@@ -1862,7 +1863,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		RegressionInput regressionInput = reportKeyResult.output.regressionData.regressionOutput.regressionInput;
 
 		Pair<Double, String> responsePair = getAvgResponseState(avgTimeDenom, avgTimeNum, 
-				baseAvgTimeDenom, baseAvgTimeNum, regressionInput);
+				baseAvgTimeDenom, baseAvgTimeNum, result.transactionVolume, regressionInput);
 		
 		result.avgTimeDelta = responsePair.getFirst();
 		result.deltaDesc = responsePair.getSecond();
