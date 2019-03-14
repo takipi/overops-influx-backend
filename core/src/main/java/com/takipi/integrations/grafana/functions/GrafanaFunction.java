@@ -81,7 +81,6 @@ import com.takipi.integrations.grafana.settings.GroupSettings.GroupFilter;
 import com.takipi.integrations.grafana.settings.ServiceSettings;
 import com.takipi.integrations.grafana.settings.input.GeneralSettings;
 import com.takipi.integrations.grafana.settings.input.SlowdownSettings;
-import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public abstract class GrafanaFunction
@@ -1228,8 +1227,7 @@ public abstract class GrafanaFunction
 				
 		applyFilters(input, serviceId, builder);
 
-		Response<TransactionsGraphResult> response = ApiCache.getTransactionsGraph(apiClient, serviceId, input,
-			pointsWanted, baselineTimespan, activeTimespan, builder.build());
+		Response<TransactionsGraphResult> response = apiClient.get(builder.build());
 				
 		validateResponse(response);
 		
@@ -1277,8 +1275,7 @@ public abstract class GrafanaFunction
 		
 		applyFilters(input, serviceId, builder);
 		
-		Response<TransactionsVolumeResult> response = ApiCache.getTransactionsVolume(apiClient, serviceId,
-				input, activeTimespan, baselineTimespan, builder.build());
+		Response<TransactionsVolumeResult> response = apiClient.get(builder.build());
 		
 		if (response.isBadResponse())
 		{

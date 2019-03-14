@@ -10,6 +10,8 @@ import com.takipi.api.client.request.event.EventsVolumeRequest;
 import com.takipi.api.client.request.metrics.GraphRequest;
 import com.takipi.api.client.request.process.JvmsRequest;
 import com.takipi.api.client.request.server.ServersRequest;
+import com.takipi.api.client.request.transaction.TransactionsGraphRequest;
+import com.takipi.api.client.request.transaction.TransactionsVolumeRequest;
 import com.takipi.api.client.request.view.ViewsRequest;
 import com.takipi.api.core.request.intf.ApiGetRequest;
 import com.takipi.api.core.result.intf.ApiResult;
@@ -23,6 +25,8 @@ import com.takipi.integrations.grafana.cache.key.events.CacheGetEventsGraphKey;
 import com.takipi.integrations.grafana.cache.key.events.CacheGetEventsKey;
 import com.takipi.integrations.grafana.cache.key.events.CacheGetEventsSlimVolumeKey;
 import com.takipi.integrations.grafana.cache.key.events.CacheGetEventsVolumeKey;
+import com.takipi.integrations.grafana.cache.key.transaction.CacheGetTransactionsGraphKey;
+import com.takipi.integrations.grafana.cache.key.transaction.CacheGetTransactionsKey;
 import com.takipi.integrations.grafana.cache.key.views.CacheGetViewKey;
 
 public class CacheKeyFactory
@@ -80,6 +84,20 @@ public class CacheKeyFactory
 			// Smarter mechanism that tries to return a good enough result based on volume type.
 			//
 			return CacheGetEventsGraphKey.create(apiClient, (GraphRequest) request);
+		}
+		else if (request instanceof TransactionsVolumeRequest)
+		{
+			// TODO
+			// Smarter mechanism that tries to return a good enough result based on volume type.
+			//
+			return CacheGetTransactionsKey.create(apiClient, (TransactionsVolumeRequest) request);
+		}
+		else if (request instanceof TransactionsGraphRequest)
+		{
+			// TODO
+			// Smarter mechanism that tries to return a good enough result based on volume type.
+			//
+			return CacheGetTransactionsGraphKey.create(apiClient, (TransactionsGraphRequest) request);
 		}
 		
 		return null;
