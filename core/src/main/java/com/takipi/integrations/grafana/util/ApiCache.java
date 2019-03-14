@@ -16,10 +16,6 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListenableFutureTask;
 import com.takipi.api.client.ApiClient;
-import com.takipi.api.client.request.transaction.TransactionsGraphRequest;
-import com.takipi.api.client.request.transaction.TransactionsVolumeRequest;
-import com.takipi.api.client.result.transaction.TransactionsGraphResult;
-import com.takipi.api.client.result.transaction.TransactionsVolumeResult;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionUtil;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
@@ -30,7 +26,6 @@ import com.takipi.integrations.grafana.functions.GrafanaThreadPool;
 import com.takipi.integrations.grafana.functions.RegressionFunction;
 import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOutput;
 import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
-import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.EventFilterInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 
@@ -300,102 +295,6 @@ public class ApiCache {
 		}
 	}
 	
-	protected static class TransactionsCacheLoader extends ViewInputCacheLoader {
-		protected int baselineTimespan;
-		protected int activeTimespan;
-		
-		@Override
-		public boolean equals(Object obj) {
-			if (!(obj instanceof TransactionsCacheLoader)) {
-				return false;
-			}
-
-			if (!super.equals(obj)) {
-				return false;
-			}
-			
-			TransactionsCacheLoader other = (TransactionsCacheLoader)obj;
-			
-			if (activeTimespan != other.activeTimespan) {
-				return false;
-			}
-			
-			if (baselineTimespan != other.baselineTimespan) {
-				return false;
-			}
-
-			return true;
-		}
-
-		public TransactionsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input) {
-			this(apiClient, request, serviceId, input, 0, 0);
-		}
-		
-		public TransactionsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input, int baselineTimespan, int activeTimespan) {
-			super(apiClient, request, serviceId, input);
-			
-			this.baselineTimespan = baselineTimespan;
-			this.activeTimespan = activeTimespan;
-		}
-	}
-
-	protected static class TransactionsGraphCacheLoader extends ViewInputCacheLoader {
-
-		protected int pointsWanted;
-		protected int baselineTimespan;
-		protected int activeTimespan;
-
-		@Override
-		public boolean equals(Object obj) {
-
-			if (!(obj instanceof TransactionsGraphCacheLoader)) {
-				return false;
-			}
-
-			if (!super.equals(obj)) {
-				return false;
-			}
-
-			TransactionsGraphCacheLoader other = (TransactionsGraphCacheLoader) obj;
-
-			if (pointsWanted != other.pointsWanted) {
-				return false;
-			}
-			
-			if (baselineTimespan != other.baselineTimespan) {
-				return false;
-			}
-			
-			if (activeTimespan != other.activeTimespan) {
-				return false;
-			}
-
-			return true;
-		}
-		
-		@Override
-		public String toString()
-		{
-			return super.toString() + " aw = " + activeTimespan + " bw = " + baselineTimespan;
-		}
-
-		public TransactionsGraphCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId,
-				ViewInput input, int pointsWanted) {
-			this(apiClient, request, serviceId, input, pointsWanted, 0, 0);
-
-		}
-
-		
-		public TransactionsGraphCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId,
-				ViewInput input, int pointsWanted, int baselineTimespan, int activeTimespan) {
-
-			super(apiClient, request, serviceId, input);
-			this.pointsWanted = pointsWanted;
-			this.activeTimespan = activeTimespan;
-			this.baselineTimespan = baselineTimespan;
-		}
-	}
-	
 	private static class RegresionWindowCacheLoader {
 		protected RegressionInput input;
 		protected ApiClient apiClient;
@@ -539,39 +438,6 @@ public class ApiCache {
 		} catch (ExecutionException e) {
 			throw new IllegalStateException(e);
 		}
-	}
-	
-	public static Response<TransactionsVolumeResult> getTransactionsVolume(ApiClient apiClient, String serviceId,
-			ViewInput input, TransactionsVolumeRequest request) {
-		return getTransactionsVolume(apiClient, serviceId, input, 0, 0, request);
-	}
-
-	@SuppressWarnings("unchecked")
-	public static Response<TransactionsVolumeResult> getTransactionsVolume(ApiClient apiClient, String serviceId,
-			ViewInput input, int activeTimespan, int baselineTimespan, TransactionsVolumeRequest request) {
-
-		TransactionsCacheLoader cacheKey = new TransactionsCacheLoader(apiClient, request, serviceId, input, activeTimespan, baselineTimespan);
-		Response<TransactionsVolumeResult> response = (Response<TransactionsVolumeResult>)getItem(cacheKey);
-
-		return response;
-	}
-	
-	public static Response<TransactionsGraphResult> getTransactionsGraph(ApiClient apiClient, String serviceId,
-			BaseGraphInput input, int pointsWanted,
-			TransactionsGraphRequest request) {
-		return getTransactionsGraph(apiClient, serviceId, input, pointsWanted, 0, 0, request);
-	}
-
-	@SuppressWarnings("unchecked")
-	public static Response<TransactionsGraphResult> getTransactionsGraph(ApiClient apiClient, String serviceId,
-			BaseEventVolumeInput input, int pointsWanted, int baselineTimespan, int activeTimespan, 
-			TransactionsGraphRequest request) {
-
-		TransactionsGraphCacheLoader cacheKey = new TransactionsGraphCacheLoader(apiClient, request, serviceId, input,
-				pointsWanted, baselineTimespan, activeTimespan);
-		Response<TransactionsGraphResult> response = (Response<TransactionsGraphResult>) ApiCache.getItem(cacheKey);
-		
-		return response;
 	}
 	
 	public static RegressionWindow getRegressionWindow(ApiClient apiClient, RegressionInput input) {
