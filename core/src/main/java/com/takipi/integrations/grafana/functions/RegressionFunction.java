@@ -46,7 +46,7 @@ import com.takipi.integrations.grafana.util.EventLinkEncoder;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class RegressionFunction extends EventsFunction {	
-	private static final int MAX_ITEMS_DESC = 5; 
+	private static final int MAX_ITEMS_DESC = 3; 
 
 	public static class Factory implements FunctionFactory {
 		
