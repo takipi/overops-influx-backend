@@ -24,6 +24,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
@@ -44,7 +45,6 @@ import com.takipi.api.client.request.metrics.GraphRequest;
 import com.takipi.api.client.request.process.JvmsRequest;
 import com.takipi.api.client.request.transaction.TransactionsGraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsVolumeRequest;
-import com.takipi.api.client.request.view.ViewsRequest;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventSlimResult;
 import com.takipi.api.client.result.event.EventsResult;
@@ -53,7 +53,6 @@ import com.takipi.api.client.result.metrics.GraphResult;
 import com.takipi.api.client.result.process.JvmsResult;
 import com.takipi.api.client.result.transaction.TransactionsGraphResult;
 import com.takipi.api.client.result.transaction.TransactionsVolumeResult;
-import com.takipi.api.client.result.view.ViewsResult;
 import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.performance.PerformanceUtil;
 import com.takipi.api.client.util.performance.calc.PerformanceCalculator;
@@ -65,6 +64,7 @@ import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.transaction.TransactionUtil;
 import com.takipi.api.client.util.validation.ValidationUtil.GraphType;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
+import com.takipi.api.client.util.view.ViewUtil;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
@@ -1917,27 +1917,6 @@ public abstract class GrafanaFunction
 		}
 	}
 	
-	protected SummarizedView getView(String serviceId, String viewName) {
-		
-		if ((viewName.length() == 0) || (viewName.startsWith(GRAFANA_VAR_PREFIX))) {
-			return null;
-		}
-		
-		ViewsRequest request = ViewsRequest.newBuilder().setServiceId(serviceId).setViewName(viewName).build();
-		
-		Response<ViewsResult> response = ApiCache.getView(apiClient, serviceId, viewName, request);
-		
-		if ((response.isBadResponse()) ||	(response.data == null) || (response.data.views == null) ||
-			(response.data.views.size() == 0))
-		{
-			return null;
-		}
-		
-		SummarizedView result = response.data.views.get(0);
-		
-		return result;
-	}
-	
 	protected static String getServiceValue(String value, String serviceId)
 	{
 		return value + SERVICE_SEPERATOR + serviceId;
@@ -1960,13 +1939,20 @@ public abstract class GrafanaFunction
 	{
 		String viewName;
 		
-		if ((name != null) && (!name.isEmpty())) { 
-			viewName = name;
-		} else {
+		if (Strings.isNullOrEmpty(name))
+		{
 			viewName = ALL_EVENTS;
 		}
+		else if (name.startsWith(GRAFANA_VAR_PREFIX))
+		{
+			return null;
+		}
+		else
+		{
+			viewName = name;
+		}
 		
-		SummarizedView view = getView(serviceId, viewName);
+		SummarizedView view = ViewUtil.getServiceViewByName(apiClient, serviceId, viewName);
 		
 		if (view == null)
 		{

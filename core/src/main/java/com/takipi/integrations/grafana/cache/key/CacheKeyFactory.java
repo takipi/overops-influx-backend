@@ -5,6 +5,7 @@ import com.takipi.api.client.request.application.ApplicationsRequest;
 import com.takipi.api.client.request.deployment.DeploymentsRequest;
 import com.takipi.api.client.request.process.JvmsRequest;
 import com.takipi.api.client.request.server.ServersRequest;
+import com.takipi.api.client.request.view.ViewsRequest;
 import com.takipi.api.core.request.intf.ApiGetRequest;
 import com.takipi.api.core.result.intf.ApiResult;
 import com.takipi.integrations.grafana.cache.key.base.CacheKey;
@@ -12,6 +13,7 @@ import com.takipi.integrations.grafana.cache.key.clients.CacheGetApplicationsKey
 import com.takipi.integrations.grafana.cache.key.clients.CacheGetDeploymentsKey;
 import com.takipi.integrations.grafana.cache.key.clients.CacheGetJvmsKey;
 import com.takipi.integrations.grafana.cache.key.clients.CacheGetServersKey;
+import com.takipi.integrations.grafana.cache.key.views.CacheGetViewKey;
 
 public class CacheKeyFactory
 {
@@ -32,6 +34,10 @@ public class CacheKeyFactory
 		else if (request instanceof JvmsRequest)
 		{
 			return CacheGetJvmsKey.create(apiClient, (JvmsRequest) request);
+		}
+		else if (request instanceof ViewsRequest)
+		{
+			return CacheGetViewKey.create(apiClient, (ViewsRequest) request);
 		}
 		
 		return null;
