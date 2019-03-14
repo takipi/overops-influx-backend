@@ -22,13 +22,11 @@ import com.takipi.api.client.request.event.EventsSlimVolumeRequest;
 import com.takipi.api.client.request.metrics.GraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsGraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsVolumeRequest;
-import com.takipi.api.client.request.view.ViewsRequest;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
 import com.takipi.api.client.result.metrics.GraphResult;
 import com.takipi.api.client.result.transaction.TransactionsGraphResult;
 import com.takipi.api.client.result.transaction.TransactionsVolumeResult;
-import com.takipi.api.client.result.view.ViewsResult;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionUtil;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
@@ -196,52 +194,6 @@ public class ApiCache {
 		}
 	}
 	
-	protected static class ViewCacheLoader extends ServiceCacheLoader {
-
-		protected String viewName;
-
-		public ViewCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, String viewName) {
-
-			super(apiClient, request, serviceId);
-			
-			this.viewName = viewName;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-
-			if (!(obj instanceof ViewCacheLoader)) {
-				return false;
-			}
-
-			if (!super.equals(obj)) {
-				return false;
-			}
-
-			ViewCacheLoader other = (ViewCacheLoader) obj;
-
-			if (!Objects.equal(viewName, other.viewName)) {
-				return false;
-			}
-
-			return true;
-		}
-
-		@Override
-		public int hashCode() {
-			if (viewName == null) {
-				return super.hashCode();
-			}
-
-			return super.hashCode() ^ viewName.hashCode();
-		}
-		
-		@Override
-		public String toString() {
-			return this.getClass().getSimpleName() + ": " + viewName + " " + viewName;
-		}
-	}
-
 	protected abstract static class ViewInputCacheLoader extends ServiceCacheLoader {
 
 		protected ViewInput input;
@@ -751,16 +703,6 @@ public class ApiCache {
 		} catch (ExecutionException e) {
 			throw new IllegalStateException(e);
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	public static Response<ViewsResult> getView(ApiClient apiClient, String serviceId, String viewName,
-			ViewsRequest viewsRequest) {
-
-		ViewCacheLoader cacheKey = new ViewCacheLoader(apiClient, viewsRequest, serviceId, viewName);
-		Response<ViewsResult> response = (Response<ViewsResult>)getItem(cacheKey);
-
-		return response;
 	}
 	
 	public static Response<TransactionsVolumeResult> getTransactionsVolume(ApiClient apiClient, String serviceId,
