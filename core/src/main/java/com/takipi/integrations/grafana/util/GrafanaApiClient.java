@@ -1,6 +1,7 @@
 package com.takipi.integrations.grafana.util;
 
 import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.RemoteApiClient;
 import com.takipi.integrations.grafana.servlet.ServletUtil.Auth;
 
 public class GrafanaApiClient {
@@ -41,7 +42,7 @@ public class GrafanaApiClient {
 	}
 
 	public static ApiClient getApiClient(String hostname, String token) {
-		return ApiClient.newBuilder()
+		return RemoteApiClient.newBuilder()
             .setHostname(hostname)
             .setApiKey(token)
             .setConnectTimeout(TIMEOUT)
