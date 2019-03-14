@@ -2156,7 +2156,24 @@ public class ReliabilityReportFunction extends EventsFunction {
 			return null;
 		}
 		
-		GraphType result = GraphType.valueOf(input.graphType.replace(" ", ""));
+		String actualGraphType;
+		String graphType = input.graphType.replace(" ", "");
+		
+		// This should be temporary due to naming inconsistency.
+		// We really need to streamline our naming for KPIs.
+		//
+		switch (graphType)
+		{
+			case "NewErrors":				actualGraphType = "NewIssues"; break;
+			case "SevereNewErrors":			actualGraphType = "SevereNewIssues"; break;
+			case "IncreasingErrors":		actualGraphType = "ErrorIncreases"; break;
+			case "SevereIncreasingErrors":	actualGraphType = "SevereErrorIncreases"; break;
+			case "ErrorCount":				actualGraphType = "UniqueErrors"; break;
+			
+			default: actualGraphType = graphType;
+		}
+		
+		GraphType result = GraphType.valueOf(actualGraphType);
 		return result;
 	}
 	

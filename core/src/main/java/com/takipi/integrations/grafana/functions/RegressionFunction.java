@@ -1089,35 +1089,38 @@ public class RegressionFunction extends EventsFunction {
 		
 		int size = 0;
 		int issuesSize = regressionOutput.newIssues + regressionOutput.severeNewIssues;
+		
+		if (!CollectionUtil.safeIsEmpty(regressionOutput.eventDatas))
+		{
+			for (EventData eventData : regressionOutput.eventDatas) {
 				
-		for (EventData eventData : regressionOutput.eventDatas) {
-			
-			if (!(eventData instanceof RegressionData)) {
-				continue;
-			}
-			
-			RegressionData regressionData = (RegressionData)eventData;
-			
-			if (regressionData.regression != null) {
-				continue;
-			}
-			
-			EventResult newEvent = regressionData.event;
-			
-			if ((newEvent.error_location != null) && (newEvent.stats.hits > 0)) {
-				result.append(newEvent.name);
-				result.append(" in ");
-				result.append(getSimpleClassName(newEvent.error_location.class_name));
-				size++;
-			} else {
-				continue;
-			}
+				if (!(eventData instanceof RegressionData)) {
+					continue;
+				}
 				
-			if (size == maxIssuesSize) {
-				break;
-			} else {
-				if (size < issuesSize) {
-					result.append(", ");
+				RegressionData regressionData = (RegressionData)eventData;
+				
+				if (regressionData.regression != null) {
+					continue;
+				}
+				
+				EventResult newEvent = regressionData.event;
+				
+				if ((newEvent.error_location != null) && (newEvent.stats.hits > 0)) {
+					result.append(newEvent.name);
+					result.append(" in ");
+					result.append(getSimpleClassName(newEvent.error_location.class_name));
+					size++;
+				} else {
+					continue;
+				}
+					
+				if (size == maxIssuesSize) {
+					break;
+				} else {
+					if (size < issuesSize) {
+						result.append(", ");
+					}
 				}
 			}
 		}
@@ -1139,47 +1142,50 @@ public class RegressionFunction extends EventsFunction {
 		
 		int size = 0;
 		int regressionsSize = regressionOutput.regressions + regressionOutput.criticalRegressions;
+		
+		if (!CollectionUtil.safeIsEmpty(regressionOutput.eventDatas))
+		{
+			for (EventData eventData : regressionOutput.eventDatas) {
 				
-		for (EventData eventData : regressionOutput.eventDatas) {
-			
-			if (!(eventData instanceof RegressionData)) {
-				continue;
-			}
-			
-			RegressionData regressionData = (RegressionData)eventData;
-			
-			if (regressionData.regression == null) {
-				continue;
-			}
-			
-			double baseRate = (double) regressionData.regression.getBaselineHits() / (double)  regressionData.regression.getBaselineInvocations();
-			double activeRate = (double) regressionData.event.stats.hits / (double) regressionData.event.stats.invocations;
-
-			int delta = (int)((activeRate - baseRate) * 100);
-			
-			if (delta < 1000) {
-				result.append("+"); 
-				result.append(delta);
-			} else {
-				result.append(">1000"); 
-			}
-			
-			result.append("% "); 
-
-			result.append(regressionData.event.name);
-			
-			if (regressionData.event.error_location != null) {
-				result.append(" in ");
-				result.append(getSimpleClassName(regressionData.event.error_location.class_name));
-			}
-						
-			size++;
-			
-			if (size == maxItems) {
-				break;
-			} else {
-				if (size < regressionsSize) {
-					result.append(", ");
+				if (!(eventData instanceof RegressionData)) {
+					continue;
+				}
+				
+				RegressionData regressionData = (RegressionData)eventData;
+				
+				if (regressionData.regression == null) {
+					continue;
+				}
+				
+				double baseRate = (double) regressionData.regression.getBaselineHits() / (double)  regressionData.regression.getBaselineInvocations();
+				double activeRate = (double) regressionData.event.stats.hits / (double) regressionData.event.stats.invocations;
+	
+				int delta = (int)((activeRate - baseRate) * 100);
+				
+				if (delta < 1000) {
+					result.append("+"); 
+					result.append(delta);
+				} else {
+					result.append(">1000"); 
+				}
+				
+				result.append("% "); 
+	
+				result.append(regressionData.event.name);
+				
+				if (regressionData.event.error_location != null) {
+					result.append(" in ");
+					result.append(getSimpleClassName(regressionData.event.error_location.class_name));
+				}
+							
+				size++;
+				
+				if (size == maxItems) {
+					break;
+				} else {
+					if (size < regressionsSize) {
+						result.append(", ");
+					}
 				}
 			}
 		}

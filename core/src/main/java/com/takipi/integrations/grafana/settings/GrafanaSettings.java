@@ -169,16 +169,15 @@ public class GrafanaSettings {
 						
 						if (serviceJson != null) {	
 							result = parseServiceSettings(key.serviceId, key.apiClient, serviceJson, false);
-							
-							if (result == null) {
-								
-								String defaultJson = settingsStorage.getDefaultServiceSettings();
-								
-								if (defaultJson != null) {
-									result = parseServiceSettings(key.serviceId, key.apiClient, defaultJson, false);
-								}
-							}
 						} 
+						
+						if (result == null) {
+							String defaultJson = settingsStorage.getDefaultServiceSettings();
+							
+							if (defaultJson != null) {
+								result = parseServiceSettings(key.serviceId, key.apiClient, defaultJson, false);
+							}
+						}
 						
 						if (result == null) {
 							
