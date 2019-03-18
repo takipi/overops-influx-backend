@@ -95,7 +95,7 @@ public abstract class GrafanaFunction
 	}
 	
 	private static final DecimalFormat singleDigitFormatter = new DecimalFormat("#.#");
-	private static final DecimalFormat doubleDigitFormatter = new DecimalFormat("#.####");
+	private static final DecimalFormat doubleDigitFormatter = new DecimalFormat("#.##");
 
 	protected static final String ALL_EVENTS = "All Events";
 	

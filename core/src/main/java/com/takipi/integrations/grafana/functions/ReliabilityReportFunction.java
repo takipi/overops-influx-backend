@@ -1692,7 +1692,14 @@ public class ReliabilityReportFunction extends EventsFunction {
 			}
 				
 			result.failures += event.stats.hits;	
-			result.eventCount++;			}
+			result.eventCount++;			
+		}
+		
+		Map<TransactionKey, TransactionData> transactionMap = reportKeyResult.output.transactionMap;
+		
+		if (transactionMap == null) {
+			return result;	
+		}
 		
 		Graph baseGraph = reportKeyResult.output.regressionData.regressionOutput.baseVolumeGraph;
 		
@@ -1710,7 +1717,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 					continue;
 				}
 				
-				TransactionData eventTransaction = getEventTransactionData(reportKeyResult.output.transactionMap, event);
+				TransactionData eventTransaction = getEventTransactionData(transactionMap, event);
 				
 				if (eventTransaction == null) {
 					continue;
@@ -1841,13 +1848,19 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		AppTransactionData result = new  AppTransactionData();
 		
+		Map<TransactionKey, TransactionData> transactionMap = reportKeyResult.output.transactionMap;
+		
+		if (transactionMap == null) {
+			return result;
+		}
+		
 		double avgTimeNum = 0;
 		double avgTimeDenom = 0;
 		
 		double baseAvgTimeNum = 0;
 		double baseAvgTimeDenom = 0;
 		
-		for (TransactionData transactionData : reportKeyResult.output.transactionMap.values()) {
+		for (TransactionData transactionData : transactionMap.values()) {
 			
 			result.errorVolume += transactionData.errorsHits;
 			
@@ -2287,14 +2300,14 @@ public class ReliabilityReportFunction extends EventsFunction {
 			rateStr = "Δ>100%";	 
 		} else {		
 			if (stringFormat) {
-				rateStr = "+" + formatRate(appReliabilityData.failureRateDelta, true);
+				rateStr = "+" + formatRate(appReliabilityData.failureRateDelta, false);
 			} else {
 				rateStr = null;
 			}
 		}
 		
 		if (rateStr != null) {
-			result = String.format("(%s %s)", rateStr, statusPrefix);
+			result = String.format("%s %s", rateStr, statusPrefix);
 		} else {
 			result = appReliabilityData.failureRateDelta;
 		}
