@@ -3,6 +3,8 @@ package com.takipi.integrations.grafana.input;
 import java.util.Arrays;
 import java.util.List;
 
+import com.takipi.integrations.grafana.input.ReliabilityKpiGraphInput.ReportInterval;
+
 /** 
  * A function returning a report for a a target set of applications, deployments or tiers (i.e. categories)
  * listing an possible new errors, increases (i.e. regressions) and slowdowns. The function can return
@@ -62,6 +64,16 @@ public class ReliabilityReportInput extends RegressionsInput {
 		Tiers,
 		
 		/**
+		 * The report will return a a single row each day within the timeframe
+		 */
+		Timeline,
+		
+		/**
+		 * The report will return a a single row each day within the timeframe with extended information
+		 */
+		Timeline_Extended,
+		
+		/**
 		 * The report will return a a single row for the target event set
 		 */
 		Default;
@@ -70,16 +82,16 @@ public class ReliabilityReportInput extends RegressionsInput {
 	/**
 	 * The key value to be be used as the Y value of each point if the function is to return a graph 
 	 */
-	public enum GraphType {
+	public enum RelabilityKpi {
 		/**
 		 * chart the number of new issues
 		 */
-		NewIssues, 
+		NewErrors, 
 		
 		/**
 		 * chart the number of severe new issues
 		 */
-		SevereNewIssues, 
+		SevereNewErrors, 
 		
 		/**
 		 * chart the number of increasing errors 
@@ -110,7 +122,7 @@ public class ReliabilityReportInput extends RegressionsInput {
 		/**
 		 * chart the unique number of events of the target app, deployment, tier
 		 */
-		UniqueErrors,
+		ErrorCount,
 		
 		/**
 		 * chart the relative rate of events of the target app, deployment, tier
@@ -140,11 +152,32 @@ public class ReliabilityReportInput extends RegressionsInput {
 		ScoreDesc
 	}
 	
+	public static RelabilityKpi getKpi(String kpi) {
+		
+		if ((kpi ==  null) || (kpi.length() == 0)) {
+			return RelabilityKpi.Score;
+		}
+		
+		RelabilityKpi result = RelabilityKpi.valueOf(kpi.replace(" ", ""));
+		
+		return result;
+	}
+	
 	/**
 	 * Control whether to report only on live deployment in Deployment report mode
 	 */
 	public boolean liveDeploymentsOnly;
 	
+	/**
+	 * Control the report interval in Timeline mode
+	 */
+	public ReportInterval reportInterval;
+	
+	/**
+	 * Control whether to add am "Application" tier  in Tiers report mode
+	 */
+	public boolean addAppTier;
+
 	/**
 	 * The specific value to chart
 	 */
@@ -158,7 +191,7 @@ public class ReliabilityReportInput extends RegressionsInput {
 	public ReportMode getReportMode() {
 		
 		if (mode == null) {
-			return  ReportMode.Default;
+			return ReportMode.Default;
 		}
 		
 		return mode;	
@@ -343,6 +376,11 @@ public class ReliabilityReportInput extends RegressionsInput {
 	public static final String PREV_DEP_STATE =  "previousDepState";
 	
 	/**
+	* The field name of the row used to link the user to the diff of the current timeline interval and its prev one
+	 */
+	public static final String TIMELINE_DIFF_STATE =  "TimelineDiffState";
+	
+	/**
 	 * The field name of the row is a Value of any new issues in this row
 	 */
 	public static final String NEW_ISSUES = "NewIssues";
@@ -485,6 +523,28 @@ public class ReliabilityReportInput extends RegressionsInput {
 			SLOWDOWNS_DESC,
 		 	SCORE_DESC,
 		 	NAME, 
+			NEW_ISSUES, 
+		  	REGRESSIONS, 
+		 	SLOWDOWNS, 		 	
+		 	SCORE
+		});
+	
+	/**
+	 * The list of default fields returned for timeline reporting
+	 */
+	public static final List<String> DEFAULT_TIMELINE_FIELDS = Arrays.asList(
+		new String[] { 	
+			ViewInput.FROM, 
+			ViewInput.TO, 
+		 	ViewInput.TIME_RANGE, 
+		 	SERVICE, 
+		 	KEY, 
+		 	NEW_ISSUES_DESC, 
+		 	REGRESSIONS_DESC, 
+			SLOWDOWNS_DESC,
+		 	SCORE_DESC,
+		 	NAME, 
+		 	TIMELINE_DIFF_STATE,
 			NEW_ISSUES, 
 		  	REGRESSIONS, 
 		 	SLOWDOWNS, 		 	

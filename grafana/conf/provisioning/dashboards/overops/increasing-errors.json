@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 28,
-  "iteration": 1551951730144,
+  "iteration": 1552989101595,
   "links": [
     {
       "icon": "dashboard",
@@ -49,7 +49,7 @@
       "tags": [],
       "tooltip": "Home",
       "type": "link",
-      "url": "d/lg0U4qriz/home"
+      "url": "/d/lg0U4qriz/home"
     },
     {
       "asDropdown": true,
@@ -795,7 +795,7 @@
           "tags": []
         }
       ],
-      "title": "",
+      "title": "$eventCount Events",
       "transform": "table",
       "type": "table"
     }
@@ -1231,8 +1231,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "time >= 1551865333954ms and time <= 1551951733954ms",
-          "value": "time >= 1551865333954ms and time <= 1551951733954ms"
+          "text": "time >= 1552902700863ms and time <= 1552989100863ms",
+          "value": "time >= 1552902700863ms and time <= 1552989100863ms"
         },
         "datasource": "OO",
         "hide": 2,
@@ -1242,6 +1242,31 @@
         "name": "timeFilterVar",
         "options": [],
         "query": "timeFilter({\"timeFilter\":\"$timeFilter\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "eventCount",
+        "options": [],
+        "query": "regressions({\"render\":\"SingleStat\", \"regressionTypes\":\"Regressions,SevereRegressions\", \"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"maxColumnLength\":120,\"pointsWanted\":\"$pointsWanted\",\"searchText\":\"$search\", \"eventLocations\":\"$increasingErrors\", \"types\":\"$type\", \"timeFilterVar\":\"true\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1287,5 +1312,5 @@
   "timezone": "",
   "title": "Increasing Errors",
   "uid": "WZ739NYmk",
-  "version": 119
+  "version": 120
 }

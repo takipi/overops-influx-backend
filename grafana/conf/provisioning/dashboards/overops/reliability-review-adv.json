@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 44,
-  "iteration": 1552451353835,
+  "iteration": 1552989043460,
   "links": [
     {
       "asDropdown": true,
@@ -396,7 +396,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "ReliabilityKpiGraph({\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"$type\",\"limit\":\"$limit\", \"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"interval\":\"$__interval\", \"reportInterval\":\"24h\", \"kpi\":\"$kpi\", \"aggregate\":\"true\"})",
+          "query": "ReliabilityKpiGraph({\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"$type\",\"limit\":\"$limit\", \"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"interval\":\"$__interval\", \"reportInterval\":\"24h\", \"kpi\":\"$kpi\", \"aggregate\":\"true\", \"deductFrom100\":\"true\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -778,7 +778,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "ReliabilityKpiGraph({\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"$type\",\"limit\":\"$limit\", \"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"interval\":\"$__interval\", \"reportInterval\":\"24h\", \"kpi\":\"$kpi\"})",
+          "query": "ReliabilityKpiGraph({\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"$type\",\"limit\":\"$limit\", \"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"interval\":\"$__interval\", \"reportInterval\":\"24h\", \"kpi\":\"$kpi\", \"deductFrom100\":\"true\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -853,7 +853,7 @@
       {
         "allValue": "all",
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "None",
           "value": "None"
         },
@@ -878,6 +878,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -902,6 +903,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -926,6 +928,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -950,7 +953,7 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "All Events",
           "value": "All Events"
         },
@@ -973,6 +976,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -997,6 +1001,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1021,6 +1026,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -1045,7 +1051,7 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "Score",
           "value": "Score"
         },
@@ -1057,8 +1063,8 @@
         "options": [
           {
             "selected": false,
-            "text": "NewErrors",
-            "value": "NewErrors"
+            "text": "New Errors",
+            "value": "New Errors"
           },
           {
             "selected": false,
@@ -1067,13 +1073,13 @@
           },
           {
             "selected": false,
-            "text": "Increasing Errors",
-            "value": "Increasing Errors"
+            "text": "Error Increases",
+            "value": "Error Increases"
           },
           {
             "selected": false,
-            "text": "Severe Increasing Errors",
-            "value": "Severe Increasing Errors"
+            "text": "Severe Error Increases",
+            "value": "Severe Error Increases"
           },
           {
             "selected": false,
@@ -1106,14 +1112,14 @@
             "value": "Score"
           }
         ],
-        "query": "NewErrors, Severe New Errors, Increasing Errors, Severe Increasing Errors, Slowdowns, Severe Slowdowns, Error Volume, Error Count, Error Rate, Score",
+        "query": "New Errors,Severe New Errors,Error Increases,Severe Error Increases,Slowdowns,Severe Slowdowns,Error Volume,Error Count,Error Rate,Score",
         "skipUrlSync": false,
         "type": "custom"
       },
       {
         "allValue": null,
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "10",
           "value": "10"
         },
@@ -1233,6 +1239,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -1257,6 +1264,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -1281,6 +1289,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -1305,6 +1314,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -1361,5 +1371,5 @@
   "timezone": "",
   "title": "Reliability Review Adv",
   "uid": "NmADICjik",
-  "version": 7
+  "version": 9
 }

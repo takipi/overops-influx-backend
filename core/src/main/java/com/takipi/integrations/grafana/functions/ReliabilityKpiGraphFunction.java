@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import org.joda.time.DateTime;
 
@@ -21,10 +23,6 @@ import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
 import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.result.event.EventResult;
-import com.takipi.api.client.util.performance.PerformanceUtil;
-import com.takipi.api.client.util.performance.calc.PerformanceCalculator;
-import com.takipi.api.client.util.performance.calc.PerformanceScore;
-import com.takipi.api.client.util.performance.transaction.GraphPerformanceCalculator;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.transaction.TransactionUtil;
@@ -36,13 +34,14 @@ import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOu
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.ReliabilityKpiGraphInput;
-import com.takipi.integrations.grafana.input.ReliabilityKpiGraphInput.ReliabilityKpi;
+import com.takipi.integrations.grafana.input.ReliabilityKpiGraphInput.ReportInterval;
+import com.takipi.integrations.grafana.input.ReliabilityReportInput;
+import com.takipi.integrations.grafana.input.ReliabilityReportInput.RelabilityKpi;
 import com.takipi.integrations.grafana.input.ReliabilityReportInput.ReportMode;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.GroupSettings;
 import com.takipi.integrations.grafana.settings.input.RegressionReportSettings;
-import com.takipi.integrations.grafana.settings.input.SlowdownSettings;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
@@ -65,6 +64,18 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		}
 	}
 	
+	protected class TimelineData {
+		
+		protected ReliabilityKpiGraphInput input;
+		protected Pair<DateTime, DateTime> timespan;
+		
+		protected ReliabilityKpiGraphInput expandedInput;
+		protected Pair<DateTime, DateTime> expandedTimespan;
+	
+		protected ReliabilityKpiGraphInput baselineInput;
+		protected Pair<DateTime, DateTime> baselineTimespan;
+	}
+	
 	protected class GraphResultData {
 		protected Graph graph;
 		protected Map<String, EventResult> eventListMap;
@@ -74,24 +85,22 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		
 		protected String serviceId;
 		protected String viewId;
-		protected ReliabilityKpiGraphInput input;
-		protected Pair<DateTime, DateTime> timespan;
+		protected TimelineData timelineData;
+	
 		
 		protected BaseGraphAsyncTask(String serviceId, String viewId, 
-			ReliabilityKpiGraphInput input, Pair<DateTime, DateTime> timespan) {
+				TimelineData timelineData) {
 			
 			this.serviceId = serviceId;
 			this.viewId = viewId;
-			this.input = input;
-			this.timespan = timespan;
+			this.timelineData = timelineData;
 		}
 	}
 	
 	protected class GraphDataTask extends BaseGraphAsyncTask implements Callable<Object>{
 
-		protected GraphDataTask(String serviceId, String viewId, 
-			ReliabilityKpiGraphInput input, Pair<DateTime, DateTime> timespan) {
-			super(serviceId, viewId, input, timespan);
+		protected GraphDataTask(String serviceId, String viewId, TimelineData timelineData) {
+			super(serviceId, viewId, timelineData);
 		}
 		
 		@Override
@@ -99,33 +108,81 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			
 			GraphResultData result = new GraphResultData();
 
-			result.graph = getEventsGraph(serviceId, viewId, input.pointsWanted, input, input.volumeType, 
-					timespan.getFirst(), timespan.getSecond());
+			result.graph = getEventsGraph(serviceId, viewId, timelineData.input.pointsWanted, 
+					timelineData.expandedInput, timelineData.input.volumeType, 
+					timelineData.expandedTimespan.getFirst(), timelineData.expandedTimespan.getSecond());
 			
-			result.eventListMap = getEventMap(serviceId, input,
-					timespan.getFirst(), timespan.getSecond(), null, input.pointsWanted);
+			result.eventListMap = getEventMap(serviceId, timelineData.expandedInput,
+					timelineData.timespan.getFirst(), timelineData.timespan.getSecond(), 
+				null, timelineData.input.pointsWanted);
 			
 			return result;
 		}
 	}
 	
-	protected class TransactionGraphTask extends BaseGraphAsyncTask implements Callable<Object>{
+	protected class TransactionResultData {
+		protected boolean isBaseline;
+		protected Collection<TransactionGraph> graphs;
+	}
+	
+	protected class TasksResultData {
+		protected TransactionResultData baselineTransactionData;
+		protected TransactionResultData activeTransactionData;
+		protected GraphResultData graphResultData;
+	}
 		
-		protected TransactionGraphTask(String serviceId, String viewId, 
-				ReliabilityKpiGraphInput input, Pair<DateTime, DateTime> timespan) {
+	protected class TransactionGraphTask extends BaseGraphAsyncTask implements Callable<Object>{
 			
-			super(serviceId, viewId, input, timespan);
+		protected TransactionGraphTask(String serviceId, String viewId, 
+				TimelineData timelineData) {
+			
+			super(serviceId, viewId, timelineData);
+		}
+		
+		@Override
+		public Object call() throws Exception {
+					
+			TransactionResultData result = new TransactionResultData();
+
+			result.graphs = getTransactionGraphs(timelineData.input, serviceId, viewId, 
+					timelineData.timespan, timelineData.input.getSearchText(), 
+					timelineData.input.transactionPointsWanted, 0, 0);
+			
+			return result;
+		}
+	}
+	
+	protected class TransactionBaselineGraphTask extends BaseGraphAsyncTask implements Callable<Object>{
+		
+		
+		protected TransactionBaselineGraphTask(String serviceId, String viewId, 
+				TimelineData timelineData) {
+			
+			super(serviceId, viewId, timelineData);
 		}
 		
 		@Override
 		public Object call() throws Exception {
 			
-			Collection<TransactionGraph> graphs = getTransactionGraphs(input, serviceId, viewId, timespan, 
-					input.getSearchText(), input.transactionPointsWanted, 0, 0);
-			
-			return graphs;
-		}
+			TransactionResultData result = new TransactionResultData();
 
+			result.isBaseline = true;
+			result.graphs = getTransactionGraphs(timelineData.baselineInput, serviceId, viewId, 
+					timelineData.baselineTimespan, timelineData.baselineInput.getSearchText(), 
+					timelineData.baselineInput.transactionPointsWanted, 0, 0);
+			
+			return result;
+		}
+	}
+	
+	public class TaskKpiResult {
+		protected String app;
+		protected Collection<KpiInterval> kpiIntervals;
+		
+		protected TaskKpiResult(String app, Collection<KpiInterval> kpiIntervals) {
+			this.app = app;
+			this.kpiIntervals = kpiIntervals;
+		}
 	}
 	
 	protected class KpiGraphAsyncTask extends GraphAsyncTask {
@@ -133,16 +190,21 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		protected String app;
 		protected boolean isKey;
 		protected Collection<Pair<DateTime, DateTime>> periods;
+		protected boolean returnKpi;
+		protected TimelineData timelineData;
 		
 		protected KpiGraphAsyncTask(String serviceId, String viewId, String viewName,
-				BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, 
-				Collection<String> serviceIds, int pointsWanted,
-				String app, boolean isKey, Collection<Pair<DateTime, DateTime>> periods) {
+				TimelineData timelineData, Collection<String> serviceIds, int pointsWanted,
+				String app, boolean isKey, Collection<Pair<DateTime, DateTime>> periods,
+				boolean returnKpi) {
 
-			super(serviceId, viewId, viewName, request, timeSpan, serviceIds, pointsWanted);
+			super(serviceId, viewId, viewName, timelineData.input, timelineData.timespan,
+				serviceIds, pointsWanted);
 			this.app = app;
 			this.isKey = isKey;
 			this.periods = periods;
+			this.returnKpi = returnKpi;
+			this.timelineData = timelineData;
 		}
 
 		@Override
@@ -152,10 +214,24 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			
 			try {
 				
-				List<GraphSeries> graphSeries = processServiceGraph(serviceIds, serviceId, viewId, 
-					input, timeSpan, periods, app, isKey);
+				ReliabilityKpiGraphInput rkInput =  (ReliabilityKpiGraphInput)input;
+				RelabilityKpi kpi = ReliabilityReportInput.getKpi(rkInput.kpi);
+
+				Map<DateTime, KpiInterval> kpiIntervals = processServiceKpis(serviceId, viewId, 
+					timelineData, kpi, periods, isKey);
 				
-				return new AsyncResult(graphSeries);
+				Object result;
+				
+				if (returnKpi) {
+					result = new TaskKpiResult(app, kpiIntervals.values());
+				} else {
+					List<GraphSeries> series = getGraphSeries(serviceIds, serviceId, 
+						rkInput, kpi, kpiIntervals, app);
+					
+					result = new TaskSeriesResult(series);
+				}
+								
+				return result;
 			}
 			finally {
 				afterCall();
@@ -170,11 +246,18 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		}
 	}
 	
-	protected abstract class KpiInterval {
-		protected abstract Object getValue(ReliabilityKpi kpi);
+	public abstract class KpiInterval {
+		
+		public Pair<DateTime, DateTime> period;
+		
+		protected abstract Object getValue(RelabilityKpi kpi);
+		
+		protected KpiInterval(Pair<DateTime, DateTime> period) {
+			this.period = period;
+		}
 	}
 	
-	protected class RegressionInterval extends KpiInterval {
+	public class RegressionInterval extends KpiInterval {
 		
 		protected int newErrors;
 		protected int severeNewErrors;
@@ -182,8 +265,12 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		protected int severeRegressions;
 		protected RegressionOutput output;
 		
+		protected RegressionInterval(Pair<DateTime, DateTime> period) {
+			super(period);
+		}
+		
 		@Override
-		protected Object getValue(ReliabilityKpi kpi) {
+		protected Object getValue(RelabilityKpi kpi) {
 			
 			switch (kpi) {
 				
@@ -193,10 +280,10 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 				case SevereNewErrors: 
 					return severeNewErrors;
 				
-				case IncreasingErrors: 
+				case ErrorIncreases: 
 					return regressions + severeRegressions;
 				
-				case SevereIncreasingErrors: 
+				case SevereErrorIncreases: 
 					return severeRegressions;
 				
 				default: throw new IllegalStateException(kpi.toString());
@@ -204,13 +291,18 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		}
 	}
 	
-	protected class SlowdownInterval extends KpiInterval {
+	public class SlowdownInterval extends KpiInterval {
 		
 		protected int slowdowns;
 		protected int severeSlowdowns;
+		protected Map<TransactionKey, TransactionData> transactionMap;
+		
+		protected SlowdownInterval(Pair<DateTime, DateTime> period) {
+			super(period);
+		}
 		
 		@Override
-		protected Object getValue(ReliabilityKpi kpi) {
+		protected Object getValue(RelabilityKpi kpi) {
 			
 			switch (kpi) {
 				
@@ -225,14 +317,20 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		}
 	}
 	
-	protected class VolumeInterval extends KpiInterval  {
+	public class VolumeInterval extends KpiInterval  {
 		
 		protected long volume;
 		protected long invocations;
 		protected Set<String> eventIds;
 		
+
+		protected VolumeInterval(Pair<DateTime, DateTime> period) {
+			super(period);
+			this.eventIds = new HashSet<String>();
+		}
+		
 		@Override
-		protected Object getValue(ReliabilityKpi kpi) {
+		protected Object getValue(RelabilityKpi kpi) {
 			
 			switch (kpi) {
 				
@@ -253,20 +351,20 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 				default: throw new IllegalStateException(kpi.toString());
 			}
 		}
-		
-		protected VolumeInterval() {
-			this.eventIds = new HashSet<String>();
-		}
 	}
 	
-	protected class ScoreInterval extends KpiInterval {
+	public class ScoreInterval extends KpiInterval {
+		
+		protected ScoreInterval(Pair<DateTime, DateTime> period) {
+			super(period);
+		}
 		
 		protected RegressionInterval regressionInterval;
 		protected SlowdownInterval slowdownInterval;
 		protected double score;
 		
 		@Override
-		protected Object getValue(ReliabilityKpi kpi) {
+		protected Object getValue(RelabilityKpi kpi) {
 			return score;
 		}
 	}
@@ -275,138 +373,144 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		super(apiClient);
 	}
 	
-	private Pair<Collection<TransactionGraph>, Collection<TransactionGraph>> getSlowdownGraphs(Collection<TransactionGraph> graphs, 
-			Pair<DateTime, DateTime> period, int baselineWindow) {
-			
-		List<TransactionGraph> activeGraphs = new ArrayList<TransactionGraph>();
-		List<TransactionGraph> baselineGraphs = new ArrayList<TransactionGraph>();
-
-		DateTime baselineEnd = period.getFirst();
-		DateTime baselineStart = baselineEnd.minusMinutes(baselineWindow);
+	private Collection<TransactionGraph> sectionGraphs(Collection<TransactionGraph> graphs,
+		DateTime start, DateTime end) {
+		
+		List<TransactionGraph> result = new ArrayList<TransactionGraph>();
 		
 		for (TransactionGraph graph : graphs) {
+			
+			TransactionGraph resultGraph = new TransactionGraph();
 				
-			TransactionGraph activeGraph = new TransactionGraph();
+			resultGraph.class_name = graph.class_name;
+			resultGraph.method_desc = graph.method_desc;
+			resultGraph.method_name = graph.method_name;
+			resultGraph.name = graph.name;
+			resultGraph.points = new ArrayList<com.takipi.api.client.data.transaction.TransactionGraph.GraphPoint>();
 				
-			activeGraph.class_name = graph.class_name;
-			activeGraph.method_desc = graph.method_desc;
-			activeGraph.method_name = graph.method_name;
-			activeGraph.name = graph.name;
-			activeGraph.points = new ArrayList<com.takipi.api.client.data.transaction.TransactionGraph.GraphPoint>();
+			result.add(resultGraph);
 				
-			activeGraphs.add(activeGraph);
-				
-			TransactionGraph baselineGraph = new TransactionGraph();
-
-			baselineGraph.class_name = graph.class_name;
-			baselineGraph.method_desc = graph.method_desc;
-			baselineGraph.method_name = graph.method_name;
-			baselineGraph.name = graph.name;
-			baselineGraph.points = new ArrayList<com.takipi.api.client.data.transaction.TransactionGraph.GraphPoint>();
-				
-			baselineGraphs.add(baselineGraph);
-
 			for (com.takipi.api.client.data.transaction.TransactionGraph.GraphPoint gp : graph.points) {
 					
 				DateTime gpTime = TimeUtil.getDateTime(gp.time);
 					
-				if ((gpTime.isAfter(period.getFirst())) 
-				&& (gpTime.isBefore(period.getSecond()))) {
-					activeGraph.points.add(gp);
-					continue;
-				}
-					
-				if ((gpTime.isAfter(baselineStart)) 
-				&& (gpTime.isBefore(baselineEnd))) {
-					baselineGraph.points.add(gp);
-				}	
+				if (timespanContains(start, end, gpTime)) {
+					resultGraph.points.add(gp);
+				} 
 			}					
 		}
 		
-		return Pair.of(baselineGraphs, activeGraphs);
+		return result;
+		
 	}
 	
-	private Pair<Graph, Graph> getRegressionGraphs(Graph graph, Pair<DateTime, DateTime> period,
-		int baselineWindow) {
-		
-		Graph activeGraph = new Graph();
-		Graph baselineGraph = new Graph();
-		
-		activeGraph.id = graph.id;
-		activeGraph.type = graph.type;
-		activeGraph.points = new ArrayList<GraphPoint>();
-		
-		baselineGraph.id = graph.id;
-		baselineGraph.type = graph.type;
-		baselineGraph.points = new ArrayList<GraphPoint>();
-
+	private Pair<Collection<TransactionGraph>, Collection<TransactionGraph>> getSlowdownGraphs(
+			Collection<TransactionGraph> baselineGraphs, 
+			Collection<TransactionGraph> activeGraphs, 
+			Pair<DateTime, DateTime> period, int baselineWindow) {
+			
 		DateTime baselineEnd = period.getFirst();
 		DateTime baselineStart = baselineEnd.minusMinutes(baselineWindow);
 		
+		Collection<TransactionGraph> resultBaselineGraphs = sectionGraphs(baselineGraphs, baselineStart, baselineEnd);
+		Collection<TransactionGraph> resultActiveGraphs = sectionGraphs(activeGraphs, period.getFirst(), period.getSecond());
+		
+		return Pair.of(resultBaselineGraphs, resultActiveGraphs);
+	}
+		
+	protected class RegressionPeriodData {
+		protected Graph activeGraph;
+		protected Graph baselineGraph;
+		protected Map<String, EventResult> eventMap;
+	}
+	
+	private RegressionPeriodData getRegressionGraphs(Map<String, EventResult> eventMap, 
+		Graph graph, Pair<DateTime, DateTime> period,
+		int baselineWindow) {
+		
+		RegressionPeriodData result = new RegressionPeriodData();
+		
+		result.activeGraph = new Graph();
+		result.baselineGraph = new Graph();
+		result.eventMap = new HashMap<String, EventResult>();
+		
+		result.activeGraph.id = graph.id;
+		result.activeGraph.type = graph.type;
+		result.activeGraph.points = new ArrayList<GraphPoint>();
+		
+		result.baselineGraph.id = graph.id;
+		result.baselineGraph.type = graph.type;
+		result.baselineGraph.points = new ArrayList<GraphPoint>();
+
+		DateTime baselineEnd = period.getFirst();
+		DateTime baselineStart = baselineEnd.minusMinutes(baselineWindow);
+						
 		for (GraphPoint gp : graph.points) {
 			
-			DateTime gpTime = TimeUtil.getDateTime(gp.time);
-			
-			if ((gpTime.isAfter(period.getFirst())) 
-			&& (gpTime.isBefore(period.getSecond()))) {
-				activeGraph.points.add(gp);
+			if (gp.contributors == null) {
 				continue;
 			}
 			
-			if ((gpTime.isAfter(baselineStart)) 
-			&& (gpTime.isBefore(baselineEnd))) {
-				baselineGraph.points.add(gp);
+			DateTime gpTime = TimeUtil.getDateTime(gp.time);
+						
+			if (timespanContains(period.getFirst(), period.getSecond(), gpTime)) {
+				
+				result.activeGraph.points.add(gp);
+				
+				for (GraphPointContributor gpc : gp.contributors) {
+					
+					EventResult event = eventMap.get(gpc.id);
+					
+					if (event != null) {
+						result.eventMap.put(event.id, event);
+					}		
+				}
+			} 
+			
+			if (timespanContains(baselineStart, baselineEnd, gpTime)) {
+				result.baselineGraph.points.add(gp);
 			}	
 		}
 		
-		return Pair.of(baselineGraph, activeGraph);
+		return result;
 	}
 		
 	private NavigableMap<DateTime, KpiInterval> processSlowdowns(String serviceId,
-			String viewId, ReliabilityKpiGraphInput input, 
-			Collection<Pair<DateTime, DateTime>> periods, Collection<TransactionGraph> graphs) {
+		String viewId, TimelineData timelineData, 
+		Collection<Pair<DateTime, DateTime>> periods, 
+		Collection<TransactionGraph> baselineGraphs, 
+		Collection<TransactionGraph> activeGraphs) {
 		
-		if (graphs == null) {
+		if ((baselineGraphs == null) || (activeGraphs == null)) {
 			return Collections.emptyNavigableMap();
 		}
 
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
-		
-		SlowdownSettings slowdownSettings = GrafanaSettings.getData(apiClient, serviceId).slowdown;
-		
-		if (slowdownSettings == null) {
-			throw new IllegalStateException("Missing slowdown settings for " + serviceId);
-		}
 		
 		NavigableMap<DateTime, KpiInterval> result = new TreeMap<DateTime, KpiInterval>();
 		
 		for (Pair<DateTime, DateTime> period : periods) {
 			
 			Pair<RegressionInput, RegressionWindow> regPair = regressionFunction.getRegressionInput(serviceId, viewId,
-					input, period, true);
+					timelineData.input, period, true);
 			
 			RegressionInput regressionInput = regPair.getFirst();
 			
-			Pair<Collection<TransactionGraph>, Collection<TransactionGraph>> graphPairs = getSlowdownGraphs(graphs,
-				period, regressionInput.baselineTimespan);
-			
-			PerformanceCalculator<TransactionGraph> calc = GraphPerformanceCalculator.of(
-					slowdownSettings.active_invocations_threshold, slowdownSettings.baseline_invocations_threshold,
-					slowdownSettings.min_delta_threshold,
-					slowdownSettings.over_avg_slowing_percentage, slowdownSettings.over_avg_critical_percentage,
-					slowdownSettings.std_dev_factor);
+			Pair<Collection<TransactionGraph>, Collection<TransactionGraph>> graphPairs = getSlowdownGraphs(baselineGraphs,
+				activeGraphs, period, regressionInput.baselineTimespan);
 						
 			Map<String, TransactionGraph> baselineGraphsMap = TransactionUtil.getTransactionGraphsMap(graphPairs.getFirst());	
 			Map<String, TransactionGraph> activeGraphsMap = TransactionUtil.getTransactionGraphsMap(graphPairs.getSecond());
 
-			Map<TransactionGraph, PerformanceScore> performanceScores = PerformanceUtil.getPerformanceStates(
-					activeGraphsMap, baselineGraphsMap, calc);
+			Map<TransactionKey, TransactionData> transactionsMap = getTransactionDatas(serviceId,
+				activeGraphsMap.values(), baselineGraphsMap.values());
 			
-			SlowdownInterval slowdownInterval = new SlowdownInterval();
+			SlowdownInterval slowdownInterval = new SlowdownInterval(period);
+			slowdownInterval.transactionMap = transactionsMap;
 			
-			for (PerformanceScore performanceScore : performanceScores.values()) {
-				
-				switch (performanceScore.state) {
+			for (TransactionData transactionData : transactionsMap.values()) {
+			
+				switch (transactionData.state) {
 					
 					case CRITICAL:
 						slowdownInterval.severeSlowdowns++;
@@ -427,25 +531,26 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 	}
 	
 	private Map<DateTime, KpiInterval> processVolumesMap(String serviceId,
-			String viewId, ReliabilityKpiGraphInput input, 
-			Pair<DateTime, DateTime> timespan,
+			String viewId, TimelineData timelineData,
 			Collection<Pair<DateTime, DateTime>> periods) {
 		
-		Graph graph = getEventsGraph(serviceId, viewId, input.pointsWanted, input, input.volumeType, 
-				timespan.getFirst(), timespan.getSecond());
+		Graph graph = getEventsGraph(serviceId, viewId, timelineData.input.pointsWanted, 
+				timelineData.input, timelineData.input.volumeType, 
+				timelineData.timespan.getFirst(), timelineData.timespan.getSecond());
 		
 		if (graph == null) {
 			return Collections.emptyMap();
 		}
 		
-		EventFilter eventFilter = getEventFilter(serviceId, input, timespan);
+		EventFilter eventFilter = getEventFilter(serviceId, timelineData.input, timelineData.timespan);
 
 		if (eventFilter == null) {
 			return Collections.emptyMap();
 		}
 		
-		Map<String, EventResult> eventMap = getEventMap(serviceId, input,
-				timespan.getFirst(), timespan.getSecond(), null, input.pointsWanted);
+		Map<String, EventResult> eventMap = getEventMap(serviceId, timelineData.input,
+			timelineData.timespan.getFirst(), timelineData.timespan.getSecond(), 
+			null, timelineData.input.pointsWanted);
 		
 		if (eventMap == null) {
 			return Collections.emptyMap();
@@ -465,7 +570,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 					VolumeInterval volumeInterval = (VolumeInterval)(result.get(period.getFirst()));
 					
 					if (volumeInterval == null) {
-						volumeInterval = new VolumeInterval();
+						volumeInterval = new VolumeInterval(period);
 						result.put(period.getFirst(), volumeInterval);
 					}
 					
@@ -493,17 +598,10 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		return result;
 	}
 	
-	private void resetStats(Collection<EventResult> events) {
+	private KpiInterval aggregateRegressions(Pair<DateTime, DateTime> timespan,
+			Map<DateTime, KpiInterval> intervals) {
 		
-		for (EventResult event : events) {
-			event.stats.hits = 0;
-			event.stats.invocations = 0;
-		}
-	}
-	
-	private KpiInterval aggregateRegressions(Map<DateTime, KpiInterval> intervals) {
-		
-		RegressionInterval result = new RegressionInterval();
+		RegressionInterval result = new RegressionInterval(timespan);
 		
 		for (KpiInterval kpiInterval : intervals.values()) {
 			
@@ -518,9 +616,9 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		return result;
 	}
 	
-	private KpiInterval aggregateSlowdowns(Map<DateTime, KpiInterval> intervals) {
+	private KpiInterval aggregateSlowdowns(Pair<DateTime, DateTime> timespan, Map<DateTime, KpiInterval> intervals) {
 		
-		SlowdownInterval result = new SlowdownInterval();
+		SlowdownInterval result = new SlowdownInterval(timespan);
 		
 		for (KpiInterval kpiInterval : intervals.values()) {
 			
@@ -533,9 +631,10 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		return result;
 	}
 	
-	private KpiInterval aggregateScores(Map<DateTime, KpiInterval> intervals) {
+	private KpiInterval aggregateScores(Pair<DateTime, DateTime> timespan,
+		Map<DateTime, KpiInterval> intervals) {
 		
-		ScoreInterval result = new ScoreInterval();
+		ScoreInterval result = new ScoreInterval(timespan);
 		
 		for (KpiInterval kpiInterval : intervals.values()) {
 			
@@ -551,9 +650,10 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		return result;
 	}
 	
-	private KpiInterval aggregateVolumes(Map<DateTime, KpiInterval> intervals) {
+	private KpiInterval aggregateVolumes(Pair<DateTime, DateTime> timespan,
+		Map<DateTime, KpiInterval> intervals) {
 		
-		VolumeInterval result = new VolumeInterval();
+		VolumeInterval result = new VolumeInterval(timespan);
 		
 		for (KpiInterval kpiInterval : intervals.values()) {
 			
@@ -568,8 +668,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 	}
 	
 	private NavigableMap<DateTime, KpiInterval> processRegressions(String serviceId,
-			String viewId, ReliabilityKpiGraphInput input, ReliabilityKpi kpi,
-			Pair<DateTime, DateTime> timespan,
+			String viewId, TimelineData timelineData, RelabilityKpi kpi,
 			Collection<Pair<DateTime, DateTime>> periods, GraphResultData graphData) {
 		
 		if (graphData == null) {
@@ -586,38 +685,46 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
 		
-		boolean newOnly = (kpi == ReliabilityKpi.NewErrors) || (kpi == ReliabilityKpi.SevereNewErrors);
+		boolean newOnly = (kpi == RelabilityKpi.NewErrors) || (kpi == RelabilityKpi.SevereNewErrors);
 		
 		NavigableMap<DateTime, KpiInterval> result = new TreeMap<DateTime, KpiInterval>();
-
+		
 		for (Pair<DateTime, DateTime> period : periods) {
+				
+			RegressionWindow inputWindow = new RegressionWindow();
+			
+			inputWindow.activeTimespan = (int)TimeUnit.MILLISECONDS.toMinutes(period.getSecond().getMillis() - period.getFirst().getMillis());
+			inputWindow.activeWindowStart = period.getFirst();
 			
 			Pair<RegressionInput, RegressionWindow> regPair = regressionFunction.getRegressionInput(serviceId, viewId,
-				input, period, newOnly);
+				timelineData.input, inputWindow, period, newOnly);
 			
 			RegressionInput regressionInput = regPair.getFirst();
 			RegressionWindow regressionWindow = regPair.getSecond();
 			
-			Pair<Graph, Graph> graphPair = getRegressionGraphs(graphData.graph, period, regressionInput.baselineTimespan);
+			Pair<Map<String, EventResult>, Long> filteredResult = filterEvents(serviceId, 
+				period, timelineData.input, graphData.eventListMap.values());
+
+			RegressionPeriodData regressionPeriodData = getRegressionGraphs(filteredResult.getFirst(),
+				graphData.graph, period, regressionInput.baselineTimespan);
 			
-			Graph baselineGraph = graphPair.getFirst();
-			Graph activeGraph = graphPair.getSecond();
+			Graph baselineGraph = regressionPeriodData.baselineGraph;
+			Graph activeGraph = regressionPeriodData.activeGraph;
+					
+			Collection<EventResult> clonedEvents = cloneEvents(regressionPeriodData.eventMap.values(), false);
+			Map<String, EventResult> clonedEventsMap = getEventsMap(clonedEvents);
 			
-			resetStats(graphData.eventListMap.values());
+			long volume = applyGraphToEvents(clonedEventsMap, activeGraph, null);
 			
-			Pair<Collection<EventResult>, Long> eventsPair = applyGraphToEvents(serviceId, 
-					graphData.eventListMap, timespan, activeGraph, input);
-			
-			Collection<EventResult> events = eventsPair.getFirst();
-			long volume = eventsPair.getSecond().longValue();
-			
-			regressionInput.events = events;
+			Map<String, EventResult> nonEmptyEventsMap = getEventsMap(clonedEventsMap.values(), false);
+						
+			regressionInput.events = nonEmptyEventsMap.values();
 			regressionInput.baselineGraph = baselineGraph;
 			
-			RegressionOutput regressionOutput = regressionFunction.executeRegression(input,regressionInput, 
-				regressionWindow, graphData.eventListMap, volume, baselineGraph, activeGraph);
+			RegressionOutput regressionOutput = regressionFunction.executeRegression(timelineData.input, 
+				regressionInput, regressionWindow, nonEmptyEventsMap, volume, baselineGraph, activeGraph);					
 			
-			RegressionInterval regressionInterval = new RegressionInterval();
+			RegressionInterval regressionInterval = new RegressionInterval(period);
 			
 			regressionInterval.output = regressionOutput;
 						
@@ -674,22 +781,59 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		return result;
 	}
 	
+	private Pair<DateTime, Integer> getIntervalPair(Pair<DateTime, DateTime> timespan,
+		ReportInterval reportInterval) {
+		
+		DateTime periodFrom;
+		int delta;
+		
+		switch (reportInterval) {
+			
+			case Hour:
+				delta = (int)TimeUnit.HOURS.toMinutes(1);
+				periodFrom = timespan.getSecond().withMinuteOfHour(0);
+				break;
+			
+			case Day:
+				delta = (int)TimeUnit.DAYS.toMinutes(1);
+				periodFrom = timespan.getSecond().withMillisOfDay(0);
+				break;
+			
+			case Week:
+				delta = (int)TimeUnit.DAYS.toMinutes(7);
+				periodFrom = timespan.getSecond().withMillisOfDay(0);
+				break;
+			
+			default:
+				throw new IllegalStateException(String.valueOf(reportInterval));
+			
+		}
+		
+		return Pair.of(periodFrom, delta);
+	}
+	
 	private Collection<Pair<DateTime, DateTime>> getIntervalPeriods(Pair<DateTime, DateTime> timespan,
-		int reportInterval) {
+			DateTime start, int delta) {
 		
 		List<Pair<DateTime, DateTime>> result = new ArrayList<Pair<DateTime, DateTime>>();
 		
-		DateTime periodFrom = timespan.getSecond();
-		DateTime periodTo = timespan.getSecond();
+		DateTime periodFrom = start;
+		DateTime periodTo = periodFrom;
+				
+		result.add(Pair.of(periodFrom, timespan.getSecond()));
 		
 		while (periodFrom.isAfter(timespan.getFirst())) {
 			
-			periodFrom = periodFrom.minusMinutes(reportInterval);
+			periodFrom = periodFrom.minusMinutes(delta);
 			
 			if (periodFrom.isAfter(timespan.getFirst())) {
 				result.add(Pair.of(periodFrom, periodTo));
 			} else {
-				result.add(Pair.of(timespan.getFirst(), periodTo));
+				long priodDelta = TimeUnit.MILLISECONDS.toMinutes(periodTo.getMillis() - timespan.getFirst().getMillis());
+				
+				if (priodDelta >= delta) {
+					result.add(Pair.of(timespan.getFirst(), periodTo));
+				}
 			}
 			
 			periodTo = periodFrom;
@@ -699,11 +843,10 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 	}
 	
 	private Pair<Map<DateTime, KpiInterval>, KpiInterval> processRegressions(
-		String serviceId, String viewId, ReliabilityKpiGraphInput input, 
-		Pair<DateTime, DateTime> timespan, Collection<Pair<DateTime, DateTime>> periods,
-		ReliabilityKpi kpi) {
+		String serviceId, String viewId, TimelineData timelineData, 
+		Collection<Pair<DateTime, DateTime>> periods, RelabilityKpi kpi) {
 		
-		GraphDataTask graphTask = new GraphDataTask(serviceId, viewId, input, timespan);
+		GraphDataTask graphTask = new GraphDataTask(serviceId, viewId, timelineData);
 		
 		GraphResultData graphResult;
 		
@@ -714,12 +857,12 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		}
 		
 		Map<DateTime, KpiInterval> intervals = processRegressions(serviceId, 
-			viewId, input, kpi, timespan, periods, graphResult);
+			viewId, timelineData, kpi, periods, graphResult);
 		
 		KpiInterval aggregate;
 		
-		if (input.aggregate) {
-			aggregate = aggregateRegressions(intervals);
+		if (timelineData.input.aggregate) {
+			aggregate = aggregateRegressions(timelineData.timespan, intervals);
 		} else {
 			aggregate = null;	
 		}
@@ -727,46 +870,63 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		return Pair.of(intervals, aggregate);
 	}
 	
-	@SuppressWarnings("unchecked")
-	private Pair<Map<DateTime, KpiInterval>, KpiInterval> processScores(
-			String serviceId, String viewId, ReliabilityKpiGraphInput input, 
-			Pair<DateTime, DateTime> timespan, 
-			Collection<Pair<DateTime, DateTime>> periods, 
-			boolean isKey, ReliabilityKpi kpi) {
-	
-		TransactionGraphTask transactionGraphTask = new TransactionGraphTask(serviceId, viewId, input, timespan);
-		GraphDataTask graphTask = new GraphDataTask(serviceId, viewId, input, timespan);
-
-		List<Object> taskResults = executeTasks(Arrays.asList(new Callable[] {transactionGraphTask, graphTask}), true);
+	private TasksResultData getTaskResults(List<Object> taskResults ) {
 		
-		Collection<TransactionGraph> graphs = null;
-		GraphResultData graphResult = null;
+		TasksResultData result = new TasksResultData();
 		
 		for (Object taskResult : taskResults) {
 			  
-			if (taskResult instanceof Collection<?>) {
-				graphs = (Collection<TransactionGraph>)taskResult;
+			if (taskResult instanceof TransactionResultData) {
+				TransactionResultData transactionResult = (TransactionResultData)taskResult;
+				
+				if (transactionResult.isBaseline) {
+					result.baselineTransactionData = transactionResult;
+				} else {
+					result.activeTransactionData = transactionResult;
+				}
+				
 			} else if (taskResult instanceof GraphResultData) {
-				graphResult = (GraphResultData)taskResult;
+				result.graphResultData = (GraphResultData)taskResult;
 			}
 		}
 		
+		return result;
+		
+	}
+	
+	@SuppressWarnings("unchecked")
+	private Pair<Map<DateTime, KpiInterval>, KpiInterval> processScores(
+			String serviceId, String viewId, TimelineData timelineData,
+			Collection<Pair<DateTime, DateTime>> periods, 
+			boolean isKey, RelabilityKpi kpi) {
+	
+		TransactionGraphTask transactionGraphTask = new TransactionGraphTask(serviceId, viewId, timelineData);
+		
+		TransactionBaselineGraphTask baselineGraphTask = new TransactionBaselineGraphTask(serviceId, 
+			viewId, timelineData);
+
+		GraphDataTask graphTask = new GraphDataTask(serviceId, viewId, timelineData);
+
+		List<Object> taskResults = executeTasks(Arrays.asList(new Callable[] 
+			{transactionGraphTask, baselineGraphTask, graphTask}), true);
+		
+		TasksResultData tasksResultData = getTaskResults(taskResults);
+		
 		NavigableMap<DateTime, KpiInterval> regressionIntervals = processRegressions(serviceId, 
-				viewId, input, kpi, timespan, periods, graphResult);
+				viewId, timelineData, kpi, periods, tasksResultData.graphResultData);
 		
 		NavigableMap<DateTime, KpiInterval> slowdownIntervals = processSlowdowns(serviceId, 
-				viewId, input, periods, graphs);
+				viewId, timelineData, periods, tasksResultData.baselineTransactionData.graphs,
+				tasksResultData.activeTransactionData.graphs);
 		
 		NavigableMap<DateTime, KpiInterval> intervals = getScoreIntervals(serviceId, 
-			isKey, regressionIntervals, slowdownIntervals);
+			isKey, timelineData.input.deductFrom100, regressionIntervals, slowdownIntervals);
 		
 		KpiInterval aggregate;
 		
-		if (input.aggregate) {
-			aggregate = aggregateScores(intervals);
+		if (timelineData.input.aggregate) {
+			aggregate = aggregateScores(timelineData.timespan, intervals);
 		} else {
-			KpiInterval lastInterval = intervals.lastEntry().getValue();
-			intervals.put(timespan.getSecond(), lastInterval);
 			aggregate = null;
 		}
 		
@@ -775,15 +935,15 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 	}
 	
 	private Pair<Map<DateTime, KpiInterval>, KpiInterval> processVolumes(
-			String serviceId, String viewId, ReliabilityKpiGraphInput input, 
-			Pair<DateTime, DateTime> timespan, Collection<Pair<DateTime, DateTime>> periods) {
+			String serviceId, String viewId, TimelineData timelineData, 
+			Collection<Pair<DateTime, DateTime>> periods) {
 	
-		Map<DateTime, KpiInterval> intervals = processVolumesMap(serviceId, viewId, input, timespan, periods);
+		Map<DateTime, KpiInterval> intervals = processVolumesMap(serviceId, viewId, timelineData, periods);
 		
 		KpiInterval aggregate;
 		
-		if (input.aggregate) {
-			aggregate = aggregateVolumes(intervals);
+		if (timelineData.input.aggregate) {
+			aggregate = aggregateVolumes(timelineData.timespan, intervals);
 		} else {
 			aggregate = null;
 		}
@@ -793,25 +953,28 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 	
 	@SuppressWarnings("unchecked")
 	private Pair<Map<DateTime, KpiInterval>, KpiInterval> processSlowdowns(
-			String serviceId, String viewId, ReliabilityKpiGraphInput input, 
-			Pair<DateTime, DateTime> timespan, Collection<Pair<DateTime, DateTime>> periods) {
+			String serviceId, String viewId, TimelineData timelineData, Collection<Pair<DateTime, DateTime>> periods) {
 	
-		TransactionGraphTask txGraphTask = new TransactionGraphTask(serviceId, viewId, input, timespan);
+		TransactionGraphTask transactionGraphTask = new TransactionGraphTask(serviceId, viewId, timelineData);
 		
-		Collection<TransactionGraph> graphs;
-		
-		try {
-			graphs = (Collection<TransactionGraph>)txGraphTask.call();
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
+		TransactionBaselineGraphTask baselineGraphTask = new TransactionBaselineGraphTask(serviceId, 
+			viewId, timelineData);
 
-		Map<DateTime, KpiInterval> intervals = processSlowdowns(serviceId, viewId, input, periods, graphs);
+		GraphDataTask graphTask = new GraphDataTask(serviceId, viewId, timelineData);
+
+		List<Object> taskResults = executeTasks(Arrays.asList(new Callable[] 
+			{transactionGraphTask, baselineGraphTask, graphTask}), true);		
+		
+		TasksResultData tasksResultData = getTaskResults(taskResults);
+		
+		Map<DateTime, KpiInterval> intervals = processSlowdowns(serviceId, viewId, timelineData, 
+			periods, tasksResultData.baselineTransactionData.graphs,
+			tasksResultData.activeTransactionData.graphs);
 		
 		KpiInterval aggregate;
 
-		if (input.aggregate) {
-			aggregate = aggregateSlowdowns(intervals);
+		if (timelineData.input.aggregate) {
+			aggregate = aggregateSlowdowns(timelineData.timespan, intervals);
 		} else {
 			aggregate = null;
 		}
@@ -819,43 +982,38 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		return Pair.of(intervals, aggregate);		
 	}
 	
-	protected List<GraphSeries> processServiceGraph(Collection<String> serviceIds,
-		String serviceId, String viewId, BaseGraphInput input, 
-		Pair<DateTime, DateTime> timespan, Collection<Pair<DateTime, DateTime>> periods,
-		String app, boolean isKey) {
-		
-		ReliabilityKpiGraphInput rkInput =  (ReliabilityKpiGraphInput)input;
-		
-		ReliabilityKpi kpi = rkInput.getKpi();
-		
+	private Map<DateTime, KpiInterval> processServiceKpis(String serviceId, String viewId, 
+		TimelineData timelineData, RelabilityKpi kpi,
+		Collection<Pair<DateTime, DateTime>> periods, boolean isKey) {
+						
 		Pair<Map<DateTime, KpiInterval>, KpiInterval> intervalPair;
 		
 		switch (kpi) {
 			
 			case NewErrors:
 			case SevereNewErrors:
-			case IncreasingErrors:
-			case SevereIncreasingErrors:
+			case ErrorIncreases:
+			case SevereErrorIncreases:
 				
-				intervalPair = processRegressions(serviceId, viewId, rkInput, timespan, periods, kpi);			
+				intervalPair = processRegressions(serviceId, viewId, timelineData, periods, kpi);			
 				break;
 			
 			case Slowdowns:
 			case SevereSlowdowns:
 			
-				intervalPair = processSlowdowns(serviceId, viewId, rkInput, timespan, periods);
+				intervalPair = processSlowdowns(serviceId, viewId, timelineData, periods);
 				break;
 							
 			case ErrorVolume:		
 			case ErrorCount:
 			case ErrorRate:
 				
-				intervalPair = processVolumes(serviceId, viewId, rkInput, timespan, periods);
+				intervalPair = processVolumes(serviceId, viewId, timelineData, periods);
 				break;
 				
 			case Score:
 				
-				intervalPair = processScores(serviceId, viewId, rkInput, timespan, periods, isKey, kpi);
+				intervalPair = processScores(serviceId, viewId, timelineData, periods, isKey, kpi);
 				break;
 				
 			default:
@@ -865,23 +1023,20 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		Map<DateTime, KpiInterval> intervalMap = intervalPair.getFirst();
 		KpiInterval aggregate = intervalPair.getSecond();
 		
-		Map<DateTime, KpiInterval> targetIntervals;
+		Map<DateTime, KpiInterval> result;
 		
 		if (aggregate != null) {
-			targetIntervals = Collections.singletonMap(timespan.getSecond(), aggregate);
+			result = Collections.singletonMap(timelineData.timespan.getSecond(), aggregate);
 		} else {
-			targetIntervals = intervalMap;
+			result = intervalMap;
 		}
-		
-		List<GraphSeries> result = getGraphSeries(serviceIds, serviceId, 
-			rkInput, kpi, targetIntervals, app);
 		
 		return result;
 	}
 	
 	private List<GraphSeries> getGraphSeries(Collection<String> serviceIds,
 		String serviceId, ReliabilityKpiGraphInput input,
-		ReliabilityKpi kpi, Map<DateTime, KpiInterval> intervals,
+		RelabilityKpi kpi, Map<DateTime, KpiInterval> intervals,
 		String app) {
 		
 		Series series = new Series();
@@ -905,7 +1060,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 	}
 	
 	private NavigableMap<DateTime, KpiInterval> getScoreIntervals(String serviceId, 
-		boolean isKey, Map<DateTime, KpiInterval> regressionIntervals, 
+		boolean isKey, boolean deductFrom100, Map<DateTime, KpiInterval> regressionIntervals, 
 		Map<DateTime, KpiInterval> slowdownIntervals) {
 		
 		RegressionReportSettings reportSettings = GrafanaSettings.getData(apiClient, serviceId).regression_report;
@@ -918,26 +1073,28 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		
 		for (Map.Entry<DateTime, KpiInterval> entry : regressionIntervals.entrySet()) {
 			
+			RegressionInterval regressionInterval = (RegressionInterval)(entry.getValue());
 			ScoreInterval scoreInterval = (ScoreInterval)(result.get(entry.getKey()));
 			
 			if (scoreInterval == null) {
-				scoreInterval = new ScoreInterval();
+				scoreInterval = new ScoreInterval(regressionInterval.period);
 				result.put(entry.getKey(), scoreInterval);
 			}
 			
-			scoreInterval.regressionInterval = (RegressionInterval)(entry.getValue());
+			scoreInterval.regressionInterval = regressionInterval;
 		}
 		
 		for (Map.Entry<DateTime, KpiInterval> entry : slowdownIntervals.entrySet()) {
 			
+			SlowdownInterval slowdownInterval =  (SlowdownInterval)(entry.getValue());
 			ScoreInterval scoreInterval = (ScoreInterval)(result.get(entry.getKey()));
 			
 			if (scoreInterval == null) {
-				scoreInterval = new ScoreInterval();
+				scoreInterval = new ScoreInterval(slowdownInterval.period);
 				result.put(entry.getKey(), scoreInterval);
 			}
 			
-			scoreInterval.slowdownInterval = (SlowdownInterval)(entry.getValue());
+			scoreInterval.slowdownInterval = slowdownInterval;
 		}
 		
 		for (KpiInterval kpiInterval : result.values()) {
@@ -957,9 +1114,40 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 				scoreInterval.regressionInterval.severeRegressions, 
 				scoreInterval.slowdownInterval.slowdowns, 
 				scoreInterval.slowdownInterval.severeSlowdowns, 
-				isKey, ReportMode.Applications);
+				isKey, deductFrom100, ReportMode.Applications);
 			
 			scoreInterval.score = scorePair.getFirst().doubleValue();
+		}
+		
+		return result;
+	}
+	
+	public Collection<TaskKpiResult> executeIntervals(Collection<String> serviceIds, 
+			ReliabilityKpiGraphInput input, Pair<DateTime, DateTime> timeSpan) {
+		
+		Collection<Callable<Object>> tasks = getTasks(serviceIds, input, 
+			timeSpan, input.pointsWanted, false, true);
+		
+		List<Object> taskResults;
+		
+		if (tasks.size() > 1) {
+			taskResults	= executeTasks(tasks, true);
+		} else {
+			try {
+				taskResults = Collections.singletonList(tasks.iterator().next().call());
+			}
+			catch (Exception e) {
+				throw new IllegalStateException(e);
+			}
+		}
+		
+		List<TaskKpiResult> result = new ArrayList<TaskKpiResult>();
+		
+		for (Object taskResult : taskResults) {
+			
+			if (taskResult instanceof TaskKpiResult) {
+				result.add((TaskKpiResult)taskResult);
+			}
 		}
 		
 		return result;
@@ -968,6 +1156,59 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 	@Override
 	protected Collection<Callable<Object>> getTasks(Collection<String> serviceIds, BaseGraphInput input,
 			Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
+		return getTasks(serviceIds, input, timeSpan, pointsWanted, true, false);
+	}
+	
+	private TimelineData getTimelineData(ReliabilityKpiGraphInput input ,
+			Pair<DateTime, DateTime> timeSpan,
+			int baselineTimespan, Gson gson, String json, String app) {
+	
+		TimelineData result = new TimelineData();
+		
+		String expandedTimeFilter;
+
+		String timeUnit = TimeUtil.getTimeUnit(input.timeFilter);
+
+		if (timeUnit != null) {
+			
+			int interval = TimeUtil.parseInterval(timeUnit);
+			int expandedInterval = interval + baselineTimespan;
+			
+			expandedTimeFilter = TimeUtil.getLastWindowMinTimeFilter(expandedInterval);
+		} else {
+			expandedTimeFilter = TimeUtil.toTimeFilter(timeSpan.getFirst().minusMinutes(baselineTimespan), 
+				timeSpan.getSecond());
+		}
+		
+		String apps;
+		
+		if (app != null) {
+			apps = app;
+		} else {
+			apps = input.applications;
+		}
+		
+		result.input = gson.fromJson(json, input.getClass());
+		result.input.applications = apps;
+		result.timespan = TimeUtil.getTimeFilter(result.input.timeFilter);
+		
+		result.expandedInput = gson.fromJson(json, input.getClass());
+		result.expandedInput.applications = apps;
+		result.expandedInput.timeFilter = expandedTimeFilter;		
+		result.expandedTimespan = TimeUtil.getTimeFilter(expandedTimeFilter);
+		
+		result.baselineInput = gson.fromJson(json, input.getClass());
+		result.baselineInput.applications = apps;
+		result.baselineTimespan = Pair.of(result.expandedTimespan.getFirst(), result.timespan.getFirst());
+		result.baselineInput.timeFilter = TimeUtil.toTimeFilter(result.baselineTimespan);			
+	
+		return result;
+		
+	}
+	
+	protected Collection<Callable<Object>> getTasks(Collection<String> serviceIds, BaseGraphInput input,
+			Pair<DateTime, DateTime> timeSpan, int pointsWanted, 
+			boolean splitByApp, boolean returnKpi) {
 		
 		List<Callable<Object>> result = new ArrayList<Callable<Object>>();
 
@@ -975,69 +1216,93 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		
 		ReliabilityKpiGraphInput rkInput =  (ReliabilityKpiGraphInput)input;
 				
-		String timeUnit = TimeUtil.getTimeUnit(input.timeFilter);
-		int reportInterval = TimeUtil.parseInterval(rkInput.reportInterval);
+		ReportInterval reportInterval = rkInput.getReportInterval();
 		
-		Collection<Pair<DateTime, DateTime>> periods = getIntervalPeriods(timeSpan, reportInterval);
+		Pair<DateTime, Integer> intervalPair = getIntervalPair(timeSpan, reportInterval);
+		
+		DateTime periodStart = intervalPair.getFirst();
+		int timeDelta = intervalPair.getSecond();
+		
+		Collection<Pair<DateTime, DateTime>> periods = getIntervalPeriods(timeSpan, periodStart, timeDelta);
 		
 		Gson gson = new Gson();
 		String json = gson.toJson(input);
 		
 		AppsGraphFunction appsFunction = new AppsGraphFunction(apiClient);
 		
+		Pair<DateTime, DateTime> regInputwindow = Pair.of(timeSpan.getSecond().minusMinutes(timeDelta), timeSpan.getSecond());
+
 		for (String serviceId : serviceIds) {
 			
-			List<String> keyApps = new ArrayList<String>();
+			String viewId = getViewId(serviceId, input.view);
 			
+			Pair<RegressionInput, RegressionWindow> regInput = regressionFunction.getRegressionInput(serviceId, 
+					viewId, input, regInputwindow, false);
+				
+			int baselineTimespan = regInput.getFirst().baselineTimespan;
+			
+			List<String> keyApps = new ArrayList<String>();
 			GroupSettings appGroups = GrafanaSettings.getData(apiClient, serviceId).applications;
 			
 			if (appGroups != null) {
 				keyApps.addAll(appGroups.getAllGroupNames(true));
 			}
-			
-			String viewId = getViewId(serviceId, input.view);
-			
-			Pair<RegressionInput, RegressionWindow> regInput = regressionFunction.getRegressionInput(serviceId, 
-					viewId, input, Pair.of(timeSpan.getSecond().minusMinutes(reportInterval), timeSpan.getSecond()), false);
-				
-			int baselineTimespan = regInput.getFirst().baselineTimespan;
-			
-			String expandedTimeFilter;
-
-			if (timeUnit != null) {
-				
-				int interval = TimeUtil.parseInterval(timeUnit);
-				int expandedInterval = interval + baselineTimespan;
-				
-				expandedTimeFilter = TimeUtil.getLastWindowMinTimeFilter(expandedInterval);
-			} else {
-				expandedTimeFilter = TimeUtil.toTimeFilter(timeSpan.getFirst().minusMinutes(baselineTimespan), 
-					timeSpan.getSecond());
-			}
+						
+			if (splitByApp) {
 					
-			Pair<DateTime, DateTime> expandedTimeSpan = TimeUtil.getTimeFilter(expandedTimeFilter);
-			
-			Collection<String> apps = appsFunction.getApplications(serviceId, input, rkInput.limit);
-			
-			for (String app : apps) {
+				Collection<String> apps = appsFunction.getApplications(serviceId, input, rkInput.limit);
 				
-				ReliabilityKpiGraphInput appInput = gson.fromJson(json, rkInput.getClass());
+				for (String app : apps) {
+					
+					TimelineData timelineData = getTimelineData(rkInput, timeSpan,
+						baselineTimespan, gson, json, app);
+					
+					boolean isKey = keyApps.contains(app);
+					
+					KpiGraphAsyncTask graphAsyncTask = new KpiGraphAsyncTask(serviceId, viewId, input.view, 
+							timelineData, serviceIds, pointsWanted, app, isKey, periods, returnKpi);
+					
+					result.add(graphAsyncTask);		
+				}		
+			} else {
 				
-				appInput.applications = app;
-				appInput.timeFilter = expandedTimeFilter;
+				TimelineData timelineData = getTimelineData(rkInput, timeSpan,
+						baselineTimespan, gson, json, null);
 				
-				boolean isKey = keyApps.contains(app);
+				Collection<String> inputApps = input.getApplications(apiClient, serviceId);
 				
-				KpiGraphAsyncTask graphAsyncTask = new KpiGraphAsyncTask(serviceId, viewId, input.view, 
-						appInput, expandedTimeSpan, serviceIds, pointsWanted, app, isKey, periods);
+				boolean isKey = isInputKeyApps(keyApps, inputApps);
+			 	
+				KpiGraphAsyncTask graphAsyncTask = new KpiGraphAsyncTask(serviceId, viewId, 
+					input.view, timelineData, serviceIds, 
+					pointsWanted, null, isKey, periods, returnKpi);
 				
-				result.add(graphAsyncTask);		
-			}		
+				result.add(graphAsyncTask);	
+			}
 		}
 		
 		return result;
 	}
 	
+	private boolean isInputKeyApps(Collection<String> keyApps, Collection<String> inputApps) {
+		
+		boolean result;
+		
+	 	if (CollectionUtil.safeIsEmpty(inputApps)) {
+	 		result = false;
+	 	} else {
+	 		result = true;
+	 		
+	 		for (String inputApp : inputApps) {
+		 		if (!keyApps.contains(inputApp)) {
+		 			result = false;
+		 			break;
+		 		}
+		 	}
+	 	}
+	 	
+	 	return result;
+	}
 	
 	@Override
 	public List<Series> process(FunctionInput functionInput) {

@@ -783,6 +783,10 @@ public class ApiCache {
 			if ((input.deployments == null) != (other.input.deployments == null)) {
 				return false;
 			}
+			
+			if (!Objects.equal(input.activeWindowStart, other.input.activeWindowStart)) {
+				return false;
+			}
 
 			if (input.deployments != null) {
 				
@@ -861,7 +865,7 @@ public class ApiCache {
 				return false;
 			}
 			
-			if (!newOnly != other.newOnly) {
+			if (newOnly != other.newOnly) {
 				return false;
 			}
 

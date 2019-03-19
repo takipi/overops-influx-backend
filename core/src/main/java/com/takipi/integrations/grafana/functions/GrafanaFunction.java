@@ -218,9 +218,9 @@ public abstract class GrafanaFunction
 		
 		@Override
 		public Object call() throws Exception
-		{			
+		{		
 			Response<GraphResult> response = ApiCache.getEventGraph(apiClient, serviceId, input, volumeType,
-					builder.build(), pointsWanted, baselineWindow, activeWindow, windowSlice);
+				builder.build(), pointsWanted, baselineWindow, activeWindow, windowSlice);
 			
 			if (response.isBadResponse())
 			{
@@ -783,12 +783,9 @@ public abstract class GrafanaFunction
 		return true;
 	}
 	
-	/**
-	 * @param timeSpan - needed for children 
-	 */
 	protected Collection<TransactionGraph> getBaselineTransactionGraphs(
 		String serviceId, String viewId, BaseEventVolumeInput input, 
-		Pair<DateTime, DateTime> timeSpan, RegressionInput regressionInput, 
+		@SuppressWarnings("unused") Pair<DateTime, DateTime> timeSpan, RegressionInput regressionInput, 
 		RegressionWindow regressionWindow) {
 		
 		BaseEventVolumeInput baselineInput;
@@ -805,7 +802,6 @@ public abstract class GrafanaFunction
 		
 		DateTime baselineStart = regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan);
 
-		
 		Collection<TransactionGraph> result = getTransactionGraphs(baselineInput, serviceId, 
 				viewId, Pair.of(baselineStart, regressionWindow.activeWindowStart), 
 				null, baselineInput.pointsWanted, 
@@ -861,8 +857,9 @@ public abstract class GrafanaFunction
 	private Pair<RegressionInput, RegressionWindow> updateTransactionPerformance(String serviceId, String viewId, 
 			Pair<DateTime, DateTime> timeSpan, BaseEventVolumeInput input, 
 			Map<TransactionKey, TransactionData> transactionDatas) {
-	
+		
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
+		
 		Pair<RegressionInput, RegressionWindow> result = regressionFunction.getRegressionInput(serviceId, 
 				viewId, input, timeSpan, false);
 		
@@ -876,6 +873,15 @@ public abstract class GrafanaFunction
 		Collection<TransactionGraph> baselineTransactionGraphs = getBaselineTransactionGraphs(serviceId, 
 			viewId, input, timeSpan, regressionInput, regressionWindow);
 	
+		updateTransactionPerformance(serviceId, baselineTransactionGraphs, transactionDatas);
+		
+		return result;
+		
+	}
+	
+	protected void updateTransactionPerformance(String serviceId, 
+			Collection<TransactionGraph> baselineTransactionGraphs, 
+			Map<TransactionKey, TransactionData> transactionDatas) {
 
 		SlowdownSettings slowdownSettings = GrafanaSettings.getData(apiClient, serviceId).slowdown;
 		
@@ -927,9 +933,7 @@ public abstract class GrafanaFunction
 					transactionData.baselineInvocations = baselineStats.invocations;
 				}
 			}
-		}
-		
-		return result;
+		}		
 	}
 	
 	private void updateTransactionEvents(String serviceId, Pair<DateTime, DateTime> timeSpan,
@@ -994,6 +998,31 @@ public abstract class GrafanaFunction
 		}
 	}
 	
+	private Map<TransactionKey, TransactionData> getTransactionDatas(Collection<TransactionGraph> transactionGraphs) {
+		
+		Map<TransactionKey, TransactionData> result = new HashMap<TransactionKey, TransactionData>();
+				
+		for (TransactionGraph transactionGraph : transactionGraphs) {	
+			TransactionData transactionData = new TransactionData();	
+			transactionData.graph = transactionGraph;
+			Pair<String, String> pair = getTransactionNameAndMethod(transactionGraph.name, true);
+			TransactionKey key = TransactionKey.of(pair.getFirst(), pair.getSecond());
+			result.put(key, transactionData);
+		}
+		
+		return result;
+		
+	}
+	
+	protected Map<TransactionKey, TransactionData> getTransactionDatas(String serviceId,
+			Collection<TransactionGraph> transactionGraphs,
+			Collection<TransactionGraph> baselineGraphs) {
+		
+		Map<TransactionKey, TransactionData> result = getTransactionDatas(transactionGraphs);
+		updateTransactionPerformance(serviceId, baselineGraphs, result);
+		
+		return result;
+	}
 	
 	protected TransactionDataResult getTransactionDatas(Collection<TransactionGraph> transactionGraphs,
 			String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
@@ -1004,15 +1033,7 @@ public abstract class GrafanaFunction
 		}
 		
 		TransactionDataResult result = new TransactionDataResult();
-		result.items = new HashMap<TransactionKey, TransactionData>();
-				
-		for (TransactionGraph transactionGraph :transactionGraphs) {	
-			TransactionData transactionData = new TransactionData();	
-			transactionData.graph = transactionGraph;
-			Pair<String, String> pair = getTransactionNameAndMethod(transactionGraph.name, true);
-			TransactionKey key = TransactionKey.of(pair.getFirst(), pair.getSecond());
-			result.items.put(key, transactionData);
-		}
+		result.items = getTransactionDatas(transactionGraphs);
 		
 		if (updateEvents) {
 			
@@ -1516,7 +1537,18 @@ public abstract class GrafanaFunction
 		return result;
 	}
 	
-	protected Graph mergeGraphs(Collection<GraphSliceTaskResult> graphTasks ) {
+	protected boolean timespanContains(DateTime start, DateTime end, DateTime value) {
+		
+		if ((value.getMillis() > start.getMillis()) 
+		&& (value.getMillis() <= end.getMillis())) {
+
+			return true;
+		}
+		
+		return false;
+	}
+	
+	protected Graph mergeGraphs(Collection<GraphSliceTaskResult> graphTasks) {
 		
 		if (graphTasks.size() == 0) {
 			return null;
@@ -1543,8 +1575,8 @@ public abstract class GrafanaFunction
 			}
 			
 			for (GraphPoint gp : graphSliceTaskResult.graph.points) {
-				long epoch = TimeUtil.getLongTime(gp.time);
-				graphPoints.put(Long.valueOf(epoch), gp);
+				DateTime dateTime = TimeUtil.getDateTime(gp.time);
+				graphPoints.put(Long.valueOf(dateTime.getMillis()), gp);
 			}			
 		}
 		
@@ -1622,17 +1654,39 @@ public abstract class GrafanaFunction
 		}
 	}
 	
-	protected Pair<Collection<EventResult>, Long> applyGraphToEvents(String serviceId, 
-			Map<String, EventResult> eventListMap, Pair<DateTime, DateTime> timespan,
-			Graph graph, BaseEventVolumeInput input)
-	{
+	protected Pair<Map<String, EventResult>, Long> filterEvents(String serviceId, 
+		Pair<DateTime, DateTime> timespan, BaseEventVolumeInput input, 
+		Collection<EventResult> events) {
+	
 		EventFilter eventFilter = getEventFilter(serviceId, input, timespan);
 		
 		if (eventFilter == null) {
-			return Pair.of(Collections.emptyList(), Long.valueOf(0l));
+			return Pair.of(Collections.emptyMap(), Long.valueOf(0l));
 		}
 		
 		long volume = 0;
+		
+		Map<String, EventResult> filteredEvents = new HashMap<String, EventResult>();
+		
+		for (EventResult event : events) {	
+			
+			if (eventFilter.filter(event)) {
+				continue;
+			}
+			
+			filteredEvents.put(event.id, event);
+			volume += event.stats.hits;
+		}
+		
+		Pair<Map<String, EventResult>, Long> result = Pair.of(filteredEvents, Long.valueOf(volume));		
+		
+		return result;
+	}
+	
+	protected long applyGraphToEvents(Map<String, EventResult> eventListMap, 
+		Graph graph, Pair<DateTime, DateTime> timespan) {
+		
+		long result = 0;
 		
 		for (GraphPoint gp : graph.points)
 		{
@@ -1642,6 +1696,15 @@ public abstract class GrafanaFunction
 				continue;
 			}
 			
+			if (timespan != null) {
+				
+				DateTime gpTime = TimeUtil.getDateTime(gp.time);
+				
+				if (!timespanContains(timespan.getFirst(), timespan.getSecond(), gpTime)) {
+					continue;
+				}
+			}
+	
 			for (GraphPointContributor gpc : gp.contributors)
 			{		
 				EventResult event = eventListMap.get(gpc.id);
@@ -1650,26 +1713,14 @@ public abstract class GrafanaFunction
 				{
 					event.stats.invocations += gpc.stats.invocations;
 					event.stats.hits += gpc.stats.hits;
-					volume += gpc.stats.hits;
+					result += gpc.stats.hits;
 				}
 			}
 		}
 		
-		Map<String, EventResult> filteredEvents = new HashMap<String, EventResult>();
-		
-		for (EventResult event : eventListMap.values())
-		{	
-			if (eventFilter.filter(event))
-			{
-				continue;
-			}
-			
-			filteredEvents.put(event.id, event);
-		}
-		
-		return Pair.of(filteredEvents.values(), Long.valueOf(volume));
+		return result;
 	}
-	
+		
 	private Collection<EventResult> getEventListFromGraph(String serviceId, String viewId, ViewInput input,
 			DateTime from, DateTime to,
 			VolumeType volumeType, int pointsCount)
@@ -1770,7 +1821,13 @@ public abstract class GrafanaFunction
 			return null;
 		}
 		
-		List<EventResult> eventsCopy = new ArrayList<EventResult>(events.size());
+		return cloneEvents(events, false);
+		
+	}
+	
+	protected Collection<EventResult> cloneEvents(Collection<EventResult> events, boolean copyStats) {
+		
+		List<EventResult> result = new ArrayList<EventResult>(events.size());
 		
 		try
 		{
@@ -1778,7 +1835,14 @@ public abstract class GrafanaFunction
 			{
 				EventResult clone = (EventResult)event.clone();
 				clone.stats = new Stats();
-				eventsCopy.add(clone);
+				
+				if (copyStats) {
+					clone.stats.hits = event.stats.hits;
+					clone.stats.invocations = event.stats.invocations;
+
+				}
+				
+				result.add(clone);
 			}
 		}
 		catch (CloneNotSupportedException e)
@@ -1787,17 +1851,24 @@ public abstract class GrafanaFunction
 			
 		}
 		
-		return eventsCopy;
+		return result;
 	}
 	
-	private static Map<String, EventResult> getEventsMap(Collection<EventResult> events)
+	protected static Map<String, EventResult> getEventsMap(Collection<EventResult> events)
+	{
+		return getEventsMap(events, true);
+	}
+	
+	protected static Map<String, EventResult> getEventsMap(Collection<EventResult> events, boolean allowNoHits)
 	{
 		
 		Map<String, EventResult> result = new HashMap<String, EventResult>();
 		
 		for (EventResult event : events)
 		{
-			result.put(event.id, event);
+			if ((allowNoHits) || (event.stats.hits > 0)) {
+				result.put(event.id, event);
+			}
 		}
 		
 		return result;

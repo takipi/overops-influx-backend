@@ -43,6 +43,7 @@ public class BaselineWindowFunction extends EnvironmentVariableFunction
 	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender)
 	{		
+		
 		BaselineWindowInput bwInput = (BaselineWindowInput)input;
 		
 		String viewId = getViewId(serviceId, bwInput.view);

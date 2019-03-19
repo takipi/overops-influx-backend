@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 29,
-  "iteration": 1551951757540,
+  "iteration": 1552989121813,
   "links": [
     {
       "icon": "dashboard",
@@ -37,7 +37,7 @@
       "tags": [],
       "tooltip": "Home",
       "type": "link",
-      "url": "d/lg0U4qriz/home"
+      "url": "/d/lg0U4qriz/home"
     },
     {
       "asDropdown": true,
@@ -262,7 +262,7 @@
       },
       "id": 34,
       "links": [],
-      "pageSize": 50,
+      "pageSize": 10,
       "scroll": true,
       "showHeader": true,
       "sort": {
@@ -663,7 +663,7 @@
           "tags": []
         }
       ],
-      "title": "",
+      "title": "$newEventCount Events",
       "transform": "table",
       "type": "table"
     }
@@ -992,6 +992,31 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "newEventCount",
+        "options": [],
+        "query": "regressions({\"fields\":\"link,jira_issue_url,reg_desc,description,severity,typeMessage,stats.hits,rate,introduced_by,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":120, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"render\":\"SingleStat\", \"searchText\":\"$search\", \"regressionTypes\":\"NewIssues,SevereNewIssues\", \"first_seen\":\"$timeFilter\", \"timeFilterVar\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
@@ -1028,5 +1053,5 @@
   "timezone": "",
   "title": "New Errors",
   "uid": "3NZ83NLik",
-  "version": 106
+  "version": 108
 }

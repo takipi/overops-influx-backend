@@ -77,6 +77,11 @@ public class RegressionsInput extends EventsInput
 		SingleStatDesc,
 		
 		/**
+		 * return a the count of events returned
+		 */
+		SingleStatCount,
+		
+		/**
 		 * return a table with each row depicting a new or increasing error
 		 */
 		Grid,
@@ -108,6 +113,11 @@ public class RegressionsInput extends EventsInput
 	/**
 	 * Additional fields supported by this functions
 	 */
+	
+	/**
+	 * The max number of event tooltips to show on hover
+	 */
+	public static int MAX_TOOLTIP_ITEMS = 3;
 	
 	/**
 	 * Value of the regression rate

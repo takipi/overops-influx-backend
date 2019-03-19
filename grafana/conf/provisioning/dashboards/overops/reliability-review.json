@@ -14,7 +14,7 @@
       },
       {
         "datasource": "OO",
-        "enable": false,
+        "enable": true,
         "hide": false,
         "iconColor": "#0a50a1",
         "limit": 100,
@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 36,
-  "iteration": 1552445613150,
+  "iteration": 1552989027362,
   "links": [
     {
       "icon": "bolt",
@@ -281,7 +281,7 @@
       "dashes": false,
       "datasource": "OO",
       "description": "Chart the $graphType of the key applications. Key applications are marked with * and appear first followed by live applications up to limit of  $limit applications in total.",
-      "fill": 0,
+      "fill": 1,
       "gridPos": {
         "h": 9,
         "w": 24,
@@ -460,11 +460,9 @@
       {
         "allValue": "all",
         "current": {
-          "tags": [],
+          "selected": true,
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -487,6 +485,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -511,6 +510,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -535,6 +535,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -559,7 +560,7 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "All Events",
           "value": "All Events"
         },
@@ -582,6 +583,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -606,6 +608,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -630,6 +633,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -655,7 +659,6 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "tags": [],
           "text": "10",
           "value": "10"
         },
@@ -666,12 +669,12 @@
         "name": "limit",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "5",
             "value": "5"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "10",
             "value": "10"
           }
@@ -695,8 +698,8 @@
         "options": [
           {
             "selected": false,
-            "text": "NewErrors",
-            "value": "NewErrors"
+            "text": "New Errors",
+            "value": "New Errors"
           },
           {
             "selected": false,
@@ -705,13 +708,13 @@
           },
           {
             "selected": false,
-            "text": "Increasing Errors",
-            "value": "Increasing Errors"
+            "text": "Error Increases",
+            "value": "Error Increases"
           },
           {
             "selected": false,
-            "text": "Severe Increasing Errors",
-            "value": "Severe Increasing Errors"
+            "text": "Severe Error Increases",
+            "value": "Severe Error Increases"
           },
           {
             "selected": false,
@@ -724,7 +727,7 @@
             "value": "Severe Slowdowns"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "Error Volume",
             "value": "Error Volume"
           },
@@ -739,12 +742,12 @@
             "value": "Error Rate"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "Score",
             "value": "Score"
           }
         ],
-        "query": "NewErrors, Severe New Errors, Increasing Errors, Severe Increasing Errors, Slowdowns, Severe Slowdowns, Error Volume, Error Count, Error Rate, Score",
+        "query": "New Errors,Severe New Errors,Error Increases,Severe Error Increases,Slowdowns,Severe Slowdowns,Error Volume,Error Count,Error Rate,Score",
         "skipUrlSync": false,
         "type": "custom"
       },
@@ -843,6 +846,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -867,6 +871,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -891,6 +896,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -972,5 +978,5 @@
   "timezone": "",
   "title": "Reliability Review",
   "uid": "82eIMSsmz",
-  "version": 71
+  "version": 74
 }
