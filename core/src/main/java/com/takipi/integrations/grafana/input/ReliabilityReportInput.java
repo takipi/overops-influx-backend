@@ -63,6 +63,8 @@ public class ReliabilityReportInput extends RegressionsInput {
 		 */
 		Tiers,
 		
+		Tiers_Extended,
+		
 		/**
 		 * The report will return a a single row each day within the timeframe
 		 */
@@ -554,7 +556,7 @@ public class ReliabilityReportInput extends RegressionsInput {
 	/**
 	 * The list of default fields returned for extended app reporting
 	 */
-	public static final List<String> DEFAULT_APP_EXT_FIELDS = Arrays.asList(
+	public static final List<String> DEFAULT_EXTENDED_FIELDS = Arrays.asList(
 		 new String[] { 	
 			ViewInput.FROM, 
 			ViewInput.TO, 

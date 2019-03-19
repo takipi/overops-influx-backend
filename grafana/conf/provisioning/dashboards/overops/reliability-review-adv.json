@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 44,
-  "iteration": 1552989043460,
+  "iteration": 1553032865671,
   "links": [
     {
       "asDropdown": true,
@@ -674,7 +674,7 @@
       "dashes": false,
       "datasource": "OO",
       "description": "Chart the $graphType of the key applications. Key applications are marked with * and appear first followed by live applications up to limit of  $limit applications in total.",
-      "fill": 0,
+      "fill": 1,
       "gridPos": {
         "h": 9,
         "w": 12,
@@ -878,9 +878,8 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
+          "text": "all",
+          "value": "all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -903,9 +902,8 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
+          "text": "all",
+          "value": "all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1119,9 +1117,9 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "text": "10",
-          "value": "10"
+          "selected": false,
+          "text": "5",
+          "value": "5"
         },
         "hide": 0,
         "includeAll": false,
@@ -1130,12 +1128,12 @@
         "name": "limit",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "5",
             "value": "5"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "10",
             "value": "10"
           }
@@ -1371,5 +1369,5 @@
   "timezone": "",
   "title": "Reliability Review Adv",
   "uid": "NmADICjik",
-  "version": 9
+  "version": 10
 }

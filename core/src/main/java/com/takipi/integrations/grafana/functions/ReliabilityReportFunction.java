@@ -476,6 +476,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 				result.deployments = name;
 				break;
 				
+			case Tiers_Extended:
 			case Tiers:
 				List<String> types = new ArrayList<String>();
 				Collection<String> inputTypes = reportInput.getTypes(apiClient, serviceId);
@@ -517,13 +518,14 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		switch (rrInput.getReportMode()) {
 			
+			case Tiers:
 			case Applications:
 				return ReliabilityReportInput.DEFAULT_APP_FIELDS;
 				
-			case Tiers:
 			case Apps_Extended:
 			case Timeline_Extended:
-				return ReliabilityReportInput.DEFAULT_APP_EXT_FIELDS;
+			case Tiers_Extended:
+				return ReliabilityReportInput.DEFAULT_EXTENDED_FIELDS;
 			
 			case Deployments:
 				return ReliabilityReportInput.DEFAULT_DEP_FIELDS;
@@ -1006,6 +1008,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 				break;
 					
 			case Tiers: 
+			case Tiers_Extended:
 				keys = getTiers(serviceId, regInput, timeSpan);
 				break;
 				
@@ -1139,7 +1142,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		double criticalRegressionsScore = severeRegressions  * reportSettings.critical_regression_score;
 		double regressionsScore = regressions * reportSettings.regression_score;
 		
-		if (reportMode != ReportMode.Tiers) {
+		if ((reportMode != ReportMode.Tiers) && (reportMode != ReportMode.Tiers_Extended)) {
 			criticalRegressionsScore += severeSlowdowns * reportSettings.critical_regression_score;
 			regressionsScore += slowdowns * reportSettings.regression_score;
 		}
@@ -1211,7 +1214,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		int allIssuesCount = regressionOutput.newIssues + regressionOutput.severeNewIssues + 
 				regressionOutput.criticalRegressions + regressionOutput.regressions;
 		
-		if (reportMode != ReportMode.Tiers) {
+		if ((reportMode != ReportMode.Tiers) &  (reportMode != ReportMode.Tiers_Extended)) {
 			allIssuesCount += reportKeyResults.slowdowns + reportKeyResults.severeSlowdowns;
 		}
 		
@@ -1225,7 +1228,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			addDeduction("error increase", regressionOutput.regressions, reportSettings.regression_score, deductions);
 			addDeduction("severe error increase", regressionOutput.criticalRegressions, reportSettings.critical_regression_score, deductions);
 			
-			if (reportMode != ReportMode.Tiers) {
+			if ((reportMode != ReportMode.Tiers) && (reportMode != ReportMode.Tiers_Extended)) {
 				addDeduction("slowdown", reportKeyResults.slowdowns, reportSettings.regression_score, deductions);
 				addDeduction("severe slowdown", reportKeyResults.severeSlowdowns, reportSettings.critical_regression_score, deductions);
 			}
@@ -1834,6 +1837,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 				break;
 		
 			case Tiers:
+			case Tiers_Extended:
 				failureInput.types = GroupSettings.toGroupName(reportKeyResult.output.reportKey.name);
 				break;
 				
@@ -2065,14 +2069,14 @@ public class ReliabilityReportFunction extends EventsFunction {
 
 		if (reliabilityData.failRateState != ReliabilityState.OK) {
 			
-			failDelta.append(" up from ");
+			failDelta.append(" from ");
 			failDelta.append(formatRate(baseFailRate, true));
 		}
 		
 		failureDesc.append(failDelta);
 		failureDesc.append(") in ");
 		failureDesc.append(formatLongValue(transactionData.transactionVolume));
-		failureDesc.append(" transactions");
+		failureDesc.append(" calls");
 		
 		StringBuilder relabilityDesc = new StringBuilder();
 		
@@ -2341,9 +2345,9 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			switch (rrInput.getReportMode()) {
 				
-				case Tiers:
 				case Apps_Extended:
 				case Timeline_Extended:
+				case Tiers_Extended:
 					addAppExtendedFields(rrInput, row, reportKeyResult, serviceValue);	
 					break;
 				case Deployments:
@@ -2552,7 +2556,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		String rateStr;
 			
 		if (appReliabilityData.failureRateDelta > 1) {
-			rateStr = "Δ>100%";	 
+			rateStr = ">100%";	 
 		} else {		
 			if (stringFormat) {
 				rateStr = "+" + formatRate(appReliabilityData.failureRateDelta, false);

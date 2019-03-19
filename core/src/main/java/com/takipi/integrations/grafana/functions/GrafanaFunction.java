@@ -2074,11 +2074,11 @@ public abstract class GrafanaFunction
 	protected static String formatLongValue(long value) {
 		
 		if (value > 1000000000) {
-			return singleDigitFormatter.format(value / 1000000000.0) + " Bil";
+			return singleDigitFormatter.format(value / 1000000000.0) + "B";
 		}
 		
 		if (value > 1000000) {
-			return singleDigitFormatter.format(value / 1000000.0) + " Mil";
+			return singleDigitFormatter.format(value / 1000000.0) + "M";
 		}
 		
 		if (value > 1000) {
@@ -2102,7 +2102,16 @@ public abstract class GrafanaFunction
 			df = singleDigitFormatter; 
 		}
 		
-		return df.format(value * 100) + "%";
+		String result;
+		String strValue = df.format(value * 100) + "%";
+		
+		if (strValue.startsWith("0.")) {
+			result = strValue.substring(1);
+		} else {
+			result = strValue;
+		}
+		
+		return result;
 	} 
 
 	protected List<Series> createSingleStatSeries(Pair<DateTime, DateTime> timespan, Object singleStat)

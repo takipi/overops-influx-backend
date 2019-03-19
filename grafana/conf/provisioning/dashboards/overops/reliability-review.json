@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 36,
-  "iteration": 1552989027362,
+  "iteration": 1553032850714,
   "links": [
     {
       "icon": "bolt",
@@ -209,7 +209,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "ReliabilityKpiGraph({\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"$type\",\"limit\":\"$limit\", \"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"interval\":\"$__interval\", \"reportInterval\":\"24h\", \"kpi\":\"$kpi\", \"aggregate\":\"true\"})",
+          "query": "ReliabilityKpiGraph({\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"$type\",\"limit\":\"$limit\", \"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"interval\":\"$__interval\", \"reportInterval\":\"24h\", \"kpi\":\"$kpi\", \"aggregate\":\"true\", \"deductFrom100\":\"true\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -281,7 +281,7 @@
       "dashes": false,
       "datasource": "OO",
       "description": "Chart the $graphType of the key applications. Key applications are marked with * and appear first followed by live applications up to limit of  $limit applications in total.",
-      "fill": 1,
+      "fill": 0,
       "gridPos": {
         "h": 9,
         "w": 24,
@@ -303,7 +303,7 @@
         "values": false
       },
       "lines": true,
-      "linewidth": 1,
+      "linewidth": 2,
       "links": [
         {
           "dashboard": "Errors",
@@ -317,7 +317,7 @@
       ],
       "nullPointMode": "null",
       "percentage": false,
-      "pointradius": 1,
+      "pointradius": 0.5,
       "points": true,
       "renderer": "flot",
       "repeat": null,
@@ -385,7 +385,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "ReliabilityKpiGraph({\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"$type\",\"limit\":\"$limit\", \"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"interval\":\"$__interval\", \"reportInterval\":\"24h\", \"kpi\":\"$kpi\"})",
+          "query": "ReliabilityKpiGraph({\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"$type\",\"limit\":\"$limit\", \"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"interval\":\"$__interval\", \"reportInterval\":\"24h\", \"kpi\":\"$kpi\", \"deductFrom100\":\"true\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -485,9 +485,8 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
+          "text": "all",
+          "value": "all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -510,9 +509,8 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
+          "text": "all",
+          "value": "all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -560,7 +558,7 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "All Events",
           "value": "All Events"
         },
@@ -658,9 +656,9 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "text": "10",
-          "value": "10"
+          "selected": false,
+          "text": "5",
+          "value": "5"
         },
         "hide": 0,
         "includeAll": false,
@@ -669,12 +667,12 @@
         "name": "limit",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "5",
             "value": "5"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "10",
             "value": "10"
           }
@@ -978,5 +976,5 @@
   "timezone": "",
   "title": "Reliability Review",
   "uid": "82eIMSsmz",
-  "version": 74
+  "version": 76
 }

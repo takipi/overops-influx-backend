@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 20,
-  "iteration": 1552984122526,
+  "iteration": 1553032746045,
   "links": [
     {
       "icon": "dashboard",
@@ -1209,7 +1209,7 @@
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 5,
+        "col": 6,
         "desc": true
       },
       "styles": [
@@ -1594,7 +1594,7 @@
         },
         {
           "alias": "Δ%",
-          "colorMode": "value",
+          "colorMode": null,
           "colors": [
             "rgba(50, 172, 45, 0.97)",
             "rgba(237, 129, 40, 0.89)",
@@ -1633,7 +1633,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "events({\"fields\":\"link,rate_desc,description,rate_delta_desc,stats.hits,rate_delta,typeMessage\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":80, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
+          "query": "events({\"fields\":\"link,rate_desc,description,rate_delta_desc,stats.hits,rate_delta,typeMessage\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":60, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -2475,12 +2475,8 @@
       {
         "allValue": "all",
         "current": {
-          "selected": false,
-          "tags": [],
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2503,7 +2499,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2552,7 +2547,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2600,7 +2594,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2626,9 +2619,7 @@
         "allValue": "*",
         "current": {
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -3024,8 +3015,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "amazon",
-          "value": "amazon"
+          "tags": [],
+          "text": "<term>",
+          "value": "<term>"
         },
         "hide": 0,
         "includeAll": false,
@@ -3069,5 +3061,5 @@
   "timezone": "",
   "title": "Reliability Analysis",
   "uid": "4DHQ63-ik",
-  "version": 245
+  "version": 251
 }
