@@ -882,6 +882,7 @@ public class ApiCache {
 			return true;
 		}
 		
+		/*
 		@Override
 		protected boolean compareTimeframes(ViewInputCacheLoader other)
 		{
@@ -891,6 +892,7 @@ public class ApiCache {
 				return super.compareTimeframes(other);
 			}
 		}
+		*/
 
 		public RegressionCacheLoader(ApiClient apiClient, String serviceId, 
 				ViewInput input, RegressionFunction function, boolean newOnly) {
