@@ -26,7 +26,6 @@ import com.takipi.api.client.result.event.EventSlimResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
 import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.regression.RegressionInput;
-import com.takipi.api.client.util.regression.RegressionStringUtil;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.url.UrlClient.Response;
@@ -507,13 +506,7 @@ public class EventsFunction extends GrafanaFunction {
 				return "";
 			}
 			
-			StringBuilder result = new StringBuilder();
-			
-			result.append(formatRate(ratePair.getSecond(), true));
-			result.append(" up from ");
-			result.append(formatRate(ratePair.getFirst(), true));
-			
-			return result.toString(); 
+			return formatRateDelta(eventData.baselineStats, eventData.event.stats);
 		}
 	}
 		
@@ -624,7 +617,11 @@ public class EventsFunction extends GrafanaFunction {
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
 				Pair<DateTime, DateTime> timeSpan) {
 
-			return RegressionStringUtil.getEventRate(eventData.event, true);
+			if (eventData.event.stats.invocations == 0) {
+				return formatLongValue(eventData.event.stats.hits);
+			}
+	
+			return formatRate(eventData.event.stats);
 		}
 
 	}
@@ -700,6 +697,41 @@ public class EventsFunction extends GrafanaFunction {
 	
 	public EventsFunction(ApiClient apiClient) {
 		super(apiClient);
+	}
+	
+	protected static String formatRateDelta(Stats baseline, Stats stats) {
+		
+		StringBuilder result = new StringBuilder();
+		
+		result.append(formatRate(stats));
+		result.append(" up from ");
+		result.append(formatRate(baseline));
+	
+		return result.toString(); 
+	}
+	
+	protected static String formatRate(Stats stats) {
+		return formatRate(stats.hits, stats.invocations);
+	}
+	
+	protected static String formatRate(long hits, long invocations) {
+		
+		if (invocations == 0) {
+			return String.valueOf(hits);
+		}
+		
+		double rate = (double)hits / (double)invocations;
+
+		StringBuilder result = new StringBuilder();
+		
+		result.append(formatLongValue(hits));
+		result.append(" in ");
+		result.append(formatLongValue(invocations));
+		result.append(" calls (");
+		result.append(formatRate(rate, true));		
+		result.append(")");
+		
+		return result.toString();
 	}
 	
 	private static Pair<Double, Double> getRatePair(EventData eventData) {

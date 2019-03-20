@@ -82,6 +82,11 @@ public class RegressionsInput extends EventsInput
 		SingleStatCount,
 		
 		/**
+		 * return a the volume of events returned
+		 */
+		SingleStatVolume,
+		
+		/**
 		 * return a table with each row depicting a new or increasing error
 		 */
 		Grid,

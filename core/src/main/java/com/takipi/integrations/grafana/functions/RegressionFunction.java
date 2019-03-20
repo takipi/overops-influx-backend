@@ -1229,7 +1229,7 @@ public class RegressionFunction extends EventsFunction {
 		return result.toString();
 	}
 		
-	private double getServiceSingleStat(String serviceId, RegressionsInput input)
+	private double getServiceSingleStatCount(String serviceId, RegressionsInput input)
 	{
 		RegressionOutput regressionOutput = runRegression(serviceId, input);
 		
@@ -1248,20 +1248,20 @@ public class RegressionFunction extends EventsFunction {
 		return result;
 	}
 	
-	private double getSingleStat(Collection<String> serviceIds, RegressionsInput input)
+	private double getSingleStatCount(Collection<String> serviceIds, RegressionsInput input)
 	{
 		
 		double result = 0;
 		
 		for (String serviceId : serviceIds)
 		{
-			result += getServiceSingleStat(serviceId, input);
+			result += getServiceSingleStatCount(serviceId, input);
 		}
 		
 		return result;
 	}
 	
-	private List<Series> processSingleStat(RegressionsInput input)
+	private List<Series> processSingleStatCount(RegressionsInput input)
 	{
 		
 		Collection<String> serviceIds = getServiceIds(input);
@@ -1279,7 +1279,7 @@ public class RegressionFunction extends EventsFunction {
 		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
 		
 		Object singleStatText;
-		double singleStatValue = getSingleStat(serviceIds, input);
+		double singleStatValue = getSingleStatCount(serviceIds, input);
 			
 		if (input.singleStatFormat != null) {
 			
@@ -1295,6 +1295,51 @@ public class RegressionFunction extends EventsFunction {
 		
 		
 		return createSingleStatSeries(timeSpan, singleStatText);
+	}
+	
+	private List<Series> processSingleStatVolume(RegressionsInput input)
+	{
+		
+		Collection<String> serviceIds = getServiceIds(input);
+		
+		if (CollectionUtil.safeIsEmpty(serviceIds)) {
+			return Collections.emptyList();
+		}
+		
+		Collection<RegressionType> regressionTypes = input.getRegressionTypes();
+
+		if (regressionTypes == null) {
+			return Collections.emptyList();
+		}
+		
+		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
+		
+		long singleStatValue = 0;
+		
+		for (String serviceId : serviceIds)
+		{
+			RegressionOutput regressionOutput = runRegression(serviceId, input);
+			
+			if ((regressionOutput == null) || (regressionOutput.empty))
+			{
+				continue;
+			}
+						
+			for (EventData eventData : regressionOutput.eventDatas) {
+				
+				RegressionData regData = (RegressionData)eventData;
+				
+				if (!regressionTypes.contains(regData.type)) {
+					continue;
+				}
+				
+				singleStatValue += regData.event.stats.hits;
+			}
+			
+			singleStatValue += getServiceSingleStatCount(serviceId, input);
+		}
+					
+		return createSingleStatSeries(timeSpan, singleStatValue);
 	}
 	
 	private List<Series> processSingleStatDesc(RegressionsInput input) {
@@ -1358,20 +1403,24 @@ public class RegressionFunction extends EventsFunction {
 		}
 		
 		switch (regInput.render) {
+			
 			case Grid:
 				return super.process(functionInput);
 			
 			case Graph:
-				throw new IllegalStateException("Graph not supported");
+				throw new IllegalStateException("Graph not supported. Use RegressionGraph");
 				
 			case SingleStat:
-				return processSingleStat(regInput);
+				return processSingleStatCount(regInput);
 				
 			case SingleStatDesc:
 				return processSingleStatDesc(regInput);
 				
 			case SingleStatCount:
-				return processSingleStat(regInput);
+				return processSingleStatCount(regInput);
+				
+			case SingleStatVolume:
+				return processSingleStatVolume(regInput);
 			
 			default: 
 				throw new IllegalStateException(String.valueOf(regInput.render));

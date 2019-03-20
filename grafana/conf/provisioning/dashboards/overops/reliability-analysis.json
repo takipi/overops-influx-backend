@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 20,
-  "iteration": 1553032746045,
+  "iteration": 1553058474922,
   "links": [
     {
       "icon": "dashboard",
@@ -1179,7 +1179,7 @@
           "tags": []
         }
       ],
-      "title": "New Errors",
+      "title": "$nec New, Volume = $nev",
       "transform": "table",
       "type": "table"
     },
@@ -1209,8 +1209,8 @@
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 6,
-        "desc": true
+        "col": null,
+        "desc": false
       },
       "styles": [
         {
@@ -1654,7 +1654,7 @@
           "tags": []
         }
       ],
-      "title": "$eventCount Errors",
+      "title": "$eventCount Errors, Volume = $e",
       "transform": "table",
       "type": "table"
     },
@@ -2459,7 +2459,7 @@
           "tags": []
         }
       ],
-      "title": "Increasing Errors",
+      "title": "$iec Inc Errors, Volume = $iev",
       "transform": "table",
       "type": "table"
     }
@@ -2475,6 +2475,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "None",
           "value": "None"
         },
@@ -2499,8 +2500,8 @@
       {
         "allValue": "all",
         "current": {
-          "text": "All",
-          "value": "$__all"
+          "text": "all",
+          "value": "all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2523,8 +2524,8 @@
       {
         "allValue": "all",
         "current": {
-          "text": "All",
-          "value": "$__all"
+          "text": "all",
+          "value": "all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2977,7 +2978,7 @@
         "multi": false,
         "name": "e",
         "options": [],
-        "query": "volume({\"type\":\"sum\",\"volumeType\":\"hits\",\"eventVolumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\",\"types\":\"$type\",\"transactions\":\"$transactions\",\"filter\":\"events\", \"pointsWanted\":\"$pointsWanted\", \"varTimeFilter\":\"true\", \"searchText\":\"$search\"})",
+        "query": "volume({\"type\":\"sum\",\"volumeType\":\"hits\",\"eventVolumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\",\"types\":\"$type\",\"transactions\":\"$transactions\",\"filter\":\"events\", \"pointsWanted\":\"$pointsWanted\", \"varTimeFilter\":\"true\", \"searchText\":\"$search\", \"stringValue\":\"true\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -3034,6 +3035,106 @@
         "query": "<term>",
         "skipUrlSync": false,
         "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": "newErrCount",
+        "multi": false,
+        "name": "nec",
+        "options": [],
+        "query": "regressions({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"render\":\"SingleStat\", \"regressionTypes\":\"NewIssues,SevereNewIssues\", \"searchText\":\"$search\", \"timeFilterVar\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": "newErrVol",
+        "multi": false,
+        "name": "nev",
+        "options": [],
+        "query": "regressions({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"render\":\"SingleStatVolume\", \"regressionTypes\":\"NewIssues,SevereNewIssues\", \"searchText\":\"$search\", \"timeFilterVar\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": "IncErrCount",
+        "multi": false,
+        "name": "iec",
+        "options": [],
+        "query": "regressions({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"render\":\"SingleStat\", \"regressionTypes\":\"Regressions,SevereRegressions\", \"searchText\":\"$search\", \"timeFilterVar\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": "incErroVol",
+        "multi": false,
+        "name": "iev",
+        "options": [],
+        "query": "regressions({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"render\":\"SingleStatVolume\", \"regressionTypes\":\"Regressions,SevereRegressions\", \"searchText\":\"$search\", \"timeFilterVar\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
@@ -3061,5 +3162,5 @@
   "timezone": "",
   "title": "Reliability Analysis",
   "uid": "4DHQ63-ik",
-  "version": 251
+  "version": 255
 }

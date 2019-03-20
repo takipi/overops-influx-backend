@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 36,
-  "iteration": 1553032850714,
+  "iteration": 1553056822236,
   "links": [
     {
       "icon": "bolt",
@@ -460,15 +460,15 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
+          "tags": [],
           "text": "None",
           "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
-        "includeAll": true,
+        "includeAll": false,
         "label": "Env",
-        "multi": true,
+        "multi": false,
         "name": "environments",
         "options": [],
         "query": "environments({\"sorted\":\"true\"})",
@@ -485,8 +485,8 @@
       {
         "allValue": "all",
         "current": {
-          "text": "all",
-          "value": "all"
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -509,8 +509,8 @@
       {
         "allValue": "all",
         "current": {
-          "text": "all",
-          "value": "all"
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -533,7 +533,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -581,7 +580,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -606,7 +604,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -631,7 +628,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -656,9 +652,10 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
-          "text": "5",
-          "value": "5"
+          "selected": true,
+          "tags": [],
+          "text": "10",
+          "value": "10"
         },
         "hide": 0,
         "includeAll": false,
@@ -667,12 +664,12 @@
         "name": "limit",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "5",
             "value": "5"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "10",
             "value": "10"
           }
@@ -844,7 +841,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -869,7 +865,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -894,7 +889,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -919,7 +913,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -944,7 +937,7 @@
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-14d",
     "to": "now"
   },
   "timepicker": {
@@ -976,5 +969,5 @@
   "timezone": "",
   "title": "Reliability Review",
   "uid": "82eIMSsmz",
-  "version": 76
+  "version": 79
 }

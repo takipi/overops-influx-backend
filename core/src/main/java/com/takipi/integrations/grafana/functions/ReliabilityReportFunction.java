@@ -68,10 +68,11 @@ public class ReliabilityReportFunction extends EventsFunction {
 	private static final Logger logger = LoggerFactory.getLogger(ReliabilityReportFunction.class);
 	
 	private static final String DEFAULT_KEY = "";
-	
+	private static final String KEY_POSTFIX = "*";
+
 	private static final SimpleDateFormat singleDayDateformat;
 	private static final SimpleDateFormat dayInMonthDateformat;
-	
+		
 	static  {
 		singleDayDateformat = new SimpleDateFormat("EEEE"); 
 		dayInMonthDateformat = new SimpleDateFormat("EEE, MMM d"); 
@@ -1228,7 +1229,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 			addDeduction("error increase", regressionOutput.regressions, reportSettings.regression_score, deductions);
 			addDeduction("severe error increase", regressionOutput.criticalRegressions, reportSettings.critical_regression_score, deductions);
 			
-			if ((reportMode != ReportMode.Tiers) && (reportMode != ReportMode.Tiers_Extended)) {
+			if ((reportMode != ReportMode.Tiers) 
+			 && (reportMode != ReportMode.Tiers_Extended)) {
 				addDeduction("slowdown", reportKeyResults.slowdowns, reportSettings.regression_score, deductions);
 				addDeduction("severe slowdown", reportKeyResults.severeSlowdowns, reportSettings.critical_regression_score, deductions);
 			}
@@ -1406,19 +1408,13 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 		}
 		
-		List<ReportKeyOutput> result;
-		
+		boolean sortAsc = getSortedAsc(regInput.getSortType(), true);		
+		List<ReportKeyOutput> result = new ArrayList<ReportKeyOutput>(reportKeyOutputMap.values());
+
 		if (reportMode == ReportMode.Deployments) {
-			boolean sortAsc = getSortedAsc(regInput.getSortType(), true);
-			List<ReportKeyOutput> sorted = new ArrayList<ReportKeyOutput>(reportKeyOutputMap.values());
-			sortDeploymentKeys(sorted, sortAsc);
-			result = sorted;
-		} else {
-			
-			boolean sortAsc = getSortedAsc(regInput.getSortType(), true);
-			List<ReportKeyOutput> sorted = new ArrayList<ReportKeyOutput>(reportKeyOutputMap.values());
-			sortKeys(sorted, sortAsc);
-			result = sorted;			
+			sortDeploymentKeys(result, sortAsc);
+		} else {	
+			sortKeysByName(result, sortAsc);
 		}
 		
 		return result;
@@ -1438,7 +1434,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 				return defaultValue;
 				
 			default:
-				throw new IllegalStateException();
+				throw new IllegalStateException(String.valueOf(sortType));
 		}
 	}
 	
@@ -1457,7 +1453,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		});
 	}
 	
-	private void sortKeys(List<ReportKeyOutput> scores, boolean asc) {
+	private void sortKeysByName(List<ReportKeyOutput> scores, boolean asc) {
 		
 		scores.sort(new Comparator<ReportKeyOutput>() {
 
@@ -1558,48 +1554,39 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return result;
 	}
 
-	private List<Series> processSingleStat(ReliabilityReportInput input)
-	{
+	private List<Series> processSingleStat(ReliabilityReportInput input) {
 		Collection<String> serviceIds = getServiceIds(input);
 		
-		if (CollectionUtil.safeIsEmpty(serviceIds))
-		{
+		if (CollectionUtil.safeIsEmpty(serviceIds)) {
 			return Collections.emptyList();
 		}
 		
 		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
-		
 		Object singleStatText = getSingleStat(serviceIds, timeSpan, input);
 		
 		return createSingleStatSeries(timeSpan, singleStatText);
 	}
 
-	private static Object formatIssues(ReliabilityReportInput input, int nonSevere, int severe)
-	{
+	private static Object formatIssues(ReliabilityReportInput input, int nonSevere, int severe) {
 		
 		Object result;
 		
-		if (severe > 0)
-		{
-			if (nonSevere == 0)
-			{
+		if (severe > 0) {
+			
+			if (nonSevere == 0) {
 				if (input.sevOnlyFormat != null) {
 					result = String.format(input.sevOnlyFormat, severe);
 				} else {
 					result = String.valueOf(severe);
 				}
-			}
-			else
-			{
+			} else {
 				if (input.sevAndNonSevFormat != null) {
 					result = String.format(input.sevAndNonSevFormat, nonSevere + severe, severe);
 				} else {
 					result = String.valueOf(nonSevere + severe);
 				}
 			}
-		}
-		else
-		{
+		} else {
 			if (nonSevere != 0) {
 				result = Integer.valueOf(nonSevere);
 			} else {
@@ -1832,7 +1819,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 		switch (reportMode) {
 			
 			case Apps_Extended:
-			case Timeline_Extended: 
+			case Timeline_Extended:
+			case Default:
 				failureInput.types = input.getFailureTypes(); 
 				break;
 		
@@ -2029,7 +2017,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		Pair<ReliabilityState, Double> failurePair;
 		
-		if (result.failRate > input.minFailRate) {
+		if ((result.failRate > input.minFailRate) 
+		&& (failureData.failures > regressionInput.minVolumeThreshold)) {
 			failurePair = getReliabilityState(baseFailRate, result.failRate,
 				transactionData.transactionVolume, regressionInput);
 
@@ -2216,12 +2205,12 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 	}
 	
-	private void addAppExtendedFields(
+	private void addExtendedFields(
 			ReliabilityReportInput input, ReportRow row, 
 			ReportKeyResults reportKeyResult, String serviceName) {
 				
 		String appStatusName = getAppStatusName(input, reportKeyResult.relability.reliabilityState, serviceName);
-		Object failRateDelta = getFailRateDelta(input, reportKeyResult.relability, false, false);
+		Object failRateDelta = getFailRateDelta(input, reportKeyResult.relability, false, false, false);
 		
 		row.set(ReliabilityReportInput.STATUS_NAME, appStatusName);
 
@@ -2279,6 +2268,40 @@ public class ReliabilityReportFunction extends EventsFunction {
 		row.set(ReliabilityReportInput.PREV_DEP_STATE, previousDepState);
 	}
 	
+	private Pair<Pair<Object, Object>, String> getReportKeyTimeRange(
+			EventsInput input, Pair<DateTime, DateTime> timeSpan, 
+			ReportMode reportMode,RegressionWindow regressionWindow) {
+		
+		String timeRange;
+		Pair<Object, Object> fromTo;
+		
+		if ((reportMode == ReportMode.Timeline)
+		  ||(reportMode == ReportMode.Timeline_Extended)) {
+			DateTime activeStart = regressionWindow.activeWindowStart;
+			DateTime activEnd = activeStart.plusMinutes(regressionWindow.activeTimespan);
+			
+			timeRange = null;
+			fromTo = Pair.of(activeStart.getMillis(), activEnd.getMillis());
+		} else {
+			if (regressionWindow != null) {
+				
+				timeRange = TimeUtil.getTimeRange(regressionWindow.activeTimespan);
+				
+				DateTime from = regressionWindow.activeWindowStart;
+				DateTime to = regressionWindow.activeWindowStart.plusMinutes(regressionWindow.activeTimespan);
+				
+				fromTo = getTimeFilterPair(Pair.of(from, to), 
+					TimeUtil.getLastWindowMinTimeFilter(regressionWindow.activeTimespan));
+
+			} else {
+				fromTo = getTimeFilterPair(timeSpan, input.timeFilter);
+				timeRange = TimeUtil.getTimeRange(input.timeFilter);	
+			}
+		}
+		
+		return Pair.of(fromTo, timeRange);	
+	}
+	
 	@Override
 	protected List<List<Object>> processServiceEvents(Collection<String> serviceIds,
 			String serviceId, EventsInput input,
@@ -2297,32 +2320,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			RegressionWindow regressionWindow = reportKeyResult.output.regressionData.regressionOutput.regressionWindow;
 			
-			String timeRange;
-			Pair<Object, Object> fromTo;
-			
-			if ((reportMode == ReportMode.Timeline)
-			  ||(reportMode == ReportMode.Timeline_Extended)) {
-				DateTime activeStart = regressionWindow.activeWindowStart;
-				DateTime activEnd = activeStart.plusMinutes(regressionWindow.activeTimespan);
-				
-				timeRange = null;
-				fromTo = Pair.of(activeStart.getMillis(), activEnd.getMillis());
-			} else {
-				if (regressionWindow != null) {
-					
-					timeRange = TimeUtil.getTimeRange(regressionWindow.activeTimespan);
-					
-					DateTime from = regressionWindow.activeWindowStart;
-					DateTime to = regressionWindow.activeWindowStart.plusMinutes(regressionWindow.activeTimespan);
-					
-					fromTo = getTimeFilterPair(Pair.of(from, to), 
-						TimeUtil.getLastWindowMinTimeFilter(regressionWindow.activeTimespan));
-	
-				} else {
-					fromTo = getTimeFilterPair(timeSpan, input.timeFilter);
-					timeRange = TimeUtil.getTimeRange(input.timeFilter);	
-				}
-			}
+			Pair<Pair<Object, Object>, String> timeRangePair = getReportKeyTimeRange(rrInput, 
+				timeSpan, reportMode, regressionWindow);
 					
 			Object newIssuesValue = formatIssues(rrInput, reportKeyResult.newIssues, reportKeyResult.severeNewIssues);
 			Object regressionsValue = formatIssues(rrInput, reportKeyResult.regressions, reportKeyResult.criticalRegressions);
@@ -2335,9 +2334,9 @@ public class ReliabilityReportFunction extends EventsFunction {
 				
 			ReportRow row = new ReportRow(fields);
 			
-			row.set(ViewInput.FROM, fromTo.getFirst());
-			row.set(ViewInput.TO, fromTo.getSecond());
-			row.set(ViewInput.TIME_RANGE, timeRange);
+			row.set(ViewInput.FROM, timeRangePair.getFirst().getFirst());
+			row.set(ViewInput.TO, timeRangePair.getFirst().getSecond());
+			row.set(ViewInput.TIME_RANGE, timeRangePair.getSecond());
 
 			row.set(ReliabilityReportInput.SERVICE, serviceId);
 			row.set(ReliabilityReportInput.KEY, name);
@@ -2348,10 +2347,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 				case Apps_Extended:
 				case Timeline_Extended:
 				case Tiers_Extended:
-					addAppExtendedFields(rrInput, row, reportKeyResult, serviceValue);	
+					addExtendedFields(rrInput, row, reportKeyResult, serviceValue);	
 					break;
 				case Deployments:
-					addDepCompareFields(row, reportKeyResult, fromTo);
+					addDepCompareFields(row, reportKeyResult, timeRangePair.getFirst());
 					break;
 				case Timeline:
 					addTimelineFields(row);
@@ -2382,7 +2381,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		String name = GroupSettings.fromGroupName(reportKeyResult.output.reportKey.name);
 		
 		if (reportKeyResult.output.reportKey.isKey) {
-			return name  + "*";
+			return name  + KEY_POSTFIX;
 		} else {
 			return name;
 		}
@@ -2539,13 +2538,13 @@ public class ReliabilityReportFunction extends EventsFunction {
 			ReliabilityReportInput input, ReportKeyResults reportKeyResult, boolean postfix) {
 		
 		ReportKeyReliability appReliabilityData = getAppReliabilityData(serviceId, timespan, input, reportKeyResult);
-		Object result = getFailRateDelta(input, appReliabilityData, true, postfix);
+		Object result = getFailRateDelta(input, appReliabilityData, true, postfix, true);
 		
 		return result;
 	}
 	
 	private Object getFailRateDelta(ReliabilityReportInput input, ReportKeyReliability appReliabilityData,
-			boolean stringFormat, boolean postfix) {
+			boolean stringFormat, boolean postfix, boolean deltaPrefix) {
 		
 		if (appReliabilityData.failureRateDelta == 0) {
 			return "";
@@ -2556,7 +2555,11 @@ public class ReliabilityReportFunction extends EventsFunction {
 		String rateStr;
 			
 		if (appReliabilityData.failureRateDelta > 1) {
-			rateStr = ">100%";	 
+			if (deltaPrefix) {
+				rateStr = "Δ>100%";	 	
+			} else {
+				rateStr = ">100%";	 
+			}
 		} else {		
 			if (stringFormat) {
 				rateStr = "+" + formatRate(appReliabilityData.failureRateDelta, false);

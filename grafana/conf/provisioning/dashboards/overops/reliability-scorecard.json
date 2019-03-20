@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 22,
-  "iteration": 1553032811286,
+  "iteration": 1553057967143,
   "links": [
     {
       "icon": "dashboard",
@@ -993,7 +993,7 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "A report detailing providing a weighted score of the selected deployments. If no deployments are selected, the $limit most recent deployments are selected. Live deployments are marked with a *. Score weights are defined  in the Settings dashboard.",
+      "description": "A report detailing providing information about anomalies detected within a given day. Use the \"Applications\" selector to filter information for a specific app.",
       "fontSize": "100%",
       "gridPos": {
         "h": 8,
@@ -1993,9 +1993,11 @@
       {
         "allValue": "None",
         "current": {
-          "selected": true,
+          "tags": [],
           "text": "None",
-          "value": "None"
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -2018,8 +2020,10 @@
       {
         "allValue": "all",
         "current": {
-          "text": "all",
-          "value": "all"
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -2042,8 +2046,8 @@
       {
         "allValue": "all",
         "current": {
-          "text": "all",
-          "value": "all"
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2401,7 +2405,7 @@
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-7d",
     "to": "now"
   },
   "timepicker": {
@@ -2433,5 +2437,5 @@
   "timezone": "",
   "title": "Reliability Scorecard",
   "uid": "lfqKXMfmz",
-  "version": 181
+  "version": 183
 }
