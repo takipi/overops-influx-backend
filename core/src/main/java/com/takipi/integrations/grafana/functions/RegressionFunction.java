@@ -657,6 +657,19 @@ public class RegressionFunction extends EventsFunction {
 	{
 		return getRegressionInput(serviceId, viewId, input, null, timeSpan, newOnly);
 	}
+	
+	public Pair<RegressionInput, RegressionWindow> getRegressionInput(String serviceId,
+			EventFilterInput input,
+			Pair<DateTime, DateTime> timeSpan, boolean newOnly)
+	{
+		String viewId = getViewId(serviceId, input.view);
+		
+		if (viewId == null) {
+			return null;
+		}
+		
+		return getRegressionInput(serviceId, viewId, input, null, timeSpan, newOnly);
+	}
 		
 	
 	public Pair<RegressionInput, RegressionWindow> getRegressionInput(String serviceId, String viewId,
@@ -1063,8 +1076,7 @@ public class RegressionFunction extends EventsFunction {
 	
 	public RegressionOutput runRegression(String serviceId, EventFilterInput regInput)
 	{
-		RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient, 
-			serviceId, regInput, this, false, true);
+		RegressionOutput regressionOutput = runRegression(serviceId, regInput, true);	
 		return regressionOutput;
 	}
 	

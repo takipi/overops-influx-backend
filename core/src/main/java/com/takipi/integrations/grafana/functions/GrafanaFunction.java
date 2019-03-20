@@ -2031,15 +2031,23 @@ public abstract class GrafanaFunction
 		}
 	}
 	
-	protected String getViewId(String serviceId, String name)
-	{
-		String viewName;
+	public static String getViewName(String name) {
+	
+		String result;
 		
 		if ((name != null) && (!name.isEmpty() && (!name.startsWith("$")))) { 
-			viewName = name;
+			result = name;
 		} else {
-			viewName = ALL_EVENTS;
+			result = ALL_EVENTS;
 		}
+		
+		return result;
+		
+	}
+	
+	protected String getViewId(String serviceId, String name)
+	{
+		String viewName = getViewName(name);
 		
 		SummarizedView view = getView(serviceId, viewName);
 		
