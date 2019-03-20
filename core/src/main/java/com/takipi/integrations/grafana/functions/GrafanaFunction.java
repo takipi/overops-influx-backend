@@ -2035,7 +2035,7 @@ public abstract class GrafanaFunction
 	{
 		String viewName;
 		
-		if ((name != null) && (!name.isEmpty())) { 
+		if ((name != null) && (!name.isEmpty() && (!name.startsWith("$")))) { 
 			viewName = name;
 		} else {
 			viewName = ALL_EVENTS;

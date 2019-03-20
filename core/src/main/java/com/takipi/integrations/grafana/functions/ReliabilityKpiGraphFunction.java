@@ -524,7 +524,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 				}	
 			}
 			
-			result.put(period.getFirst(), slowdownInterval);				
+			result.put(period.getSecond(), slowdownInterval);				
 		}
 		
 		return result;
@@ -571,7 +571,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 					
 					if (volumeInterval == null) {
 						volumeInterval = new VolumeInterval(period);
-						result.put(period.getFirst(), volumeInterval);
+						result.put(period.getSecond(), volumeInterval);
 					}
 					
 					if (CollectionUtil.safeIsEmpty(gp.contributors)) {
@@ -775,7 +775,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 				}
 			}
 			
-			result.put(period.getFirst(), regressionInterval);
+			result.put(period.getSecond(), regressionInterval);
 		}
 		
 		return result;

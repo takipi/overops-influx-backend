@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 22,
-  "iteration": 1553057967143,
+  "iteration": 1553060209796,
   "links": [
     {
       "icon": "dashboard",
@@ -993,7 +993,7 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "A report detailing providing information about anomalies detected within a given day. Use the \"Applications\" selector to filter information for a specific app.",
+      "description": "A report detailing anomalies detected within a given day. Use the \"Applications\" selector to filter information for a specific app.",
       "fontSize": "100%",
       "gridPos": {
         "h": 8,
@@ -1993,11 +1993,9 @@
       {
         "allValue": "None",
         "current": {
-          "tags": [],
+          "selected": true,
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2020,10 +2018,8 @@
       {
         "allValue": "all",
         "current": {
-          "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "text": "all",
+          "value": "all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2046,8 +2042,8 @@
       {
         "allValue": "all",
         "current": {
-          "text": "All",
-          "value": "$__all"
+          "text": "all",
+          "value": "all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2094,9 +2090,8 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "text": "All Events",
-          "value": "All Events"
+          "text": "",
+          "value": ""
         },
         "hide": 2,
         "includeAll": false,
@@ -2105,7 +2100,7 @@
         "name": "view",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "All Events",
             "value": "All Events"
           }
@@ -2405,7 +2400,7 @@
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {
@@ -2437,5 +2432,5 @@
   "timezone": "",
   "title": "Reliability Scorecard",
   "uid": "lfqKXMfmz",
-  "version": 183
+  "version": 184
 }

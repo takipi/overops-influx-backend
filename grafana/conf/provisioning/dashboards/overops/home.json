@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 43,
-  "iteration": 1553058142523,
+  "iteration": 1553060119240,
   "links": [],
   "panels": [
     {
@@ -1784,7 +1784,7 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "A report detailing providing information about anomalies detected within a given day. Use the \"Applications\" selector to filter information for a specific app.",
+      "description": "A report detailing anomalies detected within a given day. Use the \"Applications\" selector to filter information for a specific app.",
       "fontSize": "100%",
       "gridPos": {
         "h": 5,
@@ -2601,9 +2601,8 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "text": "All Events",
-          "value": "All Events"
+          "text": "",
+          "value": ""
         },
         "hide": 2,
         "includeAll": false,
@@ -2612,7 +2611,7 @@
         "name": "view",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "All Events",
             "value": "All Events"
           }
@@ -3109,5 +3108,5 @@
   "timezone": "",
   "title": "Home",
   "uid": "lg0U4qriz",
-  "version": 240
+  "version": 241
 }
