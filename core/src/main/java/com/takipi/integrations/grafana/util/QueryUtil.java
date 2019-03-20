@@ -13,6 +13,10 @@ public class QueryUtil
 	
 	public static String query(Auth auth, String query)
 	{
+		if (query == null) {
+			return "No query provided";
+		}
+		
 		if (query.startsWith("SHOW RETENTION POLICIES")) {
 			return "{\"results\":[{\"statement_id\":0,\"series\":[{\"columns\":[\"name\",\"duration\",\"shardGroupDuration\",\"replicaN\",\"default\"],\"values\":[[\"autogen\",\"0s\",\"168h0m0s\",1,true]]}]}]}";
 		} else if (query.startsWith("SHOW DATABASES")) {

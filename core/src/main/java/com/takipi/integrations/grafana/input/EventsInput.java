@@ -67,6 +67,16 @@ public class EventsInput extends BaseEventVolumeInput {
 	public static final String DESCRIPTION = "description";
 	
 	/**
+	 * A value showing the change between the event rate in the selected timeframe and the baseline
+	 */
+	public static final String RATE_DELTA = "rate_delta";
+	
+	/**
+	 * A value describing the change between the event rate in the selected timeframe and the baseline
+	 */
+	public static final String RATE_DELTA_DESC = "rate_delta_desc";
+	
+	/**
 	 * An optional value to control the volume data retrieved for objects in this query. If "hits" is specified,
 	 * "N/A" will be returned for all values of the "rate" field (if selected). 
 	 */
@@ -76,4 +86,34 @@ public class EventsInput extends BaseEventVolumeInput {
 	 * An optional value controlling the max string length of the message and typeMessage columns.
 	 */
 	public int maxColumnLength;
+	
+	/**
+	 * The types of output supported by this function
+	 */
+	public enum OutputMode {
+		
+		/**
+		 * Output data in grid format
+		 */
+		Grid,
+		
+		/**
+		 * Output a single stat denoting the number of events (rows) returned by this function
+		 */
+		SingleStat
+	}
+	
+	/**
+	 * The type of output returned by this function
+	 */
+	public OutputMode outputMode;
+	
+	public OutputMode getOutputMode() {
+		
+		if (outputMode == null) {
+			return OutputMode.Grid;
+		}
+		
+		return outputMode;
+	}
 }

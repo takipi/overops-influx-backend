@@ -98,7 +98,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 				List<GraphSeries> serviceSeries = processServiceGraph(serviceIds, serviceId, viewId, viewName,
 						input, timeSpan, pointsWanted);
 	
-				return new AsyncResult(serviceSeries);
+				return new TaskSeriesResult(serviceSeries);
 			}
 			finally {
 				afterCall();
@@ -113,10 +113,10 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		}
 	}
 
-	protected static class AsyncResult {
+	protected static class TaskSeriesResult {
 		protected List<GraphSeries> data;
 
-		protected AsyncResult(List<GraphSeries> data) {
+		protected TaskSeriesResult(List<GraphSeries> data) {
 			this.data = data;
 		}
 	}
@@ -264,8 +264,8 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		
 		for (Object taskResult : taskResults) {
 			
-			if (taskResult instanceof AsyncResult) {
-				AsyncResult asyncResult = (AsyncResult)taskResult;
+			if (taskResult instanceof TaskSeriesResult) {
+				TaskSeriesResult asyncResult = (TaskSeriesResult)taskResult;
 				
 				if (asyncResult.data != null) {
 					result.addAll(asyncResult.data);
@@ -333,9 +333,9 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		
 		for (Callable<Object> task : tasks) {
 			
-			AsyncResult taskResult;
+			TaskSeriesResult taskResult;
 			try {
-				taskResult = (AsyncResult)(task.call());
+				taskResult = (TaskSeriesResult)(task.call());
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
 			}

@@ -14,7 +14,7 @@
       },
       {
         "datasource": "OO",
-        "enable": false,
+        "enable": true,
         "hide": false,
         "iconColor": "#0a50a1",
         "limit": 100,
@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 36,
-  "iteration": 1552445613150,
+  "iteration": 1553056822236,
   "links": [
     {
       "icon": "bolt",
@@ -209,7 +209,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "ReliabilityKpiGraph({\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"$type\",\"limit\":\"$limit\", \"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"interval\":\"$__interval\", \"reportInterval\":\"24h\", \"kpi\":\"$kpi\", \"aggregate\":\"true\"})",
+          "query": "ReliabilityKpiGraph({\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"$type\",\"limit\":\"$limit\", \"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"interval\":\"$__interval\", \"reportInterval\":\"24h\", \"kpi\":\"$kpi\", \"aggregate\":\"true\", \"deductFrom100\":\"true\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -303,7 +303,7 @@
         "values": false
       },
       "lines": true,
-      "linewidth": 1,
+      "linewidth": 2,
       "links": [
         {
           "dashboard": "Errors",
@@ -317,7 +317,7 @@
       ],
       "nullPointMode": "null",
       "percentage": false,
-      "pointradius": 1,
+      "pointradius": 0.5,
       "points": true,
       "renderer": "flot",
       "repeat": null,
@@ -385,7 +385,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "ReliabilityKpiGraph({\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"$type\",\"limit\":\"$limit\", \"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"interval\":\"$__interval\", \"reportInterval\":\"24h\", \"kpi\":\"$kpi\"})",
+          "query": "ReliabilityKpiGraph({\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"$type\",\"limit\":\"$limit\", \"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"interval\":\"$__interval\", \"reportInterval\":\"24h\", \"kpi\":\"$kpi\", \"deductFrom100\":\"true\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -462,15 +462,13 @@
         "current": {
           "tags": [],
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
-        "includeAll": true,
+        "includeAll": false,
         "label": "Env",
-        "multi": true,
+        "multi": false,
         "name": "environments",
         "options": [],
         "query": "environments({\"sorted\":\"true\"})",
@@ -666,12 +664,12 @@
         "name": "limit",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "5",
             "value": "5"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "10",
             "value": "10"
           }
@@ -695,8 +693,8 @@
         "options": [
           {
             "selected": false,
-            "text": "NewErrors",
-            "value": "NewErrors"
+            "text": "New Errors",
+            "value": "New Errors"
           },
           {
             "selected": false,
@@ -705,13 +703,13 @@
           },
           {
             "selected": false,
-            "text": "Increasing Errors",
-            "value": "Increasing Errors"
+            "text": "Error Increases",
+            "value": "Error Increases"
           },
           {
             "selected": false,
-            "text": "Severe Increasing Errors",
-            "value": "Severe Increasing Errors"
+            "text": "Severe Error Increases",
+            "value": "Severe Error Increases"
           },
           {
             "selected": false,
@@ -724,7 +722,7 @@
             "value": "Severe Slowdowns"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "Error Volume",
             "value": "Error Volume"
           },
@@ -739,12 +737,12 @@
             "value": "Error Rate"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "Score",
             "value": "Score"
           }
         ],
-        "query": "NewErrors, Severe New Errors, Increasing Errors, Severe Increasing Errors, Slowdowns, Severe Slowdowns, Error Volume, Error Count, Error Rate, Score",
+        "query": "New Errors,Severe New Errors,Error Increases,Severe Error Increases,Slowdowns,Severe Slowdowns,Error Volume,Error Count,Error Rate,Score",
         "skipUrlSync": false,
         "type": "custom"
       },
@@ -915,7 +913,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -940,7 +937,7 @@
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-14d",
     "to": "now"
   },
   "timepicker": {
@@ -972,5 +969,5 @@
   "timezone": "",
   "title": "Reliability Review",
   "uid": "82eIMSsmz",
-  "version": 71
+  "version": 79
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.ocpsoft.prettytime.PrettyTime;
@@ -135,7 +136,7 @@ public class TimeUtil {
 
 	public static String getTimeFilter(Pair<DateTime, DateTime> timespan) {
 		
-		DateTime now = DateTime.now();
+		DateTime now = now();
 
 		long toDelta =  now.getMillis() - timespan.getSecond().getMillis();
 		
@@ -155,6 +156,10 @@ public class TimeUtil {
 		return result;
 	}
 	
+	public static DateTime now() {
+		return DateTime.now(DateTimeZone.UTC);
+	}
+	
 	public static Pair<DateTime, DateTime> getTimeFilter(String timeFilter) {
 		if ((timeFilter == null) || (timeFilter.isEmpty())) {
 			throw new IllegalArgumentException("timeFilter cannot be empty");
@@ -164,7 +169,7 @@ public class TimeUtil {
 		DateTime to;
 
 		if (timeFilter.startsWith(LAST_TIME_WINDOW)) {
-			to = DateTime.now();
+			to =  now();
 			from = to.minusMinutes(getTimeDelta(timeFilter));
 			return Pair.of(from, to);
 		}
@@ -177,7 +182,7 @@ public class TimeUtil {
 		}
 
 		if (timeFilter.startsWith(SO_FAR_WINDOW)) {
-			to = DateTime.now();
+			to =  now();
 			from = getTimeGreaterThan(timeFilter);
 			return Pair.of(from, to);
 		}
@@ -215,7 +220,7 @@ public class TimeUtil {
 	private static DateTime getTimeGreaterThan(String timeFilter) {
 		int unitIndex = timeFilter.indexOf(MILLI_UNIT);
 		String value = timeFilter.substring(SO_FAR_WINDOW.length(), unitIndex);
-		DateTime result = new DateTime(Long.valueOf(value));
+		DateTime result = new DateTime(Long.valueOf(value), DateTimeZone.UTC);
 
 		return result;
 	}
@@ -225,7 +230,7 @@ public class TimeUtil {
 		String timeWindow = timeFilter.substring(rangeIndex + RANGE_WINDOW.length(),
 				timeFilter.length() - MILLI_UNIT.length());
 
-		DateTime result = new DateTime(Long.valueOf(timeWindow));
+		DateTime result = new DateTime(Long.valueOf(timeWindow), DateTimeZone.UTC);
 
 		return result;
 	}
@@ -256,6 +261,10 @@ public class TimeUtil {
 		return parseInterval(getTimeUnit(timeFilter));
 	}
 	
+	public static String toTimeFilter(Pair<DateTime, DateTime> timespan) {
+		return toTimeFilter(timespan.getFirst(), timespan.getSecond());
+	}
+	
 	public static String toTimeFilter(DateTime from, DateTime to) {
 		return SO_FAR_WINDOW + from.getMillis() + MILLI_UNIT + " " + RANGE_WINDOW + to.getMillis() + MILLI_UNIT;
 	}
@@ -264,7 +273,7 @@ public class TimeUtil {
 		
 		String result;
 		
-		long toDelta =  DateTime.now().getMillis() - timespan.getSecond().getMillis();
+		long toDelta =  now().getMillis() - timespan.getSecond().getMillis();
 
 		if (TimeUnit.MILLISECONDS.toMinutes(toDelta) < 1) {
 			

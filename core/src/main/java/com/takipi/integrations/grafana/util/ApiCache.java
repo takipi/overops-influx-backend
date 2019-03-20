@@ -44,6 +44,7 @@ import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.request.intf.ApiGetRequest;
 import com.takipi.api.core.url.UrlClient.Response;
+import com.takipi.integrations.grafana.functions.GrafanaFunction;
 import com.takipi.integrations.grafana.functions.GrafanaThreadPool;
 import com.takipi.integrations.grafana.functions.RegressionFunction;
 import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOutput;
@@ -422,6 +423,16 @@ public class ApiCache {
 			return result;
 			
 		}
+		
+		protected boolean compareTimeframes(ViewInputCacheLoader other) {
+			
+			if ((input.timeFilter != null) && (other.input.timeFilter != null) &&
+				(!compareTimeFilters(input.timeFilter, other.input.timeFilter))) {
+				return false;
+			}
+		
+			return true;
+		}
 
 		@Override
 		public boolean equals(Object obj) {
@@ -436,12 +447,12 @@ public class ApiCache {
 
 			ViewInputCacheLoader other = (ViewInputCacheLoader) obj;
 			
-			if ((input.timeFilter != null) && (other.input.timeFilter != null) &&
-				(!compareTimeFilters(input.timeFilter, other.input.timeFilter))) {
+			if (!compareTimeframes(other)) {
 				return false;
 			}
 
-			if (!Objects.equal(input.view, other.input.view)) {
+			if (!Objects.equal(GrafanaFunction.getViewName(input.view),
+				GrafanaFunction.getViewName((other.input.view)))) {
 				return false;
 			}
 
@@ -472,11 +483,10 @@ public class ApiCache {
 		@Override
 		public int hashCode() {
 
-			if (input.view == null) {
-				return super.hashCode();
-			}
-
-			return super.hashCode() ^ input.view.hashCode();
+			int result = super.hashCode() ^ 
+				GrafanaFunction.getViewName(input.view).hashCode();
+			
+			return result;
 		}
 
 		@Override
@@ -783,6 +793,10 @@ public class ApiCache {
 			if ((input.deployments == null) != (other.input.deployments == null)) {
 				return false;
 			}
+			
+			if (!Objects.equal(input.activeWindowStart, other.input.activeWindowStart)) {
+				return false;
+			}
 
 			if (input.deployments != null) {
 				
@@ -823,7 +837,7 @@ public class ApiCache {
 
 		protected boolean newOnly;
 		protected RegressionFunction function;
-
+		
 		@Override
 		public boolean equals(Object obj) {
 
@@ -861,15 +875,27 @@ public class ApiCache {
 				return false;
 			}
 			
-			if (!newOnly != other.newOnly) {
+			if (newOnly != other.newOnly) {
 				return false;
 			}
 
 			return true;
 		}
+		
+		/*
+		@Override
+		protected boolean compareTimeframes(ViewInputCacheLoader other)
+		{
+			if (input.deployments != null) {
+				return Objects.equal(input.deployments, other.input.deployments);
+			} else {
+				return super.compareTimeframes(other);
+			}
+		}
+		*/
 
-		public RegressionCacheLoader(ApiClient apiClient, String serviceId, ViewInput input,
-				RegressionFunction function, boolean newOnly) {
+		public RegressionCacheLoader(ApiClient apiClient, String serviceId, 
+				ViewInput input, RegressionFunction function, boolean newOnly) {
 
 			super(apiClient, null, serviceId, input, null);
 			this.function = function;

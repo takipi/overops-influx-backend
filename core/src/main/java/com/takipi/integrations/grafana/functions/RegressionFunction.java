@@ -46,7 +46,6 @@ import com.takipi.integrations.grafana.util.EventLinkEncoder;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class RegressionFunction extends EventsFunction {	
-	private static final int MAX_ITEMS_DESC = 3; 
 
 	public static class Factory implements FunctionFactory {
 		
@@ -656,6 +655,27 @@ public class RegressionFunction extends EventsFunction {
 			EventFilterInput input,
 			Pair<DateTime, DateTime> timeSpan, boolean newOnly)
 	{
+		return getRegressionInput(serviceId, viewId, input, null, timeSpan, newOnly);
+	}
+	
+	public Pair<RegressionInput, RegressionWindow> getRegressionInput(String serviceId,
+			EventFilterInput input,
+			Pair<DateTime, DateTime> timeSpan, boolean newOnly)
+	{
+		String viewId = getViewId(serviceId, input.view);
+		
+		if (viewId == null) {
+			return null;
+		}
+		
+		return getRegressionInput(serviceId, viewId, input, null, timeSpan, newOnly);
+	}
+		
+	
+	public Pair<RegressionInput, RegressionWindow> getRegressionInput(String serviceId, String viewId,
+		EventFilterInput input, RegressionWindow window,
+		Pair<DateTime, DateTime> timeSpan, boolean newOnly)
+	{
 		
 		RegressionSettings regressionSettings = getRegressionSettings(serviceId);
 		
@@ -668,9 +688,19 @@ public class RegressionFunction extends EventsFunction {
 		regressionInput.activeTimespan = (int)TimeUnit.MILLISECONDS
 				.toMinutes(timeSpan.getSecond().getMillis() - timeSpan.getFirst().getMillis());
 		
+		if ((CollectionUtil.safeIsEmpty(regressionInput.deployments))) {
+			regressionInput.activeWindowStart = timeSpan.getFirst();
+		}
+		
 		regressionInput.baselineTimespan = regressionSettings.min_baseline_timespan;
 		
-		RegressionWindow regressionWindow = ApiCache.getRegressionWindow(apiClient, regressionInput);
+		RegressionWindow regressionWindow;
+
+		if (window == null) {
+			regressionWindow = ApiCache.getRegressionWindow(apiClient, regressionInput);
+		} else {
+			regressionWindow = window;
+		}
 		
 		if ((!CollectionUtil.safeIsEmpty(regressionInput.deployments)) && (!regressionWindow.deploymentFound))
 		{
@@ -747,10 +777,13 @@ public class RegressionFunction extends EventsFunction {
 		
 		Collection<GraphSliceTask> baselineGraphTasks;
 		
+		DateTime baselineStart = regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan);
+		DateTime baselineEnd = regressionWindow.activeWindowStart;
+		
 		if (!newOnly) {
 			baselineGraphTasks = getGraphTasks(serviceId, viewId, baselinePoints, baselineInput, 
-				VolumeType.all, regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan),
-				regressionWindow.activeWindowStart, regressionInput.baselineTimespan, regressionWindow.activeTimespan, false);
+				VolumeType.all, baselineStart, baselineEnd,
+				regressionInput.baselineTimespan, regressionWindow.activeTimespan, false);
 		} else {
 			baselineGraphTasks = null;
 		}
@@ -763,8 +796,11 @@ public class RegressionFunction extends EventsFunction {
 			graphActiveTimespan = 0;
 		}
 		
+		DateTime activeStart = regressionWindow.activeWindowStart;
+		DateTime activeEnd = regressionWindow.activeWindowStart.plusMinutes(regressionWindow.activeTimespan);
+		
 		Collection<GraphSliceTask> activeGraphTasks = getGraphTasks(serviceId, viewId, input.pointsWanted, 
-			input, VolumeType.all, regressionWindow.activeWindowStart, DateTime.now(), 0, graphActiveTimespan, false);
+			input, VolumeType.all, activeStart, activeEnd, 0, graphActiveTimespan, false);
 		
 		List<GraphSliceTask> graphTasks = new ArrayList<GraphSliceTask>(); 
 		
@@ -837,8 +873,9 @@ public class RegressionFunction extends EventsFunction {
 				
 				RegressionData regData = (RegressionData)eventData;
 				
-				if (regData.event.stats.hits == 0) 
+				if (regData.event.stats.hits == 0)  {
 					continue;
+				}
 				
 				switch (regData.type)
 				{
@@ -890,7 +927,7 @@ public class RegressionFunction extends EventsFunction {
 		
 		Map<String, EventResult> eventListMap = getEventMap(serviceId, input,
 			from, to, null, input.pointsWanted);
-	
+			
 		Graph baselineGraph;
 		Graph activeWindowGraph;
 		
@@ -906,7 +943,11 @@ public class RegressionFunction extends EventsFunction {
 			activeWindowGraph = null;		
 		}
 		
-		if ((activeWindowGraph == null) ||	(activeWindowGraph.points == null)) {
+		if (eventListMap == null) {
+			return RegressionOutput.emptyOutput;
+		}
+		
+		if ((activeWindowGraph == null) ||(activeWindowGraph.points == null)) {
 			return RegressionOutput.emptyOutput;
 		}
 		
@@ -914,21 +955,21 @@ public class RegressionFunction extends EventsFunction {
 			return RegressionOutput.emptyOutput;
 		}
 		
-		Pair<Collection<EventResult>, Long> eventsPair = applyGraphToEvents(serviceId, 
-			eventListMap, timespan, activeWindowGraph, input);
+		Pair<Map<String, EventResult>, Long> filteredResult = filterEvents(serviceId, 
+			timespan, input, eventListMap.values());
 		
-		Collection<EventResult> events = eventsPair.getFirst();
-		long volume = eventsPair.getSecond().longValue();
+		Map<String, EventResult> filteredMap = filteredResult.getFirst();
 		
-		regressionInput.events = events;
+		long volume = applyGraphToEvents(filteredMap, activeWindowGraph, timespan);
+		
+		regressionInput.events = filteredMap.values();
 		regressionInput.baselineGraph = baselineGraph;
 				
 		RegressionOutput result = executeRegression(input, regressionInput, 
 			regressionWindow, eventListMap, volume, baselineGraph, activeWindowGraph);
-				
-		return result;
-	}
 	
+		return result;
+	}	
 	
 	public RegressionOutput executeRegression(BaseEventVolumeInput input, 
 			RegressionInput regressionInput, RegressionWindow regressionWindow, 
@@ -1035,8 +1076,7 @@ public class RegressionFunction extends EventsFunction {
 	
 	public RegressionOutput runRegression(String serviceId, EventFilterInput regInput)
 	{
-		RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient, 
-			serviceId, regInput, this, false, true);
+		RegressionOutput regressionOutput = runRegression(serviceId, regInput, true);	
 		return regressionOutput;
 	}
 	
@@ -1201,7 +1241,7 @@ public class RegressionFunction extends EventsFunction {
 		return result.toString();
 	}
 		
-	private double getServiceSingleStat(String serviceId, RegressionsInput input)
+	private double getServiceSingleStatCount(String serviceId, RegressionsInput input)
 	{
 		RegressionOutput regressionOutput = runRegression(serviceId, input);
 		
@@ -1220,20 +1260,20 @@ public class RegressionFunction extends EventsFunction {
 		return result;
 	}
 	
-	private double getSingleStat(Collection<String> serviceIds, RegressionsInput input)
+	private double getSingleStatCount(Collection<String> serviceIds, RegressionsInput input)
 	{
 		
 		double result = 0;
 		
 		for (String serviceId : serviceIds)
 		{
-			result += getServiceSingleStat(serviceId, input);
+			result += getServiceSingleStatCount(serviceId, input);
 		}
 		
 		return result;
 	}
 	
-	private List<Series> processSingleStat(RegressionsInput input)
+	private List<Series> processSingleStatCount(RegressionsInput input)
 	{
 		
 		Collection<String> serviceIds = getServiceIds(input);
@@ -1251,7 +1291,7 @@ public class RegressionFunction extends EventsFunction {
 		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
 		
 		Object singleStatText;
-		double singleStatValue = getSingleStat(serviceIds, input);
+		double singleStatValue = getSingleStatCount(serviceIds, input);
 			
 		if (input.singleStatFormat != null) {
 			
@@ -1267,6 +1307,51 @@ public class RegressionFunction extends EventsFunction {
 		
 		
 		return createSingleStatSeries(timeSpan, singleStatText);
+	}
+	
+	private List<Series> processSingleStatVolume(RegressionsInput input)
+	{
+		
+		Collection<String> serviceIds = getServiceIds(input);
+		
+		if (CollectionUtil.safeIsEmpty(serviceIds)) {
+			return Collections.emptyList();
+		}
+		
+		Collection<RegressionType> regressionTypes = input.getRegressionTypes();
+
+		if (regressionTypes == null) {
+			return Collections.emptyList();
+		}
+		
+		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
+		
+		long singleStatValue = 0;
+		
+		for (String serviceId : serviceIds)
+		{
+			RegressionOutput regressionOutput = runRegression(serviceId, input);
+			
+			if ((regressionOutput == null) || (regressionOutput.empty))
+			{
+				continue;
+			}
+						
+			for (EventData eventData : regressionOutput.eventDatas) {
+				
+				RegressionData regData = (RegressionData)eventData;
+				
+				if (!regressionTypes.contains(regData.type)) {
+					continue;
+				}
+				
+				singleStatValue += regData.event.stats.hits;
+			}
+			
+			singleStatValue += getServiceSingleStatCount(serviceId, input);
+		}
+					
+		return createSingleStatSeries(timeSpan, singleStatValue);
 	}
 	
 	private List<Series> processSingleStatDesc(RegressionsInput input) {
@@ -1295,9 +1380,9 @@ public class RegressionFunction extends EventsFunction {
 			
 			if ((regressionTypes.contains(RegressionType.NewIssues)) 
 			|| (regressionTypes.contains(RegressionType.SevereNewIssues))) {
-				value = getNewIssuesDesc(regressionOutput, MAX_ITEMS_DESC);
+				value = getNewIssuesDesc(regressionOutput, RegressionsInput.MAX_TOOLTIP_ITEMS);
 			} else {
-				value = getRegressionsDesc(regressionOutput, MAX_ITEMS_DESC);
+				value = getRegressionsDesc(regressionOutput, RegressionsInput.MAX_TOOLTIP_ITEMS);
 
 			}
 				
@@ -1330,17 +1415,24 @@ public class RegressionFunction extends EventsFunction {
 		}
 		
 		switch (regInput.render) {
+			
 			case Grid:
 				return super.process(functionInput);
 			
 			case Graph:
-				throw new IllegalStateException("Graph not supported");
+				throw new IllegalStateException("Graph not supported. Use RegressionGraph");
 				
 			case SingleStat:
-				return processSingleStat(regInput);
+				return processSingleStatCount(regInput);
 				
 			case SingleStatDesc:
 				return processSingleStatDesc(regInput);
+				
+			case SingleStatCount:
+				return processSingleStatCount(regInput);
+				
+			case SingleStatVolume:
+				return processSingleStatVolume(regInput);
 			
 			default: 
 				throw new IllegalStateException(String.valueOf(regInput.render));

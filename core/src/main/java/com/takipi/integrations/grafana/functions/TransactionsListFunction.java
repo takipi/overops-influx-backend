@@ -19,6 +19,7 @@ import com.takipi.api.client.util.transaction.TransactionUtil;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.FunctionInput;
+import com.takipi.integrations.grafana.input.RegressionsInput;
 import com.takipi.integrations.grafana.input.TransactionsListInput;
 import com.takipi.integrations.grafana.input.TransactionsListInput.RenderMode;
 import com.takipi.integrations.grafana.input.ViewInput;
@@ -32,7 +33,6 @@ import com.takipi.integrations.grafana.util.TimeUtil;
 public class TransactionsListFunction extends GrafanaFunction {
 		
 	private static final String MISSING_TIMER_LINK = "missing-timer-event";
-	private static final int MAX_ITEMS_DESC = 3; 
 
 	public static class Factory implements FunctionFactory {
 
@@ -393,7 +393,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 					timeSpan, input, false, 0);
 
 			String serviceDesc = getSlowdownsDesc(transactionDataResult.items.values(), 
-				states, MAX_ITEMS_DESC);
+				states, RegressionsInput.MAX_TOOLTIP_ITEMS);
 			
 			if (serviceIds.size() > 1) {
 				result.append(serviceId);
@@ -519,14 +519,14 @@ public class TransactionsListFunction extends GrafanaFunction {
 				severeSlowdowns.add(transactionData);
 			} else if (transactionData.state == PerformanceState.SLOWING) {
 				slowdowns.add(transactionData);	
-			}	
+			}			
 		}
 		
 		int index = 0;
 		
-		Collection<TransactionData> sortedSevereSlowdons = getTransactionSortedByDelta(severeSlowdowns);
+		Collection<TransactionData> sortedSevereSlowdowns = getTransactionSortedByDelta(severeSlowdowns);
 	
-		for (TransactionData transactionData : sortedSevereSlowdons) {
+		for (TransactionData transactionData : sortedSevereSlowdowns) {
 		
 			result.append("+");
 			result.append(getSlowdownRateStr(transactionData));
@@ -542,9 +542,9 @@ public class TransactionsListFunction extends GrafanaFunction {
 		
 		index = 0;
 		
-		Collection<TransactionData> sortedSlowdons = getTransactionSortedByDelta(slowdowns);
+		Collection<TransactionData> sortedSlowdowns = getTransactionSortedByDelta(slowdowns);
 		
-		for (TransactionData transactionData : sortedSlowdons) {
+		for (TransactionData transactionData : sortedSlowdowns) {
 			
 			result.append("+");
 			result.append(getSlowdownRateStr(transactionData));

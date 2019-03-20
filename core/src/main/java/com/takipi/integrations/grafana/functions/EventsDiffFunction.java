@@ -14,7 +14,6 @@ import com.google.common.base.Objects;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.result.event.EventResult;
-import com.takipi.api.client.util.regression.RegressionStringUtil;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.EventsDiffInput;
@@ -71,15 +70,15 @@ public class EventsDiffFunction extends EventsFunction
 		}
 		
 		protected double getDelta() {
+			
 			double sourceRate = getRate(source);
 			double targetRate = getRate(event);
 			
 			return targetRate - sourceRate;
 		}
 		
-		protected String getDeltaDesc() {
-			return RegressionStringUtil.getEventRate(event, true) + " from " 
-				+ RegressionStringUtil.getEventRate(source, true);
+		protected String getDeltaDesc() {		
+			return formatRateDelta(source.stats, event.stats);
 		}
 	}
 	

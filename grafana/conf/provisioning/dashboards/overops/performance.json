@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 19,
-  "iteration": 1552169254049,
+  "iteration": 1553032930081,
   "links": [
     {
       "icon": "dashboard",
@@ -64,7 +64,7 @@
         "#d44a3a"
       ],
       "datasource": "OO",
-      "decimals": 2,
+      "decimals": 1,
       "description": "The number of calls into the selected transactions within the selected timeframe.",
       "format": "short",
       "gauge": {
@@ -1587,7 +1587,7 @@
           "tags": []
         }
       ],
-      "title": "",
+      "title": "$transactionCount Transactions",
       "transform": "table",
       "type": "table"
     }
@@ -1604,8 +1604,11 @@
         "allValue": "all",
         "current": {
           "selected": true,
+          "tags": [],
           "text": "None",
-          "value": "None"
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -1628,7 +1631,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1677,7 +1679,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1726,7 +1727,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1751,7 +1751,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -1822,7 +1821,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "Logged Error|Uncaught Exception|HTTP Error",
           "value": "Logged Error|Uncaught Exception|HTTP Error"
         },
@@ -1894,7 +1892,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -1919,7 +1916,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -1944,7 +1940,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "var-type=Logged Error&var-type=Uncaught Exception&var-type=HTTP Error&",
           "value": "var-type=Logged Error&var-type=Uncaught Exception&var-type=HTTP Error&"
         },
@@ -1965,11 +1960,35 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "136",
+          "value": "136"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "transactionCount",
+        "options": [],
+        "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"renderMode\":\"SingleStat\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"searchText\":\"$searchText\", \"pointsWanted\":\"$transactionPointsWanted\",\"eventPointsWanted\":\"$pointsWanted\", \"timeFilterVar\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
   "time": {
-    "from": "now-1d",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {
@@ -2001,5 +2020,5 @@
   "timezone": "",
   "title": "Performance",
   "uid": "Z40SpeJmz",
-  "version": 131
+  "version": 134
 }
