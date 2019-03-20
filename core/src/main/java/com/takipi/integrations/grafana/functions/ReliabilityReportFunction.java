@@ -1091,9 +1091,14 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		int result = 0;
 		
+		if (regressionOutput.empty) {
+			return 0;
+		}
+		
 		if (CollectionUtil.safeIsEmpty(regressionOutput.regressionInput.deployments)) {
 			result = regressionOutput.regressionInput.activeTimespan;
 		} else {
+						
 			DateTime lastPointTime = null;
 			
 			for (int i = regressionOutput.activeVolumeGraph.points.size() - 1; i >= 0; i--) {
@@ -1332,9 +1337,28 @@ public class ReliabilityReportFunction extends EventsFunction {
 			if (kpiInterval instanceof ScoreInterval) {
 				
 				ScoreInterval scoreInterval = (ScoreInterval)kpiInterval;
-					
-				reportKeyOutput.transactionMap = scoreInterval.slowdownInterval.transactionMap;
-				reportKeyOutput.regressionData = new RegressionKeyData(reportKey, scoreInterval.regressionInterval.output);
+				
+				Map<TransactionKey, TransactionData> transactionMap;
+				 
+				if ((scoreInterval.slowdownInterval != null)
+				&& (scoreInterval.slowdownInterval.transactionMap != null)) {
+					transactionMap = scoreInterval.slowdownInterval.transactionMap;
+				} else {
+					transactionMap = Collections.emptyMap();
+				}
+				
+				reportKeyOutput.transactionMap = transactionMap;
+				
+				RegressionOutput regressionOutput;
+				
+				if ((scoreInterval.regressionInterval != null) 
+				&& (scoreInterval.regressionInterval.output != null)) {
+					regressionOutput = scoreInterval.regressionInterval.output;
+				} else {
+					regressionOutput = RegressionOutput.emptyOutput;
+				}
+				
+				reportKeyOutput.regressionData = new RegressionKeyData(reportKey, regressionOutput);
 			}
 				
 			result.add(reportKeyOutput);	
@@ -1742,6 +1766,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 	
 	private KeyOutputEventVolume getKeyOutputEventVolume(ReportKeyOutput output) {
 		
+		if (output.regressionData.regressionOutput.empty) {
+			return null;
+		}
+		
 		Collection<EventResult> events = output.regressionData.regressionOutput.regressionInput.events;
 		
 		if (events == null) {
@@ -1778,6 +1806,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 		StringBuilder result = new StringBuilder();
 		
 		result.append(regressionData.reportKey);
+		
+		if (regressionData.regressionOutput.empty) {
+			return result.toString();
+		}
 		
 		result.append(" over ");
 		
@@ -1932,6 +1964,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 		EventFilter failureFilter = getFailureTypeFilter(serviceId, timespan, input, reportKeyResult);
 		
 		if (failureFilter == null) {
+			return result;
+		}
+		
+		if (reportKeyResult.output.regressionData.regressionOutput.empty) {
 			return result;
 		}
 		
@@ -2275,8 +2311,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 		String timeRange;
 		Pair<Object, Object> fromTo;
 		
-		if ((reportMode == ReportMode.Timeline)
-		  ||(reportMode == ReportMode.Timeline_Extended)) {
+		boolean isTimeline = (reportMode == ReportMode.Timeline)
+				  ||(reportMode == ReportMode.Timeline_Extended);
+		
+		if ((isTimeline) && (regressionWindow != null)) {
 			DateTime activeStart = regressionWindow.activeWindowStart;
 			DateTime activEnd = activeStart.plusMinutes(regressionWindow.activeTimespan);
 			
