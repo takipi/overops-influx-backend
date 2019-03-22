@@ -3013,8 +3013,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "boo",
-          "value": "boo"
+          "text": "<term>",
+          "value": "<term>"
         },
         "hide": 0,
         "includeAll": false,
