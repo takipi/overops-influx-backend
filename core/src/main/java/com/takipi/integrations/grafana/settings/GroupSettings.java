@@ -178,7 +178,7 @@ public class GroupSettings
 		return result;
 	}
 	
-	public Collection<String>getAllGroupValues() {
+	public Collection<String> getAllGroupValues() {
 		
 		List<String> result = new ArrayList<String>();
 
