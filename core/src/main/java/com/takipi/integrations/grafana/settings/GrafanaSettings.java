@@ -19,8 +19,8 @@ import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.service.SummarizedService;
 import com.takipi.api.client.util.client.ClientUtil;
+import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.common.util.Pair;
-import com.takipi.integrations.grafana.settings.input.ServiceSettingsData;
 
 public class GrafanaSettings {
 	
@@ -31,8 +31,9 @@ public class GrafanaSettings {
 	public static final String EXTENSION = ".json";
 	public static final String DEFAULT = File.separator + "settings" + File.separator + "oo_as_influx_default_settings" + EXTENSION;
 	
+	private static final boolean ENABLE_CACHE = false;
 	private static final int CACHE_SIZE = 1000;
-	private static final int CACHE_RETENTION = 1;
+	private static final int CACHE_RETENTION = 20;
 	
 	private static LoadingCache<SettingsCacheKey, ServiceSettings> settingsCache = null;
 	private static SettingsStorage settingsStorage = null;
@@ -151,53 +152,58 @@ public class GrafanaSettings {
 		initCache();
 	}
 	
+	private static ServiceSettings loadServiceSettings(ApiClient apiClient, String serviceId) {
+		
+		authService(apiClient, serviceId);
+		
+		String name = getServiceJsonName(serviceId);
+		String serviceJson = settingsStorage.getServiceSettings(name);
+		
+		ServiceSettings result = null;
+		
+		if (serviceJson != null) {	
+			result = parseServiceSettings(serviceId, serviceJson, false);
+		} 
+		
+		if (result == null) {
+			String defaultJson = settingsStorage.getDefaultServiceSettings();
+			
+			if (defaultJson != null) {
+				result = parseServiceSettings(serviceId, defaultJson, false);
+			}
+		}
+		
+		if (result == null) {
+			
+			Pair<ServiceSettingsData, String> bundledSettings = getBundledDefaultSettings();
+										
+			if (bundledSettings != null) {
+				result = getServiceSettings(bundledSettings.getFirst(), bundledSettings.getSecond());
+			} 
+		}
+		
+		if (result == null) {
+			throw new IllegalStateException("Could not acquire settings for " + serviceId);
+		}
+		
+		validateSettings(result.getData());
+		
+		return result;
+	}
+	
 	private static void initCache()
 	{
-		settingsCache = CacheBuilder.newBuilder()
-				.maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_RETENTION, TimeUnit.MINUTES)
-				.build(new CacheLoader<SettingsCacheKey, ServiceSettings>() {
-					
-					@Override
-					public ServiceSettings load(SettingsCacheKey key) {
+		if (ENABLE_CACHE) {
+			settingsCache = CacheBuilder.newBuilder()
+					.maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_RETENTION, TimeUnit.SECONDS)
+					.build(new CacheLoader<SettingsCacheKey, ServiceSettings>() {
 						
-						authService(key.apiClient, key.serviceId);
-						
-						String name = getServiceJsonName(key.serviceId);
-						String serviceJson = settingsStorage.getServiceSettings(name);
-						
-						ServiceSettings result = null;
-						
-						if (serviceJson != null) {	
-							result = parseServiceSettings(key.serviceId, key.apiClient, serviceJson, false);
-						} 
-						
-						if (result == null) {
-							String defaultJson = settingsStorage.getDefaultServiceSettings();
-							
-							if (defaultJson != null) {
-								result = parseServiceSettings(key.serviceId, key.apiClient, defaultJson, false);
-							}
+						@Override
+						public ServiceSettings load(SettingsCacheKey key) {
+							return loadServiceSettings(key.apiClient, key.serviceId);
 						}
-						
-						if (result == null) {
-							
-							Pair<ServiceSettingsData, String> bundledSettings = getBundledDefaultSettings();
-														
-							if (bundledSettings != null) {
-								result = getServiceSettings(key.serviceId, key.apiClient,
-									bundledSettings.getFirst(), bundledSettings.getSecond());
-							} 
-						}
-						
-						if (result == null) {
-							throw new IllegalStateException("Could not acquire settings for " + key.serviceId);
-						}
-						
-						validateSettings(result.getData());
-						
-						return result;
-					}
-				});
+					});
+		}
 	}
 	
 	private static void validateSettings(ServiceSettingsData serviceSettingsData) {
@@ -247,20 +253,19 @@ public class GrafanaSettings {
 		return new Gson().fromJson(json, ServiceSettingsData.class);
 	}
 	
-	private static ServiceSettings getServiceSettings(String serviceId, ApiClient apiClient, 
-		ServiceSettingsData data, String json) {
-		return new ServiceSettings(serviceId, apiClient, json, data);
+	private static ServiceSettings getServiceSettings(ServiceSettingsData data, String json) {
+		return new ServiceSettings(json, data);
 	}
 	
 	private static ServiceSettings parseServiceSettings(String serviceId, 
-		ApiClient apiClient, String json, boolean allowThrow) {
+		String json, boolean allowThrow) {
 		
 		ServiceSettingsData data;
 		ServiceSettings result;
 		
 		try {
 			data = parseServiceSettings(json);
-			result = new ServiceSettings(serviceId, apiClient, json, data);
+			result = new ServiceSettings(json, data);
 		} catch (Exception e) {
 			
 			if (allowThrow) {
@@ -281,12 +286,16 @@ public class GrafanaSettings {
 	public static ServiceSettings getServiceSettings(ApiClient apiClient, String serviceId) {
 		ServiceSettings result;
 		
-		try {
-			result = settingsCache.get(new SettingsCacheKey(apiClient, serviceId));
-		} catch (ExecutionException e) {
-			throw new IllegalStateException(e);
-		}		
-		
+		if (ENABLE_CACHE) {
+			try {
+				result = settingsCache.get(new SettingsCacheKey(apiClient, serviceId));
+			} catch (ExecutionException e) {
+				throw new IllegalStateException(e);
+			}	
+		} else {
+			result = loadServiceSettings(apiClient, serviceId);
+		}
+			
 		return result;
 	}
 	
@@ -297,11 +306,14 @@ public class GrafanaSettings {
 
 	public static void saveServiceSettings(ApiClient apiClient, String serviceId, String json) {
 		
-		ServiceSettings settings = parseServiceSettings(serviceId, apiClient, json, true);
+		ServiceSettings settings = parseServiceSettings(serviceId, json, true);
 		
 		SettingsCacheKey key = new SettingsCacheKey(apiClient, serviceId);
 		
-		settingsCache.put(key, settings);
+		if (ENABLE_CACHE) {
+			settingsCache.put(key, settings);
+		}
+
 		settingsStorage.saveServiceSettings(getServiceJsonName(serviceId), json);
 	}
 	

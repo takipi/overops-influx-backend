@@ -5,12 +5,11 @@ import java.util.List;
 import java.util.TreeSet;
 
 import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.util.settings.GroupSettings;
+import com.takipi.api.client.util.settings.GroupSettings.Group;
 import com.takipi.integrations.grafana.input.ApplicationsInput;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
-import com.takipi.integrations.grafana.settings.GrafanaSettings;
-import com.takipi.integrations.grafana.settings.GroupSettings;
-import com.takipi.integrations.grafana.settings.GroupSettings.Group;
 import com.takipi.integrations.grafana.util.ApiCache;
 
 public class ApplicationsFunction extends EnvironmentVariableFunction {
@@ -41,7 +40,7 @@ public class ApplicationsFunction extends EnvironmentVariableFunction {
 	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender) {
 	
-		GroupSettings appGroupSettings = GrafanaSettings.getData(apiClient, serviceId).applications;
+		GroupSettings appGroupSettings = getSettings(serviceId).applications;
 		
 		if (appGroupSettings != null) {
 			
@@ -59,8 +58,7 @@ public class ApplicationsFunction extends EnvironmentVariableFunction {
 	}
 	
 	@Override
-	protected void sortValues(FunctionInput input, List<List<Object>> series)
-	{
+	protected void sortValues(FunctionInput input, List<List<Object>> series) {
 		//do nothing
 	}
 

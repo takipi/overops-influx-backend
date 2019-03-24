@@ -9,6 +9,7 @@ import org.joda.time.DateTime;
 import com.google.common.collect.Lists;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.result.event.EventResult;
+import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.integrations.grafana.input.ViewInput;
 
 public class EventLinkEncoder {
@@ -30,10 +31,11 @@ public class EventLinkEncoder {
 				"\"request_ids\":[%s]},\"timestamp\":\"%s\"}";
 	
 
-	public static String encodeLink(ApiClient apiClient, String serviceId, ViewInput input, EventResult event, DateTime from, DateTime to) {
+	public static String encodeLink(ApiClient apiClient, ServiceSettingsData settingsData, String serviceId, ViewInput input, 
+		EventResult event, DateTime from, DateTime to) {
 			
-		Collection<String> apps = input.getApplications(apiClient, serviceId);
-		Collection<String> deployments = input.getDeployments(serviceId);
+		Collection<String> apps = input.getApplications(apiClient, settingsData, serviceId);
+		Collection<String> deployments = input.getDeployments(serviceId, apiClient);
 		Collection<String> servers = input.getServers(serviceId);
 
 		String json = String.format(TEMPLATE, serviceId, TimeUtil.getMillisAsString(from), TimeUtil.getMillisAsString(to),

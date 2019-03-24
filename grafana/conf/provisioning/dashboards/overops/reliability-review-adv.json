@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 44,
-  "iteration": 1553057654822,
+  "iteration": 1553396138673,
   "links": [
     {
       "asDropdown": true,
@@ -802,7 +802,7 @@
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Apps Trend: $kpi",
+      "title": "Apps Trend: $kpi $timeFilterAlert",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -853,6 +853,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": false,
           "tags": [],
           "text": "None",
           "value": "None"
@@ -950,7 +951,7 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "All Events",
           "value": "All Events"
         },
@@ -1045,7 +1046,7 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "Score",
           "value": "Score"
         },
@@ -1113,9 +1114,9 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "text": "10",
-          "value": "10"
+          "selected": false,
+          "text": "5",
+          "value": "5"
         },
         "hide": 0,
         "includeAll": false,
@@ -1124,12 +1125,12 @@
         "name": "limit",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "5",
             "value": "5"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "10",
             "value": "10"
           }
@@ -1325,11 +1326,35 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "timeFilterAlert",
+        "options": [],
+        "query": "minTimeFilterAlert({\"timeFilter\":\"$timeFilter\",\"minRange\":\"24h\", \"text\":\" - select a timeframe > 1d to chart trend\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
   "time": {
-    "from": "now-14d",
+    "from": "now-7d",
     "to": "now"
   },
   "timepicker": {
@@ -1361,5 +1386,5 @@
   "timezone": "",
   "title": "Reliability Review Adv",
   "uid": "NmADICjik",
-  "version": 11
+  "version": 13
 }

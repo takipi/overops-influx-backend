@@ -27,7 +27,7 @@ public class SettingsUtil {
 		return result;	
 	}
 
-	private static String getServiceId(String environments) {
+	public static String getServiceId(String environments) {
 
 		Collection<String> serviceIds = BaseEnvironmentsInput.getServiceIds(environments);
 
@@ -80,7 +80,6 @@ public class SettingsUtil {
 			SettingsPair pair = parse(data);
 
 			ApiClient apiClient = GrafanaApiClient.getApiClient();
-
 			GrafanaSettings.saveServiceSettings(apiClient, pair.serviceId, pair.settings);
 		} catch (Exception e) {
 			error = e.getMessage();
