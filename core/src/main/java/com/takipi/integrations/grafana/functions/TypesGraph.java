@@ -10,12 +10,11 @@ import org.joda.time.DateTime;
 
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.util.regression.settings.GeneralSettings;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.input.TypesGraphInput;
-import com.takipi.integrations.grafana.settings.GrafanaSettings;
-import com.takipi.integrations.grafana.settings.input.GeneralSettings;
 
 public class TypesGraph extends GraphFunction {
 
@@ -88,7 +87,7 @@ public class TypesGraph extends GraphFunction {
 				Collection<String> defaultTypes = graphInput.getDefaultTypes();
 				
 				if (defaultTypes == null) {
-					GeneralSettings generalSettings = GrafanaSettings.getData(apiClient, serviceId).general;
+					GeneralSettings generalSettings = getSettings(serviceId).general;
 					
 					if (generalSettings != null) {
 						defaultTypes = generalSettings.getDefaultTypes();

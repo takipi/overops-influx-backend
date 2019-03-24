@@ -14,6 +14,7 @@ import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
 import com.takipi.api.client.result.event.EventResult;
+import com.takipi.api.client.util.regression.settings.ServiceSettingsData;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
@@ -59,6 +60,11 @@ public class GraphFunction extends BaseGraphFunction {
 	public GraphFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
+	
+	public GraphFunction(ApiClient apiClient, Map<String, ServiceSettingsData> settingsMaps) {
+		super(apiClient, settingsMaps);
+	}
+	
 	@Override
 	protected List<GraphSeries> processServiceGraph(Collection<String> serviceIds, String serviceId, String viewId, String viewName,
 			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
@@ -79,24 +85,23 @@ public class GraphFunction extends BaseGraphFunction {
 		if (graph == null) {
 			return Collections.emptyList();
 		}
-		
-		Series series = new Series();
-				
-		String tagName = getSeriesName(input, input.seriesName, serviceId, serviceIds);
-		String cleanTagName = cleanSeriesName(tagName);
-		
+					
 		SeriesVolume seriesData = processGraphPoints(serviceId, viewId, timeSpan, graph, graphInput);
 
-		series.name = EMPTY_NAME;
-		series.columns = Arrays.asList(new String[] { TIME_COLUMN, cleanTagName });
+		String tagName = getSeriesName(input, input.seriesName, serviceId, serviceIds);		
+		String cleanTagName = cleanSeriesName(tagName);
+		
+		List<List<Object>> values;
 		
 		if ((graphInput.condense) && (seriesData.values.size() > pointsWanted) &&
 			(graphInput.getTimeFormat() == TimeFormat.EPOCH)) {
-			series.values = condensePoints(seriesData.values, pointsWanted);
+			values = condensePoints(seriesData.values, pointsWanted);
 		} else {
-			series.values = seriesData.values;
+			values = seriesData.values;
 		}
-		
+
+		Series series = createGraphSeries(cleanTagName, seriesData.volume, values);
+
 		return Collections.singletonList(GraphSeries.of(series, seriesData.volume, cleanTagName));
 
 	}

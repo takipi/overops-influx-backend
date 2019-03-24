@@ -15,23 +15,19 @@ public class VariableRedirectFunction extends VariableFunction
 {
 	private static final String DICTIONARY_SEPERATOR = Pattern.quote(":");
 	
-	public static class Factory implements FunctionFactory
-	{
+	public static class Factory implements FunctionFactory {
 		@Override
-		public GrafanaFunction create(ApiClient apiClient)
-		{
+		public GrafanaFunction create(ApiClient apiClient) {
 			return new VariableRedirectFunction(apiClient);
 		}
 		
 		@Override
-		public Class<?> getInputClass()
-		{
+		public Class<?> getInputClass() {
 			return VariableRedirectInput.class;
 		}
 		
 		@Override
-		public String getName()
-		{
+		public String getName() {
 			return "variableRedirect";
 		}
 	}
@@ -52,6 +48,7 @@ public class VariableRedirectFunction extends VariableFunction
 		String [] parts = dictionary.split(ARRAY_SEPERATOR);
 		
 		for (String part : parts) {
+		
 			String[] keyValue = part.split(DICTIONARY_SEPERATOR);
 			
 			if (keyValue.length != 2) {

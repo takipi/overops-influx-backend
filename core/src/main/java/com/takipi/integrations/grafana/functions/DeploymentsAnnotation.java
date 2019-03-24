@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
-import org.ocpsoft.prettytime.PrettyTime;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.deployment.SummarizedDeployment;
@@ -78,9 +77,7 @@ public class DeploymentsAnnotation extends BaseGraphFunction {
 		if (deps == null) {
 			return;
 		}
-		
-		PrettyTime prettyTime = new PrettyTime();
-					
+							
 		for (SummarizedDeployment dep : deps) {
 			
 			if (dep.first_seen == null) {
@@ -115,18 +112,12 @@ public class DeploymentsAnnotation extends BaseGraphFunction {
 			
 		DeploymentsGraphInput dgInput = (DeploymentsGraphInput)input;
 		
-		Series series = new Series();
-		
-		String name = getServiceValue(DEPLOY_SERIES_NAME, serviceId, serviceIds);
-		
-		series.name = EMPTY_NAME;
-		series.columns = Arrays.asList(new String[] { TIME_COLUMN, name});
-		
-		series.values = new ArrayList<List<Object>>();
-		
+		String name = getServiceValue(DEPLOY_SERIES_NAME, serviceId, serviceIds);		
+		Series series = createGraphSeries(name, 0);
+
 		List<Pair<DateTime, String>> deployments = new ArrayList<Pair<DateTime, String>>();
 		
-		Collection<String> selectedDeployments = input.getDeployments(serviceId);
+		Collection<String> selectedDeployments = input.getDeployments(serviceId, apiClient);
 
 		addDeployments(selectedDeployments, deployments, serviceId, false);
 		sortDeployments(deployments);

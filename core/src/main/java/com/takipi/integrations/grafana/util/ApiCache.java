@@ -2,6 +2,7 @@ package com.takipi.integrations.grafana.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -19,6 +20,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListenableFutureTask;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.application.SummarizedApplication;
+import com.takipi.api.client.data.deployment.SummarizedDeployment;
 import com.takipi.api.client.request.application.ApplicationsRequest;
 import com.takipi.api.client.request.deployment.DeploymentsRequest;
 import com.takipi.api.client.request.event.EventRequest;
@@ -54,6 +56,7 @@ import com.takipi.integrations.grafana.input.EventFilterInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 
 public class ApiCache {
+	
 	private static final Logger logger = LoggerFactory.getLogger(ApiCache.class);
 	
 	private static final int CACHE_SIZE = 1000;
@@ -470,8 +473,8 @@ public class ApiCache {
 				return false;
 			}
 
-			Collection<String> apps = input.getApplications(apiClient, serviceId);
-			Collection<String> otherApps = other.input.getApplications(apiClient, serviceId);
+			Collection<String> apps = input.getApplications(null, null, serviceId, false);
+			Collection<String> otherApps = other.input.getApplications(null, null, serviceId, false);
 			
 			if (!compare(apps, otherApps)) {
 				return false;
@@ -858,20 +861,24 @@ public class ApiCache {
 				return false;
 			}
 						
-			if (!Objects.equal(eventInput.hasTransactions(), otherInput.hasTransactions())) {
+			if (!Objects.equal(eventInput.hasTransactions(), 
+				otherInput.hasTransactions())) {
 				return false;
 			}
 			
-			if ((eventInput.hasTransactions()) && (!Objects.equal(eventInput.transactions, 
+			if ((eventInput.hasTransactions())
+			&& (!Objects.equal(eventInput.transactions, 
 				otherInput.transactions))) {
 				return false;
 			}
 			
-			if (!Objects.equal(eventInput.searchText, otherInput.searchText)) {
+			if (!Objects.equal(eventInput.searchText, 
+				otherInput.searchText)) {
 				return false;
 			}
 			
-			if (!Objects.equal(eventInput.eventLocations, otherInput.eventLocations)) {
+			if (!Objects.equal(eventInput.eventLocations, 
+				otherInput.eventLocations)) {
 				return false;
 			}
 			
@@ -904,6 +911,7 @@ public class ApiCache {
 	}
 
 	private static Response<?> getItem(BaseCacheLoader key) {
+		
 		try {
 			Response<?> result = queryCache.get(key);
 			
@@ -912,6 +920,7 @@ public class ApiCache {
 			} 
 			
 			return result;
+			
 		} catch (ExecutionException e) {
 			throw new IllegalStateException(e);
 		}
@@ -919,7 +928,7 @@ public class ApiCache {
 
 	@SuppressWarnings("unchecked")
 	public static Response<ViewsResult> getView(ApiClient apiClient, String serviceId, String viewName,
-			ViewsRequest viewsRequest) {
+		ViewsRequest viewsRequest) {
 
 		ViewCacheLoader cacheKey = new ViewCacheLoader(apiClient, viewsRequest, serviceId, viewName);
 		Response<ViewsResult> response = (Response<ViewsResult>)getItem(cacheKey);
@@ -935,6 +944,25 @@ public class ApiCache {
 		Response<DeploymentsResult> response = (Response<DeploymentsResult>)getItem(cacheKey);
 
 		return response;
+	}
+	
+	public static Collection<String> getDeploymentNames(ApiClient apiClient, String serviceId, boolean active) {
+
+		List<String> result;
+		Response<DeploymentsResult> response = getDeployments(apiClient, serviceId, active);	
+		
+		if ((response.data != null) && (response.data.deployments != null)) {
+			
+			result = new ArrayList<String>();
+			
+			for (SummarizedDeployment dep : response.data.deployments) {
+				result.add(dep.name);
+			}
+		} else {
+			result = Collections.emptyList();
+		}
+		
+		return result;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -961,12 +989,17 @@ public class ApiCache {
 
 		Response<ApplicationsResult> response = getApplications(apiClient, serviceId, active);
 		
-		List<String> result = new ArrayList<String>();
+		List<String> result;
 		
 		if ((response.data != null) && (response.data.applications != null)) {
+			
+			result = new ArrayList<String>(response.data.applications.size());
+
 			for (SummarizedApplication app : response.data.applications) {
 				result.add(app.name);
 			}
+		} else {
+			result = Collections.emptyList();
 		}
 		
 		return result;

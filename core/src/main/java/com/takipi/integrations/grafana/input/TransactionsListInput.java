@@ -35,8 +35,37 @@ public class TransactionsListInput extends BaseGraphInput {
 	 */
 	public enum RenderMode
 	{
+		
+		/**
+		 * Output the volume of transactions matching the target state (e.t. OK, Slowing, Critical)
+		 */
+		
 		SingleStat,
+		
+		/**
+		 * Output a tooltip description of transactions matching the target state (e.t. OK, Slowing, Critical)
+		 */
 		SingleStatDesc,
+		
+		
+		/**
+		 * Output the volume of transactions
+		 */
+		SingleStatVolume,
+		
+		/**
+		 * Output a weighted avg of transaction response time
+		 */
+		SingleStatAvg,
+		
+		/**
+		 * Output a weighted avg of transaction baseline response time
+		 */
+		SingleStatBaselineAvg,
+		
+		/**
+		 * Output a row for each transaction
+		 */
 		Grid
 	}
 	

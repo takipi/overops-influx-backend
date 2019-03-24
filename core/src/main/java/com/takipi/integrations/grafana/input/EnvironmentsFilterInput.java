@@ -1,12 +1,17 @@
 package com.takipi.integrations.grafana.input;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.google.common.base.Objects;
 import com.takipi.api.client.ApiClient;
-import com.takipi.integrations.grafana.settings.GrafanaSettings;
-import com.takipi.integrations.grafana.settings.GroupSettings;
+import com.takipi.api.client.util.regression.settings.GroupSettings;
+import com.takipi.api.client.util.regression.settings.GroupSettings.Group;
+import com.takipi.api.client.util.regression.settings.GroupSettings.GroupFilter;
+import com.takipi.api.client.util.regression.settings.ServiceSettingsData;
+import com.takipi.common.util.CollectionUtil;
+import com.takipi.integrations.grafana.util.ApiCache;
 
 /**
  * Input for functions that use a filter to request data from a specific combination
@@ -42,41 +47,114 @@ public abstract class EnvironmentsFilterInput extends BaseEnvironmentsInput {
 		return hasFilter(deployments);
 	}
 	
-	public Collection<String> getApplications(ApiClient apiClient, String serviceId) {
-		return getApplications(apiClient, serviceId, true);
+	public Collection<String> getApplications(ApiClient apiClient,
+		ServiceSettingsData settingsData, String serviceId) {
+		return getApplications(apiClient, settingsData, serviceId, true);
 	}
 	
-	public Collection<String> getApplications(ApiClient apiClient, String serviceId,
+	public Collection<String> getApplications(ApiClient apiClient, 
+		ServiceSettingsData settingsData, String serviceId,
 		boolean expandGroups) {
 		
-		List<String> apps = getServiceFilters(applications, serviceId, true);
+		Collection<String> apps = getServiceFilters(applications, serviceId, true);
 		
 		if (apps == null) {
 			return null;
 		}
 			
-		Collection<String> result;
+		Set<String> result = new HashSet<String>();
 		
-		if ((apiClient != null) && (expandGroups)) {			
-			GroupSettings groupSettings = GrafanaSettings.getData(apiClient, serviceId).applications;
-			
-			if (groupSettings != null) {
-				result = groupSettings.expandList(apps);
-			} else {
-				result = apps;	
-			}
+		if ((settingsData != null) && (settingsData.applications != null) && (expandGroups)) {			
+				
+			Collection<String> serviceApps = null;
+
+			for (String app : apps) {
+				
+				if (GroupSettings.isGroup(app)) {
+					
+					Group group = settingsData.applications.getGroup(app);
+					
+					if (group != null) {
+						
+						GroupFilter filter = group.getFilter();
+						
+						if (!CollectionUtil.safeIsEmpty(filter.patterns)) {
+							
+							if (serviceApps == null) {
+								serviceApps  = ApiCache.getApplicationNames(apiClient, serviceId, false);
+							}
+							
+							for (String serviceApp : serviceApps) {
+								 
+								 if (!filter.filter(serviceApp)) {
+									 result.add(serviceApp);
+								 }
+							 }	
+						}
+						
+						if (!CollectionUtil.safeIsEmpty(filter.values)) {
+							result.addAll(filter.values);
+						}		
+					} else {
+						result.add(GroupSettings.fromGroupName(app));
+					}
+				} else {
+					result.add(app);
+				}				
+			} 			
 		} else {
-			result = apps;
+			result.addAll(apps);
 		}
 		
 		return result;
 	}
 
-	public List<String> getDeployments(String serviceId) {
-		return getServiceFilters(deployments, serviceId, true);
+	public Collection<String> getDeployments(String serviceId) {
+		return getDeployments(serviceId, null, false);
+	}
+	
+	public Collection<String> getDeployments(String serviceId, ApiClient apiClient) {
+		return getDeployments(serviceId, apiClient, true);
+	}
+	
+	private Collection<String> getDeployments(String serviceId, ApiClient apiClient, 
+			boolean expandGroups) {
+		
+		Collection<String> serviceValues = getServiceFilters(deployments, serviceId, true);
+		
+		if (serviceValues == null) {
+			return null;
+		}
+		
+		Set<String> result = new HashSet<String>();				
+		
+		if (expandGroups) {
+			
+			GroupFilter filter = GroupFilter.from(serviceValues);
+			
+			if (!CollectionUtil.safeIsEmpty(filter.patterns)) {
+				
+				Collection<String> deps = ApiCache.getDeploymentNames(apiClient, serviceId, false);
+				
+				for (String dep : deps) {
+					 
+					 if (!filter.filter(dep)) {
+						 result.add(dep);
+					 }
+				 }
+			}
+			
+			if (!CollectionUtil.safeIsEmpty(filter.values)) {
+				result.addAll(filter.values);
+			}
+		} else {
+			result.addAll(serviceValues);
+		}
+	
+		return result;
 	}
 
-	public List<String> getServers(String serviceId) {
+	public Collection<String> getServers(String serviceId) {
 		return getServiceFilters(servers, serviceId, true);
 	}
 	

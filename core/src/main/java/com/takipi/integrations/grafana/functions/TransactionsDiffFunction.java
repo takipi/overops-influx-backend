@@ -40,8 +40,7 @@ public class TransactionsDiffFunction extends TransactionsListFunction
 	@Override
 	protected Collection<TransactionGraph> getBaselineTransactionGraphs(String serviceId, String viewId,
 			BaseEventVolumeInput input, Pair<DateTime, DateTime> timeSpan,
-			RegressionInput regressionInput, RegressionWindow regressionWindow)
-	{
+			RegressionInput regressionInput, RegressionWindow regressionWindow) {
 		TransactionsDiffInput tdInput = (TransactionsDiffInput)input;
 		
 		Gson gson = new Gson();
@@ -58,14 +57,13 @@ public class TransactionsDiffFunction extends TransactionsListFunction
 		return result;
 	}
 
-	public TransactionsDiffFunction(ApiClient apiClient)
-	{
+	public TransactionsDiffFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
 	
 	@Override
-	public List<Series> process(FunctionInput functionInput)
-	{
+	public List<Series> process(FunctionInput functionInput) {
+		
 		if (!(functionInput instanceof TransactionsDiffInput)) {
 			throw new IllegalArgumentException("functionInput");
 		}

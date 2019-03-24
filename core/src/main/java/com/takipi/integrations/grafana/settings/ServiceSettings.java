@@ -7,25 +7,19 @@ import java.util.List;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.infra.Categories.Category;
+import com.takipi.api.client.util.regression.settings.ServiceSettingsData;
 import com.takipi.common.util.CollectionUtil;
-import com.takipi.integrations.grafana.settings.GroupSettings.GroupFilter;
-import com.takipi.integrations.grafana.settings.input.ServiceSettingsData;
 
 public class ServiceSettings {
 	
 	private ServiceSettingsData data;
 	private volatile Categories instance = null;
-	private String serviceId;
-	private ApiClient apiClient;
 	private String json;
 	
-	public ServiceSettings(String serviceId, ApiClient apiClient, String json, ServiceSettingsData data) {
+	public ServiceSettings(String json, ServiceSettingsData data) {
 		this.data = data;
-		this.serviceId = serviceId;
-		this.apiClient = apiClient;
 		this.json = json;
 	}
 	
@@ -40,32 +34,6 @@ public class ServiceSettings {
 		}
 		
 		return data;
-	}
-	
-	public GroupFilter getTransactionsFilter(Collection<String> transactions) {
-		
-		GroupFilter result;
-		
-		if (transactions != null)
-		{
-			
-			GroupSettings transactionGroups = GrafanaSettings.getData(apiClient, serviceId).transactions;
-			
-			if (transactionGroups != null)
-			{
-				result = transactionGroups.getExpandedFilter(transactions);
-			}
-			else
-			{
-				result = GroupFilter.from(transactions);
-			}
-		}
-		else
-		{
-			result = null;
-		}
-		
-		return result;
 	}
 	
 	private boolean isMatch(Category a, Category b) {

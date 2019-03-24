@@ -14,6 +14,8 @@ import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.util.infra.Categories;
+import com.takipi.api.client.util.regression.settings.GeneralSettings;
+import com.takipi.api.client.util.regression.settings.GroupSettings;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
@@ -21,8 +23,6 @@ import com.takipi.integrations.grafana.input.EventTypesInput;
 import com.takipi.integrations.grafana.input.EventTypesInput.EventTypes;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
-import com.takipi.integrations.grafana.settings.GroupSettings;
-import com.takipi.integrations.grafana.settings.input.GeneralSettings;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class EventTypesFunction extends EnvironmentVariableFunction {
@@ -109,7 +109,7 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 		if (eventInput.types != null) {
 			types = eventInput.getTypes();
 		} else {
-			GeneralSettings settings = GrafanaSettings.getData(apiClient, serviceId).general;
+			GeneralSettings settings = getSettings(serviceId).general;
 			
 			if (settings != null) {
 				types = settings.getDefaultTypes();

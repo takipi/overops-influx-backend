@@ -39,8 +39,7 @@ public class TransactionAvgGraphFunction extends TransactionsGraphFunction
 		}
 	}
 	
-	public TransactionAvgGraphFunction(ApiClient apiClient)
-	{
+	public TransactionAvgGraphFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
 	

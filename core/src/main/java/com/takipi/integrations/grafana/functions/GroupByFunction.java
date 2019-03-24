@@ -24,15 +24,14 @@ import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.util.client.ClientUtil;
+import com.takipi.api.client.util.regression.settings.GroupSettings;
+import com.takipi.api.client.util.regression.settings.GroupSettings.Group;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseVolumeInput.AggregationType;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.GroupByInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.settings.GrafanaSettings;
-import com.takipi.integrations.grafana.settings.GroupSettings;
-import com.takipi.integrations.grafana.settings.GroupSettings.Group;
 import com.takipi.integrations.grafana.util.DeploymentUtil;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
@@ -453,12 +452,12 @@ public class GroupByFunction extends BaseVolumeFunction {
 		List<String> apps;
 
 		if (input.hasApplications()) {
-			apps = new ArrayList<String>(input.getApplications(apiClient, serviceId));
+			apps = new ArrayList<String>(input.getApplications(apiClient, getSettings(serviceId), serviceId));
 		} else {
 			
 			List<String> keyApps = new ArrayList<String>();
 			
-			GroupSettings appGroups = GrafanaSettings.getData(apiClient, serviceId).applications;
+			GroupSettings appGroups = getSettings(serviceId).applications;
 			
 			if ((appGroups != null) && (appGroups.groups != null)) {
 				
@@ -515,7 +514,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 		List<BaseGroupByAsyncTask> result = new ArrayList<BaseGroupByAsyncTask>();
 
-		List<String> servers;
+		Collection<String> servers;
 
 		if (input.hasServers()) {
 			servers = input.getServers(serviceId);
@@ -523,11 +522,13 @@ public class GroupByFunction extends BaseVolumeFunction {
 			servers = ClientUtil.getServers(apiClient, serviceId);
 		}
 		
+		List<String> serverList = new ArrayList<String>(servers);
+		
 		int size;
 		
 		if (input.limit > 0) {
 			
-			servers.sort(new Comparator<String>() {
+			serverList.sort(new Comparator<String>() {
 
 				@Override
 				public int compare(String o1, String o2) {
@@ -535,16 +536,16 @@ public class GroupByFunction extends BaseVolumeFunction {
 				}	
 			});
 			
-			size = Math.min(servers.size(), input.limit);
+			size = Math.min(serverList.size(), input.limit);
 		} else {
-			size = servers.size();
+			size = serverList.size();
 		}
 
 		String json = new Gson().toJson(input);
 
 		for (int i = 0; i < size; i++) {
 
-			String server = servers.get(i);
+			String server = serverList.get(i);
 			
 			GroupByInput serverInput = new Gson().fromJson(json, input.getClass());
 			serverInput.applications = server;
@@ -620,7 +621,6 @@ public class GroupByFunction extends BaseVolumeFunction {
 	private void executeFilteredVolume(Map<GroupByKey, GroupByVolume> map, String key, GroupByInput input,
 		String serviceId, Pair<DateTime, DateTime> timespan) {
 
-
 		Map<String, EventResult> events = getEventMap(serviceId, input, timespan.getFirst(), timespan.getSecond(), 
 			input.volumeType, input.pointsWanted);
 		
@@ -634,10 +634,10 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 		List<BaseGroupByAsyncTask> result = new ArrayList<BaseGroupByAsyncTask>();
 
-		List<String> deployments;
+		Collection<String> deployments;
 
 		if (input.hasDeployments()) {
-			deployments = input.getDeployments(serviceId);
+			deployments =  input.getDeployments(serviceId, apiClient);
 		} else {
 			List<String> activeDeps =  new ArrayList<String>(
 				ClientUtil.getDeployments(apiClient, serviceId, true));
@@ -652,6 +652,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 				DeploymentUtil.sortDeployments(allDeps);
 								
 				for (String dep : allDeps) {
+					
 					if (!activeDeps.contains(dep)) {
 						activeDeps.add(dep);						
 					}
@@ -673,24 +674,28 @@ public class GroupByFunction extends BaseVolumeFunction {
 			size = deployments.size();
 		}
 		
-		String json = new Gson().toJson(input);
+		Gson gson =  new Gson();
+		String json = gson.toJson(input);
 
-		for (int i = 0; i < size; i++) {
-
-			String deployment = deployments.get(i);
+		for (String deployment : deployments) {
 			
-			GroupByInput depInput = new Gson().fromJson(json, input.getClass());
+			GroupByInput depInput = gson.fromJson(json, input.getClass());
 			depInput.deployments = deployment;
 			
-			result.add(new GroupByFilterAsyncTask(map, deployment, depInput, serviceId, viewId, timeSpan));
+			result.add(new GroupByFilterAsyncTask(map, deployment, 
+				depInput, serviceId, viewId, timeSpan));
+			
+			if (result.size() > size) {
+				break;
+			}
 		}
 
 		return result;
 	}
 
 	private void updateMap(Map<GroupByKey, GroupByVolume> map, String serviceId, String key, 
-			Pair<DateTime, DateTime> timespan,
-			Collection<EventResult> events, GroupByInput input) {
+		Pair<DateTime, DateTime> timespan,
+		Collection<EventResult> events, GroupByInput input) {
 
 		if (events == null) {
 			return;
@@ -800,17 +805,17 @@ public class GroupByFunction extends BaseVolumeFunction {
 		}
 
 		switch (input.field) {
-		case application:
-			return processApplicationsGroupBy(map, input, serviceId, viewId, timeSpan);
-
-		case deployment:
-			return processDeploymentsGroupBy(map, input, serviceId, viewId, timeSpan);
-
-		case server:
-			return processServersGroupBy(map, input, serviceId, viewId, timeSpan);
-
-		default:
-			return processEventsGroupBy(map, input, serviceId, viewId, timeSpan);
+			case application:
+				return processApplicationsGroupBy(map, input, serviceId, viewId, timeSpan);
+	
+			case deployment:
+				return processDeploymentsGroupBy(map, input, serviceId, viewId, timeSpan);
+	
+			case server:
+				return processServersGroupBy(map, input, serviceId, viewId, timeSpan);
+	
+			default:
+				return processEventsGroupBy(map, input, serviceId, viewId, timeSpan);
 		}
 	}
 
@@ -857,32 +862,36 @@ public class GroupByFunction extends BaseVolumeFunction {
 		return result;
 	}
 
-	private static Series createSeries(GroupByInput input, String seriesKey) {
-		Series series = new Series();
-
+	private Series createSeries(GroupByInput input, String seriesKey) {
+		
+		Series result;
+		
 		if (input.addTags) {
-			series.name = SERIES_NAME;
-			series.tags = Collections.singletonList(seriesKey);
+			
+			result = new Series();
+
+			result.name = SERIES_NAME;
+			result.tags = Collections.singletonList(seriesKey);
 
 			Collection<AggregationType> types = getColumnTypes(input);
 
-			series.columns = new ArrayList<String>();
-			series.columns.add(TIME_COLUMN);
+			result.columns = new ArrayList<String>();
+			result.columns.add(TIME_COLUMN);
 
 			for (AggregationType agType : types) {
-				series.columns.add(agType.toString());
+				result.columns.add(agType.toString());
 			}
+			
+			result.values = new ArrayList<List<Object>>();	
 		} else {
-			series.name = EMPTY_NAME;
-			series.columns = Arrays.asList(new String[] { TIME_COLUMN, seriesKey });
+			result = createGraphSeries(seriesKey, 0);
 		}
 
-		series.values = new ArrayList<List<Object>>();
 
-		return series;
+		return result;
 	}
 
-	private static Map<String, SeriesResult> processGroupResults(GroupByInput input,
+	private Map<String, SeriesResult> processGroupResults(GroupByInput input,
 			Map<String, GroupResult> groupResults, Collection<String> serviceIds) {
 
 		Map<String, SeriesResult> resultMap = new HashMap<String, SeriesResult>();

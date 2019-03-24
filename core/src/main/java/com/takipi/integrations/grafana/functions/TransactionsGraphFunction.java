@@ -20,6 +20,8 @@ import com.takipi.api.client.data.transaction.TransactionGraph.GraphPoint;
 import com.takipi.api.client.util.performance.calc.PerformanceState;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
+import com.takipi.api.client.util.regression.settings.GroupSettings;
+import com.takipi.api.client.util.regression.settings.GroupSettings.GroupFilter;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.GraphFunction.SeriesVolume;
@@ -31,8 +33,6 @@ import com.takipi.integrations.grafana.input.TransactionsGraphInput.GraphType;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput.TimeWindow;
 import com.takipi.integrations.grafana.input.TransactionsListInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.settings.GroupSettings;
-import com.takipi.integrations.grafana.settings.GroupSettings.GroupFilter;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionsGraphFunction extends BaseGraphFunction {
@@ -192,9 +192,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		
 		List<GraphSeries> result = processServiceGraph(serviceId, tgInput, 
 				serviceIds, timeSpan, transactionGraphs.graphs);
-		
-		//sortSeriesByName(series);
-	
+			
 		return result;
 	}
     
@@ -473,23 +471,21 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 	protected GraphSeries createAggregateGraphSeries(String serviceId, Collection<TransactionGraph> graphs,
 			GroupFilter transactionFilter, TransactionsGraphInput input, 
 			Collection<String> serviceIds, String seriesName) {
-
-		Series series = new Series();
 			
+		long volume;
 		SeriesVolume seriesValues;
 
 		if ((input.volumeType == null) || (input.volumeType.equals(GraphType.avg_time))) {
+			volume = 0;
 			seriesValues = getAvgSeriesValues(graphs, transactionFilter, input);
 
 		} else {
 			seriesValues = getInvSeriesValues(graphs, transactionFilter, input);
+			volume = seriesValues.volume;
 		}
 
 		String cleanSeriesName = cleanSeriesName(seriesName);
-		
-		series.name = EMPTY_NAME;
-		series.columns = Arrays.asList(new String[] { TIME_COLUMN, cleanSeriesName });
-		series.values = seriesValues.values;
+		Series series = createGraphSeries(cleanSeriesName, volume, seriesValues.values);
 
 		return GraphSeries.of(series, seriesValues.volume, cleanSeriesName);
 
@@ -498,17 +494,21 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 	private GraphSeries createTransactionGraphSeries(String serviceId, TransactionGraph graph, 
 			GraphType volumeType, Collection<String> serviceIds, TransactionsGraphInput input) {
 
-		Series series = new Series();
 		
 		String tagName = getServiceValue(getTransactionName(graph.name, true), serviceId, serviceIds);
 		String cleanTagName = cleanSeriesName(tagName);
 
-		series.name = EMPTY_NAME;
-		series.columns = Arrays.asList(new String[] { TIME_COLUMN, cleanTagName });
-
 		SeriesVolume seriesData = processGraphPoints(graph, volumeType, input);
-
-		series.values = seriesData.values;
+		
+		long volume = 0;
+		
+		if (input.volumeType.equals(GraphType.invocations)) {
+			volume = seriesData.volume;
+		} else {
+			volume = 0;
+		}
+		
+		Series series = createGraphSeries(cleanTagName, volume, seriesData.values);
 
 		return GraphSeries.of(series, seriesData.volume, cleanTagName);
 	}
