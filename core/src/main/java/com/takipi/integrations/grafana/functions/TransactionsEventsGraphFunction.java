@@ -17,7 +17,7 @@ import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
 import com.takipi.api.client.result.event.EventResult;
-import com.takipi.api.client.util.regression.settings.GroupSettings.GroupFilter;
+import com.takipi.api.client.util.settings.GroupSettings.GroupFilter;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;

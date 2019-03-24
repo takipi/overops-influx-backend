@@ -14,8 +14,8 @@ import org.joda.time.DateTime;
 
 import com.google.common.base.Objects;
 import com.takipi.api.client.ApiClient;
-import com.takipi.api.client.util.regression.settings.GroupSettings;
-import com.takipi.api.client.util.regression.settings.ServiceSettingsData;
+import com.takipi.api.client.util.settings.GroupSettings;
+import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;

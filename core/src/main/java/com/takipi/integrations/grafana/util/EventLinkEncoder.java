@@ -9,7 +9,7 @@ import org.joda.time.DateTime;
 import com.google.common.collect.Lists;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.result.event.EventResult;
-import com.takipi.api.client.util.regression.settings.ServiceSettingsData;
+import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.integrations.grafana.input.ViewInput;
 
 public class EventLinkEncoder {

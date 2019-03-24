@@ -6,10 +6,10 @@ import java.util.Set;
 
 import com.google.common.base.Objects;
 import com.takipi.api.client.ApiClient;
-import com.takipi.api.client.util.regression.settings.GroupSettings;
-import com.takipi.api.client.util.regression.settings.GroupSettings.Group;
-import com.takipi.api.client.util.regression.settings.GroupSettings.GroupFilter;
-import com.takipi.api.client.util.regression.settings.ServiceSettingsData;
+import com.takipi.api.client.util.settings.GroupSettings;
+import com.takipi.api.client.util.settings.GroupSettings.Group;
+import com.takipi.api.client.util.settings.GroupSettings.GroupFilter;
+import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.integrations.grafana.util.ApiCache;
 

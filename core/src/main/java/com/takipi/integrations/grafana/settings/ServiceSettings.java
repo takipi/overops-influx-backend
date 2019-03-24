@@ -9,7 +9,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.infra.Categories.Category;
-import com.takipi.api.client.util.regression.settings.ServiceSettingsData;
+import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.common.util.CollectionUtil;
 
 public class ServiceSettings {

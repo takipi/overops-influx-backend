@@ -10,7 +10,7 @@ import org.joda.time.DateTime;
 
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
-import com.takipi.api.client.util.regression.settings.GeneralSettings;
+import com.takipi.api.client.util.settings.GeneralSettings;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.GraphInput;

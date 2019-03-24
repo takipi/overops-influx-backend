@@ -15,7 +15,7 @@ import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.transaction.Stats;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.util.performance.calc.PerformanceState;
-import com.takipi.api.client.util.regression.settings.SlowdownSettings;
+import com.takipi.api.client.util.settings.SlowdownSettings;
 import com.takipi.api.client.util.transaction.TransactionUtil;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;

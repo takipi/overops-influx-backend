@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.TreeSet;
 
 import com.takipi.api.client.ApiClient;
-import com.takipi.api.client.util.regression.settings.GroupSettings;
-import com.takipi.api.client.util.regression.settings.GroupSettings.Group;
+import com.takipi.api.client.util.settings.GroupSettings;
+import com.takipi.api.client.util.settings.GroupSettings.Group;
 import com.takipi.integrations.grafana.input.ApplicationsInput;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;

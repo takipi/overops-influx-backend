@@ -9,9 +9,9 @@ import org.joda.time.DateTime;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.transaction.TransactionGraph;
-import com.takipi.api.client.util.regression.settings.GroupSettings;
-import com.takipi.api.client.util.regression.settings.GroupSettings.Group;
-import com.takipi.api.client.util.regression.settings.GroupSettings.GroupFilter;
+import com.takipi.api.client.util.settings.GroupSettings;
+import com.takipi.api.client.util.settings.GroupSettings.Group;
+import com.takipi.api.client.util.settings.GroupSettings.GroupFilter;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput.AggregateMode;

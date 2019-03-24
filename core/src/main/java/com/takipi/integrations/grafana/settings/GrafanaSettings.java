@@ -19,7 +19,7 @@ import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.service.SummarizedService;
 import com.takipi.api.client.util.client.ClientUtil;
-import com.takipi.api.client.util.regression.settings.ServiceSettingsData;
+import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.common.util.Pair;
 
 public class GrafanaSettings {

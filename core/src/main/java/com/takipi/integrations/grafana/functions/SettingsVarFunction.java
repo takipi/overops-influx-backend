@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.takipi.api.client.ApiClient;
-import com.takipi.api.client.util.regression.settings.GeneralSettings;
+import com.takipi.api.client.util.settings.GeneralSettings;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.SettingsVarInput;
