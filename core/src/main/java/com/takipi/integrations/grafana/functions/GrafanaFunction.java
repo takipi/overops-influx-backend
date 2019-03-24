@@ -48,7 +48,6 @@ import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventSlimResult;
 import com.takipi.api.client.result.event.EventsResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
-import com.takipi.api.client.result.event.EventsVolumeResult;
 import com.takipi.api.client.result.metrics.GraphResult;
 import com.takipi.api.client.result.process.JvmsResult;
 import com.takipi.api.client.result.transaction.TransactionsGraphResult;
@@ -1803,11 +1802,7 @@ public abstract class GrafanaFunction
 		
 		List<EventResult> events;
 		
-		if (response.data instanceof EventsVolumeResult)
-		{
-			events = ((EventsVolumeResult)(response.data)).events;
-		}
-		else if (response.data instanceof EventsResult)
+		if (response.data instanceof EventsResult)
 		{
 			events = ((EventsResult)(response.data)).events;
 		}
