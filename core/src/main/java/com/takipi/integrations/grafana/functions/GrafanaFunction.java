@@ -176,7 +176,7 @@ public abstract class GrafanaFunction {
 	private static final int NO_GRAPH_SLICE = -1;
 	
 	protected final ApiClient apiClient;
-	protected Map<String, ServiceSettingsData> settingsMaps;
+	protected volatile Map<String, ServiceSettingsData> settingsMaps;
 	
 	protected class GraphSliceTaskResult {
 		
