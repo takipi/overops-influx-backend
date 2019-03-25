@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 43,
-  "iteration": 1553091273885,
+  "iteration": 1553491644996,
   "links": [],
   "panels": [
     {
@@ -1505,7 +1505,7 @@
         },
         {
           "alias": "Fail Δ%",
-          "colorMode": "value",
+          "colorMode": null,
           "colors": [
             "rgba(50, 172, 45, 0.97)",
             "rgba(237, 129, 40, 0.89)",
@@ -2601,7 +2601,7 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "All Events",
           "value": "All Events"
         },
@@ -2612,7 +2612,7 @@
         "name": "view",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "All Events",
             "value": "All Events"
           }
@@ -2719,9 +2719,8 @@
         "allValue": null,
         "current": {
           "selected": false,
-          "tags": [],
-          "text": "10",
-          "value": "10"
+          "text": "5",
+          "value": "5"
         },
         "hide": 0,
         "includeAll": false,
@@ -2730,12 +2729,12 @@
         "name": "limit",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "5",
             "value": "5"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "10",
             "value": "10"
           }
@@ -3087,5 +3086,5 @@
   "timezone": "",
   "title": "Home",
   "uid": "lg0U4qriz",
-  "version": 243
+  "version": 244
 }
