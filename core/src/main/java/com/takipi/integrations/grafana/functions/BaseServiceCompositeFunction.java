@@ -12,8 +12,7 @@ import com.takipi.integrations.grafana.output.Series;
 
 public abstract class BaseServiceCompositeFunction extends BaseCompositeFunction
 {
-	public BaseServiceCompositeFunction(ApiClient apiClient)
-	{
+	public BaseServiceCompositeFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
 
@@ -21,8 +20,7 @@ public abstract class BaseServiceCompositeFunction extends BaseCompositeFunction
 		String serviceId, EnvironmentsFilterInput functionInput);
 	
 	@Override
-	protected Collection<Pair<GrafanaFunction, FunctionInput>> getFunctions(FunctionInput functionInput)
-	{
+	protected Collection<Pair<GrafanaFunction, FunctionInput>> getFunctions(FunctionInput functionInput) {
 		EnvironmentsFilterInput input = (EnvironmentsFilterInput)functionInput;
 		Collection<String> serviceIds = getServiceIds(input);
 		
@@ -36,8 +34,8 @@ public abstract class BaseServiceCompositeFunction extends BaseCompositeFunction
 	}
 	
 	@Override
-	public List<Series> process(FunctionInput functionInput)
-	{
+	public List<Series> process(FunctionInput functionInput) {
+		
 		if (!(functionInput instanceof EnvironmentsFilterInput)) {
 			throw new IllegalArgumentException("functionInput");
 		}

@@ -32,7 +32,7 @@ public class ViewInput extends EnvironmentsFilterInput {
 	public String timeFilter;
 	
 	/**
-	 * A value indicating whether this timeFilter is passed from a template variable
+	 * A value indicating whether this timeFilter is passed from within a template variable
 	 */
 	public boolean varTimeFilter;
 

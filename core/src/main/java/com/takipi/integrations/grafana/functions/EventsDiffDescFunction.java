@@ -131,7 +131,7 @@ public class EventsDiffDescFunction extends EnvironmentVariableFunction {
 		targetInput.servers = input.compareToServers;
 		targetInput.deployments = input.compareToDeployments;
 		
-		Collection<String> appsB = targetInput.getApplications(apiClient, serviceId);
+		Collection<String> appsB = targetInput.getApplications(apiClient, getSettings(serviceId), serviceId);
 		Collection<String> depsB = targetInput.getDeployments(serviceId);
 		Collection<String> srvB = targetInput.getServers(serviceId);
 		
@@ -144,7 +144,7 @@ public class EventsDiffDescFunction extends EnvironmentVariableFunction {
 		
 		StringBuilder result = new StringBuilder();
 						
-		Collection<String> appsA = input.getApplications(apiClient, serviceId);
+		Collection<String> appsA = input.getApplications(apiClient, getSettings(serviceId), serviceId);
 		Collection<String> depsA = input.getDeployments(serviceId);
 		Collection<String> srvA = input.getServers(serviceId);
 		
@@ -162,8 +162,8 @@ public class EventsDiffDescFunction extends EnvironmentVariableFunction {
 		targetInput.servers = input.compareToServers;
 		targetInput.deployments = input.compareToDeployments;
 		
-		Collection<String> appsA = input.getApplications(apiClient, serviceId);
-		Collection<String> appsB = targetInput.getApplications(apiClient, serviceId);
+		Collection<String> appsA = input.getApplications(apiClient, getSettings(serviceId), serviceId);
+		Collection<String> appsB = targetInput.getApplications(apiClient, getSettings(serviceId), serviceId);
 		
 		Collection<String> depsA = input.getDeployments(serviceId);
 		Collection<String> depsB = targetInput.getDeployments(serviceId);

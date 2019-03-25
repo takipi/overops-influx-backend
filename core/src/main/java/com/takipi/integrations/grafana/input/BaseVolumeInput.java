@@ -19,4 +19,9 @@ public abstract class BaseVolumeInput extends BaseEventVolumeInput  {
 	 * A comma delimited array of the types of volume returned by this query. 
 	 */
 	public String type;
+	
+	/**
+	 * Control whether values are returned in numeric format or string format (e.g. 1000 vs "1K")
+	 */
+	public boolean stringValue;
 }

@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Date;
 
 import org.joda.time.DateTime;
-import org.ocpsoft.prettytime.PrettyTime;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.regression.RegressionInput;
@@ -41,8 +40,8 @@ public class BaselineWindowFunction extends EnvironmentVariableFunction
 
 	@Override
 	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
-			VariableAppender appender)
-	{		
+			VariableAppender appender) {		
+		
 		BaselineWindowInput bwInput = (BaselineWindowInput)input;
 		
 		String viewId = getViewId(serviceId, bwInput.view);
@@ -54,7 +53,7 @@ public class BaselineWindowFunction extends EnvironmentVariableFunction
 		
 		Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(bwInput.timeFilter);
 		
-		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
+		RegressionFunction regressionFunction = new RegressionFunction(apiClient, settingsMaps);
 		Pair<RegressionInput, RegressionWindow> inputPair = regressionFunction.getRegressionInput(serviceId, 
 			viewId, bwInput, timespan, false);
 		
@@ -85,7 +84,7 @@ public class BaselineWindowFunction extends EnvironmentVariableFunction
 		
 		if (bwInput.prettyFormat) {
 			Date duration = DateTime.now().minusMinutes(time).toDate();
-			value = new PrettyTime().formatDuration(duration);
+			value = prettyTime.formatDuration(duration);
 		} else {
 			value = time + TimeUtil.MINUTE_POSTFIX;
 		}

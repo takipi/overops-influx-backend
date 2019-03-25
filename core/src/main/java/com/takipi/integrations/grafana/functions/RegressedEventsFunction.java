@@ -52,7 +52,7 @@ public class RegressedEventsFunction extends EnvironmentVariableFunction
 		RegressionsInput rgInput = gson.fromJson(json, RegressionsInput.class);
 		rgInput.timeFilter = TimeUtil.getTimeFilter(timespan);
 		
-		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
+		RegressionFunction regressionFunction = new RegressionFunction(apiClient, settingsMaps);
 		
 		RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient, 
 			serviceId, rgInput, regressionFunction, false, true);

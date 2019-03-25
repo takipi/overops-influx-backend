@@ -56,6 +56,7 @@ public class CategoryFunction extends GraphFunction {
 		CategoryInput categoryInput = (CategoryInput)input;
 				
 		for (Category category : response.data.categories) {
+			
 			if (categoryInput.category.equals(category.name)) {
 				
 				if (category.views == null) {

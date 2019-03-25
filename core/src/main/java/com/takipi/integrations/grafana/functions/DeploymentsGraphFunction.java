@@ -77,7 +77,7 @@ public class DeploymentsGraphFunction extends GraphFunction {
 
 	public Collection<String> getDeployments(String serviceId, 	EnvironmentsFilterInput input, int limit) {
 		
-		Collection<String> selectedDeployments = input.getDeployments(serviceId);
+		Collection<String> selectedDeployments = input.getDeployments(serviceId, apiClient);
 		
 		if (!CollectionUtil.safeIsEmpty(selectedDeployments)) {
 			return selectedDeployments;

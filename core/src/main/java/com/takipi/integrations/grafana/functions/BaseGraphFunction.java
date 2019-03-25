@@ -14,12 +14,13 @@ import org.joda.time.DateTime;
 
 import com.google.common.base.Objects;
 import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.util.settings.GroupSettings;
+import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.settings.GroupSettings;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public abstract class BaseGraphFunction extends GrafanaFunction {
@@ -98,7 +99,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 				List<GraphSeries> serviceSeries = processServiceGraph(serviceIds, serviceId, viewId, viewName,
 						input, timeSpan, pointsWanted);
 	
-				return new AsyncResult(serviceSeries);
+				return new TaskSeriesResult(serviceSeries);
 			}
 			finally {
 				afterCall();
@@ -113,16 +114,20 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		}
 	}
 
-	protected static class AsyncResult {
+	protected static class TaskSeriesResult {
 		protected List<GraphSeries> data;
 
-		protected AsyncResult(List<GraphSeries> data) {
+		protected TaskSeriesResult(List<GraphSeries> data) {
 			this.data = data;
 		}
 	}
 
 	public BaseGraphFunction(ApiClient apiClient) {
 		super(apiClient);
+	}
+	
+	public BaseGraphFunction(ApiClient apiClient, Map<String, ServiceSettingsData> settingsMaps) {
+		super(apiClient, settingsMaps);
 	}
 
 	@Override
@@ -148,15 +153,12 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		return result;
 	}
 	
+	
 	protected GraphSeries getGraphSeries(GraphData graphData, String name, FunctionInput input) {
 							
-		Series series = new Series();
-		
 		String cleanName = cleanSeriesName(name);
-		
-		series.name = EMPTY_NAME;
-		series.columns = Arrays.asList(new String[] { TIME_COLUMN, cleanName });
-		series.values = new ArrayList<List<Object>>();
+
+		Series series = createGraphSeries(cleanName, graphData.volume);
 		
 		long volume = graphData.volume;
 			
@@ -264,8 +266,8 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		
 		for (Object taskResult : taskResults) {
 			
-			if (taskResult instanceof AsyncResult) {
-				AsyncResult asyncResult = (AsyncResult)taskResult;
+			if (taskResult instanceof TaskSeriesResult) {
+				TaskSeriesResult asyncResult = (TaskSeriesResult)taskResult;
 				
 				if (asyncResult.data != null) {
 					result.addAll(asyncResult.data);
@@ -333,9 +335,9 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		
 		for (Callable<Object> task : tasks) {
 			
-			AsyncResult taskResult;
+			TaskSeriesResult taskResult;
 			try {
-				taskResult = (AsyncResult)(task.call());
+				taskResult = (TaskSeriesResult)(task.call());
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
 			}

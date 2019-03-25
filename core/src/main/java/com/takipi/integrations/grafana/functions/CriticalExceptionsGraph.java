@@ -16,12 +16,11 @@ import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
 import com.takipi.api.client.result.event.EventResult;
+import com.takipi.api.client.util.settings.RegressionSettings;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.input.GraphLimitInput;
-import com.takipi.integrations.grafana.settings.GrafanaSettings;
-import com.takipi.integrations.grafana.settings.input.RegressionSettings;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class CriticalExceptionsGraph extends LimitGraphFunction {
@@ -81,7 +80,7 @@ public class CriticalExceptionsGraph extends LimitGraphFunction {
 		Long key = null;
 		Long lastKey = null;
 		
-		RegressionSettings regressionSettings = GrafanaSettings.getData(apiClient, serviceId).regression;
+		RegressionSettings regressionSettings = getSettings(serviceId).regression;
 		
 		if (regressionSettings == null) {
 			return Collections.emptyList();
@@ -109,7 +108,8 @@ public class CriticalExceptionsGraph extends LimitGraphFunction {
 
 				EventResult event = eventMap.get(gpc.id);
 
-				if ((event == null) || (event.error_location == null) || (event.error_origin == null) || (eventFilter.filter(event))) {
+				if ((event == null) || (event.error_location == null) 
+				|| (event.error_origin == null) || (eventFilter.filter(event))) {
 					continue;
 				}
 				

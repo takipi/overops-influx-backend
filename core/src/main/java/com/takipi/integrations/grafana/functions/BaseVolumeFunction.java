@@ -51,7 +51,11 @@ public abstract class BaseVolumeFunction extends GrafanaFunction {
 
 		switch (type) {
 		case sum:
-			value = Double.valueOf(volume.sum);
+			if (input.stringValue) {
+				value = formatLongValue((long)volume.sum);
+			} else { 
+				value = Double.valueOf(volume.sum);
+			}
 			break;
 
 		case avg:
@@ -59,7 +63,11 @@ public abstract class BaseVolumeFunction extends GrafanaFunction {
 			break;
 
 		case count:
-			value = Long.valueOf(volume.count);
+			if (input.stringValue) {
+				value = formatLongValue(volume.count);
+			} else { 
+				value = Long.valueOf(volume.count);
+			}
 			break;
 
 		default:

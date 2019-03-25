@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 44,
-  "iteration": 1552451353835,
+  "iteration": 1553396138673,
   "links": [
     {
       "asDropdown": true,
@@ -396,7 +396,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "ReliabilityKpiGraph({\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"$type\",\"limit\":\"$limit\", \"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"interval\":\"$__interval\", \"reportInterval\":\"24h\", \"kpi\":\"$kpi\", \"aggregate\":\"true\"})",
+          "query": "ReliabilityKpiGraph({\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"$type\",\"limit\":\"$limit\", \"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"interval\":\"$__interval\", \"reportInterval\":\"24h\", \"kpi\":\"$kpi\", \"aggregate\":\"true\", \"deductFrom100\":\"true\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -778,7 +778,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "ReliabilityKpiGraph({\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"$type\",\"limit\":\"$limit\", \"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"interval\":\"$__interval\", \"reportInterval\":\"24h\", \"kpi\":\"$kpi\"})",
+          "query": "ReliabilityKpiGraph({\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"types\":\"$type\",\"limit\":\"$limit\", \"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"interval\":\"$__interval\", \"reportInterval\":\"24h\", \"kpi\":\"$kpi\", \"deductFrom100\":\"true\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -802,7 +802,7 @@
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Apps Trend: $kpi",
+      "title": "Apps Trend: $kpi $timeFilterAlert",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -854,6 +854,7 @@
         "allValue": "all",
         "current": {
           "selected": false,
+          "tags": [],
           "text": "None",
           "value": "None"
         },
@@ -861,7 +862,7 @@
         "hide": 0,
         "includeAll": false,
         "label": "Env",
-        "multi": true,
+        "multi": false,
         "name": "environments",
         "options": [],
         "query": "environments({\"sorted\":\"true\"})",
@@ -1057,8 +1058,8 @@
         "options": [
           {
             "selected": false,
-            "text": "NewErrors",
-            "value": "NewErrors"
+            "text": "New Errors",
+            "value": "New Errors"
           },
           {
             "selected": false,
@@ -1067,13 +1068,13 @@
           },
           {
             "selected": false,
-            "text": "Increasing Errors",
-            "value": "Increasing Errors"
+            "text": "Error Increases",
+            "value": "Error Increases"
           },
           {
             "selected": false,
-            "text": "Severe Increasing Errors",
-            "value": "Severe Increasing Errors"
+            "text": "Severe Error Increases",
+            "value": "Severe Error Increases"
           },
           {
             "selected": false,
@@ -1106,7 +1107,7 @@
             "value": "Score"
           }
         ],
-        "query": "NewErrors, Severe New Errors, Increasing Errors, Severe Increasing Errors, Slowdowns, Severe Slowdowns, Error Volume, Error Count, Error Rate, Score",
+        "query": "New Errors,Severe New Errors,Error Increases,Severe Error Increases,Slowdowns,Severe Slowdowns,Error Volume,Error Count,Error Rate,Score",
         "skipUrlSync": false,
         "type": "custom"
       },
@@ -1114,8 +1115,8 @@
         "allValue": null,
         "current": {
           "selected": false,
-          "text": "10",
-          "value": "10"
+          "text": "5",
+          "value": "5"
         },
         "hide": 0,
         "includeAll": false,
@@ -1124,12 +1125,12 @@
         "name": "limit",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "5",
             "value": "5"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "10",
             "value": "10"
           }
@@ -1325,11 +1326,35 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "timeFilterAlert",
+        "options": [],
+        "query": "minTimeFilterAlert({\"timeFilter\":\"$timeFilter\",\"minRange\":\"24h\", \"text\":\" - select a timeframe > 1d to chart trend\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-7d",
     "to": "now"
   },
   "timepicker": {
@@ -1361,5 +1386,5 @@
   "timezone": "",
   "title": "Reliability Review Adv",
   "uid": "NmADICjik",
-  "version": 7
+  "version": 13
 }

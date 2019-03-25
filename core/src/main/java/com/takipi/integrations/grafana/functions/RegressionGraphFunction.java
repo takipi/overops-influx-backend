@@ -174,7 +174,7 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 			GraphInput input) {
  		
 		RegressionGraphInput graphInput = getGraphInput(input);
-		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
+		RegressionFunction regressionFunction = new RegressionFunction(apiClient, settingsMaps);
 		
 		RegressionOutput regressionOutput = regressionFunction.runRegression(serviceId, graphInput);
 

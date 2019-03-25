@@ -13,15 +13,14 @@ import org.joda.time.DateTime;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.transaction.Transaction;
+import com.takipi.api.client.util.settings.GroupSettings;
+import com.takipi.api.client.util.settings.GroupSettings.Group;
+import com.takipi.api.client.util.settings.GroupSettings.GroupFilter;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.TransactionsInput;
-import com.takipi.integrations.grafana.settings.GrafanaSettings;
-import com.takipi.integrations.grafana.settings.GroupSettings;
-import com.takipi.integrations.grafana.settings.GroupSettings.Group;
-import com.takipi.integrations.grafana.settings.GroupSettings.GroupFilter;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionsFunction extends EnvironmentVariableFunction {
@@ -126,7 +125,7 @@ public class TransactionsFunction extends EnvironmentVariableFunction {
 			return;
 		}
 				
-		GroupSettings groupSettings = GrafanaSettings.getData(apiClient, serviceId).transactions;
+		GroupSettings groupSettings = getSettings(serviceId).transactions;
 		
 		Set<Group> matchingGroups = new HashSet<Group>();	
 		Map<Group, GroupFilter> groupFilters;

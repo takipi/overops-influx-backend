@@ -32,8 +32,7 @@ public abstract class BaseCompositeFunction extends GrafanaFunction
 		}
 		
 		@Override
-		public Object call() throws Exception
-		{
+		public Object call() throws Exception {
 			FunctionResult result = new FunctionResult();
 			
 			result.function = function;
@@ -45,16 +44,14 @@ public abstract class BaseCompositeFunction extends GrafanaFunction
 		
 	}
 	
-	public BaseCompositeFunction(ApiClient apiClient)
-	{
+	public BaseCompositeFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
 	
 	protected abstract Collection<Pair<GrafanaFunction, FunctionInput>> getFunctions(FunctionInput functionInput);
 
 	@Override
-	public List<Series> process(FunctionInput functionInput)
-	{
+	public List<Series> process(FunctionInput functionInput) {
 		Collection<Pair<GrafanaFunction, FunctionInput>> functions = getFunctions(functionInput);
 		
 		if (functions.isEmpty()) {

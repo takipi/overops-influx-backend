@@ -14,23 +14,30 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 import org.joda.time.DateTime;
-import org.ocpsoft.prettytime.PrettyTime;
 
 import com.google.common.base.Objects;
+import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.Location;
 import com.takipi.api.client.data.event.Stats;
 import com.takipi.api.client.result.event.EventResult;
+import com.takipi.api.client.result.event.EventSlimResult;
+import com.takipi.api.client.result.event.EventsSlimVolumeResult;
 import com.takipi.api.client.util.infra.Categories;
-import com.takipi.api.client.util.regression.RegressionStringUtil;
+import com.takipi.api.client.util.regression.RegressionInput;
+import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
+import com.takipi.api.client.util.settings.GeneralSettings;
+import com.takipi.api.client.util.settings.ServiceSettingsData;
+import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.EventsInput;
+import com.takipi.integrations.grafana.input.EventsInput.OutputMode;
 import com.takipi.integrations.grafana.input.FunctionInput;
+import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
-import com.takipi.integrations.grafana.settings.input.GeneralSettings;
 import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.EventLinkEncoder;
 import com.takipi.integrations.grafana.util.TimeUtil;
@@ -67,7 +74,9 @@ public class EventsFunction extends GrafanaFunction {
 
 	
 	protected class EventData {
+		
 		protected EventResult event;
+		protected Stats baselineStats;
 		
 		protected EventData(EventResult event) {
 			this.event = event;
@@ -356,11 +365,9 @@ public class EventsFunction extends GrafanaFunction {
 	protected class EventDescriptionFormatter extends FieldFormatter {
 
 		private Categories categories;
-		private PrettyTime prettyTime;
 		
 		protected EventDescriptionFormatter(Categories categories) {
 			this.categories = categories;
-			this.prettyTime = new PrettyTime();
 		}
 		
 		@Override
@@ -468,14 +475,47 @@ public class EventsFunction extends GrafanaFunction {
 		}
 	}
 	
+	protected class RateDeltaFormatter extends FieldFormatter {
+
+		@Override
+		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
+				Pair<DateTime, DateTime> timeSpan)
+		{
+			Double deltaValue = getRateDelta(eventData);
+			
+			if (deltaValue == null) {
+				return "";
+			}
+			
+			return deltaValue;
+		}
+			
+	}
 	
+	protected class RateDeltaDescFormatter extends FieldFormatter {
+
+		@Override
+		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
+				Pair<DateTime, DateTime> timeSpan)
+		{
+			Pair<Double, Double> ratePair = getRatePair(eventData);
+			
+			if (ratePair == null) {
+				return "";
+			}
+			
+			return formatRateDelta(eventData.baselineStats, eventData.event.stats);
+		}
+	}
+		
 	protected class LinkFormatter extends FieldFormatter {
 
 		@Override
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
 				Pair<DateTime, DateTime> timeSpan) {
 
-			return EventLinkEncoder.encodeLink(apiClient, serviceId, input, eventData.event, 
+			return EventLinkEncoder.encodeLink(apiClient, getSettings(serviceId), 
+				serviceId, input, eventData.event, 
 				timeSpan.getFirst(), timeSpan.getSecond());
 		}
 		
@@ -576,7 +616,11 @@ public class EventsFunction extends GrafanaFunction {
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
 				Pair<DateTime, DateTime> timeSpan) {
 
-			return RegressionStringUtil.getEventRate(eventData.event, true);
+			if (eventData.event.stats.invocations == 0) {
+				return formatLongValue(eventData.event.stats.hits);
+			}
+	
+			return formatRate(eventData.event.stats);
 		}
 
 	}
@@ -611,13 +655,21 @@ public class EventsFunction extends GrafanaFunction {
 			Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();
 			return new EventDescriptionFormatter(categories);
 		}
+		
+		if (column.equals(EventsInput.RATE_DELTA)) {
+			return new RateDeltaFormatter();
+		}
+		
+		if (column.equals(EventsInput.RATE_DELTA_DESC)) {
+			return new RateDeltaDescFormatter();
+		}
 			
 		Field field = getReflectField(column);
 
 		if (column.equals(JIRA_ISSUE_URL)) {
 			return new JiraUrlFormatter(field);
 		}
-		
+	
 		if ((column.equals(FIRST_SEEN)) || (column.equals(LAST_SEEN))) {
 			return new DateFormatter(field);
 		}
@@ -646,6 +698,87 @@ public class EventsFunction extends GrafanaFunction {
 		super(apiClient);
 	}
 	
+	public EventsFunction(ApiClient apiClient, Map<String, ServiceSettingsData> settingsMaps) {
+		super(apiClient, settingsMaps);
+	}
+	
+	protected static String formatRateDelta(Stats baseline, Stats stats) {
+		
+		StringBuilder result = new StringBuilder();
+		
+		result.append(formatRate(stats));
+		result.append(" up from ");
+		result.append(formatRate(baseline));
+	
+		return result.toString(); 
+	}
+	
+	protected static String formatRate(Stats stats) {
+		return formatRate(stats.hits, stats.invocations);
+	}
+	
+	protected static String formatRate(long hits, long invocations) {
+		
+		if (invocations == 0) {
+			return String.valueOf(hits);
+		}
+		
+		double rate = (double)hits / (double)invocations;
+
+		StringBuilder result = new StringBuilder();
+		
+		result.append(formatLongValue(hits));
+		result.append(" in ");
+		result.append(formatLongValue(invocations));
+		result.append(" calls (");
+		result.append(formatRate(rate, true));		
+		result.append(")");
+		
+		return result.toString();
+	}
+	
+	private static Pair<Double, Double> getRatePair(EventData eventData) {
+		
+		if (eventData.baselineStats == null) {
+			return null;
+		}
+		
+		if (eventData.baselineStats.invocations == 0) {
+			return null;
+		}
+		
+		if (eventData.event.stats.invocations == 0) {
+			return null;
+		}
+		
+		double baseRate = (double)eventData.baselineStats.hits / (double)eventData.baselineStats.invocations;
+		double rate = (double)eventData.event.stats.hits / (double)eventData.event.stats.invocations;
+
+		return Pair.of(baseRate, rate);
+	}
+	
+	private static Double getRateDelta(EventData eventData) {
+	
+		Pair<Double, Double> ratePair = getRatePair(eventData);
+		
+		if (ratePair == null) {
+			return null;
+		}
+		
+		
+		if (ratePair.getFirst() > ratePair.getSecond()) {
+			return null;
+			
+		}
+		double deltaValue = ratePair.getSecond() - ratePair.getFirst();
+		
+		if (deltaValue < 0.01) {
+			return null;
+		}
+		
+		return deltaValue;
+	}
+	
 	protected List<EventData> getEventData(String serviceId, EventsInput input, 
 			Pair<DateTime, DateTime> timeSpan) {
 		
@@ -667,7 +800,7 @@ public class EventsFunction extends GrafanaFunction {
 	
 	protected List<EventData> mergeSimilarEvents(String serviceId, List<EventData> eventDatas) {
 		
-		GeneralSettings settings = GrafanaSettings.getData(apiClient, serviceId).general;
+		GeneralSettings settings = getSettings(serviceId).general;
 		
 		if ((settings == null) || (!settings.group_by_entryPoint)) {
 			return eventDatas;
@@ -770,8 +903,70 @@ public class EventsFunction extends GrafanaFunction {
 		clone.jira_issue_url = jiraUrl;
 		return Collections.singletonList(new EventData(clone));
 	}
+	
+	private void updateEventBaselineStats(String serviceId, 
+		EventsInput input, Pair<DateTime, DateTime> timeSpan,
+		Collection <EventData> eventDatas) {
+		
+		String viewId = getViewId(serviceId, input.view);
+		
+		if (viewId == null)
+		{
+			return;
+		}
+		
+		RegressionFunction regressionFunction = new RegressionFunction(apiClient, settingsMaps);
+		
+		Pair<RegressionInput, RegressionWindow> regPair = regressionFunction.getRegressionInput(serviceId, 
+			viewId, input, timeSpan, false);
+		
+		int baseline = regPair.getFirst().baselineTimespan;
+		
+		Gson gson = new Gson();
+		String json = gson.toJson(input);
+		EventsInput baselineInput = gson.fromJson(json, input.getClass());
+		
+		Pair<DateTime, DateTime> baselineTimespan = Pair.of(timeSpan.getFirst().minusMinutes(baseline) ,timeSpan.getFirst());
+		     
+		EventsSlimVolumeResult eventsVolume = getEventsVolume(serviceId,
+			viewId, baselineInput, baselineTimespan.getFirst(), baselineTimespan.getSecond(),
+			VolumeType.all);
 
-	private void updateJiraUrls(String serviceId, Collection <EventData> eventDatas) {
+		Map<String, EventData> eventDataMap = new HashMap<String, EventData>(eventDatas.size());
+		
+		for (EventData eventData : eventDatas) {
+			 
+			eventDataMap.put(eventData.event.id, eventData);
+			
+			if (eventData.event.similar_event_ids != null) {
+				for (String similarId : eventData.event.similar_event_ids) {
+					eventDataMap.put(similarId, eventData);	
+				}
+			}
+		}
+		
+		if (eventsVolume != null) {
+			
+			for (EventSlimResult eventResult : eventsVolume.events) {
+				
+				EventData eventData = eventDataMap.get(eventResult.id);
+				
+				if (eventData == null) {
+					continue;
+				}
+					
+				if (eventData.baselineStats == null) {
+					eventData.baselineStats =  new Stats();
+				}
+				
+				eventData.baselineStats.hits += eventResult.stats.hits;
+				eventData.baselineStats.invocations += eventResult.stats.invocations;
+			}
+		}			
+	}
+	
+	private void updateJiraUrls(String serviceId, 
+		Collection <EventData> eventDatas) {
 		
 		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
 		
@@ -842,9 +1037,42 @@ public class EventsFunction extends GrafanaFunction {
 	/**
 	 * @param serviceIds - needed for children
 	 */
-	protected List<List<Object>> processServiceEvents(Collection<String> serviceIds, String serviceId, EventsInput input, Pair<DateTime, DateTime> timeSpan) {
-
+	protected List<List<Object>> processServiceEvents(Collection<String> serviceIds, 
+		String serviceId, EventsInput input, Pair<DateTime, DateTime> timeSpan) {
+		
+		Collection<EventData> eventDatas = processEventDatas(serviceId, 
+			input, timeSpan);
+				
+		List<List<Object>> result = new ArrayList<List<Object>>(eventDatas.size());
+			
 		Map<String, FieldFormatter> formatters = getFieldFormatters(serviceId, input.getFields());
+
+		if ((formatters.containsKey(JIRA_ISSUE_URL)) 
+		|| (formatters.containsKey(EventsInput.JIRA_STATE))) {
+			updateJiraUrls(serviceId, eventDatas);
+		}
+		
+		if ((formatters.containsKey(EventsInput.RATE_DELTA)) 
+		|| (formatters.containsKey(EventsInput.RATE_DELTA_DESC))) {
+			updateEventBaselineStats(serviceId, input, timeSpan, eventDatas);
+		}
+		
+		for (EventData eventData : eventDatas) {	 
+	
+			List<Object> outputObject = processEvent(serviceId, 
+				input, eventData, formatters.values(), timeSpan);
+			
+			if (outputObject != null) {
+				result.add(outputObject);
+			}
+		}
+
+		return result;
+
+	}
+	
+	private Collection<EventData> processEventDatas(String serviceId, 
+		EventsInput input, Pair<DateTime, DateTime> timeSpan) {
 		
 		List<EventData> mergedDatas;
 		List<EventData> eventDatas = getEventData(serviceId, input, timeSpan);
@@ -863,13 +1091,8 @@ public class EventsFunction extends GrafanaFunction {
 			return Collections.emptyList();
 		}
 		
-		List<List<Object>> result = new ArrayList<List<Object>>(mergedDatas.size());
+		List<EventData> result = new ArrayList<EventData>(mergedDatas.size());
 			
-		if ((formatters.containsKey(JIRA_ISSUE_URL)) 
-		|| (formatters.containsKey(EventsInput.JIRA_STATE))) {
-			updateJiraUrls(serviceId, eventDatas);
-		}
-		
 		for (EventData eventData : mergedDatas) {	 
 	
 			if (eventFilter.filter(eventData.event)) {
@@ -879,16 +1102,11 @@ public class EventsFunction extends GrafanaFunction {
 			if (eventData.event.stats.hits == 0) {
 				continue;
 			}
-			
-			List<Object> outputObject = processEvent(serviceId, input, eventData, formatters.values(), timeSpan);
-			
-			if (outputObject != null) {
-				result.add(outputObject);
-			}
+					
+			result.add(eventData);
 		}
 
 		return result;
-
 	}
 
 	/**
@@ -957,18 +1175,9 @@ public class EventsFunction extends GrafanaFunction {
 
 		return field;
 	}
-
-	@Override
-	public List<Series> process(FunctionInput functionInput) {
-
-		if (!(functionInput instanceof EventsInput)) {
-			throw new IllegalArgumentException("functionInput");
-		}
-
-		EventsInput input = (EventsInput) functionInput;
-
-		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
-
+	
+	private List<Series> processGrid(EventsInput input, Pair<DateTime, DateTime> timeSpan) {
+		
 		Series series = new Series();
 
 		series.name = SERIES_NAME;
@@ -983,5 +1192,44 @@ public class EventsFunction extends GrafanaFunction {
 		}
 
 		return Collections.singletonList(series);
+	}
+	
+	private List<Series> processSingleStat(EventsInput input, Pair<DateTime, DateTime> timeSpan) {
+	
+		Collection<String> serviceIds = getServiceIds(input);
+
+		int value = 0;
+		
+		for (String serviceId : serviceIds) {
+			Collection<EventData> serviceEventDatas = processEventDatas(serviceId, input, timeSpan);
+			value += serviceEventDatas.size();
+		}
+
+		return createSingleStatSeries(timeSpan, value);
+	}
+
+	@Override
+	public List<Series> process(FunctionInput functionInput) {
+
+		if (!(functionInput instanceof EventsInput)) {
+			throw new IllegalArgumentException("functionInput");
+		}
+
+		EventsInput input = (EventsInput)getInput((ViewInput)functionInput);
+		
+		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
+  
+		OutputMode outputMode = input.getOutputMode();
+		
+		switch (outputMode) {
+			
+			case Grid:
+				return processGrid(input, timeSpan);
+			case SingleStat:
+				return processSingleStat(input, timeSpan);
+			default:
+				throw new IllegalStateException(String.valueOf(outputMode));
+			
+		}
 	}
 }

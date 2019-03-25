@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 39,
-  "iteration": 1552530864074,
+  "iteration": 1553396306726,
   "links": [
     {
       "icon": "dashboard",
@@ -84,12 +84,12 @@
       "links": [
         {
           "dashboard": "Reliability Analysis",
-          "includeVars": true,
+          "includeVars": false,
           "keepTime": true,
           "targetBlank": true,
           "title": "Reliability Analysis. $s",
           "type": "dashboard",
-          "url": "d/4DHQ63-ik/reliability-analysis"
+          "url": "/d/4DHQ63-ik/reliability-analysis"
         }
       ],
       "mappingType": 1,
@@ -142,7 +142,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"SingleStat\", \"scoreType\":\"$scoreType\"})",
+          "query": "regressionReport({\"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"SingleStat\", \"scoreType\":\"$scoreType\", \"graphType\":\"Score\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -581,7 +581,7 @@
           "keepTime": true,
           "title": "Increasing Errors. $ie",
           "type": "absolute",
-          "url": "d/WZ739NYmk/increasing-errors"
+          "url": "/d/WZ739NYmk/increasing-errors"
         }
       ],
       "mappingType": 1,
@@ -976,7 +976,7 @@
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Transaction Throughput",
+      "title": "$tc Transactions, Throughput= $tv",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -1266,17 +1266,7 @@
       },
       "lines": true,
       "linewidth": 1,
-      "links": [
-        {
-          "dashboard": "d/Z40SpeJmz/performance",
-          "includeVars": true,
-          "keepTime": true,
-          "targetBlank": true,
-          "title": "Performance",
-          "type": "absolute",
-          "url": "d/Z40SpeJmz/performance"
-        }
-      ],
+      "links": [],
       "nullPointMode": "null as zero",
       "percentage": false,
       "pointradius": 5,
@@ -1420,7 +1410,7 @@
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Transaction Response (ms)",
+      "title": "Transaction Response ($ta avg, baseline: $tba)",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -1466,7 +1456,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "Chart errors according to key code tiers (e.g. AWS, SQL, Tomcat,..). Key code tiers are defined in the Settings dashboard. If no key tiers are defined, then 3rd party code tiers (as defined in  https://git.io/fpPT0) with the most errors are charted.",
+      "description": "Chart errors according to key code tiers (e.g. AWS, SQL, Tomcat,..). Key code tiers are defined in the Settings dashboard. If no key tiers are defined, then 3rd party code tiers (as defined  [here](https://git.io/fpPT0) ) with the most errors are charted.",
       "fill": 0,
       "gridPos": {
         "h": 5,
@@ -1687,7 +1677,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "The number of errors of type: $type in the selected transactions overlaid on the number of calls (throughput) into them.",
+      "description": "The number of errors of type: $failureTypesArrayPretty in the selected transactions overlaid on the number of calls (throughput) into them. Transaction failures types are defined in the Settings dashboard.",
       "fill": 0,
       "gridPos": {
         "h": 5,
@@ -1714,8 +1704,9 @@
           "dashboard": "Errors",
           "includeVars": true,
           "keepTime": true,
+          "params": "varType=$failureTypesArray",
           "targetBlank": true,
-          "title": "Errors",
+          "title": "Transaction Failures",
           "type": "absolute",
           "url": "d/HYBPMdYik/errors"
         }
@@ -1861,7 +1852,7 @@
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Transaction Errors",
+      "title": "$tfc Transaction Failures ,Volume = $tf",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -2084,7 +2075,7 @@
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Critical Exceptions",
+      "title": "$cec Critical Exceptions, Volume = $ce",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -2505,8 +2496,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "var-type=Logged Error&var-type=Uncaught Exception&var-type=HTTP Error&",
-          "value": "var-type=Logged Error&var-type=Uncaught Exception&var-type=HTTP Error&"
+          "text": "&var-type=Logged Error&var-type=Uncaught Exception&var-type=HTTP Error",
+          "value": "&var-type=Logged Error&var-type=Uncaught Exception&var-type=HTTP Error"
         },
         "datasource": "OO",
         "hide": 2,
@@ -2515,7 +2506,31 @@
         "multi": false,
         "name": "failureTypesArray",
         "options": [],
-        "query": "convertToArray({\"array\":\"$transactionFailureTypes\", \"prefix\":\"var-type=\", \"postfix\":\"&\"})",
+        "query": "convertToArray({\"array\":\"$transactionFailureTypes\", \"prefix\":\"&var-type=\", \"postfix\":\"\"})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "Logged Error, Uncaught Exception, HTTP Error, ",
+          "value": "Logged Error, Uncaught Exception, HTTP Error, "
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "failureTypesArrayPretty",
+        "options": [],
+        "query": "convertToArray({\"array\":\"$transactionFailureTypes\", \"prefix\":\"\", \"postfix\":\", \"})",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -2615,32 +2630,6 @@
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
-        "label": "",
-        "multi": false,
-        "name": "sd",
-        "options": [],
-        "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"renderMode\":\"SingleStatDesc\",\"types\":\"$failureTypes\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$transactionPointsWanted\",\"performanceStates\":\"CRITICAL\", \"varTimeFilter\":\"true\"})",
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "isNone": true,
-          "selected": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
-        "hide": 2,
-        "includeAll": false,
         "label": "IncresingErrorDesc",
         "multi": false,
         "name": "ie",
@@ -2696,7 +2685,237 @@
         "multi": false,
         "name": "e",
         "options": [],
-        "query": "volume({\"type\":\"sum\",\"volumeType\":\"hits\",\"eventVolumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\",\"types\":\"$type\",\"transactions\":\"$transactions\",\"filter\":\"events\", \"pointsWanted\":\"$pointsWanted\", \"varTimeFilter\":\"true\"})",
+        "query": "volume({\"type\":\"sum\",\"volumeType\":\"hits\",\"eventVolumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\",\"types\":\"$type\",\"transactions\":\"$transactions\",\"filter\":\"events\", \"pointsWanted\":\"$pointsWanted\", \"varTimeFilter\":\"true\", \"stringValue\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "0",
+          "value": "0"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": "criticalErrors",
+        "multi": false,
+        "name": "ce",
+        "options": [],
+        "query": "volume({\"type\":\"sum\",\"volumeType\":\"hits\",\"eventVolumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\",\"types\":\"Critical Exceptions\",\"transactions\":\"$transactions\",\"filter\":\"events\", \"pointsWanted\":\"$pointsWanted\", \"varTimeFilter\":\"true\", \"stringValue\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "0",
+          "value": "0"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": "criticalErrorsCount",
+        "multi": false,
+        "name": "cec",
+        "options": [],
+        "query": "volume({\"type\":\"count\",\"volumeType\":\"hits\",\"eventVolumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\",\"types\":\"Critical Exceptions\",\"transactions\":\"$transactions\",\"filter\":\"events\", \"pointsWanted\":\"$pointsWanted\", \"varTimeFilter\":\"true\", \"stringValue\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "0",
+          "value": "0"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": "TransFail",
+        "multi": false,
+        "name": "tf",
+        "options": [],
+        "query": "volume({\"type\":\"sum\",\"volumeType\":\"hits\",\"eventVolumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\",\"filter\":\"events\", \"pointsWanted\":\"$pointsWanted\", \"varTimeFilter\":\"true\", \"stringValue\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "0",
+          "value": "0"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": "TransFailCount",
+        "multi": false,
+        "name": "tfc",
+        "options": [],
+        "query": "volume({\"type\":\"count\",\"volumeType\":\"hits\",\"eventVolumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\",\"filter\":\"events\", \"pointsWanted\":\"$pointsWanted\", \"varTimeFilter\":\"true\", \"stringValue\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": "transDesc",
+        "multi": false,
+        "name": "sd",
+        "options": [],
+        "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"renderMode\":\"SingleStatDesc\",\"types\":\"$failureTypes\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$transactionPointsWanted\",\"performanceStates\":\"CRITICAL\", \"varTimeFilter\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": "transVol",
+        "multi": false,
+        "name": "tv",
+        "options": [],
+        "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"renderMode\":\"SingleStatVolume\",\"types\":\"$failureTypes\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$transactionPointsWanted\",\"varTimeFilter\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": "transCount",
+        "multi": false,
+        "name": "tc",
+        "options": [],
+        "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"renderMode\":\"SingleStat\",\"types\":\"$failureTypes\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$transactionPointsWanted\",\"varTimeFilter\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": "transAvg",
+        "multi": false,
+        "name": "ta",
+        "options": [],
+        "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"renderMode\":\"SingleStatAvg\",\"types\":\"$failureTypes\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$transactionPointsWanted\",\"varTimeFilter\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": "tranBaselineAvg",
+        "multi": false,
+        "name": "tba",
+        "options": [],
+        "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"renderMode\":\"SingleStatBaselineAvg\",\"types\":\"$failureTypes\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$transactionPointsWanted\",\"varTimeFilter\":\"true\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -2733,5 +2952,5 @@
   "timezone": "",
   "title": "Site Reliability",
   "uid": "nxdE2gXmk",
-  "version": 37
+  "version": 51
 }

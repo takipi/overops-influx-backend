@@ -134,6 +134,7 @@ public class TiersGraphFunction extends LimitGraphFunction {
 				}
 
 				for (String label : labels) {
+					
 					GraphData graphData = graphsData.get(label);
 					
 					if (graphData == null) {
@@ -221,8 +222,6 @@ public class TiersGraphFunction extends LimitGraphFunction {
 			}
 		} 
 		
-		//sortGraphData(result);
-
 		return result;
 	}
 }

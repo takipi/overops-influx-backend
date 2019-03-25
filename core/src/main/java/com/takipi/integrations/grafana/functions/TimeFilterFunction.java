@@ -52,7 +52,14 @@ public class TimeFilterFunction extends VariableFunction {
 				int min = Math.min(rangeMin, limitMin);
 				
 				if (tfInput.rangeOnly) {
-					value = tfInput.rangePrefix + TimeUtil.getTimeRange(min);
+					
+					String timeRangeMin = TimeUtil.getTimeRange(min);
+					
+					if (tfInput.rangePrefix != null) {
+						value = tfInput.rangePrefix + timeRangeMin;
+					} else {
+						value = timeRangeMin;
+					}
 				} else {
 					value = TimeUtil.getLastWindowMinTimeFilter(min);	
 				}

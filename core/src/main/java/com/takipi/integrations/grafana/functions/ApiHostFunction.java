@@ -13,8 +13,7 @@ public class ApiHostFunction extends VariableFunction
 	private static final String SAAS_API = "api.overops.com";
 	private static final String SAAS_APP = "app.overops.com";
 	
-	public ApiHostFunction(ApiClient apiClient)
-	{
+	public ApiHostFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
 
@@ -45,13 +44,11 @@ public class ApiHostFunction extends VariableFunction
 	}
 
 	@Override
-	protected void populateValues(FunctionInput input, VariableAppender appender)
-	{
+	protected void populateValues(FunctionInput input, VariableAppender appender) {
 		ApiHostInput ahInput = (ApiHostInput)input;
 		String hostName = apiClient.getHostname();
 	
-		try
-		{
+		try {
 			HostType type;
 			
 			if (ahInput.type != null) {
