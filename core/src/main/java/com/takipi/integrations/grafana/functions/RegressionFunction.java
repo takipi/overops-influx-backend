@@ -707,6 +707,9 @@ public class RegressionFunction extends EventsFunction {
 		if (input.hasDeployments()) {
 			Gson gson = new Gson();
 			baselineInput = gson.fromJson(gson.toJson(input), input.getClass());
+			
+			//deployments by their nature do not have baseline - 
+			//they are compared against the general baseline
 			baselineInput.deployments = null;
 		} else {
 			baselineInput = input;
@@ -778,11 +781,14 @@ public class RegressionFunction extends EventsFunction {
 		Graph baselineGraph = mergeGraphs(baseLineGraphResults);
 		Graph activeWindowGraph = mergeGraphs(activeGraphResults);		
 		
+		//printGraph(baselineGraph);
+		
 		GraphResult activeGraphResult = new GraphResult();
 		activeGraphResult.graphs = Collections.singletonList(activeWindowGraph);	
 		
 		ApiCache.putEventGraph(apiClient, serviceId, input, VolumeType.all, null,
-				input.pointsWanted, 0, graphActiveTimespan, 0, Response.of(200, activeGraphResult));
+				input.pointsWanted, 0, graphActiveTimespan, 
+				Response.of(200, activeGraphResult));
 		
 		if (baselineGraph != null) {
 		
@@ -790,12 +796,13 @@ public class RegressionFunction extends EventsFunction {
 			baselineGraphResult.graphs = Collections.singletonList(baselineGraph);		
 		
 			ApiCache.putEventGraph(apiClient, serviceId, baselineInput, VolumeType.all, null,
-					input.pointsWanted, regressionInput.baselineTimespan, 0, 0, Response.of(200, baselineGraphResult));
+					input.pointsWanted, regressionInput.baselineTimespan, 0, 
+					Response.of(200, baselineGraphResult));
 		}
 		
 		return Pair.of(baselineGraph, activeWindowGraph);	
 	}
-		
+	
 	protected RegressionOutput createRegressionOutput(EventFilterInput input,
 			RegressionInput regressionInput, RegressionWindow regressionWindow,
 			RateRegression rateRegression, Map<String, EventResult> eventListMap,

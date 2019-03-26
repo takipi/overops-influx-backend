@@ -276,11 +276,11 @@ public class ReliabilityReportFunction extends EventsFunction {
 				Pair<DateTime, DateTime> activeWindow = Pair.of(from, to);
 				
 				Collection<TransactionGraph> transactionGraphs = getTransactionGraphs(input,
-						serviceId, viewId, activeWindow, input.getSearchText(), 
-						input.pointsWanted, regressionWindow.activeTimespan, 0);
+					serviceId, viewId, activeWindow, input.getSearchText(), 
+					input.pointsWanted, 0, 0);
 								
 				TransactionDataResult transactionDataResult = getTransactionDatas(
-						transactionGraphs, serviceId, viewId, timeSpan, input, updateEvents, 0);				
+					transactionGraphs, serviceId, viewId, timeSpan, input, updateEvents, 0);				
 				
 				SlowdownAsyncResult result;
 				
@@ -887,8 +887,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 				
 				SummarizedDeployment prev = null;
 				SummarizedDeployment curr = null;
-
-				
+		
 				if (sortedDeps != null) {
 						
 					for (int i = 0; i < sortedDeps.size(); i++) {

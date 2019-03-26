@@ -37,7 +37,6 @@ import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOu
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.ReliabilityKpiGraphInput;
-import com.takipi.integrations.grafana.input.ReliabilityKpiGraphInput.ReportInterval;
 import com.takipi.integrations.grafana.input.ReliabilityReportInput;
 import com.takipi.integrations.grafana.input.ReliabilityReportInput.RelabilityKpi;
 import com.takipi.integrations.grafana.input.ReliabilityReportInput.ReportMode;
@@ -65,6 +64,8 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 	}
 	
 	protected class TimelineData {
+		
+		protected int baselineWindow;
 		
 		protected ReliabilityKpiGraphInput input;
 		protected Pair<DateTime, DateTime> timespan;
@@ -169,7 +170,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			result.isBaseline = true;
 			result.graphs = getTransactionGraphs(timelineData.baselineInput, serviceId, viewId, 
 					timelineData.baselineTimespan, timelineData.baselineInput.getSearchText(), 
-					timelineData.baselineInput.transactionPointsWanted, 0, 0);
+					timelineData.baselineInput.transactionPointsWanted, 0, timelineData.baselineWindow);
 			
 			return result;
 		}
@@ -785,72 +786,6 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		return result;
 	}
 	
-	private Pair<DateTime, Integer> getIntervalPair(Pair<DateTime, DateTime> timespan,
-		ReportInterval reportInterval) {
-		
-		DateTime periodFrom;
-		int delta;
-		
-		switch (reportInterval) {
-			
-			case Hour:
-				delta = (int)TimeUnit.HOURS.toMinutes(1);
-				periodFrom = timespan.getSecond().withMinuteOfHour(0);
-				break;
-			
-			case Day:
-				delta = (int)TimeUnit.DAYS.toMinutes(1);
-				periodFrom = timespan.getSecond().withMillisOfDay(0);
-				break;
-			
-			case Week:
-				delta = (int)TimeUnit.DAYS.toMinutes(7);
-				periodFrom = timespan.getSecond().withMillisOfDay(0);
-				break;
-			
-			default:
-				throw new IllegalStateException(String.valueOf(reportInterval));
-			
-		}
-		
-		return Pair.of(periodFrom, delta);
-	}
-	
-	private Collection<Pair<DateTime, DateTime>> getIntervalPeriods(Pair<DateTime, DateTime> timespan,
-			DateTime start, int delta) {
-		
-		if (timespan.getSecond().minus(timespan.getFirst().getMillis()).getMillis() <= 
-				TimeUnit.MINUTES.toMillis(delta)) {
-			return Collections.singleton(timespan);
-		}
-		
-		List<Pair<DateTime, DateTime>> result = new ArrayList<Pair<DateTime, DateTime>>();
-		
-		DateTime periodFrom = start;
-		DateTime periodTo = periodFrom;
-				
-		result.add(Pair.of(periodFrom, timespan.getSecond()));
-		
-		while (periodFrom.isAfter(timespan.getFirst())) {
-			
-			periodFrom = periodFrom.minusMinutes(delta);
-			
-			if (periodFrom.isAfter(timespan.getFirst())) {
-				result.add(Pair.of(periodFrom, periodTo));
-			} else {
-				long priodDelta = TimeUnit.MILLISECONDS.toMinutes(periodTo.getMillis() - timespan.getFirst().getMillis());
-				
-				if (priodDelta >= delta) {
-					result.add(Pair.of(timespan.getFirst(), periodTo));
-				}
-			}
-			
-			periodTo = periodFrom;
-		}
-		
-		return result;
-	}
-	
 	private Pair<Map<DateTime, KpiInterval>, KpiInterval> processRegressions(
 		String serviceId, String viewId, TimelineData timelineData, 
 		Collection<Pair<DateTime, DateTime>> periods, RelabilityKpi kpi) {
@@ -1205,7 +1140,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		result.baselineInput = gson.fromJson(json, input.getClass());
 		result.baselineInput.applications = apps;
 		result.baselineTimespan = Pair.of(result.expandedTimespan.getFirst(), result.timespan.getFirst());
-		result.baselineInput.timeFilter = TimeUtil.toTimeFilter(result.baselineTimespan);			
+		//result.baselineInput.timeFilter = TimeUtil.toTimeFilter(result.baselineTimespan);			
 	
 		return result;
 		
@@ -1221,14 +1156,15 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		
 		ReliabilityKpiGraphInput rkInput =  (ReliabilityKpiGraphInput)input;
 				
-		ReportInterval reportInterval = rkInput.getReportInterval();
+		TimeUtil.Interval reportInterval = rkInput.getReportInterval();
 		
-		Pair<DateTime, Integer> intervalPair = getIntervalPair(timeSpan, reportInterval);
+		Pair<DateTime, Integer> intervalPair = TimeUtil.getPeriodStart(timeSpan, reportInterval);
 		
 		DateTime periodStart = intervalPair.getFirst();
 		int timeDelta = intervalPair.getSecond();
 		
-		Collection<Pair<DateTime, DateTime>> periods = getIntervalPeriods(timeSpan, periodStart, timeDelta);
+		Collection<Pair<DateTime, DateTime>> periods = TimeUtil.getTimespanPeriods(timeSpan, 
+			periodStart, timeDelta, false);
 		
 		Gson gson = new Gson();
 		String json = gson.toJson(input);

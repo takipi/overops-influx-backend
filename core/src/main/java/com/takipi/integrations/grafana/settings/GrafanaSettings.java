@@ -157,7 +157,7 @@ public class GrafanaSettings {
 		authService(apiClient, serviceId);
 		
 		String name = getServiceJsonName(serviceId);
-		String serviceJson = settingsStorage.getServiceSettings(name);
+		String serviceJson = settingsStorage.getValue(name);
 		
 		ServiceSettings result = null;
 		
@@ -314,7 +314,7 @@ public class GrafanaSettings {
 			settingsCache.put(key, settings);
 		}
 
-		settingsStorage.saveServiceSettings(getServiceJsonName(serviceId), json);
+		settingsStorage.setValue(getServiceJsonName(serviceId), json);
 	}
 	
 	public void setSettingsStorage(SettingsStorage settingsStorage) {

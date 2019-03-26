@@ -16,10 +16,10 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import org.joda.time.DateTime;
-import org.joda.time.Days;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.ocpsoft.prettytime.PrettyTime;
@@ -84,6 +84,7 @@ import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.TimeUtil;
+import com.takipi.integrations.grafana.util.TimeUtil.Interval;
 
 public abstract class GrafanaFunction {	
 	
@@ -172,8 +173,7 @@ public abstract class GrafanaFunction {
 		TYPES_MAP.put(HTTP_ERROR, "HTTP");			
 	}
 	
-	private static final int END_SLICE_POINT_COUNT = 2;
-	private static final int NO_GRAPH_SLICE = -1;
+	//private static final int END_SLICE_POINT_COUNT = 2;
 	
 	protected final ApiClient apiClient;
 	protected volatile Map<String, ServiceSettingsData> settingsMaps;
@@ -201,11 +201,12 @@ public abstract class GrafanaFunction {
 		protected int activeWindow;
 		protected int pointsWanted;
 		protected int windowSlice;
+		protected boolean cache;
 		protected GraphRequest.Builder builder;
 		
 		protected GraphSliceTask(GraphRequest.Builder builder, String serviceId, String viewId, int pointsWanted,
 				ViewInput input, VolumeType volumeType, DateTime from, DateTime to,
-				int baselineWindow, int activeWindow, int windowSlice) {
+				int baselineWindow, int activeWindow, int windowSlice, boolean cache) {
 			
 			this.builder = builder;
 			this.serviceId = serviceId;
@@ -218,12 +219,16 @@ public abstract class GrafanaFunction {
 			this.baselineWindow = baselineWindow;
 			this.activeWindow = activeWindow;
 			this.windowSlice = windowSlice;
+			this.cache = cache;
 		}
 		
 		@Override
 		public Object call() throws Exception {		
-			Response<GraphResult> response = ApiCache.getEventGraph(apiClient, serviceId, input, volumeType,
-				builder.build(), pointsWanted, baselineWindow, activeWindow, windowSlice);
+			
+			Response<GraphResult> response = ApiCache.getEventGraph(apiClient, 
+				serviceId, input, volumeType, builder.build(), 
+				pointsWanted, baselineWindow, activeWindow, windowSlice,
+				Pair.of(from, to), cache);
 			
 			if (response.isBadResponse()) {
 				return null;
@@ -258,14 +263,19 @@ public abstract class GrafanaFunction {
 	}
 	
 	protected class SliceRequest {
+		
 		protected DateTime from;
 		protected DateTime to;
-		int pointCount;
+		protected int pointCount;
+		protected boolean cache;
 		
-		protected SliceRequest(DateTime from, DateTime to, int pointCount) {
+		
+		protected SliceRequest(DateTime from, DateTime to, 
+			int pointCount, boolean cache) {
 			this.from = from;
 			this.to = to;
 			this.pointCount = pointCount;
+			this.cache = cache;
 		}
 	}
 	
@@ -815,7 +825,7 @@ public abstract class GrafanaFunction {
 		Collection<TransactionGraph> result = getTransactionGraphs(baselineInput, serviceId, 
 				viewId, Pair.of(baselineStart, regressionWindow.activeWindowStart), 
 				null, baselineInput.pointsWanted, 
-				regressionWindow.activeTimespan, regressionInput.baselineTimespan);
+				0, regressionInput.baselineTimespan);
 		
 		return result;
 	}
@@ -1442,7 +1452,9 @@ public abstract class GrafanaFunction {
 	}
 	
 	protected GraphSliceTask createGraphAsyncTask(String serviceId, String viewId, int pointsCount,
-			ViewInput input, VolumeType volumeType, DateTime from, DateTime to, int baselineWindow, int activeWindow, int windowSlice) {
+			ViewInput input, VolumeType volumeType, 
+			DateTime from, DateTime to, int baselineWindow, int activeWindow, 
+			int windowSlice, boolean cache) {
 		
 		GraphRequest.Builder builder = GraphRequest.newBuilder().setServiceId(serviceId).setViewId(viewId)
 				.setGraphType(GraphType.view).setFrom(from.toString(dateTimeFormatter)).setTo(to.toString(dateTimeFormatter))
@@ -1451,7 +1463,8 @@ public abstract class GrafanaFunction {
 		applyFilters(input, serviceId, builder);
 		
 		GraphSliceTask task = new GraphSliceTask(builder, serviceId, viewId, pointsCount, 
-			input, volumeType, from, to, baselineWindow, activeWindow, windowSlice);
+			input, volumeType, from, to, baselineWindow, activeWindow,
+			windowSlice, cache);
 		
 		return task;
 	}
@@ -1472,40 +1485,60 @@ public abstract class GrafanaFunction {
 	protected Collection<GraphSliceTask> getGraphTasks(String serviceId, String viewId, int pointsCount,
 			ViewInput input, VolumeType volumeType, DateTime from, DateTime to, 
 			int baselineWindow, int activeWindow, boolean sync) {
-		
-		int days = Math.abs(Days.daysBetween(from, to).getDays());
-		
-		int effectivePoints;
+				
+		int periodPoints;
 		List<SliceRequest> sliceRequests;
 		
+		Pair<DateTime, DateTime> timespan = Pair.of(from, to);
 		
-		if ((sync) || ((days < 3) || (days > 14))) // This is just a starting point
-		{
+		if (TimeUtil.getTimespanMill(timespan) > TimeUnit.DAYS.toMillis(1) * 2) {
 		
-			effectivePoints = pointsCount;
-			sliceRequests = Collections.singletonList(new SliceRequest(from, to, pointsCount));	
+			Pair<DateTime, Integer> periodStart = TimeUtil.getPeriodStart(timespan, Interval.Day);
+			
+			Collection<Pair<DateTime, DateTime>> periods = TimeUtil.getTimespanPeriods(timespan,
+				periodStart.getFirst(), periodStart.getSecond(), baselineWindow == 0);
+			
+			periodPoints = Math.max(periodPoints = (pointsCount / periods.size()) + 1, 2);
+
+			sliceRequests = new ArrayList<SliceRequest>(periods.size());
+			
+			int index = 0;
+			
+			for (Pair<DateTime, DateTime> period :periods) {
+				
+				boolean cache = (index > 0) && (index < periods.size() - 1) 
+					&& (input.deployments == null);
+				
+				SliceRequest slice = new SliceRequest(period.getFirst(),
+					period.getSecond().minusMinutes(1), periodPoints, cache);
+				
+				sliceRequests.add(slice);
+				
+				index++;
+			}	
+		} else {
+			periodPoints = pointsCount;
+			sliceRequests = Collections.singletonList(new SliceRequest(from, to, pointsCount, false));	
 		}
-		else {
-			effectivePoints = (pointsCount / days) + 1;
-			sliceRequests = getTimeSlices(from, to, days, effectivePoints);	
-		}
 		
-		
-		List<GraphSliceTask> tasks = Lists.newArrayList();
+		List<GraphSliceTask> tasks = new ArrayList<GraphSliceTask>(sliceRequests.size());
 		
 		int index = 0;
 		
 		for (SliceRequest sliceRequest : sliceRequests) {
+			
 			int sliceIndex;
 			
 			if (sync) {
-				sliceIndex = NO_GRAPH_SLICE;
+				sliceIndex = ApiCache.NO_GRAPH_SLICE;
 			} else {
 				sliceIndex = index;
 			}
 				
-			GraphSliceTask task = createGraphAsyncTask(serviceId, viewId, sliceRequest.pointCount, input, volumeType, 
-					sliceRequest.from, sliceRequest.to, baselineWindow, activeWindow, sliceIndex);
+			GraphSliceTask task = createGraphAsyncTask(serviceId, viewId,
+				sliceRequest.pointCount, input, volumeType, 
+				sliceRequest.from, sliceRequest.to, 
+				baselineWindow, activeWindow, sliceIndex, sliceRequest.cache);
 				
 			index++;
 			
@@ -1515,6 +1548,7 @@ public abstract class GrafanaFunction {
 		return tasks;
 	}
 	
+	/*
 	private List<SliceRequest> getTimeSlices(DateTime from, DateTime to, int days, int pointCount) {
 		
 		List<SliceRequest> result = Lists.newArrayList();
@@ -1538,6 +1572,7 @@ public abstract class GrafanaFunction {
 		
 		return result;
 	}
+	*/
 	
 	protected boolean timespanContains(DateTime start, DateTime end, DateTime value) {
 		

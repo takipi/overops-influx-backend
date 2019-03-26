@@ -1,5 +1,8 @@
 package com.takipi.integrations.grafana.util;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -13,6 +16,7 @@ import org.ocpsoft.prettytime.PrettyTime;
 import com.takipi.common.util.Pair;
 
 public class TimeUtil {
+	
 	private static final String LAST_TIME_WINDOW = "time >= now() - ";
 	private static final String SO_FAR_WINDOW = "time >= ";
 	private static final String RANGE_WINDOW = "and time <= ";
@@ -27,6 +31,12 @@ public class TimeUtil {
 	private static final DateTimeFormatter fmt = ISODateTimeFormat.dateTime().withZoneUTC();
 	private static final PrettyTime prettyTime = new PrettyTime();
 
+	public enum Interval {
+		Week,
+		Day,
+		Hour
+	}
+	
 	public static String getDateTimeFromEpoch(long epoch) {
 		return new DateTime(epoch).toString(fmt);
 	}
@@ -286,5 +296,75 @@ public class TimeUtil {
 		}
 		
 		return result;
+	}
+	
+	public static Pair<DateTime, Integer> getPeriodStart(Pair<DateTime, DateTime> timespan,
+		Interval interval) {
+			
+		DateTime periodFrom;
+		int delta;
+			
+		switch (interval) {
+				
+			case Hour:
+				delta = (int)TimeUnit.HOURS.toMinutes(1);
+				periodFrom = timespan.getSecond().withMinuteOfHour(0);
+				break;
+				
+			case Day:
+				delta = (int)TimeUnit.DAYS.toMinutes(1);
+				periodFrom = timespan.getSecond().withMillisOfDay(0);
+				break;
+				
+			case Week:
+				delta = (int)TimeUnit.DAYS.toMinutes(7);
+				periodFrom = timespan.getSecond().withMillisOfDay(0);
+				break;
+				
+			default:
+				throw new IllegalStateException(String.valueOf(interval));
+				
+		}
+			
+		return Pair.of(periodFrom, delta);
+	}
+	
+	public static Collection<Pair<DateTime, DateTime>> getTimespanPeriods(Pair<DateTime, DateTime> timespan,
+			DateTime start, int delta, boolean addLastInterval) {
+		
+		if (timespan.getSecond().minus(timespan.getFirst().getMillis()).getMillis() <= 
+				TimeUnit.MINUTES.toMillis(delta)) {
+			return Collections.singleton(timespan);
+		}
+		
+		List<Pair<DateTime, DateTime>> result = new ArrayList<Pair<DateTime, DateTime>>();
+		
+		DateTime periodFrom = start;
+		DateTime periodTo = periodFrom;
+				
+		result.add(Pair.of(periodFrom, timespan.getSecond()));
+		
+		while (periodFrom.isAfter(timespan.getFirst())) {
+			
+			periodFrom = periodFrom.minusMinutes(delta);
+			
+			if (periodFrom.isAfter(timespan.getFirst())) {
+				result.add(Pair.of(periodFrom, periodTo));
+			} else {
+				long priodDelta = TimeUnit.MILLISECONDS.toMinutes(periodTo.getMillis() - timespan.getFirst().getMillis());
+				
+				if ((addLastInterval) || (priodDelta >= delta)) {
+					result.add(Pair.of(timespan.getFirst(), periodTo));
+				}
+			}
+			
+			periodTo = periodFrom;
+		}
+				
+		return result;
+	}
+	
+	public static long getTimespanMill(Pair<DateTime, DateTime> timespan) {
+		return timespan.getSecond().getMillis() - timespan.getFirst().getMillis();
 	}
 }

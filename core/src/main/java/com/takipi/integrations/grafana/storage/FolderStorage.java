@@ -1,4 +1,4 @@
-package com.takipi.integrations.grafana.settings;
+package com.takipi.integrations.grafana.storage;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,13 +7,17 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class FolderSettingsStorage extends BaseSettingsStorage {
-		
-	public static final String SETTINGS_FOLDER = "grafanaSettingsFolder";
+public class FolderStorage extends BaseStorage {
+			
+	private final String folder;
 	
-	private static File getFile(String name) {
+	public FolderStorage(String folder) {
+		this.folder = folder;
+	}
+	
+	private File getFile(String name) {
 		
-		String settingsFolder = System.getProperty(SETTINGS_FOLDER);	
+		String settingsFolder = System.getProperty(folder);	
 		
 		if (settingsFolder == null) {
 			return null;

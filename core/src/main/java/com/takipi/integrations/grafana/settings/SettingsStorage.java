@@ -1,7 +1,7 @@
 package com.takipi.integrations.grafana.settings;
 
-public interface SettingsStorage {
+import com.takipi.integrations.grafana.storage.KeyValueStorage;
+
+public interface SettingsStorage extends KeyValueStorage {
 	public String getDefaultServiceSettings();
-	public String getServiceSettings(String name);
-	public void saveServiceSettings(String name, String settings);
 }
