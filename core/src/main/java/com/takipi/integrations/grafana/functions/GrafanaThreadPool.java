@@ -14,7 +14,7 @@ import com.takipi.common.util.Pair;
 public class GrafanaThreadPool {
 	private static final int CACHE_SIZE = 100;
 	private static final int CACHE_RETENTION_MIN = 2;
-	private static final int THREADS_PER_API_KEY = 20;
+	private static final int THREADS_PER_API_KEY = 50;
 	
 	private static final LoadingCache<ApiClient, Pair<Executor, Executor>> executorCache = CacheBuilder
 			.newBuilder()

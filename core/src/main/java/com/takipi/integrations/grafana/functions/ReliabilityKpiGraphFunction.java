@@ -111,7 +111,8 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 
 			result.graph = getEventsGraph(serviceId, viewId, timelineData.input.pointsWanted, 
 					timelineData.expandedInput, timelineData.input.volumeType, 
-					timelineData.expandedTimespan.getFirst(), timelineData.expandedTimespan.getSecond());
+					timelineData.expandedTimespan.getFirst(),
+					timelineData.expandedTimespan.getSecond(), 0, 0, false);
 			
 			result.eventListMap = getEventMap(serviceId, timelineData.expandedInput,
 					timelineData.timespan.getFirst(), timelineData.timespan.getSecond(), 

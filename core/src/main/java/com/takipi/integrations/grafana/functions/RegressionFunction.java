@@ -708,8 +708,8 @@ public class RegressionFunction extends EventsFunction {
 			Gson gson = new Gson();
 			baselineInput = gson.fromJson(gson.toJson(input), input.getClass());
 			
-			//deployments by their nature do not have baseline - 
-			//they are compared against the general baseline
+			//deployments by definition nature do not have their own baseline - 
+			//they are compared against the general baseline (all prev deps)
 			baselineInput.deployments = null;
 		} else {
 			baselineInput = input;
