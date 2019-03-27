@@ -295,6 +295,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		protected int slowdowns;
 		protected int severeSlowdowns;
 		protected Map<TransactionKey, TransactionData> transactionMap;
+		protected RegressionInput regressionInput;
 		
 		protected SlowdownInterval(Pair<DateTime, DateTime> period) {
 			super(period);
