@@ -116,7 +116,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			result.eventListMap = getEventMap(serviceId, timelineData.expandedInput,
 					timelineData.timespan.getFirst(), timelineData.timespan.getSecond(), 
 				null, timelineData.input.pointsWanted);
-			
+						
 			return result;
 		}
 	}
@@ -714,7 +714,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			
 			Graph baselineGraph = regressionPeriodData.baselineGraph;
 			Graph activeGraph = regressionPeriodData.activeGraph;
-					
+			
 			Collection<EventResult> clonedEvents = cloneEvents(regressionPeriodData.eventMap.values(), false);
 			Map<String, EventResult> clonedEventsMap = getEventsMap(clonedEvents);
 			

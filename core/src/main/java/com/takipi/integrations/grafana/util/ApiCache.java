@@ -73,8 +73,10 @@ public class ApiCache {
 	public static boolean PRINT_DURATIONS = true;
 	
 	public static final int NO_GRAPH_SLICE = -1;
+	public static final int MIN_SLICE_POINTS = 3;
+	
 	private static final String CACHE_FOLDER = "GraphCacheFolder";
-
+	protected static boolean CACHE_GRAPHS = true;
 
 	protected abstract static class BaseCacheLoader {
 
@@ -1086,7 +1088,7 @@ public class ApiCache {
 				pointsWanted, baselineWindow, activeWindow, windowSlice, timespan);
 			
 		String keyName;
-		boolean cachable = (cacheStorage != null) && (cache);
+		boolean cachable = (CACHE_GRAPHS) && (cacheStorage != null) && (cache);
 		
 		if (cachable) {
 			

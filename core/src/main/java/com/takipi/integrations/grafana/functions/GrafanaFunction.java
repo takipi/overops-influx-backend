@@ -95,6 +95,8 @@ public abstract class GrafanaFunction {
 		public String getName();
 	}
 	
+	protected static boolean SLICE_GRAPHS = true;
+	
 	private static final DecimalFormat singleDigitFormatter = new DecimalFormat("#.#");
 	private static final DecimalFormat doubleDigitFormatter = new DecimalFormat("#.##");
 
@@ -1440,15 +1442,19 @@ public abstract class GrafanaFunction {
 		
 	}
 	
-	
 	protected Graph getEventsGraph(String serviceId, String viewId, int pointsCount,
 			ViewInput input, VolumeType volumeType, DateTime from, DateTime to) {
-		return getEventsGraph(serviceId, viewId, pointsCount, input, volumeType, from, to, 0, 0);
+		
+		return getEventsGraph(serviceId, viewId, pointsCount, 
+			input, volumeType, from, to, 0, 0);
 	}
 	
 	protected Graph getEventsGraph(String serviceId, String viewId, int pointsCount,
-			ViewInput input, VolumeType volumeType, DateTime from, DateTime to, int baselineWindow, int activeWindow) {
-		return getEventsGraph(serviceId, viewId, pointsCount, input, volumeType, from, to, baselineWindow, activeWindow, true);
+			ViewInput input, VolumeType volumeType, DateTime from, DateTime to, 
+			int baselineWindow, int activeWindow) {
+		
+		return getEventsGraph(serviceId, viewId, pointsCount, 
+			input, volumeType, from, to, baselineWindow, activeWindow, true);
 	}
 	
 	protected GraphSliceTask createGraphAsyncTask(String serviceId, String viewId, int pointsCount,
@@ -1470,16 +1476,25 @@ public abstract class GrafanaFunction {
 	}
 	
 	protected Graph getEventsGraph(String serviceId, String viewId, int pointsCount,
-			ViewInput input, VolumeType volumeType, DateTime from, DateTime to, int baselineWindow, int activeWindow, boolean sync) {		
+		ViewInput input, VolumeType volumeType, DateTime from, DateTime to,
+		int baselineWindow, int activeWindow, boolean sync) {		
 		
 		Collection<GraphSliceTask> tasks = getGraphTasks(serviceId, viewId, 
 				pointsCount, input, volumeType, from, to, baselineWindow, activeWindow, sync);
 
-		Collection<GraphSliceTaskResult> graphTasks = executeGraphTasks(tasks, sync);
+		Collection<GraphSliceTaskResult> graphTaskResults = executeGraphTasks(tasks, sync);
 			
-		Graph result = mergeGraphs(graphTasks);
-		
+		Graph result = mergeGraphs(graphTaskResults);
+			
 		return result;
+	}
+	
+	protected void printGraph(Graph graph) {
+		
+		for (GraphPoint gp : graph.points) {
+			System.out.println(gp.time + " " + gp.stats.hits + " " + gp.stats.invocations + ", ");
+			
+		}
 	}
 	
 	protected Collection<GraphSliceTask> getGraphTasks(String serviceId, String viewId, int pointsCount,
@@ -1491,14 +1506,16 @@ public abstract class GrafanaFunction {
 		
 		Pair<DateTime, DateTime> timespan = Pair.of(from, to);
 		
-		if (TimeUtil.getTimespanMill(timespan) > TimeUnit.DAYS.toMillis(1) * 2) {
+		boolean graterThanTwoDays = TimeUtil.getTimespanMill(timespan) > TimeUnit.DAYS.toMillis(1) * 2;
+		
+		if ((SLICE_GRAPHS) && (!sync) && (graterThanTwoDays)) {
 		
 			Pair<DateTime, Integer> periodStart = TimeUtil.getPeriodStart(timespan, Interval.Day);
 			
 			Collection<Pair<DateTime, DateTime>> periods = TimeUtil.getTimespanPeriods(timespan,
 				periodStart.getFirst(), periodStart.getSecond(), baselineWindow == 0);
 			
-			periodPoints = Math.max(periodPoints = (pointsCount / periods.size()) + 1, 2);
+			periodPoints = Math.max(periodPoints = (pointsCount / periods.size()) + 1, ApiCache.MIN_SLICE_POINTS);
 
 			sliceRequests = new ArrayList<SliceRequest>(periods.size());
 			
@@ -1507,10 +1524,12 @@ public abstract class GrafanaFunction {
 			for (Pair<DateTime, DateTime> period :periods) {
 				
 				boolean cache = (index > 0) && (index < periods.size() - 1) 
-					&& (input.deployments == null);
+					&& ((input.deployments == null) 
+					|| (GrafanaFunction.VAR_ALL.contains(input.deployments)));
 				
+				//.minusMinutes(1)
 				SliceRequest slice = new SliceRequest(period.getFirst(),
-					period.getSecond().minusMinutes(1), periodPoints, cache);
+					period.getSecond(), periodPoints, cache);
 				
 				sliceRequests.add(slice);
 				
