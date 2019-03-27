@@ -647,11 +647,12 @@ public class ApiCache {
 		protected int baselineWindow;
 		protected int windowSlice;
 		protected Pair<DateTime, DateTime> timespan;
+		protected boolean cachable;
 
 		public GraphCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
 				VolumeType volumeType, int pointsWanted, 
 				int baselineWindow, int activeWindow, int windowSlice,
-				Pair<DateTime, DateTime> timespan) {
+				Pair<DateTime, DateTime> timespan, boolean cachable) {
 
 			super(apiClient, request, serviceId, input, volumeType);
 			this.pointsWanted = pointsWanted;
@@ -659,6 +660,7 @@ public class ApiCache {
 			this.baselineWindow = baselineWindow;
 			this.windowSlice = windowSlice;
 			this.timespan = timespan;
+			this.cachable = cachable;
 		}
 				
 		@Override
@@ -690,6 +692,43 @@ public class ApiCache {
 			}
 
 			return true;
+		}
+		
+		@Override
+		public Response<?> load()
+		{
+			String keyName;
+			
+			if (cachable) {
+				
+				keyName = keyName();
+				String value = cacheStorage.getValue(keyName);
+				
+				if (value != null) {
+					
+					Gson gson = new Gson();
+					GraphResult graphResult = gson.fromJson(value, GraphResult.class);
+					
+					if (graphResult != null) {
+						Response<GraphResult> response = Response.of(200, graphResult);						
+						return response;
+					}
+				}
+			} else {
+				keyName = null;
+			}
+			
+			@SuppressWarnings("unchecked")
+			Response<GraphResult> response = (Response<GraphResult>)super.load();
+
+			if ((cachable) && (response != null) 
+			&& (response.data != null) && (response.isOK())) {
+				Gson gson = new Gson();
+				String value = gson.toJson(response.data); 
+				cacheStorage.setValue(keyName, value);
+			}
+			
+			return response;
 		}
 			
 		public String keyName() {
@@ -1084,38 +1123,13 @@ public class ApiCache {
 			int baselineWindow, int activeWindow, int windowSlice,
 			Pair<DateTime, DateTime> timespan, boolean cache) {
 
-		GraphCacheLoader cacheKey = new GraphCacheLoader(apiClient, request, serviceId, input, volumeType, 
-				pointsWanted, baselineWindow, activeWindow, windowSlice, timespan);
-			
-		String keyName;
 		boolean cachable = (CACHE_GRAPHS) && (cacheStorage != null) && (cache);
 		
-		if (cachable) {
-			
-			keyName = cacheKey.keyName();
-			String value = cacheStorage.getValue(keyName);
-			
-			if (value != null) {
-				Gson gson = new Gson();
-				GraphResult graphResult = gson.fromJson(value, GraphResult.class);
-				
-				if (graphResult != null) {
-					return Response.of(200, graphResult);
-				}
-			}
-		} else {
-			keyName = null;
-		}
+		GraphCacheLoader cacheKey = new GraphCacheLoader(apiClient, request, serviceId, input, volumeType, 
+				pointsWanted, baselineWindow, activeWindow, windowSlice, timespan, cachable);
 		
 		Response<GraphResult> response = (Response<GraphResult>) getItem(cacheKey);
 
-		if ((cachable) && (response != null) 
-		&& (response.data != null) && (response.isOK())) {
-			Gson gson = new Gson();
-			String value = gson.toJson(response.data); 
-			cacheStorage.setValue(keyName, value);
-		}
-		
 		return response;
 	}
 	
@@ -1124,7 +1138,7 @@ public class ApiCache {
 			int baselineWindow, int activeWindow, Response<GraphResult> graphResult) {
 
 		GraphCacheLoader cacheKey = new GraphCacheLoader(apiClient, request, serviceId, input, volumeType, 
-			pointsWanted, baselineWindow, activeWindow, NO_GRAPH_SLICE, null);
+			pointsWanted, baselineWindow, activeWindow, NO_GRAPH_SLICE, null, false);
 		
 		queryCache.put(cacheKey, graphResult);
 	}
