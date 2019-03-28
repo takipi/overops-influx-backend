@@ -295,6 +295,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		protected int slowdowns;
 		protected int severeSlowdowns;
 		protected Map<TransactionKey, TransactionData> transactionMap;
+		protected RegressionInput regressionInput;
 		
 		protected SlowdownInterval(Pair<DateTime, DateTime> period) {
 			super(period);
@@ -509,8 +510,10 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 				activeGraphsMap.values(), baselineGraphsMap.values());
 			
 			SlowdownInterval slowdownInterval = new SlowdownInterval(period);
-			slowdownInterval.transactionMap = transactionsMap;
 			
+			slowdownInterval.transactionMap = transactionsMap;
+			slowdownInterval.regressionInput = regressionInput;
+					
 			for (TransactionData transactionData : transactionsMap.values()) {
 			
 				switch (transactionData.state) {
