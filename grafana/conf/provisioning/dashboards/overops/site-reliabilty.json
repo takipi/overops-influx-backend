@@ -89,7 +89,7 @@
           "targetBlank": true,
           "title": "Reliability Analysis. $s",
           "type": "dashboard",
-          "url": "/d/4DHQ63-ik/reliability-analysis"
+          "url": "d/4DHQ63-ik/reliability-analysis"
         }
       ],
       "mappingType": 1,
@@ -581,7 +581,7 @@
           "keepTime": true,
           "title": "Increasing Errors. $ie",
           "type": "absolute",
-          "url": "/d/WZ739NYmk/increasing-errors"
+          "url": "d/WZ739NYmk/increasing-errors"
         }
       ],
       "mappingType": 1,
