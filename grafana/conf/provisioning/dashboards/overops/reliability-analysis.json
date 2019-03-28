@@ -83,6 +83,8 @@
       "interval": null,
       "links": [
         {
+          "includeVars": true,
+          "keepTime": true,
           "dashboard": "Reliability Scorecard",
           "title": "Reliability Scorecard. $s",
           "type": "absolute",
