@@ -276,5 +276,9 @@ public class FunctionParser {
 		registerFunction(new TimeFilterFunction.Factory());
 		registerFunction(new MinTimeFilterAlertFunction.Factory());
 		registerFunction(new ConvertToArrayFunction.Factory());
+		
+		//diagnostics functions
+		registerFunction(new QueryDiagnosticsFunction.Factory());
+
 	}
 }

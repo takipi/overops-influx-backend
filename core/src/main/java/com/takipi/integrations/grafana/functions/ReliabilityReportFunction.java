@@ -168,6 +168,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 		protected ReportKey reportKey;
 		protected RegressionKeyData regressionData;
 		protected Map<TransactionKey, TransactionData> transactionMap;
+		protected RegressionInput transactionRegInput;
+
 		
 		protected ReportKeyOutput(ReportKey key) {
 			this.reportKey = key;
@@ -226,10 +228,14 @@ public class ReliabilityReportFunction extends EventsFunction {
 	protected static class SlowdownAsyncResult extends ReportAsyncResult{
 		
 		protected Map<TransactionKey, TransactionData> transactionMap;
+		protected RegressionInput regressionInput;
 		
-		protected SlowdownAsyncResult(ReportKey key, Map<TransactionKey, TransactionData> transactionMap) {
+		protected SlowdownAsyncResult(ReportKey key, Map<TransactionKey, TransactionData> transactionMap,
+			RegressionInput regressionInput) {
+			
 			super(key);
 			this.transactionMap = transactionMap;
+			this.regressionInput = regressionInput;
 		}
 	}
 
@@ -266,10 +272,12 @@ public class ReliabilityReportFunction extends EventsFunction {
 					viewId, input, timeSpan, false);
 				
 				if (regPair == null) {
-					return new SlowdownAsyncResult(reportKey, Collections.emptyMap());
+					return new SlowdownAsyncResult(reportKey, Collections.emptyMap(), null);
 				}
-					
+				
+				RegressionInput regressionInput = regPair.getFirst();
 				RegressionWindow regressionWindow = regPair.getSecond();
+
 				
 				DateTime to = DateTime.now();
 				DateTime from = to.minusMinutes(regressionWindow.activeTimespan);
@@ -285,9 +293,9 @@ public class ReliabilityReportFunction extends EventsFunction {
 				SlowdownAsyncResult result;
 				
 				if (transactionDataResult != null) {
-					result = new SlowdownAsyncResult(reportKey, transactionDataResult.items);
+					result = new SlowdownAsyncResult(reportKey, transactionDataResult.items, regressionInput);
 				} else {
-					result = new SlowdownAsyncResult(reportKey, Collections.emptyMap());
+					result = new SlowdownAsyncResult(reportKey, Collections.emptyMap(), regressionInput);
 				}
 							
 				return result;
@@ -1359,17 +1367,12 @@ public class ReliabilityReportFunction extends EventsFunction {
 			if (kpiInterval instanceof ScoreInterval) {
 				
 				ScoreInterval scoreInterval = (ScoreInterval)kpiInterval;
-				
-				Map<TransactionKey, TransactionData> transactionMap;
-				 
+								 
 				if ((scoreInterval.slowdownInterval != null)
 				&& (scoreInterval.slowdownInterval.transactionMap != null)) {
-					transactionMap = scoreInterval.slowdownInterval.transactionMap;
-				} else {
-					transactionMap = Collections.emptyMap();
-				}
-				
-				reportKeyOutput.transactionMap = transactionMap;
+					reportKeyOutput.transactionMap = scoreInterval.slowdownInterval.transactionMap;
+					reportKeyOutput.transactionRegInput =  scoreInterval.slowdownInterval.regressionInput;
+				} 
 				
 				RegressionOutput regressionOutput;
 				
@@ -1451,6 +1454,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 				
 				SlowdownAsyncResult slowdownAsyncResult = (SlowdownAsyncResult)asyncResult;
 				reportKeyOutput.transactionMap = slowdownAsyncResult.transactionMap;
+				reportKeyOutput.transactionRegInput = slowdownAsyncResult.regressionInput;
 			}
 			
 		}
@@ -2173,6 +2177,18 @@ public class ReliabilityReportFunction extends EventsFunction {
 			return result;
 		}
 		
+		RegressionInput regressionInput;
+		
+		if (reportKeyResult.output.transactionRegInput != null) {
+			regressionInput = reportKeyResult.output.transactionRegInput;
+		} else {
+			regressionInput 	= reportKeyResult.output.regressionData.regressionOutput.regressionInput;
+		}
+		
+		if (regressionInput == null) {
+			return null;
+		}
+
 		double avgTimeNum = 0;
 		double avgTimeDenom = 0;
 		
@@ -2192,9 +2208,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			baseAvgTimeNum += transactionData.baselineAvg * transactionData.baselineInvocations;
 			baseAvgTimeDenom += transactionData.baselineInvocations;
 		}
-		
-		RegressionInput regressionInput = reportKeyResult.output.regressionData.regressionOutput.regressionInput;
-
+			
 		Pair<Double, String> responsePair = getAvgResponseState(avgTimeDenom, avgTimeNum, 
 				baseAvgTimeDenom, baseAvgTimeNum, result.transactionVolume, regressionInput);
 		

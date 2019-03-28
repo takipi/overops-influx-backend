@@ -94,11 +94,9 @@ public abstract class GrafanaFunction {
 		public Class<?> getInputClass();
 		public String getName();
 	}
-	
-	protected static boolean SLICE_GRAPHS = true;
-	
-	private static final DecimalFormat singleDigitFormatter = new DecimalFormat("#.#");
-	private static final DecimalFormat doubleDigitFormatter = new DecimalFormat("#.##");
+		
+	public static final DecimalFormat singleDigitFormatter = new DecimalFormat("#.#");
+	public static final DecimalFormat doubleDigitFormatter = new DecimalFormat("#.##");
 
 	protected static final PrettyTime prettyTime = new PrettyTime();
 	
@@ -1464,7 +1462,8 @@ public abstract class GrafanaFunction {
 		
 		GraphRequest.Builder builder = GraphRequest.newBuilder().setServiceId(serviceId).setViewId(viewId)
 				.setGraphType(GraphType.view).setFrom(from.toString(dateTimeFormatter)).setTo(to.toString(dateTimeFormatter))
-				.setVolumeType(volumeType).setWantedPointCount(pointsCount).setRaw(true);
+				.setVolumeType(volumeType).setRaw(true).//setResolution(GraphResolution.H8);
+				setWantedPointCount(pointsCount);
 		
 		applyFilters(input, serviceId, builder);
 		
@@ -1489,14 +1488,6 @@ public abstract class GrafanaFunction {
 		return result;
 	}
 	
-	protected void printGraph(Graph graph) {
-		
-		for (GraphPoint gp : graph.points) {
-			System.out.println(gp.time + " " + gp.stats.hits + " " + gp.stats.invocations + ", ");
-			
-		}
-	}
-	
 	protected Collection<GraphSliceTask> getGraphTasks(String serviceId, String viewId, int pointsCount,
 			ViewInput input, VolumeType volumeType, DateTime from, DateTime to, 
 			int baselineWindow, int activeWindow, boolean sync) {
@@ -1505,10 +1496,9 @@ public abstract class GrafanaFunction {
 		List<SliceRequest> sliceRequests;
 		
 		Pair<DateTime, DateTime> timespan = Pair.of(from, to);
-		
-		boolean graterThanTwoDays = TimeUtil.getTimespanMill(timespan) > TimeUnit.DAYS.toMillis(1) * 2;
-		
-		if ((SLICE_GRAPHS) && (!sync) && (graterThanTwoDays)) {
+				
+		if ((ApiCache.SLICE_GRAPHS) && (!sync)
+		&& (TimeUtil.getTimespanMill(timespan) > TimeUnit.DAYS.toMillis(2))) {
 		
 			Pair<DateTime, Integer> periodStart = TimeUtil.getPeriodStart(timespan, Interval.Day);
 			

@@ -781,8 +781,6 @@ public class RegressionFunction extends EventsFunction {
 		Graph baselineGraph = mergeGraphs(baseLineGraphResults);
 		Graph activeWindowGraph = mergeGraphs(activeGraphResults);		
 		
-		//printGraph(baselineGraph);
-		
 		GraphResult activeGraphResult = new GraphResult();
 		activeGraphResult.graphs = Collections.singletonList(activeWindowGraph);	
 		
