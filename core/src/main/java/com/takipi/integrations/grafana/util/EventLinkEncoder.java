@@ -2,11 +2,14 @@ package com.takipi.integrations.grafana.util;
 
 import java.util.Base64;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.joda.time.DateTime;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.util.settings.ServiceSettingsData;
@@ -40,7 +43,7 @@ public class EventLinkEncoder {
 
 		String json = String.format(TEMPLATE, serviceId, TimeUtil.getMillisAsString(from), TimeUtil.getMillisAsString(to),
 				toList(servers), toList(apps), toList(deployments),
-				event.id, TimeUtil.getMillisAsString(to));
+				toEventIdsList(event), TimeUtil.getMillisAsString(to));
 
 		String snapshot = Base64.getUrlEncoder().encodeToString(json.getBytes());
 		
@@ -50,17 +53,39 @@ public class EventLinkEncoder {
 		return snapshot;
 	}
 	
+	private static String toEventIdsList(EventResult event) {
+		Set<String> allEventIds = Sets.newHashSet();
+		
+		allEventIds.add(event.id);
+		
+		if (event.similar_event_ids != null) {
+			allEventIds.addAll(event.similar_event_ids);
+		}
+		
+		return toList(allEventIds, false);
+	}
+	
 	private static String toList(Collection<String> col) {
+		return toList(col, true);
+	}
+	
+	private static String toList(Collection<String> col, boolean addQuotes) {
 		List<String> lst = Lists.newArrayList(col);
 
 		StringBuilder sb = new StringBuilder();
 
 		for (int i = 0; i < lst.size(); i++) {
 			String s = lst.get(i);
-
-			sb.append('"');
+			
+			if (addQuotes) {
+				sb.append('"');
+			}
+			
 			sb.append(s);
-			sb.append('"');
+			
+			if (addQuotes) {
+				sb.append('"');
+			}
 
 			if (i < lst.size() - 1) {
 				sb.append(',');
