@@ -9,13 +9,12 @@ import org.joda.time.DateTime;
 
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.transaction.TransactionGraph;
+import com.takipi.api.client.util.settings.GroupSettings;
+import com.takipi.api.client.util.settings.GroupSettings.Group;
+import com.takipi.api.client.util.settings.GroupSettings.GroupFilter;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput.AggregateMode;
-import com.takipi.integrations.grafana.settings.GrafanaSettings;
-import com.takipi.integrations.grafana.settings.GroupSettings;
-import com.takipi.integrations.grafana.settings.GroupSettings.Group;
-import com.takipi.integrations.grafana.settings.GroupSettings.GroupFilter;
 
 public class KeyTransactionsGraphFunction extends TransactionsGraphFunction
 {
@@ -51,7 +50,7 @@ public class KeyTransactionsGraphFunction extends TransactionsGraphFunction
 			return Collections.emptyList();
 		}
 		
-		GroupSettings transactionGroups = GrafanaSettings.getData(apiClient, serviceId).transactions;
+		GroupSettings transactionGroups = getSettings(serviceId).transactions;
 		
 		if (transactionGroups == null) {
 			return super.processServiceGraph(serviceId, input, serviceIds, timespan, graphs);

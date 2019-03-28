@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 import org.joda.time.DateTime;
-import org.ocpsoft.prettytime.PrettyTime;
 
 import com.google.common.base.Objects;
 import com.google.gson.Gson;
@@ -27,6 +26,8 @@ import com.takipi.api.client.result.event.EventsSlimVolumeResult;
 import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
+import com.takipi.api.client.util.settings.GeneralSettings;
+import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
@@ -37,7 +38,6 @@ import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
-import com.takipi.integrations.grafana.settings.input.GeneralSettings;
 import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.EventLinkEncoder;
 import com.takipi.integrations.grafana.util.TimeUtil;
@@ -365,11 +365,9 @@ public class EventsFunction extends GrafanaFunction {
 	protected class EventDescriptionFormatter extends FieldFormatter {
 
 		private Categories categories;
-		private PrettyTime prettyTime;
 		
 		protected EventDescriptionFormatter(Categories categories) {
 			this.categories = categories;
-			this.prettyTime = new PrettyTime();
 		}
 		
 		@Override
@@ -516,7 +514,8 @@ public class EventsFunction extends GrafanaFunction {
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
 				Pair<DateTime, DateTime> timeSpan) {
 
-			return EventLinkEncoder.encodeLink(apiClient, serviceId, input, eventData.event, 
+			return EventLinkEncoder.encodeLink(apiClient, getSettings(serviceId), 
+				serviceId, input, eventData.event, 
 				timeSpan.getFirst(), timeSpan.getSecond());
 		}
 		
@@ -699,6 +698,10 @@ public class EventsFunction extends GrafanaFunction {
 		super(apiClient);
 	}
 	
+	public EventsFunction(ApiClient apiClient, Map<String, ServiceSettingsData> settingsMaps) {
+		super(apiClient, settingsMaps);
+	}
+	
 	protected static String formatRateDelta(Stats baseline, Stats stats) {
 		
 		StringBuilder result = new StringBuilder();
@@ -797,7 +800,7 @@ public class EventsFunction extends GrafanaFunction {
 	
 	protected List<EventData> mergeSimilarEvents(String serviceId, List<EventData> eventDatas) {
 		
-		GeneralSettings settings = GrafanaSettings.getData(apiClient, serviceId).general;
+		GeneralSettings settings = getSettings(serviceId).general;
 		
 		if ((settings == null) || (!settings.group_by_entryPoint)) {
 			return eventDatas;
@@ -912,7 +915,7 @@ public class EventsFunction extends GrafanaFunction {
 			return;
 		}
 		
-		RegressionFunction regressionFunction = new RegressionFunction(apiClient);
+		RegressionFunction regressionFunction = new RegressionFunction(apiClient, settingsMaps);
 		
 		Pair<RegressionInput, RegressionWindow> regPair = regressionFunction.getRegressionInput(serviceId, 
 			viewId, input, timeSpan, false);
@@ -1215,7 +1218,7 @@ public class EventsFunction extends GrafanaFunction {
 		EventsInput input = (EventsInput)getInput((ViewInput)functionInput);
 		
 		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
-
+  
 		OutputMode outputMode = input.getOutputMode();
 		
 		switch (outputMode) {

@@ -6,10 +6,10 @@ import java.util.Collections;
 import java.util.List;
 
 import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.util.settings.RegressionSettings;
 import com.takipi.integrations.grafana.functions.EventFilter;
 import com.takipi.integrations.grafana.functions.GrafanaFunction;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
-import com.takipi.integrations.grafana.settings.input.RegressionSettings;
 
 /**
  * The base function input used to include / exclude event objects matching a specific criteria

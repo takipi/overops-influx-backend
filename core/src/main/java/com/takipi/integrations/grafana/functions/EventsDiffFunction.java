@@ -175,7 +175,8 @@ public class EventsDiffFunction extends EventsFunction
 			eventsDiffInput.timeFilter = sourceTimeFilter;
 		}
 		
-		if ((Objects.equal(input.getApplications(apiClient, serviceId), targetInput.getApplications(apiClient, serviceId))) 
+		if ((Objects.equal(input.getApplications(apiClient, getSettings(serviceId), serviceId), 
+			targetInput.getApplications(apiClient, getSettings(serviceId), serviceId))) 
 		&& (Objects.equal(input.getDeployments(serviceId), targetInput.getDeployments(serviceId))) 
 		&& (Objects.equal(input.getServers(serviceId), targetInput.getServers(serviceId)))
 		&& (sourceTimeFilter == null)) {

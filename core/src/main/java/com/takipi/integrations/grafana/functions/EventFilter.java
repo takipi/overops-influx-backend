@@ -12,16 +12,15 @@ import org.joda.time.DateTime;
 import com.takipi.api.client.data.event.Location;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.util.infra.Categories;
+import com.takipi.api.client.util.settings.GroupSettings;
+import com.takipi.api.client.util.settings.GroupSettings.GroupFilter;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
-import com.takipi.integrations.grafana.settings.GroupSettings;
-import com.takipi.integrations.grafana.settings.GroupSettings.GroupFilter;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class EventFilter
 {
 	public static final String CRITICAL_EXCEPTIONS = "Critical Exceptions";
-	public static final String CATEGORY_PREFIX = "-";
 	public static final String EXCEPTION_PREFIX = "--";
 	public static final String TERM = "<term>";
 	public static final String ARCHIVE = "Archive";
@@ -46,14 +45,14 @@ public class EventFilter
 	public static String toExceptionFilter(String value) {
 		
 		if (!isExceptionFilter(value)) {
-			return EventFilter.EXCEPTION_PREFIX + value;
+			return EXCEPTION_PREFIX + value;
 		} else { 
 			return value;
 		}
 	}
 	
 	public static boolean isExceptionFilter(String name) {
-		return name.startsWith(EventFilter.EXCEPTION_PREFIX);
+		return name.startsWith(EXCEPTION_PREFIX);
 	}
 	
 	public static String fromExceptionFilter(String value) {
@@ -62,7 +61,7 @@ public class EventFilter
 			return value;
 		}
 		
-		return value.substring(EventFilter.EXCEPTION_PREFIX.length());
+		return value.substring(EXCEPTION_PREFIX.length());
 	}
 	
 	
@@ -82,7 +81,7 @@ public class EventFilter
 			
 			for (String eventLocation : eventLocations) {
 				
-				String[] eventLocationParts = eventLocation.split(Pattern.quote("."));
+				String[] eventLocationParts = eventLocation.split(GrafanaFunction.QUALIFIED_DELIM_PATTERN);
 						
 				if (eventLocationParts.length == 2) {
 					result.eventLocations.add(Pair.of(eventLocationParts[0], eventLocationParts[1]));		
@@ -96,18 +95,15 @@ public class EventFilter
 		result.labels = labels;
 		result.categories = categories;
 		
-		if (!TERM.equals(searchText))
-		{
+		if (!TERM.equals(searchText)) {
 			result.searchText = searchText;
 		}
 		
-		if (!TERM.equals(transactionSearchText))
-		{
+		if (!TERM.equals(transactionSearchText)) {
 			result.transactionSearchText = transactionSearchText;
 		}
 		
-		if (labelsRegex != null)
-		{
+		if (labelsRegex != null) {
 			result.labelsPattern = Pattern.compile(labelsRegex);
 		}
 		
@@ -115,19 +111,15 @@ public class EventFilter
 		result.eventTypes = new ArrayList<String>();
 		result.categoryTypes = new ArrayList<String>();
 		
-		if (types != null)
-		{
-			for (String type : types)
-			{
-				if (isExceptionFilter(type))
-				{
+		if (types != null) {
+			
+			for (String type : types) {
+				
+				if (isExceptionFilter(type)) {
 					result.exceptionTypes.add(fromExceptionFilter(type));
-				} 
-				else if (GroupSettings.isGroup(type))
-				{
+				} else if (GroupSettings.isGroup(type)) {
 					result.categoryTypes.add(GroupSettings.fromGroupName(type));
-				}
-				else {
+				} else {
 					if (!type.equals(GrafanaFunction.ALL)) {
 						result.eventTypes.add(type);
 					}
@@ -135,28 +127,24 @@ public class EventFilter
 			}
 		}
 		
-		if (firstSeen != null)
-		{
+		if (firstSeen != null) {
 			result.firstSeen = TimeUtil.getTimeFilter(firstSeen);
 		}
 		
 		return result;
 	}
 	
-	private boolean compareLabels(EventResult event)
-	{
+	private boolean compareLabels(EventResult event) {
 		
-		for (String label : labels)
-		{
-			for (String eventLabel : event.labels)
-			{
-				if (label.equals(eventLabel))
-				{
+		for (String label : labels) {
+			
+			for (String eventLabel : event.labels) {
+				if (label.equals(eventLabel)) {
 					return true;
 				}
 				
-				if ((label.equals(GrafanaFunction.HIDDEN)) || (label.equals(GrafanaFunction.RESOVED)))
-				{
+				if ((label.equals(GrafanaFunction.HIDDEN)) 
+				|| (label.equals(GrafanaFunction.RESOLVED))) {
 					return false;
 				}
 			}
@@ -165,14 +153,13 @@ public class EventFilter
 		return false;
 	}
 	
-	private boolean compareLabelsRegex(EventResult event)
-	{
-		for (String eventLabel : event.labels)
-		{
+	private boolean compareLabelsRegex(EventResult event) {
+		
+		for (String eventLabel : event.labels) {
+			
 			Matcher matcher = labelsPattern.matcher(eventLabel);
 			
-			if (matcher.find())
-			{
+			if (matcher.find()) {
 				return true;
 			}
 			
@@ -181,9 +168,9 @@ public class EventFilter
 		return false;
 	}
 	
-	public boolean labelMatches(String label)
-	{
-		return (labelsPattern == null) || (labelsPattern.matcher(label).find());
+	public boolean labelMatches(String label) {
+		return (labelsPattern == null) 
+			|| (labelsPattern.matcher(label).find());
 	}
 	
 	private boolean filterExceptionType(EventResult event) {
@@ -209,14 +196,16 @@ public class EventFilter
 		Set<String> locationLabels = null;
 			
 		if (event.error_origin != null) {
+			
 			originLabels = categories.getCategories(event.error_origin.class_name);
 			
 			if (matchLabels(originLabels)) {
 				return false;
 			}
 		}
-		
+	
 		if (event.error_location != null) {
+			
 			locationLabels = categories.getCategories(event.error_location.class_name);
 			
 			if (matchLabels(locationLabels)) {
@@ -224,8 +213,8 @@ public class EventFilter
 			}
 		}
 		
-		boolean hasCategories = (!CollectionUtil.safeIsEmpty(originLabels)) ||
-			(!CollectionUtil.safeIsEmpty(locationLabels));
+		boolean hasCategories = (!CollectionUtil.safeIsEmpty(originLabels)) 
+							|| (!CollectionUtil.safeIsEmpty(locationLabels));
 			
 		if ((categoryTypes.contains(APP_CODE)) && (!hasCategories)) {
 			return false;
@@ -247,8 +236,8 @@ public class EventFilter
 		return true;
 	}
 	
-	private boolean filterType(EventResult event)
-	{
+	private boolean filterType(EventResult event) {
+		
 		if (filterExceptionType(event)) {
 			return true;
 		}
@@ -270,12 +259,11 @@ public class EventFilter
 			return false;
 		}
 		
-		for (String label : labels)
-		{
-			for (String type : categoryTypes)
-			{
-				if (type.equals(label))
-				{
+		for (String label : labels)	{
+			
+			for (String type : categoryTypes) {
+				
+				if (type.equals(label)) {
 					return true;
 				}
 			}
@@ -284,44 +272,38 @@ public class EventFilter
 		return false;
 	}
 	
-	private boolean searchLocation(Location location, String s)
-	{
+	private boolean searchLocation(Location location, String s) {
 		
-		if (location == null)
-		{
+		if (location == null) {
 			return false;
 		}
 		
-		if (location.prettified_name.toLowerCase().contains(s))
-		{
+		if (location.prettified_name.toLowerCase().contains(s)) {
 			return true;
 		}
 		
 		return false;
 	}
 	
-	private boolean searchText(EventResult event)
-	{
+	private boolean searchText(EventResult event) {
 		
 		String s = searchText.toLowerCase();
 		
-		if (searchLocation(event.error_location, s))
-		{
+		if (searchLocation(event.error_location, s)) {
 			return true;
 		}
 		
-		if (searchLocation(event.entry_point, s))
-		{
+		if (searchLocation(event.entry_point, s)) {
 			return true;
 		}
 		
-		if ((event.message != null) && (event.message.toLowerCase().contains(s)))
-		{
+		if ((event.message != null) 
+		&& (event.message.toLowerCase().contains(s))) {
 			return true;
 		}
 		
-		if ((event.introduced_by != null) && (event.introduced_by.toLowerCase().contains(s)))
-		{
+		if ((event.introduced_by != null) 
+		&& (event.introduced_by.toLowerCase().contains(s))) {
 			return true;
 		}
 		
@@ -330,12 +312,11 @@ public class EventFilter
 	
 	public boolean filterTransaction(EventResult event) {
 		
-		if (transactionsFilter != null)
-		{
+		if (transactionsFilter != null) {
+			
 			Location entryPoint = event.entry_point;
 			
-			if ((entryPoint == null) || (entryPoint.class_name == null))
-			{
+			if ((entryPoint == null) || (entryPoint.class_name == null)) {
 				return true;
 			}
 			
@@ -373,20 +354,17 @@ public class EventFilter
 	
 	public boolean filter(EventResult event)
 	{
-		if (event.is_rethrow)
-		{
+		if (event.is_rethrow) {
 			return true;
 		}
 		
 		if (CollectionUtil.safeContains(event.labels, ARCHIVE) ||
-			CollectionUtil.safeContains(event.labels, RESOLVED))
-		{
+			CollectionUtil.safeContains(event.labels, RESOLVED)) {
 			return true;
 		}
 		
 		if ((!CollectionUtil.safeIsEmpty(allowedTypes)) 
-				&& (!allowedTypes.contains(event.type)))
-		{
+				&& (!allowedTypes.contains(event.type))) {
 			return true;
 		}
 		
@@ -394,68 +372,61 @@ public class EventFilter
 			return true;
 		}
 			
-		if ((types != null) && (!types.isEmpty()))
-		{
-			if (filterType(event))
-			{
+		if ((types != null) && (!types.isEmpty())) {
+			
+			if (filterType(event)) {
 				return true;
 			}
 		}
 		
-		if ((eventLocations != null) && (!eventLocations.isEmpty()))
-		{
-			if (filterEventLocation(event))
-			{
+		if ((eventLocations != null) && (!eventLocations.isEmpty())) {
+			
+			if (filterEventLocation(event)) {
 				return true;
 			}
 		} 
 		
-		if ((introducedBy != null) && (!introducedBy.isEmpty()) && (!introducedBy.contains(event.introduced_by)))
-		{
+		if ((introducedBy != null) 
+		&& (!introducedBy.isEmpty()) 
+		&& (!introducedBy.contains(event.introduced_by))) {
 			return true;
 		}
 		
-		if ((labels != null) && (!labels.isEmpty()))
-		{
-			if (event.labels == null)
-			{
+		if ((labels != null) && (!labels.isEmpty())) {
+			
+			if (event.labels == null) {
 				return true;
 			}
 			
-			if (!compareLabels(event))
-			{
+			if (!compareLabels(event)) {
 				return true;
 			}
 		}
 		
-		if (labelsPattern != null)
-		{
-			if (event.labels == null)
-			{
+		if (labelsPattern != null) {
+			
+			if (event.labels == null) {
 				return true;
 			}
 			
-			if (!compareLabelsRegex(event))
-			{
+			if (!compareLabelsRegex(event)) {
 				return true;
 			}
 		}
 		
-		if (firstSeen != null)
-		{
+		if (firstSeen != null) {
+			
 			DateTime eventFirstSeen = TimeUtil.getDateTime(event.first_seen);
 			
-			boolean inRange =
-					(eventFirstSeen.isAfter(firstSeen.getFirst())) && (eventFirstSeen.isBefore(firstSeen.getSecond()));
+			boolean inRange = (eventFirstSeen.isAfter(firstSeen.getFirst())) 
+							&& (eventFirstSeen.isBefore(firstSeen.getSecond()));
 			
-			if (!inRange)
-			{
+			if (!inRange) {
 				return true;
 			}
 		}
 		
-		if ((searchText != null) && (!searchText(event)))
-		{
+		if ((searchText != null) && (!searchText(event))) {
 			return true;
 		}
 		

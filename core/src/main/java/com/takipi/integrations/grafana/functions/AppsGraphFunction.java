@@ -3,9 +3,13 @@ package com.takipi.integrations.grafana.functions;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.util.settings.GroupSettings;
+import com.takipi.api.client.util.settings.GroupSettings.Group;
+import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
@@ -13,9 +17,6 @@ import com.takipi.integrations.grafana.input.EnvironmentsFilterInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.GraphLimitInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.settings.GrafanaSettings;
-import com.takipi.integrations.grafana.settings.GroupSettings;
-import com.takipi.integrations.grafana.settings.GroupSettings.Group;
 import com.takipi.integrations.grafana.util.ApiCache;
 
 public class AppsGraphFunction extends BaseServiceCompositeFunction
@@ -40,15 +41,17 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction
 	
 	protected class AppGraphFunction extends GraphFunction {
 
-		public AppGraphFunction(ApiClient apiClient)
-		{
+		public AppGraphFunction(ApiClient apiClient) {
 			super(apiClient);
+		}
+		
+		public AppGraphFunction(ApiClient apiClient, Map<String, ServiceSettingsData> settingsMaps) {
+			super(apiClient, settingsMaps);
 		}
 		
 		@Override
 		protected String getSeriesName(BaseGraphInput input, String seriesName, 
-				String serviceId, Collection<String> serviceIds)
-		{
+				String serviceId, Collection<String> serviceIds) {
 			String result = getServiceValue(input.applications, serviceId, serviceIds);
 			return result;		
 		}
@@ -79,7 +82,7 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction
 		EnvironmentsFilterInput input, int limit) {
 
 		List<String> result;
-		Collection<String> selectedApps = input.getApplications(apiClient, serviceId, false);
+		Collection<String> selectedApps = input.getApplications(apiClient, getSettings(serviceId), serviceId, false);
 		
 		if (!CollectionUtil.safeIsEmpty(selectedApps)) {
 			
@@ -89,7 +92,7 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction
 		
 		List<String> keyApps = new ArrayList<String>();
 		
-		GroupSettings appGroups = GrafanaSettings.getData(apiClient, serviceId).applications;
+		GroupSettings appGroups = getSettings(serviceId).applications;
 		
 		if (appGroups != null) {
 			
@@ -105,7 +108,7 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction
 		List<String> activeApps = new ArrayList<String>(ApiCache.getApplicationNames(apiClient, serviceId, true));  
 		
 		sortApplicationsByProcess(serviceId, activeApps,
-			input.getServers(serviceId), input.getDeployments(serviceId));	
+			input.getServers(serviceId), input.getDeployments(serviceId, apiClient));	
 		
 		result = new ArrayList<String>(keyApps.size() + activeApps.size());
 		result.addAll(keyApps);
@@ -140,13 +143,13 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction
 		
 		Collection<String> apps = getApplications(serviceId, functionInput, input.limit);
 		
-		String json = new Gson().toJson(functionInput);
+		Gson gson = new Gson();
+		String json = gson.toJson(functionInput);
 		
 		for (String app : apps) {
-			Gson gson = new Gson();
 			EnvironmentsFilterInput appInput = gson.fromJson(json, functionInput.getClass());
 			appInput.applications = app;
-			result.add(Pair.of(new AppGraphFunction(apiClient), appInput));
+			result.add(Pair.of(new AppGraphFunction(apiClient, settingsMaps), appInput));
 		}
 		
 		return result;
