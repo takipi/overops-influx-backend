@@ -175,8 +175,10 @@ public class GraphFunction extends BaseGraphFunction {
 		Map<String, EventResult> eventMap;
 		
 		if (input.hasEventFilter()) {
+			
 			eventMap = getEventMap(serviceId, input, timeSpan.getFirst(), timeSpan.getSecond(),
 				input.volumeType, input.pointsWanted);
+			
 			eventFilter = getEventFilter(serviceId, input, timeSpan);
 			
 			if (eventFilter == null) {
@@ -184,7 +186,7 @@ public class GraphFunction extends BaseGraphFunction {
 			}
 
 		} else {
-			eventMap= null;
+			eventMap = null;
 			eventFilter = null;
 		}
 		
@@ -233,6 +235,7 @@ public class GraphFunction extends BaseGraphFunction {
 
 	@Override
 	public List<Series> process(FunctionInput functionInput) {
+		
 		if (!(functionInput instanceof GraphInput)) {
 			throw new IllegalArgumentException("functionInput");
 		}

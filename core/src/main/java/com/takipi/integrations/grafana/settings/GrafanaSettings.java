@@ -3,7 +3,6 @@ package com.takipi.integrations.grafana.settings;
 import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -18,9 +17,11 @@ import com.google.common.cache.LoadingCache;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.service.SummarizedService;
-import com.takipi.api.client.util.client.ClientUtil;
+import com.takipi.api.client.result.service.ServicesResult;
 import com.takipi.api.client.util.settings.ServiceSettingsData;
+import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.Pair;
+import com.takipi.integrations.grafana.util.ApiCache;
 
 public class GrafanaSettings {
 	
@@ -83,11 +84,14 @@ public class GrafanaSettings {
 			return;
 		}
 		
-		List<SummarizedService> summarizedServices = ClientUtil.getEnvironments(apiClient);
+		Response<ServicesResult> response = ApiCache.getServices(apiClient);
 		
-		for (SummarizedService summarizedService : summarizedServices) {
-			if (summarizedService.id.equals(serviceId)) {
-				return;
+		if ((response.data != null) && (response.data.services != null)) {
+				
+			for (SummarizedService summarizedService : response.data.services) {
+				if (summarizedService.id.equals(serviceId)) {
+					return;
+				}
 			}
 		}
 		
@@ -157,7 +161,7 @@ public class GrafanaSettings {
 		authService(apiClient, serviceId);
 		
 		String name = getServiceJsonName(serviceId);
-		String serviceJson = settingsStorage.getServiceSettings(name);
+		String serviceJson = settingsStorage.getValue(name);
 		
 		ServiceSettings result = null;
 		
@@ -314,7 +318,7 @@ public class GrafanaSettings {
 			settingsCache.put(key, settings);
 		}
 
-		settingsStorage.saveServiceSettings(getServiceJsonName(serviceId), json);
+		settingsStorage.setValue(getServiceJsonName(serviceId), json);
 	}
 	
 	public void setSettingsStorage(SettingsStorage settingsStorage) {

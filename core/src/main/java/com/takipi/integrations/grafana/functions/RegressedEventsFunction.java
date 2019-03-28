@@ -1,22 +1,18 @@
 package com.takipi.integrations.grafana.functions;
 
+import java.util.ArrayList;
 import java.util.Collection;
-
-import org.joda.time.DateTime;
+import java.util.List;
 
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.regression.RegressionResult;
-import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOutput;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.RegressedEventsInput;
 import com.takipi.integrations.grafana.input.RegressionsInput;
-import com.takipi.integrations.grafana.util.ApiCache;
-import com.takipi.integrations.grafana.util.TimeUtil;
 
-public class RegressedEventsFunction extends EnvironmentVariableFunction
-{
+public class RegressedEventsFunction extends EnvironmentVariableFunction {
 
 	public static class Factory implements FunctionFactory {
 
@@ -35,8 +31,8 @@ public class RegressedEventsFunction extends EnvironmentVariableFunction
 			return "increasingErrors";
 		}
 	}
-	public RegressedEventsFunction(ApiClient apiClient)
-	{
+	
+	public RegressedEventsFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
 
@@ -44,30 +40,35 @@ public class RegressedEventsFunction extends EnvironmentVariableFunction
 	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender)
 	{
-		RegressedEventsInput reInput = (RegressedEventsInput)input;
-		Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(reInput.timeFilter);
+		RegressedEventsInput reInput = (RegressedEventsInput)getInput((RegressedEventsInput)input);
 		
 		Gson gson = new Gson();
-		String json = gson.toJson(input);
+		String json = gson.toJson(reInput);
 		RegressionsInput rgInput = gson.fromJson(json, RegressionsInput.class);
-		rgInput.timeFilter = TimeUtil.getTimeFilter(timespan);
 		
-		RegressionFunction regressionFunction = new RegressionFunction(apiClient, settingsMaps);
-		
-		RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient, 
-			serviceId, rgInput, regressionFunction, false, true);
-				
-		if (regressionOutput == null) {
+		RegressionFunction regressionFunction = new RegressionFunction(apiClient, settingsMaps);		
+		RegressionOutput regressionOutput = regressionFunction.runRegression(serviceId, rgInput, false);
+	
+		if ((regressionOutput == null) || (regressionOutput.empty)) {
 			return;
 		}
+			
+		Collection<RegressionResult> regressionResults = regressionOutput.rateRegression.getSortedAllRegressions();
 		
-		for (RegressionResult regressionResult : regressionOutput.rateRegression.getSortedAllRegressions()) {
+		List<String> values = new ArrayList<String>(regressionResults.size());
+		
+		for (RegressionResult regressionResult : regressionResults) {
+			
 			String value = formatLocation(regressionResult.getEvent().error_location);
 			
-			if (value != null) {
-				appender.append(getServiceValue(value, serviceId, serviceIds));
+			if ((value != null) && (!values.contains(value))) {
+				values.add(value);
 			}
 		}
-	}
-	
+		
+		for (String value : values) {
+			appender.append(getServiceValue(value, serviceId, serviceIds));
+
+		}
+	}	
 }

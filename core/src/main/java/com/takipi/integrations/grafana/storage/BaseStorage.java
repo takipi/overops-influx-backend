@@ -1,4 +1,4 @@
-package com.takipi.integrations.grafana.settings;
+package com.takipi.integrations.grafana.storage;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,19 +8,19 @@ import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
 
-public abstract class BaseSettingsStorage implements SettingsStorage {
+import com.takipi.integrations.grafana.settings.GrafanaSettings;
+import com.takipi.integrations.grafana.settings.SettingsStorage;
+
+public abstract class BaseStorage implements SettingsStorage {
+	
 	@Override
 	public String getDefaultServiceSettings() {
-		return getSettings(GrafanaSettings.DEFAULT);
+		return getValue(GrafanaSettings.DEFAULT);
 	}
 
 	@Override
-	public String getServiceSettings(String name) {
-		return getSettings(name);
-	}
-
-	@Override
-	public void saveServiceSettings(String name, String settings) {
+	public void setValue(String name, String settings) {
+		
 		try {
 			OutputStream outputStream = getOutputStream(name);
 			
@@ -35,9 +35,11 @@ public abstract class BaseSettingsStorage implements SettingsStorage {
 		}
 	}
 	
-	private String getSettings(String key) {
+	@Override
+	public String getValue(String name) {
+		
 		try {
-			InputStream inputStream = getInputStream(key);
+			InputStream inputStream = getInputStream(name);
 			
 			if (inputStream == null) {
 				return null;
