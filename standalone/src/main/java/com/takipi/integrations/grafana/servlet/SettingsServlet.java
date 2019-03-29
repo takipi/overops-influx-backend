@@ -11,9 +11,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.takipi.integrations.grafana.storage.FolderStorage;
 import org.apache.commons.io.IOUtils;
 
-import com.takipi.integrations.grafana.settings.FolderSettingsStorage;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.util.SettingsUtil;
 
@@ -27,7 +27,7 @@ public class SettingsServlet extends HttpServlet
 	@Override
 	public void init() throws ServletException
 	{
-		GrafanaSettings.init(new FolderSettingsStorage());
+		GrafanaSettings.init(new FolderStorage("grafanaSettingsFolder"));
 		
 		String disabledStr = ServletUtil.getConfigParam(this, "disabled");
 		
