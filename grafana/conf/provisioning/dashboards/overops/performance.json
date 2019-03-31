@@ -28,16 +28,16 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 19,
-  "iteration": 1550029439069,
+  "iteration": 1553032930081,
   "links": [
     {
-      "icon": "external link",
+      "icon": "dashboard",
+      "includeVars": true,
+      "keepTime": true,
       "tags": [],
-      "targetBlank": true,
-      "title": "HELP",
-      "tooltip": "Learn more about this dashboard",
+      "tooltip": "Home",
       "type": "link",
-      "url": "https://doc.overops.com/docs/performance-dashboard"
+      "url": "d/lg0U4qriz/home"
     },
     {
       "asDropdown": true,
@@ -64,7 +64,7 @@
         "#d44a3a"
       ],
       "datasource": "OO",
-      "decimals": 2,
+      "decimals": 1,
       "description": "The number of calls into the selected transactions within the selected timeframe.",
       "format": "short",
       "gauge": {
@@ -311,7 +311,16 @@
       },
       "id": 18,
       "interval": null,
-      "links": [],
+      "links": [
+        {
+          "dashboard": "Slowdowns",
+          "includeVars": true,
+          "keepTime": true,
+          "title": "Slowdowns",
+          "type": "absolute",
+          "url": "d/iHSORcymk/slowdowns"
+        }
+      ],
       "mappingType": 1,
       "mappingTypes": [
         {
@@ -425,7 +434,16 @@
       },
       "id": 21,
       "interval": null,
-      "links": [],
+      "links": [
+        {
+          "dashboard": "Slowdowns",
+          "includeVars": true,
+          "keepTime": true,
+          "title": "Slowdowns",
+          "type": "absolute",
+          "url": "d/iHSORcymk/slowdowns"
+        }
+      ],
       "mappingType": 1,
       "mappingTypes": [
         {
@@ -544,10 +562,10 @@
           "dashboard": "Errors",
           "includeVars": true,
           "keepTime": true,
-          "params": "",
+          "params": "$failureTypesArray",
           "targetBlank": true,
           "title": "Errors",
-          "type": "absolute",
+          "type": "dashboard",
           "url": "d/HYBPMdYik/errors"
         }
       ],
@@ -1313,7 +1331,7 @@
           "link": true,
           "linkTargetBlank": false,
           "linkTooltip": "${__cell_1}. Thresholds are defined in the Settings dashboard. Click to drill-in.",
-          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-timeRange=${__cell_4}&var-transactions=${__cell_9}&var-performanceStates=OK%7CSLOWING%7CCRITICAL%7CNO_DATA",
+          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&from=${__cell_2}&to=${__cell_3}&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-transactions=${__cell_9}&var-performanceStates=OK%7CSLOWING%7CCRITICAL%7CNO_DATA",
           "mappingType": 1,
           "pattern": "transaction",
           "thresholds": [],
@@ -1569,7 +1587,7 @@
           "tags": []
         }
       ],
-      "title": "",
+      "title": "$transactionCount Transactions",
       "transform": "table",
       "type": "table"
     }
@@ -1585,8 +1603,12 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
+          "tags": [],
           "text": "None",
-          "value": "None"
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -1691,7 +1713,7 @@
         "multi": true,
         "name": "transactions",
         "options": [],
-        "query": "transactions({\"environments\":\"$environments\",\"view\":\"All Events\",\"timeFilter\":\"time >= now() - 7d\",\"sorted\":\"true\"})",
+        "query": "transactions({\"environments\":\"$environments\",\"view\":\"All Events\",\"timeFilter\":\"$timeFilter\",\"sorted\":\"true\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1776,8 +1798,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "",
-          "value": ""
+          "selected": true,
+          "text": "All Events",
+          "value": "All Events"
         },
         "hide": 2,
         "includeAll": false,
@@ -1786,7 +1809,7 @@
         "name": "view",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "All Events",
             "value": "All Events"
           }
@@ -1869,7 +1892,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -1894,7 +1916,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -1907,6 +1928,54 @@
         "options": [],
         "query": "apiHost({\"type\":\"PORT\"})",
         "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "var-type=Logged Error&var-type=Uncaught Exception&var-type=HTTP Error&",
+          "value": "var-type=Logged Error&var-type=Uncaught Exception&var-type=HTTP Error&"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "failureTypesArray",
+        "options": [],
+        "query": "convertToArray({\"array\":\"$transactionFailureTypes\", \"prefix\":\"var-type=\", \"postfix\":\"&\"})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "136",
+          "value": "136"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "transactionCount",
+        "options": [],
+        "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"renderMode\":\"SingleStat\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"searchText\":\"$searchText\", \"pointsWanted\":\"$transactionPointsWanted\",\"eventPointsWanted\":\"$pointsWanted\", \"timeFilterVar\":\"true\"})",
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -1951,5 +2020,5 @@
   "timezone": "",
   "title": "Performance",
   "uid": "Z40SpeJmz",
-  "version": 118
+  "version": 134
 }

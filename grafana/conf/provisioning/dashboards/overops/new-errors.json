@@ -28,16 +28,16 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 29,
-  "iteration": 1549869882069,
+  "iteration": 1552989121813,
   "links": [
     {
-      "icon": "external link",
+      "icon": "dashboard",
+      "includeVars": true,
+      "keepTime": true,
       "tags": [],
-      "targetBlank": true,
-      "title": "HELP",
-      "tooltip": "Learn more about this dashboard",
+      "tooltip": "Home",
       "type": "link",
-      "url": "https://doc.overops.com/docs/new-errors-dashboard"
+      "url": "d/lg0U4qriz/home"
     },
     {
       "asDropdown": true,
@@ -262,7 +262,7 @@
       },
       "id": 34,
       "links": [],
-      "pageSize": 50,
+      "pageSize": 10,
       "scroll": true,
       "showHeader": true,
       "sort": {
@@ -663,7 +663,7 @@
           "tags": []
         }
       ],
-      "title": "",
+      "title": "$newEventCount Events",
       "transform": "table",
       "type": "table"
     }
@@ -992,11 +992,36 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "newEventCount",
+        "options": [],
+        "query": "regressions({\"fields\":\"link,jira_issue_url,reg_desc,description,severity,typeMessage,stats.hits,rate,introduced_by,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":120, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"render\":\"SingleStat\", \"searchText\":\"$search\", \"regressionTypes\":\"NewIssues,SevereNewIssues\", \"first_seen\":\"$timeFilter\", \"timeFilterVar\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {
@@ -1028,5 +1053,5 @@
   "timezone": "",
   "title": "New Errors",
   "uid": "3NZ83NLik",
-  "version": 103
+  "version": 108
 }
