@@ -1462,41 +1462,4 @@ public class RegressionFunction extends EventsFunction {
 		}
 	}
 	
-	private class Gggg
-	{
-		private String serviceId;
-		private RegressionInput regressionInput;
-		private BaseEventVolumeInput input;
-		private EventFilterInput baselineInput;
-		private int graphActiveTimespan;
-		private Map<DeterminantKey, List<Graph>> baselineGraphKeys;
-		private Map<DeterminantKey, List<Graph>> activeWindowGraphKeys;
-		private DeterminantKey graphResultKey;
-		private Graph baselineGraph;
-		private Graph activeWindowGraph;
-		
-		public Gggg(String serviceId, RegressionInput regressionInput, BaseEventVolumeInput input, EventFilterInput baselineInput, int graphActiveTimespan, Map<DeterminantKey, List<Graph>> baselineGraphKeys, Map<DeterminantKey, List<Graph>> activeWindowGraphKeys, DeterminantKey graphResultKey)
-		{
-			this.serviceId = serviceId;
-			this.regressionInput = regressionInput;
-			this.input = input;
-			this.baselineInput = baselineInput;
-			this.graphActiveTimespan = graphActiveTimespan;
-			this.baselineGraphKeys = baselineGraphKeys;
-			this.activeWindowGraphKeys = activeWindowGraphKeys;
-			this.graphResultKey = graphResultKey;
-		}
-		
-		public Graph getBaselineGraph()
-		{
-			return baselineGraph;
-		}
-		
-		public Graph getActiveWindowGraph()
-		{
-			return activeWindowGraph;
-		}
-		
-		
-	}
 }
