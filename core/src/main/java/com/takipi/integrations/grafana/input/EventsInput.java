@@ -77,6 +77,12 @@ public class EventsInput extends BaseEventVolumeInput {
 	public static final String RATE_DELTA_DESC = "rate_delta_desc";
 	
 	/**
+	 * the order of this event within the returned list, based on its severity compared
+	 * to other events within the return list
+	 */
+	public static final String RANK = "rank";
+	
+	/**
 	 * An optional value to control the volume data retrieved for objects in this query. If "hits" is specified,
 	 * "N/A" will be returned for all values of the "rate" field (if selected). 
 	 */

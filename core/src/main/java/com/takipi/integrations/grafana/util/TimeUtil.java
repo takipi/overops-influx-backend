@@ -219,7 +219,7 @@ public class TimeUtil {
 	
 	public static String prettifyTime(String value) {
 		DateTime dateTime = fmt.parseDateTime(value);
-		String result = prettyTime.format(new Date(dateTime.getMillis()));
+		String result = prettyTime.formatDuration(new Date(dateTime.getMillis()));
 		return result;
 	}
 	

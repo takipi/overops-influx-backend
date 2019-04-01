@@ -54,7 +54,7 @@ public class TransactionsVolumeFunction extends BaseVolumeFunction {
 		long transactionTotal = 0;
 
 		Collection<TransactionGraph> transactionGraphs = getTransactionGraphs(input, serviceId, viewId, 
-			timeSpan, input.getSearchText(), input.pointsWanted, 0, 0);
+			timeSpan, input.getSearchText(), input.pointsWanted);
 		
 		if (transactionGraphs == null) {
 			return result;

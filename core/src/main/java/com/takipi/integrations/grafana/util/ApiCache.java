@@ -528,11 +528,9 @@ public class ApiCache {
 
 		@Override
 		public int hashCode() {
-			if (viewName == null) {
-				return super.hashCode();
-			}
-
-			return super.hashCode() ^ viewName.hashCode();
+			
+			return super.hashCode() ^ 
+				GrafanaFunction.getViewName(viewName).hashCode();
 		}
 		
 		@Override
@@ -995,9 +993,11 @@ public class ApiCache {
 
 			TransactionsGraphCacheLoader other = (TransactionsGraphCacheLoader) obj;
 
+			/*
 			if (pointsWanted != other.pointsWanted) {
 				return false;
 			}
+			*/
 			
 			if (baselineTimespan != other.baselineTimespan) {
 				return false;

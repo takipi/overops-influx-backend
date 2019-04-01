@@ -57,10 +57,10 @@ public class SlowTransactionsFunction extends EnvironmentVariableFunction
 		Collection<PerformanceState> performanceStates = TransactionsListInput.getStates(input.performanceStates);
 		
 		Collection<TransactionGraph> activeGraphs = getTransactionGraphs(input, serviceId, 
-				viewId, timeSpan, input.getSearchText(), input.pointsWanted, 0, 0);
+				viewId, timeSpan, input.getSearchText(), input.pointsWanted);
 		
 		TransactionDataResult transactionDataResult = getTransactionDatas(activeGraphs,
-			serviceId, viewId, timeSpan, input, false, 0);
+			serviceId, viewId, timeSpan, input, false, 0, true);
 			
 		if (transactionDataResult == null) {
 			return Collections.emptyList();

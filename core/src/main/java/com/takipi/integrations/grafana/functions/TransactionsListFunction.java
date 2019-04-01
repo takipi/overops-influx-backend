@@ -16,7 +16,6 @@ import com.takipi.api.client.data.transaction.Stats;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.util.performance.calc.PerformanceState;
 import com.takipi.api.client.util.settings.SlowdownSettings;
-import com.takipi.api.client.util.transaction.TransactionUtil;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.FunctionInput;
@@ -139,7 +138,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 			TransactionsListInput input, List<String> fields, Collection<PerformanceState> states) {
 
 		TransactionDataResult transactions = getTransactionDatas(serviceId, timeSpan, 
-			input, true, input.eventPointsWanted);
+			input, true, input.eventPointsWanted, true);
 		
 		if (transactions == null) {
 			return Collections.emptyList();
@@ -196,8 +195,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 	private String getSlowdownDesc(TransactionData transactionData, 
 		SlowdownSettings slowdownSettings, Stats stats) {
 				
-		Stats baselineStats = TransactionUtil.aggregateGraph(transactionData.baselineGraph);
-		double baseline = baselineStats.avg_time_std_deviation * slowdownSettings.std_dev_factor + transactionData.baselineAvg;
+		double baseline = transactionData.baselineStats.avg_time_std_deviation * slowdownSettings.std_dev_factor + transactionData.baselineStats.avg_time;
 		
 		StringBuilder result = new StringBuilder();
 		
@@ -215,7 +213,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 			result.append("(");	
 			result.append((int)(transactionData.score));
 			result.append("% of calls > baseline avg ");
-			result.append((int)(baselineStats.avg_time));
+			result.append((int)(transactionData.baselineStats.avg_time));
 			result.append("ms + ");
 			result.append(slowdownSettings.std_dev_factor);
 			result.append("x stdDev = ");
@@ -224,7 +222,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 			result.append(") AND (avg response ");
 			result.append((int)(stats.avg_time));
 			result.append("ms - ");
-			result.append((int)(baselineStats.avg_time));
+			result.append((int)(transactionData.baselineStats.avg_time));
 			result.append("ms baseline > ");
 			result.append(slowdownSettings.min_delta_threshold);
 			result.append("ms threshold)");			
@@ -293,8 +291,8 @@ public class TransactionsListFunction extends GrafanaFunction {
 			setOutputObjectField(object, fields, TransactionsListInput.TRANSACTION, name);
 			setOutputObjectField(object, fields, TransactionsListInput.TOTAL, transactionData.stats.invocations);
 			setOutputObjectField(object, fields, TransactionsListInput.AVG_RESPONSE, transactionData.stats.avg_time);
-			setOutputObjectField(object, fields, TransactionsListInput. BASELINE_AVG, transactionData.baselineAvg);
-			setOutputObjectField(object, fields, TransactionsListInput.BASELINE_CALLS, NumberUtil.format(transactionData.baselineInvocations));
+			setOutputObjectField(object, fields, TransactionsListInput. BASELINE_AVG, transactionData.baselineStats.avg_time);
+			setOutputObjectField(object, fields, TransactionsListInput.BASELINE_CALLS, NumberUtil.format(transactionData.baselineStats.invocations));
 			setOutputObjectField(object, fields, TransactionsListInput.ACTIVE_CALLS, NumberUtil.format(transactionData.stats.invocations));
 			setOutputObjectField(object, fields, TransactionsListInput.SLOW_STATE, getStateValue(transactionData.state));
 			setOutputObjectField(object, fields, TransactionsListInput.DELTA_DESC, description);
@@ -345,7 +343,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 		Pair<DateTime, DateTime> timeSpan, Collection<PerformanceState> states) {	
 		
 		TransactionDataResult transactionDataResult = getTransactionDatas(serviceId,
-			timeSpan, input, false, 0);
+			timeSpan, input, false, 0, true);
 
 		if (transactionDataResult == null) {
 			return 0;
@@ -385,7 +383,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 		for (String serviceId : serviceIds) {				
 			
 			TransactionDataResult transactionDataResult = getTransactionDatas(serviceId,
-					timeSpan, input, false, 0);
+					timeSpan, input, false, 0, true);
 
 			String serviceDesc = getSlowdownsDesc(transactionDataResult.items.values(), 
 				states, RegressionsInput.MAX_TOOLTIP_ITEMS);
@@ -418,7 +416,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 		for (String serviceId : serviceIds) {
 			
 			TransactionDataResult transactionDataResult = getTransactionDatas(serviceId,
-				timeSpan, input, false, 0);
+				timeSpan, input, false, 0, true);
 
 			if (transactionDataResult == null) {
 				continue;
@@ -427,7 +425,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 			for (TransactionData transactionData : transactionDataResult.items.values()) {
 				
 				if (states.contains(transactionData.state)) {
-					baselineInvocations += transactionData.baselineInvocations;
+					baselineInvocations += transactionData.baselineStats.invocations;
 				}
 			}	
 		}
@@ -441,7 +439,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 		for (String serviceId : serviceIds) {
 					
 			TransactionDataResult transactionDataResult = getTransactionDatas(serviceId,
-				timeSpan, input, false, 0);
+				timeSpan, input, false, 0, true);
 
 			if (transactionDataResult == null) {
 				continue;
@@ -450,7 +448,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 			for (TransactionData transactionData : transactionDataResult.items.values()) {
 					
 				if (states.contains(transactionData.state)) {
-					avg += transactionData.baselineAvg * transactionData.baselineInvocations / baselineInvocations;
+					avg += transactionData.baselineStats.avg_time * transactionData.baselineStats.invocations / baselineInvocations;
 				}
 			}		
 		}
@@ -471,7 +469,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 		for (String serviceId : serviceIds) {
 			
 			TransactionDataResult transactionDataResult = getTransactionDatas(serviceId,
-				timeSpan, input, false, 0);
+				timeSpan, input, false, 0, true);
 
 			if (transactionDataResult == null) {
 				continue;
@@ -493,7 +491,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 		for (String serviceId : serviceIds) {
 					
 			TransactionDataResult transactionDataResult = getTransactionDatas(serviceId,
-				timeSpan, input, false, 0);
+				timeSpan, input, false, 0, true);
 
 			if (transactionDataResult == null) {
 				continue;
@@ -523,7 +521,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 		for (String serviceId : serviceIds) {
 			
 			TransactionDataResult transactionDataResult = getTransactionDatas(serviceId,
-				timeSpan, input, false, 0);
+				timeSpan, input, false, 0, true);
 
 			if (transactionDataResult == null) {
 				continue;
@@ -608,7 +606,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 	}
 	
 	private static double getSlowdownRate(TransactionData transactionData) {
-		return transactionData.stats.avg_time / transactionData.baselineAvg;
+		return transactionData.stats.avg_time / transactionData.baselineStats.avg_time;
 	}
 	
 	public static String getSlowdownsDesc(Collection<TransactionData> transactionDatas,

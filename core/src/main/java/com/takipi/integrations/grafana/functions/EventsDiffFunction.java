@@ -27,8 +27,7 @@ public class EventsDiffFunction extends EventsFunction
 {
 	public final static String NO_DIFF = "0m";
 
-	public EventsDiffFunction(ApiClient apiClient)
-	{
+	public EventsDiffFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
 	
@@ -97,8 +96,7 @@ public class EventsDiffFunction extends EventsFunction
 		}
 		
 		@Override
-		protected Object formatValue(Object value, EventsInput input)
-		{
+		protected Object formatValue(Object value, EventsInput input) {
 			return value;
 		}
 	}
@@ -238,8 +236,7 @@ public class EventsDiffFunction extends EventsFunction
 	}	
 		
 	@Override
-	protected List<EventData> mergeEventDatas(List<EventData> eventDatas)
-	{
+	protected List<EventData> mergeEventDatas(List<EventData> eventDatas) {
 		for (EventData eventData : eventDatas) {
 			if (eventData instanceof DiffEventData) {
 				return eventDatas;
@@ -265,8 +262,8 @@ public class EventsDiffFunction extends EventsFunction
 	}
 	
 	@Override
-	protected void sortEventDatas(List<EventData> eventDatas)
-	{
+	protected void sortEventDatas(String serviceId, List<EventData> eventDatas) {
+		
 		eventDatas.sort(new Comparator<EventData>() {
 			
 			@Override

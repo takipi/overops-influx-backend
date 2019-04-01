@@ -148,7 +148,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 
 			result.graphs = getTransactionGraphs(timelineData.input, serviceId, viewId, 
 					timelineData.timespan, timelineData.input.getSearchText(), 
-					timelineData.input.transactionPointsWanted, 0, 0);
+					timelineData.input.transactionPointsWanted);
 			
 			return result;
 		}
@@ -172,7 +172,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			result.graphs = getTransactionGraphs(timelineData.baselineInput, serviceId, viewId, 
 					timelineData.baselineTimespan, timelineData.baselineInput.getSearchText(), 
 					timelineData.baselineInput.transactionPointsWanted, 0, timelineData.baselineWindow);
-			
+						
 			return result;
 		}
 	}
@@ -220,7 +220,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 				RelabilityKpi kpi = ReliabilityReportInput.getKpi(rkInput.kpi);
 
 				Map<DateTime, KpiInterval> kpiIntervals = processServiceKpis(serviceId, viewId, 
-					timelineData, kpi, periods, isKey);
+						rkInput, timelineData, kpi, periods, isKey);
 				
 				Object result;
 				
@@ -844,8 +844,8 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 	
 	@SuppressWarnings("unchecked")
 	private Pair<Map<DateTime, KpiInterval>, KpiInterval> processScores(
-			String serviceId, String viewId, TimelineData timelineData,
-			Collection<Pair<DateTime, DateTime>> periods, 
+			String serviceId, String viewId, ReliabilityKpiGraphInput input, 
+			TimelineData timelineData, Collection<Pair<DateTime, DateTime>> periods, 
 			boolean isKey, RelabilityKpi kpi) {
 	
 		TransactionGraphTask transactionGraphTask = new TransactionGraphTask(serviceId, viewId, timelineData);
@@ -868,7 +868,8 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 				tasksResultData.activeTransactionData.graphs);
 		
 		NavigableMap<DateTime, KpiInterval> intervals = getScoreIntervals(serviceId, 
-			isKey, timelineData.input.deductFrom100, regressionIntervals, slowdownIntervals);
+			input, isKey, timelineData.input.deductFrom100, 
+			regressionIntervals, slowdownIntervals);
 		
 		KpiInterval aggregate;
 		
@@ -931,7 +932,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 	}
 	
 	private Map<DateTime, KpiInterval> processServiceKpis(String serviceId, String viewId, 
-		TimelineData timelineData, RelabilityKpi kpi,
+		ReliabilityKpiGraphInput input, TimelineData timelineData, RelabilityKpi kpi,
 		Collection<Pair<DateTime, DateTime>> periods, boolean isKey) {
 						
 		Pair<Map<DateTime, KpiInterval>, KpiInterval> intervalPair;
@@ -961,7 +962,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 				
 			case Score:
 				
-				intervalPair = processScores(serviceId, viewId, timelineData, periods, isKey, kpi);
+				intervalPair = processScores(serviceId, viewId, input, timelineData, periods, isKey, kpi);
 				break;
 				
 			default:
@@ -1004,7 +1005,8 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 	}
 	
 	private NavigableMap<DateTime, KpiInterval> getScoreIntervals(String serviceId, 
-		boolean isKey, boolean deductFrom100, Map<DateTime, KpiInterval> regressionIntervals, 
+		ReliabilityKpiGraphInput input, boolean isKey, boolean deductFrom100, 
+		Map<DateTime, KpiInterval> regressionIntervals, 
 		Map<DateTime, KpiInterval> slowdownIntervals) {
 		
 		RegressionReportSettings reportSettings = getSettings(serviceId).regression_report;
@@ -1050,6 +1052,15 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 				continue;
 			}
 				
+			int appSize;
+			Collection<String> apps = input.getApplications(apiClient, getSettings(serviceId), serviceId);
+			
+			if (CollectionUtil.safeIsEmpty(apps)) {
+				appSize = apps.size();
+			} else {
+				appSize = 0;
+			}
+			
 			Pair<Double, Integer> scorePair = ReliabilityReportFunction.getScore(
 				scoreInterval.regressionInterval.output, reportSettings, 
 				scoreInterval.regressionInterval.newErrors, 
@@ -1058,7 +1069,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 				scoreInterval.regressionInterval.severeRegressions, 
 				scoreInterval.slowdownInterval.slowdowns, 
 				scoreInterval.slowdownInterval.severeSlowdowns, 
-				isKey, deductFrom100, ReportMode.Applications);
+				isKey, deductFrom100, ReportMode.Applications, appSize);
 			
 			scoreInterval.score = scorePair.getFirst().doubleValue();
 		}
