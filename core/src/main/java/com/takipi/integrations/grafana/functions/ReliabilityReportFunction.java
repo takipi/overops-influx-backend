@@ -16,6 +16,10 @@ import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,6 +102,63 @@ public class ReliabilityReportFunction extends EventsFunction {
 		}
 	}
 	
+	protected static class DeterminantKey implements Comparable<DeterminantKey> {
+		
+		public static final DeterminantKey Empty = new DeterminantKey(null, null, null);
+		
+		private String determinantKey;
+		
+		public String getDeterminantKey() {
+			return determinantKey;
+		}
+		
+		public DeterminantKey(String machineName, String agentName, String deploymentName) {
+			
+			List<String> determinantValues = Lists.newArrayList();
+			
+			if (machineName != null) {
+				determinantValues.add(machineName);
+			}
+			
+			if (agentName != null) {
+				determinantValues.add(agentName);
+			}
+			
+			if (deploymentName != null) {
+				determinantValues.add(deploymentName);
+			}
+			
+			this.determinantKey = String.join("_", determinantValues);
+			
+			if (Strings.isNullOrEmpty(determinantKey)) {
+				logger.info("Empty determinant value for item");
+				
+				this.determinantKey = ALL;
+			}
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			if (!(obj instanceof  DeterminantKey))
+			{
+				return false;
+			}
+			
+			return ((DeterminantKey) (obj)).determinantKey.equals(determinantKey);
+		}
+		
+		@Override
+		public int hashCode() {
+			return determinantKey.hashCode();
+		}
+		
+		@Override
+		public int compareTo(DeterminantKey o)
+		{
+			return determinantKey.compareTo(o.getDeterminantKey());
+		}
+	}
+	
 	protected static class ReportKey implements Comparable<ReportKey>{
 		
 		protected String name;
@@ -106,6 +167,21 @@ public class ReliabilityReportFunction extends EventsFunction {
 		protected ReportKey(String name, boolean isKey) {
 			this.name = name;
 			this.isKey = isKey;
+		}
+		
+		public ReportKey(Collection<ReportKey> reportKeys)
+		{
+			Collection<String> reportKeyNames = Lists.newArrayList();
+			
+			isKey = true;
+			
+			for (ReportKey reportKey : reportKeys) {
+				reportKeyNames.add(reportKey.name);
+				
+				isKey &= reportKey.isKey;
+			}
+			
+			this.name = String.join(GRAFANA_SEPERATOR_RAW, reportKeyNames);
 		}
 		
 		@Override
@@ -216,10 +292,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 		}
 	}
 	
-	protected static class RegressionAsyncResult extends ReportAsyncResult {
+	protected static class AggregatedRegressionAsyncResult extends ReportAsyncResult {
 		protected RegressionOutput output;
 		
-		protected RegressionAsyncResult(ReportKey key, RegressionOutput output) {
+		protected AggregatedRegressionAsyncResult(ReportKey key, RegressionOutput output) {
 			super(key);
 			this.output = output;
 		}
@@ -231,7 +307,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		protected RegressionInput regressionInput;
 		
 		protected SlowdownAsyncResult(ReportKey key, Map<TransactionKey, TransactionData> transactionMap,
-			RegressionInput regressionInput) {
+									  RegressionInput regressionInput) {
 			
 			super(key);
 			this.transactionMap = transactionMap;
@@ -242,16 +318,19 @@ public class ReliabilityReportFunction extends EventsFunction {
 	public class SlowdownAsyncTask extends BaseAsyncTask implements Callable<Object> {
 		
 		protected String viewId;
+		private Map<String, Pair<ReportKey, RegressionsInput>> subRegressionInputs;
 		protected ReportKey reportKey;
 		protected String serviceId;
 		protected RegressionsInput input;
 		protected Pair<DateTime, DateTime> timeSpan;
 		protected boolean updateEvents;
 
-		protected SlowdownAsyncTask(String serviceId, String viewId,  
-				ReportKey key, RegressionsInput input,
-				Pair<DateTime, DateTime> timeSpan, boolean updateEvents) {
-
+		protected SlowdownAsyncTask(String serviceId, String viewId,
+									Map<String, Pair<ReportKey, RegressionsInput>> subRegressionInputs,
+									ReportKey key, RegressionsInput input,
+									Pair<DateTime, DateTime> timeSpan, boolean updateEvents) {
+			this.subRegressionInputs = subRegressionInputs;
+			
 			this.reportKey = key;
 			this.serviceId = serviceId;
 			this.input = input;
@@ -266,7 +345,6 @@ public class ReliabilityReportFunction extends EventsFunction {
 			beforeCall();
 
 			try {
-
 				RegressionFunction regressionFunction = new RegressionFunction(apiClient, settingsMaps);
 				Pair<RegressionInput, RegressionWindow> regPair = regressionFunction.getRegressionInput(serviceId, 
 					viewId, input, timeSpan, false);
@@ -286,24 +364,77 @@ public class ReliabilityReportFunction extends EventsFunction {
 				Collection<TransactionGraph> transactionGraphs = getTransactionGraphs(input,
 					serviceId, viewId, activeWindow, input.getSearchText(), 
 					input.pointsWanted, 0, 0);
-								
-				TransactionDataResult transactionDataResult = getTransactionDatas(
-					transactionGraphs, serviceId, viewId, timeSpan, input, updateEvents, 0);				
 				
-				SlowdownAsyncResult result;
+				Map<DeterminantKey, List<TransactionGraph>> transactionsGraphMap = Maps.newHashMap();
 				
-				if (transactionDataResult != null) {
-					result = new SlowdownAsyncResult(reportKey, transactionDataResult.items, regressionInput);
-				} else {
-					result = new SlowdownAsyncResult(reportKey, Collections.emptyMap(), regressionInput);
+				for (TransactionGraph transactionGraph : transactionGraphs) {
+					
+					DeterminantKey determinantKey = new DeterminantKey(transactionGraph.machine_name,
+							transactionGraph.application_name, transactionGraph.deployment_name);
+					
+					List<TransactionGraph> determinantTransactionGraphList = transactionsGraphMap.get(determinantKey);
+					
+					if (determinantTransactionGraphList == null) {
+						determinantTransactionGraphList = Lists.newArrayList();
+						
+						transactionsGraphMap.put(determinantKey, determinantTransactionGraphList);
+					}
+					
+					determinantTransactionGraphList.add(transactionGraph);
 				}
+				
+				List<SlowdownAsyncResult> results = Lists.newArrayList();
+				
+				for (DeterminantKey transactionGraphKey : transactionsGraphMap.keySet())
+				{
+					Pair<ReportKey, RegressionsInput> subRegressionKeys = subRegressionInputs.get(transactionGraphKey.determinantKey);
+					
+					if (subRegressionKeys == null)
+					{
+						for (String key : subRegressionInputs.keySet())
+						{
+							SlowdownAsyncResult result = getTransactionResult(regressionInput, transactionGraphs, subRegressionInputs.get(key));
 							
-				return result;
+							results.add(result);
+						}
+					}
+					else
+					{
+						SlowdownAsyncResult result = getTransactionResult(regressionInput, transactionGraphs, subRegressionKeys);
+						
+						results.add(result);
+					}
+					
+					
+				}
+				
+				return results;
 			} finally {
 				afterCall();
 			}
 		}
-
+		
+		private SlowdownAsyncResult getTransactionResult(RegressionInput regressionInput, Collection<TransactionGraph> transactionGraphs, Pair<ReportKey, RegressionsInput> reportKeyRegressionsInputPair)
+		{
+			ReportKey subReportKey = reportKeyRegressionsInputPair.getFirst();
+			RegressionsInput subRegressionInput = reportKeyRegressionsInputPair.getSecond();
+			
+			TransactionDataResult transactionDataResult = getTransactionDatas(
+					transactionGraphs, serviceId, viewId, timeSpan,
+					subRegressionInput, updateEvents, 0);
+			
+			SlowdownAsyncResult result;
+			
+			if (transactionDataResult != null)
+			{
+				result = new SlowdownAsyncResult(subReportKey, transactionDataResult.items, regressionInput);
+			} else
+			{
+				result = new SlowdownAsyncResult(subReportKey, Collections.emptyMap(), regressionInput);
+			}
+			return result;
+		}
+		
 		@Override
 		public String toString() {
 			return String.join(" ", "Regression", serviceId, reportKey.name);
@@ -311,23 +442,43 @@ public class ReliabilityReportFunction extends EventsFunction {
 	}
 	
 	public static class RegressionAsyncTask extends BaseAsyncTask implements Callable<Object> {
-
+		
+		private Map<String, Pair<ReportKey, RegressionsInput>> subRegressionInputs;
 		protected RegressionFunction function;
 		protected ReportKey reportKey;
 		protected String serviceId;
-		protected RegressionsInput input;
+		protected BaseEventVolumeInput input;
 		protected Pair<DateTime, DateTime> timeSpan;
 		protected boolean newOnly;
-
-		protected RegressionAsyncTask(RegressionFunction function, ReportKey key, String serviceId, RegressionsInput input,
-				Pair<DateTime, DateTime> timeSpan, boolean newOnly) {
-
+		
+		private final String viewId;
+		private final RegressionInput regressionInput;
+		private RegressionWindow activeWindow;
+		private final DateTime activeWindowEnd;
+		private final DateTime activeWindowStart;
+		
+		
+		protected RegressionAsyncTask(Map<String, Pair<ReportKey, RegressionsInput>> subRegressionInputs,
+				RegressionFunction function,
+				ReportKey aggregatedKey, String serviceId, String viewId,
+				BaseEventVolumeInput input, Pair<DateTime, DateTime> timeSpan, boolean newOnly) {
+			this.subRegressionInputs = subRegressionInputs;
 			this.function = function;
-			this.reportKey = key;
+			this.reportKey = aggregatedKey;
 			this.serviceId = serviceId;
 			this.input = input;
 			this.timeSpan = timeSpan;
 			this.newOnly = newOnly;
+			this.viewId = viewId;
+			
+			Pair<RegressionInput, RegressionWindow> regressionInputData =
+					function.getRegressionInput(serviceId, viewId, input, timeSpan, true);
+			
+			this.regressionInput = regressionInputData.getFirst();
+			this.activeWindow = regressionInputData.getSecond();
+			
+			activeWindowStart = activeWindow.activeWindowStart;
+			activeWindowEnd = activeWindow.activeWindowStart.plusMinutes(regressionInput.activeTimespan);
 		}
 
 		@Override
@@ -336,17 +487,80 @@ public class ReliabilityReportFunction extends EventsFunction {
 			beforeCall();
 
 			try {
-
-				RegressionOutput output = function.runRegression(serviceId, input, newOnly); 
-				RegressionAsyncResult result = new RegressionAsyncResult(reportKey, output);
+				List regressionResults = Lists.newArrayList();
 				
-				return result;
+				Collection<EventResult> eventList = function.getEventList(serviceId, viewId, input, activeWindowStart, activeWindowEnd);
+				
+				Map<DeterminantKey, Map<String, EventResult>> eventsMap = getEventsMapByKey(eventList);
+				
+				Map<DeterminantKey, Pair<Graph, Graph>> regressionGraphsMap = function.getRegressionGraphs(serviceId,
+						viewId, regressionInput, activeWindow,
+						input, newOnly);
+				
+				for (DeterminantKey determinantKey : regressionGraphsMap.keySet())
+				{
+					Map<String, EventResult> eventResultMap = eventsMap.get(determinantKey);
+					
+					Pair<Graph, Graph> regressionGraphs = regressionGraphsMap.get(determinantKey);
+					
+					Graph baselineGraph = regressionGraphs.getFirst();
+					Graph activeWindowGraph = regressionGraphs.getSecond();
+					
+					appendGraphStats(eventResultMap, activeWindowGraph);
+					
+					if (activeWindow.deploymentFound)
+					{
+						Pair<DateTime, DateTime> dateTimeDateTimePair = activeWindow.deploymentsTimespan.get(determinantKey.determinantKey);
+						
+						if (dateTimeDateTimePair != null)
+						{
+							activeWindow.activeWindowStart = dateTimeDateTimePair.getFirst();
+							DateTime activeWindowEnd = dateTimeDateTimePair.getSecond();
+							
+							activeWindow.activeTimespan = (int) TimeUnit.MILLISECONDS
+									.toMinutes(activeWindowEnd.minus(
+											activeWindow.activeWindowStart.getMillis()).getMillis());
+						}
+					}
+					
+					Pair<ReportKey, RegressionsInput> subInputData = subRegressionInputs.get(determinantKey.determinantKey);
+					
+					// type is all
+					if (subInputData == null)
+					{
+						for (String transactionGraphKey : subRegressionInputs.keySet())
+						{
+							regressionResults.add(getRegressionsOutput(eventResultMap, baselineGraph, activeWindowGraph, subRegressionInputs.get(transactionGraphKey)));
+						}
+					}
+					else
+					{
+						regressionResults.add(getRegressionsOutput(eventResultMap, baselineGraph, activeWindowGraph, subInputData));
+					}
+				}
+				
+				return regressionResults;
 			} finally {
 				afterCall();
 			}
 
 		}
-
+		
+		private AggregatedRegressionAsyncResult getRegressionsOutput(Map<String, EventResult> eventResultMap, Graph baselineGraph, Graph activeWindowGraph, Pair<ReportKey, RegressionsInput> subInputData)
+		{
+			ReportKey subReportKey = subInputData.getFirst();
+			RegressionsInput subRegressionInput = subInputData.getSecond();
+			
+			RegressionOutput regressionOutput = function.getRegressionOutput(serviceId, subRegressionInput, newOnly,
+					TimeUtil.getTimeFilter(subRegressionInput.timeFilter), regressionInput,
+					activeWindow, eventResultMap, baselineGraph, activeWindowGraph);
+			
+			AggregatedRegressionAsyncResult result = new AggregatedRegressionAsyncResult(
+					subReportKey, regressionOutput);
+			
+			return result;
+		}
+		
 		@Override
 		public String toString() {
 			return String.join(" ", "Regression", serviceId, reportKey.name);
@@ -467,8 +681,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 	public ReliabilityReportFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
-
-	private ReliabilityReportInput getInput(ReliabilityReportInput reportInput, 
+	
+	private ReliabilityReportInput getInput(ReliabilityReportInput reportInput,
 		String serviceId, String name, boolean mustCopy) {
 		
 		ReportMode mode = reportInput.getReportMode();
@@ -555,7 +769,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 	}
 
 	private Collection<ReportKey> getTiers(String serviceId, ReliabilityReportInput input,
-			Pair<DateTime, DateTime> timeSpan) {
+										   Pair<DateTime, DateTime> timeSpan) {
  		
 		Collection<String> keyTiers = GrafanaSettings.getServiceSettings(apiClient, serviceId).getTierNames();
 		
@@ -664,7 +878,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		protected RegressionOutput regressionOutput;
 
 		protected RegressionKeyData(ReportKey key,
-				RegressionOutput regressionOutput) {
+									RegressionOutput regressionOutput) {
 
 			this.reportKey = key;
 			this.regressionOutput = regressionOutput;
@@ -672,7 +886,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 	}
 
 	protected List<ReportAsyncResult> processAsync(String serviceId, ReliabilityReportInput input,
-			Pair<DateTime, DateTime> timeSpan, Collection<ReportKey> reportKeys) {
+												   Pair<DateTime, DateTime> timeSpan,
+												   Collection<ReportKey> activeKeys) {
 
 		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
 		List<ReportAsyncResult> result = new ArrayList<ReportAsyncResult>();
@@ -685,61 +900,58 @@ public class ReliabilityReportFunction extends EventsFunction {
 			return Collections.emptyList();
 		}
 		
-		for (ReportKey reportKey : reportKeys) {
+		ReportKey aggregatedActiveKey = new ReportKey(activeKeys);
+		
+		Map<String, Pair<ReportKey, RegressionsInput>> subRegressionInputs = Maps.newHashMap();
+		
+		for (ReportKey key : activeKeys) {
+			RegressionsInput regInput = getInput(input, serviceId, key.name, true);
 			
+			subRegressionInputs.put(key.name, Pair.of(key, regInput));
+		}
+		
+		if (scoreType.includeRegressions()) {
 			RegressionFunction regressionFunction = new RegressionFunction(apiClient, settingsMaps);
-
-			RegressionsInput regressionsInput = getInput(input, serviceId, reportKey.name, false);
-			RegressionsInput transactionInput = getInput(input, serviceId, reportKey.name, true);
-
-			transactionInput.pointsWanted = input.transactionPointsWanted;
 			
-			if ((scoreType == ScoreType.Combined) || (scoreType == ScoreType.Regressions)) {
-
-				RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient, 
-					serviceId, regressionsInput, regressionFunction, false, false);
-						
-				if (regressionOutput != null) {
-					result.add(new RegressionAsyncResult(reportKey, regressionOutput));
-				} else {
-					tasks.add(new RegressionAsyncTask(regressionFunction, 
-						reportKey, serviceId, regressionsInput, timeSpan, false));
-				}
-			}
+			RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient,
+				serviceId, input, regressionFunction, false, false);
 			
-			if ((scoreType == ScoreType.Combined) || (scoreType == ScoreType.Slowdowns)) {
-				tasks.add(new SlowdownAsyncTask(serviceId, viewId,  
-					reportKey, transactionInput, timeSpan, input.getReportMode() == ReportMode.Apps_Extended));
-			}
-			
-			if (scoreType == ScoreType.NewOnly) {
-
-				RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient, 
-					serviceId, regressionsInput, regressionFunction, true, false);
-						
-				if (regressionOutput != null) {
-					result.add(new RegressionAsyncResult(reportKey, regressionOutput));
-				} else {
-					tasks.add(new RegressionAsyncTask(regressionFunction, 
-						reportKey, serviceId, regressionsInput, timeSpan, true));
-				}
+			if (regressionOutput != null) {
+				result.add(new AggregatedRegressionAsyncResult(aggregatedActiveKey, regressionOutput));
+			} else {
+				RegressionsInput regressionInput = getInput(input, serviceId, aggregatedActiveKey.name, true);
+				
+				tasks.add(new RegressionAsyncTask(subRegressionInputs, regressionFunction,
+						aggregatedActiveKey, serviceId, viewId, regressionInput ,timeSpan, false));
 			}
 		}
 		
-		if (tasks.size() == 1) {
-			try {
-				result.add((ReportAsyncResult)(tasks.get(0).call()));
-			} catch (Exception e) {
-				throw new IllegalStateException(e);
-			}
-		} else {
-			List<Object> taskResults = executeTasks(tasks, false);
-	
-			for (Object taskResult : taskResults) {
-	
-				if (taskResult instanceof ReportAsyncResult) {
-					result.add((ReportAsyncResult) taskResult);
+		if ((scoreType.includeSlowdowns())) {
+			RegressionsInput transactionInput = getInput(input, serviceId, aggregatedActiveKey.name, true);
+			
+			transactionInput.pointsWanted = input.transactionPointsWanted;
+			
+			tasks.add(new SlowdownAsyncTask(serviceId, viewId, subRegressionInputs,
+				aggregatedActiveKey, transactionInput, timeSpan, input.getReportMode() == ReportMode.Apps_Extended));
+		}
+		
+		List<Object> taskResults = executeTasks(tasks, false);
+
+		for (Object taskResult : taskResults) {
+			
+			if (taskResult instanceof Collection) {
+				for (Object taskResultItem : ((Collection) taskResult)) {
+					if (!(taskResultItem instanceof ReportAsyncResult))
+					{
+						continue;
+					}
+					
+					result.add((ReportAsyncResult) taskResultItem);
 				}
+			}
+			else if (taskResult instanceof ReportAsyncResult)
+			{
+				result.add((ReportAsyncResult) taskResult);
 			}
 		}
 
@@ -767,7 +979,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 	}
 
 	private Collection<ReportKey> getActiveApplications(String serviceId, ReliabilityReportInput input,
-			Pair<DateTime, DateTime> timeSpan) {
+														Pair<DateTime, DateTime> timeSpan) {
 
 		List<String> keyApps = new ArrayList<String>();
 		
@@ -871,8 +1083,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return result;
 	}
 	
-	private Collection<ReportKey> getActiveDeployments(String serviceId, 
-		ReliabilityReportInput input, Pair<DateTime, DateTime> timespan) {
+	private Collection<ReportKey> getActiveDeployments(String serviceId,
+													   ReliabilityReportInput input, Pair<DateTime, DateTime> timespan) {
 
 		List<ReportKey> result = new ArrayList<ReportKey>();
 		Collection<String> selectedDeployments = input.getDeployments(serviceId, apiClient);
@@ -1011,8 +1223,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return result;
 	}
 	
-	private Collection<ReportKey> getActiveKeys(String serviceId, ReliabilityReportInput regInput,
-			Pair<DateTime, DateTime> timeSpan) {
+	private Collection<ReportKey> getActiveKey(String serviceId, ReliabilityReportInput regInput,
+											   Pair<DateTime, DateTime> timeSpan) {
 		
 		Collection<ReportKey> keys;
 			
@@ -1041,7 +1253,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			default: 
 				throw new IllegalStateException("Unsopported mode " + mode);
 			}
-
+			
 		return keys;
 	}
 	
@@ -1229,7 +1441,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			Date introduced = DateTime.now().minusMinutes(activeTimespan).toDate();
 			result.append(prettyTime.format(introduced));
 			
-			DeploymentReportKey depReportKey = (DeploymentReportKey)reportKeyResults.output.reportKey;
+			DeploymentReportKey depReportKey = (DeploymentReportKey) reportKeyResults.output.reportKey;
 			
 			if ((depReportKey.current != null) 
 			&& (depReportKey.current.first_seen != null) && (depReportKey.current.last_seen != null)) {
@@ -1418,10 +1630,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 			return executeTimeline(serviceId, regInput, timeSpan);
 		}
 		
-		Collection<ReportKey> keys = getActiveKeys(serviceId, regInput, timeSpan);
+		Collection<ReportKey> keys = getActiveKey(serviceId, regInput, timeSpan);
 		
 		logger.debug("Executing report " + reportMode + " keys: " + Arrays.toString(keys.toArray()));
-
+		
 		List<ReportAsyncResult> AsyncResults = processAsync(serviceId, regInput, timeSpan, keys);
 
 		Map<ReportKey, ReportKeyOutput> reportKeyOutputMap = new HashMap<ReportKey, ReportKeyOutput>();
@@ -1435,9 +1647,9 @@ public class ReliabilityReportFunction extends EventsFunction {
 				reportKeyOutputMap.put(asyncResult.key, reportKeyOutput);
 			}
 			
-			if (asyncResult instanceof RegressionAsyncResult) {
+			if (asyncResult instanceof AggregatedRegressionAsyncResult) {
 			
-				RegressionOutput regressionOutput = ((RegressionAsyncResult)asyncResult).output;
+				RegressionOutput regressionOutput = ((AggregatedRegressionAsyncResult)asyncResult).output;
 	
 				if ((regressionOutput == null)
 				|| (regressionOutput.rateRegression == null)) {

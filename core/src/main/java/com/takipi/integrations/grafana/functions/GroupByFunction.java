@@ -18,11 +18,11 @@ import org.joda.time.DateTime;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
-import com.takipi.api.client.data.event.Stats;
 import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
 import com.takipi.api.client.result.event.EventResult;
+import com.takipi.api.client.result.event.IApiStats;
 import com.takipi.api.client.util.client.ClientUtil;
 import com.takipi.api.client.util.settings.GroupSettings;
 import com.takipi.api.client.util.settings.GroupSettings.Group;
@@ -381,7 +381,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static void processEventGroupBy(GroupByInput request, Map<GroupByKey, GroupByVolume> map, EventResult event,
-			EventFilter filter, Stats stats, DateTime time) {
+			EventFilter filter, IApiStats stats, DateTime time) {
 
 		long value;
 

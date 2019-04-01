@@ -12,6 +12,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.takipi.integrations.grafana.functions.ReliabilityReportFunction.DeterminantKey;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Objects;
@@ -686,7 +689,7 @@ public class RegressionFunction extends EventsFunction {
 		
 	}
 	
-	private Pair<Graph, Graph> getRegressionGraphs(String serviceId, String viewId,
+	public Map<DeterminantKey, Pair<Graph, Graph>> getRegressionGraphs(String serviceId, String viewId,
 			RegressionInput regressionInput, RegressionWindow regressionWindow,
 			BaseEventVolumeInput input, boolean newOnly) {
 		
@@ -764,41 +767,120 @@ public class RegressionFunction extends EventsFunction {
 		
 		Collection<GraphSliceTaskResult> graphSliceTaskResults = executeGraphTasks(graphTasks, false);
 		
-		List<GraphSliceTaskResult> baseLineGraphResults = new ArrayList<GraphSliceTaskResult>();
-		List<GraphSliceTaskResult> activeGraphResults = new ArrayList<GraphSliceTaskResult>();
+		Map<DeterminantKey, List<Graph>> baselineGraphKeys = Maps.newHashMap();
+		Map<DeterminantKey, List<Graph>> activeWindowGraphKeys = Maps.newHashMap();
+		
+		divideGraphsByDeterminant(baselineGraphTasks, graphSliceTaskResults, baselineGraphKeys, activeWindowGraphKeys);
+		
+		Map<DeterminantKey, Pair<Graph, Graph>> graphResults = Maps.newHashMap();
+		
+		for (DeterminantKey graphResultKey : activeWindowGraphKeys.keySet())
+		{
+			Pair<Graph, Graph> determinantGraphs = getDeterminantGraphs(serviceId, regressionInput, input, baselineInput, graphActiveTimespan,
+					baselineGraphKeys, activeWindowGraphKeys, graphResultKey);
+			
+			Graph baselineGraph = determinantGraphs.getFirst();
+			Graph activeWindowGraph = determinantGraphs.getSecond();
+			
+			graphResults.put(graphResultKey, Pair.of(baselineGraph, activeWindowGraph));
+		}
+		
+		return graphResults;
+	}
 	
+	public Pair<Graph, Graph> getDeterminantGraphs(String serviceId, RegressionInput regressionInput,
+		   BaseEventVolumeInput input, EventFilterInput baselineInput,
+		   int graphActiveTimespan, Map<DeterminantKey, List<Graph>> baselineGraphKeys, Map<DeterminantKey,
+			List<Graph>> activeWindowGraphKeys, DeterminantKey graphResultKey)
+	{
+		List<Graph> baselineGraphs = baselineGraphKeys.get(graphResultKey);
+		List<Graph> activeWindowGraphs = activeWindowGraphKeys.get(graphResultKey);
+		
+		Graph baselineGraph = null;
+		Graph activeWindowGraph = null;
+		
+		if (!CollectionUtil.safeIsEmpty(baselineGraphs))
+		{
+			baselineGraph = mergeGraphs(baselineGraphs);
+		}
+		if (!CollectionUtil.safeIsEmpty(activeWindowGraphs))
+		{
+			activeWindowGraph = mergeGraphs(activeWindowGraphs);
+		}
+		
+		if (activeWindowGraph != null)
+		{
+			
+			GraphResult activeGraphResult = new GraphResult();
+			
+			activeGraphResult.graphs = Collections.singletonList(activeWindowGraph);
+			
+			ApiCache.putEventGraph(apiClient, serviceId, input, VolumeType.all, null,
+					input.pointsWanted, 0, graphActiveTimespan,
+					Response.of(200, activeGraphResult));
+			
+			if ((input.hasDeployments())) {
+				if (baselineGraph == null) {
+					
+					if ((baselineGraphKeys.get(DeterminantKey.Empty) != null) &&
+							(!(CollectionUtil.safeIsEmpty(baselineGraphKeys.get(DeterminantKey.Empty))))) {
+						
+						List<Graph> allBaselineGraphs = baselineGraphKeys.get(DeterminantKey.Empty);
+						
+						baselineGraph = mergeGraphs(allBaselineGraphs);
+					}
+				}
+			}
+			
+			if (baselineGraph != null) {
+				
+				GraphResult baselineGraphResult = new GraphResult();
+				baselineGraphResult.graphs = Collections.singletonList(baselineGraph);
+				
+				ApiCache.putEventGraph(apiClient, serviceId, baselineInput, VolumeType.all, null,
+						input.pointsWanted, 0, regressionInput.baselineTimespan,
+						Response.of(200, baselineGraphResult));
+			}
+			
+		}
+		
+		return Pair.of(baselineGraph, activeWindowGraph);
+	}
+	
+	private void divideGraphsByDeterminant(Collection<GraphSliceTask> baselineGraphTasks, Collection<GraphSliceTaskResult> graphSliceTaskResults,
+			Map<DeterminantKey, List<Graph>> baselineGraphKeys, Map<DeterminantKey, List<Graph>> activeWindowGraphKeys)
+	{
 		for (GraphSliceTaskResult graphSliceTaskResult : graphSliceTaskResults) {
 			
-			if (CollectionUtil.safeContains(baselineGraphTasks, graphSliceTaskResult.task)) {
-				baseLineGraphResults.add(graphSliceTaskResult);
+			boolean isBaselineTask = baselineGraphTasks.contains(graphSliceTaskResult.task);
+			
+			for (Graph graph : graphSliceTaskResult.graphs) {
+				
+				DeterminantKey graphsKey = new DeterminantKey(graph.machine_name, graph.application_name, graph.deployment_name);
+				
+				if (isBaselineTask)
+				{
+					putGraphToDeterminantMap(baselineGraphKeys, graph, graphsKey);
+				} else {
+					putGraphToDeterminantMap(activeWindowGraphKeys, graph, graphsKey);
+				}
 			}
 			
-			if (activeGraphTasks.contains(graphSliceTaskResult.task)) {
-				activeGraphResults.add(graphSliceTaskResult);
-			}
+		}
+	}
+	
+	private void putGraphToDeterminantMap(Map<DeterminantKey, List<Graph>> graphKeys, Graph graph, DeterminantKey graphsKey)
+	{
+		List<Graph> graphList = graphKeys.get(graphsKey);
+		
+		if (CollectionUtil.safeIsEmpty(graphList))
+		{
+			
+			graphList = Lists.newArrayList();
+			graphKeys.put(graphsKey, graphList);
 		}
 		
-		Graph baselineGraph = mergeGraphs(baseLineGraphResults);
-		Graph activeWindowGraph = mergeGraphs(activeGraphResults);		
-		
-		GraphResult activeGraphResult = new GraphResult();
-		activeGraphResult.graphs = Collections.singletonList(activeWindowGraph);	
-		
-		ApiCache.putEventGraph(apiClient, serviceId, input, VolumeType.all, null,
-				input.pointsWanted, 0, graphActiveTimespan, 
-				Response.of(200, activeGraphResult));
-		
-		if (baselineGraph != null) {
-		
-			GraphResult baselineGraphResult = new GraphResult();
-			baselineGraphResult.graphs = Collections.singletonList(baselineGraph);		
-		
-			ApiCache.putEventGraph(apiClient, serviceId, baselineInput, VolumeType.all, null,
-					input.pointsWanted, regressionInput.baselineTimespan, 0, 
-					Response.of(200, baselineGraphResult));
-		}
-		
-		return Pair.of(baselineGraph, activeWindowGraph);	
+		graphList.add(graph);
 	}
 	
 	protected RegressionOutput createRegressionOutput(EventFilterInput input,
@@ -880,14 +962,29 @@ public class RegressionFunction extends EventsFunction {
 			
 		if (eventListMap == null) {
 			return RegressionOutput.emptyOutput;
-		}	
+		}
 		
-		Pair<Graph, Graph> regressionGraphs = getRegressionGraphs(serviceId, 
-			viewId, regressionInput, regressionWindow, input, newOnly);
+		Collection<Pair<Graph, Graph>> regressionGraphsCollection = getRegressionGraphs(serviceId,
+				viewId, regressionInput, regressionWindow, input, newOnly).values();
+		
+		if (CollectionUtil.safeIsEmpty(regressionGraphsCollection))
+		{
+			return RegressionOutput.emptyOutput;
+		}
+		
+		Pair<Graph, Graph> regressionGraphs = Lists.newArrayList(regressionGraphsCollection).get(0);
 			
 		Graph baselineGraph = regressionGraphs.getFirst();
 		Graph activeWindowGraph = regressionGraphs.getSecond();
 		
+		return getRegressionOutput(serviceId, input, newOnly, timespan, regressionInput,
+				regressionWindow, eventListMap, baselineGraph, activeWindowGraph);
+	}
+	
+	public RegressionOutput getRegressionOutput(String serviceId, BaseEventVolumeInput input, boolean newOnly,
+				Pair<DateTime, DateTime> timespan, RegressionInput regressionInput, RegressionWindow regressionWindow,
+				Map<String, EventResult> eventListMap, Graph baselineGraph, Graph activeWindowGraph)
+	{
 		if ((activeWindowGraph == null) ||(activeWindowGraph.points == null)) {
 			return RegressionOutput.emptyOutput;
 		}
@@ -896,7 +993,7 @@ public class RegressionFunction extends EventsFunction {
 			return RegressionOutput.emptyOutput;
 		}
 		
-		Pair<Map<String, EventResult>, Long> filteredResult = filterEvents(serviceId, 
+		Pair<Map<String, EventResult>, Long> filteredResult = filterEvents(serviceId,
 			timespan, input, eventListMap.values());
 		
 		Map<String, EventResult> filteredMap = filteredResult.getFirst();
@@ -905,12 +1002,12 @@ public class RegressionFunction extends EventsFunction {
 		
 		regressionInput.events = filteredMap.values();
 		regressionInput.baselineGraph = baselineGraph;
-				
-		RegressionOutput result = executeRegression(input, regressionInput, 
+		
+		RegressionOutput result = executeRegression(input, regressionInput,
 			regressionWindow, eventListMap, volume, baselineGraph, activeWindowGraph, false);
-	
+		
 		return result;
-	}	
+	}
 	
 	public RegressionOutput executeRegression(BaseEventVolumeInput input, 
 			RegressionInput regressionInput, RegressionWindow regressionWindow, 
@@ -919,8 +1016,8 @@ public class RegressionFunction extends EventsFunction {
 		
 		regressionInput.validate();
 		
-		RateRegression rateRegression = RegressionUtil.calculateRateRegressions(apiClient, regressionInput, null,
-				false);
+		RateRegression rateRegression = RegressionUtil.calculateRateRegressions(baselineGraph, regressionWindow,
+				apiClient, regressionInput, null, false);
 		
 		RegressionOutput result = createRegressionOutput(input, 
 				regressionInput, regressionWindow,
@@ -1363,5 +1460,43 @@ public class RegressionFunction extends EventsFunction {
 			default: 
 				throw new IllegalStateException(String.valueOf(regInput.render));
 		}
+	}
+	
+	private class Gggg
+	{
+		private String serviceId;
+		private RegressionInput regressionInput;
+		private BaseEventVolumeInput input;
+		private EventFilterInput baselineInput;
+		private int graphActiveTimespan;
+		private Map<DeterminantKey, List<Graph>> baselineGraphKeys;
+		private Map<DeterminantKey, List<Graph>> activeWindowGraphKeys;
+		private DeterminantKey graphResultKey;
+		private Graph baselineGraph;
+		private Graph activeWindowGraph;
+		
+		public Gggg(String serviceId, RegressionInput regressionInput, BaseEventVolumeInput input, EventFilterInput baselineInput, int graphActiveTimespan, Map<DeterminantKey, List<Graph>> baselineGraphKeys, Map<DeterminantKey, List<Graph>> activeWindowGraphKeys, DeterminantKey graphResultKey)
+		{
+			this.serviceId = serviceId;
+			this.regressionInput = regressionInput;
+			this.input = input;
+			this.baselineInput = baselineInput;
+			this.graphActiveTimespan = graphActiveTimespan;
+			this.baselineGraphKeys = baselineGraphKeys;
+			this.activeWindowGraphKeys = activeWindowGraphKeys;
+			this.graphResultKey = graphResultKey;
+		}
+		
+		public Graph getBaselineGraph()
+		{
+			return baselineGraph;
+		}
+		
+		public Graph getActiveWindowGraph()
+		{
+			return activeWindowGraph;
+		}
+		
+		
 	}
 }

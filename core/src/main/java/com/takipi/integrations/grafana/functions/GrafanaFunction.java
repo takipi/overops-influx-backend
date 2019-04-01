@@ -26,10 +26,10 @@ import org.ocpsoft.prettytime.PrettyTime;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.Location;
-import com.takipi.api.client.data.event.Stats;
 import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
@@ -49,6 +49,8 @@ import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventSlimResult;
 import com.takipi.api.client.result.event.EventsResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
+import com.takipi.api.client.result.event.MainStats;
+import com.takipi.api.client.data.event.Stats;
 import com.takipi.api.client.result.metrics.GraphResult;
 import com.takipi.api.client.result.process.JvmsResult;
 import com.takipi.api.client.result.transaction.TransactionsGraphResult;
@@ -73,6 +75,7 @@ import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
+import com.takipi.integrations.grafana.functions.ReliabilityReportFunction.DeterminantKey;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
@@ -86,15 +89,14 @@ import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.TimeUtil;
 import com.takipi.integrations.grafana.util.TimeUtil.Interval;
 
-public abstract class GrafanaFunction {	
-	
+public abstract class GrafanaFunction {
 	public interface FunctionFactory {
 		
 		public GrafanaFunction create(ApiClient apiClient);
 		public Class<?> getInputClass();
 		public String getName();
 	}
-		
+	
 	public static final DecimalFormat singleDigitFormatter = new DecimalFormat("#.#");
 	public static final DecimalFormat doubleDigitFormatter = new DecimalFormat("#.##");
 
@@ -126,7 +128,7 @@ public abstract class GrafanaFunction {
 	
 	public static final String ALL = "All";
 	public static final String NONE = "None";
-	public static final List<String> VAR_ALL = Arrays.asList(new String[] { "*", ALL, 
+	public static final List<String> VAR_ALL = Arrays.asList(new String[] { "*", ALL,
 		ALL.toLowerCase(), NONE, NONE.toLowerCase() });
 	
 	protected static final char QUALIFIED_DELIM = '.';
@@ -181,11 +183,11 @@ public abstract class GrafanaFunction {
 	protected class GraphSliceTaskResult {
 		
 		GraphSliceTask task;
-		Graph graph;
+		List<Graph> graphs;
 		
-		protected GraphSliceTaskResult(GraphSliceTask task, Graph graph) {
+		protected GraphSliceTaskResult(GraphSliceTask task, List<Graph> graphs) {
 			this.task = task;
-			this.graph = graph;
+			this.graphs = graphs;
 		}
 	}
 	
@@ -258,7 +260,7 @@ public abstract class GrafanaFunction {
 				return null;
 			}
 			
-			return new GraphSliceTaskResult(this, graph)	;
+			return new GraphSliceTaskResult(this, graphResult.graphs);
 		}
 	}
 	
@@ -899,6 +901,65 @@ public abstract class GrafanaFunction {
 		
 	}
 	
+	protected static class RegressionPeriodData {
+		protected Graph activeGraph;
+		protected Graph baselineGraph;
+		protected Map<String, EventResult> eventMap;
+	}
+	
+	protected static RegressionPeriodData getRegressionGraphs(Graph graph, Pair<DateTime, DateTime> period,
+													 int baselineWindow, Map<String, EventResult> eventMap) {
+		
+		RegressionPeriodData result = new RegressionPeriodData();
+		
+		result.activeGraph = new Graph();
+		result.baselineGraph = new Graph();
+		result.eventMap = new HashMap<String, EventResult>();
+		
+		result.activeGraph.id = graph.id;
+		result.activeGraph.type = graph.type;
+		result.activeGraph.points = new ArrayList<GraphPoint>();
+		
+		result.baselineGraph.id = graph.id;
+		result.baselineGraph.type = graph.type;
+		result.baselineGraph.points = new ArrayList<GraphPoint>();
+		
+		DateTime baselineEnd = period.getFirst();
+		DateTime baselineStart = baselineEnd.minusMinutes(baselineWindow);
+		
+		for (GraphPoint gp : graph.points) {
+			
+			if (gp.contributors == null) {
+				continue;
+			}
+			
+			DateTime gpTime = TimeUtil.getDateTime(gp.time);
+			
+			if (timespanContains(period.getFirst(), period.getSecond(), gpTime)) {
+				
+				result.activeGraph.points.add(gp);
+				
+				for (GraphPointContributor gpc : gp.contributors) {
+					if (eventMap != null)
+					{
+						EventResult event = eventMap.get(gpc.id);
+						
+						if (event != null)
+						{
+							result.eventMap.put(event.id, event);
+						}
+					}
+				}
+			}
+			
+			if (timespanContains(baselineStart, baselineEnd, gpTime)) {
+				result.baselineGraph.points.add(gp);
+			}
+		}
+		
+		return result;
+	}
+	
 	protected void updateTransactionPerformance(String serviceId, 
 			Collection<TransactionGraph> baselineTransactionGraphs, 
 			Map<TransactionKey, TransactionData> transactionDatas) {
@@ -1482,8 +1543,15 @@ public abstract class GrafanaFunction {
 				pointsCount, input, volumeType, from, to, baselineWindow, activeWindow, sync);
 
 		Collection<GraphSliceTaskResult> graphTaskResults = executeGraphTasks(tasks, sync);
-			
-		Graph result = mergeGraphs(graphTaskResults);
+		
+		ArrayList<Graph> graphs = Lists.newArrayList();
+		
+		for (GraphSliceTaskResult graphSliceTaskResult : graphTaskResults)
+		{
+			graphs.addAll(graphSliceTaskResult.graphs);
+		}
+		
+		Graph result = mergeGraphs(graphs);
 			
 		return result;
 	}
@@ -1505,7 +1573,7 @@ public abstract class GrafanaFunction {
 			Collection<Pair<DateTime, DateTime>> periods = TimeUtil.getTimespanPeriods(timespan,
 				periodStart.getFirst(), periodStart.getSecond(), baselineWindow == 0);
 			
-			periodPoints = Math.max(periodPoints = (pointsCount / periods.size()) + 1, ApiCache.MIN_SLICE_POINTS);
+			periodPoints = Math.max((pointsCount / periods.size()) + 1, ApiCache.MIN_SLICE_POINTS);
 
 			sliceRequests = new ArrayList<SliceRequest>(periods.size());
 			
@@ -1526,8 +1594,7 @@ public abstract class GrafanaFunction {
 				index++;
 			}	
 		} else {
-			periodPoints = pointsCount;
-			sliceRequests = Collections.singletonList(new SliceRequest(from, to, pointsCount, false));	
+			sliceRequests = Collections.singletonList(new SliceRequest(from, to, pointsCount, false));
 		}
 		
 		List<GraphSliceTask> tasks = new ArrayList<GraphSliceTask>(sliceRequests.size());
@@ -1583,7 +1650,7 @@ public abstract class GrafanaFunction {
 	}
 	*/
 	
-	protected boolean timespanContains(DateTime start, DateTime end, DateTime value) {
+	protected static boolean timespanContains(DateTime start, DateTime end, DateTime value) {
 		
 		if ((value.getMillis() > start.getMillis()) 
 		&& (value.getMillis() <= end.getMillis())) {
@@ -1594,36 +1661,34 @@ public abstract class GrafanaFunction {
 		return false;
 	}
 	
-	protected Graph mergeGraphs(Collection<GraphSliceTaskResult> graphTasks) {
+	protected Graph mergeGraphs(Collection<Graph> graphs) {
 		
-		if (graphTasks.size() == 0) {
+		if (graphs.size() == 0) {
 			return null;
 		}
 		
-		if (graphTasks.size() == 1) {
-			return graphTasks.iterator().next().graph;
+		if (graphs.size() == 1) {
+			return graphs.iterator().next();
 		}
 		
-		Graph result = new Graph();		
+		Graph result = new Graph();
 		Map<Long, GraphPoint> graphPoints = new TreeMap<Long, GraphPoint>();
 		
-		for (Object taskResult : graphTasks) {
+		for (Graph graph : graphs) {
 			
-			if (taskResult == null) {
+			if (graph == null) {
 				continue;
 			}
 			
-			GraphSliceTaskResult graphSliceTaskResult = (GraphSliceTaskResult)taskResult;
-			
 			if (result.id == null) {
-				result.id = graphSliceTaskResult.graph.id;
-				result.type = graphSliceTaskResult.graph.type;
+				result.id = graph.id;
+				result.type = graph.type;
 			}
 			
-			for (GraphPoint gp : graphSliceTaskResult.graph.points) {
+			for (GraphPoint gp : graph.points) {
 				DateTime dateTime = TimeUtil.getDateTime(gp.time);
 				graphPoints.put(Long.valueOf(dateTime.getMillis()), gp);
-			}			
+			}
 		}
 		
 		result.points = new ArrayList<GraphPoint>(graphPoints.values());
@@ -1666,7 +1731,7 @@ public abstract class GrafanaFunction {
 		return result;
 	}
 	
-	private static void appendGraphStats(Map<String, EventResult> eventMap, Graph graph) {
+	protected static void appendGraphStats(Map<String, EventResult> eventMap, Graph graph) {
 		
 		for (GraphPoint gp : graph.points) {
 			
@@ -1683,7 +1748,7 @@ public abstract class GrafanaFunction {
 				}
 				
 				if (event.stats == null) {
-					event.stats = new Stats();
+					event.stats = new MainStats();
 				}
 				
 				event.stats.hits += gpc.stats.hits;
@@ -1817,12 +1882,13 @@ public abstract class GrafanaFunction {
 				continue;
 			}
 			
-			event.stats = eventSlimResult.stats;
+			event.stats.hits = eventSlimResult.stats.hits;
+			event.stats.invocations = eventSlimResult.stats.invocations;
 		}
 	}
 	
-	private Collection<EventResult> getEventList(String serviceId, String viewId, ViewInput input, DateTime from,
-			DateTime to) {
+	public Collection<EventResult> getEventList(String serviceId, String viewId, ViewInput input, DateTime from,
+												DateTime to) {
 		
 		EventsRequest.Builder builder = EventsRequest.newBuilder().setRaw(true);
 		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);
@@ -1850,25 +1916,57 @@ public abstract class GrafanaFunction {
 		
 		List<EventResult> result = new ArrayList<EventResult>(events.size());
 		
-		try {
-			for (EventResult event : events) {
-				
-				EventResult clone = (EventResult)event.clone();
-				clone.stats = new Stats();
-				
-				if (copyStats) {
-					clone.stats.hits = event.stats.hits;
-					clone.stats.invocations = event.stats.invocations;
-				}
-				
-				result.add(clone);
-			}
-		} catch (CloneNotSupportedException e) {
-			throw new IllegalStateException(e);
+		for (EventResult event : events) {
 			
+			EventResult clone = (EventResult)event.clone();
+			
+			result.add(clone);
 		}
 		
 		return result;
+	}
+	
+	
+	public static Map<DeterminantKey, Map<String, EventResult>> getEventsMapByKey(Collection<EventResult> events) {
+		Map<DeterminantKey, Map<String, EventResult>> keyToEventMap = Maps.newHashMap();
+		
+		for (EventResult event : events) {
+			if (event.stats.contributors == null) {
+				safePutEventToKeysMap(keyToEventMap, DeterminantKey.Empty, event);
+			}
+			
+			for (Stats contributor : event.stats.contributors) {
+				
+				DeterminantKey determinantKey = new DeterminantKey(contributor.machine_name,
+						contributor.application_name, contributor.deployment_name);
+				
+				EventResult contributorEventResult = (EventResult) event.clone();
+				
+				contributorEventResult.stats.invocations = contributor.invocations;
+				contributorEventResult.stats.hits = contributor.hits;
+				
+				contributorEventResult.stats.contributors = Lists.newArrayList();
+				
+				safePutEventToKeysMap(keyToEventMap, determinantKey, contributorEventResult);
+			}
+		}
+		
+		return keyToEventMap;
+	}
+	
+	private static void safePutEventToKeysMap(Map<DeterminantKey, Map<String, EventResult>> keyToEventMap,
+											  DeterminantKey determinantKey, EventResult event) {
+		
+		Map<String, EventResult> currentDeterminant = keyToEventMap.get(determinantKey);
+		
+		if (currentDeterminant == null)
+		{
+			currentDeterminant = Maps.newHashMap();
+			
+			keyToEventMap.put(determinantKey, currentDeterminant);
+		}
+		
+		currentDeterminant.put(event.id, event);
 	}
 	
 	protected static Map<String, EventResult> getEventsMap(Collection<EventResult> events) {

@@ -208,22 +208,41 @@ public class ReliabilityReportInput extends RegressionsInput {
 		/**
 		 * Include regression analysis for new events only
 		 */
-		NewOnly, 
+		NewOnly(true, false),
 		
 		/**
 		 * Include regression analysis for new and increasing events
 		 */
-		Regressions, 
+		Regressions(true, false),
 		
 		/**
 		 * Include slowdown analysis 
 		 */
-		Slowdowns, 
+		Slowdowns(false, true),
 	
 		/**
 		 * Combine regression and slowdown analysis in the output (default)
 		 */
-		Combined
+		Combined(true, true);
+		
+		private final boolean includeRegressions;
+		private final boolean includeTransactions;
+		
+		ScoreType(boolean includeRegressions, boolean includeTransactions)
+		{
+			this.includeRegressions = includeRegressions;
+			this.includeTransactions = includeTransactions;
+		}
+		
+		public boolean includeSlowdowns()
+		{
+			return includeTransactions;
+		}
+		
+		public boolean includeRegressions()
+		{
+			return includeRegressions;
+		}
 	}
 	
 	public ScoreType scoreType;

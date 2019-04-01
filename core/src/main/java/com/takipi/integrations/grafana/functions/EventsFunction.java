@@ -23,6 +23,7 @@ import com.takipi.api.client.data.event.Stats;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventSlimResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
+import com.takipi.api.client.result.event.IApiStats;
 import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
@@ -702,7 +703,7 @@ public class EventsFunction extends GrafanaFunction {
 		super(apiClient, settingsMaps);
 	}
 	
-	protected static String formatRateDelta(Stats baseline, Stats stats) {
+	protected static String formatRateDelta(IApiStats baseline, IApiStats stats) {
 		
 		StringBuilder result = new StringBuilder();
 		
@@ -713,7 +714,7 @@ public class EventsFunction extends GrafanaFunction {
 		return result.toString(); 
 	}
 	
-	protected static String formatRate(Stats stats) {
+	protected static String formatRate(IApiStats stats) {
 		return formatRate(stats.hits, stats.invocations);
 	}
 	
@@ -889,13 +890,8 @@ public class EventsFunction extends GrafanaFunction {
 		
 		EventResult clone;
 		
-		try {
-			clone = (EventResult)event.clone();
-		} catch (CloneNotSupportedException e) {
-			throw new IllegalStateException(e);
-		}
+		clone = (EventResult)event.clone();
 		
-		clone.stats = stats;
 		clone.jira_issue_url = jiraUrl;
 		return Collections.singletonList(new EventData(clone));
 	}
