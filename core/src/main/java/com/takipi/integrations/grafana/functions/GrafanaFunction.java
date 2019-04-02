@@ -155,6 +155,7 @@ public abstract class GrafanaFunction {
 	protected static final String HTTP_ERROR = "HTTP Error";
 
 	public static final int TOP_TRANSACTIONS_MAX = 3;
+	public static final int GET_EVENT_LIST_MAX_RETRIES = 5;
 	public static final String TOP_ERRORING_TRANSACTIONS = String.format("Top %d Failing", TOP_TRANSACTIONS_MAX);
 	public static final String SLOWEST_TRANSACTIONS = String.format("Top %d Slowest", TOP_TRANSACTIONS_MAX);
 	public static final String SLOWING_TRANSACTIONS = String.format("Top %d Slowing", TOP_TRANSACTIONS_MAX);
@@ -1333,7 +1334,7 @@ public abstract class GrafanaFunction {
 				.setWantedPointCount(pointsWanted);
 				
 		applyFilters(input, serviceId, builder);
-
+		
 		Response<TransactionsGraphResult> response = ApiCache.getTransactionsGraph(apiClient, serviceId, input,
 			pointsWanted, baselineTimespan, activeTimespan, builder.build());
 				
@@ -1888,7 +1889,13 @@ public abstract class GrafanaFunction {
 	}
 	
 	public Collection<EventResult> getEventList(String serviceId, String viewId, ViewInput input, DateTime from,
-												DateTime to) {
+												DateTime to)
+	{
+		return getEventList(serviceId, viewId, input, from, to, false);
+	}
+	
+	public Collection<EventResult> getEventList(String serviceId, String viewId, ViewInput input, DateTime from,
+			DateTime to, boolean copyStats) {
 		
 		EventsRequest.Builder builder = EventsRequest.newBuilder().setRaw(true);
 		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);
@@ -1908,7 +1915,7 @@ public abstract class GrafanaFunction {
 			return null;
 		}
 		
-		return cloneEvents(events, false);
+		return cloneEvents(events, copyStats);
 		
 	}
 	
@@ -1919,6 +1926,11 @@ public abstract class GrafanaFunction {
 		for (EventResult event : events) {
 			
 			EventResult clone = (EventResult)event.clone();
+			
+			if (!copyStats)
+			{
+				clone.stats = new MainStats();
+			}
 			
 			result.add(clone);
 		}
@@ -1931,7 +1943,7 @@ public abstract class GrafanaFunction {
 		Map<DeterminantKey, Map<String, EventResult>> keyToEventMap = Maps.newHashMap();
 		
 		for (EventResult event : events) {
-			if (event.stats.contributors == null) {
+			if (CollectionUtil.safeIsEmpty(event.stats.contributors)) {
 				safePutEventToKeysMap(keyToEventMap, DeterminantKey.Empty, event);
 			}
 			
@@ -1942,10 +1954,7 @@ public abstract class GrafanaFunction {
 				
 				EventResult contributorEventResult = (EventResult) event.clone();
 				
-				contributorEventResult.stats.invocations = contributor.invocations;
-				contributorEventResult.stats.hits = contributor.hits;
-				
-				contributorEventResult.stats.contributors = Lists.newArrayList();
+				contributorEventResult.stats = new MainStats();
 				
 				safePutEventToKeysMap(keyToEventMap, determinantKey, contributorEventResult);
 			}

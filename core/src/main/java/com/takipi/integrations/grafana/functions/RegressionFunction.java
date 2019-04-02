@@ -1016,8 +1016,7 @@ public class RegressionFunction extends EventsFunction {
 		
 		regressionInput.validate();
 		
-		RateRegression rateRegression = RegressionUtil.calculateRateRegressions(baselineGraph, regressionWindow,
-				apiClient, regressionInput, null, false);
+		RateRegression rateRegression = RegressionUtil.calculateRateRegressions(apiClient, regressionInput, null, false);
 		
 		RegressionOutput result = createRegressionOutput(input, 
 				regressionInput, regressionWindow,
