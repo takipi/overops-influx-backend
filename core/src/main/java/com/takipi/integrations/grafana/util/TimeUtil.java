@@ -72,11 +72,17 @@ public class TimeUtil {
 	}
 	
 	public static String getTimeRange(int min) {
+		return getTimeRange(min, false);
+	}
+		
+	
+	public static String getTimeRange(int min, boolean allowDays) {
        
-		//if (min % (24 * 60) == 0) {
-        //		double days = (double)(min) / 24 / 60;
-		//	return String.valueOf(Math.round(days)) + DAY_POSTFIX;
-        //}
+		if ((allowDays) && (min % (24 * 60) == 0) 
+		&& (min > (int)TimeUnit.DAYS.toMinutes(3))) {
+        		double days = (double)(min) / 24 / 60;
+			return String.valueOf(Math.round(days)) + DAY_POSTFIX;
+        }
 		
 		if (min % 60 == 0) {
     			double hours = (double)(min) / 60;

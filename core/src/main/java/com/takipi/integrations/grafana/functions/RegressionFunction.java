@@ -28,7 +28,6 @@ import com.takipi.api.client.util.regression.RegressionUtil;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.settings.RegressionReportSettings;
 import com.takipi.api.client.util.settings.RegressionSettings;
-import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
@@ -41,6 +40,7 @@ import com.takipi.integrations.grafana.input.RegressionsInput;
 import com.takipi.integrations.grafana.input.RegressionsInput.RegressionType;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
+import com.takipi.integrations.grafana.settings.ServiceSettings;
 import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.EventLinkEncoder;
 import com.takipi.integrations.grafana.util.TimeUtil;
@@ -262,7 +262,7 @@ public class RegressionFunction extends EventsFunction {
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
 				Pair<DateTime, DateTime> timeSpan) {
 			
-			RegressionReportSettings settings = getSettings(serviceId).regression_report;
+			RegressionReportSettings settings = getSettingsData(serviceId).regression_report;
 			
 			if (settings == null) {
 				return Integer.valueOf(0);
@@ -381,7 +381,7 @@ public class RegressionFunction extends EventsFunction {
 			DateTime from = regData.regResult.getActiveWndowStart().minusMinutes(regData.input.baselineTimespan);
 			DateTime to = DateTime.now();
 			
-			return EventLinkEncoder.encodeLink(apiClient, getSettings(serviceId), 
+			return EventLinkEncoder.encodeLink(apiClient, getSettingsData(serviceId), 
 				serviceId, input, eventData.event, from, to);
 		}
 		
@@ -395,14 +395,14 @@ public class RegressionFunction extends EventsFunction {
 		super(apiClient);
 	}
 	
-	public RegressionFunction(ApiClient apiClient, Map<String, ServiceSettingsData> settingsMaps) {
+	public RegressionFunction(ApiClient apiClient, Map<String, ServiceSettings> settingsMaps) {
 		super(apiClient, settingsMaps);
 	}
 	
 	private void sortRegressions(String serviceId, List<EventData> eventData) {	
 		
 		List<String> criticalExceptionList = new ArrayList<String>(
-				getSettings(serviceId).regression.getCriticalExceptionTypes());
+				getSettingsData(serviceId).regression.getCriticalExceptionTypes());
 		
 		eventData.sort(new Comparator<EventData>() {
 			
@@ -587,7 +587,7 @@ public class RegressionFunction extends EventsFunction {
 	
 	private RegressionSettings getRegressionSettings(String serviceId) {
 		
-		RegressionSettings regressionSettings = getSettings(serviceId).regression;
+		RegressionSettings regressionSettings = getSettingsData(serviceId).regression;
 		
 		if (regressionSettings == null) {
 			throw new IllegalStateException("Missing regression settings for " + serviceId);
@@ -658,7 +658,7 @@ public class RegressionFunction extends EventsFunction {
 		regressionInput.activeTimespan = regressionWindow.activeTimespan;
 		regressionInput.baselineTimespan = expandedBaselineTimespan;
 		
-		regressionInput.applictations = input.getApplications(apiClient, getSettings(serviceId), serviceId);
+		regressionInput.applictations = input.getApplications(apiClient, getSettingsData(serviceId), serviceId);
 		regressionInput.servers = input.getServers(serviceId);
 		
 		Collection<String> criticalExceptionTypes = regressionSettings.getCriticalExceptionTypes();

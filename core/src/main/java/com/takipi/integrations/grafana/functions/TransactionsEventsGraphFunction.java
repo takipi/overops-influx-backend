@@ -203,7 +203,7 @@ public class TransactionsEventsGraphFunction extends LimitGraphFunction {
 			
 		if (CollectionUtil.safeIsEmpty(transactions)) {
 			
-			Collection<String> types = input.getTypes(apiClient, serviceId);
+			Collection<String> types = getTypes(serviceId, input);
 			
 			if (!CollectionUtil.safeIsEmpty(types)) {
 				return processTypesGraphSeries(serviceIds, serviceId, viewId, 

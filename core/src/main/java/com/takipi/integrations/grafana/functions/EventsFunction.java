@@ -27,7 +27,6 @@ import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.settings.GeneralSettings;
-import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
@@ -37,7 +36,7 @@ import com.takipi.integrations.grafana.input.EventsInput.OutputMode;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.settings.GrafanaSettings;
+import com.takipi.integrations.grafana.settings.ServiceSettings;
 import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.EventLinkEncoder;
 import com.takipi.integrations.grafana.util.TimeUtil;
@@ -525,7 +524,7 @@ public class EventsFunction extends GrafanaFunction {
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
 				Pair<DateTime, DateTime> timeSpan) {
 
-			return EventLinkEncoder.encodeLink(apiClient, getSettings(serviceId), 
+			return EventLinkEncoder.encodeLink(apiClient, getSettingsData(serviceId), 
 				serviceId, input, eventData.event, 
 				timeSpan.getFirst(), timeSpan.getSecond());
 		}
@@ -554,11 +553,9 @@ public class EventsFunction extends GrafanaFunction {
 				if (hasMessage) {
 					result.append(": ");
 					result.append(eventData.event.message);
-				} else {
-					if (eventData.event.error_location != null) {
-						result.append(" in ");
-						result.append(formatLocation(eventData.event.error_location));
-					}
+				} else if (eventData.event.error_location != null) {
+					result.append(" in ");
+					result.append(formatLocation(eventData.event.error_location));
 				}
 				
 				return result.toString();
@@ -578,8 +575,8 @@ public class EventsFunction extends GrafanaFunction {
 		
 		@Override
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
-				Pair<DateTime, DateTime> timeSpan)
-		{
+				Pair<DateTime, DateTime> timeSpan) {
+			
 			String type = TYPES_MAP.get(eventData.event.type);
 			Object value = super.getValue(eventData, serviceId, input, timeSpan);
 
@@ -664,7 +661,7 @@ public class EventsFunction extends GrafanaFunction {
 		}
 		
 		if (column.equals(EventsInput.DESCRIPTION)) {
-			Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();
+			Categories categories = getSettings(serviceId).getCategories();
 			return new EventDescriptionFormatter(categories);
 		}
 		
@@ -714,7 +711,7 @@ public class EventsFunction extends GrafanaFunction {
 		super(apiClient);
 	}
 	
-	public EventsFunction(ApiClient apiClient, Map<String, ServiceSettingsData> settingsMaps) {
+	public EventsFunction(ApiClient apiClient, Map<String, ServiceSettings> settingsMaps) {
 		super(apiClient, settingsMaps);
 	}
 	
@@ -816,7 +813,7 @@ public class EventsFunction extends GrafanaFunction {
 	
 	protected List<EventData> mergeSimilarEvents(String serviceId, List<EventData> eventDatas) {
 		
-		GeneralSettings settings = getSettings(serviceId).general;
+		GeneralSettings settings = getSettingsData(serviceId).general;
 		
 		if ((settings == null) || (!settings.group_by_entryPoint)) {
 			return eventDatas;
@@ -1052,7 +1049,7 @@ public class EventsFunction extends GrafanaFunction {
 	protected void sortEventDatas(String serviceId, List<EventData> eventDatas ) {
 	
 		List<String> criticalExceptionList = new ArrayList<String>(
-			getSettings(serviceId).regression.getCriticalExceptionTypes());
+			getSettingsData(serviceId).regression.getCriticalExceptionTypes());
 		
 		eventDatas.sort(new Comparator<EventData>() {
 			

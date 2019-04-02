@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 53,
-  "iteration": 1554100356645,
+  "iteration": 1554187230982,
   "links": [
     {
       "icon": "dashboard",
@@ -932,9 +932,7 @@
   "refresh": false,
   "schemaVersion": 16,
   "style": "dark",
-  "tags": [
-    "OverOps"
-  ],
+  "tags": [],
   "templating": {
     "list": [
       {
@@ -965,9 +963,8 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
+          "text": "all",
+          "value": "all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -990,9 +987,8 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
+          "text": "all",
+          "value": "all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1040,9 +1036,8 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
+          "text": "Uncaught Exception",
+          "value": "Uncaught Exception"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1051,7 +1046,7 @@
         "multi": true,
         "name": "type",
         "options": [],
-        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\", \"timeFilter\":\"$timeFilter\"})",
+        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"varTimeFilter\":\"true\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1098,9 +1093,8 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
+          "text": "*",
+          "value": "*"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1147,7 +1141,6 @@
         "allValue": null,
         "current": {
           "isNone": true,
-          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -1172,7 +1165,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1197,7 +1189,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -1222,7 +1213,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -1247,7 +1237,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "0",
           "value": "0"
         },
@@ -1258,7 +1247,7 @@
         "multi": false,
         "name": "eventCount",
         "options": [],
-        "query": "events({\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"outputMode\":\"SingleStat\", \"timeFilterVar\":\"true\"})",
+        "query": "events({\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"outputMode\":\"SingleStat\", \"varTimeFilter\":\"true\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1272,7 +1261,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "0",
           "value": "0"
         },
@@ -1298,7 +1286,6 @@
         "allValue": null,
         "current": {
           "isNone": true,
-          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -1324,7 +1311,6 @@
         "allValue": null,
         "current": {
           "isNone": true,
-          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -1350,7 +1336,6 @@
         "allValue": null,
         "current": {
           "isNone": true,
-          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -1407,5 +1392,5 @@
   "timezone": "",
   "title": "Errors Drill-down",
   "uid": "6TxYIh6mk",
-  "version": 3
+  "version": 7
 }

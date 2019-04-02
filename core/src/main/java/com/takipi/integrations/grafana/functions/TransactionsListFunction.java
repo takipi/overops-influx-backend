@@ -261,7 +261,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 			String serviceId, Pair<DateTime, DateTime> timeSpan,
 			TransactionsListInput input, List<String> fields) {
 		
-		SlowdownSettings slowdownSettings = getSettings(serviceId).slowdown;
+		SlowdownSettings slowdownSettings = getSettingsData(serviceId).slowdown;
 		
 		List<List<Object>> result = new ArrayList<List<Object>>(transactions.size());
 
@@ -274,7 +274,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 			String link;
 			
 			if (transactionData.currTimer != null) {
-				link = EventLinkEncoder.encodeLink(apiClient, getSettings(serviceId), serviceId, input, transactionData.currTimer, 
+				link = EventLinkEncoder.encodeLink(apiClient, getSettingsData(serviceId), serviceId, input, transactionData.currTimer, 
 					timeSpan.getFirst(), timeSpan.getSecond());
 			} else {
 				link = MISSING_TIMER_LINK;

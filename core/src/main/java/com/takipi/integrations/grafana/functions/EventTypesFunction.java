@@ -22,7 +22,6 @@ import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.EventTypesInput;
 import com.takipi.integrations.grafana.input.EventTypesInput.EventTypes;
 import com.takipi.integrations.grafana.input.FunctionInput;
-import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class EventTypesFunction extends EnvironmentVariableFunction {
@@ -109,7 +108,7 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 		if (eventInput.types != null) {
 			types = eventInput.getTypes();
 		} else {
-			GeneralSettings settings = getSettings(serviceId).general;
+			GeneralSettings settings = getSettingsData(serviceId).general;
 			
 			if (settings != null) {
 				types = settings.getDefaultTypes();
@@ -122,7 +121,7 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 		Set<String> exceptionTypes = new TreeSet<String>();
 		Set<String> categoryNames = new TreeSet<String>();
 			
-		Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();
+		Categories categories = getSettings(serviceId).getCategories();
 
 		for (EventResult event : events.values()) {
 			
@@ -141,7 +140,7 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 			if (categories != null) {
 			
 				if (event.error_origin != null) {
-					Set<String> originLabels = categories.getCategories(event.error_origin.class_name);
+	 				Set<String> originLabels = categories.getCategories(event.error_origin.class_name);
 					
 					if (!CollectionUtil.safeIsEmpty(originLabels))  {
 						categoryNames.addAll(originLabels);

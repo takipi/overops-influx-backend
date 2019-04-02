@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 22,
-  "iteration": 1553060209796,
+  "iteration": 1554185546232,
   "links": [
     {
       "icon": "dashboard",
@@ -88,7 +88,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_8}. $settingsPostfix. $drilldownPostfix",
+          "linkTooltip": "${__cell_8}. $settingsPostfix",
           "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-deployments=$limitDeployments&var-servers=$limitServers&var-applications=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "Name",
@@ -302,7 +302,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_5}.  $drilldownPostfix",
+          "linkTooltip": "${__cell_5}",
           "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-deployments=$limitDeployments&var-servers=$limitServers&var-applications=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "NewIssues",
@@ -322,7 +322,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_6}.  $drilldownPostfix",
+          "linkTooltip": "${__cell_6}",
           "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&from=${__cell_0}&to=${__cell_1}&var-environments=${__cell_3}&var-deployments=$limitDeployments&var-servers=$limitServers&var-applications=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "Regressions",
@@ -358,7 +358,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_7}.  $drilldownPostfix",
+          "linkTooltip": "${__cell_7}",
           "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&from=${__cell_0}&to=${__cell_1}&var-environments=${__cell_3}&var-deployments=$limitDeployments&var-servers=$limitServers&var-applications=${__cell_4}",
           "mappingType": 1,
           "pattern": "Slowdowns",
@@ -497,7 +497,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Grid\", \"mode\":\"Applications\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\"})",
+          "query": "regressionReport({\"timeFilter\":\"$timeFilterLimit\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Grid\", \"mode\":\"Applications\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -519,7 +519,7 @@
         }
       ],
       "timeFrom": null,
-      "title": "Apps",
+      "title": "Apps: $timeFilterLimitRange",
       "transform": "table",
       "type": "table"
     },
@@ -557,7 +557,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_8}. $settingsPostfix. $drilldownPostfix",
+          "linkTooltip": "${__cell_8}. $settingsPostfix",
           "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$limitServers&var-applications=$limitApplications&var-deployments=$limitDeployments&var-type=-${__cell_4}&var-scoreType=Regressions",
           "mappingType": 1,
           "pattern": "Name",
@@ -769,7 +769,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_5}. $drilldownPostfix",
+          "linkTooltip": "${__cell_5}",
           "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-applications=$limitApplications&var-deployments=$limitDeployments&var-servers=$limitServers&var-type=-${__cell_4}",
           "mappingType": 1,
           "pattern": "NewIssues",
@@ -789,7 +789,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_6}. $drilldownPostfix",
+          "linkTooltip": "${__cell_6}",
           "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&from=${__cell_0}&to=${__cell_1}&var-environments=${__cell_3}&var-applications=$limitApplications&var-deployments=$limitDeployments&var-servers=$limitServers&var-type=-${__cell_4}",
           "mappingType": 1,
           "pattern": "Regressions",
@@ -964,7 +964,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Grid\", \"mode\":\"Tiers\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"scoreType\":\"Regressions\", \"addAppTier\":\"true\"})",
+          "query": "regressionReport({\"timeFilter\":\"$timeFilterLimit\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Grid\", \"mode\":\"Tiers\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"scoreType\":\"Regressions\", \"addAppTier\":\"true\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -986,7 +986,7 @@
         }
       ],
       "timeFrom": null,
-      "title": "App Tiers",
+      "title": "App Tiers: $timeFilterLimitRange",
       "transform": "table",
       "type": "table"
     },
@@ -1024,7 +1024,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_8}. $settingsPostfix. $drilldownPostfix",
+          "linkTooltip": "${__cell_8}. $settingsPostfix",
           "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers&var-type=$limitType",
           "mappingType": 1,
           "pattern": "Name",
@@ -1237,7 +1237,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_5}. $drilldownPostfix",
+          "linkTooltip": "${__cell_5}",
           "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers&var-type=$limitType",
           "mappingType": 1,
           "pattern": "NewIssues",
@@ -1257,7 +1257,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_6}. $drilldownPostfix",
+          "linkTooltip": "${__cell_6}",
           "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&from=${__cell_0}&to=${__cell_1}&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers&&var-type=$limitType",
           "mappingType": 1,
           "pattern": "Regressions",
@@ -1293,7 +1293,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_7}. $drilldownPostfix",
+          "linkTooltip": "${__cell_7}",
           "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&from=${__cell_0}&to=${__cell_1}&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers",
           "mappingType": 1,
           "pattern": "Slowdowns",
@@ -1473,7 +1473,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Grid\", \"mode\":\"Timeline\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"volumeType\":\"all\"})",
+          "query": "regressionReport({\"timeFilter\":\"$timelineTimeFilterLimit\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Grid\", \"mode\":\"Timeline\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"volumeType\":\"all\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1495,7 +1495,7 @@
         }
       ],
       "timeFrom": null,
-      "title": "Timeline",
+      "title": "Timeline: $timelineTimeFilterLimitRange",
       "transform": "table",
       "type": "table"
     },
@@ -1533,7 +1533,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_8}. $settingsPostfix. $drilldownPostfix",
+          "linkTooltip": "${__cell_8}. $settingsPostfix",
           "linkUrl": "d/4DHQ63-ik/reliability-analysis?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers&var-deployments=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "Name",
@@ -1746,7 +1746,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_5}. $drilldownPostfix",
+          "linkTooltip": "${__cell_5}",
           "linkUrl": "d/3NZ83NLik/new-errors?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers&var-deployments=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "NewIssues",
@@ -1766,7 +1766,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_6}. $drilldownPostfix",
+          "linkTooltip": "${__cell_6}",
           "linkUrl": "d/WZ739NYmk/increasing-errors?orgId=1&from=${__cell_0}&to=${__cell_1}&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers&var-deployments=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "Regressions",
@@ -1802,7 +1802,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_7}. $drilldownPostfix",
+          "linkTooltip": "${__cell_7}",
           "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&from=${__cell_0}&to=${__cell_1}&var-environments=${__cell_3}&var-applications=$limitApplications&var-servers=$limitServers&var-deployments=${__cell_4}",
           "mappingType": 1,
           "pattern": "Slowdowns",
@@ -1955,7 +1955,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Grid\", \"mode\":\"Deployments\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\"})",
+          "query": "regressionReport({\"timeFilter\":\"$timeFilterLimit\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Grid\", \"mode\":\"Deployments\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1993,9 +1993,12 @@
       {
         "allValue": "None",
         "current": {
-          "selected": true,
+          "selected": false,
+          "tags": [],
           "text": "None",
-          "value": "None"
+          "value": [
+            "None"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -2018,8 +2021,8 @@
       {
         "allValue": "all",
         "current": {
-          "text": "all",
-          "value": "all"
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2042,8 +2045,8 @@
       {
         "allValue": "all",
         "current": {
-          "text": "all",
-          "value": "all"
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2090,8 +2093,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "",
-          "value": ""
+          "selected": true,
+          "text": "All Events",
+          "value": "All Events"
         },
         "hide": 2,
         "includeAll": false,
@@ -2100,7 +2104,7 @@
         "name": "view",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "All Events",
             "value": "All Events"
           }
@@ -2207,7 +2211,7 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
+          "selected": true,
           "tags": [],
           "text": "5",
           "value": "5"
@@ -2259,28 +2263,6 @@
       {
         "allValue": null,
         "current": {
-          "text": "Click to drill down",
-          "value": "Click to drill down"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": null,
-        "multi": false,
-        "name": "drilldownPostfix",
-        "options": [
-          {
-            "selected": false,
-            "text": "Click to drill in",
-            "value": "Click to drill in"
-          }
-        ],
-        "query": "Click to drill in",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
           "text": "All",
           "value": "All"
         },
@@ -2305,6 +2287,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -2329,6 +2312,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -2396,6 +2380,102 @@
         "query": "3",
         "skipUrlSync": false,
         "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "time >= now() - 24h",
+          "value": "time >= now() - 24h"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "timeFilterLimit",
+        "options": [],
+        "query": "timeFilter({\"timeFilter\":\"$timeFilter\",\"limit\":\"72h\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "24h",
+          "value": "24h"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "timeFilterLimitRange",
+        "options": [],
+        "query": "timeFilter({\"timeFilter\":\"$timeFilter\",\"limit\":\"72h\", \"rangeOnly\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "time >= now() - 24h",
+          "value": "time >= now() - 24h"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "timelineTimeFilterLimit",
+        "options": [],
+        "query": "timeFilter({\"timeFilter\":\"$timeFilter\",\"limit\":\"7d\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "24h",
+          "value": "24h"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "timelineTimeFilterLimitRange",
+        "options": [],
+        "query": "timeFilter({\"timeFilter\":\"$timeFilter\",\"limit\":\"7d\", \"rangeOnly\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
@@ -2432,5 +2512,5 @@
   "timezone": "",
   "title": "Reliability Scorecard",
   "uid": "lfqKXMfmz",
-  "version": 184
+  "version": 190
 }

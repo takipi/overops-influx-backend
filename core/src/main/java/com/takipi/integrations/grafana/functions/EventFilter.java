@@ -120,7 +120,7 @@ public class EventFilter
 				} else if (GroupSettings.isGroup(type)) {
 					result.categoryTypes.add(GroupSettings.fromGroupName(type));
 				} else {
-					if (!type.equals(GrafanaFunction.ALL)) {
+					if (!GrafanaFunction.VAR_ALL.contains(type)) {
 						result.eventTypes.add(type);
 					}
 				}

@@ -839,9 +839,16 @@ public class ApiCache {
 			if (cachable) {
 				
 				keyName = keyName();
+				String value = null;
 				
 				this.loadT1 = System.currentTimeMillis();
-				String value = cacheStorage.getValue(keyName);
+				
+				try {
+					value = cacheStorage.getValue(keyName);
+				} catch (Exception e) {
+					logger.error("Could not load data for " + keyName, e);
+				}
+			
 				this.loadT2 = System.currentTimeMillis();
 
 				if (value != null) {
@@ -863,9 +870,15 @@ public class ApiCache {
 
 			if ((cachable) && (response != null) 
 			&& (response.data != null) && (response.isOK())) {
-				Gson gson = new Gson();
-				String value = gson.toJson(response.data); 
-				cacheStorage.setValue(keyName, value);
+				
+				try {
+					Gson gson = new Gson();
+					String value = gson.toJson(response.data); 
+					cacheStorage.setValue(keyName, value);
+				} catch (Exception e) {
+					logger.error("Could not store data for " + keyName, e);
+				}
+				
 			}
 			
 			return response;

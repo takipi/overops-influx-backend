@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 31,
-  "iteration": 1554098499338,
+  "iteration": 1554187211559,
   "links": [
     {
       "icon": "dashboard",
@@ -167,7 +167,7 @@
         }
       ],
       "thresholds": "25,50",
-      "title": "Unique",
+      "title": "Events: $type",
       "type": "singlestat",
       "valueFontSize": "70%",
       "valueMaps": [
@@ -626,7 +626,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"Uncaught Exceptions\",\"seriesName\":\"Volume\", \"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
+          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$uncaughtType\",\"seriesName\":\"Volume\", \"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -648,7 +648,7 @@
         }
       ],
       "thresholds": "25,50",
-      "title": "$uec Uncaught Ex",
+      "title": "$uec Uncaught",
       "type": "singlestat",
       "valueFontSize": "70%",
       "valueMaps": [
@@ -751,7 +751,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"Critical Exceptions\",\"seriesName\":\"Volume\", \"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
+          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$criticalExType\",\"seriesName\":\"Volume\", \"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -876,7 +876,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"HTTP Error\",\"seriesName\":\"Volume\", \"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
+          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$httpErrorType\",\"seriesName\":\"Volume\", \"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1001,7 +1001,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"Logged Error\",\"seriesName\":\"Volume\", \"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
+          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$logErrorType\",\"seriesName\":\"Volume\", \"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1926,12 +1926,9 @@
       {
         "allValue": "None",
         "current": {
-          "selected": false,
-          "tags": [],
+          "selected": true,
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1952,10 +1949,10 @@
         "useTags": false
       },
       {
-        "allValue": "*",
+        "allValue": "All",
         "current": {
-          "text": "All",
-          "value": "$__all"
+          "text": "all",
+          "value": "all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1976,10 +1973,10 @@
         "useTags": false
       },
       {
-        "allValue": "*",
+        "allValue": "All",
         "current": {
-          "text": "All",
-          "value": "$__all"
+          "text": "all",
+          "value": "all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2000,7 +1997,7 @@
         "useTags": false
       },
       {
-        "allValue": "*",
+        "allValue": "All",
         "current": {
           "text": "All",
           "value": "$__all"
@@ -2026,7 +2023,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2037,7 +2033,7 @@
         "multi": true,
         "name": "type",
         "options": [],
-        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\", \"timeFilter\":\"$timeFilter\"})",
+        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"varTimeFilter\":\"true\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -2084,7 +2080,6 @@
       {
         "allValue": "*",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2132,9 +2127,8 @@
       {
         "allValue": null,
         "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
+          "text": "All Events",
+          "value": "All Events"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2181,7 +2175,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -2206,7 +2199,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -2241,7 +2233,7 @@
         "multi": false,
         "name": "eventCount",
         "options": [],
-        "query": "events({\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"outputMode\":\"SingleStat\", \"timeFilterVar\":\"true\"})",
+        "query": "events({\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"outputMode\":\"SingleStat\", \"varTimeFilter\":\"true\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -2280,7 +2272,6 @@
         "allValue": null,
         "current": {
           "isNone": true,
-          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -2306,7 +2297,6 @@
         "allValue": null,
         "current": {
           "isNone": true,
-          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -2332,7 +2322,6 @@
         "allValue": null,
         "current": {
           "isNone": true,
-          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -2417,7 +2406,7 @@
         "multi": false,
         "name": "uec",
         "options": [],
-        "query": "events({\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"types\":\"Uncaught Exception\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"outputMode\":\"SingleStat\", \"timeFilterVar\":\"true\"})",
+        "query": "events({\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"types\":\"$uncaughtType\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"outputMode\":\"SingleStat\", \"varTimeFilter\":\"true\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -2441,7 +2430,7 @@
         "multi": false,
         "name": "hec",
         "options": [],
-        "query": "events({\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"types\":\"HTTP Error\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"outputMode\":\"SingleStat\", \"timeFilterVar\":\"true\"})",
+        "query": "events({\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"types\":\"$httpErrorType\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"outputMode\":\"SingleStat\", \"varTimeFilter\":\"true\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -2465,7 +2454,7 @@
         "multi": false,
         "name": "cec",
         "options": [],
-        "query": "events({\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"types\":\"Critical Exceptions\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"outputMode\":\"SingleStat\", \"timeFilterVar\":\"true\"})",
+        "query": "events({\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"types\":\"$criticalExType\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"outputMode\":\"SingleStat\", \"varTimeFilter\":\"true\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -2489,7 +2478,103 @@
         "multi": false,
         "name": "lec",
         "options": [],
-        "query": "events({\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"types\":\"Logged Error\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"outputMode\":\"SingleStat\", \"timeFilterVar\":\"true\"})",
+        "query": "events({\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"types\":\"$logErrorType\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"outputMode\":\"SingleStat\", \"varTimeFilter\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "all|Uncaught Exception",
+          "value": "all|Uncaught Exception"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "uncaughtType",
+        "options": [],
+        "query": "concat({\"a\":\"$type\",\"b\":\"Uncaught Exception\",\"separator\":\"|\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "all|HTTP Error",
+          "value": "all|HTTP Error"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "httpErrorType",
+        "options": [],
+        "query": "concat({\"a\":\"$type\",\"b\":\"HTTP Error\",\"separator\":\"|\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "all|Logged Error",
+          "value": "all|Logged Error"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "logErrorType",
+        "options": [],
+        "query": "concat({\"a\":\"$type\",\"b\":\"Logged Error\",\"separator\":\"|\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "all|Critical Exceptions",
+          "value": "all|Critical Exceptions"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "criticalExType",
+        "options": [],
+        "query": "concat({\"a\":\"$type\",\"b\":\"Critical Exceptions\",\"separator\":\"|\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -2535,5 +2620,5 @@
   "timezone": "",
   "title": "Errors",
   "uid": "HYBPMdYik",
-  "version": 148
+  "version": 157
 }

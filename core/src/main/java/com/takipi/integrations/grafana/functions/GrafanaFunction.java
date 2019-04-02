@@ -65,6 +65,7 @@ import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.settings.GeneralSettings;
 import com.takipi.api.client.util.settings.GroupSettings;
 import com.takipi.api.client.util.settings.GroupSettings.GroupFilter;
+import com.takipi.api.client.util.settings.RegressionSettings;
 import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.api.client.util.settings.SlowdownSettings;
 import com.takipi.api.client.util.transaction.TransactionUtil;
@@ -78,11 +79,13 @@ import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.EnvironmentsFilterInput;
+import com.takipi.integrations.grafana.input.EventFilterInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.VariableInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
+import com.takipi.integrations.grafana.settings.ServiceSettings;
 import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.TimeUtil;
 import com.takipi.integrations.grafana.util.TimeUtil.Interval;
@@ -188,7 +191,7 @@ public abstract class GrafanaFunction {
 	//private static final int END_SLICE_POINT_COUNT = 2;
 	
 	protected final ApiClient apiClient;
-	protected volatile Map<String, ServiceSettingsData> settingsMaps;
+	protected volatile Map<String, ServiceSettings> settingsMaps;
 	
 	protected class GraphSliceTaskResult {
 		
@@ -559,13 +562,14 @@ public abstract class GrafanaFunction {
 					if (d2 - d1 < 0) {
 						return -1;
 					}
+					
 					return 0;
 				}
 			};
 		}
 	}
 	
-	public GrafanaFunction(ApiClient apiClient, Map<String, ServiceSettingsData> settingsMaps) {
+	public GrafanaFunction(ApiClient apiClient, Map<String, ServiceSettings> settingsMaps) {
 		this.apiClient = apiClient;
 		this.settingsMaps = settingsMaps;
 	}
@@ -574,9 +578,14 @@ public abstract class GrafanaFunction {
 		this(apiClient, null);
 	}
 			
-	public ServiceSettingsData getSettings(String serviceId) {
+	public ServiceSettingsData getSettingsData(String serviceId) {
+		return getSettings(serviceId).getData();
+	}
+
+	
+	public ServiceSettings getSettings(String serviceId) {
 		
-		ServiceSettingsData result = null;
+		ServiceSettings result = null;
 		
 		if (settingsMaps != null) {
 			
@@ -589,7 +598,7 @@ public abstract class GrafanaFunction {
 			synchronized (this) {
 				
 				if (settingsMaps == null) {
-					settingsMaps = Collections.synchronizedMap(new TreeMap<String, ServiceSettingsData>());
+					settingsMaps = Collections.synchronizedMap(new TreeMap<String, ServiceSettings>());
 					result = doGetSettings(serviceId);
 				}		
 			}		
@@ -602,8 +611,47 @@ public abstract class GrafanaFunction {
 		return result;
 	}
 	
-	private ServiceSettingsData doGetSettings(String serviceId) {
-		ServiceSettingsData result = GrafanaSettings.getServiceSettings(apiClient, serviceId).getData();
+	public Collection<String> getTypes(String serviceId, EventFilterInput eventFilterInput) {
+		return getTypes(serviceId, true, eventFilterInput);
+	}
+
+	public Collection<String> getTypes(String serviceId, boolean expandCriticalTypes,
+		EventFilterInput eventFilterInput) {
+		
+		if (!VariableInput.hasFilter(eventFilterInput.types)) {
+			return null;
+		}
+		
+		String value = eventFilterInput.types.replace(GrafanaFunction.ARRAY_SEPERATOR_RAW,
+				GrafanaFunction.GRAFANA_SEPERATOR_RAW);
+		
+		List<String> result = new ArrayList<String>();
+		Collection<String> types = VariableInput.getServiceFilters(value, null, true);
+		
+		for (String type : types) {
+			
+			if ((expandCriticalTypes) && (EventFilter.CRITICAL_EXCEPTIONS.equals(type))) {
+				
+				RegressionSettings regressionSettings = getSettingsData(serviceId).regression;
+				
+				if (regressionSettings != null) {
+					Collection<String> criticalExceptionTypes = regressionSettings.getCriticalExceptionTypes();
+					
+					for (String criticalExceptionType : criticalExceptionTypes) {
+						result.add(EventFilter.toExceptionFilter(criticalExceptionType));
+					}
+				}
+			} else {
+				result.add(type);
+			}
+		}
+		
+		return result;
+	}
+	
+	private ServiceSettings doGetSettings(String serviceId) {
+		
+		ServiceSettings result = GrafanaSettings.getServiceSettings(apiClient, serviceId);
 		settingsMaps.put(serviceId, result);
 		
 		return result;
@@ -936,7 +984,7 @@ public abstract class GrafanaFunction {
 		RegressionInput regressionInput = result.getFirst();
 		RegressionWindow regressionWindow = result.getSecond();
 		
-		SlowdownSettings slowdownSettings = getSettings(serviceId).slowdown;
+		SlowdownSettings slowdownSettings = getSettingsData(serviceId).slowdown;
 		
 		if (slowdownSettings == null) {
 			throw new IllegalStateException("Missing slowdown settings for " + serviceId);
@@ -1222,7 +1270,7 @@ public abstract class GrafanaFunction {
 		
 		Map<TransactionKey, TransactionData> result = getTransactionDatas(transactionGraphs);
 		
-		SlowdownSettings slowdownSettings = getSettings(serviceId).slowdown;
+		SlowdownSettings slowdownSettings = getSettingsData(serviceId).slowdown;
 		
 		if (slowdownSettings == null) {
 			throw new IllegalStateException("Missing slowdown settings for " + serviceId);
@@ -1384,7 +1432,7 @@ public abstract class GrafanaFunction {
 		
 		if (transactions != null) {
 			
-			GroupSettings transactionGroups = getSettings(serviceId).transactions;
+			GroupSettings transactionGroups = getSettingsData(serviceId).transactions;
 			
 			if (transactionGroups != null) {
 				result = transactionGroups.getExpandedFilter(transactions);
@@ -1407,7 +1455,7 @@ public abstract class GrafanaFunction {
 			return null;
 		}
 		
-		Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();	
+		Categories categories = getSettings(serviceId).getCategories();	
 
 		
 		Collection<String> allowedTypes;
@@ -1419,7 +1467,7 @@ public abstract class GrafanaFunction {
 				allowedTypes = toArray(input.allowedTypes);
 			}
 		} else {
-			GeneralSettings generalSettings = getSettings(serviceId).general;
+			GeneralSettings generalSettings = getSettingsData(serviceId).general;
 			
 			if (generalSettings != null) {
 				allowedTypes = generalSettings.getDefaultTypes();
@@ -1431,7 +1479,7 @@ public abstract class GrafanaFunction {
 		Collection<String> eventLocations = VariableInput.getServiceFilters(input.eventLocations, 
 			serviceId, true);
 	
-		return EventFilter.of(input.getTypes(apiClient, serviceId), allowedTypes, 
+		return EventFilter.of(getTypes(serviceId, input), allowedTypes, 
 				input.getIntroducedBy(serviceId), eventLocations, transactionsFilter,
 				input.geLabels(serviceId), input.labelsRegex, 
 				input.firstSeen, categories, input.searchText, 
@@ -2231,7 +2279,7 @@ public abstract class GrafanaFunction {
 	protected void applyFilters(EnvironmentsFilterInput input, String serviceId,
 			TimeframeRequest.Builder builder) {
 		
-		for (String app : input.getApplications(apiClient, getSettings(serviceId), serviceId)) {
+		for (String app : input.getApplications(apiClient, getSettingsData(serviceId), serviceId)) {
 			builder.addApp(app);
 		}
 		

@@ -44,6 +44,7 @@ import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOu
 import com.takipi.integrations.grafana.functions.ReliabilityKpiGraphFunction.KpiInterval;
 import com.takipi.integrations.grafana.functions.ReliabilityKpiGraphFunction.ScoreInterval;
 import com.takipi.integrations.grafana.functions.ReliabilityKpiGraphFunction.TaskKpiResult;
+import com.takipi.integrations.grafana.input.EnvironmentsFilterInput;
 import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.RegressionsInput;
@@ -57,7 +58,6 @@ import com.takipi.integrations.grafana.input.ReliabilityReportInput.ScoreType;
 import com.takipi.integrations.grafana.input.ReliabilityReportInput.SortType;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.DeploymentUtil;
 import com.takipi.integrations.grafana.util.TimeUtil;
@@ -98,7 +98,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		}
 	}
 	
-	protected static class ReportKey implements Comparable<ReportKey>{
+	protected class ReportKey implements Comparable<ReportKey>{
 		
 		protected String name;
 		protected boolean isKey;
@@ -141,9 +141,24 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			return result;
 		}
+		
+		/**
+		 * @param serviceId - needed for children 
+		 */
+		public int getWeight(String serviceId) {
+			return 1;
+		}
+		
+		/**
+		 * @param serviceId - needed for children 
+		 * @param reportKeyResults - needed for children 
+		 */
+		public String getFullName(String serviceId, ReportKeyResults reportKeyResults) {
+			return name;
+		}
 	}
 	
-	protected static class DeploymentReportKey extends ReportKey {
+	protected class DeploymentReportKey extends ReportKey {
 		
 		protected SummarizedDeployment current;
 		protected SummarizedDeployment previous;
@@ -154,6 +169,68 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			this.current = current;
 			this.previous = previous;
+		}
+		
+		@Override
+		public String getFullName(String serviceId, ReportKeyResults reportKeyResults) {
+			
+			StringBuilder result = new StringBuilder();
+			
+			result.append(", introduced ");
+			
+			int activeTimespan = reportKeyResults.output.regressionData.regressionOutput.regressionInput.activeTimespan;
+			Date introduced = DateTime.now().minusMinutes(activeTimespan).toDate();
+			result.append(prettyTime.format(introduced));
+								
+			if ((current != null) && (current.first_seen != null) && (current.last_seen != null)) {
+							
+				DateTime firstSeen = TimeUtil.getDateTime(current.first_seen);
+				DateTime lastSeen = TimeUtil.getDateTime(current.last_seen);
+
+				long delta = lastSeen.getMillis() - firstSeen.getMillis();
+				Date lifetime = DateTime.now().minus(delta).toDate();
+					
+				result.append(", lifetime: ");
+				result.append(prettyTime.formatDuration(lifetime));					
+			}
+			
+			return result.toString();
+		}
+	}
+	
+	protected class AppReportKey extends ReportKey {
+
+		protected AppReportKey(String name, boolean isKey) {
+			super(name, isKey);
+		}
+		
+		@Override
+		public int getWeight(String serviceId) {
+			
+			int result;
+			
+			Collection<String> apps = EnvironmentsFilterInput.getApplications(apiClient,
+				getSettingsData(serviceId), serviceId, name, true);
+				
+			if (!CollectionUtil.safeIsEmpty(apps)) {
+				result = apps.size();
+			} else {
+				result = 0;
+			}
+			
+			
+			return result;
+		}
+		
+		@Override
+		public String getFullName(String serviceId, ReportKeyResults reportKeyResults) {
+			
+			Collection<String> apps = EnvironmentsFilterInput.getApplications(apiClient,
+					getSettingsData(serviceId), serviceId, name, true);
+			
+			String result = String.join(", ", apps);		
+
+			return result;		
 		}
 	}
 	
@@ -494,7 +571,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			case Tiers_Extended:
 			case Tiers:
 				List<String> types = new ArrayList<String>();
-				Collection<String> inputTypes = reportInput.getTypes(apiClient, serviceId);
+				Collection<String> inputTypes = getTypes(serviceId, reportInput);
 				
 				if (inputTypes != null) {
 					for (String type : inputTypes) {
@@ -557,9 +634,9 @@ public class ReliabilityReportFunction extends EventsFunction {
 	private Collection<ReportKey> getTiers(String serviceId, ReliabilityReportInput input,
 			Pair<DateTime, DateTime> timeSpan) {
  		
-		Collection<String> keyTiers = GrafanaSettings.getServiceSettings(apiClient, serviceId).getTierNames();
+		Collection<String> keyTiers = getSettings(serviceId).getTierNames();
 		
-		Collection<String> types = input.getTypes(apiClient, serviceId);
+		Collection<String> types = getTypes(serviceId, input);
 		
 		Set<ReportKey> result = new TreeSet<ReportKey>();
 		
@@ -601,7 +678,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			return Collections.emptyList();
 		}
 		
-		Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();
+		Categories categories = getSettings(serviceId).getCategories();
 				
 		for (EventResult event : eventsMap.values()) {
 						
@@ -773,14 +850,16 @@ public class ReliabilityReportFunction extends EventsFunction {
 
 		List<String> keyApps = new ArrayList<String>();
 		
-		GroupSettings appGroups = getSettings(serviceId).applications;
+		GroupSettings appGroups = getSettingsData(serviceId).applications;
 		
 		if (appGroups != null) {
 			keyApps.addAll(appGroups.getAllGroupNames(true));
 		}
 		
 		List<ReportKey> reportKeys;
-		Collection<String> selectedApps = input.getApplications(apiClient, getSettings(serviceId), serviceId, false);
+		
+		Collection<String> selectedApps = input.getApplications(apiClient,
+			getSettingsData(serviceId), serviceId, false);
 		
 		if (!CollectionUtil.safeIsEmpty(selectedApps)) {
 			
@@ -788,14 +867,14 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			for (String selectedApp : selectedApps) {
 				boolean isKey = keyApps.contains(selectedApp);
-				reportKeys.add(new ReportKey(selectedApp, isKey));
+				reportKeys.add(new AppReportKey(selectedApp, isKey));
 			}
 			
 			return reportKeys;
 		}
 			
 		if (keyApps.size() > input.limit) {
-			return toReportKeys(keyApps, true);
+			return toAppReportKeys(keyApps, true);
 		}
 		
 		Collection<String> activeApps = ApiCache.getApplicationNames(apiClient, serviceId, true);
@@ -806,8 +885,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			reportKeys = new ArrayList<ReportKey>(keyApps.size() + activeApps.size());
 			
-			reportKeys.addAll(toReportKeys(keyApps, true));
-			reportKeys.addAll(toReportKeys(activeApps, false));
+			reportKeys.addAll(toAppReportKeys(keyApps, true));
+			reportKeys.addAll(toAppReportKeys(activeApps, false));
 			
 			reportKeys.sort(null);
 			
@@ -828,8 +907,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		reportKeys = new ArrayList<ReportKey>();
 		
-		reportKeys.addAll(toReportKeys(keyApps, true));
-		reportKeys.addAll(toReportKeys(nonKeyApps, false));
+		reportKeys.addAll(toAppReportKeys(keyApps, true));
+		reportKeys.addAll(toAppReportKeys(nonKeyApps, false));
 		
 		List<ReportKey> result;
 		
@@ -867,6 +946,17 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		for (String key : keys) {
 			result.add(new ReportKey(key, isKey));
+		}
+		
+		return result;
+	}
+	
+	private Collection<ReportKey> toAppReportKeys(Collection<String> keys, boolean isKey) {
+		
+		List<ReportKey> result = new ArrayList<ReportKey>(keys.size());
+		
+		for (String key : keys) {
+			result.add(new AppReportKey(key, isKey));
 		}
 		
 		return result;
@@ -1053,12 +1143,12 @@ public class ReliabilityReportFunction extends EventsFunction {
 
 		if (regInput.applications != null) {
 			
-			GroupSettings appGroups = getSettings(serviceId).applications;
+			GroupSettings appGroups = getSettingsData(serviceId).applications;
 			
 			if (appGroups != null) {
 				 
 				List<String> keyApps = new ArrayList<String>(appGroups.getAllGroupNames(true));
-				Collection<String> apps = regInput.getApplications(apiClient, getSettings(serviceId), serviceId, false);
+				Collection<String> apps = regInput.getApplications(apiClient, getSettingsData(serviceId), serviceId, false);
 				
 				isKey = false;
 				
@@ -1191,7 +1281,6 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		return Pair.of(resultScore, scoreWindow);
 	}
-
 	
 	private Pair<Double, Integer> getScore(String serviceId,
 		ReliabilityReportInput input, RegressionReportSettings reportSettings, 
@@ -1199,21 +1288,15 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		RegressionOutput regressionOutput = reportKeyResults.output.regressionData.regressionOutput;
 		
-		Collection<String> apps = input.getApplications(apiClient, getSettings(serviceId), serviceId);
+		ReportMode reportMode = input.getReportMode();	
 		
-		int appsSize;
-		
-		if (!CollectionUtil.safeIsEmpty(apps)) {
-			appsSize = apps.size();
-		} else {
-			appsSize = 0;
-		}
+		int keyWeight = reportKeyResults.output.reportKey.getWeight(serviceId);
 		
 		return getScore(regressionOutput, reportSettings, 
 				regressionOutput.newIssues, regressionOutput.severeNewIssues, 
 				regressionOutput.regressions, regressionOutput.criticalRegressions, 
 				reportKeyResults.slowdowns, reportKeyResults.severeSlowdowns, 
-				reportKeyResults.output.reportKey.isKey,true, input.getReportMode(), appsSize);
+				reportKeyResults.output.reportKey.isKey,true,reportMode, keyWeight);
 
 	}
 	
@@ -1228,47 +1311,11 @@ public class ReliabilityReportFunction extends EventsFunction {
 		RegressionOutput regressionOutput = reportKeyResults.output.regressionData.regressionOutput;
 
 		result.append("Score ");
-		
-		String keyName = reportKeyResults.output.reportKey.name;
-
-		Collection<String> apps = input.getApplications(apiClient, getSettings(serviceId), serviceId);
 
 		ReportMode reportMode = input.getReportMode();
 
-		if ((keyName != null) && (keyName.length() > 0)) {
-			result.append(" for ");
-			
-			if ((!CollectionUtil.safeIsEmpty(apps)) && 
-				(((reportMode == ReportMode.Applications) 
-				|| (reportMode == ReportMode.Apps_Extended)))) {
-				result.append(String.join(", ", apps));		
-			} else {
-				result.append(keyName);	
-			}
-		}
-		
-		
-		if (reportMode == ReportMode.Deployments) {
-			result.append(", introduced ");
-			int activeTimespan = reportKeyResults.output.regressionData.regressionOutput.regressionInput.activeTimespan;
-			Date introduced = DateTime.now().minusMinutes(activeTimespan).toDate();
-			result.append(prettyTime.format(introduced));
-			
-			DeploymentReportKey depReportKey = (DeploymentReportKey)reportKeyResults.output.reportKey;
-			
-			if ((depReportKey.current != null) 
-			&& (depReportKey.current.first_seen != null) && (depReportKey.current.last_seen != null)) {
-						
-				DateTime firstSeen = TimeUtil.getDateTime(depReportKey.current.first_seen);
-				DateTime lastSeen = TimeUtil.getDateTime(depReportKey.current.last_seen);
-
-				long delta = lastSeen.getMillis() - firstSeen.getMillis();
-				Date lifetime = DateTime.now().minus(delta).toDate();
-				
-				result.append(", lifetime: ");
-				result.append(prettyTime.formatDuration(lifetime));				
-			}	
-		}
+		String fullName = reportKeyResults.output.reportKey.getFullName(serviceId, reportKeyResults);
+		result.append(fullName);	
 		
 		result.append(" = 100");
 		
@@ -1304,9 +1351,11 @@ public class ReliabilityReportFunction extends EventsFunction {
 			result.append(", avg over ");
 			result.append(duration);
 			
-			if (!CollectionUtil.safeIsEmpty(apps)) {
+			int appsSize = reportKeyResults.output.reportKey.getWeight(serviceId);
+			
+			if (appsSize > 1) {
 				result.append(" and ");
-				result.append(apps.size());
+				result.append(appsSize);
 				result.append(" apps");
 			} 
 			
@@ -1687,7 +1736,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			Pair<DateTime, DateTime> timeSpan, ReliabilityReportInput input, 
 			Collection<ReportKeyOutput> reportKeyOutputs) {
 		
-		RegressionReportSettings reportSettings = getSettings(serviceId).regression_report;
+		RegressionReportSettings reportSettings = getSettingsData(serviceId).regression_report;
 		
 		if (reportSettings == null) {
 			throw new IllegalStateException("Unable to acquire regression report settings for " + serviceId);

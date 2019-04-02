@@ -27,7 +27,6 @@ import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.settings.GroupSettings;
 import com.takipi.api.client.util.settings.RegressionReportSettings;
-import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.api.client.util.transaction.TransactionUtil;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
@@ -41,6 +40,7 @@ import com.takipi.integrations.grafana.input.ReliabilityReportInput;
 import com.takipi.integrations.grafana.input.ReliabilityReportInput.RelabilityKpi;
 import com.takipi.integrations.grafana.input.ReliabilityReportInput.ReportMode;
 import com.takipi.integrations.grafana.output.Series;
+import com.takipi.integrations.grafana.settings.ServiceSettings;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
@@ -381,7 +381,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		super(apiClient);
 	}
 	
-	public ReliabilityKpiGraphFunction(ApiClient apiClient, Map<String, ServiceSettingsData> settingsMaps) {
+	public ReliabilityKpiGraphFunction(ApiClient apiClient, Map<String, ServiceSettings> settingsMaps) {
 		super(apiClient, settingsMaps);
 	}
 	
@@ -1009,7 +1009,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		Map<DateTime, KpiInterval> regressionIntervals, 
 		Map<DateTime, KpiInterval> slowdownIntervals) {
 		
-		RegressionReportSettings reportSettings = getSettings(serviceId).regression_report;
+		RegressionReportSettings reportSettings = getSettingsData(serviceId).regression_report;
 		
 		if (reportSettings == null) {
 			throw new IllegalStateException("Unable to acquire regression report settings for " + serviceId);
@@ -1053,7 +1053,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			}
 				
 			int appSize;
-			Collection<String> apps = input.getApplications(apiClient, getSettings(serviceId), serviceId);
+			Collection<String> apps = input.getApplications(apiClient, getSettingsData(serviceId), serviceId);
 			
 			if (CollectionUtil.safeIsEmpty(apps)) {
 				appSize = apps.size();
@@ -1198,7 +1198,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			int baselineTimespan = regInput.getFirst().baselineTimespan;
 			
 			List<String> keyApps = new ArrayList<String>();
-			GroupSettings appGroups = getSettings(serviceId).applications;
+			GroupSettings appGroups = getSettingsData(serviceId).applications;
 			
 			if (appGroups != null) {
 				keyApps.addAll(appGroups.getAllGroupNames(true));
@@ -1225,7 +1225,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 				TimelineData timelineData = getTimelineData(rkInput, timeSpan,
 						baselineTimespan, gson, json, null);
 				
-				Collection<String> inputApps = input.getApplications(apiClient, getSettings(serviceId), serviceId);
+				Collection<String> inputApps = input.getApplications(apiClient, getSettingsData(serviceId), serviceId);
 				
 				boolean isKey = isInputKeyApps(keyApps, inputApps);
 			 	
