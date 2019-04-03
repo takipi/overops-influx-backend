@@ -706,10 +706,19 @@ public class RegressionFunction extends EventsFunction {
 		}
 		
 		EventFilterInput baselineInput;
+		DateTime baselineStart = regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan);
+		DateTime baselineEnd = regressionWindow.activeWindowStart;
+		
+		DateTime activeStart = regressionWindow.activeWindowStart;
+		DateTime activeEnd = regressionWindow.activeWindowStart.plusMinutes(regressionWindow.activeTimespan);
 		
 		if (input.hasDeployments()) {
 			Gson gson = new Gson();
+			// for deployments baseline graph will start baseline timespan before the first deployment
+			// and finish at the end of current deployment the cache therefore should return the results quickly for
+			// the actual active window. Each deployment baseline will be calculated afterwards in code
 			baselineInput = gson.fromJson(gson.toJson(input), input.getClass());
+			baselineEnd = activeEnd;
 			
 			//deployments by definition nature do not have their own baseline - 
 			//they are compared against the general baseline (all prev deps)
@@ -732,9 +741,6 @@ public class RegressionFunction extends EventsFunction {
 		
 		Collection<GraphSliceTask> baselineGraphTasks;
 		
-		DateTime baselineStart = regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan);
-		DateTime baselineEnd = regressionWindow.activeWindowStart;
-		
 		if (!newOnly) {
 			baselineGraphTasks = getGraphTasks(serviceId, viewId, baselinePoints, baselineInput, 
 				VolumeType.all, baselineStart, baselineEnd,
@@ -750,9 +756,6 @@ public class RegressionFunction extends EventsFunction {
 		} else {
 			graphActiveTimespan = 0;
 		}
-		
-		DateTime activeStart = regressionWindow.activeWindowStart;
-		DateTime activeEnd = regressionWindow.activeWindowStart.plusMinutes(regressionWindow.activeTimespan);
 		
 		Collection<GraphSliceTask> activeGraphTasks = getGraphTasks(serviceId, viewId, input.pointsWanted, 
 			input, VolumeType.all, activeStart, activeEnd, 0, graphActiveTimespan, false);
@@ -774,8 +777,7 @@ public class RegressionFunction extends EventsFunction {
 		
 		Map<DeterminantKey, Pair<Graph, Graph>> graphResults = Maps.newHashMap();
 		
-		for (DeterminantKey graphResultKey : activeWindowGraphKeys.keySet())
-		{
+		for (DeterminantKey graphResultKey : activeWindowGraphKeys.keySet()) {
 			Pair<Graph, Graph> determinantGraphs = getDeterminantGraphs(serviceId, regressionInput, input, baselineInput, graphActiveTimespan,
 					baselineGraphKeys, activeWindowGraphKeys, graphResultKey);
 			
@@ -791,26 +793,22 @@ public class RegressionFunction extends EventsFunction {
 	public Pair<Graph, Graph> getDeterminantGraphs(String serviceId, RegressionInput regressionInput,
 		   BaseEventVolumeInput input, EventFilterInput baselineInput,
 		   int graphActiveTimespan, Map<DeterminantKey, List<Graph>> baselineGraphKeys, Map<DeterminantKey,
-			List<Graph>> activeWindowGraphKeys, DeterminantKey graphResultKey)
-	{
+			List<Graph>> activeWindowGraphKeys, DeterminantKey graphResultKey) {
 		List<Graph> baselineGraphs = baselineGraphKeys.get(graphResultKey);
 		List<Graph> activeWindowGraphs = activeWindowGraphKeys.get(graphResultKey);
 		
 		Graph baselineGraph = null;
 		Graph activeWindowGraph = null;
 		
-		if (!CollectionUtil.safeIsEmpty(baselineGraphs))
-		{
+		if (!CollectionUtil.safeIsEmpty(baselineGraphs)) {
 			baselineGraph = mergeGraphs(baselineGraphs);
 		}
-		if (!CollectionUtil.safeIsEmpty(activeWindowGraphs))
-		{
+		
+		if (!CollectionUtil.safeIsEmpty(activeWindowGraphs)) {
 			activeWindowGraph = mergeGraphs(activeWindowGraphs);
 		}
 		
-		if (activeWindowGraph != null)
-		{
-			
+		if (activeWindowGraph != null) {
 			GraphResult activeGraphResult = new GraphResult();
 			
 			activeGraphResult.graphs = Collections.singletonList(activeWindowGraph);
@@ -820,10 +818,11 @@ public class RegressionFunction extends EventsFunction {
 					Response.of(200, activeGraphResult));
 			
 			if ((input.hasDeployments())) {
+				
 				if (baselineGraph == null) {
 					
 					if ((baselineGraphKeys.get(DeterminantKey.Empty) != null) &&
-							(!(CollectionUtil.safeIsEmpty(baselineGraphKeys.get(DeterminantKey.Empty))))) {
+						(!(CollectionUtil.safeIsEmpty(baselineGraphKeys.get(DeterminantKey.Empty))))) {
 						
 						List<Graph> allBaselineGraphs = baselineGraphKeys.get(DeterminantKey.Empty);
 						
@@ -833,7 +832,6 @@ public class RegressionFunction extends EventsFunction {
 			}
 			
 			if (baselineGraph != null) {
-				
 				GraphResult baselineGraphResult = new GraphResult();
 				baselineGraphResult.graphs = Collections.singletonList(baselineGraph);
 				
@@ -873,9 +871,7 @@ public class RegressionFunction extends EventsFunction {
 	{
 		List<Graph> graphList = graphKeys.get(graphsKey);
 		
-		if (CollectionUtil.safeIsEmpty(graphList))
-		{
-			
+		if (CollectionUtil.safeIsEmpty(graphList)) {
 			graphList = Lists.newArrayList();
 			graphKeys.put(graphsKey, graphList);
 		}
@@ -967,8 +963,7 @@ public class RegressionFunction extends EventsFunction {
 		Collection<Pair<Graph, Graph>> regressionGraphsCollection = getRegressionGraphs(serviceId,
 				viewId, regressionInput, regressionWindow, input, newOnly).values();
 		
-		if (CollectionUtil.safeIsEmpty(regressionGraphsCollection))
-		{
+		if (CollectionUtil.safeIsEmpty(regressionGraphsCollection)) {
 			return RegressionOutput.emptyOutput;
 		}
 		

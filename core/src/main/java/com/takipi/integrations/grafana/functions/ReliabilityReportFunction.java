@@ -540,12 +540,20 @@ public class ReliabilityReportFunction extends EventsFunction {
 							activeWindow.activeTimespan = (int) TimeUnit.MILLISECONDS
 									.toMinutes(activeWindowEnd.minus(
 											activeWindow.activeWindowStart.getMillis()).getMillis());
+							
+							RegressionPeriodData deploymentsRegressionGraphs = getRegressionGraphs(baselineGraph, dateTimeDateTimePair, regressionInput.baselineTimespan,
+									eventResultMap);
+							
+							baselineGraph = deploymentsRegressionGraphs.baselineGraph;
+							activeWindowGraph = deploymentsRegressionGraphs.activeGraph;
+							eventResultMap = deploymentsRegressionGraphs.eventMap;
 						}
 					}
 					
 					Pair<ReportKey, RegressionsInput> subInputData = subRegressionInputs.get(determinantKey.determinantKey);
 					
-					// type is all
+					// For tiers we create a single graph request without deployments, machine, apps filter but need to break
+					// the input afterwards by the specific type of regression input
 					if (subInputData == null)
 					{
 						for (String transactionGraphKey : subRegressionInputs.keySet())

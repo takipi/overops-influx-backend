@@ -921,9 +921,17 @@ public abstract class GrafanaFunction {
 		result.activeGraph.type = graph.type;
 		result.activeGraph.points = new ArrayList<GraphPoint>();
 		
+		result.activeGraph.application_name = graph.deployment_name;
+		result.activeGraph.application_name = graph.machine_name;
+		result.activeGraph.application_name = graph.application_name;
+								
 		result.baselineGraph.id = graph.id;
 		result.baselineGraph.type = graph.type;
 		result.baselineGraph.points = new ArrayList<GraphPoint>();
+		
+		result.baselineGraph.deployment_name = graph.deployment_name;
+		result.baselineGraph.machine_name = graph.machine_name;
+		result.baselineGraph.application_name = graph.application_name;
 		
 		DateTime baselineEnd = period.getFirst();
 		DateTime baselineStart = baselineEnd.minusMinutes(baselineWindow);
@@ -1954,7 +1962,7 @@ public abstract class GrafanaFunction {
 				
 				EventResult contributorEventResult = (EventResult) event.clone();
 				
-				contributorEventResult.stats = new MainStats();
+//				contributorEventResult.stats = new MainStats();
 				
 				safePutEventToKeysMap(keyToEventMap, determinantKey, contributorEventResult);
 			}
