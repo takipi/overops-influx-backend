@@ -357,6 +357,13 @@ public class RegressionFunction extends EventsFunction {
 		}
 	}
 	
+	public int expandBaselineTimespan(String serviceId, RegressionWindow activeWindow)
+	{
+		RegressionSettings regressionSettings = getRegressionSettings(serviceId);
+		
+		return expandBaselineTimespan(regressionSettings.baseline_timespan_factor, regressionSettings.min_baseline_timespan, activeWindow);
+	}
+	
 	private int expandBaselineTimespan(int baselineTimespanFactor, int minBaselineTimespan,
 			RegressionWindow activeWindow) {
 		

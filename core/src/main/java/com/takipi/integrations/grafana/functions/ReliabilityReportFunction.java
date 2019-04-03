@@ -541,7 +541,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 									.toMinutes(activeWindowEnd.minus(
 											activeWindow.activeWindowStart.getMillis()).getMillis());
 							
-							RegressionPeriodData deploymentsRegressionGraphs = getRegressionGraphs(baselineGraph, dateTimeDateTimePair, regressionInput.baselineTimespan,
+							int baselineTimespan = function.expandBaselineTimespan(serviceId, activeWindow);
+							
+							RegressionPeriodData deploymentsRegressionGraphs = getRegressionGraphs(baselineGraph,
+									dateTimeDateTimePair, baselineTimespan,
 									eventResultMap);
 							
 							baselineGraph = deploymentsRegressionGraphs.baselineGraph;

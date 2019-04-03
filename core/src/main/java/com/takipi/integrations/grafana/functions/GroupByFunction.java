@@ -22,7 +22,7 @@ import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
 import com.takipi.api.client.result.event.EventResult;
-import com.takipi.api.client.result.event.IApiStats;
+import com.takipi.api.client.result.event.ApiBaseStats;
 import com.takipi.api.client.util.client.ClientUtil;
 import com.takipi.api.client.util.settings.GroupSettings;
 import com.takipi.api.client.util.settings.GroupSettings.Group;
@@ -381,7 +381,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static void processEventGroupBy(GroupByInput request, Map<GroupByKey, GroupByVolume> map, EventResult event,
-			EventFilter filter, IApiStats stats, DateTime time) {
+			EventFilter filter, ApiBaseStats stats, DateTime time) {
 
 		long value;
 

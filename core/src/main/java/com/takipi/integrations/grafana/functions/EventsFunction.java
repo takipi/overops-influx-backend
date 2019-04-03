@@ -23,7 +23,7 @@ import com.takipi.api.client.data.event.Stats;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventSlimResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
-import com.takipi.api.client.result.event.IApiStats;
+import com.takipi.api.client.result.event.ApiBaseStats;
 import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
@@ -703,7 +703,7 @@ public class EventsFunction extends GrafanaFunction {
 		super(apiClient, settingsMaps);
 	}
 	
-	protected static String formatRateDelta(IApiStats baseline, IApiStats stats) {
+	protected static String formatRateDelta(ApiBaseStats baseline, ApiBaseStats stats) {
 		
 		StringBuilder result = new StringBuilder();
 		
@@ -714,7 +714,7 @@ public class EventsFunction extends GrafanaFunction {
 		return result.toString(); 
 	}
 	
-	protected static String formatRate(IApiStats stats) {
+	protected static String formatRate(ApiBaseStats stats) {
 		return formatRate(stats.hits, stats.invocations);
 	}
 	
