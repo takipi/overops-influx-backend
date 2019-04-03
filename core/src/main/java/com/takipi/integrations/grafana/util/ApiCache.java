@@ -3,12 +3,15 @@ package com.takipi.integrations.grafana.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.Callable;
+import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,11 +19,14 @@ import com.google.common.base.Objects;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListenableFutureTask;
+import com.google.common.collect.EvictingQueue;
+import com.google.common.collect.Queues;
+import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.application.SummarizedApplication;
 import com.takipi.api.client.data.deployment.SummarizedDeployment;
+import com.takipi.api.client.data.metrics.Graph;
+import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.request.application.ApplicationsRequest;
 import com.takipi.api.client.request.deployment.DeploymentsRequest;
 import com.takipi.api.client.request.event.EventRequest;
@@ -28,15 +34,18 @@ import com.takipi.api.client.request.event.EventsRequest;
 import com.takipi.api.client.request.event.EventsSlimVolumeRequest;
 import com.takipi.api.client.request.metrics.GraphRequest;
 import com.takipi.api.client.request.process.JvmsRequest;
+import com.takipi.api.client.request.service.ServicesRequest;
 import com.takipi.api.client.request.transaction.TransactionsGraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsVolumeRequest;
 import com.takipi.api.client.request.view.ViewsRequest;
 import com.takipi.api.client.result.application.ApplicationsResult;
 import com.takipi.api.client.result.deployment.DeploymentsResult;
 import com.takipi.api.client.result.event.EventResult;
+import com.takipi.api.client.result.event.EventsResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
 import com.takipi.api.client.result.metrics.GraphResult;
 import com.takipi.api.client.result.process.JvmsResult;
+import com.takipi.api.client.result.service.ServicesResult;
 import com.takipi.api.client.result.transaction.TransactionsGraphResult;
 import com.takipi.api.client.result.transaction.TransactionsVolumeResult;
 import com.takipi.api.client.result.view.ViewsResult;
@@ -46,6 +55,7 @@ import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.request.intf.ApiGetRequest;
 import com.takipi.api.core.url.UrlClient.Response;
+import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.GrafanaFunction;
 import com.takipi.integrations.grafana.functions.GrafanaThreadPool;
 import com.takipi.integrations.grafana.functions.RegressionFunction;
@@ -54,25 +64,110 @@ import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.EventFilterInput;
 import com.takipi.integrations.grafana.input.ViewInput;
+import com.takipi.integrations.grafana.storage.FolderStorage;
+import com.takipi.integrations.grafana.storage.KeyValueStorage;
 
 public class ApiCache {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ApiCache.class);
 	
-	private static final int CACHE_SIZE = 1000;
-	private static final int CACHE_REFRESH_RETENTION = 2;
-	private static final int CACHE_RELOAD_WINDOW = 3;
+	private static final int CACHE_SIZE = 500;
+	private static final int CACHE_REFRESH_RETENTION = 90;
+		
+	public static final int NO_GRAPH_SLICE = -1;
+	public static final int MIN_SLICE_POINTS = 3;
 	
+	public static boolean CACHE_GRAPHS = true;
+	public static boolean SLICE_GRAPHS = true;
+	
+	private static final String CACHE_FOLDER = "GraphCacheFolder";
 	public static boolean PRINT_DURATIONS = true;
-	
-	protected abstract static class BaseCacheLoader {
 
-		protected ApiClient apiClient;
-		protected ApiGetRequest<?> request;
+	public static class QueryLogItem {
+		
+		public long apiHash;
+		public final long t1;
+		public long t2;
+		public String serviceId;
+		public Class<?> loaderClass;
+		public String loaderData;
+		public String exception;
+		public int functionThreadSize;
+		public int functionQueueSize;
+		public int queryThreadSize;
+		public int queryQueueSize;	
+		
+		public QueryLogItem() {
+			this.t1 = System.currentTimeMillis();
+		}	
+
+		@Override
+		public String toString() {
+			
+			StringBuilder result = new StringBuilder();
+			
+			if (serviceId != null) {
+				result.append(serviceId);
+				result.append(" ");
+			}
+
+			result.append(getLoaderClassName(loaderClass));
+			
+			double delta = Math.max(0, t2 - t1);
+			
+			result.append(": ");
+			result.append(GrafanaFunction.singleDigitFormatter.format(delta / 1000));
+			result.append("sec, ");
+			
+			if (loaderData != null) {
+				result.append("data: ");
+				result.append(loaderData);
+				result.append(", ");
+			}
+			
+			if (exception != null) {
+				result.append("ex: ");
+				result.append(exception);
+				result.append(", ");
+			}
+			
+			result.append("FTS:");
+			result.append(functionThreadSize);
+			result.append(", FQS:");
+			result.append(functionQueueSize);
+			
+			result.append(" QTS:");
+			result.append(queryThreadSize);
+			result.append(", QQS:");
+			result.append(queryQueueSize);
+			
+			return result.toString();	
+		}
+	}
+	
+	public abstract static class BaseCacheLoader {
+
+		public ApiClient apiClient;
+		public ApiGetRequest<?> request;
+		
+		public long loadT1;
+		public long loadT2;
+
 		
 		public BaseCacheLoader(ApiClient apiClient, ApiGetRequest<?> request) {
 			this.apiClient = apiClient;
 			this.request = request;
+		}
+		
+		/**
+		 * @param response - for children 
+		 */
+		public String getLoaderData(Response<?> response) {
+			return null;
+		}
+		
+		protected String getServiceId() {
+			return null;
 		}
 
 		protected boolean printDuration() {
@@ -101,25 +196,81 @@ public class ApiCache {
 		}
 		
 		public Response<?> load() {
-			long t1 = System.currentTimeMillis();
-				
+						
+			QueryLogItem queryLogItem = new QueryLogItem();
+			
+			queryLogItem.apiHash = apiClient.hashCode();
+			this.loadT1 = queryLogItem.t1;
+			
+			queryLogItems.add(queryLogItem);
+		
 			try {
-				Response<?> result = apiClient.get(request);
+					
+				queryLogItem.loaderClass = this.getClass();
+				queryLogItem.serviceId = this.getServiceId();
 				
-				long t2 = System.currentTimeMillis();
-				
-				if ((PRINT_DURATIONS)  && (printDuration())) {
-					double sec = (double)(t2-t1) / 1000;
-					logger.info(sec + " sec: " + toString());
+				if (queryLogItem.serviceId != null) {
+					
+					Pair<ThreadPoolExecutor, ThreadPoolExecutor> serviceExecutors = 
+						GrafanaThreadPool.getExecutors(apiClient);
+					
+					queryLogItem.functionThreadSize = serviceExecutors.getFirst().getActiveCount();
+					queryLogItem.functionQueueSize = serviceExecutors.getFirst().getQueue().size();
+					
+					queryLogItem.queryThreadSize = serviceExecutors.getSecond().getActiveCount();
+					queryLogItem.queryQueueSize = serviceExecutors.getSecond().getQueue().size();				
 				}
 				
-				return result;
-			} catch (Throwable e) {
-				long t2 = System.currentTimeMillis();
+				Response<?> result = apiClient.get(request);
 				
-				throw new IllegalStateException("Error executing after " + ((double)(t2-t1) / 1000) + " sec: " + toString(), e);
+				queryLogItem.t2 = System.currentTimeMillis();
+				this.loadT2 = queryLogItem.t2;
+				
+				if (result != null) {
+					queryLogItem.loaderData = getLoaderData(result);
+				}
+				
+				if ((PRINT_DURATIONS)  && (this.printDuration())) {
+					logger.info(queryLogItem.toString());
+				}
+								
+				return result;
+				
+			} catch (Throwable e) {
+				queryLogItem.t2 = System.currentTimeMillis();
+				this.loadT2 = queryLogItem.t2;
+				
+				queryLogItem.exception = e.getMessage();
+				
+				throw new IllegalStateException("Error executing " + queryLogItem.toString() , e);
 			}
 		}
+		
+		@Override
+		public String toString() {
+			return getLoaderClassName(this.getClass());
+		}
+	}
+	
+	protected static class ServicesCacheLoader extends BaseCacheLoader {
+
+		public ServicesCacheLoader(ApiClient apiClient, ApiGetRequest<?> request) {
+			super(apiClient, request);
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+
+			if (!(obj instanceof ServicesCacheLoader)) {
+				return false;
+			}
+
+			if (!super.equals(obj)) {
+				return false;
+			}
+
+			return true;
+		}		
 	}
 
 	protected abstract static class ServiceCacheLoader extends BaseCacheLoader {
@@ -154,6 +305,11 @@ public class ApiCache {
 		@Override
 		public int hashCode() {
 			return super.hashCode() ^ serviceId.hashCode();
+		}
+		
+		@Override
+		protected String getServiceId() {
+			return serviceId;
 		}
 	}
 	
@@ -205,7 +361,7 @@ public class ApiCache {
 		
 		@Override
 		public String toString() {
-			return this.getClass().getSimpleName() + ": " + Id;
+			return getLoaderClassName(this.getClass()) + ": " + Id;
 		}
 	}
 
@@ -248,7 +404,7 @@ public class ApiCache {
 		
 		@Override
 		public String toString() {
-			return this.getClass().getSimpleName() + " active: " + active;
+			return getLoaderClassName(this.getClass()) + " active: " + active;
 		}
 	}
 	
@@ -291,7 +447,7 @@ public class ApiCache {
 		
 		@Override
 		public String toString() {
-			return this.getClass().getSimpleName() + " active: " + active;
+			return getLoaderClassName(this.getClass()) + " active: " + active;
 		}
 	}
 	
@@ -334,7 +490,7 @@ public class ApiCache {
 		
 		@Override
 		public String toString() {
-			return this.getClass().getSimpleName() + " active: " + active;
+			return getLoaderClassName(this.getClass()) + " active: " + active;
 		}
 	}
 	
@@ -362,7 +518,8 @@ public class ApiCache {
 
 			ViewCacheLoader other = (ViewCacheLoader) obj;
 
-			if (!Objects.equal(viewName, other.viewName)) {
+			if (!Objects.equal(GrafanaFunction.getViewName(viewName),
+					GrafanaFunction.getViewName(other.viewName))) {
 				return false;
 			}
 
@@ -430,8 +587,8 @@ public class ApiCache {
 		protected boolean compareTimeframes(ViewInputCacheLoader other) {
 			
 			if ((input.timeFilter != null) && (other.input.timeFilter != null) &&
-				(!compareTimeFilters(input.timeFilter, other.input.timeFilter))) {
-				return false;
+		    		(!compareTimeFilters(input.timeFilter, other.input.timeFilter))) {	
+				return false;	
 			}
 		
 			return true;
@@ -494,8 +651,8 @@ public class ApiCache {
 
 		@Override
 		public String toString() {
-			return this.getClass().getSimpleName() + ": " + serviceId + " " + input.view + " D: " + input.deployments
-					+ " A: " + input.applications + " S: " + input.servers;
+			return getLoaderClassName(this.getClass()) + ": " + serviceId + " " + input.view + " Deps: " + input.deployments
+					+ " Apps: " + input.applications + " Servs: " + input.servers;
 		}
 	}
 
@@ -554,7 +711,7 @@ public class ApiCache {
 
 		@Override
 		public String toString() {
-			return super.toString() + " vt: " + volumeType;
+			return super.toString() + " volumeType: " + volumeType;
 		}
 	}
 	
@@ -603,14 +760,48 @@ public class ApiCache {
 
 			return true;
 		}
+		
+		@Override
+		public String getLoaderData(Response<?> response) {
+			
+			if (response.data instanceof EventsResult) {
+				
+				EventsResult eventsResult = (EventsResult)response.data;
+				
+				if (eventsResult.events == null) {
+					return "0";
+				}
+				
+				return String.valueOf(eventsResult.events.size());	
+			}
+			
+			return super.getLoaderData(response);
+		}
 	}
 
 	protected static class GraphCacheLoader extends VolumeCacheLoader {
+		
 		protected int pointsWanted;
 		protected int activeWindow;
 		protected int baselineWindow;
 		protected int windowSlice;
+		protected Pair<DateTime, DateTime> timespan;
+		protected boolean cachable;
 
+		public GraphCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
+				VolumeType volumeType, int pointsWanted, 
+				int baselineWindow, int activeWindow, int windowSlice,
+				Pair<DateTime, DateTime> timespan, boolean cachable) {
+
+			super(apiClient, request, serviceId, input, volumeType);
+			this.pointsWanted = pointsWanted;
+			this.activeWindow = activeWindow;
+			this.baselineWindow = baselineWindow;
+			this.windowSlice = windowSlice;
+			this.timespan = timespan;
+			this.cachable = cachable;
+		}
+				
 		@Override
 		public boolean equals(Object obj) {
 			if (!(obj instanceof GraphCacheLoader)) {
@@ -635,35 +826,101 @@ public class ApiCache {
 				return false;
 			}
 			
-
 			if (windowSlice != other.windowSlice) {
 				return false;
 			}
 
 			return true;
 		}
+		
+		@Override
+		public Response<?> load()
+		{
+			String keyName;
+			
+			if (cachable) {
+				
+				keyName = keyName();
+				
+				this.loadT1 = System.currentTimeMillis();
+				String value = cacheStorage.getValue(keyName);
+				this.loadT2 = System.currentTimeMillis();
 
-		public GraphCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
-				VolumeType volumeType, int pointsWanted, int baselineWindow, int activeWindow, int windowSlice) {
+				if (value != null) {
+					
+					Gson gson = new Gson();
+					GraphResult graphResult = gson.fromJson(value, GraphResult.class);
+					
+					if (graphResult != null) {
+						Response<GraphResult> response = Response.of(200, graphResult);						
+						return response;
+					}
+				}
+			} else {
+				keyName = null;
+			}
+			
+			@SuppressWarnings("unchecked")
+			Response<GraphResult> response = (Response<GraphResult>)super.load();
 
-			super(apiClient, request, serviceId, input, volumeType);
-			this.pointsWanted = pointsWanted;
-			this.activeWindow = activeWindow;
-			this.baselineWindow = baselineWindow;
-			this.windowSlice = windowSlice;
+			if ((cachable) && (response != null) 
+			&& (response.data != null) && (response.isOK())) {
+				Gson gson = new Gson();
+				String value = gson.toJson(response.data); 
+				cacheStorage.setValue(keyName, value);
+			}
+			
+			return response;
+		}
+			
+		private String keyName() {
+						
+			String result = String.join("_", serviceId, input.view, input.applications,
+					input.deployments, input.servers, String.valueOf(pointsWanted), 
+					String.valueOf(volumeType), TimeUtil.toString(timespan.getFirst()),
+					TimeUtil.toString(timespan.getSecond()));
+			
+			return result;
 		}
 		
 		@Override
-		public String toString()
-		{
-			String result = super.toString() + " pw: " + pointsWanted + " aw: " 
-				+ activeWindow + " bw: " + baselineWindow + " slc: " + windowSlice;
+		public String toString() {
+			
+			String result = super.toString() + " pointsWanted: " + pointsWanted + " activeWindow: " 
+				+ activeWindow + " baselineWindow: " + baselineWindow + " graph slice: " + windowSlice;
 			
 			return result;
+		}
+		
+		@Override
+		public String getLoaderData(Response<?> response) {
+			
+			if (response.data instanceof GraphResult) {
+				
+				GraphResult graphResult = (GraphResult)response.data;
+				
+				if (graphResult.graphs == null) {
+					return "0";
+				}
+				
+				int points = 0;
+				
+				for (Graph graph : graphResult.graphs) {
+					
+					if (graph.points != null) {
+						points += graph.points.size();	
+					}
+				}
+				
+				return graphResult.graphs.size() + "\\" + points;
+			}
+		
+			return super.getLoaderData(response);
 		}
 	}
 	
 	protected static class TransactionsCacheLoader extends ViewInputCacheLoader {
+		
 		protected int baselineTimespan;
 		protected int activeTimespan;
 		
@@ -699,6 +956,23 @@ public class ApiCache {
 			
 			this.baselineTimespan = baselineTimespan;
 			this.activeTimespan = activeTimespan;
+		}
+		
+		@Override
+		public String getLoaderData(Response<?> response) {
+			
+			if (response.data instanceof TransactionsVolumeResult) {
+				
+				TransactionsVolumeResult transactionsVolumeResult = (TransactionsVolumeResult)response.data;
+				
+				if (transactionsVolumeResult.transactions == null) {
+					return "0";
+				}
+				
+				return String.valueOf(transactionsVolumeResult.transactions.size());	
+			}
+			
+			return super.getLoaderData(response);
 		}
 	}
 
@@ -737,8 +1011,7 @@ public class ApiCache {
 		}
 		
 		@Override
-		public String toString()
-		{
+		public String toString() {
 			return super.toString() + " aw = " + activeTimespan + " bw = " + baselineTimespan;
 		}
 
@@ -747,7 +1020,32 @@ public class ApiCache {
 			this(apiClient, request, serviceId, input, pointsWanted, 0, 0);
 
 		}
+		
+		@Override
+		public String getLoaderData(Response<?> response) 	{
 
+			if (response.data instanceof TransactionsGraphResult) {
+				
+				TransactionsGraphResult transactionsGraphResult = (TransactionsGraphResult)response.data;
+				
+				if (transactionsGraphResult.graphs == null) {
+					return "0";
+				}
+				
+				int points = 0;
+				
+				for (TransactionGraph graph : transactionsGraphResult.graphs) {
+					
+					if (graph.points != null) {
+						points += graph.points.size();	
+					}
+				}
+				
+				return transactionsGraphResult.graphs.size() + "\\" + points;
+			}
+			
+			return super.getLoaderData(response);
+		}
 		
 		public TransactionsGraphCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId,
 				ViewInput input, int pointsWanted, int baselineTimespan, int activeTimespan) {
@@ -836,7 +1134,7 @@ public class ApiCache {
 		}
 	}
 	
-	protected static class RegressionCacheLoader extends EventsCacheLoader {
+	public static class RegressionCacheLoader extends EventsCacheLoader {
 
 		protected boolean newOnly;
 		protected RegressionFunction function;
@@ -900,6 +1198,32 @@ public class ApiCache {
 			}
 		}
 		*/
+		
+		public String getLoaderData(RegressionOutput regressionOutput) {
+			
+			StringBuilder result = new StringBuilder();
+			
+			if ((regressionOutput.baseVolumeGraph != null) 
+			&& (regressionOutput.baseVolumeGraph.points != null)) {
+				result.append("Baseline graph points: ");
+				result.append(regressionOutput.baseVolumeGraph.points.size());
+				result.append(", ");
+			}	
+			
+			if ((regressionOutput.activeVolumeGraph != null) 
+			&& (regressionOutput.activeVolumeGraph.points != null)) {
+				result.append("Active graph points: ");
+				result.append(regressionOutput.activeVolumeGraph.points.size());
+				result.append(", ");
+			}	
+			
+			if (regressionOutput.eventListMap != null) {
+				result.append("Event list: ");
+				result.append(regressionOutput.eventListMap.size());
+			}
+		
+			return result.toString();
+		}
 
 		public RegressionCacheLoader(ApiClient apiClient, String serviceId, 
 				ViewInput input, RegressionFunction function, boolean newOnly) {
@@ -976,6 +1300,16 @@ public class ApiCache {
 	}
 	
 	@SuppressWarnings("unchecked")
+	public static Response<ServicesResult> getServices(ApiClient apiClient) {
+
+		ServicesRequest request = ServicesRequest.newBuilder().build();
+		ServicesCacheLoader cacheKey = new ServicesCacheLoader(apiClient, request);
+		Response<ServicesResult> response = (Response<ServicesResult>)getItem(cacheKey);
+
+		return response;
+	}
+	
+	@SuppressWarnings("unchecked")
 	public static Response<ApplicationsResult> getApplications(ApiClient apiClient, String serviceId, boolean active) {
 
 		ApplicationsRequest request = ApplicationsRequest.newBuilder().setServiceId(serviceId).setActive(active).build();
@@ -1019,14 +1353,18 @@ public class ApiCache {
 
 		return response;
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	public static Response<GraphResult> getEventGraph(ApiClient apiClient, String serviceId,
 			ViewInput input, VolumeType volumeType, GraphRequest request, int pointsWanted,
-			int baselineWindow, int activeWindow, int windowSlice) {
+			int baselineWindow, int activeWindow, int windowSlice,
+			Pair<DateTime, DateTime> timespan, boolean cache) {
 
+		boolean cachable = (CACHE_GRAPHS) && (cacheStorage != null) && (cache);
+		
 		GraphCacheLoader cacheKey = new GraphCacheLoader(apiClient, request, serviceId, input, volumeType, 
-			pointsWanted, baselineWindow, activeWindow, windowSlice);
+				pointsWanted, baselineWindow, activeWindow, windowSlice, timespan, cachable);
+		
 		Response<GraphResult> response = (Response<GraphResult>) getItem(cacheKey);
 
 		return response;
@@ -1034,10 +1372,12 @@ public class ApiCache {
 	
 	public static void putEventGraph(ApiClient apiClient, String serviceId,
 			ViewInput input, VolumeType volumeType, GraphRequest request, int pointsWanted,
-			int baselineWindow, int activeWindow, int windowSlice, Response<GraphResult> graphResult) {
+			int baselineWindow, int activeWindow, Response<GraphResult> graphResult) {
 
 		GraphCacheLoader cacheKey = new GraphCacheLoader(apiClient, request, serviceId, input, volumeType, 
-			pointsWanted, baselineWindow, activeWindow, windowSlice);
+			pointsWanted, baselineWindow, activeWindow, NO_GRAPH_SLICE, null, false);
+		
+		cacheKey.loadT1 = System.currentTimeMillis();
 		
 		queryCache.put(cacheKey, graphResult);
 	}
@@ -1133,27 +1473,63 @@ public class ApiCache {
 		RegressionCacheLoader key = new RegressionCacheLoader(apiClient, serviceId, input, function, newOnly);
 		
 		if (load) {
-			try
-			{
-				RegressionOutput result = rgressionReportRache.get(key);
+			
+			try {
+				RegressionOutput result = regressionOutputCache.get(key);
 				
 				if (result.empty) {
-					rgressionReportRache.invalidate(key);
+					regressionOutputCache.invalidate(key);
 				}
 				
 				return result;
-			}
-			catch (ExecutionException e)
-			{
+			} catch (ExecutionException e) {
 				throw new IllegalStateException(e);
 			}
 		} else {
-			return rgressionReportRache.getIfPresent(key);
+			return regressionOutputCache.getIfPresent(key);
 		}
 	}
 	
-	private static final LoadingCache<RegressionCacheLoader, RegressionOutput> rgressionReportRache = CacheBuilder
-			.newBuilder().maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_REFRESH_RETENTION, TimeUnit.MINUTES)
+	public static void setCacheStorage(KeyValueStorage cacheStorage) {
+		ApiCache.cacheStorage = cacheStorage;
+	}
+	
+	private static final Map<Class<?>, String> loaderClassNames;
+	
+	static {
+		loaderClassNames = new HashMap<Class<?>, String>();
+		
+		loaderClassNames.put(EventsCacheLoader.class, "Events");
+		loaderClassNames.put(GraphCacheLoader.class, "Graph");
+		loaderClassNames.put(TransactionsGraphCacheLoader.class, "TxGraph");
+		loaderClassNames.put(TransactionsCacheLoader.class, "Tx");
+		loaderClassNames.put(EventCacheLoader.class, "Event");
+		loaderClassNames.put(RegresionWindowCacheLoader.class, "Reg");
+		loaderClassNames.put(ViewCacheLoader.class, "View");
+		loaderClassNames.put(ServicesCacheLoader.class, "Services");
+		loaderClassNames.put(ApplicationsCacheLoader.class, "Apps");
+		loaderClassNames.put(DeploymentsCacheLoader.class, "Deps");
+		loaderClassNames.put(ProcessesCacheLoader.class, "Process");
+		loaderClassNames.put(SlimVolumeCacheLoader.class, "SlimEv");
+
+	}
+	
+	private static String getLoaderClassName(Class<?> loaderClass) {
+		
+		String result = loaderClassNames.get(loaderClass);
+		
+		if (result == null) {
+			result = loaderClass.getSimpleName();
+		}
+		
+		return result;
+		
+	}
+	
+	private static KeyValueStorage cacheStorage = new FolderStorage(CACHE_FOLDER); 
+
+	public static final LoadingCache<RegressionCacheLoader, RegressionOutput> regressionOutputCache = CacheBuilder
+			.newBuilder().maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_REFRESH_RETENTION, TimeUnit.SECONDS)
 			.build(new CacheLoader<RegressionCacheLoader, RegressionOutput>() {
 				
 				@Override
@@ -1165,8 +1541,7 @@ public class ApiCache {
 
 	private static final LoadingCache<RegresionWindowCacheLoader, RegressionWindow> regressionWindowCache = CacheBuilder
 			.newBuilder().maximumSize(CACHE_SIZE)
-			.expireAfterAccess(CACHE_REFRESH_RETENTION, TimeUnit.MINUTES)
-			.refreshAfterWrite(CACHE_RELOAD_WINDOW, TimeUnit.MINUTES)
+			.expireAfterWrite(CACHE_REFRESH_RETENTION, TimeUnit.SECONDS)
 			.build(new CacheLoader<RegresionWindowCacheLoader, RegressionWindow>() {
 				
 				@Override
@@ -1174,14 +1549,14 @@ public class ApiCache {
 					
 					RegressionWindow result = RegressionUtil.getActiveWindow(key.apiClient, key.input, 
 							System.out);
+					
 					return result;
 				}
 			});
-
-	private static final LoadingCache<BaseCacheLoader, Response<?>> queryCache = CacheBuilder.newBuilder()
+	
+	public static final LoadingCache<BaseCacheLoader, Response<?>> queryCache = CacheBuilder.newBuilder()
 			.maximumSize(CACHE_SIZE)
-			.expireAfterAccess(CACHE_REFRESH_RETENTION, TimeUnit.MINUTES)
-			.refreshAfterWrite(CACHE_REFRESH_RETENTION, TimeUnit.MINUTES)
+			.expireAfterWrite(CACHE_REFRESH_RETENTION, TimeUnit.SECONDS)
 			.build(new CacheLoader<BaseCacheLoader, Response<?>>() {
 				
 				@Override
@@ -1190,24 +1565,9 @@ public class ApiCache {
 					Response<?> result = key.load();
 					return result;
 				}
-				
-				@Override
-				public ListenableFuture<Response<?>> reload(final BaseCacheLoader key, Response<?> prev) {
-		              
-					ListenableFutureTask<Response<?>> task = ListenableFutureTask.create(new Callable<Response<?>>() {
-		                
-						@Override
-						public Response<?> call() {
-		                     return key.load();
-		                   }
-		                });
-		                 
-		                Executor executor = GrafanaThreadPool.getQueryExecutor(key.apiClient);
-		                executor.execute(task);
-		                
-		                return task;
-		               
-		             }
 			});
-
+	
+	public static final Queue<QueryLogItem> queryLogItems = Queues.synchronizedQueue(
+			EvictingQueue.create(CACHE_SIZE));
+		
 }

@@ -11,7 +11,11 @@
 	<logger name="com.takipi" level="info" additivity="false">
 		<appender-ref ref="STDOUT" />
 	</logger>
-
+	
+	<logger name="com.takipi.api.client.observe" level="debug" additivity="false">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	
 	<root level="error">
 		<appender-ref ref="STDOUT" />
 	</root>

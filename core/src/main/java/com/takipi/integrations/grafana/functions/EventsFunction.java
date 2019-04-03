@@ -840,23 +840,19 @@ public class EventsFunction extends GrafanaFunction {
 			return;
 		}
 		
+		Set<String> similarIds = new HashSet<String>();
+		
 		if (source.similar_event_ids != null) {
-			if (target.similar_event_ids != null) {
-				for (String similarId: source.similar_event_ids) {
-					if (!target.similar_event_ids.contains(similarId)) {
-						target.similar_event_ids.add(similarId);
-					}
-				}
-			} else {
-				target.similar_event_ids = new ArrayList<String>(source.similar_event_ids);	
-			}
-		} else if (target.similar_event_ids == null) {
-			target.similar_event_ids = new ArrayList<String>();
+			similarIds.addAll(source.similar_event_ids);
 		}
 		
-		if (!target.similar_event_ids.contains(source.id)) {
-			target.similar_event_ids.add(source.id);
+		if (target.similar_event_ids != null) {
+			similarIds.addAll(target.similar_event_ids);
 		}
+		
+		similarIds.add(source.id);
+		
+		target.similar_event_ids = new ArrayList<String>(similarIds);
 	}
 	
 	protected List<EventData> mergeEventDatas(List<EventData> eventDatas) {

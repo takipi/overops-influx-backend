@@ -1,5 +1,7 @@
 package com.takipi.integrations.grafana.input;
 
+import com.takipi.integrations.grafana.util.TimeUtil;
+
 /**
  * A function charting a target reliability KPI for a selected set of apps. KPIs include:
  * reliability score, error volumes, new errors, increasing errors and more. The out put
@@ -31,21 +33,15 @@ public class ReliabilityKpiGraphInput extends GraphInput {
 	 */
 	public int limit;
 	
-	public enum ReportInterval {
-		Week,
-		Day,
-		Hour
-	}
-	
 	/**
 	 * The interval by which to group data (e.g. 1d, 7d,..), default = Day
 	 */
-	public ReportInterval reportInterval;
+	public TimeUtil.Interval reportInterval;
 	
-	public ReportInterval getReportInterval() {
+	public TimeUtil.Interval getReportInterval() {
 		
 		if (reportInterval == null) {
-			return ReportInterval.Day;
+			return TimeUtil.Interval.Day;
 		}
 		
 		return reportInterval;

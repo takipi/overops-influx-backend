@@ -8,37 +8,32 @@ import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.LimitVariableInput;
 import com.takipi.integrations.grafana.output.Series;
 
-public class LimitVariableFunction extends VariableFunction
-{
-	public static class Factory implements FunctionFactory
-	{
+public class LimitVariableFunction extends VariableFunction {
+	
+	public static class Factory implements FunctionFactory {
 		@Override
-		public GrafanaFunction create(ApiClient apiClient)
-		{
+		public GrafanaFunction create(ApiClient apiClient) {
 			return new LimitVariableFunction(apiClient);
 		}
 		
 		@Override
-		public Class<?> getInputClass()
-		{
+		public Class<?> getInputClass() {
 			return LimitVariableInput.class;
 		}
 		
 		@Override
-		public String getName()
-		{
+		public String getName()	{
 			return "limitVariable";
 		}
 	}
 	
-	public LimitVariableFunction(ApiClient apiClient)
-	{
+	public LimitVariableFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
 
 	@Override
-	protected void populateValues(FunctionInput input, VariableAppender appender)
-	{
+	protected void populateValues(FunctionInput input, VariableAppender appender) {
+		
 		LimitVariableInput pvInput = (LimitVariableInput)input;
 		
 		Collection<String> values = pvInput.getValues();
@@ -56,8 +51,8 @@ public class LimitVariableFunction extends VariableFunction
 	}
 	
 	@Override
-	public List<Series> process(FunctionInput functionInput)
-	{
+	public List<Series> process(FunctionInput functionInput) {
+		
 		if (!(functionInput instanceof LimitVariableInput)) {
 			throw new IllegalArgumentException("functionInput");
 		}

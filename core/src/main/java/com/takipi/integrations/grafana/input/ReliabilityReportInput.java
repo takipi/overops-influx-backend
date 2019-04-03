@@ -3,7 +3,7 @@ package com.takipi.integrations.grafana.input;
 import java.util.Arrays;
 import java.util.List;
 
-import com.takipi.integrations.grafana.input.ReliabilityKpiGraphInput.ReportInterval;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 /** 
  * A function returning a report for a a target set of applications, deployments or tiers (i.e. categories)
@@ -173,7 +173,7 @@ public class ReliabilityReportInput extends RegressionsInput {
 	/**
 	 * Control the report interval in Timeline mode
 	 */
-	public ReportInterval reportInterval;
+	public TimeUtil.Interval reportInterval;
 	
 	/**
 	 * Control whether to add am "Application" tier  in Tiers report mode
