@@ -1590,9 +1590,7 @@ public abstract class GrafanaFunction {
 			
 			for (Pair<DateTime, DateTime> period :periods) {
 				
-				boolean cache = (index > 0) && (index < periods.size() - 1) 
-					&& ((input.deployments == null) 
-					|| (GrafanaFunction.VAR_ALL.contains(input.deployments)));
+				boolean cache = (index > 0) && (index < periods.size() - 1);
 				
 				//.minusMinutes(1)
 				SliceRequest slice = new SliceRequest(period.getFirst(),
