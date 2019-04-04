@@ -27,6 +27,7 @@ import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.settings.GeneralSettings;
+import com.takipi.api.client.util.settings.RegressionSettings;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
@@ -1084,8 +1085,10 @@ public class EventsFunction extends GrafanaFunction {
 	
 	protected void sortEventDatas(String serviceId, List<EventData> eventDatas ) {
 	
-		List<String> criticalExceptionList = new ArrayList<String>(
-			getSettingsData(serviceId).regression.getCriticalExceptionTypes());
+		RegressionSettings regressionSettings = getSettingsData(serviceId).regression;
+		
+		int minThreshold = regressionSettings.error_min_volume_threshold;
+		List<String> criticalExceptionList = new ArrayList<String>(regressionSettings.getCriticalExceptionTypes());
 		
 		eventDatas.sort(new Comparator<EventData>() {
 			
@@ -1096,7 +1099,7 @@ public class EventsFunction extends GrafanaFunction {
 				double o2RateDelta = getDelta(getRateDelta(o2));
 				
 				return compareEvents(o1.event, o2.event, o1RateDelta, o2RateDelta, 
-					criticalExceptionList);
+					criticalExceptionList, minThreshold);
 			}
 				
 		});

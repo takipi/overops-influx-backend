@@ -401,8 +401,10 @@ public class RegressionFunction extends EventsFunction {
 	
 	private void sortRegressions(String serviceId, List<EventData> eventData) {	
 		
-		List<String> criticalExceptionList = new ArrayList<String>(
-				getSettingsData(serviceId).regression.getCriticalExceptionTypes());
+		RegressionSettings regressionSettings = getSettingsData(serviceId).regression;
+		
+		int minThreshold = regressionSettings.error_min_volume_threshold;
+		List<String> criticalExceptionList = new ArrayList<String>(regressionSettings.getCriticalExceptionTypes());
 		
 		eventData.sort(new Comparator<EventData>() {
 			
@@ -422,7 +424,7 @@ public class RegressionFunction extends EventsFunction {
 					(r1.type == RegressionType.NewIssues)) {
 							
 					return compareEvents(o1.event, o2.event, 0, 0, 
-						criticalExceptionList);
+						criticalExceptionList, minThreshold);
 				}			
 				
 				if ((r1.type == RegressionType.SevereRegressions) ||
@@ -502,9 +504,11 @@ public class RegressionFunction extends EventsFunction {
 	
 	private void sortRegressionDatas(String serviceId, List<EventData> eventDatas) {
 		
-		List<String> criticalExceptionList = new ArrayList<String>(
-				getSettingsData(serviceId).regression.getCriticalExceptionTypes());
-			
+		RegressionSettings regressionSettings = getSettingsData(serviceId).regression;
+		
+		int minThreshold = regressionSettings.error_min_volume_threshold;
+		List<String> criticalExceptionList = new ArrayList<String>(regressionSettings.getCriticalExceptionTypes());
+		
 		eventDatas.sort(new Comparator<EventData>() {
 
 			@Override
@@ -519,7 +523,8 @@ public class RegressionFunction extends EventsFunction {
 					return typeDelta;
 				}
 				
-				int result = compareEvents(o1.event, o2.event, 0, 0, criticalExceptionList);
+				int result = compareEvents(o1.event, o2.event, 
+					0, 0, criticalExceptionList, minThreshold);
 				
 				return result;
 			}

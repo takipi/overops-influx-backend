@@ -1813,7 +1813,7 @@ public abstract class GrafanaFunction {
 	
 	protected int compareEvents(EventResult o1, EventResult o2, 
 		double o1RateDelta, double o2RateDelta,
-		List<String> criticalExceptionList) {
+		List<String> criticalExceptionList, int minThreshold) {
 		
 		boolean iso1Uncaught = o1.type.equals(UNCAUGHT_EXCEPTION); 
 		boolean iso2Uncaught = o2.type.equals(UNCAUGHT_EXCEPTION); 
@@ -1854,6 +1854,15 @@ public abstract class GrafanaFunction {
 
 		if (newDelta != 0) {
 			return newDelta;
+		}
+		
+		boolean o1Threshold = o1.stats.hits > minThreshold;
+		boolean o2Threshold = o2.stats.hits > minThreshold;
+
+		int thresholdDelta = Boolean.compare(o2Threshold, o1Threshold);
+
+		if (thresholdDelta != 0) {
+			return thresholdDelta;
 		}
 		
 		int rateDelta = Double.compare(o2RateDelta, o1RateDelta);
