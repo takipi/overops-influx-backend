@@ -729,8 +729,8 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			regressionInput.events = nonEmptyEventsMap.values();
 			regressionInput.baselineGraph = baselineGraph;
 			
-			RegressionOutput regressionOutput = regressionFunction.executeRegression(timelineData.input, 
-				regressionInput, regressionWindow, 
+			RegressionOutput regressionOutput = regressionFunction.executeRegression(serviceId,
+				timelineData.input, regressionInput, regressionWindow, 
 				nonEmptyEventsMap, volume, baselineGraph, activeGraph, true);					
 			
 			RegressionInterval regressionInterval = new RegressionInterval(period);

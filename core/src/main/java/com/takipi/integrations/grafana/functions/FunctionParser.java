@@ -278,6 +278,7 @@ public class FunctionParser {
 		registerFunction(new MinTimeFilterAlertFunction.Factory());
 		registerFunction(new ConvertToArrayFunction.Factory());
 		registerFunction(new ConcatFunction.Factory());
+		registerFunction(new ExtendWindowFunction.Factory());
 
 		
 		//diagnostics functions

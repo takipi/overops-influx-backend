@@ -176,6 +176,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			StringBuilder result = new StringBuilder();
 			
+			result.append(name);
 			result.append(", introduced ");
 			
 			int activeTimespan = reportKeyResults.output.regressionData.regressionOutput.regressionInput.activeTimespan;
@@ -365,7 +366,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 					input.pointsWanted);
 								
 				TransactionDataResult transactionDataResult = getTransactionDatas(
-					transactionGraphs, serviceId, viewId, timeSpan, input, updateEvents, 0, false);				
+					transactionGraphs, serviceId, viewId, timeSpan, input, true, updateEvents, false, 
+					0, false);				
 				
 				SlowdownAsyncResult result;
 				
@@ -1310,7 +1312,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		RegressionOutput regressionOutput = reportKeyResults.output.regressionData.regressionOutput;
 
-		result.append("Score ");
+		result.append("Score for ");
 
 		ReportMode reportMode = input.getReportMode();
 
@@ -1630,8 +1632,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		}
 	}
 	
-	private Object getServiceSingleStat(Collection<String> serviceIds, String serviceId, Pair<DateTime, DateTime> timeSpan, ReliabilityReportInput input)
-	{
+	private Object getServiceSingleStat(Collection<String> serviceIds, String serviceId, Pair<DateTime, DateTime> timeSpan, ReliabilityReportInput input) {
 		Collection<ReportKeyOutput> reportKeyOutputs = executeReport(serviceId, input, timeSpan);
 		Collection<ReportKeyResults> reportKeyResults = getReportResults(serviceId, timeSpan, input, reportKeyOutputs);
 		
@@ -1788,7 +1789,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 				reportKeyResults.failures = getAppFailureData(serviceId, input, timeSpan, reportKeyResults);
 				reportKeyResults.transactions = getAppTransactionData(reportKeyResults);
 				
-				reportKeyResults.relability = getAppReliabilityData(reportKeyResults, 
+				reportKeyResults.relability = getAppReliabilityData(serviceId, reportKeyResults, 
 					input, reportKeyResults.transactions, reportKeyResults.failures);
 					
 				
@@ -2140,8 +2141,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return ReliabilityState.OK;
 	}
 	
-	private ReportKeyReliability getAppReliabilityData(ReportKeyResults reportKeyResult,
-		ReliabilityReportInput input,
+	private ReportKeyReliability getAppReliabilityData(String serviceId,
+		ReportKeyResults reportKeyResult, ReliabilityReportInput input,
 		ReportKeyTransactions transactionData, ReportKeyFailures failureData) {
 		
 		ReportKeyReliability result = new ReportKeyReliability();
@@ -2180,7 +2181,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		result.reliabilityState = combineStates(result.failRateState , result.scoreState);
 		
-		Pair<String, String> descsPair = getReliabilityDescs(result, reportKeyResult, input, 
+		Pair<String, String> descsPair = getReliabilityDescs(serviceId, result, reportKeyResult, input, 
 			transactionData, failureData, baseFailRate);
 		
 		result.relabilityDesc = descsPair.getFirst();
@@ -2189,8 +2190,9 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return result;
 	}
 	
-	private Pair<String, String> getReliabilityDescs(ReportKeyReliability reliabilityData,
-		ReportKeyResults reportKeyResult,ReliabilityReportInput input,
+	private Pair<String, String> getReliabilityDescs(String serviceId,
+		ReportKeyReliability reliabilityData,
+		ReportKeyResults reportKeyResult, ReliabilityReportInput input,
 		ReportKeyTransactions transactionData, ReportKeyFailures failureData,
 		double baseFailRate) {
 	
@@ -2217,6 +2219,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 		StringBuilder relabilityDesc = new StringBuilder();
 		
 		relabilityDesc.append(reliabilityData.reliabilityState.toString().toUpperCase());
+		relabilityDesc.append(" for ");
+		relabilityDesc.append(reportKeyResult.output.reportKey.getFullName(serviceId, reportKeyResult));
 		relabilityDesc.append(": ");
 
 		if (reliabilityData.failRateState != ReliabilityState.OK) {
@@ -2666,7 +2670,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		ReportKeyFailures appFailureData = getAppFailureData(serviceId, input, timespan, reportKeyResult);
 		ReportKeyTransactions appTransactionsData = getAppTransactionData(reportKeyResult);
 		
-		ReportKeyReliability result = getAppReliabilityData(reportKeyResult, input, appTransactionsData, appFailureData);
+		ReportKeyReliability result = getAppReliabilityData(serviceId, reportKeyResult, input, appTransactionsData, appFailureData);
 				
 		return result;
 	}

@@ -195,7 +195,8 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 			return Collections.emptyList();
 		}
 		
-		List<EventData> eventDatas = regressionFunction.processRegression(graphInput, regressionOutput.regressionInput,
+		List<EventData> eventDatas = regressionFunction.processRegression(serviceId,
+			graphInput, regressionOutput.regressionInput,
 			regressionOutput.rateRegression, includeNew, includeRegressions);
 		
 		EventFilter eventFilter = getEventFilter(serviceId, graphInput, timeSpan);

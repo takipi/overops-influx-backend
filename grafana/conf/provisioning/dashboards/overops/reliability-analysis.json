@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 20,
-  "iteration": 1554100410564,
+  "iteration": 1554363043219,
   "links": [
     {
       "icon": "dashboard",
@@ -332,7 +332,7 @@
         {
           "includeVars": true,
           "keepTime": true,
-          "targetBlank": true,
+          "targetBlank": false,
           "title": "Performance. $sd",
           "type": "absolute",
           "url": "d/Z40SpeJmz/performance"
@@ -454,7 +454,7 @@
         {
           "includeVars": true,
           "keepTime": true,
-          "targetBlank": true,
+          "targetBlank": false,
           "title": "New Errors. $ne",
           "type": "absolute",
           "url": "d/3NZ83NLik/new-errors"
@@ -698,7 +698,7 @@
           "dashboard": "d/HYBPMdYik/errors",
           "includeVars": true,
           "keepTime": true,
-          "targetBlank": true,
+          "targetBlank": false,
           "title": "Unique Errors. Volume = $e errors.",
           "type": "absolute",
           "url": "d/HYBPMdYik/errors"
@@ -1633,7 +1633,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "events({\"fields\":\"link,rate_desc,description,rate_delta_desc,stats.hits,rate_delta,typeMessage\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":60, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
+          "query": "events({\"fields\":\"link,rate_desc,description,rate_delta_desc,rank,stats.hits,rate_delta,typeMessage\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":60, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -2575,8 +2575,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "",
-          "value": ""
+          "selected": true,
+          "text": "All Events",
+          "value": "All Events"
         },
         "hide": 2,
         "includeAll": false,
@@ -2585,7 +2586,7 @@
         "name": "view",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "All Events",
             "value": "All Events"
           }
@@ -2622,6 +2623,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2729,6 +2731,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "Logged Error|Uncaught Exception|HTTP Error",
           "value": "Logged Error|Uncaught Exception|HTTP Error"
         },
@@ -2753,6 +2756,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -2777,6 +2781,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -3021,7 +3026,7 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
+          "selected": true,
           "text": "<term>",
           "value": "<term>"
         },
@@ -3167,5 +3172,5 @@
   "timezone": "",
   "title": "Reliability Analysis",
   "uid": "4DHQ63-ik",
-  "version": 257
+  "version": 259
 }

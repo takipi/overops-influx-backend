@@ -50,6 +50,7 @@ public class EventsFunction extends GrafanaFunction {
 	protected static final String LAST_SEEN = "last_seen";
 	protected static final String MESSAGE = "message";
 	protected static final String JIRA_ISSUE_URL = "jira_issue_url";
+
 	
 	private static final int MAX_JIRA_BATCH_SIZE = 10;
 
@@ -336,6 +337,20 @@ public class EventsFunction extends GrafanaFunction {
 		protected Object getTarget(EventData eventData) {
 			return eventData.event.stats;
 		}	
+		
+		@Override
+		protected Object formatValue(Object value, EventsInput input) {
+			
+			if ((value instanceof Long) && (((Long)value).longValue() == 0)) {
+				return "";
+			}
+			
+			if ((value instanceof Integer) && (((Integer)value).intValue() == 0)) {
+				return "";
+			}
+			
+			return value;
+		}
 	}
 
 	protected static class DateFormatter extends ReflectFormatter {
@@ -371,6 +386,20 @@ public class EventsFunction extends GrafanaFunction {
 				Pair<DateTime, DateTime> timeSpan) {
 
 			return eventData.rank;
+		}
+	}
+	
+	protected class EntryPointNameFormatter extends FieldFormatter {
+
+		@Override
+		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
+				Pair<DateTime, DateTime> timeSpan) {
+
+			if (eventData.event.entry_point == null) {
+				return "";
+			}
+			
+			return getSimpleClassName(eventData.event.entry_point.class_name);
 		}
 	}
 	
@@ -439,7 +468,7 @@ public class EventsFunction extends GrafanaFunction {
 			}
 				
 			if (eventData.event.introduced_by != null) {
-				result.append(". New in: ");
+				result.append(". Introduced in: ");
 				result.append(eventData.event.introduced_by);
 			} else {
 				result.append(". First seen: ");
@@ -473,8 +502,7 @@ public class EventsFunction extends GrafanaFunction {
 		}
 
 		@Override
-		protected Object formatValue(Object value, EventsInput input)
-		{
+		protected Object formatValue(Object value, EventsInput input) {
 			if (value == null) {
 				return super.formatValue(value, input);
 			}
@@ -506,8 +534,7 @@ public class EventsFunction extends GrafanaFunction {
 
 		@Override
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
-				Pair<DateTime, DateTime> timeSpan)
-		{
+				Pair<DateTime, DateTime> timeSpan) {
 			Pair<Double, Double> ratePair = getRatePair(eventData);
 			
 			if (ratePair == null) {
@@ -515,6 +542,11 @@ public class EventsFunction extends GrafanaFunction {
 			}
 			
 			return formatRateDelta(eventData.baselineStats, eventData.event.stats);
+		}
+		
+		@Override
+		protected Object formatValue(Object value, EventsInput input) {
+			return value;
 		}
 	}
 		
@@ -676,13 +708,17 @@ public class EventsFunction extends GrafanaFunction {
 		if (column.equals(EventsInput.RANK)) {
 			return new RankFormatter();
 		}
+		
+		if (column.equals(EventsInput.ENTRY_POINT_NAME)) {
+			return new EntryPointNameFormatter();
+		}
 			
 		Field field = getReflectField(column);
 
 		if (column.equals(JIRA_ISSUE_URL)) {
 			return new JiraUrlFormatter(field);
 		}
-	
+		
 		if ((column.equals(FIRST_SEEN)) || (column.equals(LAST_SEEN))) {
 			return new DateFormatter(field);
 		}
@@ -1140,7 +1176,7 @@ public class EventsFunction extends GrafanaFunction {
 			}
 
 			if (eventData.event.stats.hits == 0) {
-				continue;
+				//continue;
 			}
 					
 			result.add(eventData);

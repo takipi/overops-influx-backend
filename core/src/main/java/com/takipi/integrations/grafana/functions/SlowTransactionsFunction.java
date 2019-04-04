@@ -60,7 +60,7 @@ public class SlowTransactionsFunction extends EnvironmentVariableFunction
 				viewId, timeSpan, input.getSearchText(), input.pointsWanted);
 		
 		TransactionDataResult transactionDataResult = getTransactionDatas(activeGraphs,
-			serviceId, viewId, timeSpan, input, false, 0, true);
+			serviceId, viewId, timeSpan, input, true, false, false, 0, true);
 			
 		if (transactionDataResult == null) {
 			return Collections.emptyList();

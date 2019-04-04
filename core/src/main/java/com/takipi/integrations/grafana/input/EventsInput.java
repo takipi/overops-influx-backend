@@ -83,6 +83,11 @@ public class EventsInput extends BaseEventVolumeInput {
 	public static final String RANK = "rank";
 	
 	/**
+	 * the simple name of the event entry point class name
+	 */
+	public static final String ENTRY_POINT_NAME = "entry_point_name";
+	
+	/**
 	 * An optional value to control the volume data retrieved for objects in this query. If "hits" is specified,
 	 * "N/A" will be returned for all values of the "rate" field (if selected). 
 	 */

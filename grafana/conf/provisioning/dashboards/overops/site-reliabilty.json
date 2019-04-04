@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 39,
-  "iteration": 1553396306726,
+  "iteration": 1554363081518,
   "links": [
     {
       "icon": "dashboard",
@@ -84,12 +84,12 @@
       "links": [
         {
           "dashboard": "Reliability Analysis",
-          "includeVars": false,
+          "includeVars": true,
           "keepTime": true,
-          "targetBlank": true,
+          "targetBlank": false,
           "title": "Reliability Analysis. $s",
           "type": "dashboard",
-          "url": "d/4DHQ63-ik/reliability-analysis"
+          "url": "/d/4DHQ63-ik/reliability-analysis"
         }
       ],
       "mappingType": 1,
@@ -210,11 +210,11 @@
           "dashboard": "Errors",
           "includeVars": true,
           "keepTime": true,
-          "params": "$failureTypesArray",
-          "targetBlank": true,
+          "params": "&var_type=Transaction Failures",
+          "targetBlank": false,
           "title": "Transaction Failures. $fr",
           "type": "absolute",
-          "url": "d/HYBPMdYik/errors"
+          "url": "d/YVh71-emz/transaction-failures"
         }
       ],
       "mappingType": 1,
@@ -335,7 +335,7 @@
         {
           "includeVars": true,
           "keepTime": true,
-          "targetBlank": true,
+          "targetBlank": false,
           "title": "Performance. $sd",
           "type": "absolute",
           "url": "d/Z40SpeJmz/performance"
@@ -457,7 +457,7 @@
         {
           "includeVars": true,
           "keepTime": true,
-          "targetBlank": true,
+          "targetBlank": false,
           "title": "New Errors. $ne",
           "type": "absolute",
           "url": "d/3NZ83NLik/new-errors"
@@ -581,7 +581,7 @@
           "keepTime": true,
           "title": "Increasing Errors. $ie",
           "type": "absolute",
-          "url": "d/WZ739NYmk/increasing-errors"
+          "url": "/d/WZ739NYmk/increasing-errors"
         }
       ],
       "mappingType": 1,
@@ -701,7 +701,7 @@
           "dashboard": "d/HYBPMdYik/errors",
           "includeVars": true,
           "keepTime": true,
-          "targetBlank": true,
+          "targetBlank": false,
           "title": "Unique Errors. Volume = $e errors.",
           "type": "absolute",
           "url": "d/HYBPMdYik/errors"
@@ -2126,12 +2126,9 @@
       {
         "allValue": "all",
         "current": {
-          "selected": false,
-          "tags": [],
+          "selected": true,
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2154,6 +2151,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2178,6 +2176,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2202,6 +2201,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2273,6 +2273,7 @@
       {
         "allValue": "All",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2297,6 +2298,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -2321,6 +2323,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -2378,6 +2381,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "Logged Error|Uncaught Exception|HTTP Error",
           "value": "Logged Error|Uncaught Exception|HTTP Error"
         },
@@ -2402,6 +2406,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -2426,6 +2431,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -2496,8 +2502,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "&var-type=Logged Error&var-type=Uncaught Exception&var-type=HTTP Error",
-          "value": "&var-type=Logged Error&var-type=Uncaught Exception&var-type=HTTP Error"
+          "text": "var-type=Logged Error&var-type=Uncaught Exception&var-type=HTTP Error&",
+          "value": "var-type=Logged Error&var-type=Uncaught Exception&var-type=HTTP Error&"
         },
         "datasource": "OO",
         "hide": 2,
@@ -2545,7 +2551,6 @@
         "allValue": null,
         "current": {
           "isNone": true,
-          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -2571,7 +2576,6 @@
         "allValue": null,
         "current": {
           "isNone": true,
-          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -2597,7 +2601,6 @@
         "allValue": null,
         "current": {
           "isNone": true,
-          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -2623,7 +2626,6 @@
         "allValue": null,
         "current": {
           "isNone": true,
-          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -2649,7 +2651,6 @@
         "allValue": null,
         "current": {
           "isNone": true,
-          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -2674,7 +2675,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "0",
           "value": "0"
         },
@@ -2699,7 +2699,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "0",
           "value": "0"
         },
@@ -2724,7 +2723,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "0",
           "value": "0"
         },
@@ -2749,7 +2747,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "0",
           "value": "0"
         },
@@ -2774,7 +2771,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "0",
           "value": "0"
         },
@@ -2800,7 +2796,6 @@
         "allValue": null,
         "current": {
           "isNone": true,
-          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -2826,7 +2821,6 @@
         "allValue": null,
         "current": {
           "isNone": true,
-          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -2852,7 +2846,6 @@
         "allValue": null,
         "current": {
           "isNone": true,
-          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -2878,7 +2871,6 @@
         "allValue": null,
         "current": {
           "isNone": true,
-          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -2904,7 +2896,6 @@
         "allValue": null,
         "current": {
           "isNone": true,
-          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -2952,5 +2943,5 @@
   "timezone": "",
   "title": "Site Reliability",
   "uid": "nxdE2gXmk",
-  "version": 51
+  "version": 53
 }

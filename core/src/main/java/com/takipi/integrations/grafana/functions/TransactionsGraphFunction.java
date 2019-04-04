@@ -114,7 +114,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			Collection<PerformanceState> performanceStates = TransactionsListInput.getStates(input.performanceStates);
 			
 			TransactionDataResult transactionDataResult = getTransactionDatas(activeGraphs, 
-				serviceId, viewId, timeSpan, input, false, 0, true);
+				serviceId, viewId, timeSpan, input, true, false, false, 0, true);
 			
 			if (transactionDataResult == null) {
 				return null;

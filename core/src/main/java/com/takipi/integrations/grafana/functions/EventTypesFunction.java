@@ -26,7 +26,7 @@ import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class EventTypesFunction extends EnvironmentVariableFunction {
 
-	private static int DEFAULT_TIME_DAYS = 7;
+	private static int MAX_TIME_DAYS = 1;
 	
 	public static class Factory implements FunctionFactory {
 
@@ -71,9 +71,14 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 		
 		if (eventInput.timeFilter != null) {
 			Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(eventInput.timeFilter);
-			result.timeFilter = TimeUtil.getTimeFilter(timespan);	
+			
+			if (TimeUtil.getDateTimeDeltaMill(timespan) < TimeUnit.DAYS.toMillis(1)) {
+				result.timeFilter = TimeUtil.getTimeFilter(timespan);	
+			} else {
+				result.timeFilter  = TimeUtil.getLastWindowTimeFilter(TimeUnit.DAYS.toMillis(MAX_TIME_DAYS));
+			}
 		} else {			
-			result.timeFilter  = TimeUtil.getLastWindowTimeFilter(TimeUnit.DAYS.toMillis(DEFAULT_TIME_DAYS));
+			result.timeFilter  = TimeUtil.getLastWindowTimeFilter(TimeUnit.DAYS.toMillis(MAX_TIME_DAYS));
 		}
 		
 		return result;
@@ -162,6 +167,7 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 		if (availTypes.contains(EventTypes.EventTypes)) {
 			
 			appender.append(EventFilter.CRITICAL_EXCEPTIONS);
+			appender.append(EventFilter.TRANSACTION_FAILURES);
 
 			for (String type : eventTypes) {
 				appender.append(type);

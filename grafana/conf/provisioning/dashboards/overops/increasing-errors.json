@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 28,
-  "iteration": 1552989101595,
+  "iteration": 1554363103684,
   "links": [
     {
       "icon": "dashboard",
@@ -49,7 +49,7 @@
       "tags": [],
       "tooltip": "Home",
       "type": "link",
-      "url": "d/lg0U4qriz/home"
+      "url": "/d/lg0U4qriz/home"
     },
     {
       "asDropdown": true,
@@ -795,7 +795,7 @@
           "tags": []
         }
       ],
-      "title": "$eventCount Events",
+      "title": "",
       "transform": "table",
       "type": "table"
     }
@@ -1009,28 +1009,26 @@
         "type": "custom"
       },
       {
-        "allValue": "All",
+        "allValue": null,
         "current": {
           "text": "All",
-          "value": "$__all"
+          "value": "All"
         },
-        "datasource": "OO",
-        "hide": 0,
-        "includeAll": true,
+        "hide": 2,
+        "includeAll": false,
         "label": "Increases",
-        "multi": true,
+        "multi": false,
         "name": "increasingErrors",
-        "options": [],
-        "query": "increasingErrors({\"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\"})",
-        "refresh": 2,
-        "regex": "",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "All"
+          }
+        ],
+        "query": "All",
         "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
+        "type": "custom"
       },
       {
         "allValue": null,
@@ -1231,8 +1229,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "time >= 1552902700863ms and time <= 1552989100863ms",
-          "value": "time >= 1552902700863ms and time <= 1552989100863ms"
+          "text": "time >= 1554276703638ms and time <= 1554363103638ms",
+          "value": "time >= 1554276703638ms and time <= 1554363103638ms"
         },
         "datasource": "OO",
         "hide": 2,
@@ -1242,31 +1240,6 @@
         "name": "timeFilterVar",
         "options": [],
         "query": "timeFilter({\"timeFilter\":\"$timeFilter\"})",
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
-        "hide": 2,
-        "includeAll": false,
-        "label": null,
-        "multi": false,
-        "name": "eventCount",
-        "options": [],
-        "query": "regressions({\"render\":\"SingleStat\", \"regressionTypes\":\"Regressions,SevereRegressions\", \"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"maxColumnLength\":120,\"pointsWanted\":\"$pointsWanted\",\"searchText\":\"$search\", \"eventLocations\":\"$increasingErrors\", \"types\":\"$type\", \"timeFilterVar\":\"true\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1312,5 +1285,5 @@
   "timezone": "",
   "title": "Increasing Errors",
   "uid": "WZ739NYmk",
-  "version": 120
+  "version": 123
 }

@@ -435,11 +435,11 @@ public class RegressionFunction extends EventsFunction {
 		});
 	}
 	
-	public List<EventData> processRegression(EventFilterInput functionInput, RegressionInput input,
+	public List<EventData> processRegression(String serviceId, EventFilterInput functionInput, RegressionInput input,
 			RateRegression rateRegression, boolean includeNew, boolean includeRegressions) {
 		
 		List<EventData> result;
-		List<EventData> eventDatas = processRegressionData(input, rateRegression, includeNew, includeRegressions);
+		List<EventData> eventDatas = processRegressionData(serviceId, input, rateRegression, includeNew, includeRegressions);
 				
 		if (functionInput.hasTransactions()) {
 			result = eventDatas;
@@ -450,9 +450,8 @@ public class RegressionFunction extends EventsFunction {
 		return result;
 	}
 	
-	private List<EventData> processRegressionData(RegressionInput input,
-			RateRegression rateRegression, boolean includeNew, boolean includeRegressions)
-	{
+	private List<EventData> processRegressionData(String serviceId, RegressionInput input,
+			RateRegression rateRegression, boolean includeNew, boolean includeRegressions) {
 		
 		List<EventData> result = new ArrayList<EventData>();
 		
@@ -495,8 +494,37 @@ public class RegressionFunction extends EventsFunction {
 				result.add(new RegressionData(rateRegression, input, regressionResult, RegressionType.Regressions));
 			}
 		}
+	
+		sortRegressionDatas(serviceId, result);
 		
 		return result;
+	}
+	
+	private void sortRegressionDatas(String serviceId, List<EventData> eventDatas) {
+		
+		List<String> criticalExceptionList = new ArrayList<String>(
+				getSettingsData(serviceId).regression.getCriticalExceptionTypes());
+			
+		eventDatas.sort(new Comparator<EventData>() {
+
+			@Override
+			public int compare(EventData o1, EventData o2) {
+				
+				RegressionData r1 = (RegressionData)o1;
+				RegressionData r2 = (RegressionData)o2;
+				
+				int typeDelta = Integer.compare(r2.type.ordinal(), r1.type.ordinal());
+
+				if (typeDelta != 0) {
+					return typeDelta;
+				}
+				
+				int result = compareEvents(o1.event, o2.event, 0, 0, criticalExceptionList);
+				
+				return result;
+			}
+		});
+		
 	}
 	
 	@Override
@@ -793,8 +821,8 @@ public class RegressionFunction extends EventsFunction {
 		return Pair.of(baselineGraph, activeWindowGraph);	
 	}
 	
-	protected RegressionOutput createRegressionOutput(EventFilterInput input,
-			RegressionInput regressionInput, RegressionWindow regressionWindow,
+	protected RegressionOutput createRegressionOutput(String serviceId, 
+			EventFilterInput input, RegressionInput regressionInput, RegressionWindow regressionWindow,
 			RateRegression rateRegression, Map<String, EventResult> eventListMap,
 			Graph baseVolumeGraph, Graph activeVolumeGraph, long volume,
 			boolean allowEmpty) {
@@ -811,7 +839,7 @@ public class RegressionFunction extends EventsFunction {
 		
 		if ((regressionInput != null) && (rateRegression != null)) {
 			
-			result.eventDatas = processRegression(input, regressionInput, rateRegression, true, true);
+			result.eventDatas = processRegression(serviceId, input, regressionInput, rateRegression, true, true);
 			
 			for (EventData eventData : result.eventDatas) {
 				
@@ -898,13 +926,13 @@ public class RegressionFunction extends EventsFunction {
 		regressionInput.events = filteredMap.values();
 		regressionInput.baselineGraph = baselineGraph;
 				
-		RegressionOutput result = executeRegression(input, regressionInput, 
+		RegressionOutput result = executeRegression(serviceId, input, regressionInput, 
 			regressionWindow, eventListMap, volume, baselineGraph, activeWindowGraph, false);
 	
 		return result;
 	}	
 	
-	public RegressionOutput executeRegression(BaseEventVolumeInput input, 
+	public RegressionOutput executeRegression(String serviceId, BaseEventVolumeInput input, 
 			RegressionInput regressionInput, RegressionWindow regressionWindow, 
 			Map<String, EventResult> eventListMap, long volume,
 			Graph baselineGraph, Graph activeWindowGraph, boolean allowEmpty) {
@@ -914,11 +942,11 @@ public class RegressionFunction extends EventsFunction {
 		RateRegression rateRegression = RegressionUtil.calculateRateRegressions(apiClient, regressionInput, null,
 				false);
 		
-		RegressionOutput result = createRegressionOutput(input, 
-				regressionInput, regressionWindow,
+		RegressionOutput result = createRegressionOutput(serviceId,
+				input, regressionInput, regressionWindow,
 				rateRegression, eventListMap,
 				baselineGraph, activeWindowGraph, volume, allowEmpty);
-				
+		
 		return result;
 	}
 	

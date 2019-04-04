@@ -45,6 +45,10 @@ public class TimeUtil {
 		return to.getMillis() - from.getMillis();
 	}
 	
+	public static long getDateTimeDeltaMill(Pair<DateTime, DateTime> timespan) {
+		return getDateTimeDelta(timespan.getFirst(), timespan.getSecond());
+	}
+	
 	public static long getDateTimeDelta(Pair<String, String> timespan) {
 		DateTime from = fmt.parseDateTime(timespan.getFirst());
 		DateTime to = fmt.parseDateTime(timespan.getSecond());
