@@ -1547,8 +1547,13 @@ public class ApiCache {
 				@Override
 				public RegressionWindow load(RegresionWindowCacheLoader key) {
 					
+					Response<DeploymentsResult> deployments =
+							getDeployments(key.apiClient, key.input.serviceId, false);
+					
+					List<SummarizedDeployment> summarizedDeployments = deployments.data.deployments;
+					
 					RegressionWindow result = RegressionUtil.getActiveWindow(key.apiClient, key.input, 
-							System.out);
+							System.out, summarizedDeployments);
 					
 					return result;
 				}
