@@ -561,13 +561,24 @@ public class ReliabilityReportFunction extends EventsFunction {
 					{
 						for (String transactionGraphKey : subRegressionInputs.keySet())
 						{
+							subInputData = subRegressionInputs.get(transactionGraphKey);
+							
+							RegressionInput subRegressionInput =
+									function.getRegressionInput(serviceId, viewId, subInputData.getSecond(), timeSpan, newOnly)
+									.getFirst();
+							
 							regressionResults.add(getRegressionsOutput(eventResultMap, baselineGraph, activeWindowGraph,
-									subRegressionInputs.get(transactionGraphKey)));
+									subInputData ,subRegressionInput));
 						}
 					}
 					else
 					{
-						regressionResults.add(getRegressionsOutput(eventResultMap, baselineGraph, activeWindowGraph, subInputData));
+						RegressionInput subRegressionInput =
+								function.getRegressionInput(serviceId, viewId, subInputData.getSecond(), timeSpan, newOnly)
+								.getFirst();
+						
+						regressionResults.add(getRegressionsOutput(eventResultMap, baselineGraph,
+								activeWindowGraph, subInputData, subRegressionInput));
 					}
 				}
 				
@@ -579,13 +590,14 @@ public class ReliabilityReportFunction extends EventsFunction {
 		}
 		
 		private AggregatedRegressionAsyncResult getRegressionsOutput(Map<String, EventResult> eventResultMap,
-				Graph baselineGraph, Graph activeWindowGraph, Pair<ReportKey, RegressionsInput> subInputData)
+				Graph baselineGraph, Graph activeWindowGraph, Pair<ReportKey, RegressionsInput> subInputData,
+				RegressionInput subRegressionInput)
 		{
 			ReportKey subReportKey = subInputData.getFirst();
-			RegressionsInput subRegressionInput = subInputData.getSecond();
+			RegressionsInput subRegressionsInput = subInputData.getSecond();
 			
-			RegressionOutput regressionOutput = function.getRegressionOutput(serviceId, subRegressionInput, newOnly,
-					TimeUtil.getTimeFilter(subRegressionInput.timeFilter), regressionInput,
+			RegressionOutput regressionOutput = function.getRegressionOutput(serviceId, subRegressionsInput, newOnly,
+					TimeUtil.getTimeFilter(subRegressionsInput.timeFilter), subRegressionInput,
 					activeWindow, eventResultMap, baselineGraph, activeWindowGraph);
 			
 			AggregatedRegressionAsyncResult result = new AggregatedRegressionAsyncResult(

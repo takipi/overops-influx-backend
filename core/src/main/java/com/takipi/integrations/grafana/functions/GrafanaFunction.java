@@ -1960,7 +1960,7 @@ public abstract class GrafanaFunction {
 				
 				EventResult contributorEventResult = (EventResult) event.clone();
 				
-//				contributorEventResult.stats = new MainStats();
+				contributorEventResult.stats = new MainStats();
 				
 				safePutEventToKeysMap(keyToEventMap, determinantKey, contributorEventResult);
 			}
