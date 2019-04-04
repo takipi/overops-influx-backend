@@ -28,7 +28,6 @@ import com.takipi.api.client.util.regression.RegressionUtil;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.settings.RegressionReportSettings;
 import com.takipi.api.client.util.settings.RegressionSettings;
-import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
@@ -41,6 +40,7 @@ import com.takipi.integrations.grafana.input.RegressionsInput;
 import com.takipi.integrations.grafana.input.RegressionsInput.RegressionType;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
+import com.takipi.integrations.grafana.settings.ServiceSettings;
 import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.EventLinkEncoder;
 import com.takipi.integrations.grafana.util.TimeUtil;
@@ -262,7 +262,7 @@ public class RegressionFunction extends EventsFunction {
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
 				Pair<DateTime, DateTime> timeSpan) {
 			
-			RegressionReportSettings settings = getSettings(serviceId).regression_report;
+			RegressionReportSettings settings = getSettingsData(serviceId).regression_report;
 			
 			if (settings == null) {
 				return Integer.valueOf(0);
@@ -381,7 +381,7 @@ public class RegressionFunction extends EventsFunction {
 			DateTime from = regData.regResult.getActiveWndowStart().minusMinutes(regData.input.baselineTimespan);
 			DateTime to = DateTime.now();
 			
-			return EventLinkEncoder.encodeLink(apiClient, getSettings(serviceId), 
+			return EventLinkEncoder.encodeLink(apiClient, getSettingsData(serviceId), 
 				serviceId, input, eventData.event, from, to);
 		}
 		
@@ -395,12 +395,17 @@ public class RegressionFunction extends EventsFunction {
 		super(apiClient);
 	}
 	
-	public RegressionFunction(ApiClient apiClient, Map<String, ServiceSettingsData> settingsMaps) {
+	public RegressionFunction(ApiClient apiClient, Map<String, ServiceSettings> settingsMaps) {
 		super(apiClient, settingsMaps);
 	}
 	
-	private void sortRegressions(List<EventData> eventData) 
-	{		
+	private void sortRegressions(String serviceId, List<EventData> eventData) {	
+		
+		RegressionSettings regressionSettings = getSettingsData(serviceId).regression;
+		
+		int minThreshold = regressionSettings.error_min_volume_threshold;
+		List<String> criticalExceptionList = new ArrayList<String>(regressionSettings.getCriticalExceptionTypes());
+		
 		eventData.sort(new Comparator<EventData>() {
 			
 			@Override
@@ -418,19 +423,8 @@ public class RegressionFunction extends EventsFunction {
 				if ((r1.type == RegressionType.SevereNewIssues) ||
 					(r1.type == RegressionType.NewIssues)) {
 							
-					long delta = r2.event.stats.hits - r1.event.stats.hits;
-					
-					if (delta > 0) {
-						return 1;
-					}
-					
-					if (delta < 0) {
-						return -1;
-					}
-					
-					if (delta == 0) {
-						return 0;
-					}
+					return compareEvents(o1.event, o2.event, 0, 0, 
+						criticalExceptionList, minThreshold);
 				}			
 				
 				if ((r1.type == RegressionType.SevereRegressions) ||
@@ -438,16 +432,16 @@ public class RegressionFunction extends EventsFunction {
 					return r2.getDelta() - r1.getDelta();		
 				}		
 				
-				throw new IllegalStateException();
+				throw new IllegalStateException(String.valueOf(r1.type));
 			}
 		});
 	}
 	
-	public List<EventData> processRegression(EventFilterInput functionInput, RegressionInput input,
+	public List<EventData> processRegression(String serviceId, EventFilterInput functionInput, RegressionInput input,
 			RateRegression rateRegression, boolean includeNew, boolean includeRegressions) {
 		
 		List<EventData> result;
-		List<EventData> eventDatas = processRegressionData(input, rateRegression, includeNew, includeRegressions);
+		List<EventData> eventDatas = processRegressionData(serviceId, input, rateRegression, includeNew, includeRegressions);
 				
 		if (functionInput.hasTransactions()) {
 			result = eventDatas;
@@ -458,9 +452,8 @@ public class RegressionFunction extends EventsFunction {
 		return result;
 	}
 	
-	private List<EventData> processRegressionData(RegressionInput input,
-			RateRegression rateRegression, boolean includeNew, boolean includeRegressions)
-	{
+	private List<EventData> processRegressionData(String serviceId, RegressionInput input,
+			RateRegression rateRegression, boolean includeNew, boolean includeRegressions) {
 		
 		List<EventData> result = new ArrayList<EventData>();
 		
@@ -503,8 +496,40 @@ public class RegressionFunction extends EventsFunction {
 				result.add(new RegressionData(rateRegression, input, regressionResult, RegressionType.Regressions));
 			}
 		}
+	
+		sortRegressionDatas(serviceId, result);
 		
 		return result;
+	}
+	
+	private void sortRegressionDatas(String serviceId, List<EventData> eventDatas) {
+		
+		RegressionSettings regressionSettings = getSettingsData(serviceId).regression;
+		
+		int minThreshold = regressionSettings.error_min_volume_threshold;
+		List<String> criticalExceptionList = new ArrayList<String>(regressionSettings.getCriticalExceptionTypes());
+		
+		eventDatas.sort(new Comparator<EventData>() {
+
+			@Override
+			public int compare(EventData o1, EventData o2) {
+				
+				RegressionData r1 = (RegressionData)o1;
+				RegressionData r2 = (RegressionData)o2;
+				
+				int typeDelta = Integer.compare(r2.type.ordinal(), r1.type.ordinal());
+
+				if (typeDelta != 0) {
+					return typeDelta;
+				}
+				
+				int result = compareEvents(o1.event, o2.event, 
+					0, 0, criticalExceptionList, minThreshold);
+				
+				return result;
+			}
+		});
+		
 	}
 	
 	@Override
@@ -595,7 +620,7 @@ public class RegressionFunction extends EventsFunction {
 	
 	private RegressionSettings getRegressionSettings(String serviceId) {
 		
-		RegressionSettings regressionSettings = getSettings(serviceId).regression;
+		RegressionSettings regressionSettings = getSettingsData(serviceId).regression;
 		
 		if (regressionSettings == null) {
 			throw new IllegalStateException("Missing regression settings for " + serviceId);
@@ -666,7 +691,7 @@ public class RegressionFunction extends EventsFunction {
 		regressionInput.activeTimespan = regressionWindow.activeTimespan;
 		regressionInput.baselineTimespan = expandedBaselineTimespan;
 		
-		regressionInput.applictations = input.getApplications(apiClient, getSettings(serviceId), serviceId);
+		regressionInput.applictations = input.getApplications(apiClient, getSettingsData(serviceId), serviceId);
 		regressionInput.servers = input.getServers(serviceId);
 		
 		Collection<String> criticalExceptionTypes = regressionSettings.getCriticalExceptionTypes();
@@ -801,8 +826,8 @@ public class RegressionFunction extends EventsFunction {
 		return Pair.of(baselineGraph, activeWindowGraph);	
 	}
 	
-	protected RegressionOutput createRegressionOutput(EventFilterInput input,
-			RegressionInput regressionInput, RegressionWindow regressionWindow,
+	protected RegressionOutput createRegressionOutput(String serviceId, 
+			EventFilterInput input, RegressionInput regressionInput, RegressionWindow regressionWindow,
 			RateRegression rateRegression, Map<String, EventResult> eventListMap,
 			Graph baseVolumeGraph, Graph activeVolumeGraph, long volume,
 			boolean allowEmpty) {
@@ -819,7 +844,7 @@ public class RegressionFunction extends EventsFunction {
 		
 		if ((regressionInput != null) && (rateRegression != null)) {
 			
-			result.eventDatas = processRegression(input, regressionInput, rateRegression, true, true);
+			result.eventDatas = processRegression(serviceId, input, regressionInput, rateRegression, true, true);
 			
 			for (EventData eventData : result.eventDatas) {
 				
@@ -906,13 +931,13 @@ public class RegressionFunction extends EventsFunction {
 		regressionInput.events = filteredMap.values();
 		regressionInput.baselineGraph = baselineGraph;
 				
-		RegressionOutput result = executeRegression(input, regressionInput, 
+		RegressionOutput result = executeRegression(serviceId, input, regressionInput, 
 			regressionWindow, eventListMap, volume, baselineGraph, activeWindowGraph, false);
 	
 		return result;
 	}	
 	
-	public RegressionOutput executeRegression(BaseEventVolumeInput input, 
+	public RegressionOutput executeRegression(String serviceId, BaseEventVolumeInput input, 
 			RegressionInput regressionInput, RegressionWindow regressionWindow, 
 			Map<String, EventResult> eventListMap, long volume,
 			Graph baselineGraph, Graph activeWindowGraph, boolean allowEmpty) {
@@ -922,11 +947,11 @@ public class RegressionFunction extends EventsFunction {
 		RateRegression rateRegression = RegressionUtil.calculateRateRegressions(apiClient, regressionInput, null,
 				false);
 		
-		RegressionOutput result = createRegressionOutput(input, 
-				regressionInput, regressionWindow,
+		RegressionOutput result = createRegressionOutput(serviceId,
+				input, regressionInput, regressionWindow,
 				rateRegression, eventListMap,
 				baselineGraph, activeWindowGraph, volume, allowEmpty);
-				
+		
 		return result;
 	}
 	
@@ -996,25 +1021,23 @@ public class RegressionFunction extends EventsFunction {
 	}
 	
 	private List<EventData> doMergeSimilarEvents(String serviceId, List<EventData> eventDatas) {
+		
 		List<EventData> result = new ArrayList<EventData>(super.mergeSimilarEvents(serviceId, eventDatas));
-		sortRegressions(result);
+		sortRegressions(serviceId, result);
+		
 		return result;
 	}
 	
 	@Override
-	protected void sortEventDatas(List<EventData> eventDatas) {
+	protected void sortEventDatas(String serviceId, List<EventData> eventDatas) {
+		//use regression sorting instead of normal event ranking
 	}
 	
 	@Override
 	protected List<EventData> mergeSimilarEvents(String serviceId, List<EventData> eventDatas) {
 		return eventDatas;
 	}
-	
-	public RegressionOutput runRegression(String serviceId, EventFilterInput regInput) {
-		RegressionOutput regressionOutput = runRegression(serviceId, regInput, true);	
-		return regressionOutput;
-	}
-	
+		
 	public RegressionOutput runRegression(String serviceId, EventFilterInput regInput, boolean newOnly) {
 		RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient, 
 			serviceId, regInput, this, newOnly, true);
@@ -1026,7 +1049,8 @@ public class RegressionFunction extends EventsFunction {
 			Pair<DateTime, DateTime> timeSpan) {
 		
 		RegressionsInput regInput = (RegressionsInput)input;
-		RegressionOutput regressionOutput = runRegression(serviceId, regInput);
+				
+		RegressionOutput regressionOutput = runRegression(serviceId, regInput, regInput.newOnly());
 		
 		if ((regressionOutput == null) || (regressionOutput.rateRegression == null) ||
 			(regressionOutput.regressionInput == null)) {
@@ -1176,7 +1200,7 @@ public class RegressionFunction extends EventsFunction {
 	}
 		
 	private double getServiceSingleStatCount(String serviceId, RegressionsInput input) {
-		RegressionOutput regressionOutput = runRegression(serviceId, input);
+		RegressionOutput regressionOutput = runRegression(serviceId, input, input.newOnly());
 		
 		if ((regressionOutput == null) || (regressionOutput.empty)) {
 			return 0;
@@ -1237,7 +1261,7 @@ public class RegressionFunction extends EventsFunction {
 		return createSingleStatSeries(timeSpan, singleStatText);
 	}
 	
-	private List<Series> processSingleStatVolume(RegressionsInput input) {
+	private List<Series> processSingleStatVolume(RegressionsInput input, boolean textValue) {
 		
 		Collection<String> serviceIds = getServiceIds(input);
 		
@@ -1257,7 +1281,7 @@ public class RegressionFunction extends EventsFunction {
 		
 		for (String serviceId : serviceIds) {
 			
-			RegressionOutput regressionOutput = runRegression(serviceId, input);
+			RegressionOutput regressionOutput = runRegression(serviceId, input, input.newOnly());
 			
 			if ((regressionOutput == null) || (regressionOutput.empty)) {
 				continue;
@@ -1276,8 +1300,16 @@ public class RegressionFunction extends EventsFunction {
 			
 			singleStatValue += getServiceSingleStatCount(serviceId, input);
 		}
-					
-		return createSingleStatSeries(timeSpan, singleStatValue);
+			
+		Object value;
+		
+		if (textValue) {
+			value = formatLongValue(singleStatValue);
+		} else {
+			value = 	singleStatValue;
+		}
+			
+		return createSingleStatSeries(timeSpan, value);
 	}
 	
 	private List<Series> processSingleStatDesc(RegressionsInput input) {
@@ -1300,7 +1332,7 @@ public class RegressionFunction extends EventsFunction {
 
 		for (String serviceId : serviceIds) {
 			
-			RegressionOutput regressionOutput = runRegression(serviceId, input);
+			RegressionOutput regressionOutput = runRegression(serviceId, input, input.newOnly());
 
 			String value;
 			
@@ -1358,7 +1390,10 @@ public class RegressionFunction extends EventsFunction {
 				return processSingleStatCount(regInput);
 				
 			case SingleStatVolume:
-				return processSingleStatVolume(regInput);
+				return processSingleStatVolume(regInput, false);
+				
+			case SingleStatVolumeText:
+				return processSingleStatVolume(regInput, true);
 			
 			default: 
 				throw new IllegalStateException(String.valueOf(regInput.render));

@@ -118,7 +118,7 @@ public class TransactionsGraphInput extends BaseGraphInput {
 		TimeWindow result = this.timeWindow;
 		
 		if (result == null) {
-			result = TimeWindow.All;
+			result = TimeWindow.Active;
 		}
 		
 		return result;

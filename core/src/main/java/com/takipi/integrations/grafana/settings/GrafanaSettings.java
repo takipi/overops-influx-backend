@@ -21,6 +21,7 @@ import com.takipi.api.client.result.service.ServicesResult;
 import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.Pair;
+import com.takipi.integrations.grafana.storage.FolderStorage;
 import com.takipi.integrations.grafana.util.ApiCache;
 
 public class GrafanaSettings {
@@ -31,7 +32,9 @@ public class GrafanaSettings {
 	
 	public static final String EXTENSION = ".json";
 	public static final String DEFAULT = File.separator + "settings" + File.separator + "oo_as_influx_default_settings" + EXTENSION;
-	
+		
+	private static final String SETTINGS_FOLDER = "grafanaSettingsFolder";
+
 	private static final boolean ENABLE_CACHE = false;
 	private static final int CACHE_SIZE = 1000;
 	private static final int CACHE_RETENTION = 20;
@@ -151,8 +154,7 @@ public class GrafanaSettings {
 	
 	public static void init(SettingsStorage newSettingsStorage)
 	{
-		settingsStorage = newSettingsStorage;
-		
+		setSettingsStorage(newSettingsStorage);
 		initCache();
 	}
 	
@@ -182,7 +184,7 @@ public class GrafanaSettings {
 			Pair<ServiceSettingsData, String> bundledSettings = getBundledDefaultSettings();
 										
 			if (bundledSettings != null) {
-				result = getServiceSettings(bundledSettings.getFirst(), bundledSettings.getSecond());
+				result = getServiceSettings(bundledSettings.getFirst());
 			} 
 		}
 		
@@ -257,8 +259,8 @@ public class GrafanaSettings {
 		return new Gson().fromJson(json, ServiceSettingsData.class);
 	}
 	
-	private static ServiceSettings getServiceSettings(ServiceSettingsData data, String json) {
-		return new ServiceSettings(json, data);
+	private static ServiceSettings getServiceSettings(ServiceSettingsData data) {
+		return new ServiceSettings(data);
 	}
 	
 	private static ServiceSettings parseServiceSettings(String serviceId, 
@@ -269,7 +271,7 @@ public class GrafanaSettings {
 		
 		try {
 			data = parseServiceSettings(json);
-			result = new ServiceSettings(json, data);
+			result = new ServiceSettings(data);
 		} catch (Exception e) {
 			
 			if (allowThrow) {
@@ -288,6 +290,7 @@ public class GrafanaSettings {
 	}
 	
 	public static ServiceSettings getServiceSettings(ApiClient apiClient, String serviceId) {
+		
 		ServiceSettings result;
 		
 		if (ENABLE_CACHE) {
@@ -303,11 +306,6 @@ public class GrafanaSettings {
 		return result;
 	}
 	
-	public static String getServiceSettingsJson(ApiClient apiClient, String serviceId) {
-		ServiceSettings settings = getServiceSettings(apiClient, serviceId);
-		return settings.getJson();
-	}
-
 	public static void saveServiceSettings(ApiClient apiClient, String serviceId, String json) {
 		
 		ServiceSettings settings = parseServiceSettings(serviceId, json, true);
@@ -321,11 +319,16 @@ public class GrafanaSettings {
 		settingsStorage.setValue(getServiceJsonName(serviceId), json);
 	}
 	
-	public void setSettingsStorage(SettingsStorage settingsStorage) {
+	public static void setSettingsStorage(SettingsStorage settingsStorage) {
+		
 		if (settingsStorage == null) {
 			throw new IllegalArgumentException("settingsStorage");
 		}
 		
 		GrafanaSettings.settingsStorage = settingsStorage;
+	}
+	
+	static {
+		init(new FolderStorage(SETTINGS_FOLDER));	
 	}
 }

@@ -12,20 +12,14 @@ import com.takipi.common.util.CollectionUtil;
 
 public class ServiceSettings {
 
-	private final String json;
 	private final ServiceSettingsData data;
 
 	private final Categories categories;
 
-	public ServiceSettings(String json, ServiceSettingsData data) {
-		this.json = json;
+	public ServiceSettings(ServiceSettingsData data) {
 		this.data = data;
 
 		this.categories = initCategories();
-	}
-
-	public String getJson() {
-		return json;
 	}
 
 	public ServiceSettingsData getData() {

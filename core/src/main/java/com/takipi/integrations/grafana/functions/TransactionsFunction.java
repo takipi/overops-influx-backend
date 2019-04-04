@@ -125,7 +125,7 @@ public class TransactionsFunction extends EnvironmentVariableFunction {
 			return;
 		}
 				
-		GroupSettings groupSettings = getSettings(serviceId).transactions;
+		GroupSettings groupSettings = getSettingsData(serviceId).transactions;
 		
 		Set<Group> matchingGroups = new HashSet<Group>();	
 		Map<Group, GroupFilter> groupFilters;

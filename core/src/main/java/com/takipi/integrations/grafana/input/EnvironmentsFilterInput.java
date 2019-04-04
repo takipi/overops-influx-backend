@@ -53,8 +53,14 @@ public abstract class EnvironmentsFilterInput extends BaseEnvironmentsInput {
 	}
 	
 	public Collection<String> getApplications(ApiClient apiClient, 
+			ServiceSettingsData settingsData, String serviceId,
+			boolean expandGroups) {
+		return getApplications(apiClient, settingsData, serviceId, applications, expandGroups);
+	}
+	
+	public static Collection<String> getApplications(ApiClient apiClient, 
 		ServiceSettingsData settingsData, String serviceId,
-		boolean expandGroups) {
+		String applications, boolean expandGroups) {
 		
 		Collection<String> apps = getServiceFilters(applications, serviceId, true);
 		

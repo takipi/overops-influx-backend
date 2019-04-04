@@ -528,11 +528,9 @@ public class ApiCache {
 
 		@Override
 		public int hashCode() {
-			if (viewName == null) {
-				return super.hashCode();
-			}
-
-			return super.hashCode() ^ viewName.hashCode();
+			
+			return super.hashCode() ^ 
+				GrafanaFunction.getViewName(viewName).hashCode();
 		}
 		
 		@Override
@@ -814,9 +812,11 @@ public class ApiCache {
 
 			GraphCacheLoader other = (GraphCacheLoader) obj;
 
+			/*
 			if (pointsWanted != other.pointsWanted) {
 				return false;
 			}
+			*/
 			
 			if (activeWindow != other.activeWindow) {
 				return false;
@@ -834,17 +834,35 @@ public class ApiCache {
 		}
 		
 		@Override
-		public Response<?> load()
-		{
-			String keyName;
+		public Response<?> load() {			
+			
+			String writeKeyName = null;
 			
 			if (cachable) {
 				
-				keyName = keyName();
+				Pair<String, Collection<String>> keyPair = getkeyNames();
 				
-				this.loadT1 = System.currentTimeMillis();
-				String value = cacheStorage.getValue(keyName);
-				this.loadT2 = System.currentTimeMillis();
+				writeKeyName = keyPair.getFirst();
+				Collection<String> readKeyNames = keyPair.getSecond();
+				
+				String value = null;
+				
+				for (String keyName : readKeyNames) {
+				
+					this.loadT1 = System.currentTimeMillis();
+					
+					try {
+						value = cacheStorage.getValue(keyName);
+					} catch (Exception e) {
+						logger.error("Could not load data for " + keyName, e);
+					}
+			
+					this.loadT2 = System.currentTimeMillis();
+					
+					if (value != null) {
+						break;
+					}
+				}
 
 				if (value != null) {
 					
@@ -856,37 +874,56 @@ public class ApiCache {
 						return response;
 					}
 				}
-			} else {
-				keyName = null;
-			}
+			} 
 			
 			@SuppressWarnings("unchecked")
 			Response<GraphResult> response = (Response<GraphResult>)super.load();
 
 			if ((cachable) && (response != null) 
 			&& (response.data != null) && (response.isOK())) {
-				Gson gson = new Gson();
-				String value = gson.toJson(response.data); 
-				cacheStorage.setValue(keyName, value);
+				
+				try {
+					Gson gson = new Gson();
+					String value = gson.toJson(response.data); 
+					cacheStorage.setValue(writeKeyName, value);
+				} catch (Exception e) {
+					logger.error("Could not store data for " + writeKeyName, e);
+				}
+				
 			}
 			
 			return response;
 		}
 			
-		private String keyName() {
-						
+		private String getKeyVolumeTypName(VolumeType volumeType) {
+			
 			String result = String.join("_", serviceId, input.view, input.applications,
-					input.deployments, input.servers, String.valueOf(pointsWanted), 
+					input.deployments, input.servers, 
 					String.valueOf(volumeType), TimeUtil.toString(timespan.getFirst()),
 					TimeUtil.toString(timespan.getSecond()));
 			
 			return result;
 		}
 		
+		private Pair<String, Collection<String>> getkeyNames() {
+			
+			List<String> readKeyNames = new ArrayList<>(2);
+			
+			if (volumeType == VolumeType.hits) {
+				readKeyNames.add(getKeyVolumeTypName(VolumeType.all));
+			}
+			
+			String writeKeyName = getKeyVolumeTypName(this.volumeType);
+			
+			readKeyNames.add(writeKeyName);
+
+			return Pair.of(writeKeyName, readKeyNames);
+		}
+		
 		@Override
 		public String toString() {
 			
-			String result = super.toString() + " pointsWanted: " + pointsWanted + " activeWindow: " 
+			String result = super.toString() + " activeWindow: " 
 				+ activeWindow + " baselineWindow: " + baselineWindow + " graph slice: " + windowSlice;
 			
 			return result;
@@ -995,9 +1032,11 @@ public class ApiCache {
 
 			TransactionsGraphCacheLoader other = (TransactionsGraphCacheLoader) obj;
 
+			/*
 			if (pointsWanted != other.pointsWanted) {
 				return false;
 			}
+			*/
 			
 			if (baselineTimespan != other.baselineTimespan) {
 				return false;
@@ -1185,6 +1224,11 @@ public class ApiCache {
 			}
 
 			return true;
+		}
+		
+		public RegressionOutput executeRegression() {
+			return function.executeRegression(serviceId, 
+				(BaseEventVolumeInput)input, newOnly);
 		}
 		
 		/*
@@ -1534,8 +1578,7 @@ public class ApiCache {
 				
 				@Override
 				public RegressionOutput load(RegressionCacheLoader key) {
-					return key.function.executeRegression(key.serviceId, 
-						(BaseEventVolumeInput)key.input, key.newOnly);
+					return key.executeRegression();
 				}
 			});
 

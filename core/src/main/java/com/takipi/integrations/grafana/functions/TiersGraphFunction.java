@@ -22,7 +22,6 @@ import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.input.GraphLimitInput;
 import com.takipi.integrations.grafana.input.TiersGraphInput;
-import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TiersGraphFunction extends LimitGraphFunction {
@@ -81,8 +80,8 @@ public class TiersGraphFunction extends LimitGraphFunction {
 		
 		Long key = null;
 		Long lastKey = null;
-		
-		Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();		
+				
+		Categories categories = getSettings(serviceId).getCategories();		
 		
 		for (GraphPoint gp : graph.points) {
 
@@ -173,7 +172,7 @@ public class TiersGraphFunction extends LimitGraphFunction {
 			graphsInPoint.clear();	
 		}
 		
-		Collection<String> tiers = GrafanaSettings.getServiceSettings(apiClient, serviceId).getTierNames();
+		Collection<String> tiers = getSettings(serviceId).getTierNames();
 		
 		List<GraphData> limitedGraphs = null;
 		

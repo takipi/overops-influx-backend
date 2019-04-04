@@ -71,7 +71,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		super(apiClient);
 	}
 	
-	private TransactionGraph mergeGraphs(TransactionData transactionData) {
+	protected TransactionGraph mergeGraphs(TransactionData transactionData) {
 		
 		TransactionGraph result = new TransactionGraph();
 		
@@ -103,7 +103,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		
 		
 		Collection<TransactionGraph> activeGraphs = getTransactionGraphs(input, serviceId, 
-				viewId, timeSpan, input.getSearchText(), pointsWanted, 0, 0);
+				viewId, timeSpan, input.getSearchText(), pointsWanted);
 		
 		TimeWindow timeWindow = input.getTimeWindow();
 		
@@ -114,7 +114,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			Collection<PerformanceState> performanceStates = TransactionsListInput.getStates(input.performanceStates);
 			
 			TransactionDataResult transactionDataResult = getTransactionDatas(activeGraphs, 
-				serviceId, viewId, timeSpan, input, false, 0);
+				serviceId, viewId, timeSpan, input, true, false, false, 0, true);
 			
 			if (transactionDataResult == null) {
 				return null;
@@ -142,7 +142,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 						break;
 
 					case All:
-						graph = mergeGraphs(transactionData);
+						graph = transactionData.baselineAndActiveGraph;
 						break;
 						
 					default:

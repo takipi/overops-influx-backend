@@ -45,6 +45,10 @@ public class TimeUtil {
 		return to.getMillis() - from.getMillis();
 	}
 	
+	public static long getDateTimeDeltaMill(Pair<DateTime, DateTime> timespan) {
+		return getDateTimeDelta(timespan.getFirst(), timespan.getSecond());
+	}
+	
 	public static long getDateTimeDelta(Pair<String, String> timespan) {
 		DateTime from = fmt.parseDateTime(timespan.getFirst());
 		DateTime to = fmt.parseDateTime(timespan.getSecond());
@@ -72,11 +76,17 @@ public class TimeUtil {
 	}
 	
 	public static String getTimeRange(int min) {
+		return getTimeRange(min, false);
+	}
+		
+	
+	public static String getTimeRange(int min, boolean allowDays) {
        
-		//if (min % (24 * 60) == 0) {
-        //		double days = (double)(min) / 24 / 60;
-		//	return String.valueOf(Math.round(days)) + DAY_POSTFIX;
-        //}
+		if ((allowDays) && (min % (24 * 60) == 0) 
+		&& (min > (int)TimeUnit.DAYS.toMinutes(3))) {
+        		double days = (double)(min) / 24 / 60;
+			return String.valueOf(Math.round(days)) + DAY_POSTFIX;
+        }
 		
 		if (min % 60 == 0) {
     			double hours = (double)(min) / 60;
@@ -219,7 +229,7 @@ public class TimeUtil {
 	
 	public static String prettifyTime(String value) {
 		DateTime dateTime = fmt.parseDateTime(value);
-		String result = prettyTime.format(new Date(dateTime.getMillis()));
+		String result = prettyTime.formatDuration(new Date(dateTime.getMillis()));
 		return result;
 	}
 	

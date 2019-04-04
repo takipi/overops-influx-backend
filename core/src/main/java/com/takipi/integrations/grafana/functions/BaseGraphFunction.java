@@ -15,12 +15,12 @@ import org.joda.time.DateTime;
 import com.google.common.base.Objects;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.settings.GroupSettings;
-import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.Series;
+import com.takipi.integrations.grafana.settings.ServiceSettings;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public abstract class BaseGraphFunction extends GrafanaFunction {
@@ -126,7 +126,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		super(apiClient);
 	}
 	
-	public BaseGraphFunction(ApiClient apiClient, Map<String, ServiceSettingsData> settingsMaps) {
+	public BaseGraphFunction(ApiClient apiClient, Map<String, ServiceSettings> settingsMaps) {
 		super(apiClient, settingsMaps);
 	}
 
@@ -139,7 +139,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		if (seriesName != null) {
 			tagName = seriesName;
 		} else {
-			Collection<String> types = input.getTypes(apiClient, serviceId, false);
+			Collection<String> types = getTypes(serviceId, false, input);
 			
 			if (!CollectionUtil.safeIsEmpty(types)) {
 				tagName = String.join(ARRAY_SEPERATOR_RAW + " ", types);

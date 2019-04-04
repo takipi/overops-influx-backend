@@ -110,6 +110,16 @@ public class TransactionsListInput extends BaseGraphInput {
 	public static final String ERRORS = "errors";
 	
 	/**
+	 * The diff in rate between the active and baseline window
+	 */
+	public static final String ERROR_RATE_DELTA = "error_rate_delta";
+	
+	/**
+	 * The desc of the diff in rate between the active and baseline window
+	 */
+	public static final String ERROR_RATE_DELTA_DESC = "error_rate_delta_desc";
+	
+	/**
 	 * a text description of the volume of errors of the type defined in the Settings dashboard a "transaction failure types".
 	 */
 	public static final String ERRORS_DESC = "error_description";
@@ -181,6 +191,7 @@ public class TransactionsListInput extends BaseGraphInput {
 		List<PerformanceState> result = new ArrayList<PerformanceState>();
 		
 		if (performanceStates != null) {
+			
 			String[] parts = performanceStates.split(GrafanaFunction.GRAFANA_SEPERATOR);
 			
 			for (String part : parts) {
