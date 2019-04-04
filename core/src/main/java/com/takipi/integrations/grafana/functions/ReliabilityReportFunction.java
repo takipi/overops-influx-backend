@@ -2283,11 +2283,14 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		for (TransactionData transactionData : transactionMap.values()) {
 			
-			result.errorVolume += transactionData.errorsHits;	
-			result.transactionVolume += transactionData.stats.invocations;
-					
-			avgTimeNum += transactionData.stats.avg_time * transactionData.stats.invocations;
-			avgTimeDenom += transactionData.stats.invocations;
+			result.errorVolume += transactionData.errorsHits;
+			
+			if (transactionData.stats != null) {
+				result.transactionVolume += transactionData.stats.invocations;
+				
+				avgTimeNum += transactionData.stats.avg_time * transactionData.stats.invocations;
+				avgTimeDenom += transactionData.stats.invocations;
+			}
 			
 			if (transactionData.baselineStats != null) {
 				baseAvgTimeNum += transactionData.baselineStats.avg_time * transactionData.baselineStats.invocations;
