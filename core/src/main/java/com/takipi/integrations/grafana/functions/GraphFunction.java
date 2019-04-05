@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +27,8 @@ import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class GraphFunction extends BaseGraphFunction {
 
+	protected static boolean PRINT_GRAPH_EVENTS = false;
+	
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -85,7 +88,7 @@ public class GraphFunction extends BaseGraphFunction {
 		if (graph == null) {
 			return Collections.emptyList();
 		}
-					
+						
 		SeriesVolume seriesData = processGraphPoints(serviceId, viewId, timeSpan, graph, graphInput);
 
 		String tagName = getSeriesName(input, input.seriesName, serviceId, serviceIds);		
@@ -190,6 +193,14 @@ public class GraphFunction extends BaseGraphFunction {
 			eventFilter = null;
 		}
 		
+		Map<String, Long> debugMap;
+		
+		if (PRINT_GRAPH_EVENTS) {
+			debugMap = new HashMap<String, Long>();
+		} else {
+			debugMap = null;
+		}	
+		
 		for (GraphPoint gp : graph.points) {
 
 			Object timeValue;
@@ -218,6 +229,16 @@ public class GraphFunction extends BaseGraphFunction {
 						continue;
 					}
 				}
+				
+				if (debugMap != null) {
+					Long v = debugMap.get(gpc.id);
+					
+					if (v != null) {
+						debugMap.put(gpc.id, v + gpc.stats.hits);
+					} else {
+						debugMap.put(gpc.id, gpc.stats.hits);
+					}
+				}
 
 				if (input.volumeType.equals(VolumeType.invocations)) {
 					value += gpc.stats.invocations;
@@ -228,6 +249,12 @@ public class GraphFunction extends BaseGraphFunction {
 
 			volume += value;
 			values.add(Arrays.asList(new Object[] { timeValue, Long.valueOf(value) }));
+		}
+			
+		if (debugMap != null) {
+			for (Map.Entry<String, Long> entry : debugMap.entrySet()) {
+				System.err.println(entry.getKey() + " = " + entry.getValue());
+			}
 		}
 		
 		return SeriesVolume.of(values,volume);

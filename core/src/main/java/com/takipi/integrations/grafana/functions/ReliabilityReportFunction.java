@@ -502,7 +502,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		protected double failureRateDelta;
 		protected double failRate;	
 		protected String failureRateDesc;
-		protected String relabilityDesc;
+		protected String reliabilityDesc;
 
 	}
 	
@@ -2117,11 +2117,13 @@ public class ReliabilityReportFunction extends EventsFunction {
 					continue;
 				}
 				
+				/* XXX removing bc of DB tx <-> event data inconsistency
 				TransactionData eventTransaction = getEventTransactionData(transactionMap, event);
 				
 				if (eventTransaction == null) {
 					continue;
 				}
+				*/
 				
 				result.baseFailures += gpc.stats.hits;						
 			}
@@ -2178,44 +2180,63 @@ public class ReliabilityReportFunction extends EventsFunction {
 		result.failureRateDelta = Math.max(0f, failurePair.getSecond());
 
 		result.scoreState = getScoreState(input, reportKeyResult.score);
-		
 		result.reliabilityState = combineStates(result.failRateState , result.scoreState);
 		
-		Pair<String, String> descsPair = getReliabilityDescs(serviceId, result, reportKeyResult, input, 
-			transactionData, failureData, baseFailRate);
+		result.reliabilityDesc = getReliabilityStateDesc(serviceId, result, 
+			reportKeyResult, input, baseFailRate);
 		
-		result.relabilityDesc = descsPair.getFirst();
-		result.failureRateDesc = descsPair.getSecond();
+		result.failureRateDesc = getReliabilityFailRateDesc(result, reportKeyResult, 
+			transactionData, failureData, baseFailRate);
 
 		return result;
 	}
 	
-	private Pair<String, String> getReliabilityDescs(String serviceId,
+	private String getReliabilityFailRateDesc(
+			ReportKeyReliability reliabilityData,
+			ReportKeyResults reportKeyResult,
+			ReportKeyTransactions transactionData, ReportKeyFailures failureData,
+			double baseFailRate) {
+		
+		StringBuilder failureDesc = new StringBuilder();
+		
+		failureDesc.append(formatLongValue(failureData.failures));
+		failureDesc.append(" failures in ");
+		failureDesc.append(formatLongValue(transactionData.transactionVolume));
+		failureDesc.append(" calls (");
+		failureDesc.append(formatRate(reliabilityData.failRate, true));
+		failureDesc.append(") compared to ");
+		failureDesc.append(formatLongValue(failureData.baseFailures));
+		failureDesc.append(" in ");
+		failureDesc.append(formatLongValue(transactionData.baseTransactions));
+		failureDesc.append(" (");
+		failureDesc.append(formatRate(baseFailRate, true));
+		failureDesc.append(")");
+
+		
+		if (reportKeyResult.output.transactionRegInput != null) {
+			failureDesc.append(" in the preceeding ");
+			int baselineTimespan = reportKeyResult.output.transactionRegInput.baselineTimespan;
+			failureDesc.append(prettyTime.formatDuration(TimeUtil.now().minusMinutes(baselineTimespan).toDate()));
+			failureDesc.append(" baseline ");
+		}
+		
+		return failureDesc.toString();
+	}
+	
+	private String getReliabilityStateDesc(String serviceId,
 		ReportKeyReliability reliabilityData,
 		ReportKeyResults reportKeyResult, ReliabilityReportInput input,
-		ReportKeyTransactions transactionData, ReportKeyFailures failureData,
 		double baseFailRate) {
 	
 		StringBuilder failDelta = new StringBuilder();
 		
 		failDelta.append(formatRate(reliabilityData.failRate, true));
 		
-		StringBuilder failureDesc = new StringBuilder();
-		
-		failureDesc.append(formatLongValue(failureData.failures));
-		failureDesc.append(" failures (");
-
-		if (reliabilityData.failRateState != ReliabilityState.OK) {
-			
+		if (reliabilityData.failRateState != ReliabilityState.OK) {	
 			failDelta.append(" from ");
 			failDelta.append(formatRate(baseFailRate, true));
 		}
-		
-		failureDesc.append(failDelta);
-		failureDesc.append(") in ");
-		failureDesc.append(formatLongValue(transactionData.transactionVolume));
-		failureDesc.append(" calls");
-		
+	
 		StringBuilder relabilityDesc = new StringBuilder();
 		
 		relabilityDesc.append(reliabilityData.reliabilityState.toString().toUpperCase());
@@ -2250,7 +2271,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			}
 		}
 					
-		return Pair.of(relabilityDesc.toString(), failureDesc.toString());
+		return relabilityDesc.toString();
 	}
 		
 	private ReportKeyTransactions getAppTransactionData(ReportKeyResults reportKeyResult) {
@@ -2283,14 +2304,11 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		for (TransactionData transactionData : transactionMap.values()) {
 			
-			result.errorVolume += transactionData.errorsHits;
-			
-			if (transactionData.stats != null) {
-				result.transactionVolume += transactionData.stats.invocations;
-				
-				avgTimeNum += transactionData.stats.avg_time * transactionData.stats.invocations;
-				avgTimeDenom += transactionData.stats.invocations;
-			}
+			result.errorVolume += transactionData.errorsHits;	
+			result.transactionVolume += transactionData.stats.invocations;
+					
+			avgTimeNum += transactionData.stats.avg_time * transactionData.stats.invocations;
+			avgTimeDenom += transactionData.stats.invocations;
 			
 			if (transactionData.baselineStats != null) {
 				baseAvgTimeNum += transactionData.baselineStats.avg_time * transactionData.baselineStats.invocations;
@@ -2391,7 +2409,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		row.set(ReliabilityReportInput.ERROR_COUNT, reportKeyResult.failures.eventCount);
 		
 		row.set(ReliabilityReportInput.RELIABILITY_STATE, reportKeyResult.relability.reliabilityState.ordinal());	
-		row.set(ReliabilityReportInput.RELIABILITY_DESC, reportKeyResult.relability.relabilityDesc);	
+		row.set(ReliabilityReportInput.RELIABILITY_DESC, reportKeyResult.relability.reliabilityDesc);	
 	}
 	
 	private void addTimelineFields(ReportRow row) {
@@ -2745,7 +2763,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			}
 		} else {		
 			if (stringFormat) {
-				rateStr = "+" + formatRate(appReliabilityData.failureRateDelta, false);
+				rateStr = "+" + formatRate(appReliabilityData.failureRateDelta, true);
 			} else {
 				rateStr = null;
 			}

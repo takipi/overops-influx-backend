@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 43,
-  "iteration": 1554362915918,
+  "iteration": 1554448675632,
   "links": [
     {
       "icon": "external link",
@@ -991,7 +991,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Grid\", \"mode\":\"Apps_Extended\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"minFailRate\":0.0005, \"failureTypes\":\"$transactionFailureTypes\", \"statusPrefixes2\":\"✅ ,⚠ ,❌ \", \"scoreRanges\":\"70,85\",  \"statusPrefixes\":\"✅,⚠️,❌\", \"failRatePrefixes\":\",↑,↑↑\"})",
+          "query": "regressionReport({\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"All\", \"render\":\"Grid\", \"mode\":\"Apps_Extended\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"minFailRate\":$minFailRate, \"failureTypes\":\"$transactionFailureTypes\", \"statusPrefixes2\":\"✅ ,⚠ ,❌ \", \"scoreRanges\":\"70,85\",  \"statusPrefixes\":\"✅,⚠️,❌\", \"failRatePrefixes\":\",↑,↑\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1766,7 +1766,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"$type\", \"render\":\"Grid\", \"mode\":\"Tiers_Extended\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"minFailRate\":0.0005, \"failureTypes\":\"$transactionFailureTypes\", \"statusPrefixes2\":\"✅ ,⚠ ,❌ \", \"scoreRanges\":\"70,85\",  \"statusPrefixes\":\"✅,⚠️,❌\", \"addAppTier\":\"true\", \"failRatePrefixes\":\",↑,↑↑\"})",
+          "query": "regressionReport({\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"All\", \"render\":\"Grid\", \"mode\":\"Tiers_Extended\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"minFailRate\":\"$minFailRate\", \"failureTypes\":\"$transactionFailureTypes\", \"statusPrefixes2\":\"✅ ,⚠ ,❌ \", \"scoreRanges\":\"70,85\",  \"statusPrefixes\":\"✅,⚠️,❌\", \"addAppTier\":\"true\", \"failRatePrefixes\":\",↑,↑\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1892,8 +1892,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "all",
-          "value": "all"
+          "text": "undefined",
+          "value": "undefined"
         },
         "hide": 2,
         "includeAll": false,
@@ -1960,8 +1960,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "SqlInsertionMessage.doProcess",
-          "value": "SqlInsertionMessage.doProcess"
+          "text": "undefined",
+          "value": "undefined"
         },
         "hide": 2,
         "includeAll": false,
@@ -2042,12 +2042,12 @@
         "name": "limit",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "20",
             "value": "20"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "10",
             "value": "10"
           },
@@ -2383,7 +2383,7 @@
         "name": "timeRange",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "24h",
             "value": "24h"
           },
@@ -2403,7 +2403,7 @@
             "value": "8h"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "48h",
             "value": "48h"
           },
@@ -2419,6 +2419,28 @@
           }
         ],
         "query": "24h,1h,3h,8h,48h, 72h,7d",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "0.005",
+          "value": "0.005"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "minFailRate",
+        "options": [
+          {
+            "selected": true,
+            "text": "0.005",
+            "value": "0.005"
+          }
+        ],
+        "query": "0.005",
         "skipUrlSync": false,
         "type": "custom"
       }
@@ -2457,5 +2479,5 @@
   "timezone": "",
   "title": "Home",
   "uid": "lg0U4qriz",
-  "version": 262
+  "version": 267
 }
