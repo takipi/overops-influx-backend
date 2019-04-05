@@ -957,34 +957,6 @@ public abstract class GrafanaFunction {
 		return result;
 	}
 	
-	private static com.takipi.api.client.data.transaction.Stats getTrasnactionGraphStats(TransactionGraph graph) {
-		
-		com.takipi.api.client.data.transaction.Stats result = new com.takipi.api.client.data.transaction.Stats();
-		
-		if (graph.points == null) {
-			return result;
-		}
-				
-		for (com.takipi.api.client.data.transaction.TransactionGraph.GraphPoint gp : graph.points) {
-			if (gp.stats != null) {
-				result.invocations += gp.stats.invocations;
-			}
-		}
-		
-		double avgTimeSum = 0;
-		
-		for (com.takipi.api.client.data.transaction.TransactionGraph.GraphPoint gp : graph.points) {
-			if (gp.stats != null) {
-				avgTimeSum += gp.stats.avg_time * gp.stats.invocations;
-			}
-		}
-		
-		result.avg_time = avgTimeSum / result.invocations;
-		
-		
-		return result;
-	}
-	
 	protected TransactionData getEventTransactionData(Map<TransactionKey, TransactionData> transactions, EventResult event) {
 	
 		TransactionKey classOnlyKey = TransactionKey.of(event.entry_point.class_name, null);
@@ -1168,7 +1140,7 @@ public abstract class GrafanaFunction {
 				transactionData.baselineGraph = baselineGraphsMap.get(transactionName);
 				
 				if (transactionData.baselineGraph != null) {
-					transactionData.baselineStats = getTrasnactionGraphStats(transactionData.baselineGraph);
+					transactionData.baselineStats =  TransactionUtil.aggregateGraph(transactionData.baselineGraph);
 				}
 				
 				transactionData.baselineAndActiveGraph = baselineAndActiveGraphsMap.get(transactionName);				
@@ -1201,7 +1173,7 @@ public abstract class GrafanaFunction {
 			
 			transactionData.state = performanceScore.state;
 			transactionData.score = performanceScore.score;
-			transactionData.stats = getTrasnactionGraphStats(transactionData.graph);
+			transactionData.stats = TransactionUtil.aggregateGraph(transactionData.graph);
 		}
 	}
 	
@@ -1289,9 +1261,9 @@ public abstract class GrafanaFunction {
 		if (eventFilter == null) {
 			return;
 		}
-		
+				
 		for (EventResult event : eventsMap.values()) {
-
+			
 			if (event.entry_point == null) {
 				continue;
 			}

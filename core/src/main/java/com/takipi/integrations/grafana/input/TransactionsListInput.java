@@ -112,7 +112,13 @@ public class TransactionsListInput extends BaseGraphInput {
 	/**
 	 * The diff in rate between the active and baseline window
 	 */
-	public static final String ERROR_RATE_DELTA = "error_rate_delta";
+	public static final String ERROR_RATE_DELTA = "error_rate_state";
+	
+	/**
+	 * An enum state comparing the rate between the active and baseline window 
+	 * with regression delta settings to output: OK, WARN, CRITICAL
+	 */
+	public static final String ERROR_RATE_DELTA_STATE = "error_rate_delta_state";
 	
 	/**
 	 * The desc of the diff in rate between the active and baseline window

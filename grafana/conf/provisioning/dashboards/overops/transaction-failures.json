@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 54,
-  "iteration": 1554363178385,
+  "iteration": 1554448809905,
   "links": [
     {
       "icon": "dashboard",
@@ -423,8 +423,8 @@
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 11,
-        "desc": true
+        "col": null,
+        "desc": false
       },
       "styles": [
         {
@@ -434,7 +434,7 @@
           "type": "hidden"
         },
         {
-          "alias": "Volume",
+          "alias": "Calls",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -442,7 +442,7 @@
             "rgba(50, 172, 45, 0.97)"
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
+          "decimals": 1,
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
@@ -517,7 +517,7 @@
           "linkUrl": "d/KsF5KIbik/performance-drill-down?orgId=1&var-transaction=${__cell_0}",
           "pattern": "avg_response",
           "thresholds": [],
-          "type": "number",
+          "type": "hidden",
           "unit": "ms"
         },
         {
@@ -532,7 +532,7 @@
           "decimals": 0,
           "link": true,
           "linkTargetBlank": false,
-          "linkTooltip": "${__cell_7}. Click to drill-down.",
+          "linkTooltip": "${__cell_7}",
           "linkUrl": "d/6TxYIh6mk/errors-drill-down?orgId=1&from=${__cell_2}&to=${__cell_3}&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-transactions=${__cell_9}&var-type=Transaction Failures",
           "mappingType": 1,
           "pattern": "transaction",
@@ -750,22 +750,42 @@
           "unit": "short"
         },
         {
-          "alias": "Failure Δ%",
-          "colorMode": null,
+          "alias": "P",
+          "colorMode": "value",
           "colors": [
-            "rgba(245, 54, 54, 0.9)",
+            "rgba(50, 172, 45, 0.97)",
             "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
+            "rgba(245, 54, 54, 0.9)"
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 0,
           "link": false,
           "linkTooltip": "${__cell_8}",
           "linkUrl": "d/6TxYIh6mk/errors-drill-down?orgId=1&from=${__cell_2}&to=${__cell_3}&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-transactions=${__cell_9}",
-          "mappingType": 1,
+          "mappingType": 2,
           "pattern": "error_rate_delta",
-          "thresholds": [],
-          "type": "number",
+          "rangeMaps": [
+            {
+              "from": "0",
+              "text": "✔",
+              "to": "0.5"
+            },
+            {
+              "from": "0.5",
+              "text": "2",
+              "to": "1"
+            },
+            {
+              "from": "1",
+              "text": "1",
+              "to": "100000"
+            }
+          ],
+          "thresholds": [
+            "0.5",
+            "1"
+          ],
+          "type": "string",
           "unit": "percentunit"
         },
         {
@@ -783,6 +803,42 @@
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
+        },
+        {
+          "alias": "P",
+          "colorMode": "value",
+          "colors": [
+            "rgba(50, 172, 45, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": true,
+          "linkTooltip": "${__cell_8}",
+          "linkUrl": "d/6TxYIh6mk/errors-drill-down?orgId=1&from=${__cell_2}&to=${__cell_3}&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-transactions=${__cell_10}&var-type=Transaction Failures",
+          "mappingType": 1,
+          "pattern": "error_rate_delta_state",
+          "thresholds": [
+            "1",
+            "2"
+          ],
+          "type": "string",
+          "unit": "short",
+          "valueMaps": [
+            {
+              "text": "✔",
+              "value": "0"
+            },
+            {
+              "text": "2",
+              "value": "1"
+            },
+            {
+              "text": "1",
+              "value": "2"
+            }
+          ]
         }
       ],
       "targets": [
@@ -803,7 +859,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"fields\":\"link,delta_description,from,to,timeRange,baseline_calls,active_calls,error_description,error_rate_delta_desc,transaction,invocations,errors,error_rate,error_rate_delta,avg_response\",\"renderMode\":\"Grid\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"searchText\":\"$searchText\", \"pointsWanted\":\"$transactionPointsWanted\",\"eventPointsWanted\":\"$pointsWanted\"})",
+          "query": "transactionsList({\"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"fields\":\"link,delta_description,from,to,timeRange,baseline_calls,active_calls,error_description,error_rate_delta_desc,error_rate_delta_state,transaction,invocations,errors,error_rate,avg_response\",\"renderMode\":\"Grid\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"searchText\":\"$searchText\", \"pointsWanted\":\"$transactionPointsWanted\",\"eventPointsWanted\":\"$pointsWanted\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -838,11 +894,8 @@
       {
         "allValue": "all",
         "current": {
-          "tags": [],
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -911,7 +964,7 @@
         "useTags": false
       },
       {
-        "allValue": "*",
+        "allValue": "All",
         "current": {
           "text": "All",
           "value": "$__all"
@@ -1199,7 +1252,6 @@
         "allValue": null,
         "current": {
           "isNone": true,
-          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -1331,5 +1383,5 @@
   "timezone": "",
   "title": "Transaction Failures",
   "uid": "YVh71-emz",
-  "version": 12
+  "version": 21
 }
