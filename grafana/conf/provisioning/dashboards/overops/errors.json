@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 31,
-  "iteration": 1554510377624,
+  "iteration": 1554519783074,
   "links": [
     {
       "icon": "dashboard",
@@ -1905,7 +1905,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "events({\"fields\":\"link,jira_issue_url,rate_desc,description,rate_delta_desc,rank,type,message,entry_point_name,stats.hits,rate,rate_delta,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":90, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
+          "query": "events({\"fields\":\"link,jira_issue_url,rate_desc,description,rate_delta_desc,rank,type,message,entry_point_name,stats.hits,rate,rate_delta,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":90, \"maxClassLength\":\"40\", \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1942,6 +1942,7 @@
       {
         "allValue": "None",
         "current": {
+          "selected": false,
           "tags": [],
           "text": "None",
           "value": [
@@ -2041,9 +2042,10 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
-          "value": "$__all"
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": "OO",
         "hide": 0,
@@ -2247,6 +2249,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "0",
           "value": "0"
         },
@@ -2271,6 +2274,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "0",
           "value": "0"
         },
@@ -2497,7 +2501,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "0",
           "value": "0"
         },
@@ -2646,7 +2649,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "7d",
           "value": "7d"
         },
@@ -2701,5 +2703,5 @@
   "timezone": "",
   "title": "Errors",
   "uid": "HYBPMdYik",
-  "version": 163
+  "version": 166
 }

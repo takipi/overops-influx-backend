@@ -99,6 +99,11 @@ public class EventsInput extends BaseEventVolumeInput {
 	public int maxColumnLength;
 	
 	/**
+	 * An optional value controlling the max string length of the transaction and location columns.
+	 */
+	public int maxClassLength;
+	
+	/**
 	 * The types of output supported by this function
 	 */
 	public enum OutputMode {

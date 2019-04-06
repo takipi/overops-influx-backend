@@ -774,11 +774,19 @@ public class TransactionsListFunction extends GrafanaFunction {
 
 		Collection<PerformanceState> performanceStates = TransactionsListInput.getStates(input.performanceStates);
 		
+		List<List<List<Object>>> servicesValues = new ArrayList<List<List<Object>>>(serviceIds.size());
+
 		for (String serviceId : serviceIds) {
+			
 			List<List<Object>> serviceEvents = processServiceTransactions(serviceId, 
 				timeSpan, input, series.columns, performanceStates);		
+			
 			series.values.addAll(serviceEvents);
+			servicesValues.add(serviceEvents);
 		}
+		
+		sortSeriesValues(series.values, servicesValues);
+
 
 		return Collections.singletonList(series);
 	}
@@ -919,9 +927,6 @@ public class TransactionsListFunction extends GrafanaFunction {
 			
 			case Grid:
 				return processGrid(input, timeSpan, serviceIds);
-				
-			//case SingleStat:
-				//return processSingleStat(input, timeSpan, serviceIds);
 				
 			case SingleStatDesc:
 				return processSingleStatDesc(input, timeSpan, serviceIds);

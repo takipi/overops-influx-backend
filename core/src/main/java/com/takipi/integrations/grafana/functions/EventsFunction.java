@@ -262,6 +262,20 @@ public class EventsFunction extends GrafanaFunction {
 
 			return builder.toString();
 		}
+		
+		protected static String getCleanClassName(EventsInput input, String value) {
+			
+			String result;
+			
+			if ((input.maxClassLength > 0)  && (value.length() > input.maxClassLength)) {		
+				result = "..." + value.substring(
+					value.length() - input.maxClassLength, value.length());
+			} else {
+				result = value;
+			}
+					
+			return result;
+		}
 
 		protected Object formatValue(Object value, EventsInput input) {
 
@@ -271,7 +285,9 @@ public class EventsFunction extends GrafanaFunction {
 
 			if (value instanceof Location) {
 				Location location = (Location)value;
-				return getSimpleClassName(location.class_name) + "." + location.method_name;
+				String simpleClassName = getSimpleClassName(location.class_name) + "." + location.method_name;
+				String cleanClassName = getCleanClassName(input, simpleClassName);
+				return cleanClassName;
 			}
 
 			if (value instanceof List) {
@@ -400,7 +416,10 @@ public class EventsFunction extends GrafanaFunction {
 				return "";
 			}
 			
-			return getSimpleClassName(eventData.event.entry_point.class_name);
+			String simpleClassName =  getSimpleClassName(eventData.event.entry_point.class_name);
+			String result = getCleanClassName(input, simpleClassName);
+			
+			return result;
 		}
 	}
 	
@@ -1265,11 +1284,16 @@ public class EventsFunction extends GrafanaFunction {
 
 		Collection<String> serviceIds = getServiceIds(input);
 
+		List<List<List<Object>>> servicesValues = new ArrayList<List<List<Object>>>(serviceIds.size());
+		
 		for (String serviceId : serviceIds) {
 			List<List<Object>> serviceEvents = processServiceEvents(serviceIds, serviceId, input, timeSpan);
 			series.values.addAll(serviceEvents);
+			servicesValues.add(serviceEvents);
 		}
 
+		sortSeriesValues(series.values, servicesValues);
+		
 		return Collections.singletonList(series);
 	}
 	

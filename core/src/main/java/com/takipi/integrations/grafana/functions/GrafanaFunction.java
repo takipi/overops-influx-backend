@@ -1709,6 +1709,33 @@ public abstract class GrafanaFunction {
 		return getServiceValue(input.view, serviceId, serviceIds);
 	}
 	
+	protected void sortSeriesValues(List<List<Object>> seriesValues,
+			Collection<List<List<Object>>> servicesValues) {
+			
+		seriesValues.sort(new Comparator<List<Object>>() {
+
+			@Override
+			public int compare(List<Object> o1, List<Object> o2)
+			{
+				int o1Index = -1;
+				int o2Index = -1;
+					
+				for (List<List<Object>> serviceValues : servicesValues) {
+						
+					if (o1Index == -1) {
+						o1Index =  serviceValues.indexOf(o1);
+					}
+					
+					if (o2Index == -1) {
+						o2Index =  serviceValues.indexOf(o2);
+					}
+				}
+				
+				return Integer.compare(o1Index, o2Index);
+			}
+		});
+	}
+	
 	protected void sortApplicationsByProcess(String serviceId, List<String> apps, 
 		Collection<String> serversFilter, Collection<String> deploymentsFilter) {
 		
