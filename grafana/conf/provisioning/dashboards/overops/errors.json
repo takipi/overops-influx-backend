@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 31,
-  "iteration": 1554446845586,
+  "iteration": 1554510377624,
   "links": [
     {
       "icon": "dashboard",
@@ -626,7 +626,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$uncaughtType\",\"seriesName\":\"Volume\", \"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
+          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$uncaughtType\",\"seriesName\":\"Volume\", \"transactions\":\"$transactions\", \"searchText\":\"$search\", \"sparkline\":\"true\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -751,7 +751,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$criticalExType\",\"seriesName\":\"Volume\", \"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
+          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$criticalExType\",\"seriesName\":\"Volume\", \"transactions\":\"$transactions\", \"searchText\":\"$search\",\"sparkline\":\"true\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -876,7 +876,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$httpErrorType\",\"seriesName\":\"Volume\", \"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
+          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$httpErrorType\",\"seriesName\":\"Volume\", \"transactions\":\"$transactions\", \"searchText\":\"$search\",\"sparkline\":\"true\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1001,7 +1001,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$logErrorType\",\"seriesName\":\"Volume\", \"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
+          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$logErrorType\",\"seriesName\":\"Volume\", \"transactions\":\"$transactions\", \"searchText\":\"$search\",\"sparkline\":\"true\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1969,7 +1969,6 @@
       {
         "allValue": "All",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1994,7 +1993,6 @@
       {
         "allValue": "All",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2043,11 +2041,9 @@
       {
         "allValue": "all",
         "current": {
-          "tags": [],
+          "selected": true,
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2103,6 +2099,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2150,8 +2147,10 @@
       {
         "allValue": null,
         "current": {
-          "text": "All Events",
-          "value": "All Events"
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
         },
         "datasource": "OO",
         "hide": 0,
@@ -2198,6 +2197,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -2222,6 +2222,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -2246,8 +2247,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "3",
-          "value": "3"
+          "text": "0",
+          "value": "0"
         },
         "datasource": "OO",
         "hide": 2,
@@ -2270,8 +2271,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "4.8K",
-          "value": "4.8K"
+          "text": "0",
+          "value": "0"
         },
         "datasource": "OO",
         "hide": 2,
@@ -2294,8 +2295,10 @@
       {
         "allValue": null,
         "current": {
-          "text": "23040m",
-          "value": "23040m"
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
         },
         "datasource": "OO",
         "hide": 2,
@@ -2318,8 +2321,10 @@
       {
         "allValue": null,
         "current": {
-          "text": "2 weeks",
-          "value": "2 weeks"
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
         },
         "datasource": "OO",
         "hide": 2,
@@ -2342,8 +2347,10 @@
       {
         "allValue": null,
         "current": {
-          "text": "2 days",
-          "value": "2 days"
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
         },
         "datasource": "OO",
         "hide": 2,
@@ -2366,7 +2373,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "",
+          "isNone": true,
+          "text": "None",
           "value": ""
         },
         "datasource": "OO",
@@ -2390,7 +2398,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "",
+          "isNone": true,
+          "text": "None",
           "value": ""
         },
         "datasource": "OO",
@@ -2414,8 +2423,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "1",
-          "value": "1"
+          "selected": true,
+          "text": "0",
+          "value": "0"
         },
         "datasource": "OO",
         "hide": 2,
@@ -2438,6 +2448,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "0",
           "value": "0"
         },
@@ -2486,6 +2497,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "0",
           "value": "0"
         },
@@ -2510,8 +2522,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "-Oracle|Uncaught Exception",
-          "value": "-Oracle|Uncaught Exception"
+          "selected": true,
+          "text": "all|Uncaught Exception",
+          "value": "all|Uncaught Exception"
         },
         "datasource": "OO",
         "hide": 2,
@@ -2534,8 +2547,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "-Oracle|HTTP Error",
-          "value": "-Oracle|HTTP Error"
+          "selected": true,
+          "text": "all|HTTP Error",
+          "value": "all|HTTP Error"
         },
         "datasource": "OO",
         "hide": 2,
@@ -2558,8 +2572,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "-Oracle|Logged Error",
-          "value": "-Oracle|Logged Error"
+          "selected": true,
+          "text": "all|Logged Error",
+          "value": "all|Logged Error"
         },
         "datasource": "OO",
         "hide": 2,
@@ -2582,8 +2597,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "-Oracle|Critical Exceptions",
-          "value": "-Oracle|Critical Exceptions"
+          "text": "all|Critical Exceptions",
+          "value": "all|Critical Exceptions"
         },
         "datasource": "OO",
         "hide": 2,
@@ -2606,8 +2621,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "9d",
-          "value": "9d"
+          "selected": true,
+          "text": "8d",
+          "value": "8d"
         },
         "datasource": "OO",
         "hide": 2,
@@ -2630,6 +2646,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "7d",
           "value": "7d"
         },
@@ -2684,5 +2701,5 @@
   "timezone": "",
   "title": "Errors",
   "uid": "HYBPMdYik",
-  "version": 161
+  "version": 163
 }

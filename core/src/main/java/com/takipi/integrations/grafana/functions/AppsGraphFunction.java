@@ -57,7 +57,8 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction
 		}
 		
 		@Override
-		protected List<Series> processSeries(List<GraphSeries> series, BaseGraphInput input) {
+		protected List<Series> processSeries(Collection<String> serviceIds,
+			List<GraphSeries> series, BaseGraphInput input) {
 			
 			List<GraphSeries> nonEmptySeries = new ArrayList<GraphSeries>(series.size());
 			
@@ -67,7 +68,7 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction
 				}
 			}
 			
-			List<Series> result = super.processSeries(nonEmptySeries, input);
+			List<Series> result = super.processSeries(serviceIds, nonEmptySeries, input);
 								
 			return result;
 		}

@@ -259,6 +259,30 @@ public class GraphFunction extends BaseGraphFunction {
 		
 		return SeriesVolume.of(values,volume);
 	}
+	
+	@Override
+	protected List<Series> processSeries(Collection<String> serviceIds,
+		List<GraphSeries> series, BaseGraphInput input) {
+		
+		GraphInput giInput = (GraphInput)input;
+		
+		long volume = 0;
+		
+		if ((serviceIds.size() > 1) && (giInput.sparkline)) {
+			
+			for (GraphSeries graphSeries : series) {
+				volume += graphSeries.volume;
+			}
+			
+			DateTime now = TimeUtil.now();
+			return createSingleStatSeries(Pair.of(now, now), volume);
+			
+		} else {
+			return super.processSeries(serviceIds, series, input);
+		}
+		
+		
+	}
 
 	@Override
 	public List<Series> process(FunctionInput functionInput) {

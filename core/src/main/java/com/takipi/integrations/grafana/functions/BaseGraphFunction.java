@@ -292,9 +292,10 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 	}
 
 	/**
+	 * @param serviceIds  - needed by child classes
 	 * @param input - needed by child classes 
 	 */
-	protected List<Series> processSeries(List<GraphSeries> series, BaseGraphInput input) {
+	protected List<Series> processSeries(Collection<String> serviceIds, List<GraphSeries> series, BaseGraphInput input) {
 
 		sortSeriesByName(series);
 		
@@ -378,7 +379,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 			series = processSync(serviceIds, input, timeSpan, pointsWanted);
 		}
 		
-		List<Series> result = processSeries(series, input);
+		List<Series> result = processSeries(serviceIds, series, input);
 
 		return result;
 	}

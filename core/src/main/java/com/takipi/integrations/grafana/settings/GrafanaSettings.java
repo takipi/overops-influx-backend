@@ -92,6 +92,7 @@ public class GrafanaSettings {
 		if ((response.data != null) && (response.data.services != null)) {
 				
 			for (SummarizedService summarizedService : response.data.services) {
+				
 				if (summarizedService.id.equals(serviceId)) {
 					return;
 				}

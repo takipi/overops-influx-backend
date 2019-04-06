@@ -113,7 +113,9 @@ public class FunctionParser {
 		try {
 			result = function.process(input);
 		} catch (Exception e) {
-			throw new IllegalStateException("Could not process query: " + e.toString() + " query:" + json, e);
+			String message = "Could not process query: " + e.toString() + " query:" + json;
+			logger.error(message, e);
+			throw new IllegalStateException(message, e);
 		}
 		
 		return result;

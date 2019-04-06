@@ -556,12 +556,12 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 	}
 	
 	@Override
-	protected List<Series> processSeries(List<GraphSeries> series, BaseGraphInput input)
-	{
+	protected List<Series> processSeries(Collection<String> serviceIds,
+		List<GraphSeries> series, BaseGraphInput input) {
 		TransactionsGraphInput tgInput = (TransactionsGraphInput)input; 
 		
 		if (tgInput.limit == 0) {
-			return super.processSeries(series, input);
+			return super.processSeries(serviceIds, series, input);
 		}
 		
 		return limitSeries(series, tgInput.limit);
