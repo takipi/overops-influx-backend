@@ -452,12 +452,12 @@ public class GroupByFunction extends BaseVolumeFunction {
 		List<String> apps;
 
 		if (input.hasApplications()) {
-			apps = new ArrayList<String>(input.getApplications(apiClient, getSettings(serviceId), serviceId));
+			apps = new ArrayList<String>(input.getApplications(apiClient, getSettingsData(serviceId), serviceId));
 		} else {
 			
 			List<String> keyApps = new ArrayList<String>();
 			
-			GroupSettings appGroups = getSettings(serviceId).applications;
+			GroupSettings appGroups = getSettingsData(serviceId).applications;
 			
 			if ((appGroups != null) && (appGroups.groups != null)) {
 				

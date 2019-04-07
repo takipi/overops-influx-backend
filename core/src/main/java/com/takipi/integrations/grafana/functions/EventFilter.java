@@ -21,6 +21,8 @@ import com.takipi.integrations.grafana.util.TimeUtil;
 public class EventFilter
 {
 	public static final String CRITICAL_EXCEPTIONS = "Critical Exceptions";
+	public static final String TRANSACTION_FAILURES = "Transaction Failures";
+
 	public static final String EXCEPTION_PREFIX = "--";
 	public static final String TERM = "<term>";
 	public static final String ARCHIVE = "Archive";
@@ -120,7 +122,7 @@ public class EventFilter
 				} else if (GroupSettings.isGroup(type)) {
 					result.categoryTypes.add(GroupSettings.fromGroupName(type));
 				} else {
-					if (!type.equals(GrafanaFunction.ALL)) {
+					if (!GrafanaFunction.VAR_ALL.contains(type)) {
 						result.eventTypes.add(type);
 					}
 				}

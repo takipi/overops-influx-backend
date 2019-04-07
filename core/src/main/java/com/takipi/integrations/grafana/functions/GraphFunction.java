@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +15,6 @@ import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
 import com.takipi.api.client.result.event.EventResult;
-import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
@@ -22,10 +22,13 @@ import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.FunctionInput.TimeFormat;
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.output.Series;
+import com.takipi.integrations.grafana.settings.ServiceSettings;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class GraphFunction extends BaseGraphFunction {
 
+	protected static boolean PRINT_GRAPH_EVENTS = false;
+	
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -61,7 +64,7 @@ public class GraphFunction extends BaseGraphFunction {
 		super(apiClient);
 	}
 	
-	public GraphFunction(ApiClient apiClient, Map<String, ServiceSettingsData> settingsMaps) {
+	public GraphFunction(ApiClient apiClient, Map<String, ServiceSettings> settingsMaps) {
 		super(apiClient, settingsMaps);
 	}
 	
@@ -85,7 +88,7 @@ public class GraphFunction extends BaseGraphFunction {
 		if (graph == null) {
 			return Collections.emptyList();
 		}
-					
+						
 		SeriesVolume seriesData = processGraphPoints(serviceId, viewId, timeSpan, graph, graphInput);
 
 		String tagName = getSeriesName(input, input.seriesName, serviceId, serviceIds);		
@@ -190,6 +193,14 @@ public class GraphFunction extends BaseGraphFunction {
 			eventFilter = null;
 		}
 		
+		Map<String, Long> debugMap;
+		
+		if (PRINT_GRAPH_EVENTS) {
+			debugMap = new HashMap<String, Long>();
+		} else {
+			debugMap = null;
+		}	
+		
 		for (GraphPoint gp : graph.points) {
 
 			Object timeValue;
@@ -218,6 +229,16 @@ public class GraphFunction extends BaseGraphFunction {
 						continue;
 					}
 				}
+				
+				if (debugMap != null) {
+					Long v = debugMap.get(gpc.id);
+					
+					if (v != null) {
+						debugMap.put(gpc.id, v + gpc.stats.hits);
+					} else {
+						debugMap.put(gpc.id, gpc.stats.hits);
+					}
+				}
 
 				if (input.volumeType.equals(VolumeType.invocations)) {
 					value += gpc.stats.invocations;
@@ -229,8 +250,38 @@ public class GraphFunction extends BaseGraphFunction {
 			volume += value;
 			values.add(Arrays.asList(new Object[] { timeValue, Long.valueOf(value) }));
 		}
+			
+		if (debugMap != null) {
+			for (Map.Entry<String, Long> entry : debugMap.entrySet()) {
+				System.err.println(entry.getKey() + " = " + entry.getValue());
+			}
+		}
 		
 		return SeriesVolume.of(values,volume);
+	}
+	
+	@Override
+	protected List<Series> processSeries(Collection<String> serviceIds,
+		List<GraphSeries> series, BaseGraphInput input) {
+		
+		GraphInput giInput = (GraphInput)input;
+		
+		long volume = 0;
+		
+		if ((serviceIds.size() > 1) && (giInput.sparkline)) {
+			
+			for (GraphSeries graphSeries : series) {
+				volume += graphSeries.volume;
+			}
+			
+			DateTime now = TimeUtil.now();
+			return createSingleStatSeries(Pair.of(now, now), volume);
+			
+		} else {
+			return super.processSeries(serviceIds, series, input);
+		}
+		
+		
 	}
 
 	@Override

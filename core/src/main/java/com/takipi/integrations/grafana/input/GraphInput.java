@@ -34,5 +34,11 @@ public class GraphInput extends BaseGraphInput {
 	 * in the result time series.
 	 */
 	public boolean condense;
+	
+	/**
+	 * Control whether this graph is shown in a grafana single stat widget sparrkline,
+	 * in which case multiple env selection will return a single aggregate volume point
+	 */
+	public boolean sparkline;
 }
 

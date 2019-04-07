@@ -336,8 +336,22 @@ public class ReliabilityReportInput extends RegressionsInput {
 	 */
 	public double minFailRate;
 	
+	/**
+	 * A comma delimited array used to visually annotate the reliability status of the key
+	 * based on the score ranges for example: ✅,⚠️,❌
+	 */
 	public String statusPrefixes;
 	
+	/**
+	 * A comma delimited array used to visually annotate the fail rate status of the key
+	 * based on the score ranges for example: ✅,⚠️,❌
+	 */
+	public String failRatePrefixes;
+	
+	/**
+	 * A comma delimited array in the form of X,Y, where X defines the threshold for a failed score
+	 * and Y defines the threshold a successful score. For example: 70,85 
+	 */
 	public String scoreRanges;
 	
 	/**

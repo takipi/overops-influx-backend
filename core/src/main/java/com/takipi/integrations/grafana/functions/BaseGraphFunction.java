@@ -15,12 +15,12 @@ import org.joda.time.DateTime;
 import com.google.common.base.Objects;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.settings.GroupSettings;
-import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.Series;
+import com.takipi.integrations.grafana.settings.ServiceSettings;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public abstract class BaseGraphFunction extends GrafanaFunction {
@@ -126,7 +126,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		super(apiClient);
 	}
 	
-	public BaseGraphFunction(ApiClient apiClient, Map<String, ServiceSettingsData> settingsMaps) {
+	public BaseGraphFunction(ApiClient apiClient, Map<String, ServiceSettings> settingsMaps) {
 		super(apiClient, settingsMaps);
 	}
 
@@ -139,7 +139,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		if (seriesName != null) {
 			tagName = seriesName;
 		} else {
-			Collection<String> types = input.getTypes(apiClient, serviceId, false);
+			Collection<String> types = getTypes(serviceId, false, input);
 			
 			if (!CollectionUtil.safeIsEmpty(types)) {
 				tagName = String.join(ARRAY_SEPERATOR_RAW + " ", types);
@@ -292,9 +292,10 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 	}
 
 	/**
+	 * @param serviceIds  - needed by child classes
 	 * @param input - needed by child classes 
 	 */
-	protected List<Series> processSeries(List<GraphSeries> series, BaseGraphInput input) {
+	protected List<Series> processSeries(Collection<String> serviceIds, List<GraphSeries> series, BaseGraphInput input) {
 
 		sortSeriesByName(series);
 		
@@ -378,7 +379,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 			series = processSync(serviceIds, input, timeSpan, pointsWanted);
 		}
 		
-		List<Series> result = processSeries(series, input);
+		List<Series> result = processSeries(serviceIds, series, input);
 
 		return result;
 	}

@@ -27,7 +27,7 @@ import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.settings.GeneralSettings;
-import com.takipi.api.client.util.settings.ServiceSettingsData;
+import com.takipi.api.client.util.settings.RegressionSettings;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
@@ -37,7 +37,7 @@ import com.takipi.integrations.grafana.input.EventsInput.OutputMode;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.settings.GrafanaSettings;
+import com.takipi.integrations.grafana.settings.ServiceSettings;
 import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.EventLinkEncoder;
 import com.takipi.integrations.grafana.util.TimeUtil;
@@ -51,6 +51,7 @@ public class EventsFunction extends GrafanaFunction {
 	protected static final String LAST_SEEN = "last_seen";
 	protected static final String MESSAGE = "message";
 	protected static final String JIRA_ISSUE_URL = "jira_issue_url";
+
 	
 	private static final int MAX_JIRA_BATCH_SIZE = 10;
 
@@ -77,9 +78,12 @@ public class EventsFunction extends GrafanaFunction {
 		
 		protected EventResult event;
 		protected Stats baselineStats;
+		protected Collection<EventData> mergedEvents;
+		protected int rank;
 		
 		protected EventData(EventResult event) {
 			this.event = event;
+			this.rank = -1;
 		}
 		
 		private boolean equalLocations(Location a, Location b) {
@@ -258,6 +262,20 @@ public class EventsFunction extends GrafanaFunction {
 
 			return builder.toString();
 		}
+		
+		protected static String getCleanClassName(EventsInput input, String value) {
+			
+			String result;
+			
+			if ((input.maxClassLength > 0)  && (value.length() > input.maxClassLength)) {		
+				result = "..." + value.substring(
+					value.length() - input.maxClassLength, value.length());
+			} else {
+				result = value;
+			}
+					
+			return result;
+		}
 
 		protected Object formatValue(Object value, EventsInput input) {
 
@@ -267,7 +285,9 @@ public class EventsFunction extends GrafanaFunction {
 
 			if (value instanceof Location) {
 				Location location = (Location)value;
-				return getSimpleClassName(location.class_name) + "." + location.method_name;
+				String simpleClassName = getSimpleClassName(location.class_name) + "." + location.method_name;
+				String cleanClassName = getCleanClassName(input, simpleClassName);
+				return cleanClassName;
 			}
 
 			if (value instanceof List) {
@@ -334,6 +354,20 @@ public class EventsFunction extends GrafanaFunction {
 		protected Object getTarget(EventData eventData) {
 			return eventData.event.stats;
 		}	
+		
+		@Override
+		protected Object formatValue(Object value, EventsInput input) {
+			
+			if ((value instanceof Long) && (((Long)value).longValue() == 0)) {
+				return "";
+			}
+			
+			if ((value instanceof Integer) && (((Integer)value).intValue() == 0)) {
+				return "";
+			}
+			
+			return value;
+		}
 	}
 
 	protected static class DateFormatter extends ReflectFormatter {
@@ -359,6 +393,33 @@ public class EventsFunction extends GrafanaFunction {
 			}
 			
 			return "";
+		}
+	}
+	
+	protected class RankFormatter extends FieldFormatter {
+
+		@Override
+		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
+				Pair<DateTime, DateTime> timeSpan) {
+
+			return eventData.rank;
+		}
+	}
+	
+	protected class EntryPointNameFormatter extends FieldFormatter {
+
+		@Override
+		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
+				Pair<DateTime, DateTime> timeSpan) {
+
+			if (eventData.event.entry_point == null) {
+				return "";
+			}
+			
+			String simpleClassName =  getSimpleClassName(eventData.event.entry_point.class_name);
+			String result = getCleanClassName(input, simpleClassName);
+			
+			return result;
 		}
 	}
 	
@@ -427,7 +488,7 @@ public class EventsFunction extends GrafanaFunction {
 			}
 				
 			if (eventData.event.introduced_by != null) {
-				result.append(". New in: ");
+				result.append(". Introduced in: ");
 				result.append(eventData.event.introduced_by);
 			} else {
 				result.append(". First seen: ");
@@ -449,22 +510,19 @@ public class EventsFunction extends GrafanaFunction {
 		}
 		
 		@Override
-		protected Object formatValue(Object value, EventsInput input)
-		{
+		protected Object formatValue(Object value, EventsInput input) {
 			return value;
 		}
 	}
 	
 	protected class JiraUrlFormatter extends ReflectFormatter {
 
-		protected JiraUrlFormatter(Field field)
-		{
+		protected JiraUrlFormatter(Field field) {
 			super(field);
 		}
 
 		@Override
-		protected Object formatValue(Object value, EventsInput input)
-		{
+		protected Object formatValue(Object value, EventsInput input) {
 			if (value == null) {
 				return super.formatValue(value, input);
 			}
@@ -496,8 +554,7 @@ public class EventsFunction extends GrafanaFunction {
 
 		@Override
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
-				Pair<DateTime, DateTime> timeSpan)
-		{
+				Pair<DateTime, DateTime> timeSpan) {
 			Pair<Double, Double> ratePair = getRatePair(eventData);
 			
 			if (ratePair == null) {
@@ -505,6 +562,11 @@ public class EventsFunction extends GrafanaFunction {
 			}
 			
 			return formatRateDelta(eventData.baselineStats, eventData.event.stats);
+		}
+		
+		@Override
+		protected Object formatValue(Object value, EventsInput input) {
+			return value;
 		}
 	}
 		
@@ -514,7 +576,7 @@ public class EventsFunction extends GrafanaFunction {
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
 				Pair<DateTime, DateTime> timeSpan) {
 
-			return EventLinkEncoder.encodeLink(apiClient, getSettings(serviceId), 
+			return EventLinkEncoder.encodeLink(apiClient, getSettingsData(serviceId), 
 				serviceId, input, eventData.event, 
 				timeSpan.getFirst(), timeSpan.getSecond());
 		}
@@ -534,7 +596,8 @@ public class EventsFunction extends GrafanaFunction {
 			boolean hasMessage = (eventData.event.message !=  null) 
 				&& (!eventData.event.message.trim().isEmpty());
 
-			if (eventData.event.type.toLowerCase().contains("exception")) {
+			if ((eventData.event.type.equals(HTTP_ERROR)) 
+			|| (EXCEPTION_TYPES.contains(eventData.event.type))) {
 				
 				StringBuilder result = new StringBuilder();
 				result.append(eventData.event.name);
@@ -542,11 +605,9 @@ public class EventsFunction extends GrafanaFunction {
 				if (hasMessage) {
 					result.append(": ");
 					result.append(eventData.event.message);
-				} else {
-					if (eventData.event.error_location != null) {
-						result.append(" in ");
-						result.append(formatLocation(eventData.event.error_location));
-					}
+				} else if (eventData.event.error_location != null) {
+					result.append(" in ");
+					result.append(formatLocation(eventData.event.error_location));
 				}
 				
 				return result.toString();
@@ -566,8 +627,8 @@ public class EventsFunction extends GrafanaFunction {
 		
 		@Override
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
-				Pair<DateTime, DateTime> timeSpan)
-		{
+				Pair<DateTime, DateTime> timeSpan) {
+			
 			String type = TYPES_MAP.get(eventData.event.type);
 			Object value = super.getValue(eventData, serviceId, input, timeSpan);
 
@@ -652,7 +713,7 @@ public class EventsFunction extends GrafanaFunction {
 		}
 		
 		if (column.equals(EventsInput.DESCRIPTION)) {
-			Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();
+			Categories categories = getSettings(serviceId).getCategories();
 			return new EventDescriptionFormatter(categories);
 		}
 		
@@ -663,13 +724,21 @@ public class EventsFunction extends GrafanaFunction {
 		if (column.equals(EventsInput.RATE_DELTA_DESC)) {
 			return new RateDeltaDescFormatter();
 		}
+		
+		if (column.equals(EventsInput.RANK)) {
+			return new RankFormatter();
+		}
+		
+		if (column.equals(EventsInput.ENTRY_POINT_NAME)) {
+			return new EntryPointNameFormatter();
+		}
 			
 		Field field = getReflectField(column);
 
 		if (column.equals(JIRA_ISSUE_URL)) {
 			return new JiraUrlFormatter(field);
 		}
-	
+		
 		if ((column.equals(FIRST_SEEN)) || (column.equals(LAST_SEEN))) {
 			return new DateFormatter(field);
 		}
@@ -698,7 +767,7 @@ public class EventsFunction extends GrafanaFunction {
 		super(apiClient);
 	}
 	
-	public EventsFunction(ApiClient apiClient, Map<String, ServiceSettingsData> settingsMaps) {
+	public EventsFunction(ApiClient apiClient, Map<String, ServiceSettings> settingsMaps) {
 		super(apiClient, settingsMaps);
 	}
 	
@@ -800,7 +869,7 @@ public class EventsFunction extends GrafanaFunction {
 	
 	protected List<EventData> mergeSimilarEvents(String serviceId, List<EventData> eventDatas) {
 		
-		GeneralSettings settings = getSettings(serviceId).general;
+		GeneralSettings settings = getSettingsData(serviceId).general;
 		
 		if ((settings == null) || (!settings.group_by_entryPoint)) {
 			return eventDatas;
@@ -897,7 +966,11 @@ public class EventsFunction extends GrafanaFunction {
 		
 		clone.stats = stats;
 		clone.jira_issue_url = jiraUrl;
-		return Collections.singletonList(new EventData(clone));
+		
+		EventData result = new EventData(clone);
+		result.mergedEvents = eventDatas;
+		
+		return Collections.singletonList(result);
 	}
 	
 	private void updateEventBaselineStats(String serviceId, 
@@ -1018,25 +1091,53 @@ public class EventsFunction extends GrafanaFunction {
 		}
 	}
 	
-	protected void sortEventDatas(List<EventData> eventDatas ) {
-	
-		eventDatas.sort(new Comparator<EventData>()
-		{
-			@Override
-			public int compare(EventData o1, EventData o2)
-			{
-				return (int)(o2.event.stats.hits - o1.event.stats.hits);
-			}
-		});
+	private static double getDelta(Double value) {
+		
+		if (value == null) {
+			return 0f;
+		}
+		
+		return value.doubleValue();
+		
 	}
 	
+	
+	protected void sortEventDatas(String serviceId, List<EventData> eventDatas ) {
+	
+		RegressionSettings regressionSettings = getSettingsData(serviceId).regression;
+		
+		int minThreshold = regressionSettings.error_min_volume_threshold;
+		List<String> criticalExceptionList = new ArrayList<String>(regressionSettings.getCriticalExceptionTypes());
+		
+		eventDatas.sort(new Comparator<EventData>() {
+			
+			@Override
+			public int compare(EventData o1, EventData o2) {
+			
+				double o1RateDelta = getDelta(getRateDelta(o1));
+				double o2RateDelta = getDelta(getRateDelta(o2));
+				
+				return compareEvents(o1.event, o2.event, o1RateDelta, o2RateDelta, 
+					criticalExceptionList, minThreshold);
+			}
+				
+		});
+		
+		int index = 1;
+		
+		for (EventData eventData : eventDatas) {
+			eventData.rank = index;
+			index++;
+		}
+	}
+
 	/**
 	 * @param serviceIds - needed for children
 	 */
 	protected List<List<Object>> processServiceEvents(Collection<String> serviceIds, 
 		String serviceId, EventsInput input, Pair<DateTime, DateTime> timeSpan) {
 		
-		Collection<EventData> eventDatas = processEventDatas(serviceId, 
+		List<EventData> eventDatas = processEventDatas(serviceId, 
 			input, timeSpan);
 				
 		List<List<Object>> result = new ArrayList<List<Object>>(eventDatas.size());
@@ -1049,9 +1150,12 @@ public class EventsFunction extends GrafanaFunction {
 		}
 		
 		if ((formatters.containsKey(EventsInput.RATE_DELTA)) 
+		|| (formatters.containsKey(EventsInput.RANK)) 
 		|| (formatters.containsKey(EventsInput.RATE_DELTA_DESC))) {
 			updateEventBaselineStats(serviceId, input, timeSpan, eventDatas);
 		}
+		
+		sortEventDatas(serviceId, eventDatas);
 		
 		for (EventData eventData : eventDatas) {	 
 	
@@ -1067,7 +1171,7 @@ public class EventsFunction extends GrafanaFunction {
 
 	}
 	
-	private Collection<EventData> processEventDatas(String serviceId, 
+	private List<EventData> processEventDatas(String serviceId, 
 		EventsInput input, Pair<DateTime, DateTime> timeSpan) {
 		
 		List<EventData> mergedDatas;
@@ -1078,9 +1182,7 @@ public class EventsFunction extends GrafanaFunction {
 		} else {
 			mergedDatas = mergeSimilarEvents(serviceId, eventDatas);
 		}
-		
-		sortEventDatas(mergedDatas);
-			
+					
 		EventFilter eventFilter = getEventFilter(serviceId, input, timeSpan);
 
 		if (eventFilter == null) {
@@ -1096,7 +1198,7 @@ public class EventsFunction extends GrafanaFunction {
 			}
 
 			if (eventData.event.stats.hits == 0) {
-				continue;
+				//continue;
 			}
 					
 			result.add(eventData);
@@ -1182,11 +1284,16 @@ public class EventsFunction extends GrafanaFunction {
 
 		Collection<String> serviceIds = getServiceIds(input);
 
+		List<List<List<Object>>> servicesValues = new ArrayList<List<List<Object>>>(serviceIds.size());
+		
 		for (String serviceId : serviceIds) {
 			List<List<Object>> serviceEvents = processServiceEvents(serviceIds, serviceId, input, timeSpan);
 			series.values.addAll(serviceEvents);
+			servicesValues.add(serviceEvents);
 		}
 
+		sortSeriesValues(series.values, servicesValues);
+		
 		return Collections.singletonList(series);
 	}
 	

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import com.takipi.common.util.CollectionUtil;
 import com.takipi.integrations.grafana.functions.GrafanaFunction;
 
 /** 
@@ -82,9 +83,14 @@ public class RegressionsInput extends EventsInput
 		SingleStatCount,
 		
 		/**
-		 * return a the volume of events returned
+		 * return the volume of events returned
 		 */
 		SingleStatVolume,
+		
+		/**
+		 * return a string value of the volume of events returned
+		 */
+		SingleStatVolumeText,
 		
 		/**
 		 * return a table with each row depicting a new or increasing error
@@ -147,9 +153,25 @@ public class RegressionsInput extends EventsInput
 	 */
 	public static String REG_DESC = "reg_desc";
 	
+	public boolean newOnly() {
+		Collection<RegressionType> regressionTypes = getRegressionTypes();
+		return newOnly(regressionTypes);
+	}
+
+	public static boolean newOnly(Collection<RegressionType> regressionTypes) {
+		
+		
+		if (CollectionUtil.safeIsEmpty(regressionTypes)) {
+			return false;
+		}
+		
+		boolean result = (!regressionTypes.contains(RegressionType.Regressions))
+				&& (!regressionTypes.contains(RegressionType.SevereRegressions));
+		
+		return result;
+	}
 	
-	public Collection<RegressionType> getRegressionTypes()
-	{
+	public Collection<RegressionType> getRegressionTypes() {
 		
 		if (regressionTypes == null)
 		{

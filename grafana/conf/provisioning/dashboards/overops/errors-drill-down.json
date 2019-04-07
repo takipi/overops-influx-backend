@@ -17,7 +17,7 @@
         "iconColor": "#1f78c1",
         "limit": 100,
         "name": "deployments",
-        "query": "deploymentsAnnotation({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"All Events\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\",\"seriesName\":\"Times\",\"graphCount\":3})",
+        "query": "deploymentsAnnotation({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"All Events\",\"timeFilter\":\"time >= now() - 14d\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\",\"seriesName\":\"Times\",\"graphCount\":3})",
         "showIn": 0,
         "tags": [],
         "type": "tags"
@@ -39,17 +39,18 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 28,
-  "iteration": 1554363103684,
+  "id": 53,
+  "iteration": 1554448828577,
   "links": [
     {
       "icon": "dashboard",
       "includeVars": true,
       "keepTime": true,
       "tags": [],
+      "title": "",
       "tooltip": "Home",
       "type": "link",
-      "url": "/d/lg0U4qriz/home"
+      "url": "d/lg0U4qriz/home"
     },
     {
       "asDropdown": true,
@@ -59,6 +60,7 @@
       "tags": [
         "OverOps"
       ],
+      "targetBlank": false,
       "type": "dashboards"
     }
   ],
@@ -69,137 +71,17 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "Shows the relative rate of increasing errors, comparing them between the last $activeWindowFmt window and the preceding $baselineOnlyFmt baseline period, as denoted by the red annotation on the graph.",
+      "description": "This graph shows the volume of the selected events overlaid onto calls into the selected transactions. To the left of the dashed red vertical annotation is the baseline period which can be used to compare against the current timeframe, which is to the right of the baseline annotation.",
       "fill": 0,
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 12,
         "x": 0,
         "y": 0
       },
       "hideTimeOverride": true,
-      "id": 36,
-      "interval": "",
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": false,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 3,
-      "points": true,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "alias": "",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "regressionGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\",\"limit\":$splitLimit, \"searchText\":\"$search\",\"eventLocations\":\"$increasingErrors\",\"graphType\":\"Percentage\", \"types\":\"$type\",\"timeFilterVar\":\"$timeFilterVar\"})\n\n",
-          "rawQuery": true,
-          "refId": "I",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": "$baseline",
-      "timeShift": null,
-      "title": "Errors / Calls Ratio  (Last $activeWindowFmt vs. preceding $baselineOnlyFmt)",
-      "tooltip": {
-        "shared": true,
-        "sort": 2,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": null,
-          "format": "short",
-          "label": "",
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "decimals": 0,
-          "format": "short",
-          "label": "",
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "OO",
-      "description": "Shows the volume of selected increasing errors, comparing them between the last $activeWindowFmt window and the preceding $baselineOnlyFmt baseline period, as denoted by the red annotation on the graph.",
-      "fill": 0,
-      "gridPos": {
-        "h": 6,
-        "w": 12,
-        "x": 12,
-        "y": 0
-      },
-      "hideTimeOverride": true,
-      "id": 39,
-      "interval": "",
+      "id": 37,
+      "interval": "1h",
       "legend": {
         "avg": false,
         "current": false,
@@ -214,17 +96,19 @@
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
-      "pointradius": 3,
+      "pointradius": 5,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "Errors",
-          "color": "#cca300"
+          "alias": "/^.Throughput/",
+          "color": "#7eb26d",
+          "fill": 2,
+          "linewidth": 0,
+          "yaxis": 2
         },
         {
-          "alias": "Calls",
-          "color": "#9ac48a"
+          "alias": "/^.Volume/"
         }
       ],
       "spaceLength": 10,
@@ -247,11 +131,12 @@
               "type": "fill"
             }
           ],
+          "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\",\"limit\":$splitLimit, \"searchText\":\"$search\", \"graphType\":\"Absolute\",\"eventLocations\":\"$increasingErrors\", \"types\":\"$type\",\"timeFilterVar\":\"$timeFilterVar\"})\n\n",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\"})",
           "rawQuery": true,
-          "refId": "I",
+          "refId": "B",
           "resultFormat": "time_series",
           "select": [
             [
@@ -285,10 +170,10 @@
               "type": "fill"
             }
           ],
-          "hide": true,
+          "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\", \"types\":\"$type\",\"limit\":$splitLimit, \"searchText\":\"$search\", \"graphType\":\"Absolute\"})\n\n",
+          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",\"seriesName\":\"Volume\", \"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -307,12 +192,50 @@
             ]
           ],
           "tags": []
+        },
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": true,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "splitGraph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",\"transactions\":\"$transactions\", \"limit\":\"$splitLimit\", \"searchText\":\"$search\"})\n",
+          "rawQuery": true,
+          "refId": "C",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
         }
       ],
       "thresholds": [],
       "timeFrom": "$baseline",
       "timeShift": null,
-      "title": "Volume (Last $activeWindowFmt vs. preceding $baselineOnlyFmt)",
+      "title": "$type: Last $activeWindowFmt vs $baselineOnlyFmt baseline",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -331,16 +254,223 @@
           "decimals": null,
           "format": "short",
           "label": "",
-          "logBase": 1,
+          "logBase": 10,
           "max": null,
           "min": "0",
           "show": true
         },
         {
-          "decimals": 0,
           "format": "short",
           "label": "",
-          "logBase": 1,
+          "logBase": 10,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "OO",
+      "description": "This graph shows the volume of the selected events overlaid onto calls into the selected transactions.",
+      "fill": 0,
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "hideTimeOverride": false,
+      "id": 36,
+      "interval": "1h",
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "/^.Throughput/",
+          "color": "#7eb26d",
+          "fill": 2,
+          "linewidth": 0,
+          "yaxis": 2
+        },
+        {
+          "alias": "/^.Volume/"
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\"})",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "alias": "",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",\"seriesName\":\"Volume\", \"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": true,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "splitGraph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",\"transactions\":\"$transactions\", \"limit\":\"$splitLimit\", \"searchText\":\"$search\"})\n",
+          "rawQuery": true,
+          "refId": "C",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "$type: $activeWindowFmt",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "short",
+          "label": "",
+          "logBase": 10,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": "",
+          "logBase": 10,
           "max": null,
           "min": null,
           "show": true
@@ -354,17 +484,17 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "Shows a list of increasing errors, comparing them between the last $activeWindowFmt window and the preceding $baselineOnlyFmt baseline period, as denoted by the red annotation on the graph.",
+      "description": "A list of all unique errors in the selected time frame and filter set. Events are ordered by the following ranking: uncaught exceptions, critical exceptions (as defined in the Settings dashboard), HTTP errors ,log errors, log warnings, swallowed exceptions and caught exceptions. For events of the same type, ranking is done comparing the rate delta and then volume.",
       "fontSize": "100%",
       "gridPos": {
-        "h": 11,
+        "h": 13,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 5
       },
       "id": 34,
       "links": [],
-      "pageSize": null,
+      "pageSize": 50,
       "scroll": true,
       "showHeader": true,
       "sort": {
@@ -383,8 +513,8 @@
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
           "link": false,
-          "linkTargetBlank": false,
-          "linkTooltip": "",
+          "linkTargetBlank": true,
+          "linkTooltip": "Go to Root Cause",
           "linkUrl": "",
           "mappingType": 2,
           "pattern": "Link",
@@ -403,7 +533,7 @@
             "rgba(50, 172, 45, 0.97)"
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 0,
+          "decimals": 1,
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
@@ -430,26 +560,6 @@
           "linkUrl": "",
           "mappingType": 1,
           "pattern": "Entry point",
-          "thresholds": [],
-          "type": "hidden",
-          "unit": "short"
-        },
-        {
-          "alias": "Introduced By",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": false,
-          "linkTargetBlank": true,
-          "linkTooltip": "",
-          "linkUrl": "",
-          "mappingType": 1,
-          "pattern": "Introduced by",
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
@@ -493,7 +603,7 @@
           "preserveFormat": false,
           "sanitize": false,
           "thresholds": [],
-          "type": "hidden",
+          "type": "string",
           "unit": "short",
           "valueMaps": [
             {
@@ -505,7 +615,7 @@
               "value": "Swallowed Exception"
             },
             {
-              "text": "HTT",
+              "text": "HTTP",
               "value": "HTTP Error"
             },
             {
@@ -547,7 +657,7 @@
           "unit": "short"
         },
         {
-          "alias": "Code Location",
+          "alias": "Location",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -558,7 +668,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_8}",
+          "linkTooltip": "${__cell_7}",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Error location",
@@ -575,95 +685,24 @@
             "rgba(50, 172, 45, 0.97)"
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": false,
+          "decimals": 0,
+          "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "",
-          "linkUrl": "",
+          "linkTooltip": "${__cell_2}",
+          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
           "pattern": "Rate",
           "thresholds": [],
-          "type": "hidden",
+          "type": "number",
           "unit": "percentunit"
         },
         {
-          "alias": "Type",
+          "alias": "",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": false,
-          "mappingType": 1,
-          "pattern": "IssueType",
-          "thresholds": [],
-          "type": "string",
-          "unit": "short",
-          "valueMaps": [
-            {
-              "text": "Reg",
-              "value": "Regression"
-            },
-            {
-              "text": "Sev New",
-              "value": "Severe New"
-            },
-            {
-              "text": "Sev Reg",
-              "value": "Severe Regression"
-            }
-          ]
-        },
-        {
-          "alias": "Message",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": true,
-          "linkTargetBlank": true,
-          "linkTooltip": "${__cell_2}: Click to drill -in.",
-          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
-          "mappingType": 1,
-          "pattern": "TypeMessage",
-          "thresholds": [],
-          "type": "number",
-          "unit": "short"
-        },
-        {
-          "alias": "Rate Δ",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "link": true,
-          "linkTargetBlank": true,
-          "linkTooltip": "${__cell_1}. Click to drill-down.",
-          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
-          "mappingType": 1,
-          "pattern": "Reg delta",
-          "thresholds": [],
-          "type": "number",
-          "unit": "percent"
-        },
-        {
-          "alias": "P",
-          "colorMode": "value",
-          "colors": [
-            "rgba(50, 172, 45, 0.97)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(245, 54, 54, 0.9)"
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
@@ -672,23 +711,10 @@
           "linkTooltip": "${__cell_3}",
           "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
           "mappingType": 1,
-          "pattern": "Severity",
-          "thresholds": [
-            "1",
-            "2"
-          ],
-          "type": "string",
-          "unit": "short",
-          "valueMaps": [
-            {
-              "text": "2",
-              "value": "1"
-            },
-            {
-              "text": "1",
-              "value": "2"
-            }
-          ]
+          "pattern": "Message",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
         },
         {
           "alias": "",
@@ -702,10 +728,59 @@
           "decimals": 2,
           "link": false,
           "mappingType": 1,
-          "pattern": "Regression",
+          "pattern": "Introduced by",
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 2,
+          "pattern": "Jira issue url",
+          "rangeMaps": [],
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short",
+          "valueMaps": [
+            {
+              "text": "moo",
+              "value": "/.*/"
+            }
+          ]
+        },
+        {
+          "alias": "Tkt",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": true,
+          "linkTargetBlank": true,
+          "linkTooltip": "🔎",
+          "linkUrl": "http://${__cell_2:raw}",
+          "mappingType": 1,
+          "pattern": "Jira state",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short",
+          "valueMaps": [
+            {
+              "text": "🎟",
+              "value": "1"
+            }
+          ]
         },
         {
           "alias": "",
@@ -734,7 +809,7 @@
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
           "mappingType": 1,
-          "pattern": "Description",
+          "pattern": "Invocations",
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
@@ -750,7 +825,61 @@
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 2,
           "mappingType": 1,
-          "pattern": "Reg desc",
+          "pattern": "Rate desc",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Description",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "Δ%",
+          "colorMode": null,
+          "colors": [
+            "rgba(50, 172, 45, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 0,
+          "link": true,
+          "linkTooltip": "${__cell_4}",
+          "linkUrl": "//$apiHost:$apiPort/tale.html?source=45&snapshot=${__cell_0}",
+          "mappingType": 1,
+          "pattern": "Rate delta",
+          "thresholds": [
+            "0.1",
+            "0.25"
+          ],
+          "type": "number",
+          "unit": "percentunit"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Rate delta desc",
           "thresholds": [],
           "type": "hidden",
           "unit": "short"
@@ -774,7 +903,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressions({\"fields\":\"link,regression,description,reg_desc,severity,typeMessage,stats.hits,rate,reg_delta,first_seen\",  \"render\":\"Grid\", \"regressionTypes\":\"Regressions,SevereRegressions\", \"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"maxColumnLength\":120,\"pointsWanted\":\"$pointsWanted\",\"searchText\":\"$search\", \"eventLocations\":\"$increasingErrors\", \"types\":\"$type\"})",
+          "query": "events({\"fields\":\"link,jira_issue_url,rate_desc,description,rate_delta_desc,rank,type,message,stats.hits,rate,rate_delta,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":120, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -795,7 +924,7 @@
           "tags": []
         }
       ],
-      "title": "",
+      "title": "$eventCount Events, Volume = $v",
       "transform": "table",
       "type": "table"
     }
@@ -807,12 +936,10 @@
   "templating": {
     "list": [
       {
-        "allValue": "*",
+        "allValue": "None",
         "current": {
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -833,7 +960,7 @@
         "useTags": false
       },
       {
-        "allValue": "*",
+        "allValue": "All",
         "current": {
           "text": "All",
           "value": "$__all"
@@ -857,7 +984,7 @@
         "useTags": false
       },
       {
-        "allValue": "*",
+        "allValue": "All",
         "current": {
           "text": "All",
           "value": "$__all"
@@ -881,31 +1008,7 @@
         "useTags": false
       },
       {
-        "allValue": "all",
-        "current": {
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "OO",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Type",
-        "multi": true,
-        "name": "type",
-        "options": [],
-        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\", \"timeFilter\":\"$timeFilter\"})",
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": "*",
+        "allValue": "All",
         "current": {
           "text": "All",
           "value": "$__all"
@@ -929,20 +1032,20 @@
         "useTags": false
       },
       {
-        "allValue": null,
+        "allValue": "all",
         "current": {
-          "text": "24",
-          "value": "24"
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": "OO",
-        "hide": 2,
-        "includeAll": false,
-        "label": "Points Wanted",
-        "multi": false,
-        "name": "pointsWanted",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Type",
+        "multi": true,
+        "name": "type",
         "options": [],
-        "query": "settingsVar({\"environments\":\"$environments\", \"name\":\"points_wanted\", \"defaultValue\":24})",
-        "refresh": 1,
+        "query": "eventTypes({\"environments\":\"$environments\", \"view\":\"$view\", \"timeFilter\":\"$timeFilter\", \"varTimeFilter\":\"true\"})",
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -986,54 +1089,33 @@
         "type": "custom"
       },
       {
+        "allValue": "*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "OO",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Transactions",
+        "multi": true,
+        "name": "transactions",
+        "options": [],
+        "query": "transactions({\"environments\":\"$environments\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"sorted\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
         "allValue": null,
         "current": {
           "selected": true,
-          "text": "All Events",
-          "value": "All Events"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "View",
-        "multi": false,
-        "name": "view",
-        "options": [
-          {
-            "selected": true,
-            "text": "All Events",
-            "value": "All Events"
-          }
-        ],
-        "query": "All Events",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "text": "All",
-          "value": "All"
-        },
-        "hide": 2,
-        "includeAll": false,
-        "label": "Increases",
-        "multi": false,
-        "name": "increasingErrors",
-        "options": [
-          {
-            "selected": true,
-            "text": "All",
-            "value": "All"
-          }
-        ],
-        "query": "All",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
-          "tags": [],
           "text": "<term>",
           "value": "<term>"
         },
@@ -1052,6 +1134,55 @@
         "query": "<term>",
         "skipUrlSync": false,
         "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "isNone": true,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": "View",
+        "multi": false,
+        "name": "view",
+        "options": [],
+        "query": "views({\"environments\":\"$environments\",\"sorted\":true, \"defaultView\":\"All Events\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "24",
+          "value": "24"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Points Wanted",
+        "multi": false,
+        "name": "pointsWanted",
+        "options": [],
+        "query": "settingsVar({\"environments\":\"$environments\", \"name\":\"points_wanted\", \"defaultValue\":24})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       },
       {
         "allValue": null,
@@ -1104,6 +1235,54 @@
       {
         "allValue": null,
         "current": {
+          "text": "0",
+          "value": "0"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "eventCount",
+        "options": [],
+        "query": "events({\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"outputMode\":\"SingleStat\", \"varTimeFilter\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "0",
+          "value": "0"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "v",
+        "options": [],
+        "query": "volume({\"type\":\"sum\",\"volumeType\":\"hits\",\"eventVolumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\",\"types\":\"$type\",\"transactions\":\"$transactions\",\"filter\":\"events\", \"pointsWanted\":\"$pointsWanted\", \"varTimeFilter\":\"true\", \"searchText\":\"$search\", \"stringValue\":\"true\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
           "isNone": true,
           "text": "None",
           "value": ""
@@ -1116,56 +1295,6 @@
         "name": "baseline",
         "options": [],
         "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Combined\"})",
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
-        "hide": 2,
-        "includeAll": false,
-        "label": null,
-        "multi": false,
-        "name": "baselineOnly",
-        "options": [],
-        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Baseline\"})",
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
-        "hide": 2,
-        "includeAll": false,
-        "label": null,
-        "multi": false,
-        "name": "activeWindow",
-        "options": [],
-        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Active\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1215,31 +1344,7 @@
         "multi": false,
         "name": "activeWindowFmt",
         "options": [],
-        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Active\",\"prettyFormat\":\"true\"})",
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "text": "time >= 1554276703638ms and time <= 1554363103638ms",
-          "value": "time >= 1554276703638ms and time <= 1554363103638ms"
-        },
-        "datasource": "OO",
-        "hide": 2,
-        "includeAll": false,
-        "label": null,
-        "multi": false,
-        "name": "timeFilterVar",
-        "options": [],
-        "query": "timeFilter({\"timeFilter\":\"$timeFilter\"})",
+        "query": "baselineWindow({\"graphType\":\"view\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"windowType\":\"Active\", \"prettyFormat\":\"true\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1283,7 +1388,7 @@
     ]
   },
   "timezone": "",
-  "title": "Increasing Errors",
-  "uid": "WZ739NYmk",
-  "version": 123
+  "title": "Errors Drill-down",
+  "uid": "6TxYIh6mk",
+  "version": 10
 }
