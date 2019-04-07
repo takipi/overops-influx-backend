@@ -739,18 +739,6 @@ public class RegressionFunction extends EventsFunction {
 			baselineInput = input;
 		}
 				
-		/*
-		Graph baselineGraph = getEventsGraph(serviceId, viewId, baselinePoints, 
-				input, VolumeType.all,
-				regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan),
-				regressionWindow.activeWindowStart, 0, regressionInput.baselineTimespan);
-	
-		Graph activeWindowGraph = getEventsGraph(serviceId, viewId, input.pointsWanted, input,
-				VolumeType.all, regressionWindow.activeWindowStart, DateTime.now(), regressionWindow.activeTimespan, 0);
-		*/
-		
-		//This section needs to be refactored into its own blocking / synch cache loader 
-		
 		Collection<GraphSliceTask> baselineGraphTasks;
 		
 		DateTime baselineStart = regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan);
