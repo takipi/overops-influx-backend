@@ -72,7 +72,7 @@ public class ApiCache {
 	private static final Logger logger = LoggerFactory.getLogger(ApiCache.class);
 	
 	private static final int CACHE_SIZE = 500;
-	private static final int CACHE_REFRESH_RETENTION = 90;
+	private static final int CACHE_REFRESH_RETENTION = 60;
 		
 	public static final int NO_GRAPH_SLICE = -1;
 	public static final int MIN_SLICE_POINTS = 3;
