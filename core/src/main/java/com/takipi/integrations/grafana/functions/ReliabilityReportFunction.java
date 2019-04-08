@@ -2257,7 +2257,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		relabilityDesc.append("Score = ");
 		
 		if ((int)reportKeyResult.score != reportKeyResult.score) {
-			relabilityDesc.append(reportKeyResult.score);
+			relabilityDesc.append(singleDigitFormatter.format(reportKeyResult.score));
 		} else {
 			relabilityDesc.append((int)reportKeyResult.score);
 		}
