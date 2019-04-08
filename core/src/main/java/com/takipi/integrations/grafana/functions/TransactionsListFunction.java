@@ -251,15 +251,16 @@ public class TransactionsListFunction extends GrafanaFunction {
 	
 	private String getSlowdownDesc(TransactionData transactionData, 
 		SlowdownSettings slowdownSettings, Stats stats) {
-				
-		double baseline = transactionData.baselineStats.avg_time_std_deviation * slowdownSettings.std_dev_factor + transactionData.baselineStats.avg_time;
-		
+					
 		StringBuilder result = new StringBuilder();
 		
 		boolean isSlowdown = (transactionData.state == PerformanceState.CRITICAL) ||
 				(transactionData.state == PerformanceState.SLOWING);
 		
 		if (isSlowdown) {
+			
+			double baseline = transactionData.baselineStats.avg_time_std_deviation 
+					* slowdownSettings.std_dev_factor + transactionData.baselineStats.avg_time;
 			
 			if  (transactionData.state == PerformanceState.CRITICAL) {
 				result.append(TransactionState.SEVERE.toString());		
@@ -332,7 +333,6 @@ public class TransactionsListFunction extends GrafanaFunction {
 			result.append(": ");
 			
 			double errorRate = (double)transactionData.errorsHits / (double)transactionData.stats.invocations;
-			double baselineErrorRate = (double)transactionData.baselineErrors / (double)transactionData.baselineStats.invocations;
 					
 			result.append(formatLongValue(transactionData.errorsHits));
 			result.append(" failures in ");
@@ -343,7 +343,9 @@ public class TransactionsListFunction extends GrafanaFunction {
 			
 			if ((transactionData.baselineStats != null)
 			&& (transactionData.baselineStats.invocations > 0)) {
-						
+				
+				double baselineErrorRate = (double)transactionData.baselineErrors / (double)transactionData.baselineStats.invocations;
+
 				result.append(" compared to ");
 				result.append(formatLongValue(transactionData.baselineErrors));
 				result.append(" in ");
