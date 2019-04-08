@@ -1987,8 +1987,7 @@ public abstract class GrafanaFunction {
 			for (Pair<DateTime, DateTime> period :periods) {
 				
 				boolean cache = (index > 0) && (index < periods.size() - 1) 
-					&& ((input.deployments == null) 
-					|| (GrafanaFunction.VAR_ALL.contains(input.deployments)));
+					&& (!input.hasDeployments());
 				
 				SliceRequest slice = new SliceRequest(period.getFirst(),
 					period.getSecond(), periodPoints, cache);

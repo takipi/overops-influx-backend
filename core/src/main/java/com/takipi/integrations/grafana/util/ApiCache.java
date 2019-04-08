@@ -1413,18 +1413,6 @@ public class ApiCache {
 
 		return response;
 	}
-	
-	public static void putEventGraph(ApiClient apiClient, String serviceId,
-			ViewInput input, VolumeType volumeType, GraphRequest request, int pointsWanted,
-			int baselineWindow, int activeWindow, Response<GraphResult> graphResult) {
-
-		GraphCacheLoader cacheKey = new GraphCacheLoader(apiClient, request, serviceId, input, volumeType, 
-			pointsWanted, baselineWindow, activeWindow, NO_GRAPH_SLICE, null, false);
-		
-		cacheKey.loadT1 = System.currentTimeMillis();
-		
-		queryCache.put(cacheKey, graphResult);
-	}
 
 	@SuppressWarnings("unchecked")
 	public static Response<EventsSlimVolumeResult> getEventVolume(ApiClient apiClient, String serviceId, 
