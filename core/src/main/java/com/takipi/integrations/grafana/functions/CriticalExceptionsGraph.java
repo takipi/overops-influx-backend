@@ -80,7 +80,7 @@ public class CriticalExceptionsGraph extends LimitGraphFunction {
 		Long key = null;
 		Long lastKey = null;
 		
-		RegressionSettings regressionSettings = getSettings(serviceId).regression;
+		RegressionSettings regressionSettings = getSettingsData(serviceId).regression;
 		
 		if (regressionSettings == null) {
 			return Collections.emptyList();

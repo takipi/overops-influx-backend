@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 20,
-  "iteration": 1553093652358,
+  "iteration": 1554673127884,
   "links": [
     {
       "icon": "dashboard",
@@ -332,7 +332,7 @@
         {
           "includeVars": true,
           "keepTime": true,
-          "targetBlank": true,
+          "targetBlank": false,
           "title": "Performance. $sd",
           "type": "absolute",
           "url": "d/Z40SpeJmz/performance"
@@ -454,7 +454,7 @@
         {
           "includeVars": true,
           "keepTime": true,
-          "targetBlank": true,
+          "targetBlank": false,
           "title": "New Errors. $ne",
           "type": "absolute",
           "url": "d/3NZ83NLik/new-errors"
@@ -698,7 +698,7 @@
           "dashboard": "d/HYBPMdYik/errors",
           "includeVars": true,
           "keepTime": true,
-          "targetBlank": true,
+          "targetBlank": false,
           "title": "Unique Errors. Volume = $e errors.",
           "type": "absolute",
           "url": "d/HYBPMdYik/errors"
@@ -1633,7 +1633,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "events({\"fields\":\"link,rate_desc,description,rate_delta_desc,stats.hits,rate_delta,typeMessage\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":60, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
+          "query": "events({\"fields\":\"link,rate_desc,description,rate_delta_desc,rank,typeMessage,stats.hits,rate_delta\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":60, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -2475,10 +2475,11 @@
       {
         "allValue": "all",
         "current": {
+          "selected": false,
           "tags": [],
-          "text": "OverOps Prod: S6295",
+          "text": "None",
           "value": [
-            "OverOps Prod: S6295"
+            "None"
           ]
         },
         "datasource": "OO",
@@ -2502,6 +2503,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2526,6 +2528,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2550,6 +2553,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2597,6 +2601,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2621,6 +2626,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2750,6 +2756,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -2774,6 +2781,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -2845,8 +2853,10 @@
       {
         "allValue": null,
         "current": {
-          "text": "Score  = 100",
-          "value": "Score  = 100"
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
         },
         "datasource": "OO",
         "hide": 2,
@@ -2869,8 +2879,10 @@
       {
         "allValue": null,
         "current": {
-          "text": "6 failures (0%) in 0 calls",
-          "value": "6 failures (0%) in 0 calls"
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
         },
         "datasource": "OO",
         "hide": 2,
@@ -2893,7 +2905,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "",
+          "isNone": true,
+          "selected": true,
+          "text": "None",
           "value": ""
         },
         "datasource": "OO",
@@ -2917,7 +2931,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "",
+          "isNone": true,
+          "selected": true,
+          "text": "None",
           "value": ""
         },
         "datasource": "OO",
@@ -2941,7 +2957,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "",
+          "isNone": true,
+          "selected": true,
+          "text": "None",
           "value": ""
         },
         "datasource": "OO",
@@ -2965,8 +2983,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "7",
-          "value": "7"
+          "selected": true,
+          "text": "0",
+          "value": "0"
         },
         "datasource": "OO",
         "hide": 2,
@@ -2989,8 +3008,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "1",
-          "value": "1"
+          "selected": true,
+          "text": "0",
+          "value": "0"
         },
         "datasource": "OO",
         "hide": 2,
@@ -3013,6 +3033,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "<term>",
           "value": "<term>"
         },
@@ -3035,8 +3056,10 @@
       {
         "allValue": null,
         "current": {
-          "text": "0",
-          "value": "0"
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
         },
         "datasource": "OO",
         "hide": 2,
@@ -3059,8 +3082,10 @@
       {
         "allValue": null,
         "current": {
-          "text": "0",
-          "value": "0"
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
         },
         "datasource": "OO",
         "hide": 2,
@@ -3069,7 +3094,7 @@
         "multi": false,
         "name": "nev",
         "options": [],
-        "query": "regressions({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"render\":\"SingleStatVolume\", \"regressionTypes\":\"NewIssues,SevereNewIssues\", \"searchText\":\"$search\", \"timeFilterVar\":\"true\"})",
+        "query": "regressions({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"render\":\"SingleStatVolumeText\", \"regressionTypes\":\"NewIssues,SevereNewIssues\", \"searchText\":\"$search\", \"timeFilterVar\":\"true\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -3083,8 +3108,10 @@
       {
         "allValue": null,
         "current": {
-          "text": "0",
-          "value": "0"
+          "isNone": true,
+          "selected": true,
+          "text": "None",
+          "value": ""
         },
         "datasource": "OO",
         "hide": 2,
@@ -3107,8 +3134,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "0",
-          "value": "0"
+          "text": "524",
+          "value": "524"
         },
         "datasource": "OO",
         "hide": 2,
@@ -3117,7 +3144,7 @@
         "multi": false,
         "name": "iev",
         "options": [],
-        "query": "regressions({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"render\":\"SingleStatVolume\", \"regressionTypes\":\"Regressions,SevereRegressions\", \"searchText\":\"$search\", \"timeFilterVar\":\"true\"})",
+        "query": "regressions({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"render\":\"SingleStatVolumeText\", \"regressionTypes\":\"Regressions,SevereRegressions\", \"searchText\":\"$search\", \"timeFilterVar\":\"true\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -3154,5 +3181,5 @@
   "timezone": "",
   "title": "Reliability Analysis",
   "uid": "4DHQ63-ik",
-  "version": 256
+  "version": 260
 }

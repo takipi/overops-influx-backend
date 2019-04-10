@@ -26,6 +26,7 @@ public class FunctionParser {
 	private static final Logger logger = LoggerFactory.getLogger(FunctionParser.class);
 	
 	private static final String QUERY_SEPERATOR = ";";
+	protected static boolean ALLOW_SYNC_QUERY = false;
 	
 	private static final Map<String, FunctionFactory> factories;
 
@@ -112,7 +113,9 @@ public class FunctionParser {
 		try {
 			result = function.process(input);
 		} catch (Exception e) {
-			throw new IllegalStateException("Could not process query: " + e.toString() + " query:" + json, e);
+			String message = "Could not process query: " + e.toString() + " query:" + json;
+			logger.error(message, e);
+			throw new IllegalStateException(message, e);
 		}
 		
 		return result;
@@ -189,7 +192,7 @@ public class FunctionParser {
 
 		List<String> singleQueries = getQueries(query);
 		
-		if (singleQueries.size() == 1) {
+		if ((ALLOW_SYNC_QUERY) && (singleQueries.size() == 1)) {
 			return processSync(apiClient, singleQueries.get(0));
 		} else {
 			return processAsync(apiClient, singleQueries);
@@ -276,6 +279,9 @@ public class FunctionParser {
 		registerFunction(new TimeFilterFunction.Factory());
 		registerFunction(new MinTimeFilterAlertFunction.Factory());
 		registerFunction(new ConvertToArrayFunction.Factory());
+		registerFunction(new ConcatFunction.Factory());
+		registerFunction(new ExtendWindowFunction.Factory());
+
 		
 		//diagnostics functions
 		registerFunction(new QueryDiagnosticsFunction.Factory());

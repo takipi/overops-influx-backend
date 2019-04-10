@@ -176,17 +176,11 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 		RegressionGraphInput graphInput = getGraphInput(input);
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient, settingsMaps);
 		
-		RegressionOutput regressionOutput = regressionFunction.runRegression(serviceId, graphInput);
-
-		if ((regressionOutput == null) || (regressionOutput.rateRegression == null) 
-			||  (regressionOutput.regressionInput == null)) {
-			return Collections.emptyList();
-		}
-		
 		boolean includeNew;
 		boolean includeRegressions;
 		
-		if ((graphInput.regressionType == null) || (graphInput.regressionType == RegressionType.Regressions)) {
+		if ((graphInput.regressionType == null)
+		|| (graphInput.regressionType == RegressionType.Regressions)) {
 			includeNew = false;
 			includeRegressions = true;
 		} else {
@@ -194,7 +188,15 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 			includeRegressions = false;
 		}
 		
-		List<EventData> eventDatas = regressionFunction.processRegression(graphInput, regressionOutput.regressionInput,
+		RegressionOutput regressionOutput = regressionFunction.runRegression(serviceId, graphInput, !includeRegressions);
+
+		if ((regressionOutput == null) || (regressionOutput.rateRegression == null) 
+			||  (regressionOutput.regressionInput == null)) {
+			return Collections.emptyList();
+		}
+		
+		List<EventData> eventDatas = regressionFunction.processRegression(serviceId,
+			graphInput, regressionOutput.regressionInput,
 			regressionOutput.rateRegression, includeNew, includeRegressions);
 		
 		EventFilter eventFilter = getEventFilter(serviceId, graphInput, timeSpan);

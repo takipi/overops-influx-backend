@@ -75,7 +75,7 @@ public class TypesGraph extends GraphFunction {
 				continue;
 			}
 
-			Collection<String> types = input.getTypes(apiClient, serviceId);
+			Collection<String> types = getTypes(serviceId, input);
 			
 			if (types != null) {
 				for (String type : types) {
@@ -87,7 +87,7 @@ public class TypesGraph extends GraphFunction {
 				Collection<String> defaultTypes = graphInput.getDefaultTypes();
 				
 				if (defaultTypes == null) {
-					GeneralSettings generalSettings = getSettings(serviceId).general;
+					GeneralSettings generalSettings = getSettingsData(serviceId).general;
 					
 					if (generalSettings != null) {
 						defaultTypes = generalSettings.getDefaultTypes();

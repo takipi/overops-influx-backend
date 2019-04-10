@@ -40,7 +40,7 @@ public class ApplicationsFunction extends EnvironmentVariableFunction {
 	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender) {
 	
-		GroupSettings appGroupSettings = getSettings(serviceId).applications;
+		GroupSettings appGroupSettings = getSettingsData(serviceId).applications;
 		
 		if (appGroupSettings != null) {
 			

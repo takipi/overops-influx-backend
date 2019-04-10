@@ -25,7 +25,13 @@ public class QueryUtil
 	
 		Object output = executeQuery(query, auth);
 	
-		String json = new Gson().toJson(output);
+		String json = null;
+		
+		try {
+			json = new Gson().toJson(output);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
 		
 		return json;
 	}
