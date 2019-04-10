@@ -507,7 +507,6 @@ public class ReliabilityReportFunction extends EventsFunction {
 					transactionGraphs, serviceId, viewId, timeSpan,
 					subRegressionInput, true, updateEvents, false,
 					0, false);
-			0, false);
 			
 			SlowdownAsyncResult result;
 			
