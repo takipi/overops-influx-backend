@@ -1001,6 +1001,11 @@ public abstract class GrafanaFunction {
 			if (baselineTransactions != null) {
 				updateTransactionPerformance(baselineTransactions, 
 					transactionDatas, slowdownSettings);
+			} else {
+				for (TransactionData transactionData : transactionDatas.values()) {
+					transactionData.state = PerformanceState.NO_DATA;
+					transactionData.stats = TransactionUtil.aggregateGraph(transactionData.graph);
+				}
 			}
 		}		
 	}
