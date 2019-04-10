@@ -228,8 +228,7 @@ public class ReliabilityReportInput extends RegressionsInput {
 		private final boolean includeRegressions;
 		private final boolean includeTransactions;
 		
-		ScoreType(boolean includeRegressions, boolean includeTransactions)
-		{
+		ScoreType(boolean includeRegressions, boolean includeTransactions) {
 			this.includeRegressions = includeRegressions;
 			this.includeTransactions = includeTransactions;
 		}

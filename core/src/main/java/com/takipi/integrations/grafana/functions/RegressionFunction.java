@@ -356,8 +356,7 @@ public class RegressionFunction extends EventsFunction {
 		}
 	}
 	
-	public int expandBaselineTimespan(String serviceId, RegressionWindow activeWindow)
-	{
+	public int expandBaselineTimespan(String serviceId, RegressionWindow activeWindow) {
 		RegressionSettings regressionSettings = getRegressionSettings(serviceId);
 		
 		return expandBaselineTimespan(regressionSettings.baseline_timespan_factor, regressionSettings.min_baseline_timespan, activeWindow);
@@ -863,8 +862,7 @@ public class RegressionFunction extends EventsFunction {
 				
 				DeterminantKey graphsKey = new DeterminantKey(graph.machine_name, graph.application_name, graph.deployment_name);
 				
-				if (isBaselineTask)
-				{
+				if (isBaselineTask) {
 					putGraphToDeterminantMap(baselineGraphKeys, graph, graphsKey);
 				} else {
 					putGraphToDeterminantMap(activeWindowGraphKeys, graph, graphsKey);
@@ -874,8 +872,7 @@ public class RegressionFunction extends EventsFunction {
 		}
 	}
 	
-	private void putGraphToDeterminantMap(Map<DeterminantKey, List<Graph>> graphKeys, Graph graph, DeterminantKey graphsKey)
-	{
+	private void putGraphToDeterminantMap(Map<DeterminantKey, List<Graph>> graphKeys, Graph graph, DeterminantKey graphsKey) {
 		List<Graph> graphList = graphKeys.get(graphsKey);
 		
 		if (CollectionUtil.safeIsEmpty(graphList)) {
@@ -1473,5 +1470,4 @@ public class RegressionFunction extends EventsFunction {
 				throw new IllegalStateException(String.valueOf(regInput.render));
 		}
 	}
-	
 }

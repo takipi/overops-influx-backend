@@ -670,8 +670,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		private AggregatedRegressionAsyncResult getRegressionsOutput(Map<String, EventResult> eventResultMap,
 				Graph baselineGraph, Graph activeWindowGraph, Pair<ReportKey, RegressionsInput> subInputData,
-				RegressionInput subRegressionInput)
-		{
+				RegressionInput subRegressionInput) {
 			ReportKey subReportKey = subInputData.getFirst();
 			RegressionsInput subRegressionsInput = subInputData.getSecond();
 			

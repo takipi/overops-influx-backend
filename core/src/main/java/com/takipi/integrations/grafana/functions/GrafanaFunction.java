@@ -134,7 +134,7 @@ public abstract class GrafanaFunction {
 	public static final String ALL = "All";
 	public static final String NONE = "None";
 	public static final List<String> VAR_ALL = Arrays.asList(new String[] { "*", ALL,
-		ALL.toLowerCase(), NONE, NONE.toLowerCase() });
+			ALL.toLowerCase(), NONE, NONE.toLowerCase() });
 	
 	protected static final char QUALIFIED_DELIM = '.';
 	protected static final char INTERNAL_DELIM = '/';
@@ -2017,8 +2017,7 @@ public abstract class GrafanaFunction {
 		
 		ArrayList<Graph> graphs = Lists.newArrayList();
 		
-		for (GraphSliceTaskResult graphSliceTaskResult : graphTaskResults)
-		{
+		for (GraphSliceTaskResult graphSliceTaskResult : graphTaskResults) {
 			graphs.addAll(graphSliceTaskResult.graphs);
 		}
 		
@@ -2410,8 +2409,7 @@ public abstract class GrafanaFunction {
 			
 			EventResult clone = (EventResult)event.clone();
 			
-			if (!copyStats)
-			{
+			if (!copyStats) {
 				clone.stats = new MainStats();
 			}
 			
@@ -2451,8 +2449,7 @@ public abstract class GrafanaFunction {
 		
 		Map<String, EventResult> currentDeterminant = keyToEventMap.get(determinantKey);
 		
-		if (currentDeterminant == null)
-		{
+		if (currentDeterminant == null) {
 			currentDeterminant = Maps.newHashMap();
 			
 			keyToEventMap.put(determinantKey, currentDeterminant);
