@@ -56,14 +56,14 @@ public class TransactionsEventsGraphFunction extends LimitGraphFunction {
 		
 		GraphLimitInput limitInput = (GraphLimitInput)input;	
 		
-		Map<String, EventResult> eventMap = getEventMap(serviceId, input, timeSpan.getFirst(), timeSpan.getSecond(), input.volumeType,
-					input.pointsWanted);
+		Map<String, EventResult> eventMap = getEventMap(serviceId, input,
+			timeSpan.getFirst(), timeSpan.getSecond(), input.volumeType);
 		
 		if (eventMap == null) {
 			return Collections.emptyList();
 		}
 		
-		Graph graph = getEventsGraph(serviceId, viewId, input.pointsWanted, input, input.volumeType,
+		Graph graph = getEventsGraph(serviceId, viewId, input, input.volumeType,
 				timeSpan.getFirst(), timeSpan.getSecond());
 		
 		if (graph == null) {
@@ -211,18 +211,18 @@ public class TransactionsEventsGraphFunction extends LimitGraphFunction {
 
 			} else {
 				return doProcessServiceGraph(serviceIds, serviceId, viewId,
-					limitInput, timeSpan, limitInput.pointsWanted);
+					limitInput, timeSpan);
 			}
 		}
 		
-		Map<String, EventResult> eventMap = getEventMap(serviceId, input, timeSpan.getFirst(), timeSpan.getSecond(), input.volumeType,
-					input.pointsWanted);
+		Map<String, EventResult> eventMap = getEventMap(serviceId, input,
+			timeSpan.getFirst(), timeSpan.getSecond(), input.volumeType);
 		
 		if (eventMap == null) {
 			return Collections.emptyList();
 		}
 		
-		Graph graph = getEventsGraph(serviceId, viewId, input.pointsWanted, input, input.volumeType,
+		Graph graph = getEventsGraph(serviceId, viewId, input, input.volumeType,
 				timeSpan.getFirst(), timeSpan.getSecond());
 		
 		if (graph == null) {

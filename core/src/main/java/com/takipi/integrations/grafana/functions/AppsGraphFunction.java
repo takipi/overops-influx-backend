@@ -83,7 +83,8 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction
 		EnvironmentsFilterInput input, int limit) {
 
 		List<String> result;
-		Collection<String> selectedApps = input.getApplications(apiClient, getSettingsData(serviceId), serviceId, false);
+		Collection<String> selectedApps = input.getApplications(apiClient, 
+			getSettingsData(serviceId), serviceId, false, true);
 		
 		if (!CollectionUtil.safeIsEmpty(selectedApps)) {
 			

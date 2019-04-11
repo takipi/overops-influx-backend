@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.util.infra.Categories;
+import com.takipi.api.client.util.infra.Categories.CategoryType;
 import com.takipi.api.client.util.settings.GeneralSettings;
 import com.takipi.api.client.util.settings.GroupSettings;
 import com.takipi.common.util.CollectionUtil;
@@ -145,7 +146,8 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 			if (categories != null) {
 			
 				if (event.error_origin != null) {
-	 				Set<String> originLabels = categories.getCategories(event.error_origin.class_name);
+	 				Set<String> originLabels = categories.getCategories(
+	 					event.error_origin.class_name, CategoryType.infra);
 					
 					if (!CollectionUtil.safeIsEmpty(originLabels))  {
 						categoryNames.addAll(originLabels);
@@ -153,7 +155,8 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 				}
 				
 				if (event.error_location != null) {
-					Set<String> locationLabels = categories.getCategories(event.error_location.class_name);
+					Set<String> locationLabels = categories.getCategories(
+						event.error_location.class_name, CategoryType.infra);
 					
 					if (!CollectionUtil.safeIsEmpty(locationLabels))  {
 						categoryNames.addAll(locationLabels);

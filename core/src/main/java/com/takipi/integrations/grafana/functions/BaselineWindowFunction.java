@@ -13,10 +13,9 @@ import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.BaselineWindowInput;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
-public class BaselineWindowFunction extends EnvironmentVariableFunction
-{	
-	public BaselineWindowFunction(ApiClient apiClient)
-	{
+public class BaselineWindowFunction extends EnvironmentVariableFunction {	
+	
+	public BaselineWindowFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
 
@@ -46,8 +45,7 @@ public class BaselineWindowFunction extends EnvironmentVariableFunction
 		
 		String viewId = getViewId(serviceId, bwInput.view);
 		
-		if (viewId == null)
-		{
+		if (viewId == null) {
 			return;
 		}
 		

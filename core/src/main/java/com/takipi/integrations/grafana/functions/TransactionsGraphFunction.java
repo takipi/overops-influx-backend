@@ -99,11 +99,11 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 
 	protected TransactionGraphsResult getTransactionsGraphs(String serviceId, 
 		String viewId, Pair<DateTime, DateTime> timeSpan, 
-		TransactionsGraphInput input, int pointsWanted) {
+		TransactionsGraphInput input) {
 		
 		
 		Collection<TransactionGraph> activeGraphs = getTransactionGraphs(input, serviceId, 
-				viewId, timeSpan, input.getSearchText(), pointsWanted);
+				viewId, timeSpan, input.getSearchText());
 		
 		TimeWindow timeWindow = input.getTimeWindow();
 		
@@ -114,7 +114,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			Collection<PerformanceState> performanceStates = TransactionsListInput.getStates(input.performanceStates);
 			
 			TransactionDataResult transactionDataResult = getTransactionDatas(activeGraphs, 
-				serviceId, viewId, timeSpan, input, true, false, false, 0, true);
+				serviceId, viewId, timeSpan, input, true, false, false, true);
 			
 			if (transactionDataResult == null) {
 				return null;
@@ -180,11 +180,12 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
     @Override
 	protected List<GraphSeries> processServiceGraph( Collection<String> serviceIds, 
 			String serviceId, String viewId, String viewName,
-			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
+			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan) {
 
 		TransactionsGraphInput tgInput = (TransactionsGraphInput)(input);
 		
-		TransactionGraphsResult transactionGraphs = getTransactionsGraphs(serviceId, viewId, timeSpan, tgInput, pointsWanted);
+		TransactionGraphsResult transactionGraphs = getTransactionsGraphs(serviceId, 
+			viewId, timeSpan, tgInput);
 		
 		if (transactionGraphs == null) {
 			return Collections.emptyList();
