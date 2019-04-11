@@ -460,7 +460,7 @@ public class EventsFunction extends GrafanaFunction {
 				
 				if (eventData.event.error_origin != null) {
 					originLabels = categories.getCategories(
-						eventData.event.error_origin.class_name, CategoryType.Infra);
+						eventData.event.error_origin.class_name, CategoryType.infra);
 				} else {
 					originLabels = null;
 				}
@@ -469,7 +469,7 @@ public class EventsFunction extends GrafanaFunction {
 				
 				if (eventData.event.error_location != null) {
 					locationLabels = categories.getCategories(
-						eventData.event.error_location.class_name, CategoryType.Infra);
+						eventData.event.error_location.class_name, CategoryType.infra);
 				} else {
 					locationLabels = null;	
 				}

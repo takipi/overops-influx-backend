@@ -1549,7 +1549,7 @@ public abstract class GrafanaFunction {
 		for (String app : apps) {
 			if (EnvironmentsFilterInput.isLabelApp(app)) {
 				String appLabel = EnvironmentsFilterInput.getLabelAppName(app);
-				String appLabelName = InfraUtil.toTierLabelName(appLabel, CategoryType.App);
+				String appLabelName = InfraUtil.toTierLabelName(appLabel, CategoryType.app);
 				labels.add(appLabelName);
 			}
 		}

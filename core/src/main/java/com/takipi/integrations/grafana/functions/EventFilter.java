@@ -201,7 +201,7 @@ public class EventFilter
 		if (event.error_origin != null) {
 			
 			originLabels = categories.getCategories(
-				event.error_origin.class_name, CategoryType.Infra);
+				event.error_origin.class_name, CategoryType.infra);
 			
 			if (matchLabels(originLabels)) {
 				return false;
@@ -211,7 +211,7 @@ public class EventFilter
 		if (event.error_location != null) {
 			
 			locationLabels = categories.getCategories(
-				event.error_location.class_name, CategoryType.Infra);
+				event.error_location.class_name, CategoryType.infra);
 			
 			if (matchLabels(locationLabels)) {
 				return false;

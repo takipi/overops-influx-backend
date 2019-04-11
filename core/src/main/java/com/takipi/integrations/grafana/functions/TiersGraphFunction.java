@@ -109,10 +109,10 @@ public class TiersGraphFunction extends LimitGraphFunction {
 				}
 
 				Set<String> originLabels = categories.getCategories(
-					event.error_origin.class_name, CategoryType.Infra);
+					event.error_origin.class_name, CategoryType.infra);
 				
 				Set<String> locationLabels = categories.getCategories(
-					event.error_location.class_name, CategoryType.Infra);
+					event.error_location.class_name, CategoryType.infra);
 
 				if ((originLabels == null) && (locationLabels == null)) {
 					continue;

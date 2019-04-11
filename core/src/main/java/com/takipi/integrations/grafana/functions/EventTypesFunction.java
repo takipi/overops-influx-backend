@@ -147,7 +147,7 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 			
 				if (event.error_origin != null) {
 	 				Set<String> originLabels = categories.getCategories(
-	 					event.error_origin.class_name, CategoryType.Infra);
+	 					event.error_origin.class_name, CategoryType.infra);
 					
 					if (!CollectionUtil.safeIsEmpty(originLabels))  {
 						categoryNames.addAll(originLabels);
@@ -156,7 +156,7 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 				
 				if (event.error_location != null) {
 					Set<String> locationLabels = categories.getCategories(
-						event.error_location.class_name, CategoryType.Infra);
+						event.error_location.class_name, CategoryType.infra);
 					
 					if (!CollectionUtil.safeIsEmpty(locationLabels))  {
 						categoryNames.addAll(locationLabels);

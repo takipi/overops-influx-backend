@@ -73,7 +73,7 @@ public class ApplicationsFunction extends EnvironmentVariableFunction {
 		
 		for (String label : labels) {
 			
-			String app = InfraUtil.getTierNameFromLabel(label, CategoryType.App);
+			String app = InfraUtil.getTierNameFromLabel(label, CategoryType.app);
 			
 			if (app == null) {
 				continue;		
