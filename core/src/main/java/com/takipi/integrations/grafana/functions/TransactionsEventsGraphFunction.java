@@ -240,7 +240,7 @@ public class TransactionsEventsGraphFunction extends LimitGraphFunction {
 		for (String transaction : transactions) {
 			
 			GroupFilter transactionFilter = getTransactionsFilter(serviceId, limitInput, timeSpan,
-				Collections.singletonList(transaction));
+				Collections.singletonList(transaction), true);
 			
 			if (transactionFilter != null) {
 				transactionFilters.put(transaction, transactionFilter);

@@ -199,9 +199,7 @@ public abstract class GrafanaFunction {
 		TYPES_MAP.put(TIMER, "TMR");
 		TYPES_MAP.put(HTTP_ERROR, "HTTP");			
 	}
-	
-	//private static final int END_SLICE_POINT_COUNT = 2;
-	
+		
 	protected final ApiClient apiClient;
 	protected volatile Map<String, ServiceSettings> settingsMaps;
 	
@@ -1438,14 +1436,15 @@ public abstract class GrafanaFunction {
 	
 	
 	protected GroupFilter getTransactionsFilter(String serviceId, BaseEventVolumeInput input,
-			Pair<DateTime, DateTime> timespan) {
+			Pair<DateTime, DateTime> timespan, boolean filterByAppTier) {
 		
 		Collection<String> transactions = input.getTransactions(serviceId);
-		return getTransactionsFilter(serviceId, input, timespan, transactions);
+		return getTransactionsFilter(serviceId, input, timespan, transactions, filterByAppTier);
 	}
 		
 	protected GroupFilter getTransactionsFilter(String serviceId, BaseEventVolumeInput input,
-		Pair<DateTime, DateTime> timespan, Collection<String> transactions) {
+		Pair<DateTime, DateTime> timespan, Collection<String> transactions,
+		boolean filterByAppTier) {
 		
 		GroupFilter result;
 		
@@ -1491,7 +1490,7 @@ public abstract class GrafanaFunction {
 			targetTransactions = null;
 		}
 						
-		result = getTransactionsFilter(serviceId, input, targetTransactions);
+		result = getTransactionsFilter(serviceId, input, targetTransactions, filterByAppTier);
 		
 		return result;
 	}
@@ -1549,11 +1548,18 @@ public abstract class GrafanaFunction {
 	}
 	
 	private GroupFilter getTransactionsFilter(String serviceId, 
-			BaseEventVolumeInput input, Collection<String> transactions) {
+			BaseEventVolumeInput input, Collection<String> transactions
+			, boolean filterByTiers) {
 		
 		GroupFilter result;
 		
-		Collection<String> tierPatterns = getAppTierPatterns(serviceId, input);
+		Collection<String> tierPatterns;
+		
+		if (filterByTiers) {
+			tierPatterns = getAppTierPatterns(serviceId, input);
+		} else {
+			tierPatterns = null;
+		}
 		
 		if ((!CollectionUtil.safeIsEmpty(transactions)) 
 		|| (!CollectionUtil.safeIsEmpty(tierPatterns))) {
@@ -1585,11 +1591,8 @@ public abstract class GrafanaFunction {
 	protected EventFilter getEventFilter(String serviceId, BaseEventVolumeInput input, 
 		Pair<DateTime, DateTime> timespan) {
 		
-		GroupFilter transactionsFilter = getTransactionsFilter(serviceId, input, timespan);
-		
-		if (transactionsFilter == null) {
-			return null;
-		}
+		GroupFilter transactionsFilter = getTransactionsFilter(serviceId, 
+			input, timespan, false);
 		
 		Categories categories = getSettings(serviceId).getCategories();	
 
@@ -1672,7 +1675,7 @@ public abstract class GrafanaFunction {
 		GroupFilter transactionsFilter = null;
 		
 		if (input.hasTransactions()) {			
-			transactionsFilter = getTransactionsFilter(serviceId, input, timeSpan);
+			transactionsFilter = getTransactionsFilter(serviceId, input, timeSpan, true);
 
 			if (transactionsFilter == null) {
 				return Collections.emptyList();
@@ -1751,7 +1754,8 @@ public abstract class GrafanaFunction {
 			
 			result = new ArrayList<Transaction>(response.data.transactions.size());
 			
-			GroupFilter transactionsFilter = getTransactionsFilter(serviceId, input, timeSpan);
+			GroupFilter transactionsFilter = getTransactionsFilter(serviceId,
+				input, timeSpan, true);
 
 			for (Transaction transaction : response.data.transactions) {
 				Pair<String, String> nameAndMethod = getFullNameAndMethod(transaction.name);

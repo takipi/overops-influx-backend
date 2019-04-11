@@ -234,7 +234,8 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
     	
 		List<GraphSeries> result;
 
-		GroupFilter transactionsFilter = getTransactionsFilter(serviceId, input, timespan);
+		GroupFilter transactionsFilter = getTransactionsFilter(serviceId, 
+			input, timespan, true);
 
 		AggregateMode aggregateMode = input.getAggregateMode();
 		
@@ -272,7 +273,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			for (String transactionGroup : transactionGroups) {
 				
 				GroupFilter groupsFilter = getTransactionsFilter(serviceId, input, timespan,
-					Collections.singletonList(transactionGroup));
+					Collections.singletonList(transactionGroup), true);
 				
 				if (groupsFilter == null) {
 					continue;
@@ -288,7 +289,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			if (singleTransactions.size() > 0) {
 				
 				GroupFilter singleTransactionsFilter = getTransactionsFilter(serviceId, input, timespan,
-					singleTransactions);
+					singleTransactions, true);
 				
 				if ((singleTransactionsFilter != null) && (!singleTransactionsFilter.isEmpty())) {
 					result.addAll(createMultiGraphSeries(serviceId, graphs, input, 

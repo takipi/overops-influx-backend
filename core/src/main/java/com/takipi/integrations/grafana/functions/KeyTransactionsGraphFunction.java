@@ -75,7 +75,7 @@ public class KeyTransactionsGraphFunction extends TransactionsGraphFunction
 				}
 			}
 		} else {
-			GroupFilter groupFilter = getTransactionsFilter(serviceId, input, timespan);
+			GroupFilter groupFilter = getTransactionsFilter(serviceId, input, timespan, true);
 			result = createMultiGraphSeries(serviceId, graphs, input, groupFilter, serviceIds);
 		}
 		
