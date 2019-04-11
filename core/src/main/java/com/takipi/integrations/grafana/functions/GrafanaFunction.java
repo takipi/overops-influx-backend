@@ -1981,7 +1981,7 @@ public abstract class GrafanaFunction {
 		
 		GraphRequest.Builder builder = GraphRequest.newBuilder().setServiceId(serviceId).setViewId(viewId)
 				.setGraphType(GraphType.view).setFrom(from.toString(dateTimeFormatter)).setTo(to.toString(dateTimeFormatter))
-				.setVolumeType(volumeType).setRaw(true).setResolution(graphResolution);
+				.setVolumeType(volumeType).setRaw(true).setResolution(graphResolution).setBreakdown(true);
 				//setWantedPointCount(pointsCount);
 		
 		applyFilters(input, serviceId, builder);
