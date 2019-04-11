@@ -150,7 +150,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 			|| fields.contains(TransactionsListInput.ERROR_RATE_DELTA_DESC);
 		
 		TransactionDataResult transactions = getTransactionDatas(serviceId, timeSpan, 
-			input, true, updateEventBaselines, input.eventPointsWanted, true);
+			input, true, updateEventBaselines, true);
 		
 		if (transactions == null) {
 			return Collections.emptyList();
@@ -519,7 +519,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 		boolean updateBaseline = states.size() < PerformanceState.values().length;
 		
 		TransactionDataResult transactionDataResult = getTransactionDatas(serviceId,
-			timeSpan, input, false, updateBaseline, 0, true);
+			timeSpan, input, false, updateBaseline, true);
 
 		if (transactionDataResult == null) {
 			return 0;
@@ -559,7 +559,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 		for (String serviceId : serviceIds) {				
 			
 			TransactionDataResult transactionDataResult = getTransactionDatas(serviceId,
-					timeSpan, input, false, false, 0, true);
+					timeSpan, input, false, false, true);
 
 			String serviceDesc = getSlowdownsDesc(transactionDataResult.items.values(), 
 				states, RegressionsInput.MAX_TOOLTIP_ITEMS);
@@ -594,7 +594,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 		for (String serviceId : serviceIds) {
 			
 			TransactionDataResult transactionDataResult = getTransactionDatas(serviceId,
-				timeSpan, input, false, false, 0, true);
+				timeSpan, input, false, false,  true);
 
 			if (transactionDataResult == null) {
 				continue;
@@ -651,7 +651,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 		for (String serviceId : serviceIds) {
 			
 			TransactionDataResult transactionDataResult = getTransactionDatas(serviceId,
-				timeSpan, input, false, updateBaseline, 0, true);
+				timeSpan, input, false, updateBaseline, true);
 
 			if (transactionDataResult == null) {
 				continue;
@@ -673,7 +673,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 		for (String serviceId : serviceIds) {
 					
 			TransactionDataResult transactionDataResult = getTransactionDatas(serviceId,
-				timeSpan, input, false, false, 0, true);
+				timeSpan, input, false, false, true);
 
 			if (transactionDataResult == null) {
 				continue;
@@ -705,7 +705,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 		for (String serviceId : serviceIds) {
 			
 			TransactionDataResult transactionDataResult = getTransactionDatas(serviceId,
-				timeSpan, input, false, updateBaseline, 0, true);
+				timeSpan, input, false, updateBaseline, true);
 
 			if (transactionDataResult == null) {
 				continue;

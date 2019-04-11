@@ -35,7 +35,8 @@ public class GrafanaSettings {
 		
 	private static final String SETTINGS_FOLDER = "grafanaSettingsFolder";
 
-	private static final boolean ENABLE_CACHE = false;
+	private static final boolean ENABLE_CACHE = true;
+	
 	private static final int CACHE_SIZE = 1000;
 	private static final int CACHE_RETENTION = 20;
 	
@@ -294,7 +295,7 @@ public class GrafanaSettings {
 		
 		ServiceSettings result;
 		
-		if (ENABLE_CACHE) {
+		if (settingsCache != null) {
 			try {
 				result = settingsCache.get(new SettingsCacheKey(apiClient, serviceId));
 			} catch (ExecutionException e) {
@@ -313,7 +314,7 @@ public class GrafanaSettings {
 		
 		SettingsCacheKey key = new SettingsCacheKey(apiClient, serviceId);
 		
-		if (ENABLE_CACHE) {
+		if (settingsCache != null) {
 			settingsCache.put(key, settings);
 		}
 

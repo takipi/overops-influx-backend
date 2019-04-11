@@ -51,13 +51,13 @@ public class SplitGraphFunction extends LimitGraphFunction {
 		GraphLimitInput limitInput = (GraphLimitInput)input;
 
 		Map<String, EventResult> eventMap = getEventMap(serviceId, input, timeSpan.getFirst(), timeSpan.getSecond(),
-				null, 0);
+				null);
 
 		if (eventMap == null) {
 			return Collections.emptyList();
 		}
 		
-		Graph graph = getEventsGraph(serviceId, viewId, input.pointsWanted, input, input.volumeType,
+		Graph graph = getEventsGraph(serviceId, viewId, input, input.volumeType,
 				timeSpan.getFirst(), timeSpan.getSecond());
 		
 		if (graph == null) {

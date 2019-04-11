@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -25,6 +27,7 @@ import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.application.SummarizedApplication;
 import com.takipi.api.client.data.deployment.SummarizedDeployment;
+import com.takipi.api.client.data.label.Label;
 import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.request.application.ApplicationsRequest;
@@ -32,6 +35,7 @@ import com.takipi.api.client.request.deployment.DeploymentsRequest;
 import com.takipi.api.client.request.event.EventRequest;
 import com.takipi.api.client.request.event.EventsRequest;
 import com.takipi.api.client.request.event.EventsSlimVolumeRequest;
+import com.takipi.api.client.request.label.LabelsRequest;
 import com.takipi.api.client.request.metrics.GraphRequest;
 import com.takipi.api.client.request.process.JvmsRequest;
 import com.takipi.api.client.request.service.ServicesRequest;
@@ -43,6 +47,7 @@ import com.takipi.api.client.result.deployment.DeploymentsResult;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventsResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
+import com.takipi.api.client.result.label.LabelsResult;
 import com.takipi.api.client.result.metrics.GraphResult;
 import com.takipi.api.client.result.process.JvmsResult;
 import com.takipi.api.client.result.service.ServicesResult;
@@ -52,6 +57,7 @@ import com.takipi.api.client.result.view.ViewsResult;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionUtil;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
+import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.request.intf.ApiGetRequest;
 import com.takipi.api.core.url.UrlClient.Response;
@@ -313,6 +319,24 @@ public class ApiCache {
 		}
 	}
 	
+	protected static class LabelsCacheLoader extends ServiceCacheLoader {
+
+		public LabelsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId) {
+			super(apiClient, request, serviceId);
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			
+			if (!(obj instanceof LabelsCacheLoader)) {
+				return false;
+			}
+			
+			return super.equals(obj);
+		}	
+	}
+
+	
 	protected static class EventCacheLoader extends ServiceCacheLoader {
 
 		protected String Id;
@@ -542,11 +566,23 @@ public class ApiCache {
 	protected abstract static class ViewInputCacheLoader extends ServiceCacheLoader {
 
 		protected ViewInput input;
+		protected Collection<String> apps;
 
-		public ViewInputCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input) {
+		protected Collection<String> getApps(ServiceSettingsData settingsData) {
+			
+			//we want to expand groups, but not labels, as they're not DB entities
+			 Collection<String> result = input.getApplications(apiClient, settingsData, serviceId, 
+				true, false);
+			 
+			 return result;
+		}
+		
+		public ViewInputCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
+			ServiceSettingsData settingsData) {
 			super(apiClient, request, serviceId);
 			
 			this.input = input;
+			this.apps = getApps(settingsData);	
 		}
 
 		private static boolean compare(Collection<String> a, Collection<String> b) {
@@ -627,11 +663,8 @@ public class ApiCache {
 			if (!compare(servers, otherServers)) {
 				return false;
 			}
-
-			Collection<String> apps = input.getApplications(null, null, serviceId, false);
-			Collection<String> otherApps = other.input.getApplications(null, null, serviceId, false);
 			
-			if (!compare(apps, otherApps)) {
+			if (!compare(apps, other.apps)) {
 				return false;
 			}
 
@@ -659,9 +692,9 @@ public class ApiCache {
 		protected VolumeType volumeType;
 
 		public VolumeCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
-				VolumeType volumeType) {
+			ServiceSettingsData settingsData, VolumeType volumeType) {
 
-			super(apiClient, request, serviceId, input);
+			super(apiClient, request, serviceId, input, settingsData);
 			this.volumeType = volumeType;
 		}
 
@@ -716,9 +749,9 @@ public class ApiCache {
 	protected static class SlimVolumeCacheLoader extends VolumeCacheLoader {
 		
 		public SlimVolumeCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
-				VolumeType volumeType) {
+				ServiceSettingsData settingsData, VolumeType volumeType) {
 
-			super(apiClient, request, serviceId, input, volumeType);
+			super(apiClient, request, serviceId, input, settingsData, volumeType);
 		}
 		
 		@Override
@@ -739,10 +772,11 @@ public class ApiCache {
 
 	protected static class EventsCacheLoader extends VolumeCacheLoader {
 		
-		public EventsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
-				VolumeType volumeType) {
+		public EventsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, 
+			String serviceId, ViewInput input, ServiceSettingsData settingsData, 
+			VolumeType volumeType) {
 
-			super(apiClient, request, serviceId, input, volumeType);
+			super(apiClient, request, serviceId, input, settingsData, volumeType);
 		}
 		
 		@Override
@@ -779,20 +813,18 @@ public class ApiCache {
 
 	protected static class GraphCacheLoader extends VolumeCacheLoader {
 		
-		protected int pointsWanted;
 		protected int activeWindow;
 		protected int baselineWindow;
 		protected int windowSlice;
 		protected Pair<DateTime, DateTime> timespan;
 		protected boolean cachable;
 
-		public GraphCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
-				VolumeType volumeType, int pointsWanted, 
-				int baselineWindow, int activeWindow, int windowSlice,
+		public GraphCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, 
+				String serviceId, ViewInput input, ServiceSettingsData settingsData,
+				VolumeType volumeType, int baselineWindow, int activeWindow, int windowSlice,
 				Pair<DateTime, DateTime> timespan, boolean cachable) {
 
-			super(apiClient, request, serviceId, input, volumeType);
-			this.pointsWanted = pointsWanted;
+			super(apiClient, request, serviceId, input, settingsData, volumeType);
 			this.activeWindow = activeWindow;
 			this.baselineWindow = baselineWindow;
 			this.windowSlice = windowSlice;
@@ -811,12 +843,6 @@ public class ApiCache {
 			}
 
 			GraphCacheLoader other = (GraphCacheLoader) obj;
-
-			/*
-			if (pointsWanted != other.pointsWanted) {
-				return false;
-			}
-			*/
 			
 			if (activeWindow != other.activeWindow) {
 				return false;
@@ -984,12 +1010,15 @@ public class ApiCache {
 			return true;
 		}
 
-		public TransactionsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input) {
-			this(apiClient, request, serviceId, input, 0, 0);
+		public TransactionsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, 
+			String serviceId, ViewInput input, ServiceSettingsData settingsData) {
+			this(apiClient, request, serviceId, input, settingsData, 0, 0);
 		}
 		
-		public TransactionsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input, int baselineTimespan, int activeTimespan) {
-			super(apiClient, request, serviceId, input);
+		public TransactionsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, 
+			String serviceId, ViewInput input, ServiceSettingsData settingsData,
+			int baselineTimespan, int activeTimespan) {
+			super(apiClient, request, serviceId, input, settingsData);
 			
 			this.baselineTimespan = baselineTimespan;
 			this.activeTimespan = activeTimespan;
@@ -1054,9 +1083,10 @@ public class ApiCache {
 			return super.toString() + " aw = " + activeTimespan + " bw = " + baselineTimespan;
 		}
 
-		public TransactionsGraphCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId,
-				ViewInput input, int pointsWanted) {
-			this(apiClient, request, serviceId, input, pointsWanted, 0, 0);
+		public TransactionsGraphCacheLoader(ApiClient apiClient, 
+			ApiGetRequest<?> request, String serviceId,
+			ViewInput input, ServiceSettingsData settingsData) {
+			this(apiClient, request, serviceId, input, settingsData, 0, 0);
 
 		}
 		
@@ -1087,10 +1117,10 @@ public class ApiCache {
 		}
 		
 		public TransactionsGraphCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId,
-				ViewInput input, int pointsWanted, int baselineTimespan, int activeTimespan) {
+			ViewInput input, ServiceSettingsData settingsData,
+			int baselineTimespan, int activeTimespan) {
 
-			super(apiClient, request, serviceId, input);
-			this.pointsWanted = pointsWanted;
+			super(apiClient, request, serviceId, input, settingsData);
 			this.activeTimespan = activeTimespan;
 			this.baselineTimespan = baselineTimespan;
 		}
@@ -1231,18 +1261,6 @@ public class ApiCache {
 				(BaseEventVolumeInput)input, newOnly);
 		}
 		
-		/*
-		@Override
-		protected boolean compareTimeframes(ViewInputCacheLoader other)
-		{
-			if (input.deployments != null) {
-				return Objects.equal(input.deployments, other.input.deployments);
-			} else {
-				return super.compareTimeframes(other);
-			}
-		}
-		*/
-		
 		public String getLoaderData(RegressionOutput regressionOutput) {
 			
 			StringBuilder result = new StringBuilder();
@@ -1272,9 +1290,17 @@ public class ApiCache {
 		public RegressionCacheLoader(ApiClient apiClient, String serviceId, 
 				ViewInput input, RegressionFunction function, boolean newOnly) {
 
-			super(apiClient, null, serviceId, input, null);
+			super(apiClient, null, serviceId, input, null, null);
 			this.function = function;
 			this.newOnly = newOnly;
+		}
+		
+		@Override
+		protected Collection<String> getApps(ServiceSettingsData settingsData) {
+			Collection<String> result = input.getApplications(apiClient, settingsData, serviceId, 
+				true, true);
+			
+			return result;
 		}
 	}
 
@@ -1354,6 +1380,33 @@ public class ApiCache {
 	}
 	
 	@SuppressWarnings("unchecked")
+	public static Response<LabelsResult> getLabels(ApiClient apiClient, String serviceId) {
+
+		LabelsRequest request = LabelsRequest.newBuilder().setServiceId(serviceId).build();		
+		LabelsCacheLoader cacheKey = new LabelsCacheLoader(apiClient, request, serviceId);
+		Response<LabelsResult> response = (Response<LabelsResult>)getItem(cacheKey);
+
+		return response;
+	}
+	
+	public static Collection<String> getLabelNames(ApiClient apiClient, String serviceId) {
+		
+		Response<LabelsResult> response = getLabels(apiClient, serviceId);
+		
+		if ((response == null) || (response.data == null)) {
+			return Collections.emptyList();
+		}
+		
+		Set<String> result = new HashSet<String>(response.data.labels.size());
+		
+		for (Label label : response.data.labels) {
+			result.add(label.name);
+		}
+		
+		return result;
+	}
+	
+	@SuppressWarnings("unchecked")
 	public static Response<ApplicationsResult> getApplications(ApiClient apiClient, String serviceId, boolean active) {
 
 		ApplicationsRequest request = ApplicationsRequest.newBuilder().setServiceId(serviceId).setActive(active).build();
@@ -1384,15 +1437,17 @@ public class ApiCache {
 	}
 	
 	public static Response<TransactionsVolumeResult> getTransactionsVolume(ApiClient apiClient, String serviceId,
-			ViewInput input, TransactionsVolumeRequest request) {
-		return getTransactionsVolume(apiClient, serviceId, input, 0, 0, request);
+			ViewInput input, ServiceSettingsData settingsData, TransactionsVolumeRequest request) {
+		return getTransactionsVolume(apiClient, serviceId, input, settingsData, 0, 0, request);
 	}
 
 	@SuppressWarnings("unchecked")
 	public static Response<TransactionsVolumeResult> getTransactionsVolume(ApiClient apiClient, String serviceId,
-			ViewInput input, int activeTimespan, int baselineTimespan, TransactionsVolumeRequest request) {
+			ViewInput input, ServiceSettingsData settingsData, 
+			int activeTimespan, int baselineTimespan, TransactionsVolumeRequest request) {
 
-		TransactionsCacheLoader cacheKey = new TransactionsCacheLoader(apiClient, request, serviceId, input, activeTimespan, baselineTimespan);
+		TransactionsCacheLoader cacheKey = new TransactionsCacheLoader(apiClient,
+			request, serviceId, input, settingsData, activeTimespan, baselineTimespan);
 		Response<TransactionsVolumeResult> response = (Response<TransactionsVolumeResult>)getItem(cacheKey);
 
 		return response;
@@ -1400,14 +1455,15 @@ public class ApiCache {
 	
 	@SuppressWarnings("unchecked")
 	public static Response<GraphResult> getEventGraph(ApiClient apiClient, String serviceId,
-			ViewInput input, VolumeType volumeType, GraphRequest request, int pointsWanted,
+			ViewInput input, ServiceSettingsData settingsData,
+			VolumeType volumeType, GraphRequest request, 
 			int baselineWindow, int activeWindow, int windowSlice,
 			Pair<DateTime, DateTime> timespan, boolean cache) {
 
 		boolean cachable = (CACHE_GRAPHS) && (cacheStorage != null) && (cache);
 		
-		GraphCacheLoader cacheKey = new GraphCacheLoader(apiClient, request, serviceId, input, volumeType, 
-				pointsWanted, baselineWindow, activeWindow, windowSlice, timespan, cachable);
+		GraphCacheLoader cacheKey = new GraphCacheLoader(apiClient, request, serviceId, input, 
+			settingsData, volumeType, baselineWindow, activeWindow, windowSlice, timespan, cachable);
 		
 		Response<GraphResult> response = (Response<GraphResult>) getItem(cacheKey);
 
@@ -1416,17 +1472,21 @@ public class ApiCache {
 
 	@SuppressWarnings("unchecked")
 	public static Response<EventsSlimVolumeResult> getEventVolume(ApiClient apiClient, String serviceId, 
-			ViewInput input, VolumeType volumeType, EventsSlimVolumeRequest request) {
+			ViewInput input, ServiceSettingsData settingsData, VolumeType volumeType, EventsSlimVolumeRequest request) {
 
-		SlimVolumeCacheLoader cacheKey = new SlimVolumeCacheLoader(apiClient, request, serviceId, input, volumeType);
+		SlimVolumeCacheLoader cacheKey = new SlimVolumeCacheLoader(apiClient, 
+			request, serviceId, input, settingsData,volumeType);
 		Response<EventsSlimVolumeResult> response = (Response<EventsSlimVolumeResult>)getItem(cacheKey);
 		return response;
 	}
 
 	private static Response<?> getEventList(ApiClient apiClient, String serviceId, 
-			ViewInput input, EventsRequest request, VolumeType volumeType, boolean load) {
+		ViewInput input, EventsRequest request, ServiceSettingsData settingsData,
+		VolumeType volumeType, boolean load) {
 		
-		EventsCacheLoader cacheKey = new EventsCacheLoader(apiClient, request, serviceId, input, volumeType);		
+		EventsCacheLoader cacheKey = new EventsCacheLoader(apiClient, 
+				request, serviceId, input, settingsData, volumeType);		
+		
 		Response<?> response;
 		
 		if (load) {
@@ -1439,14 +1499,14 @@ public class ApiCache {
 	}
 	
 	public static Response<?> getEventList(ApiClient apiClient, String serviceId, 
-			ViewInput input, EventsRequest request) {
+			ViewInput input, ServiceSettingsData settingsData, EventsRequest request) {
 		
 		Response<?> response;
 		
 		for (VolumeType volumeType : VolumeType.values()) {
 			
 			response = getEventList(apiClient, serviceId, 
-					input, request,volumeType, false);
+					input, request, settingsData, volumeType, false);
 			
 			if ((response != null)  && (response.data != null)) {
 				return response;
@@ -1454,24 +1514,27 @@ public class ApiCache {
 		}
 		
 		response = getEventList(apiClient, serviceId, 
-				input, request,null, true);
+				input, request,settingsData, null, true);
 		
 		return response;
 	}
 	
 	public static Response<TransactionsGraphResult> getTransactionsGraph(ApiClient apiClient, String serviceId,
-			BaseGraphInput input, int pointsWanted,
+			BaseGraphInput input, ServiceSettingsData settingsData,
 			TransactionsGraphRequest request) {
-		return getTransactionsGraph(apiClient, serviceId, input, pointsWanted, 0, 0, request);
+		return getTransactionsGraph(apiClient, serviceId, input, settingsData,
+			 0, 0, request);
 	}
 
 	@SuppressWarnings("unchecked")
 	public static Response<TransactionsGraphResult> getTransactionsGraph(ApiClient apiClient, String serviceId,
-			BaseEventVolumeInput input, int pointsWanted, int baselineTimespan, int activeTimespan, 
+			BaseEventVolumeInput input, ServiceSettingsData settingsData,
+			int baselineTimespan, int activeTimespan, 
 			TransactionsGraphRequest request) {
 
-		TransactionsGraphCacheLoader cacheKey = new TransactionsGraphCacheLoader(apiClient, request, serviceId, input,
-				pointsWanted, baselineTimespan, activeTimespan);
+		TransactionsGraphCacheLoader cacheKey = new TransactionsGraphCacheLoader(apiClient, 
+			request, serviceId, input, settingsData,
+			baselineTimespan, activeTimespan);
 		Response<TransactionsGraphResult> response = (Response<TransactionsGraphResult>) ApiCache.getItem(cacheKey);
 		
 		return response;

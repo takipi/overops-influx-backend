@@ -17,6 +17,7 @@ import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.util.infra.Categories;
+import com.takipi.api.client.util.infra.Categories.CategoryType;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.GraphInput;
@@ -55,14 +56,14 @@ public class TiersGraphFunction extends LimitGraphFunction {
 		
 		GraphLimitInput limitInput = (GraphLimitInput)input;
 		
-		Map<String, EventResult> eventMap = getEventMap(serviceId, input, timeSpan.getFirst(), timeSpan.getSecond(), input.volumeType,
-					input.pointsWanted);
+		Map<String, EventResult> eventMap = getEventMap(serviceId, input,
+			timeSpan.getFirst(), timeSpan.getSecond(), input.volumeType);
 		
 		if (eventMap == null) {
 			return Collections.emptyList();
 		}
 		
-		Graph graph = getEventsGraph(serviceId, viewId, input.pointsWanted, input, input.volumeType,
+		Graph graph = getEventsGraph(serviceId, viewId, input, input.volumeType,
 				timeSpan.getFirst(), timeSpan.getSecond());
 		
 		if (graph == null) {
@@ -107,8 +108,11 @@ public class TiersGraphFunction extends LimitGraphFunction {
 					continue;
 				}
 
-				Set<String> originLabels = categories.getCategories(event.error_origin.class_name);
-				Set<String> locationLabels = categories.getCategories(event.error_location.class_name);
+				Set<String> originLabels = categories.getCategories(
+					event.error_origin.class_name, CategoryType.Infra);
+				
+				Set<String> locationLabels = categories.getCategories(
+					event.error_location.class_name, CategoryType.Infra);
 
 				if ((originLabels == null) && (locationLabels == null)) {
 					continue;

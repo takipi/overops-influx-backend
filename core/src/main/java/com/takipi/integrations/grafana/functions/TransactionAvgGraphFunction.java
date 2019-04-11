@@ -46,11 +46,11 @@ public class TransactionAvgGraphFunction extends TransactionsGraphFunction
 	
 	@Override
 	protected TransactionGraphsResult getTransactionsGraphs(String serviceId, 
-			String viewId, Pair<DateTime, DateTime> timeSpan, TransactionsGraphInput
-			input, int pointsWanted) {
+		String viewId, Pair<DateTime, DateTime> timeSpan, 
+		TransactionsGraphInput input) {
 				
 		TransactionGraphsResult transactionGraphsResult = super.getTransactionsGraphs(serviceId,
-			viewId, timeSpan, input, pointsWanted);
+			viewId, timeSpan, input);
 		
 		if (transactionGraphsResult == null) {
 			return null;

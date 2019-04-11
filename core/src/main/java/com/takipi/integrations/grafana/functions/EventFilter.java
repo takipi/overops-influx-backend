@@ -12,6 +12,7 @@ import org.joda.time.DateTime;
 import com.takipi.api.client.data.event.Location;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.util.infra.Categories;
+import com.takipi.api.client.util.infra.Categories.CategoryType;
 import com.takipi.api.client.util.settings.GroupSettings;
 import com.takipi.api.client.util.settings.GroupSettings.GroupFilter;
 import com.takipi.common.util.CollectionUtil;
@@ -199,7 +200,8 @@ public class EventFilter
 			
 		if (event.error_origin != null) {
 			
-			originLabels = categories.getCategories(event.error_origin.class_name);
+			originLabels = categories.getCategories(
+				event.error_origin.class_name, CategoryType.Infra);
 			
 			if (matchLabels(originLabels)) {
 				return false;
@@ -208,7 +210,8 @@ public class EventFilter
 	
 		if (event.error_location != null) {
 			
-			locationLabels = categories.getCategories(event.error_location.class_name);
+			locationLabels = categories.getCategories(
+				event.error_location.class_name, CategoryType.Infra);
 			
 			if (matchLabels(locationLabels)) {
 				return false;
@@ -354,8 +357,8 @@ public class EventFilter
 		return true;
 	}
 	
-	public boolean filter(EventResult event)
-	{
+	public boolean filter(EventResult event)	{
+		
 		if (event.is_rethrow) {
 			return true;
 		}

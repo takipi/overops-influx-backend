@@ -135,7 +135,7 @@ public class DeploymentsGraphFunction extends GraphFunction {
 	
 	@Override
 	protected Collection<Callable<Object>> getTasks(Collection<String> serviceIds, BaseGraphInput input,
-			Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
+			Pair<DateTime, DateTime> timeSpan) {
 
 		DeploymentsGraphInput dgInput = (DeploymentsGraphInput) input;
 
@@ -154,7 +154,7 @@ public class DeploymentsGraphFunction extends GraphFunction {
 			for (String deployment : deployments) {
 				result.add(new GraphAsyncTask(serviceId, viewId, input.view, 
 						getInput(dgInput, deployment), timeSpan,
-						serviceIds, pointsWanted));
+						serviceIds));
 			}
 		}
 
