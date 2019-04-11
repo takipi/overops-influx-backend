@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -656,7 +655,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			Pair<Map<String, EventResult>, Long> filteredResult = filterEvents(serviceId, 
 				period, timelineData.input, graphData.eventListMap.values());
 
-			RegressionPeriodData regressionPeriodData = getRegressionGraphs(
+			RegressionPeriodData regressionPeriodData = cropGraphByPeriod(
 				graphData.graph, period, regressionInput.baselineTimespan, filteredResult.getFirst());
 			
 			Graph baselineGraph = regressionPeriodData.baselineGraph;

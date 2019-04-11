@@ -622,7 +622,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 							
 							int baselineTimespan = function.expandBaselineTimespan(serviceId, activeWindow);
 							
-							RegressionPeriodData deploymentsRegressionGraphs = getRegressionGraphs(baselineGraph,
+							RegressionPeriodData deploymentsRegressionGraphs = cropGraphByPeriod(baselineGraph,
 									dateTimeDateTimePair, baselineTimespan,
 									eventResultMap);
 							
