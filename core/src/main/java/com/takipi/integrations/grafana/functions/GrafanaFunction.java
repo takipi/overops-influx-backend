@@ -146,6 +146,7 @@ public abstract class GrafanaFunction {
 	
 	protected static final String QUALIFIED_DELIM_PATTERN = Pattern.quote(String.valueOf(GrafanaFunction.QUALIFIED_DELIM));
 	
+	protected static final String REGEX_STARTS_WITH = "^";
 	protected static boolean FILTER_TX_BY_APP_LABEL = false;
 	
 	private static final long H8_THRESHOLD = TimeUnit.DAYS.toMillis(7);
@@ -1508,38 +1509,41 @@ public abstract class GrafanaFunction {
 			return null;
 		}
 		
-		List<String> result = new ArrayList<String>();
 		List<Category> tiers = getSettingsData(serviceId).tiers;
 
-		if (!CollectionUtil.safeIsEmpty(tiers)) { 
+		if (CollectionUtil.safeIsEmpty(tiers)) { 
+			return null;
+		}
 		
-			for (String app : apps) {
+		List<String> result = new ArrayList<String>();
+		
+		for (String app : apps) {
 				
-				if (!EnvironmentsFilterInput.isLabelApp(app)) {
+			if (!EnvironmentsFilterInput.isLabelApp(app)) {
+				continue;
+			}
+				
+			String name = EnvironmentsFilterInput.getLabelAppName(app);
+				
+			for (Category tier : tiers) {
+				
+				if (CollectionUtil.safeIsEmpty(tier.names)) {
 					continue;
 				}
 				
-				String appName = EnvironmentsFilterInput.getLabelAppName(app);
-				
-				for (Category tier : tiers) {
-						
-					if (!CollectionUtil.safeContains(tier.labels, appName)) {
-						continue;
-					}
-					
-					if (CollectionUtil.safeIsEmpty(tier.names)) {
-						continue;
-					}
-					
-					for (String tierClass : tier.names) {
-						String regex = GroupSettings.REGEX_ESCAPE + "^"
-							+ tierClass + GroupSettings.REGEX_ESCAPE;
-						
-						result.add(regex);
-					}
+				if (!CollectionUtil.safeContains(tier.labels, name)) {
+					continue;
 				}
-			} 
-		}
+				
+				for (String tierClass : tier.names) {
+					
+					String regex = GroupSettings.REGEX_ESCAPE + REGEX_STARTS_WITH  
+						+ tierClass + GroupSettings.REGEX_ESCAPE;
+					
+					result.add(regex);
+				}
+			}
+		} 
 		
 		return result;
 	}
