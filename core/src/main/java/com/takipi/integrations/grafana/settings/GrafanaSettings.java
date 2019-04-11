@@ -17,6 +17,8 @@ import com.google.common.cache.LoadingCache;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.service.SummarizedService;
+import com.takipi.api.client.request.reliability.GetReliabilitySettingsRequest;
+import com.takipi.api.client.result.reliability.GetReliabilitySettingsResult;
 import com.takipi.api.client.result.service.ServicesResult;
 import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.api.core.url.UrlClient.Response;
@@ -172,6 +174,18 @@ public class GrafanaSettings {
 		if (serviceJson != null) {	
 			result = parseServiceSettings(serviceId, serviceJson, false);
 		} 
+		
+		if (result == null) {
+			
+			GetReliabilitySettingsRequest request = GetReliabilitySettingsRequest.newBuilder().setServiceId(serviceId).build();
+			Response<GetReliabilitySettingsResult> response = apiClient.get(request);
+			
+			if ((response.isOK() && (response.data != null) 
+			&& (response.data.reliability_settings_json != null))) {
+				result = parseServiceSettings(serviceId, 
+					response.data.reliability_settings_json, false);
+			}
+		}
 		
 		if (result == null) {
 			String defaultJson = settingsStorage.getDefaultServiceSettings();
