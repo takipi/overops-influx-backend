@@ -1687,7 +1687,8 @@ public abstract class GrafanaFunction {
 		TransactionsGraphRequest.Builder builder = TransactionsGraphRequest.newBuilder().setServiceId(serviceId)
 				.setViewId(viewId).setFrom(fromTo.getFirst()).setTo(fromTo.getSecond())
 				//.setWantedPointCount(pointsWanted);
-				.setResolution(graphResolution);
+				.setResolution(graphResolution)
+				.setBreakdown(true);
 				
 		applyFilters(input, serviceId, builder);
 		
@@ -2379,7 +2380,7 @@ public abstract class GrafanaFunction {
 	public Collection<EventResult> getEventList(String serviceId, String viewId, ViewInput input, DateTime from,
 			DateTime to, boolean copyStats) {
 		
-		EventsRequest.Builder builder = EventsRequest.newBuilder().setRaw(true);
+		EventsRequest.Builder builder = EventsRequest.newBuilder().setRaw(true).setBreakdown(true);
 		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);
 		
 		Response<?> response = ApiCache.getEventList(apiClient, serviceId, input, builder.build());
