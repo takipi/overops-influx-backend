@@ -57,6 +57,7 @@ import com.takipi.api.client.result.transaction.TransactionsGraphResult;
 import com.takipi.api.client.result.transaction.TransactionsVolumeResult;
 import com.takipi.api.client.result.view.ViewsResult;
 import com.takipi.api.client.util.infra.Categories;
+import com.takipi.api.client.util.infra.Categories.Category;
 import com.takipi.api.client.util.infra.Categories.CategoryType;
 import com.takipi.api.client.util.infra.InfraUtil;
 import com.takipi.api.client.util.performance.PerformanceUtil;
@@ -144,6 +145,8 @@ public abstract class GrafanaFunction {
 	protected static final String EMPTY_POSTFIX = ".";
 	
 	protected static final String QUALIFIED_DELIM_PATTERN = Pattern.quote(String.valueOf(GrafanaFunction.QUALIFIED_DELIM));
+	
+	protected static boolean FILTER_TX_BY_APP_LABEL = false;
 	
 	private static final long H8_THRESHOLD = TimeUnit.DAYS.toMillis(7);
 	private static final long H1_THRESHOLD = TimeUnit.HOURS.toMillis(24);
@@ -1484,27 +1487,90 @@ public abstract class GrafanaFunction {
 			
 			targetTransactions = transactionsList;			
 		} else {
-			targetTransactions = transactions;
+			targetTransactions = null;
 		}
 						
-		result = getTransactionsFilter(serviceId, targetTransactions);
+		result = getTransactionsFilter(serviceId, input, targetTransactions);
 		
 		return result;
 	}
 	
-	private GroupFilter getTransactionsFilter(String serviceId, Collection<String> transactions) {
+	private Collection<String> getAppTierPatterns(String serviceId, BaseEventVolumeInput input) {
+		
+		if (!FILTER_TX_BY_APP_LABEL) {
+			return null;
+		}
+		
+		Collection<String> apps = input.getApplications(apiClient,
+				getSettingsData(serviceId), serviceId, true, true);
+		
+		if (CollectionUtil.safeIsEmpty(apps)) {
+			return null;
+		}
+		
+		List<String> result = new ArrayList<String>();
+		List<Category> tiers = getSettingsData(serviceId).tiers;
+
+		if (!CollectionUtil.safeIsEmpty(tiers)) { 
+		
+			for (String app : apps) {
+				
+				if (!EnvironmentsFilterInput.isLabelApp(app)) {
+					continue;
+				}
+				
+				String appName = EnvironmentsFilterInput.getLabelAppName(app);
+				
+				for (Category tier : tiers) {
+						
+					if (!CollectionUtil.safeContains(tier.labels, appName)) {
+						continue;
+					}
+					
+					if (CollectionUtil.safeIsEmpty(tier.names)) {
+						continue;
+					}
+					
+					for (String tierClass : tier.names) {
+						String regex = GroupSettings.REGEX_ESCAPE + "^"
+							+ tierClass + GroupSettings.REGEX_ESCAPE;
+						
+						result.add(regex);
+					}
+				}
+			} 
+		}
+		
+		return result;
+	}
+	
+	private GroupFilter getTransactionsFilter(String serviceId, 
+			BaseEventVolumeInput input, Collection<String> transactions) {
 		
 		GroupFilter result;
 		
-		if (transactions != null) {
+		Collection<String> tierPatterns = getAppTierPatterns(serviceId, input);
+		
+		if ((!CollectionUtil.safeIsEmpty(transactions)) 
+		|| (!CollectionUtil.safeIsEmpty(tierPatterns))) {
 			
 			GroupSettings transactionGroups = getSettingsData(serviceId).transactions;
 			
-			if (transactionGroups != null) {
-				result = transactionGroups.getExpandedFilter(transactions);
-			} else {
-				result = GroupFilter.from(transactions);
-			}
+			List<String> filterValues = new ArrayList<String>();
+			
+			if (tierPatterns != null) {
+				filterValues.addAll(tierPatterns);
+			} 
+			
+			if (transactions != null) {	
+				if (transactionGroups != null) {
+					filterValues.addAll(transactionGroups.expandList(transactions));
+				} else {
+					filterValues.addAll(transactions);
+				}
+			} 
+			
+			result = GroupFilter.from(filterValues);
 		} else {
 			result = null;
 		}
@@ -1544,7 +1610,7 @@ public abstract class GrafanaFunction {
 		Set<String> labels = new HashSet<String>(input.geLabels(serviceId));
 		
 		Collection<String> apps = input.getApplications(apiClient, getSettingsData(serviceId), serviceId,
-			true, true);
+			true, true);	
 		
 		for (String app : apps) {
 			if (EnvironmentsFilterInput.isLabelApp(app)) {
