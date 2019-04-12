@@ -32,6 +32,7 @@ import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventSlimResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
 import com.takipi.api.client.util.infra.Categories;
+import com.takipi.api.client.util.infra.Categories.Category;
 import com.takipi.api.client.util.infra.Categories.CategoryType;
 import com.takipi.api.client.util.performance.calc.PerformanceState;
 import com.takipi.api.client.util.regression.RegressionInput;
@@ -664,8 +665,18 @@ public class ReliabilityReportFunction extends EventsFunction {
 		}
 			
 		if (keyTiers != null) {
-			for (String keyTier: keyTiers) {
-				result.add(new ReportKey(keyTier, true));
+			
+			List<Category> categories = getSettingsData(serviceId).tiers;
+			
+			for (Category category : categories)  {
+				
+				if ((category.getType() == CategoryType.infra)
+				&& (!CollectionUtil.safeIsEmpty(category.names))) {
+				
+					for (String label : category.labels) {
+						result.add(new ReportKey(label, true));
+					}
+				}
 			}
 		} 
 		
@@ -684,9 +695,6 @@ public class ReliabilityReportFunction extends EventsFunction {
 				
 		for (EventResult event : eventsMap.values()) {
 						
-			if (event.id.equals("40502")) {
-				System.out.println();
-			}
 			
 			boolean is3rdPartyCode = false;
 			
@@ -882,8 +890,26 @@ public class ReliabilityReportFunction extends EventsFunction {
 		if (keyApps.size() > input.limit) {
 			return toAppReportKeys(keyApps, true);
 		}
+				
+		List<String> activeApps = new ArrayList<String>(ApiCache.getApplicationNames(apiClient, serviceId, true));
 		
-		Collection<String> activeApps = ApiCache.getApplicationNames(apiClient, serviceId, true);
+		List<Category> categories = getSettingsData(serviceId).tiers;
+		 
+		for (Category category : categories) {
+			
+			if (category.getType() != CategoryType.app) {
+				continue;
+			}
+			
+			if (CollectionUtil.safeIsEmpty(category.names)) {
+				continue;
+			}
+			
+			for (String name : category.labels) {
+				String appName = EnvironmentsFilterInput.toAppLabel(name);
+				activeApps.add(appName);
+			}
+		}
 		
 		int appSize = keyApps.size() + activeApps.size();
 		

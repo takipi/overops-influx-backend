@@ -57,6 +57,7 @@ import com.takipi.api.client.result.transaction.TransactionsGraphResult;
 import com.takipi.api.client.result.transaction.TransactionsVolumeResult;
 import com.takipi.api.client.result.view.ViewsResult;
 import com.takipi.api.client.util.infra.Categories;
+import com.takipi.api.client.util.infra.Categories.Category;
 import com.takipi.api.client.util.infra.Categories.CategoryType;
 import com.takipi.api.client.util.infra.InfraUtil;
 import com.takipi.api.client.util.performance.PerformanceUtil;
@@ -145,6 +146,9 @@ public abstract class GrafanaFunction {
 	
 	protected static final String QUALIFIED_DELIM_PATTERN = Pattern.quote(String.valueOf(GrafanaFunction.QUALIFIED_DELIM));
 	
+	protected static final String REGEX_STARTS_WITH = "^";
+	protected static boolean FILTER_TX_BY_APP_LABEL = false;
+	
 	private static final long H8_THRESHOLD = TimeUnit.DAYS.toMillis(7);
 	private static final long H1_THRESHOLD = TimeUnit.HOURS.toMillis(24);
 	private static final long M5_THRESHOLD = TimeUnit.HOURS.toMillis(3);
@@ -195,9 +199,7 @@ public abstract class GrafanaFunction {
 		TYPES_MAP.put(TIMER, "TMR");
 		TYPES_MAP.put(HTTP_ERROR, "HTTP");			
 	}
-	
-	//private static final int END_SLICE_POINT_COUNT = 2;
-	
+		
 	protected final ApiClient apiClient;
 	protected volatile Map<String, ServiceSettings> settingsMaps;
 	
@@ -1434,14 +1436,15 @@ public abstract class GrafanaFunction {
 	
 	
 	protected GroupFilter getTransactionsFilter(String serviceId, BaseEventVolumeInput input,
-			Pair<DateTime, DateTime> timespan) {
+			Pair<DateTime, DateTime> timespan, boolean filterByAppTier) {
 		
 		Collection<String> transactions = input.getTransactions(serviceId);
-		return getTransactionsFilter(serviceId, input, timespan, transactions);
+		return getTransactionsFilter(serviceId, input, timespan, transactions, filterByAppTier);
 	}
 		
 	protected GroupFilter getTransactionsFilter(String serviceId, BaseEventVolumeInput input,
-		Pair<DateTime, DateTime> timespan, Collection<String> transactions) {
+		Pair<DateTime, DateTime> timespan, Collection<String> transactions,
+		boolean filterByAppTier) {
 		
 		GroupFilter result;
 		
@@ -1484,27 +1487,100 @@ public abstract class GrafanaFunction {
 			
 			targetTransactions = transactionsList;			
 		} else {
-			targetTransactions = transactions;
+			targetTransactions = null;
 		}
 						
-		result = getTransactionsFilter(serviceId, targetTransactions);
+		result = getTransactionsFilter(serviceId, input, targetTransactions, filterByAppTier);
 		
 		return result;
 	}
 	
-	private GroupFilter getTransactionsFilter(String serviceId, Collection<String> transactions) {
+	private Collection<String> getAppTierPatterns(String serviceId, BaseEventVolumeInput input) {
+		
+		if (!FILTER_TX_BY_APP_LABEL) {
+			return null;
+		}
+		
+		Collection<String> apps = input.getApplications(apiClient,
+				getSettingsData(serviceId), serviceId, true, true);
+		
+		if (CollectionUtil.safeIsEmpty(apps)) {
+			return null;
+		}
+		
+		List<Category> tiers = getSettingsData(serviceId).tiers;
+
+		if (CollectionUtil.safeIsEmpty(tiers)) { 
+			return null;
+		}
+		
+		List<String> result = new ArrayList<String>();
+		
+		for (String app : apps) {
+				
+			if (!EnvironmentsFilterInput.isLabelApp(app)) {
+				continue;
+			}
+				
+			String name = EnvironmentsFilterInput.getLabelAppName(app);
+				
+			for (Category tier : tiers) {
+				
+				if (CollectionUtil.safeIsEmpty(tier.names)) {
+					continue;
+				}
+				
+				if (!CollectionUtil.safeContains(tier.labels, name)) {
+					continue;
+				}
+				
+				for (String tierClass : tier.names) {
+					
+					String regex = GroupSettings.REGEX_ESCAPE + REGEX_STARTS_WITH  
+						+ tierClass + GroupSettings.REGEX_ESCAPE;
+					
+					result.add(regex);
+				}
+			}
+		} 
+		
+		return result;
+	}
+	
+	private GroupFilter getTransactionsFilter(String serviceId, 
+			BaseEventVolumeInput input, Collection<String> transactions
+			, boolean filterByTiers) {
 		
 		GroupFilter result;
 		
-		if (transactions != null) {
+		Collection<String> tierPatterns;
+		
+		if (filterByTiers) {
+			tierPatterns = getAppTierPatterns(serviceId, input);
+		} else {
+			tierPatterns = null;
+		}
+		
+		if ((!CollectionUtil.safeIsEmpty(transactions)) 
+		|| (!CollectionUtil.safeIsEmpty(tierPatterns))) {
 			
 			GroupSettings transactionGroups = getSettingsData(serviceId).transactions;
 			
-			if (transactionGroups != null) {
-				result = transactionGroups.getExpandedFilter(transactions);
-			} else {
-				result = GroupFilter.from(transactions);
-			}
+			List<String> filterValues = new ArrayList<String>();
+			
+			if (tierPatterns != null) {
+				filterValues.addAll(tierPatterns);
+			} 
+			
+			if (transactions != null) {	
+				if (transactionGroups != null) {
+					filterValues.addAll(transactionGroups.expandList(transactions));
+				} else {
+					filterValues.addAll(transactions);
+				}
+			} 
+			
+			result = GroupFilter.from(filterValues);
 		} else {
 			result = null;
 		}
@@ -1515,11 +1591,8 @@ public abstract class GrafanaFunction {
 	protected EventFilter getEventFilter(String serviceId, BaseEventVolumeInput input, 
 		Pair<DateTime, DateTime> timespan) {
 		
-		GroupFilter transactionsFilter = getTransactionsFilter(serviceId, input, timespan);
-		
-		if (transactionsFilter == null) {
-			return null;
-		}
+		GroupFilter transactionsFilter = getTransactionsFilter(serviceId, 
+			input, timespan, false);
 		
 		Categories categories = getSettings(serviceId).getCategories();	
 
@@ -1544,7 +1617,7 @@ public abstract class GrafanaFunction {
 		Set<String> labels = new HashSet<String>(input.geLabels(serviceId));
 		
 		Collection<String> apps = input.getApplications(apiClient, getSettingsData(serviceId), serviceId,
-			true, true);
+			true, true);	
 		
 		for (String app : apps) {
 			if (EnvironmentsFilterInput.isLabelApp(app)) {
@@ -1602,7 +1675,7 @@ public abstract class GrafanaFunction {
 		GroupFilter transactionsFilter = null;
 		
 		if (input.hasTransactions()) {			
-			transactionsFilter = getTransactionsFilter(serviceId, input, timeSpan);
+			transactionsFilter = getTransactionsFilter(serviceId, input, timeSpan, true);
 
 			if (transactionsFilter == null) {
 				return Collections.emptyList();
@@ -1681,7 +1754,8 @@ public abstract class GrafanaFunction {
 			
 			result = new ArrayList<Transaction>(response.data.transactions.size());
 			
-			GroupFilter transactionsFilter = getTransactionsFilter(serviceId, input, timeSpan);
+			GroupFilter transactionsFilter = getTransactionsFilter(serviceId,
+				input, timeSpan, true);
 
 			for (Transaction transaction : response.data.transactions) {
 				Pair<String, String> nameAndMethod = getFullNameAndMethod(transaction.name);
