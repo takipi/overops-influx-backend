@@ -1067,14 +1067,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 		if ((scoreType.includeSlowdowns())) {
 			RegressionsInput transactionInput = getInput(input, serviceId, aggregatedActiveKey.name, true);
 			
-			transactionInput.pointsWanted = input.transactionPointsWanted;
-			
 			Map<String, Pair<ReportKey, RegressionsInput>> transactionSubRegressionInputs = Maps.newHashMap();
 			
 			for (ReportKey key : activeKeys) {
 				RegressionsInput regInput = getInput(input, serviceId, key.name, true);
-				
-				regInput.pointsWanted = ((ReliabilityReportInput) transactionInput).transactionPointsWanted;
 				
 				transactionSubRegressionInputs.put(key.name, Pair.of(key, regInput));
 			}
