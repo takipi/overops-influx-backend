@@ -36,6 +36,8 @@ import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventSlimResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
 import com.takipi.api.client.util.infra.Categories;
+import com.takipi.api.client.util.infra.Categories.Category;
+import com.takipi.api.client.util.infra.Categories.CategoryType;
 import com.takipi.api.client.util.performance.calc.PerformanceState;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
@@ -287,7 +289,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			int result;
 			
 			Collection<String> apps = EnvironmentsFilterInput.getApplications(apiClient,
-				getSettingsData(serviceId), serviceId, name, true);
+				getSettingsData(serviceId), serviceId, name, true, true);
 				
 			if (!CollectionUtil.safeIsEmpty(apps)) {
 				result = apps.size();
@@ -303,7 +305,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		public String getFullName(String serviceId, ReportKeyResults reportKeyResults) {
 			
 			Collection<String> apps = EnvironmentsFilterInput.getApplications(apiClient,
-					getSettingsData(serviceId), serviceId, name, true);
+				getSettingsData(serviceId), serviceId, name, true, true);
 			
 			String result = String.join(", ", apps);		
 
@@ -438,8 +440,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 				Pair<DateTime, DateTime> activeWindow = Pair.of(from, to);
 				
 				Collection<TransactionGraph> transactionGraphs = getTransactionGraphs(input,
-					serviceId, viewId, activeWindow, input.getSearchText(), 
-					input.pointsWanted);
+					serviceId, viewId, activeWindow, input.getSearchText());
 				
 				Map<DeterminantKey, List<TransactionGraph>> transactionsGraphMap = Maps.newHashMap();
 				
@@ -506,7 +507,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			TransactionDataResult transactionDataResult = getTransactionDatas(
 					transactionGraphs, serviceId, viewId, timeSpan,
 					subRegressionInput, true, updateEvents, false,
-					0, false);
+					false);				
 			
 			SlowdownAsyncResult result;
 			
@@ -922,8 +923,18 @@ public class ReliabilityReportFunction extends EventsFunction {
 		}
 			
 		if (keyTiers != null) {
-			for (String keyTier: keyTiers) {
-				result.add(new ReportKey(keyTier, true));
+			
+			List<Category> categories = getSettingsData(serviceId).tiers;
+			
+			for (Category category : categories)  {
+				
+				if ((category.getType() == CategoryType.infra)
+				&& (!CollectionUtil.safeIsEmpty(category.names))) {
+				
+					for (String label : category.labels) {
+						result.add(new ReportKey(label, true));
+					}
+				}
 			}
 		} 
 		
@@ -942,11 +953,13 @@ public class ReliabilityReportFunction extends EventsFunction {
 				
 		for (EventResult event : eventsMap.values()) {
 						
+			
 			boolean is3rdPartyCode = false;
 			
 			if (event.error_origin != null) {
 				
-				Set<String> originLabels = categories.getCategories(event.error_origin.class_name);
+				Set<String> originLabels = categories.getCategories(
+					event.error_origin.class_name, CategoryType.infra);
 				
 				if (!CollectionUtil.safeIsEmpty(originLabels)) {
 					result.addAll(toReportKeys(originLabels, false));
@@ -956,7 +969,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			if (event.error_location != null) {
 				
-				Set<String> locationLabels = categories.getCategories(event.error_location.class_name);
+				Set<String> locationLabels = categories.getCategories(
+					event.error_location.class_name, CategoryType.infra);
 				
 				if (!CollectionUtil.safeIsEmpty(locationLabels)) {
 					result.addAll(toReportKeys(locationLabels, false));
@@ -1126,7 +1140,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		List<ReportKey> reportKeys;
 		
 		Collection<String> selectedApps = input.getApplications(apiClient,
-			getSettingsData(serviceId), serviceId, false);
+			getSettingsData(serviceId), serviceId, false, true);
 		
 		if (!CollectionUtil.safeIsEmpty(selectedApps)) {
 			
@@ -1143,8 +1157,26 @@ public class ReliabilityReportFunction extends EventsFunction {
 		if (keyApps.size() > input.limit) {
 			return toAppReportKeys(keyApps, true);
 		}
+				
+		List<String> activeApps = new ArrayList<String>(ApiCache.getApplicationNames(apiClient, serviceId, true));
 		
-		Collection<String> activeApps = ApiCache.getApplicationNames(apiClient, serviceId, true);
+		List<Category> categories = getSettingsData(serviceId).tiers;
+		 
+		for (Category category : categories) {
+			
+			if (category.getType() != CategoryType.app) {
+				continue;
+			}
+			
+			if (CollectionUtil.safeIsEmpty(category.names)) {
+				continue;
+			}
+			
+			for (String name : category.labels) {
+				String appName = EnvironmentsFilterInput.toAppLabel(name);
+				activeApps.add(appName);
+			}
+		}
 		
 		int appSize = keyApps.size() + activeApps.size();
 		
@@ -1415,7 +1447,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 			if (appGroups != null) {
 				 
 				List<String> keyApps = new ArrayList<String>(appGroups.getAllGroupNames(true));
-				Collection<String> apps = regInput.getApplications(apiClient, getSettingsData(serviceId), serviceId, false);
+				Collection<String> apps = regInput.getApplications(apiClient, getSettingsData(serviceId), 
+					serviceId, false, true);
 				
 				isKey = false;
 				

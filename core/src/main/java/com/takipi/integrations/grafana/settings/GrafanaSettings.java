@@ -17,6 +17,8 @@ import com.google.common.cache.LoadingCache;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.service.SummarizedService;
+import com.takipi.api.client.request.reliability.GetReliabilitySettingsRequest;
+import com.takipi.api.client.result.reliability.GetReliabilitySettingsResult;
 import com.takipi.api.client.result.service.ServicesResult;
 import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.api.core.url.UrlClient.Response;
@@ -35,7 +37,8 @@ public class GrafanaSettings {
 		
 	private static final String SETTINGS_FOLDER = "grafanaSettingsFolder";
 
-	private static final boolean ENABLE_CACHE = false;
+	private static final boolean ENABLE_CACHE = true;
+	
 	private static final int CACHE_SIZE = 1000;
 	private static final int CACHE_RETENTION = 20;
 	
@@ -173,6 +176,18 @@ public class GrafanaSettings {
 		} 
 		
 		if (result == null) {
+			
+			GetReliabilitySettingsRequest request = GetReliabilitySettingsRequest.newBuilder().setServiceId(serviceId).build();
+			Response<GetReliabilitySettingsResult> response = apiClient.get(request);
+			
+			if ((response.isOK() && (response.data != null) 
+			&& (response.data.reliability_settings_json != null))) {
+				result = parseServiceSettings(serviceId, 
+					response.data.reliability_settings_json, false);
+			}
+		}
+		
+		if (result == null) {
 			String defaultJson = settingsStorage.getDefaultServiceSettings();
 			
 			if (defaultJson != null) {
@@ -294,7 +309,7 @@ public class GrafanaSettings {
 		
 		ServiceSettings result;
 		
-		if (ENABLE_CACHE) {
+		if (settingsCache != null) {
 			try {
 				result = settingsCache.get(new SettingsCacheKey(apiClient, serviceId));
 			} catch (ExecutionException e) {
@@ -313,7 +328,7 @@ public class GrafanaSettings {
 		
 		SettingsCacheKey key = new SettingsCacheKey(apiClient, serviceId);
 		
-		if (ENABLE_CACHE) {
+		if (settingsCache != null) {
 			settingsCache.put(key, settings);
 		}
 

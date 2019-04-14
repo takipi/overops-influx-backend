@@ -99,11 +99,11 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 
 	protected TransactionGraphsResult getTransactionsGraphs(String serviceId, 
 		String viewId, Pair<DateTime, DateTime> timeSpan, 
-		TransactionsGraphInput input, int pointsWanted) {
+		TransactionsGraphInput input) {
 		
 		
 		Collection<TransactionGraph> activeGraphs = getTransactionGraphs(input, serviceId, 
-				viewId, timeSpan, input.getSearchText(), pointsWanted);
+				viewId, timeSpan, input.getSearchText());
 		
 		TimeWindow timeWindow = input.getTimeWindow();
 		
@@ -114,7 +114,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			Collection<PerformanceState> performanceStates = TransactionsListInput.getStates(input.performanceStates);
 			
 			TransactionDataResult transactionDataResult = getTransactionDatas(activeGraphs, 
-				serviceId, viewId, timeSpan, input, true, false, false, 0, true);
+				serviceId, viewId, timeSpan, input, true, false, false, true);
 			
 			if (transactionDataResult == null) {
 				return null;
@@ -180,11 +180,12 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
     @Override
 	protected List<GraphSeries> processServiceGraph( Collection<String> serviceIds, 
 			String serviceId, String viewId, String viewName,
-			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
+			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan) {
 
 		TransactionsGraphInput tgInput = (TransactionsGraphInput)(input);
 		
-		TransactionGraphsResult transactionGraphs = getTransactionsGraphs(serviceId, viewId, timeSpan, tgInput, pointsWanted);
+		TransactionGraphsResult transactionGraphs = getTransactionsGraphs(serviceId, 
+			viewId, timeSpan, tgInput);
 		
 		if (transactionGraphs == null) {
 			return Collections.emptyList();
@@ -233,7 +234,8 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
     	
 		List<GraphSeries> result;
 
-		GroupFilter transactionsFilter = getTransactionsFilter(serviceId, input, timespan);
+		GroupFilter transactionsFilter = getTransactionsFilter(serviceId, 
+			input, timespan, true);
 
 		AggregateMode aggregateMode = input.getAggregateMode();
 		
@@ -271,7 +273,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			for (String transactionGroup : transactionGroups) {
 				
 				GroupFilter groupsFilter = getTransactionsFilter(serviceId, input, timespan,
-					Collections.singletonList(transactionGroup));
+					Collections.singletonList(transactionGroup), true);
 				
 				if (groupsFilter == null) {
 					continue;
@@ -287,7 +289,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			if (singleTransactions.size() > 0) {
 				
 				GroupFilter singleTransactionsFilter = getTransactionsFilter(serviceId, input, timespan,
-					singleTransactions);
+					singleTransactions, true);
 				
 				if ((singleTransactionsFilter != null) && (!singleTransactionsFilter.isEmpty())) {
 					result.addAll(createMultiGraphSeries(serviceId, graphs, input, 

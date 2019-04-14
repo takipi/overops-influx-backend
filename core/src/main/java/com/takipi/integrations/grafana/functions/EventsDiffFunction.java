@@ -10,7 +10,6 @@ import java.util.Map;
 
 import org.joda.time.DateTime;
 
-import com.google.common.base.Objects;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.result.event.EventResult;
@@ -21,6 +20,7 @@ import com.takipi.integrations.grafana.input.EventsDiffInput.DiffType;
 import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.Series;
+import com.takipi.integrations.grafana.util.ArrayUtil;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class EventsDiffFunction extends EventsFunction
@@ -163,7 +163,9 @@ public class EventsDiffFunction extends EventsFunction
 			
 			sourceTimespan = Pair.of(timeSpan.getFirst().minusMinutes(offset),
 				timeSpan.getSecond().minusMinutes(offset));
-			sourceTimeFilter = TimeUtil.toTimeFilter(sourceTimespan.getFirst(), sourceTimespan.getSecond());
+			
+			sourceTimeFilter = TimeUtil.toTimeFilter(sourceTimespan.getFirst(), 
+				sourceTimespan.getSecond());
 		} else {
 			sourceTimeFilter = null;
 			sourceTimespan = timeSpan;
@@ -173,10 +175,19 @@ public class EventsDiffFunction extends EventsFunction
 			eventsDiffInput.timeFilter = sourceTimeFilter;
 		}
 		
-		if ((Objects.equal(input.getApplications(apiClient, getSettingsData(serviceId), serviceId), 
-			targetInput.getApplications(apiClient, getSettingsData(serviceId), serviceId))) 
-		&& (Objects.equal(input.getDeployments(serviceId), targetInput.getDeployments(serviceId))) 
-		&& (Objects.equal(input.getServers(serviceId), targetInput.getServers(serviceId)))
+		boolean appsEqual = ArrayUtil.compare(
+			input.getApplications(apiClient, getSettingsData(serviceId), serviceId, true, true), 
+			targetInput.getApplications(apiClient, getSettingsData(serviceId), serviceId, true, true));
+		
+		boolean depsEqual = ArrayUtil.compare(
+			input.getDeployments(serviceId),
+			targetInput.getDeployments(serviceId));
+		
+		boolean serversEqual = ArrayUtil.compare(
+			input.getServers(serviceId), 
+			targetInput.getServers(serviceId));
+		
+		if ((appsEqual) && (depsEqual) && (serversEqual)
 		&& (sourceTimeFilter == null)) {
 			return Collections.emptyList();
 		}

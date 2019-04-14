@@ -61,7 +61,7 @@ public class TypesGraph extends GraphFunction {
 	
 	@Override
 	protected Collection<Callable<Object>> getTasks(Collection<String> serviceIds, BaseGraphInput input,
-			Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
+			Pair<DateTime, DateTime> timeSpan) {
 
 		TypesGraphInput graphInput = (TypesGraphInput) input;
 
@@ -80,7 +80,7 @@ public class TypesGraph extends GraphFunction {
 			if (types != null) {
 				for (String type : types) {
 					result.add(new GraphAsyncTask(serviceId, viewId, input.view, getInput(graphInput , type), timeSpan,
-							serviceIds, pointsWanted));
+						serviceIds));
 				}
 			} else {
 				
@@ -96,16 +96,16 @@ public class TypesGraph extends GraphFunction {
 				
 				if (defaultTypes != null) {
 					for (String type : defaultTypes) {
-						result.add(new GraphAsyncTask(serviceId, viewId, input.view, getInput(graphInput , type), timeSpan,
-								serviceIds, pointsWanted));
+						result.add(new GraphAsyncTask(serviceId, viewId, 
+							input.view, getInput(graphInput , type), timeSpan, serviceIds));
 					}
 				} 	
 			}
 			
 			if (result.size() == 0) {
 				result.add(new GraphAsyncTask(serviceId, viewId, input.view, 
-						getInput(graphInput, GrafanaFunction.ALL),
-						timeSpan, serviceIds, pointsWanted));
+					getInput(graphInput, GrafanaFunction.ALL),
+					timeSpan, serviceIds));
 
 			}
 		}

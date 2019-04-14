@@ -25,6 +25,7 @@ import com.takipi.api.client.result.event.EventSlimResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
 import com.takipi.api.client.result.event.ApiBaseStats;
 import com.takipi.api.client.util.infra.Categories;
+import com.takipi.api.client.util.infra.Categories.CategoryType;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.settings.GeneralSettings;
@@ -459,7 +460,8 @@ public class EventsFunction extends GrafanaFunction {
 				Set<String> originLabels;
 				
 				if (eventData.event.error_origin != null) {
-					originLabels = categories.getCategories(eventData.event.error_origin.class_name);
+					originLabels = categories.getCategories(
+						eventData.event.error_origin.class_name, CategoryType.infra);
 				} else {
 					originLabels = null;
 				}
@@ -467,7 +469,8 @@ public class EventsFunction extends GrafanaFunction {
 				Set<String> locationLabels;
 				
 				if (eventData.event.error_location != null) {
-					locationLabels = categories.getCategories(eventData.event.error_location.class_name);
+					locationLabels = categories.getCategories(
+						eventData.event.error_location.class_name, CategoryType.infra);
 				} else {
 					locationLabels = null;	
 				}
@@ -853,7 +856,7 @@ public class EventsFunction extends GrafanaFunction {
 			Pair<DateTime, DateTime> timeSpan) {
 		
 		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, timeSpan.getFirst(), 
-			timeSpan.getSecond(), input.volumeType, input.pointsWanted);
+			timeSpan.getSecond(), input.volumeType);
 		
 		if (eventsMap == null) {
 			return Collections.emptyList();

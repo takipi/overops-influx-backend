@@ -802,7 +802,7 @@
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Apps Trend: $kpi $timeFilterAlert",
+      "title": "Apps Trend: $kpi",
       "tooltip": {
         "shared": true,
         "sort": 2,

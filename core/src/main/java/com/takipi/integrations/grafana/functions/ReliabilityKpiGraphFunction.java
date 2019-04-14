@@ -108,14 +108,14 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			
 			GraphResultData result = new GraphResultData();
 
-			result.graph = getEventsGraph(serviceId, viewId, timelineData.input.pointsWanted, 
+			result.graph = getEventsGraph(serviceId, viewId,
 					timelineData.expandedInput, timelineData.input.volumeType, 
 					timelineData.expandedTimespan.getFirst(),
 					timelineData.expandedTimespan.getSecond(), 0, 0, false);
 			
 			result.eventListMap = getEventMap(serviceId, timelineData.expandedInput,
-					timelineData.timespan.getFirst(), timelineData.timespan.getSecond(), 
-				null, timelineData.input.pointsWanted);
+				timelineData.timespan.getFirst(), timelineData.timespan.getSecond(), 
+				null);
 						
 			return result;
 		}
@@ -146,8 +146,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			TransactionResultData result = new TransactionResultData();
 
 			result.graphs = getTransactionGraphs(timelineData.input, serviceId, viewId, 
-					timelineData.timespan, timelineData.input.getSearchText(), 
-					timelineData.input.transactionPointsWanted);
+					timelineData.timespan, timelineData.input.getSearchText());
 			
 			return result;
 		}
@@ -170,7 +169,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			result.isBaseline = true;
 			result.graphs = getTransactionGraphs(timelineData.baselineInput, serviceId, viewId, 
 					timelineData.baselineTimespan, timelineData.baselineInput.getSearchText(), 
-					timelineData.baselineInput.transactionPointsWanted, 0, timelineData.baselineWindow);
+					0, timelineData.baselineWindow);
 						
 			return result;
 		}
@@ -195,12 +194,12 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		protected TimelineData timelineData;
 		
 		protected KpiGraphAsyncTask(String serviceId, String viewId, String viewName,
-				TimelineData timelineData, Collection<String> serviceIds, int pointsWanted,
+				TimelineData timelineData, Collection<String> serviceIds, 
 				String app, boolean isKey, Collection<Pair<DateTime, DateTime>> periods,
 				boolean returnKpi) {
 
 			super(serviceId, viewId, viewName, timelineData.input, timelineData.timespan,
-				serviceIds, pointsWanted);
+				serviceIds);
 			this.app = app;
 			this.isKey = isKey;
 			this.periods = periods;
@@ -242,7 +241,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		@Override
 		public String toString() {
 			return String.join(" ", "KPI", serviceId, viewId, app, 
-				timeSpan.toString(), String.valueOf(pointsWanted));
+				timeSpan.toString());
 		}
 	}
 	
@@ -484,7 +483,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			String viewId, TimelineData timelineData,
 			Collection<Pair<DateTime, DateTime>> periods) {
 		
-		Graph graph = getEventsGraph(serviceId, viewId, timelineData.input.pointsWanted, 
+		Graph graph = getEventsGraph(serviceId, viewId, 
 				timelineData.input, timelineData.input.volumeType, 
 				timelineData.timespan.getFirst(), timelineData.timespan.getSecond());
 		
@@ -500,7 +499,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		
 		Map<String, EventResult> eventMap = getEventMap(serviceId, timelineData.input,
 			timelineData.timespan.getFirst(), timelineData.timespan.getSecond(), 
-			null, timelineData.input.pointsWanted);
+			null);
 		
 		if (eventMap == null) {
 			return Collections.emptyMap();
@@ -995,7 +994,9 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			}
 				
 			int appSize;
-			Collection<String> apps = input.getApplications(apiClient, getSettingsData(serviceId), serviceId);
+			
+			Collection<String> apps = input.getApplications(apiClient, 
+				getSettingsData(serviceId), serviceId, true, true);
 			
 			if (CollectionUtil.safeIsEmpty(apps)) {
 				appSize = apps.size();
@@ -1023,7 +1024,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			ReliabilityKpiGraphInput input, Pair<DateTime, DateTime> timeSpan) {
 		
 		Collection<Callable<Object>> tasks = getTasks(serviceIds, input, 
-			timeSpan, input.pointsWanted, false, true);
+			timeSpan, false, true);
 		
 		List<Object> taskResults;
 		
@@ -1052,8 +1053,8 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 	
 	@Override
 	protected Collection<Callable<Object>> getTasks(Collection<String> serviceIds, BaseGraphInput input,
-			Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
-		return getTasks(serviceIds, input, timeSpan, pointsWanted, true, false);
+			Pair<DateTime, DateTime> timeSpan) {
+		return getTasks(serviceIds, input, timeSpan, true, false);
 	}
 	
 	private TimelineData getTimelineData(ReliabilityKpiGraphInput input ,
@@ -1104,7 +1105,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 	}
 	
 	protected Collection<Callable<Object>> getTasks(Collection<String> serviceIds, BaseGraphInput input,
-			Pair<DateTime, DateTime> timeSpan, int pointsWanted, 
+			Pair<DateTime, DateTime> timeSpan, 
 			boolean splitByApp, boolean returnKpi) {
 		
 		List<Callable<Object>> result = new ArrayList<Callable<Object>>();
@@ -1158,7 +1159,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 					boolean isKey = keyApps.contains(app);
 					
 					KpiGraphAsyncTask graphAsyncTask = new KpiGraphAsyncTask(serviceId, viewId, input.view, 
-							timelineData, serviceIds, pointsWanted, app, isKey, periods, returnKpi);
+							timelineData, serviceIds, app, isKey, periods, returnKpi);
 					
 					result.add(graphAsyncTask);		
 				}		
@@ -1167,13 +1168,14 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 				TimelineData timelineData = getTimelineData(rkInput, timeSpan,
 						baselineTimespan, gson, json, null);
 				
-				Collection<String> inputApps = input.getApplications(apiClient, getSettingsData(serviceId), serviceId);
+				Collection<String> inputApps = input.getApplications(apiClient,
+					getSettingsData(serviceId), serviceId, false ,true);
 				
 				boolean isKey = isInputKeyApps(keyApps, inputApps);
 			 	
 				KpiGraphAsyncTask graphAsyncTask = new KpiGraphAsyncTask(serviceId, viewId, 
 					input.view, timelineData, serviceIds, 
-					pointsWanted, null, isKey, periods, returnKpi);
+					null, isKey, periods, returnKpi);
 				
 				result.add(graphAsyncTask);	
 			}
@@ -1215,7 +1217,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 
 	@Override
 	protected List<GraphSeries> processServiceGraph(Collection<String> serviceIds, String serviceId, String viewId,
-			String viewName, BaseGraphInput request, Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
+			String viewName, BaseGraphInput request, Pair<DateTime, DateTime> timeSpan) {
 		
 		throw new IllegalStateException();
 	}

@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 31,
-  "iteration": 1554519783074,
+  "iteration": 1555016132849,
   "links": [
     {
       "icon": "dashboard",
@@ -1739,7 +1739,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "🔎",
-          "linkUrl": "http://${__cell_2:raw}",
+          "linkUrl": "http://${__cell_1:raw}",
           "mappingType": 1,
           "pattern": "Jira state",
           "thresholds": [],
@@ -2042,10 +2042,9 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -2378,6 +2377,7 @@
         "allValue": null,
         "current": {
           "isNone": true,
+          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -2403,6 +2403,7 @@
         "allValue": null,
         "current": {
           "isNone": true,
+          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -2600,6 +2601,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "all|Critical Exceptions",
           "value": "all|Critical Exceptions"
         },
@@ -2649,6 +2651,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "7d",
           "value": "7d"
         },
@@ -2703,5 +2706,5 @@
   "timezone": "",
   "title": "Errors",
   "uid": "HYBPMdYik",
-  "version": 166
+  "version": 167
 }

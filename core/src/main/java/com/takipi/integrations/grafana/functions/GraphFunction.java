@@ -70,19 +70,19 @@ public class GraphFunction extends BaseGraphFunction {
 	
 	@Override
 	protected List<GraphSeries> processServiceGraph(Collection<String> serviceIds, String serviceId, String viewId, String viewName,
-			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
+			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan) {
 		
 		return doProcessServiceGraph(serviceIds, serviceId,
-			viewId, input, timeSpan, pointsWanted);
+			viewId, input, timeSpan);
 	}
 
 	protected List<GraphSeries> doProcessServiceGraph(Collection<String> serviceIds, String serviceId, 
 			String viewId, BaseGraphInput input, 
-			Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
+			Pair<DateTime, DateTime> timeSpan) {
 
 		GraphInput graphInput = (GraphInput) input;
 
-		Graph graph = getEventsGraph(serviceId, viewId, pointsWanted, graphInput, 
+		Graph graph = getEventsGraph(serviceId, viewId, graphInput, 
 			graphInput.volumeType, timeSpan.getFirst(), timeSpan.getSecond());
 		
 		if (graph == null) {
@@ -94,76 +94,12 @@ public class GraphFunction extends BaseGraphFunction {
 		String tagName = getSeriesName(input, input.seriesName, serviceId, serviceIds);		
 		String cleanTagName = cleanSeriesName(tagName);
 		
-		List<List<Object>> values;
-		
-		if ((graphInput.condense) && (seriesData.values.size() > pointsWanted) &&
-			(graphInput.getTimeFormat() == TimeFormat.EPOCH)) {
-			values = condensePoints(seriesData.values, pointsWanted);
-		} else {
-			values = seriesData.values;
-		}
-
-		Series series = createGraphSeries(cleanTagName, seriesData.volume, values);
+		Series series = createGraphSeries(cleanTagName, seriesData.volume, seriesData.values);
 
 		return Collections.singletonList(GraphSeries.of(series, seriesData.volume, cleanTagName));
 
 	}
 	
-	private static long getPointTime(List<List<Object>> points, int index) {
-		return ((Long)(points.get(index).get(0))).longValue();
-	}
-	
-	private static long getPointValue(List<List<Object>> points, int index) {
-		return ((Long)(points.get(index).get(1))).longValue();
-	}
-	
-	private List<List<Object>> condensePoints(List<List<Object>> points, 
-		int pointsWanted) {
-				
-		double groupSize = (points.size() - 2) / ((double)pointsWanted - 2);
-		double currSize = groupSize;
-
-		long[] values = new long[pointsWanted - 2];
-
-		int index = 0;
-		
-		for (int i = 1; i < points.size() - 1; i++) {
-			
-			long pointValue = getPointValue(points, i);
-			
-			if (currSize >= 1) {
-				values[index] += pointValue;	
-				currSize--;
-			} else {
-				
-				values[index] += pointValue * currSize;
-				index++;
-				values[index] += pointValue * (1 - currSize);
-				currSize = groupSize - (1 - currSize);
-			}
-		}
-		
-		List<List<Object>> result = new ArrayList<List<Object>>(pointsWanted);
-		
-		long start = getPointTime(points, 0);
-		long end = getPointTime(points, points.size() - 1);
-	
-		long timeDelta = (end - start) / (pointsWanted -1);
-		
-		result.add(points.get(0));
-		
-		for (int i = 0; i < values.length; i++) {
-			
-			long time = start + timeDelta * (i + 1);
-			long value = values[i] / (long)groupSize;
-			result.add(Arrays.asList(new Object[] {Long.valueOf(time), Long.valueOf(value) }));
-		}
-
-		result.add(points.get(points.size() - 1));
-
-		return result;
-	}
-
 	/**
 	 * @param viewId - needed by children 
 	 */
@@ -180,7 +116,7 @@ public class GraphFunction extends BaseGraphFunction {
 		if (input.hasEventFilter()) {
 			
 			eventMap = getEventMap(serviceId, input, timeSpan.getFirst(), timeSpan.getSecond(),
-				input.volumeType, input.pointsWanted);
+				input.volumeType);
 			
 			eventFilter = getEventFilter(serviceId, input, timeSpan);
 			

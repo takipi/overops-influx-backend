@@ -1,7 +1,6 @@
 package com.takipi.integrations.grafana.functions;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -699,7 +698,9 @@ public class RegressionFunction extends EventsFunction {
 		regressionInput.activeTimespan = regressionWindow.activeTimespan;
 		regressionInput.baselineTimespan = expandedBaselineTimespan;
 		
-		regressionInput.applictations = input.getApplications(apiClient, getSettingsData(serviceId), serviceId);
+		regressionInput.applictations = input.getApplications(apiClient,
+			getSettingsData(serviceId), serviceId, true, false);
+		
 		regressionInput.servers = input.getServers(serviceId);
 		
 		Collection<String> criticalExceptionTypes = regressionSettings.getCriticalExceptionTypes();
@@ -722,18 +723,6 @@ public class RegressionFunction extends EventsFunction {
 	public Map<DeterminantKey, Pair<Graph, Graph>> getRegressionGraphs(String serviceId, String viewId,
 			RegressionInput regressionInput, RegressionWindow regressionWindow,
 			BaseEventVolumeInput input, boolean newOnly) {
-		
-		int ratioBaselinePoints = (regressionInput.baselineTimespan / regressionWindow.activeTimespan) * 2;
-		int baselineDays = (int)TimeUnit.MINUTES.toDays(regressionInput.baselineTimespan);
-		
-		int baselinePoints = Math.max(Math.min(ratioBaselinePoints, baselineDays / 3), input.pointsWanted);
-		
-		if (baselinePoints <= 0) {
-			throw new IllegalStateException(
-					"Negative points for dep " +	Arrays.toString(regressionInput.deployments.toArray()) + " " +
-											ratioBaselinePoints + " " + baselineDays + "  " +
-											regressionWindow.activeWindowStart);
-		}
 		
 		EventFilterInput baselineInput;
 		DateTime baselineStart = regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan);
@@ -760,7 +749,7 @@ public class RegressionFunction extends EventsFunction {
 		Collection<GraphSliceTask> baselineGraphTasks;
 		
 		if (!newOnly) {
-			baselineGraphTasks = getGraphTasks(serviceId, viewId, baselinePoints, baselineInput, 
+			baselineGraphTasks = getGraphTasks(serviceId, viewId, baselineInput, 
 				VolumeType.all, baselineStart, baselineEnd,
 				regressionInput.baselineTimespan, regressionWindow.activeTimespan, false);
 		} else {
@@ -775,7 +764,7 @@ public class RegressionFunction extends EventsFunction {
 			graphActiveTimespan = 0;
 		}
 		
-		Collection<GraphSliceTask> activeGraphTasks = getGraphTasks(serviceId, viewId, input.pointsWanted, 
+		Collection<GraphSliceTask> activeGraphTasks = getGraphTasks(serviceId, viewId, 
 			input, VolumeType.all, activeStart, activeEnd, 0, graphActiveTimespan, false);
 		
 		List<GraphSliceTask> graphTasks = new ArrayList<GraphSliceTask>(); 
@@ -958,7 +947,7 @@ public class RegressionFunction extends EventsFunction {
 		DateTime to = regressionWindow.activeWindowStart.plusMinutes(regressionInput.activeTimespan);
 		
 		Map<String, EventResult> eventListMap = getEventMap(serviceId, input,
-			from, to, null, input.pointsWanted);
+			from, to, null);
 			
 		if (eventListMap == null) {
 			return RegressionOutput.emptyOutput;

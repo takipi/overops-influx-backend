@@ -7,6 +7,8 @@ import java.util.Map;
 
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.util.infra.Categories.Category;
+import com.takipi.api.client.util.infra.Categories.CategoryType;
 import com.takipi.api.client.util.settings.GroupSettings;
 import com.takipi.api.client.util.settings.GroupSettings.Group;
 import com.takipi.common.util.CollectionUtil;
@@ -83,7 +85,8 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction
 		EnvironmentsFilterInput input, int limit) {
 
 		List<String> result;
-		Collection<String> selectedApps = input.getApplications(apiClient, getSettingsData(serviceId), serviceId, false);
+		Collection<String> selectedApps = input.getApplications(apiClient, 
+			getSettingsData(serviceId), serviceId, false, true);
 		
 		if (!CollectionUtil.safeIsEmpty(selectedApps)) {
 			
@@ -107,6 +110,24 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction
 		}
 		
 		List<String> activeApps = new ArrayList<String>(ApiCache.getApplicationNames(apiClient, serviceId, true));  
+		
+		List<Category> categories = getSettingsData(serviceId).tiers;
+		 
+		for (Category category : categories) {
+			
+			if (category.getType() != CategoryType.app) {
+				continue;
+			}
+			
+			if (CollectionUtil.safeIsEmpty(category.names)) {
+				continue;
+			}
+			
+			for (String name : category.labels) {
+				String appName = EnvironmentsFilterInput.toAppLabel(name);
+				activeApps.add(appName);
+			}
+		}
 		
 		sortApplicationsByProcess(serviceId, activeApps,
 			input.getServers(serviceId), input.getDeployments(serviceId, apiClient));	

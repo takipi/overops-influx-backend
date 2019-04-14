@@ -7,9 +7,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
@@ -57,6 +59,9 @@ import com.takipi.api.client.result.transaction.TransactionsGraphResult;
 import com.takipi.api.client.result.transaction.TransactionsVolumeResult;
 import com.takipi.api.client.result.view.ViewsResult;
 import com.takipi.api.client.util.infra.Categories;
+import com.takipi.api.client.util.infra.Categories.Category;
+import com.takipi.api.client.util.infra.Categories.CategoryType;
+import com.takipi.api.client.util.infra.InfraUtil;
 import com.takipi.api.client.util.performance.PerformanceUtil;
 import com.takipi.api.client.util.performance.calc.PerformanceScore;
 import com.takipi.api.client.util.performance.calc.PerformanceState;
@@ -143,6 +148,9 @@ public abstract class GrafanaFunction {
 	
 	protected static final String QUALIFIED_DELIM_PATTERN = Pattern.quote(String.valueOf(GrafanaFunction.QUALIFIED_DELIM));
 	
+	protected static final String REGEX_STARTS_WITH = "^";
+	protected static boolean FILTER_TX_BY_APP_LABEL = false;
+	
 	private static final long H8_THRESHOLD = TimeUnit.DAYS.toMillis(7);
 	private static final long H1_THRESHOLD = TimeUnit.HOURS.toMillis(24);
 	private static final long M5_THRESHOLD = TimeUnit.HOURS.toMillis(3);
@@ -194,9 +202,7 @@ public abstract class GrafanaFunction {
 		TYPES_MAP.put(TIMER, "TMR");
 		TYPES_MAP.put(HTTP_ERROR, "HTTP");			
 	}
-	
-	//private static final int END_SLICE_POINT_COUNT = 2;
-	
+		
 	protected final ApiClient apiClient;
 	protected volatile Map<String, ServiceSettings> settingsMaps;
 	
@@ -221,19 +227,17 @@ public abstract class GrafanaFunction {
 		protected DateTime to;
 		protected int baselineWindow;
 		protected int activeWindow;
-		protected int pointsWanted;
 		protected int windowSlice;
 		protected boolean cache;
 		protected GraphRequest.Builder builder;
 		
-		protected GraphSliceTask(GraphRequest.Builder builder, String serviceId, String viewId, int pointsWanted,
+		protected GraphSliceTask(GraphRequest.Builder builder, String serviceId, String viewId, 
 				ViewInput input, VolumeType volumeType, DateTime from, DateTime to,
 				int baselineWindow, int activeWindow, int windowSlice, boolean cache) {
 			
 			this.builder = builder;
 			this.serviceId = serviceId;
 			this.viewId = viewId;
-			this.pointsWanted = pointsWanted;
 			this.input = input;
 			this.volumeType = volumeType;
 			this.from = from;
@@ -248,8 +252,9 @@ public abstract class GrafanaFunction {
 		public Object call() throws Exception {		
 			
 			Response<GraphResult> response = ApiCache.getEventGraph(apiClient, 
-				serviceId, input, volumeType, builder.build(), 
-				pointsWanted, baselineWindow, activeWindow, windowSlice,
+				serviceId, input, getSettingsData(serviceId),
+				volumeType, builder.build(), 
+				baselineWindow, activeWindow, windowSlice,
 				Pair.of(from, to), cache);
 			
 			if (response.isBadResponse()) {
@@ -288,14 +293,12 @@ public abstract class GrafanaFunction {
 		
 		protected DateTime from;
 		protected DateTime to;
-		protected int pointCount;
 		protected boolean cache;		
 		
 		protected SliceRequest(DateTime from, DateTime to, 
-			int pointCount, boolean cache) {
+			boolean cache) {
 			this.from = from;
 			this.to = to;
-			this.pointCount = pointCount;
 			this.cache = cache;
 		}
 	}
@@ -937,8 +940,7 @@ public abstract class GrafanaFunction {
 
 		Collection<TransactionGraph> result = getTransactionGraphs(baselineInput, serviceId, 
 				viewId, Pair.of(baselineStart, timeSpan.getSecond()), 
-				null, baselineInput.pointsWanted, 
-				regressionWindow.activeTimespan, regressionInput.baselineTimespan);
+				null, regressionWindow.activeTimespan, regressionInput.baselineTimespan);
 		
 		return result;
 	}
@@ -1253,22 +1255,21 @@ public abstract class GrafanaFunction {
 	}
 	
 	private void updateTransactionBaselineEvents(String serviceId, Pair<DateTime, DateTime> timeSpan,
-		BaseEventVolumeInput input, int eventPoints, RegressionInput regressionInput, 
+		BaseEventVolumeInput input, RegressionInput regressionInput, 
 		RegressionWindow regressionWindow, Map<TransactionKey, TransactionData> transactions) {
 		
 		BaseEventVolumeInput eventsInput;
 		
-		if ((eventPoints != 0) || (input.deployments != null)) {
+		if (input.deployments != null) {
 			Gson gson = new Gson();
 			String json = gson.toJson(input);
 			eventsInput = gson.fromJson(json, input.getClass()); 
-			eventsInput.pointsWanted = eventPoints;
 			eventsInput.deployments = null;
 		} else {
 			eventsInput = input;
 		}
 		
-		Graph graph = getEventsGraph(serviceId, eventPoints, input, 
+		Graph graph = getEventsGraph(serviceId, input, 
 			VolumeType.hits, timeSpan.getFirst(), timeSpan.getSecond(), 
 			regressionInput.baselineTimespan, regressionWindow.activeTimespan, true);
 		
@@ -1310,28 +1311,16 @@ public abstract class GrafanaFunction {
 	}
 	
 	private void updateTransactionEvents(String serviceId, Pair<DateTime, DateTime> timeSpan,
-		BaseEventVolumeInput input, Map<TransactionKey, TransactionData> transactions,
-		int eventPoints) {
-		
-		BaseEventVolumeInput eventsInput;
-		
-		if (eventPoints != 0) {
-			Gson gson = new Gson();
-			String json = gson.toJson(input);
-			eventsInput = gson.fromJson(json, input.getClass()); 
-			eventsInput.pointsWanted = eventPoints;
-		} else {
-			eventsInput = input;
-		}
-		
-		Map<String, EventResult> eventsMap = getEventMap(serviceId, eventsInput, timeSpan.getFirst(),
-			timeSpan.getSecond(), VolumeType.hits, eventsInput.pointsWanted);
+		BaseEventVolumeInput input, Map<TransactionKey, TransactionData> transactions) {
+				
+		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, timeSpan.getFirst(),
+			timeSpan.getSecond(), VolumeType.hits);
 		
 		if (eventsMap == null) {
 			return;
 		}
 
-		EventFilter eventFilter = getEventFilter(serviceId, eventsInput, timeSpan);
+		EventFilter eventFilter = getEventFilter(serviceId, input, timeSpan);
 		
 		if (eventFilter == null) {
 			return;
@@ -1421,7 +1410,7 @@ public abstract class GrafanaFunction {
 			String serviceId, String viewId, Pair<DateTime, DateTime> timeSpan,
 			BaseEventVolumeInput input, 
 			boolean updateBaselne, boolean updateEvents, boolean updateBaselineEvents,
-			int eventPoints, boolean queryBaselineGraphs) {
+			boolean queryBaselineGraphs) {
 				
 		if (transactionGraphs == null) {
 			return null;
@@ -1431,7 +1420,7 @@ public abstract class GrafanaFunction {
 		result.items = getTransactionDatas(transactionGraphs);
 		
 		if (updateEvents) {
-			updateTransactionEvents(serviceId, timeSpan, input, result.items, eventPoints);
+			updateTransactionEvents(serviceId, timeSpan, input, result.items);
 		}
 			
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient, settingsMaps);
@@ -1452,7 +1441,7 @@ public abstract class GrafanaFunction {
 			}
 			
 			if (updateBaselineEvents) {
-				updateTransactionBaselineEvents(serviceId, timeSpan, input, eventPoints,
+				updateTransactionBaselineEvents(serviceId, timeSpan, input, 
 					result.regressionInput, result.regressionWindow, result.items);
 			}
 		}
@@ -1474,16 +1463,16 @@ public abstract class GrafanaFunction {
 	
 	protected TransactionDataResult getTransactionDatas(String serviceId, Pair<DateTime, DateTime> timeSpan,
 			BaseEventVolumeInput input, boolean updateEvents, boolean updateBaselineEvents,
-			int eventPoints, boolean queryBaselineGraphs) {
+			boolean queryBaselineGraphs) {
 		
 		return getTransactionDatas(serviceId, timeSpan, input, 
 			updateEvents, true, updateBaselineEvents,
-			eventPoints, queryBaselineGraphs);
+			queryBaselineGraphs);
 	}
 	
 	protected TransactionDataResult getTransactionDatas(String serviceId, Pair<DateTime, DateTime> timeSpan,
 			BaseEventVolumeInput input, boolean updateEvents, boolean updateBaselne,
-			boolean updateEventsBaseline, int eventPoints, boolean queryBaselineGraphs) {
+			boolean updateEventsBaseline, boolean queryBaselineGraphs) {
 		
 		String viewId = getViewId(serviceId, input.view);
 		
@@ -1492,11 +1481,11 @@ public abstract class GrafanaFunction {
 		}
 		
 		Collection<TransactionGraph> transactionGraphs = getTransactionGraphs(input,
-				serviceId, viewId, timeSpan, input.getSearchText(), input.pointsWanted);
+				serviceId, viewId, timeSpan, input.getSearchText());
 		
 		return getTransactionDatas(transactionGraphs, serviceId, viewId, timeSpan,
 			input, updateBaselne, updateEvents, updateEventsBaseline,
-			eventPoints, queryBaselineGraphs);
+			queryBaselineGraphs);
 	}
 	
 	private Collection<String> getTopTransactions(String serviceId, BaseEventVolumeInput input,
@@ -1508,7 +1497,7 @@ public abstract class GrafanaFunction {
 		cleanInput.transactions = null;
 		
 		TransactionDataResult transactionDataResult = getTransactionDatas(serviceId, 
-			timespan, cleanInput, processor.updateEvents(), processor.updateBaseline(), 0, true);
+			timespan, cleanInput, processor.updateEvents(), processor.updateBaseline(), true);
 		
 		Collection<String> result = processor.getTransactions(transactionDataResult);
 		
@@ -1517,17 +1506,19 @@ public abstract class GrafanaFunction {
 	
 	
 	protected GroupFilter getTransactionsFilter(String serviceId, BaseEventVolumeInput input,
-			Pair<DateTime, DateTime> timespan) {
+			Pair<DateTime, DateTime> timespan, boolean filterByAppTier) {
+		
 		Collection<String> transactions = input.getTransactions(serviceId);
-		return getTransactionsFilter(serviceId, input, timespan, transactions);
+		return getTransactionsFilter(serviceId, input, timespan, transactions, filterByAppTier);
 	}
 		
 	protected GroupFilter getTransactionsFilter(String serviceId, BaseEventVolumeInput input,
-		Pair<DateTime, DateTime> timespan, Collection<String> transactions) {
+		Pair<DateTime, DateTime> timespan, Collection<String> transactions,
+		boolean filterByAppTier) {
 		
 		GroupFilter result;
 		
-		Collection<String> targetTransactions = new ArrayList<String>();
+		Collection<String> targetTransactions;
 		
 		if (transactions != null) {
 			
@@ -1566,27 +1557,100 @@ public abstract class GrafanaFunction {
 			
 			targetTransactions = transactionsList;			
 		} else {
-			targetTransactions = transactions;
+			targetTransactions = null;
 		}
 						
-		result = getTransactionsFilter(serviceId, targetTransactions);
+		result = getTransactionsFilter(serviceId, input, targetTransactions, filterByAppTier);
 		
 		return result;
 	}
 	
-	private GroupFilter getTransactionsFilter(String serviceId, Collection<String> transactions) {
+	private Collection<String> getAppTierPatterns(String serviceId, BaseEventVolumeInput input) {
+		
+		if (!FILTER_TX_BY_APP_LABEL) {
+			return null;
+		}
+		
+		Collection<String> apps = input.getApplications(apiClient,
+				getSettingsData(serviceId), serviceId, true, true);
+		
+		if (CollectionUtil.safeIsEmpty(apps)) {
+			return null;
+		}
+		
+		List<Category> tiers = getSettingsData(serviceId).tiers;
+
+		if (CollectionUtil.safeIsEmpty(tiers)) { 
+			return null;
+		}
+		
+		List<String> result = new ArrayList<String>();
+		
+		for (String app : apps) {
+				
+			if (!EnvironmentsFilterInput.isLabelApp(app)) {
+				continue;
+			}
+				
+			String name = EnvironmentsFilterInput.getLabelAppName(app);
+				
+			for (Category tier : tiers) {
+				
+				if (CollectionUtil.safeIsEmpty(tier.names)) {
+					continue;
+				}
+				
+				if (!CollectionUtil.safeContains(tier.labels, name)) {
+					continue;
+				}
+				
+				for (String tierClass : tier.names) {
+					
+					String regex = GroupSettings.REGEX_ESCAPE + REGEX_STARTS_WITH  
+						+ tierClass + GroupSettings.REGEX_ESCAPE;
+					
+					result.add(regex);
+				}
+			}
+		} 
+		
+		return result;
+	}
+	
+	private GroupFilter getTransactionsFilter(String serviceId, 
+			BaseEventVolumeInput input, Collection<String> transactions
+			, boolean filterByTiers) {
 		
 		GroupFilter result;
 		
-		if (transactions != null) {
+		Collection<String> tierPatterns;
+		
+		if (filterByTiers) {
+			tierPatterns = getAppTierPatterns(serviceId, input);
+		} else {
+			tierPatterns = null;
+		}
+		
+		if ((!CollectionUtil.safeIsEmpty(transactions)) 
+		|| (!CollectionUtil.safeIsEmpty(tierPatterns))) {
 			
 			GroupSettings transactionGroups = getSettingsData(serviceId).transactions;
 			
-			if (transactionGroups != null) {
-				result = transactionGroups.getExpandedFilter(transactions);
-			} else {
-				result = GroupFilter.from(transactions);
-			}
+			List<String> filterValues = new ArrayList<String>();
+			
+			if (tierPatterns != null) {
+				filterValues.addAll(tierPatterns);
+			} 
+			
+			if (transactions != null) {	
+				if (transactionGroups != null) {
+					filterValues.addAll(transactionGroups.expandList(transactions));
+				} else {
+					filterValues.addAll(transactions);
+				}
+			} 
+			
+			result = GroupFilter.from(filterValues);
 		} else {
 			result = null;
 		}
@@ -1597,15 +1661,11 @@ public abstract class GrafanaFunction {
 	protected EventFilter getEventFilter(String serviceId, BaseEventVolumeInput input, 
 		Pair<DateTime, DateTime> timespan) {
 		
-		GroupFilter transactionsFilter = getTransactionsFilter(serviceId, input, timespan);
-		
-		if (transactionsFilter == null) {
-			return null;
-		}
+		GroupFilter transactionsFilter = getTransactionsFilter(serviceId, 
+			input, timespan, false);
 		
 		Categories categories = getSettings(serviceId).getCategories();	
 
-		
 		Collection<String> allowedTypes;
 		
 		if (input.allowedTypes != null) {
@@ -1624,13 +1684,25 @@ public abstract class GrafanaFunction {
 			}
 		}
 		
+		Set<String> labels = new HashSet<String>(input.geLabels(serviceId));
+		
+		Collection<String> apps = input.getApplications(apiClient, getSettingsData(serviceId), serviceId,
+			true, true);	
+		
+		for (String app : apps) {
+			if (EnvironmentsFilterInput.isLabelApp(app)) {
+				String appLabel = EnvironmentsFilterInput.getLabelAppName(app);
+				String appLabelName = InfraUtil.toTierLabelName(appLabel, CategoryType.app);
+				labels.add(appLabelName);
+			}
+		}
+		
 		Collection<String> eventLocations = VariableInput.getServiceFilters(input.eventLocations, 
 			serviceId, true);
 	
 		return EventFilter.of(getTypes(serviceId, input), allowedTypes, 
 				input.getIntroducedBy(serviceId), eventLocations, transactionsFilter,
-				input.geLabels(serviceId), input.labelsRegex, 
-				input.firstSeen, categories, input.searchText, 
+				labels, input.labelsRegex, input.firstSeen, categories, input.searchText, 
 				input.transactionSearchText);
 	}
 	
@@ -1641,11 +1713,10 @@ public abstract class GrafanaFunction {
 	}
 	
 	protected Collection<TransactionGraph> getTransactionGraphs(BaseEventVolumeInput input, String serviceId, String viewId, 
-			Pair<DateTime, DateTime> timeSpan, String searchText,
-			int pointsWanted) {
+			Pair<DateTime, DateTime> timeSpan, String searchText) {
 		
 		return getTransactionGraphs(input, serviceId, viewId, timeSpan, 
-			searchText, pointsWanted, 0, 0);
+			searchText, 0, 0);
 	}
 	
 	private GraphResolution getResolution(Pair<DateTime, DateTime> timeSpan) {
@@ -1669,12 +1740,12 @@ public abstract class GrafanaFunction {
 	
 	protected Collection<TransactionGraph> getTransactionGraphs(BaseEventVolumeInput input, String serviceId, String viewId, 
 			Pair<DateTime, DateTime> timeSpan, String searchText,
-			int pointsWanted, int activeTimespan, int baselineTimespan) {
+			int activeTimespan, int baselineTimespan) {
 		
 		GroupFilter transactionsFilter = null;
 		
 		if (input.hasTransactions()) {			
-			transactionsFilter = getTransactionsFilter(serviceId, input, timeSpan);
+			transactionsFilter = getTransactionsFilter(serviceId, input, timeSpan, true);
 
 			if (transactionsFilter == null) {
 				return Collections.emptyList();
@@ -1685,15 +1756,14 @@ public abstract class GrafanaFunction {
 		GraphResolution graphResolution = getResolution(timeSpan);
 		
 		TransactionsGraphRequest.Builder builder = TransactionsGraphRequest.newBuilder().setServiceId(serviceId)
-				.setViewId(viewId).setFrom(fromTo.getFirst()).setTo(fromTo.getSecond())
-				//.setWantedPointCount(pointsWanted);
+			.setViewId(viewId).setFrom(fromTo.getFirst()).setTo(fromTo.getSecond())
 				.setResolution(graphResolution)
 				.setBreakdown(true);
 				
 		applyFilters(input, serviceId, builder);
-		
-		Response<TransactionsGraphResult> response = ApiCache.getTransactionsGraph(apiClient, serviceId, input,
-			pointsWanted, baselineTimespan, activeTimespan, builder.build());
+
+		Response<TransactionsGraphResult> response = ApiCache.getTransactionsGraph(apiClient, 
+			serviceId, input, getSettingsData(serviceId), baselineTimespan, activeTimespan, builder.build());
 				
 		validateResponse(response);
 		
@@ -1738,7 +1808,8 @@ public abstract class GrafanaFunction {
 		applyFilters(input, serviceId, builder);
 		
 		Response<TransactionsVolumeResult> response = ApiCache.getTransactionsVolume(apiClient, serviceId,
-				input, activeTimespan, baselineTimespan, builder.build());
+				input, getSettingsData(serviceId),
+				activeTimespan, baselineTimespan, builder.build());
 		
 		if (response.isBadResponse()) {
 			System.err.println("Transnaction volume for service " + serviceId + " code: " + response.responseCode);
@@ -1754,7 +1825,8 @@ public abstract class GrafanaFunction {
 			
 			result = new ArrayList<Transaction>(response.data.transactions.size());
 			
-			GroupFilter transactionsFilter = getTransactionsFilter(serviceId, input, timeSpan);
+			GroupFilter transactionsFilter = getTransactionsFilter(serviceId,
+				input, timeSpan, true);
 
 			for (Transaction transaction : response.data.transactions) {
 				Pair<String, String> nameAndMethod = getFullNameAndMethod(transaction.name);
@@ -1951,22 +2023,22 @@ public abstract class GrafanaFunction {
 		return volDelta;
 	}
 	
-	protected Graph getEventsGraph(String serviceId, String viewId, int pointsCount,
+	protected Graph getEventsGraph(String serviceId, String viewId, 
 			ViewInput input, VolumeType volumeType, DateTime from, DateTime to) {
 		
-		return getEventsGraph(serviceId, viewId, pointsCount, 
+		return getEventsGraph(serviceId, viewId,  
 			input, volumeType, from, to, 0, 0);
 	}
 	
-	protected Graph getEventsGraph(String serviceId, String viewId, int pointsCount,
+	protected Graph getEventsGraph(String serviceId, String viewId,
 			ViewInput input, VolumeType volumeType, DateTime from, DateTime to, 
 			int baselineWindow, int activeWindow) {
 		
-		return getEventsGraph(serviceId, viewId, pointsCount, 
+		return getEventsGraph(serviceId, viewId,  
 			input, volumeType, from, to, baselineWindow, activeWindow, true);
 	}
 	
-	protected GraphSliceTask createGraphAsyncTask(String serviceId, String viewId, int pointsCount,
+	protected GraphSliceTask createGraphAsyncTask(String serviceId, String viewId, 
 			ViewInput input, VolumeType volumeType, 
 			DateTime from, DateTime to, int baselineWindow, int activeWindow, 
 			int windowSlice, boolean cache) {
@@ -1986,14 +2058,14 @@ public abstract class GrafanaFunction {
 		
 		applyFilters(input, serviceId, builder);
 		
-		GraphSliceTask task = new GraphSliceTask(builder, serviceId, viewId, pointsCount, 
+		GraphSliceTask task = new GraphSliceTask(builder, serviceId, viewId, 
 			input, volumeType, from, to, baselineWindow, activeWindow,
 			windowSlice, cache);
 		
 		return task;
 	}
 	
-	protected Graph getEventsGraph(String serviceId,int pointsCount,
+	protected Graph getEventsGraph(String serviceId,
 			ViewInput input, VolumeType volumeType, DateTime from, DateTime to,
 			int baselineWindow, int activeWindow, boolean bestRes) {	
 		
@@ -2003,16 +2075,16 @@ public abstract class GrafanaFunction {
 			return null;
 		}
 		
-		return getEventsGraph(serviceId, viewId, pointsCount, input,
+		return getEventsGraph(serviceId, viewId, input,
 			volumeType, from, to, baselineWindow, activeWindow, bestRes);
 	}
 	
-	protected Graph getEventsGraph(String serviceId, String viewId, int pointsCount,
+	protected Graph getEventsGraph(String serviceId, String viewId, 
 		ViewInput input, VolumeType volumeType, DateTime from, DateTime to,
 		int baselineWindow, int activeWindow, boolean bestRes) {		
 		
 		Collection<GraphSliceTask> tasks = getGraphTasks(serviceId, viewId, 
-				pointsCount, input, volumeType, from, to, baselineWindow, activeWindow, bestRes);
+			input, volumeType, from, to, baselineWindow, activeWindow, bestRes);
 
 		Collection<GraphSliceTaskResult> graphTaskResults = executeGraphTasks(tasks, false);
 		
@@ -2035,7 +2107,7 @@ public abstract class GrafanaFunction {
 		
 	}
 	
-	protected Collection<GraphSliceTask> getGraphTasks(String serviceId, String viewId, int pointsCount,
+	protected Collection<GraphSliceTask> getGraphTasks(String serviceId, String viewId, 
 			ViewInput input, VolumeType volumeType, DateTime from, DateTime to, 
 			int baselineWindow, int activeWindow, boolean dynamicRes) {
 		
@@ -2049,7 +2121,6 @@ public abstract class GrafanaFunction {
 			sliceGraph = true;
 		}
 		
-		int periodPoints;
 		List<SliceRequest> sliceRequests;
 				
 		if ((ApiCache.SLICE_GRAPHS) && (sliceGraph)
@@ -2060,8 +2131,6 @@ public abstract class GrafanaFunction {
 			Collection<Pair<DateTime, DateTime>> periods = TimeUtil.getTimespanPeriods(timespan,
 				periodStart.getFirst(), periodStart.getSecond(), baselineWindow == 0);
 			
-			periodPoints = Math.max((pointsCount / periods.size()) + 1, ApiCache.MIN_SLICE_POINTS);
-
 			sliceRequests = new ArrayList<SliceRequest>(periods.size());
 			
 			int index = 0;
@@ -2071,14 +2140,14 @@ public abstract class GrafanaFunction {
 				boolean cache = (index > 0) && (index < periods.size() - 1);
 				
 				SliceRequest slice = new SliceRequest(period.getFirst(),
-					period.getSecond(), periodPoints, cache);
+					period.getSecond(), cache);
 				
 				sliceRequests.add(slice);
 				
 				index++;
 			}	
 		} else {
-			sliceRequests = Collections.singletonList(new SliceRequest(from, to, pointsCount, false));
+			sliceRequests = Collections.singletonList(new SliceRequest(from, to, false));	
 		}
 		
 		List<GraphSliceTask> tasks = new ArrayList<GraphSliceTask>(sliceRequests.size());
@@ -2096,7 +2165,7 @@ public abstract class GrafanaFunction {
 			}
 				
 			GraphSliceTask task = createGraphAsyncTask(serviceId, viewId,
-				sliceRequest.pointCount, input, volumeType, 
+				input, volumeType, 
 				sliceRequest.from, sliceRequest.to, 
 				baselineWindow, activeWindow, sliceIndex, sliceRequest.cache);
 				
@@ -2306,10 +2375,9 @@ public abstract class GrafanaFunction {
 	}
 		
 	private Collection<EventResult> getEventListFromGraph(String serviceId, String viewId, ViewInput input,
-			DateTime from, DateTime to,
-			VolumeType volumeType, int pointsCount) {
+		DateTime from, DateTime to, VolumeType volumeType) {
 		
-		Graph graph = getEventsGraph(serviceId, viewId, pointsCount, input, volumeType, from, to);
+		Graph graph = getEventsGraph(serviceId, viewId, input, volumeType, from, to);
 		
 		if (graph == null) {
 			return null;
@@ -2338,7 +2406,8 @@ public abstract class GrafanaFunction {
 		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);
 		
 		Response<EventsSlimVolumeResult> response =
-				ApiCache.getEventVolume(apiClient, serviceId, input, volumeType, builder.build());
+				ApiCache.getEventVolume(apiClient, serviceId, input, 
+				getSettingsData(serviceId), volumeType, builder.build());
 		
 		validateResponse(response);
 		
@@ -2383,7 +2452,9 @@ public abstract class GrafanaFunction {
 		EventsRequest.Builder builder = EventsRequest.newBuilder().setRaw(true).setBreakdown(true);
 		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);
 		
-		Response<?> response = ApiCache.getEventList(apiClient, serviceId, input, builder.build());
+		Response<?> response = ApiCache.getEventList(apiClient, serviceId, input,
+			getSettingsData(serviceId), builder.build());
+		
 		validateResponse(response);
 		
 		List<EventResult> events;
@@ -2478,11 +2549,11 @@ public abstract class GrafanaFunction {
 	
 	protected Map<String, EventResult> getEventMap(String serviceId, ViewInput input, DateTime from, DateTime to,
 			VolumeType volumeType) {
-		return getEventMap(serviceId, input, from, to, volumeType, 0);
+		return getEventMap(serviceId, input, from, to, volumeType, false);
 	}
 	
 	protected Map<String, EventResult> getEventMap(String serviceId, ViewInput input, DateTime from, DateTime to,
-			VolumeType volumeType, int pointsCount) {
+			VolumeType volumeType, boolean useGraph) {
 		
 		String viewId = getViewId(serviceId, input.view);
 		
@@ -2495,8 +2566,9 @@ public abstract class GrafanaFunction {
 		Map<String, EventResult> result = new HashMap<String, EventResult>();
 		
 		if (volumeType != null) {
-			if (pointsCount > 0) {
-				events = getEventListFromGraph(serviceId, viewId, input, from, to, volumeType, pointsCount);
+			
+			if (useGraph) {
+				events = getEventListFromGraph(serviceId, viewId, input, from, to, volumeType);	
 			} else {
 				events = getEventList(serviceId, viewId, input, from, to);
 				
@@ -2505,6 +2577,7 @@ public abstract class GrafanaFunction {
 						volumeType, getEventsMap(events));
 				}
 			}
+			
 		} else {
 			events = getEventList(serviceId, viewId, input, from, to);
 		}
@@ -2555,15 +2628,22 @@ public abstract class GrafanaFunction {
 	protected void applyFilters(EnvironmentsFilterInput input, String serviceId,
 			TimeframeRequest.Builder builder) {
 		
-		for (String app : input.getApplications(apiClient, getSettingsData(serviceId), serviceId)) {
+		Collection<String> apps = input.getApplications(apiClient,
+			getSettingsData(serviceId), serviceId, true, false);
+		
+		for (String app : apps) {
 			builder.addApp(app);
 		}
 		
-		for (String dep : input.getDeployments(serviceId, apiClient)) {
+		Collection<String> deps = input.getDeployments(serviceId, apiClient);
+		
+		for (String dep : deps) {
 			builder.addDeployment(dep);
 		}
 		
-		for (String server : input.getServers(serviceId)) {
+		Collection<String> servers = input.getServers(serviceId); 
+		
+		for (String server : servers) {
 			builder.addServer(server);
 		}
 	}
