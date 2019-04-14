@@ -1757,8 +1757,7 @@ public abstract class GrafanaFunction {
 		
 		TransactionsGraphRequest.Builder builder = TransactionsGraphRequest.newBuilder().setServiceId(serviceId)
 			.setViewId(viewId).setFrom(fromTo.getFirst()).setTo(fromTo.getSecond())
-				.setResolution(graphResolution)
-				.setBreakdown(true);
+				.setResolution(graphResolution);
 				
 		applyFilters(input, serviceId, builder);
 
