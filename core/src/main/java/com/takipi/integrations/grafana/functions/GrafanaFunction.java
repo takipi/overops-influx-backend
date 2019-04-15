@@ -1649,7 +1649,7 @@ public abstract class GrafanaFunction {
 			searchText, 0, 0);
 	}
 	
-	private GraphResolution getResolution(Pair<DateTime, DateTime> timeSpan) {
+	protected GraphResolution getResolution(Pair<DateTime, DateTime> timeSpan) {
 				
 		long delta = timeSpan.getSecond().getMillis() - timeSpan.getFirst().getMillis();
 		

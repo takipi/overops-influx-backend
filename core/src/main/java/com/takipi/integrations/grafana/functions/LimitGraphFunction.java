@@ -45,7 +45,8 @@ public abstract class LimitGraphFunction extends GraphFunction {
 
 	@Override
 	protected List<GraphSeries> processServiceGraph(Collection<String> serviceIds, String serviceId, 
-			String viewId, String viewName, BaseGraphInput input, Pair<DateTime, DateTime> timeSpan) {
+		String viewId, String viewName, BaseGraphInput input, 
+		Pair<DateTime, DateTime> timeSpan, Object tag) {
 
 		GraphInput graphInput = (GraphInput) input;
 

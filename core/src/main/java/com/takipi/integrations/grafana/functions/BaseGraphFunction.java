@@ -75,9 +75,11 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		protected BaseGraphInput input;
 		protected Pair<DateTime, DateTime> timeSpan;
 		protected Collection<String> serviceIds;
+		protected Object tag;
 
 		protected GraphAsyncTask(String serviceId, String viewId, String viewName,
-				BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds) {
+			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan,
+			Collection<String> serviceIds, String tag) {
 
 			this.serviceId = serviceId;
 			this.viewId = viewId;
@@ -85,6 +87,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 			this.input = input;
 			this.timeSpan = timeSpan;
 			this.serviceIds = serviceIds;
+			this.tag = tag;
 		}
 
 		@Override
@@ -94,7 +97,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 			
 			try {
 				List<GraphSeries> serviceSeries = processServiceGraph(serviceIds, serviceId, viewId, viewName,
-						input, timeSpan);
+						input, timeSpan, tag);
 	
 				return new TaskSeriesResult(serviceSeries);
 			}
@@ -107,7 +110,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		@Override
 		public String toString() {
 			return String.join(" ", "Graph", serviceId, viewId, viewName, 
-				timeSpan.toString());
+				timeSpan.toString(), String.valueOf(tag));
 		}
 	}
 
@@ -246,7 +249,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 				String viewName = entry.getValue();
 
 				result.add(new GraphAsyncTask(serviceId, viewId, viewName, input,
-						timeSpan, serviceIds));
+						timeSpan, serviceIds, null));
 			}
 		}
 		
@@ -276,7 +279,8 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 	}
 
 	protected abstract List<GraphSeries> processServiceGraph(Collection<String> serviceIds, String serviceId, 
-			String viewId, String viewName, BaseGraphInput input, Pair<DateTime, DateTime> timeSpan);
+		String viewId, String viewName, BaseGraphInput input, 
+		Pair<DateTime, DateTime> timeSpan, Object tag);
 
 	protected Map<String, String> getViews(String serviceId, BaseGraphInput input) {
 		String viewId = getViewId(serviceId, input.view);

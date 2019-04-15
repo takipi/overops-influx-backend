@@ -37,6 +37,8 @@ import com.takipi.api.client.request.event.EventsRequest;
 import com.takipi.api.client.request.event.EventsSlimVolumeRequest;
 import com.takipi.api.client.request.label.LabelsRequest;
 import com.takipi.api.client.request.metrics.GraphRequest;
+import com.takipi.api.client.request.metrics.system.SystemMetricGraphRequest;
+import com.takipi.api.client.request.metrics.system.SystemMetricMetadatasRequest;
 import com.takipi.api.client.request.process.JvmsRequest;
 import com.takipi.api.client.request.service.ServicesRequest;
 import com.takipi.api.client.request.transaction.TransactionsGraphRequest;
@@ -49,6 +51,8 @@ import com.takipi.api.client.result.event.EventsResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
 import com.takipi.api.client.result.label.LabelsResult;
 import com.takipi.api.client.result.metrics.GraphResult;
+import com.takipi.api.client.result.metrics.system.SystemMetricGraphResult;
+import com.takipi.api.client.result.metrics.system.SystemMetricMetadatasResult;
 import com.takipi.api.client.result.process.JvmsResult;
 import com.takipi.api.client.result.service.ServicesResult;
 import com.takipi.api.client.result.transaction.TransactionsGraphResult;
@@ -69,6 +73,7 @@ import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOu
 import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.EventFilterInput;
+import com.takipi.integrations.grafana.input.SystemMetricsGraphInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.storage.FolderStorage;
 import com.takipi.integrations.grafana.storage.KeyValueStorage;
@@ -332,6 +337,42 @@ public class ApiCache {
 				return false;
 			}
 			
+			return super.equals(obj);
+		}	
+	}
+	
+	protected static class SystemMetricsMetadataCacheLoader extends ServiceCacheLoader {
+
+		public SystemMetricsMetadataCacheLoader(ApiClient apiClient, String serviceId) {
+			super(apiClient, null, serviceId);
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			
+			if (!(obj instanceof SystemMetricsMetadataCacheLoader)) {
+				return false;
+			}
+			
+			return super.equals(obj);
+		}	
+	}
+	
+	
+	protected static class SystemMetricMetadatasCacheLoader extends ServiceCacheLoader {
+		
+		public SystemMetricMetadatasCacheLoader(ApiClient apiClient, 
+			ApiGetRequest<?> request, String serviceId) {
+			super(apiClient, request, serviceId);
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			
+			if (!(obj instanceof SystemMetricMetadatasCacheLoader)) {
+				return false;
+			}
+					
 			return super.equals(obj);
 		}	
 	}
@@ -1042,9 +1083,41 @@ public class ApiCache {
 		}
 	}
 
+	protected static class SystemMetricsGraphCacheLoader extends ViewInputCacheLoader {
+		
+		protected String metricName;
+		
+		public SystemMetricsGraphCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId,
+				SystemMetricsGraphInput input, ServiceSettingsData settingsData,
+				String metricName) {
+			super(apiClient, request, serviceId, input, settingsData);
+			this.metricName= metricName;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+
+			if (!(obj instanceof SystemMetricsGraphCacheLoader)) {
+				return false;
+			}
+
+			if (!super.equals(obj)) {
+				return false;
+			}
+			
+			SystemMetricsGraphCacheLoader other = (SystemMetricsGraphCacheLoader)obj;
+			
+			if (!Objects.equal(metricName, other.metricName)) {
+				return false;
+			}
+			
+			return true;
+		}
+	}
+
+	
 	protected static class TransactionsGraphCacheLoader extends ViewInputCacheLoader {
 
-		protected int pointsWanted;
 		protected int baselineTimespan;
 		protected int activeTimespan;
 
@@ -1061,12 +1134,6 @@ public class ApiCache {
 
 			TransactionsGraphCacheLoader other = (TransactionsGraphCacheLoader) obj;
 
-			/*
-			if (pointsWanted != other.pointsWanted) {
-				return false;
-			}
-			*/
-			
 			if (baselineTimespan != other.baselineTimespan) {
 				return false;
 			}
@@ -1380,6 +1447,21 @@ public class ApiCache {
 	}
 	
 	@SuppressWarnings("unchecked")
+	public static Response<SystemMetricMetadatasResult> getSystemMetricMetadatas(ApiClient apiClient,
+		String serviceId) {
+		
+		SystemMetricMetadatasRequest request = SystemMetricMetadatasRequest.
+			newBuilder().setServiceId(serviceId).build();
+		
+		SystemMetricMetadatasCacheLoader key = new SystemMetricMetadatasCacheLoader(apiClient, 
+			request, serviceId);
+		
+		Response<SystemMetricMetadatasResult> response = (Response<SystemMetricMetadatasResult>)getItem(key);
+
+		return response;
+	}
+	
+	@SuppressWarnings("unchecked")
 	public static Response<LabelsResult> getLabels(ApiClient apiClient, String serviceId) {
 
 		LabelsRequest request = LabelsRequest.newBuilder().setServiceId(serviceId).build();		
@@ -1541,6 +1623,18 @@ public class ApiCache {
 	}
 	
 	@SuppressWarnings("unchecked")
+	public static Response<SystemMetricGraphResult> getSystemMetricsGraph(ApiClient apiClient, String serviceId,
+			SystemMetricsGraphInput input, ServiceSettingsData settingsData,
+			SystemMetricGraphRequest request, String metricName) {
+
+		SystemMetricsGraphCacheLoader cacheKey = new SystemMetricsGraphCacheLoader(apiClient, 
+			request, serviceId, input, settingsData, metricName);
+		Response<SystemMetricGraphResult> response = (Response<SystemMetricGraphResult>) ApiCache.getItem(cacheKey);
+		
+		return response;
+	}
+	
+	@SuppressWarnings("unchecked")
 	public static Response<EventResult> getEvent(ApiClient apiClient, String serviceId,
 			String Id) {
 
@@ -1663,5 +1757,5 @@ public class ApiCache {
 	
 	public static final Queue<QueryLogItem> queryLogItems = Queues.synchronizedQueue(
 			EvictingQueue.create(CACHE_SIZE));
-		
+	
 }

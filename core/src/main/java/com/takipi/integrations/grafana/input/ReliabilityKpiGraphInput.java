@@ -13,8 +13,7 @@ import com.takipi.integrations.grafana.util.TimeUtil;
 	ReliabilityKpiGraph({"volumeType":"all","view":"$view",
 		"timeFilter":"$timeFilter","environments":"$environments", 
 		"applications":"$applications", "servers":"$servers",
-		"types":"$type","limit":"$limit", "pointsWanted":"$pointsWanted", 
-		"transactionPointsWanted":"$transactionPointsWanted", 
+		"types":"$type","limit":"$limit", 
 		"reportInterval":"24h", "kpi":"$kpi"}) 
 		
  *Screenshot: https://drive.google.com/file/d/1kSUO1SE5gOqVCYb5eKrsWYxi4PJNbs9J/view?usp=sharing
@@ -46,12 +45,6 @@ public class ReliabilityKpiGraphInput extends GraphInput {
 		
 		return reportInterval;
 	}
-	
-	
-	/**
-	 * Number of points to retrieve when calculating slowdowns
-	 */
-	public int transactionPointsWanted;
 	
 	/**
 	 * Control whether to aggregate all apps kpis, or break down by the report interval

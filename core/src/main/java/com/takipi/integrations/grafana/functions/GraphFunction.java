@@ -70,7 +70,7 @@ public class GraphFunction extends BaseGraphFunction {
 	
 	@Override
 	protected List<GraphSeries> processServiceGraph(Collection<String> serviceIds, String serviceId, String viewId, String viewName,
-			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan) {
+			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, Object tag) {
 		
 		return doProcessServiceGraph(serviceIds, serviceId,
 			viewId, input, timeSpan);

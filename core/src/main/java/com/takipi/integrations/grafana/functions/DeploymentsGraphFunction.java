@@ -154,7 +154,7 @@ public class DeploymentsGraphFunction extends GraphFunction {
 			for (String deployment : deployments) {
 				result.add(new GraphAsyncTask(serviceId, viewId, input.view, 
 						getInput(dgInput, deployment), timeSpan,
-						serviceIds));
+						serviceIds, deployment));
 			}
 		}
 

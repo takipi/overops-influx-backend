@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 31,
-  "iteration": 1555016132849,
+  "iteration": 1555363846505,
   "links": [
     {
       "icon": "dashboard",
@@ -1078,7 +1078,13 @@
           "yaxis": 2
         },
         {
-          "alias": "/^.Volume/"
+          "alias": "/^./",
+          "yaxis": 2
+        },
+        {
+          "alias": "/^.Volume/",
+          "color": "#f2c96d",
+          "yaxis": 1
         }
       ],
       "spaceLength": 10,
@@ -1104,7 +1110,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\"})",
+          "query": "correlateGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"metricNames\":\"$metricNames\"})",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -1286,7 +1292,13 @@
           "yaxis": 2
         },
         {
-          "alias": "/^.Volume/"
+          "alias": "/^./",
+          "yaxis": 2
+        },
+        {
+          "alias": "/^.Volume/",
+          "color": "#eab839",
+          "yaxis": 1
         }
       ],
       "spaceLength": 10,
@@ -1312,7 +1324,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\"})",
+          "query": "correlateGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"metricNames\":\"$metricNames\"})",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -1942,12 +1954,9 @@
       {
         "allValue": "None",
         "current": {
-          "selected": false,
-          "tags": [],
+          "selected": true,
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1970,6 +1979,7 @@
       {
         "allValue": "All",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1994,6 +2004,7 @@
       {
         "allValue": "All",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2018,6 +2029,7 @@
       {
         "allValue": "All",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2123,6 +2135,31 @@
         "useTags": false
       },
       {
+        "allValue": "Throughput",
+        "current": {
+          "selected": true,
+          "text": "Throughput",
+          "value": "Throughput"
+        },
+        "datasource": "OO",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Correlate",
+        "multi": true,
+        "name": "metricNames",
+        "options": [],
+        "query": "correlateMetadata({\"environments\":\"$environments\"})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
         "allValue": null,
         "current": {
           "selected": true,
@@ -2148,32 +2185,30 @@
       {
         "allValue": null,
         "current": {
-          "isNone": true,
           "selected": true,
-          "text": "None",
-          "value": ""
+          "text": "All Events",
+          "value": "All Events"
         },
-        "datasource": "OO",
-        "hide": 0,
+        "hide": 2,
         "includeAll": false,
         "label": "View",
         "multi": false,
         "name": "view",
-        "options": [],
-        "query": "views({\"environments\":\"$environments\",\"sorted\":true, \"defaultView\":\"All Events\"})",
-        "refresh": 2,
-        "regex": "",
+        "options": [
+          {
+            "selected": true,
+            "text": "All Events",
+            "value": "All Events"
+          }
+        ],
+        "query": "All Events",
         "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
+        "type": "custom"
       },
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -2248,7 +2283,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "0",
           "value": "0"
         },
@@ -2273,7 +2307,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "0",
           "value": "0"
         },
@@ -2299,7 +2332,6 @@
         "allValue": null,
         "current": {
           "isNone": true,
-          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -2325,7 +2357,6 @@
         "allValue": null,
         "current": {
           "isNone": true,
-          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -2351,7 +2382,6 @@
         "allValue": null,
         "current": {
           "isNone": true,
-          "selected": true,
           "text": "None",
           "value": ""
         },
@@ -2428,7 +2458,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "0",
           "value": "0"
         },
@@ -2453,7 +2482,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "0",
           "value": "0"
         },
@@ -2478,6 +2506,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "0",
           "value": "0"
         },
@@ -2526,7 +2555,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "all|Uncaught Exception",
           "value": "all|Uncaught Exception"
         },
@@ -2551,7 +2579,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "all|HTTP Error",
           "value": "all|HTTP Error"
         },
@@ -2576,7 +2603,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "all|Logged Error",
           "value": "all|Logged Error"
         },
@@ -2601,7 +2627,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "all|Critical Exceptions",
           "value": "all|Critical Exceptions"
         },
@@ -2626,7 +2651,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "8d",
           "value": "8d"
         },
@@ -2651,7 +2675,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "7d",
           "value": "7d"
         },
@@ -2706,5 +2729,5 @@
   "timezone": "",
   "title": "Errors",
   "uid": "HYBPMdYik",
-  "version": 167
+  "version": 171
 }
