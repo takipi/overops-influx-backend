@@ -5,7 +5,6 @@
 	//
 	//General settings related to how data is presented and ordered in table and graph widgets
 	"general": {
-		
 		//Control whether events in table functions should group events from the same event location
 		//but different entry points into one row
 		"group_by_entryPoint": true,
