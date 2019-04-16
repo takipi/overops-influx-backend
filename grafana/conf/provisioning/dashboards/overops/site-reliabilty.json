@@ -1,4 +1,40 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_OO",
+      "label": "OO",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "5.3.4"
+    },
+    {
+      "type": "panel",
+      "id": "graph",
+      "name": "Graph",
+      "version": "5.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "influxdb",
+      "name": "InfluxDB",
+      "version": "5.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "singlestat",
+      "name": "Singlestat",
+      "version": "5.0.0"
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -13,7 +49,7 @@
         "type": "dashboard"
       },
       {
-        "datasource": "OO",
+        "datasource": "${DS_OO}",
         "enable": true,
         "hide": true,
         "iconColor": "#447ebc",
@@ -29,8 +65,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 39,
-  "iteration": 1555363817370,
+  "id": null,
+  "iteration": 1555446172102,
   "links": [
     {
       "icon": "dashboard",
@@ -62,7 +98,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#299c46"
       ],
-      "datasource": "OO",
+      "datasource": "${DS_OO}",
       "decimals": 1,
       "description": "A weighted score over the selected timeframe taking into account all new errors, regressions and slowdowns. Weights are defined in the Settings dashboard.",
       "format": "none",
@@ -185,7 +221,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "OO",
+      "datasource": "${DS_OO}",
       "decimals": 2,
       "description": "The ratio between selected transaction volume and the number of $transactionFailureTypes which deem the call to be unstable.",
       "format": "percentunit",
@@ -312,7 +348,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "OO",
+      "datasource": "${DS_OO}",
       "decimals": 0,
       "description": "The number of selected transactions whose avg time has increased by more than the critical slowdown threshold (as defined in the Settings dashboard) compared to the baseline period.",
       "format": "none",
@@ -435,7 +471,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "OO",
+      "datasource": "${DS_OO}",
       "description": "The number of new errors detected in the selected timeframe.",
       "format": "none",
       "gauge": {
@@ -556,7 +592,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "OO",
+      "datasource": "${DS_OO}",
       "description": "Errors whose rate (i.e. times / calls) has increased significantly in the selected timeframe. The thresholds to control what is considered to be an increase are set in the Settings dashboard.",
       "format": "none",
       "gauge": {
@@ -677,7 +713,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "OO",
+      "datasource": "${DS_OO}",
       "decimals": null,
       "description": "The number of unique errors of the currently selected types ($type)",
       "format": "short",
@@ -799,7 +835,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "OO",
+      "datasource": "${DS_OO}",
       "description": "The number of calls into each of the selected transactions overlaid on total the number of calls (Throughput) into them.",
       "fill": 0,
       "gridPos": {
@@ -824,13 +860,13 @@
       "linewidth": 1,
       "links": [
         {
-          "dashboard": "d/Z40SpeJmz/performance",
+          "dashboard": "Transactions",
           "includeVars": true,
           "keepTime": true,
-          "targetBlank": true,
-          "title": "Performance",
+          "targetBlank": false,
+          "title": "Transactions",
           "type": "absolute",
-          "url": "d/Z40SpeJmz/performance"
+          "url": "d/Z40SpeJmz/transactions"
         }
       ],
       "nullPointMode": "null as zero",
@@ -849,6 +885,10 @@
         {
           "alias": "/^.Response/",
           "color": "#f2c96d"
+        },
+        {
+          "alias": "/\\*$/",
+          "yaxis": 2
         }
       ],
       "spaceLength": 10,
@@ -874,7 +914,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"aggregateMode\":Yes,\"transactions\":\"$transactions\",\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\", \"metricNames\":\"$metricNames\"})",
+          "query": "correlateGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"aggregateMode\":Yes,\"transactions\":\"$transactions\",\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\", \"metricNames\":\"$metricNames\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1020,7 +1060,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "OO",
+      "datasource": "${DS_OO}",
       "description": "The number of errors in the selected apps overlad on the number of calls into the applications (Throughput). If no applications are selected, the first $splitLimit key applications are charted. Key applications are defined in the Settings dashboard.",
       "fill": 0,
       "gridPos": {
@@ -1048,7 +1088,7 @@
           "dashboard": "Errors",
           "includeVars": true,
           "keepTime": true,
-          "targetBlank": true,
+          "targetBlank": false,
           "title": "Errors",
           "type": "dashboard",
           "url": "d/HYBPMdYik/errors"
@@ -1071,6 +1111,10 @@
           "alias": "Times",
           "color": "#1f78c1",
           "linewidth": 2
+        },
+        {
+          "alias": "/\\*$/",
+          "yaxis": 2
         }
       ],
       "spaceLength": 10,
@@ -1096,7 +1140,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\",\"transactions\":\"$transactions\"})",
+          "query": "correlateGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\",\"transactions\":\"$transactions\", \"metricNames\":\"$metricNames\"})",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -1243,7 +1287,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "OO",
+      "datasource": "${DS_OO}",
       "description": "The response time of the selected transactions overlaid on the number of calls (throughput) into them.",
       "fill": 0,
       "gridPos": {
@@ -1266,7 +1310,16 @@
       },
       "lines": true,
       "linewidth": 1,
-      "links": [],
+      "links": [
+        {
+          "dashboard": "Transactions",
+          "includeVars": true,
+          "keepTime": true,
+          "title": "Transactions",
+          "type": "absolute",
+          "url": "d/Z40SpeJmz/transactions"
+        }
+      ],
       "nullPointMode": "null as zero",
       "percentage": false,
       "pointradius": 5,
@@ -1283,6 +1336,10 @@
         {
           "alias": ".avg_time",
           "color": "#eab839"
+        },
+        {
+          "alias": "/\\*$/",
+          "yaxis": 2
         }
       ],
       "spaceLength": 10,
@@ -1308,7 +1365,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"aggregateMode\":Yes,\"transactions\":\"$transactions\",\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\", \"metricNames\":\"$metricNames\", \"metricNames\":\"$metricNames\"})",
+          "query": "correlateGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"aggregateMode\":Yes,\"transactions\":\"$transactions\",\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\", \"metricNames\":\"$metricNames\", \"metricNames\":\"$metricNames\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1455,7 +1512,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "OO",
+      "datasource": "${DS_OO}",
       "description": "Chart errors according to key code tiers (e.g. AWS, SQL, Tomcat,..). Key code tiers are defined in the Settings dashboard. If no key tiers are defined, then 3rd party code tiers (as defined  [here](https://git.io/fpPT0) ) with the most errors are charted.",
       "fill": 0,
       "gridPos": {
@@ -1483,7 +1540,7 @@
           "dashboard": "Errors",
           "includeVars": true,
           "keepTime": true,
-          "targetBlank": true,
+          "targetBlank": false,
           "title": "Errors",
           "type": "absolute",
           "url": "d/HYBPMdYik/errors"
@@ -1506,6 +1563,10 @@
           "alias": "Times",
           "color": "#1f78c1",
           "linewidth": 2
+        },
+        {
+          "alias": "/\\*$/",
+          "yaxis": 2
         }
       ],
       "spaceLength": 10,
@@ -1531,7 +1592,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\",\"transactions\":\"$transactions\"})",
+          "query": "correlateGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\",\"transactions\":\"$transactions\", \"metricNames\":\"$metricNames\"})",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -1676,7 +1737,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "OO",
+      "datasource": "${DS_OO}",
       "description": "The number of errors of type: $failureTypesArrayPretty in the selected transactions overlaid on the number of calls (throughput) into them. Transaction failures types are defined in the Settings dashboard.",
       "fill": 0,
       "gridPos": {
@@ -1726,6 +1787,10 @@
         },
         {
           "alias": "Times"
+        },
+        {
+          "alias": "/\\*$/",
+          "yaxis": 2
         }
       ],
       "spaceLength": 10,
@@ -1751,7 +1816,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\",\"transactions\":\"$transactions\"})",
+          "query": "correlateGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\",\"transactions\":\"$transactions\", \"metricNames\":\"$metricNames\"})",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -1896,7 +1961,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "OO",
+      "datasource": "${DS_OO}",
       "description": "The number of critical exceptions for the currently selected transactions overlaid on the number of calls (throughput) into them. The list of critical exception types is defined in the Settings dashboard.",
       "fill": 0,
       "gridPos": {
@@ -1925,7 +1990,7 @@
           "includeVars": true,
           "keepTime": true,
           "params": "var-type=Critical%20Exceptions",
-          "targetBlank": true,
+          "targetBlank": false,
           "title": "Errors",
           "type": "absolute",
           "url": "d/HYBPMdYik/errors"
@@ -1948,6 +2013,10 @@
           "alias": "Times",
           "color": "#1f78c1",
           "linewidth": 2
+        },
+        {
+          "alias": "/\\*$/",
+          "yaxis": 2
         }
       ],
       "spaceLength": 10,
@@ -1973,7 +2042,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\",\"transactions\":\"$transactions\"})",
+          "query": "correlateGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\",\"transactions\":\"$transactions\", \"metricNames\":\"$metricNames\"})",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -2125,12 +2194,8 @@
     "list": [
       {
         "allValue": "all",
-        "current": {
-          "selected": true,
-          "text": "None",
-          "value": "None"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 0,
         "includeAll": false,
         "label": "Env",
@@ -2150,12 +2215,8 @@
       },
       {
         "allValue": "all",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 0,
         "includeAll": true,
         "label": "Apps",
@@ -2175,12 +2236,8 @@
       },
       {
         "allValue": "all",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 0,
         "includeAll": true,
         "label": "Server Groups",
@@ -2200,12 +2257,8 @@
       },
       {
         "allValue": "all",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 0,
         "includeAll": true,
         "label": "Deployments",
@@ -2248,11 +2301,8 @@
       },
       {
         "allValue": "all",
-        "current": {
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 0,
         "includeAll": true,
         "label": "Type",
@@ -2272,12 +2322,8 @@
       },
       {
         "allValue": "All",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 0,
         "includeAll": true,
         "label": "Transactions",
@@ -2297,12 +2343,8 @@
       },
       {
         "allValue": "All",
-        "current": {
-          "selected": true,
-          "text": "Throughput",
-          "value": "Throughput"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 0,
         "includeAll": false,
         "label": "Correlate",
@@ -2322,12 +2364,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "24",
-          "value": "24"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": "Points Wanted",
@@ -2347,12 +2385,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "100",
-          "value": "100"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": "Points Wanted",
@@ -2405,12 +2439,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "Logged Error|Uncaught Exception|HTTP Error",
-          "value": "Logged Error|Uncaught Exception|HTTP Error"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2430,12 +2460,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "app.overops.com",
-          "value": "app.overops.com"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2455,12 +2481,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "443",
-          "value": "443"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2526,11 +2548,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "var-type=Logged Error&var-type=Uncaught Exception&var-type=HTTP Error&",
-          "value": "var-type=Logged Error&var-type=Uncaught Exception&var-type=HTTP Error&"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2550,11 +2569,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "Logged Error, Uncaught Exception, HTTP Error, ",
-          "value": "Logged Error, Uncaught Exception, HTTP Error, "
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2574,12 +2590,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": "failRateDelta",
@@ -2599,12 +2611,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": "FailRateDesc",
@@ -2624,12 +2632,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2649,12 +2653,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": "IncresingErrorDesc",
@@ -2674,12 +2674,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": "NewErrorDesc",
@@ -2699,11 +2695,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "0",
-          "value": "0"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": "errorsDesc",
@@ -2723,11 +2716,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "0",
-          "value": "0"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": "criticalErrors",
@@ -2747,11 +2737,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "0",
-          "value": "0"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": "criticalErrorsCount",
@@ -2771,11 +2758,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "0",
-          "value": "0"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": "TransFail",
@@ -2795,11 +2779,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "0",
-          "value": "0"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": "TransFailCount",
@@ -2819,12 +2800,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": "transDesc",
@@ -2844,12 +2821,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": "transVol",
@@ -2869,12 +2842,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": "transCount",
@@ -2894,12 +2863,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": "transAvg",
@@ -2919,12 +2884,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": "tranBaselineAvg",
@@ -2968,5 +2929,5 @@
   "timezone": "",
   "title": "Site Reliability",
   "uid": "nxdE2gXmk",
-  "version": 54
+  "version": 21
 }
