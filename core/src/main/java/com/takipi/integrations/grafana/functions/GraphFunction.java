@@ -202,10 +202,10 @@ public class GraphFunction extends BaseGraphFunction {
 		
 		GraphInput giInput = (GraphInput)input;
 		
-		long volume = 0;
-		
 		if ((serviceIds.size() > 1) && (giInput.sparkline)) {
 			
+			long volume = 0;
+
 			for (GraphSeries graphSeries : series) {
 				volume += graphSeries.volume;
 			}
@@ -215,9 +215,7 @@ public class GraphFunction extends BaseGraphFunction {
 			
 		} else {
 			return super.processSeries(serviceIds, series, input);
-		}
-		
-		
+		}	
 	}
 
 	@Override

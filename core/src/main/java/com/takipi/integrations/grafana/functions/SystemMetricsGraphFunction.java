@@ -129,6 +129,10 @@ public class SystemMetricsGraphFunction extends BaseGraphFunction {
 		SystemMetricsMetadata metadata = SystemMetricsMetadata.of(apiClient, serviceId);
 		SystemMetric systemMetric = metadata.metricMap.get(tag.toString());
 		
+		if (systemMetric == null) {
+			return Collections.emptyList();
+		}
+		
 		Collection<SystemMetricGraphResult> graphs = getSystemMetricGraphs(serviceId, 
 				smgInput, timeSpan, systemMetric);
 		
