@@ -53,7 +53,7 @@
         "type": "dashboard"
       },
       {
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "enable": true,
         "hide": true,
         "iconColor": "#0a50a1",
@@ -105,7 +105,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_OO}",
+      "datasource": "OO",
       "decimals": 1,
       "description": "The number of calls into the selected transactions within the selected timeframe.",
       "format": "short",
@@ -220,7 +220,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_OO}",
+      "datasource": "OO",
       "decimals": null,
       "description": "The average response time of the selected transactions.",
       "format": "locale",
@@ -334,7 +334,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_OO}",
+      "datasource": "OO",
       "decimals": 0,
       "description": "The number of selected transactions whose avg time has increased by more than the critical slowdown threshold (as defined in the Settings dashboard) compared to the baseline period.",
       "format": "none",
@@ -457,7 +457,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_OO}",
+      "datasource": "OO",
       "decimals": null,
       "description": "The number of selected transactions whose avg time has increased by more than the slowdown threshold (as defined in the Settings dashboard) compared to the baseline period.",
       "format": "short",
@@ -580,7 +580,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_OO}",
+      "datasource": "OO",
       "decimals": 2,
       "description": "The rate of $transactionFailureTypes and the number of calls into the selected transactions. Transaction failure types are defined in the Settings dashboard.",
       "format": "percentunit",
@@ -706,7 +706,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_OO}",
+      "datasource": "OO",
       "description": "The number of $transactionFailureTypes that occured in the selected transactions. Failure types are defined in the Settings dashboard.",
       "format": "short",
       "gauge": {
@@ -828,7 +828,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_OO}",
+      "datasource": "OO",
       "description": "The response time of the selected transactions overlaid on the number of calls (throughput) into them.",
       "fill": 0,
       "gridPos": {
@@ -1085,7 +1085,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_OO}",
+      "datasource": "OO",
       "description": "All transaction failure types: $transactionFailureText. Click on a transaction's failure rate below to drill down into its errors. The error types defined as failures are defined in the Settings dashboard.",
       "fill": 0,
       "gridPos": {
@@ -1256,7 +1256,7 @@
     },
     {
       "columns": [],
-      "datasource": "${DS_OO}",
+      "datasource": "OO",
       "description": "The list of selected transactions and their details.",
       "fontSize": "100%",
       "gridPos": {
@@ -1745,7 +1745,7 @@
       {
         "allValue": "all",
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": false,
         "label": "Env",
@@ -1766,7 +1766,7 @@
       {
         "allValue": "All",
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Apps",
@@ -1787,7 +1787,7 @@
       {
         "allValue": "All",
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Deployments",
@@ -1808,7 +1808,7 @@
       {
         "allValue": "All",
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Server Groups",
@@ -1829,7 +1829,7 @@
       {
         "allValue": "*",
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Transaction",
@@ -1850,7 +1850,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": false,
         "label": "Correlate",
@@ -1894,7 +1894,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -1915,7 +1915,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -1982,7 +1982,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2003,7 +2003,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2024,7 +2024,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2045,7 +2045,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2066,7 +2066,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2087,7 +2087,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2108,7 +2108,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,

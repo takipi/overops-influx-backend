@@ -53,7 +53,7 @@
         "type": "dashboard"
       },
       {
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "enable": true,
         "hide": true,
         "iconColor": "#1f78c1",
@@ -65,7 +65,7 @@
         "type": "tags"
       },
       {
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "enable": true,
         "hide": true,
         "iconColor": "rgba(255, 96, 96, 1)",
@@ -116,7 +116,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_OO}",
+      "datasource": "OO",
       "decimals": null,
       "description": "The number of unique errors of the currently selected types ($type)",
       "format": "short",
@@ -230,7 +230,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_OO}",
+      "datasource": "OO",
       "decimals": 1,
       "description": "The number of unique errors of the currently selected types ($type)",
       "format": "short",
@@ -344,7 +344,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_OO}",
+      "datasource": "OO",
       "description": "The number of new errors detected in the selected timeframe of type $type.",
       "format": "none",
       "gauge": {
@@ -465,7 +465,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_OO}",
+      "datasource": "OO",
       "description": "Errors whose rate (i.e. times / calls) has increased significantly in the selected timeframe. The thresholds to control what is considered to be an increase are set in the Settings dashboard.",
       "format": "none",
       "gauge": {
@@ -586,7 +586,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_OO}",
+      "datasource": "OO",
       "decimals": 1,
       "description": "Click to drill into Uncaught Exceptions",
       "format": "short",
@@ -711,7 +711,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_OO}",
+      "datasource": "OO",
       "decimals": 1,
       "description": "The number of $criticalExceptionTypes that occured in the selected transactions. Failure types are defined in the Settings dashboard.",
       "format": "short",
@@ -836,7 +836,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_OO}",
+      "datasource": "OO",
       "decimals": 1,
       "description": "Click to drill into HTTP Errors.",
       "format": "short",
@@ -961,7 +961,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_OO}",
+      "datasource": "OO",
       "decimals": 1,
       "description": "Click to drill into Log Errors",
       "format": "short",
@@ -1082,7 +1082,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_OO}",
+      "datasource": "OO",
       "description": "This graph shows the volume of the selected events overlaid onto calls into the selected transactions. To the left of the dashed red vertical annotation is the baseline period which can be used to compare against the current timeframe, which is to the right of the baseline annotation.",
       "fill": 0,
       "gridPos": {
@@ -1296,7 +1296,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_OO}",
+      "datasource": "OO",
       "description": "This graph shows the volume of the selected events overlaid onto calls into the selected transactions.",
       "fill": 0,
       "gridPos": {
@@ -1507,7 +1507,7 @@
     },
     {
       "columns": [],
-      "datasource": "${DS_OO}",
+      "datasource": "OO",
       "description": "A list of all unique errors in the selected time frame and filter set. Events are ordered by the following ranking: uncaught exceptions, critical exceptions (as defined in the Settings dashboard), HTTP errors ,log errors, log warnings, swallowed exceptions and caught exceptions. For events of the same type, ranking is done comparing the rate delta and then volume.",
       "fontSize": "100%",
       "gridPos": {
@@ -1996,7 +1996,7 @@
       {
         "allValue": "None",
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": false,
         "label": "Env",
@@ -2017,7 +2017,7 @@
       {
         "allValue": "All",
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Apps",
@@ -2038,7 +2038,7 @@
       {
         "allValue": "All",
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Server Groups",
@@ -2059,7 +2059,7 @@
       {
         "allValue": "All",
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Deployments",
@@ -2080,7 +2080,7 @@
       {
         "allValue": "all",
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Type",
@@ -2134,7 +2134,7 @@
       {
         "allValue": "*",
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Transactions",
@@ -2155,7 +2155,7 @@
       {
         "allValue": "Throughput",
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": false,
         "label": "Correlate",
@@ -2222,7 +2222,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": "Points Wanted",
@@ -2243,7 +2243,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2264,7 +2264,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2285,7 +2285,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2306,7 +2306,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2327,7 +2327,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2348,7 +2348,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2369,7 +2369,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2390,7 +2390,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": "IncErr",
@@ -2411,7 +2411,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": "newErr",
@@ -2432,7 +2432,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": "uncaughtExCount",
@@ -2453,7 +2453,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": "HttpErrCount",
@@ -2474,7 +2474,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": "criticalExCount",
@@ -2495,7 +2495,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": "LogErrCount",
@@ -2516,7 +2516,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2537,7 +2537,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2558,7 +2558,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2579,7 +2579,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2600,7 +2600,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,

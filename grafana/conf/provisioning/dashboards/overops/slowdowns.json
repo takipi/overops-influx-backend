@@ -47,7 +47,7 @@
         "type": "dashboard"
       },
       {
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "enable": true,
         "hide": true,
         "iconColor": "#0a50a1",
@@ -59,7 +59,7 @@
         "type": "tags"
       },
       {
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "enable": true,
         "hide": true,
         "iconColor": "rgba(255, 96, 96, 1)",
@@ -109,7 +109,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_OO}",
+      "datasource": "OO",
       "description": "The response time of the selected transactions in the selected timeframe ($activeWindowFmt) compared to the baseline ($baselineOnlyFmt). The left horizontal dashed line shows the avg response time within the baseline window, while the right base line represents the response time during the last $activeWindowFmt. The red vertical dashed line shows when the baseline ends and the active time window begins.",
       "fill": 0,
       "gridPos": {
@@ -415,7 +415,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_OO}",
+      "datasource": "OO",
       "description": "The response time of the selected transactions overlaid on the number of calls (Throughput) into them during the last $activeWindowFmt. The dashed line represents the average response time during that time window.",
       "fill": 0,
       "gridPos": {
@@ -633,7 +633,7 @@
     },
     {
       "columns": [],
-      "datasource": "${DS_OO}",
+      "datasource": "OO",
       "description": "The list of selected transactions and their details.",
       "fontSize": "100%",
       "gridPos": {
@@ -1005,7 +1005,7 @@
       {
         "allValue": "all",
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": false,
         "label": "Environments",
@@ -1026,7 +1026,7 @@
       {
         "allValue": "*",
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Applications",
@@ -1047,7 +1047,7 @@
       {
         "allValue": "*",
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Deployments",
@@ -1068,7 +1068,7 @@
       {
         "allValue": "All",
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Servers",
@@ -1089,7 +1089,7 @@
       {
         "allValue": "*",
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": true,
         "label": "Transaction",
@@ -1110,7 +1110,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -1131,7 +1131,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -1198,7 +1198,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 0,
         "includeAll": false,
         "label": "Correlate",
@@ -1242,7 +1242,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -1263,7 +1263,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -1284,7 +1284,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -1305,7 +1305,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -1326,7 +1326,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -1370,7 +1370,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -1391,7 +1391,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -1412,7 +1412,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -1433,7 +1433,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -1454,7 +1454,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_OO}",
+        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
