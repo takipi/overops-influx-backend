@@ -1,4 +1,46 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_OO",
+      "label": "OO",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "5.3.4"
+    },
+    {
+      "type": "panel",
+      "id": "graph",
+      "name": "Graph",
+      "version": "5.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "influxdb",
+      "name": "InfluxDB",
+      "version": "5.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "singlestat",
+      "name": "Singlestat",
+      "version": "5.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": "5.0.0"
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -11,7 +53,7 @@
         "type": "dashboard"
       },
       {
-        "datasource": "OO",
+        "datasource": "${DS_OO}",
         "enable": true,
         "hide": true,
         "iconColor": "#1f78c1",
@@ -23,7 +65,7 @@
         "type": "tags"
       },
       {
-        "datasource": "OO",
+        "datasource": "${DS_OO}",
         "enable": true,
         "hide": true,
         "iconColor": "rgba(255, 96, 96, 1)",
@@ -39,8 +81,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 31,
-  "iteration": 1555016132849,
+  "id": null,
+  "iteration": 1555448752338,
   "links": [
     {
       "icon": "dashboard",
@@ -74,7 +116,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "OO",
+      "datasource": "${DS_OO}",
       "decimals": null,
       "description": "The number of unique errors of the currently selected types ($type)",
       "format": "short",
@@ -188,7 +230,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "OO",
+      "datasource": "${DS_OO}",
       "decimals": 1,
       "description": "The number of unique errors of the currently selected types ($type)",
       "format": "short",
@@ -302,7 +344,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "OO",
+      "datasource": "${DS_OO}",
       "description": "The number of new errors detected in the selected timeframe of type $type.",
       "format": "none",
       "gauge": {
@@ -423,7 +465,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "OO",
+      "datasource": "${DS_OO}",
       "description": "Errors whose rate (i.e. times / calls) has increased significantly in the selected timeframe. The thresholds to control what is considered to be an increase are set in the Settings dashboard.",
       "format": "none",
       "gauge": {
@@ -544,7 +586,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "OO",
+      "datasource": "${DS_OO}",
       "decimals": 1,
       "description": "Click to drill into Uncaught Exceptions",
       "format": "short",
@@ -566,9 +608,9 @@
       "links": [
         {
           "dashboard": "Errors Drill-down",
-          "includeVars": false,
+          "includeVars": true,
           "keepTime": true,
-          "params": "&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-type=Uncaught%20Exception&var-splitLimit=3&var-transactions=$transactions&var-search=$search",
+          "params": "&var-type=Uncaught Exception",
           "targetBlank": false,
           "title": "$uec Uncaught Exceptions",
           "type": "absolute",
@@ -669,7 +711,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "OO",
+      "datasource": "${DS_OO}",
       "decimals": 1,
       "description": "The number of $criticalExceptionTypes that occured in the selected transactions. Failure types are defined in the Settings dashboard.",
       "format": "short",
@@ -691,9 +733,9 @@
       "links": [
         {
           "dashboard": "Errors Drill-down",
-          "includeVars": false,
+          "includeVars": true,
           "keepTime": true,
-          "params": "&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-type=Critical%20Exceptions&var-splitLimit=3&var-transactions=$transactions&var-search=$search",
+          "params": "&var-type=Critical Exceptions",
           "targetBlank": false,
           "title": "$cec Critical Exceptions",
           "type": "absolute",
@@ -794,7 +836,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "OO",
+      "datasource": "${DS_OO}",
       "decimals": 1,
       "description": "Click to drill into HTTP Errors.",
       "format": "short",
@@ -816,9 +858,9 @@
       "links": [
         {
           "dashboard": "Errors Drill-down",
-          "includeVars": false,
+          "includeVars": true,
           "keepTime": true,
-          "params": "&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-type=HTTP%20Error&var-splitLimit=3&var-transactions=$transactions&var-search=$search",
+          "params": "&var-type=HTTP Error",
           "targetBlank": false,
           "title": "$hec HTTP Errors",
           "type": "absolute",
@@ -919,7 +961,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "OO",
+      "datasource": "${DS_OO}",
       "decimals": 1,
       "description": "Click to drill into Log Errors",
       "format": "short",
@@ -941,9 +983,9 @@
       "links": [
         {
           "dashboard": "Errors Drill-down",
-          "includeVars": false,
+          "includeVars": true,
           "keepTime": true,
-          "params": "&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-type=Logged%20Error&var-splitLimit=3&var-transactions=$transactions&var-search=$search",
+          "params": "&var-type=Logged Error",
           "targetBlank": false,
           "title": "$lec Log Errors",
           "type": "absolute",
@@ -1040,7 +1082,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "OO",
+      "datasource": "${DS_OO}",
       "description": "This graph shows the volume of the selected events overlaid onto calls into the selected transactions. To the left of the dashed red vertical annotation is the baseline period which can be used to compare against the current timeframe, which is to the right of the baseline annotation.",
       "fill": 0,
       "gridPos": {
@@ -1078,7 +1120,13 @@
           "yaxis": 2
         },
         {
-          "alias": "/^.Volume/"
+          "alias": "/^./",
+          "yaxis": 2
+        },
+        {
+          "alias": "/^.Volume/",
+          "color": "#f2c96d",
+          "yaxis": 1
         }
       ],
       "spaceLength": 10,
@@ -1104,7 +1152,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\"})",
+          "query": "correlateGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"metricNames\":\"$metricNames\"})",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -1248,7 +1296,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "OO",
+      "datasource": "${DS_OO}",
       "description": "This graph shows the volume of the selected events overlaid onto calls into the selected transactions.",
       "fill": 0,
       "gridPos": {
@@ -1286,7 +1334,13 @@
           "yaxis": 2
         },
         {
-          "alias": "/^.Volume/"
+          "alias": "/^./",
+          "yaxis": 2
+        },
+        {
+          "alias": "/^.Volume/",
+          "color": "#eab839",
+          "yaxis": 1
         }
       ],
       "spaceLength": 10,
@@ -1312,7 +1366,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\"})",
+          "query": "correlateGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"metricNames\":\"$metricNames\"})",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -1453,7 +1507,7 @@
     },
     {
       "columns": [],
-      "datasource": "OO",
+      "datasource": "${DS_OO}",
       "description": "A list of all unique errors in the selected time frame and filter set. Events are ordered by the following ranking: uncaught exceptions, critical exceptions (as defined in the Settings dashboard), HTTP errors ,log errors, log warnings, swallowed exceptions and caught exceptions. For events of the same type, ranking is done comparing the rate delta and then volume.",
       "fontSize": "100%",
       "gridPos": {
@@ -1941,15 +1995,8 @@
     "list": [
       {
         "allValue": "None",
-        "current": {
-          "selected": false,
-          "tags": [],
-          "text": "None",
-          "value": [
-            "None"
-          ]
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 0,
         "includeAll": false,
         "label": "Env",
@@ -1969,11 +2016,8 @@
       },
       {
         "allValue": "All",
-        "current": {
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 0,
         "includeAll": true,
         "label": "Apps",
@@ -1993,11 +2037,8 @@
       },
       {
         "allValue": "All",
-        "current": {
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 0,
         "includeAll": true,
         "label": "Server Groups",
@@ -2017,11 +2058,8 @@
       },
       {
         "allValue": "All",
-        "current": {
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 0,
         "includeAll": true,
         "label": "Deployments",
@@ -2041,12 +2079,8 @@
       },
       {
         "allValue": "all",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 0,
         "includeAll": true,
         "label": "Type",
@@ -2099,12 +2133,8 @@
       },
       {
         "allValue": "*",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 0,
         "includeAll": true,
         "label": "Transactions",
@@ -2113,6 +2143,27 @@
         "options": [],
         "query": "transactions({\"environments\":\"$environments\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"sorted\":\"true\"})",
         "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": "Throughput",
+        "current": {},
+        "datasource": "${DS_OO}",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Correlate",
+        "multi": true,
+        "name": "metricNames",
+        "options": [],
+        "query": "correlateMetadata({\"environments\":\"$environments\"})",
+        "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -2148,36 +2199,30 @@
       {
         "allValue": null,
         "current": {
-          "isNone": true,
           "selected": true,
-          "text": "None",
-          "value": ""
+          "text": "All Events",
+          "value": "All Events"
         },
-        "datasource": "OO",
-        "hide": 0,
+        "hide": 2,
         "includeAll": false,
         "label": "View",
         "multi": false,
         "name": "view",
-        "options": [],
-        "query": "views({\"environments\":\"$environments\",\"sorted\":true, \"defaultView\":\"All Events\"})",
-        "refresh": 2,
-        "regex": "",
+        "options": [
+          {
+            "selected": true,
+            "text": "All Events",
+            "value": "All Events"
+          }
+        ],
+        "query": "All Events",
         "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
+        "type": "custom"
       },
       {
         "allValue": null,
-        "current": {
-          "text": "24",
-          "value": "24"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": "Points Wanted",
@@ -2197,12 +2242,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "app.overops.com",
-          "value": "app.overops.com"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2222,12 +2263,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "443",
-          "value": "443"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2247,12 +2284,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "0",
-          "value": "0"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2272,12 +2305,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "0",
-          "value": "0"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2297,13 +2326,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "selected": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2323,13 +2347,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "selected": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2349,13 +2368,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "selected": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2375,13 +2389,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "selected": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": "IncErr",
@@ -2401,13 +2410,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "selected": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": "newErr",
@@ -2427,12 +2431,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "0",
-          "value": "0"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": "uncaughtExCount",
@@ -2452,12 +2452,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "0",
-          "value": "0"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": "HttpErrCount",
@@ -2477,11 +2473,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "0",
-          "value": "0"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": "criticalExCount",
@@ -2501,11 +2494,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "0",
-          "value": "0"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": "LogErrCount",
@@ -2525,12 +2515,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "all|Uncaught Exception",
-          "value": "all|Uncaught Exception"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2550,12 +2536,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "all|HTTP Error",
-          "value": "all|HTTP Error"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2575,12 +2557,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "all|Logged Error",
-          "value": "all|Logged Error"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2600,12 +2578,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "all|Critical Exceptions",
-          "value": "all|Critical Exceptions"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2625,12 +2599,8 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "8d",
-          "value": "8d"
-        },
-        "datasource": "OO",
+        "current": {},
+        "datasource": "${DS_OO}",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -2651,7 +2621,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "7d",
           "value": "7d"
         },
@@ -2674,7 +2643,7 @@
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-3h",
     "to": "now"
   },
   "timepicker": {
@@ -2706,5 +2675,5 @@
   "timezone": "",
   "title": "Errors",
   "uid": "HYBPMdYik",
-  "version": 167
+  "version": 40
 }

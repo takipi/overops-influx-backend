@@ -70,7 +70,7 @@ public class GraphFunction extends BaseGraphFunction {
 	
 	@Override
 	protected List<GraphSeries> processServiceGraph(Collection<String> serviceIds, String serviceId, String viewId, String viewName,
-			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan) {
+			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, Object tag) {
 		
 		return doProcessServiceGraph(serviceIds, serviceId,
 			viewId, input, timeSpan);
@@ -202,10 +202,10 @@ public class GraphFunction extends BaseGraphFunction {
 		
 		GraphInput giInput = (GraphInput)input;
 		
-		long volume = 0;
-		
 		if ((serviceIds.size() > 1) && (giInput.sparkline)) {
 			
+			long volume = 0;
+
 			for (GraphSeries graphSeries : series) {
 				volume += graphSeries.volume;
 			}
@@ -215,9 +215,7 @@ public class GraphFunction extends BaseGraphFunction {
 			
 		} else {
 			return super.processSeries(serviceIds, series, input);
-		}
-		
-		
+		}	
 	}
 
 	@Override

@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 53,
-  "iteration": 1554448828577,
+  "iteration": 1555363749741,
   "links": [
     {
       "icon": "dashboard",
@@ -109,6 +109,10 @@
         },
         {
           "alias": "/^.Volume/"
+        },
+        {
+          "alias": "/\\*$/",
+          "yaxis": 2
         }
       ],
       "spaceLength": 10,
@@ -134,7 +138,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\"})",
+          "query": "correlateGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\",\"metricNames\":\"$metricNames\"})",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -317,6 +321,10 @@
         },
         {
           "alias": "/^.Volume/"
+        },
+        {
+          "alias": "/\\*$/",
+          "yaxis": 2
         }
       ],
       "spaceLength": 10,
@@ -342,7 +350,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\"})",
+          "query": "correlateGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\",\"metricNames\":\"$metricNames\"})",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -1115,6 +1123,31 @@
       {
         "allValue": null,
         "current": {
+          "selected": false,
+          "text": "Throughput",
+          "value": "Throughput"
+        },
+        "datasource": "OO",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Correlate",
+        "multi": true,
+        "name": "metricNames",
+        "options": [],
+        "query": "correlateMetadata({\"environments\":\"$environments\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
           "selected": true,
           "text": "<term>",
           "value": "<term>"
@@ -1390,5 +1423,5 @@
   "timezone": "",
   "title": "Errors Drill-down",
   "uid": "6TxYIh6mk",
-  "version": 10
+  "version": 12
 }
