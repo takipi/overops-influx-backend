@@ -51,7 +51,7 @@ import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventSlimResult;
 import com.takipi.api.client.result.event.EventsResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
-import com.takipi.api.client.result.event.MainStats;
+import com.takipi.api.client.result.event.MainEventStats;
 import com.takipi.api.client.data.event.Stats;
 import com.takipi.api.client.result.metrics.GraphResult;
 import com.takipi.api.client.result.process.JvmsResult;
@@ -2300,7 +2300,7 @@ public abstract class GrafanaFunction {
 				}
 				
 				if (event.stats == null) {
-					event.stats = new MainStats();
+					event.stats = new MainEventStats();
 				}
 				
 				event.stats.hits += gpc.stats.hits;
@@ -2481,7 +2481,7 @@ public abstract class GrafanaFunction {
 			EventResult clone = (EventResult)event.clone();
 			
 			if (!copyStats) {
-				clone.stats = new MainStats();
+				clone.stats = new MainEventStats();
 			}
 			
 			result.add(clone);
@@ -2506,7 +2506,7 @@ public abstract class GrafanaFunction {
 				
 				EventResult contributorEventResult = (EventResult) event.clone();
 				
-				contributorEventResult.stats = new MainStats();
+				contributorEventResult.stats = new MainEventStats();
 				
 				safePutEventToKeysMap(keyToEventMap, determinantKey, contributorEventResult);
 			}
