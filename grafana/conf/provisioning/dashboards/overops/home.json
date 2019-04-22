@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 43,
-  "iteration": 1554835638270,
+  "iteration": 1555789313118,
   "links": [
     {
       "icon": "external link",
@@ -970,6 +970,42 @@
           "thresholds": [],
           "type": "string",
           "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "AlertDesc",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "🔔",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": true,
+          "linkTargetBlank": true,
+          "linkTooltip": "${__cell_12}",
+          "linkUrl": "//$apiHost:$apiPort/environments/${__cell_3}/alerts",
+          "mappingType": 1,
+          "pattern": "AlertStatus",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
         }
       ],
       "targets": [
@@ -991,7 +1027,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"All\", \"render\":\"Grid\", \"mode\":\"Apps_Extended\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"minFailRate\":$minFailRate, \"failureTypes\":\"$transactionFailureTypes\", \"statusPrefixes2\":\"✅ ,⚠ ,❌ \", \"scoreRanges\":\"70,85\",  \"statusPrefixes\":\"✅,⚠️,❌\", \"failRatePrefixes\":\",↑,↑\"})",
+          "query": "regressionReport({\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"All\", \"render\":\"Grid\", \"mode\":\"Apps_Extended\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"minFailRate\":$minFailRate, \"failureTypes\":\"$transactionFailureTypes\", \"statusPrefixes2\":\"✅ ,⚠ ,❌ \", \"scoreRanges\":\"70,85\",  \"statusPrefixes\":\"✅,⚠️,❌\", \"failRatePrefixes\":\",↑,↑\", \"alertStatusPrefixes\":\"➕,🆕️,📈\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1020,7 +1056,7 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "A report providing a weighted score of the key applications, as defined in the Settings dashboard. Key applications are marked with * and appear at the top of the list followed by applications with the highest event volume up to limit of  $limit applications in total. Score weights are defined in the Settings dashboard.",
+      "description": "A report providing a weighted score of the key code tiers, as defined in the Settings dashboard. Key code tiers are marked with * and appear at the top of the list followed by tiers with the highest event volume up to limit of  $limit tiers in total. 3rd party tiers are defined on [Github](https://git.io/fpPT0). Score weights are defined in the Settings dashboard.",
       "fontSize": "100%",
       "gridPos": {
         "h": 14,
@@ -1745,6 +1781,41 @@
           "thresholds": [],
           "type": "string",
           "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "AlertDesc",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
+        },
+        {
+          "alias": "🔔",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": true,
+          "linkTooltip": "${__cell_12}",
+          "linkUrl": "//$apiHost:$apiPort/environments/${__cell_3}/alerts",
+          "mappingType": 1,
+          "pattern": "AlertStatus",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
         }
       ],
       "targets": [
@@ -1766,7 +1837,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"All\", \"render\":\"Grid\", \"mode\":\"Tiers_Extended\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"minFailRate\":\"$minFailRate\", \"failureTypes\":\"$transactionFailureTypes\", \"statusPrefixes2\":\"✅ ,⚠ ,❌ \", \"scoreRanges\":\"70,85\",  \"statusPrefixes\":\"✅,⚠️,❌\", \"addAppTier\":\"true\", \"failRatePrefixes\":\",↑,↑\"})",
+          "query": "regressionReport({\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"All\", \"render\":\"Grid\", \"mode\":\"Tiers_Extended\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"minFailRate\":\"$minFailRate\", \"failureTypes\":\"$transactionFailureTypes\", \"statusPrefixes2\":\"✅ ,⚠ ,❌ \", \"scoreRanges\":\"70,85\",  \"statusPrefixes\":\"✅,⚠️,❌\", \"addAppTier\":\"true\", \"failRatePrefixes\":\",↑,↑\",\"alertStatusPrefixes\":\"➕,🆕️,📈\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -2034,6 +2105,7 @@
         "allValue": null,
         "current": {
           "selected": true,
+          "tags": [],
           "text": "10",
           "value": "10"
         },
@@ -2111,7 +2183,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -2136,7 +2207,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -2161,7 +2231,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -2186,7 +2255,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -2259,7 +2327,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "now-24h",
           "value": "now-24h"
         },
@@ -2284,7 +2351,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "now",
           "value": "now"
         },
@@ -2310,18 +2376,18 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "text": "https://app.overops.com",
-          "value": "https://app.overops.com"
+          "text": "443",
+          "value": "443"
         },
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
         "multi": false,
-        "name": "apiHost",
+        "name": "apiPort",
         "options": [],
-        "query": "apiHost({\"type\":\"FullURL\"})",
-        "refresh": 2,
+        "query": "apiHost({\"type\":\"PORT\"})",
+        "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -2335,6 +2401,30 @@
         "allValue": null,
         "current": {
           "selected": true,
+          "text": "app.overops.com",
+          "value": "app.overops.com"
+        },
+        "datasource": "OO",
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "apiHost",
+        "options": [],
+        "query": "apiHost({\"type\":\"URL_NO_PORT\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
           "text": "time >= now() - 24h",
           "value": "time >= now() - 24h"
         },
@@ -2359,7 +2449,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "24h",
           "value": "24h"
         },
@@ -2384,7 +2473,7 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
+          "tags": [],
           "text": "24h",
           "value": "24h"
         },
@@ -2437,7 +2526,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "0.005",
           "value": "0.005"
         },
@@ -2492,5 +2580,5 @@
   "timezone": "",
   "title": "Home",
   "uid": "lg0U4qriz",
-  "version": 285
+  "version": 288
 }

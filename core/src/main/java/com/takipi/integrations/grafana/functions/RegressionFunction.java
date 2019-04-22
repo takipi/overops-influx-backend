@@ -912,7 +912,7 @@ public class RegressionFunction extends EventsFunction {
 		RegressionOutput result = createRegressionOutput(serviceId,
 				input, regressionInput, regressionWindow,
 				rateRegression, eventListMap,
-				baselineGraph, activeWindowGraph, volume, allowEmpty);
+				baselineGraph, activeWindowGraph, volume, true);//allowEmpty);
 		
 		return result;
 	}

@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 54,
-  "iteration": 1555363770894,
+  "iteration": 1555789274047,
   "links": [
     {
       "icon": "dashboard",
@@ -227,6 +227,7 @@
           "show": true
         },
         {
+          "decimals": 1,
           "format": "short",
           "label": "",
           "logBase": 1,
@@ -401,6 +402,7 @@
           "show": true
         },
         {
+          "decimals": 1,
           "format": "short",
           "label": "",
           "logBase": 1,
@@ -1416,5 +1418,5 @@
   "timezone": "",
   "title": "Transaction Failures",
   "uid": "YVh71-emz",
-  "version": 23
+  "version": 24
 }

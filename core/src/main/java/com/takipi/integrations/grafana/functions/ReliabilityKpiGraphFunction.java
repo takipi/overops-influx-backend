@@ -37,7 +37,7 @@ import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.ReliabilityKpiGraphInput;
 import com.takipi.integrations.grafana.input.ReliabilityReportInput;
-import com.takipi.integrations.grafana.input.ReliabilityReportInput.RelabilityKpi;
+import com.takipi.integrations.grafana.input.ReliabilityReportInput.ReliabilityKpi;
 import com.takipi.integrations.grafana.input.ReliabilityReportInput.ReportMode;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.ServiceSettings;
@@ -216,7 +216,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			try {
 				
 				ReliabilityKpiGraphInput rkInput =  (ReliabilityKpiGraphInput)input;
-				RelabilityKpi kpi = ReliabilityReportInput.getKpi(rkInput.kpi);
+				ReliabilityKpi kpi = ReliabilityReportInput.getKpi(rkInput.kpi);
 
 				Map<DateTime, KpiInterval> kpiIntervals = processServiceKpis(serviceId, viewId, 
 						rkInput, timelineData, kpi, periods, isKey);
@@ -250,7 +250,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		
 		public Pair<DateTime, DateTime> period;
 		
-		protected abstract Object getValue(RelabilityKpi kpi);
+		protected abstract Object getValue(ReliabilityKpi kpi);
 		
 		protected KpiInterval(Pair<DateTime, DateTime> period) {
 			this.period = period;
@@ -270,7 +270,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		}
 		
 		@Override
-		protected Object getValue(RelabilityKpi kpi) {
+		protected Object getValue(ReliabilityKpi kpi) {
 			
 			switch (kpi) {
 				
@@ -303,7 +303,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		}
 		
 		@Override
-		protected Object getValue(RelabilityKpi kpi) {
+		protected Object getValue(ReliabilityKpi kpi) {
 			
 			switch (kpi) {
 				
@@ -331,7 +331,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		}
 		
 		@Override
-		protected Object getValue(RelabilityKpi kpi) {
+		protected Object getValue(ReliabilityKpi kpi) {
 			
 			switch (kpi) {
 				
@@ -365,7 +365,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		protected double score;
 		
 		@Override
-		protected Object getValue(RelabilityKpi kpi) {
+		protected Object getValue(ReliabilityKpi kpi) {
 			return score;
 		}
 	}
@@ -675,7 +675,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 	}
 	
 	private NavigableMap<DateTime, KpiInterval> processRegressions(String serviceId,
-			String viewId, TimelineData timelineData, RelabilityKpi kpi,
+			String viewId, TimelineData timelineData, ReliabilityKpi kpi,
 			Collection<Pair<DateTime, DateTime>> periods, GraphResultData graphData) {
 		
 		if (graphData == null) {
@@ -692,7 +692,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		
 		RegressionFunction regressionFunction = new RegressionFunction(apiClient, settingsMaps);
 		
-		boolean newOnly = (kpi == RelabilityKpi.NewErrors) || (kpi == RelabilityKpi.SevereNewErrors);
+		boolean newOnly = (kpi == ReliabilityKpi.NewErrors) || (kpi == ReliabilityKpi.SevereNewErrors);
 		
 		NavigableMap<DateTime, KpiInterval> result = new TreeMap<DateTime, KpiInterval>();
 		
@@ -791,7 +791,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 	
 	private Pair<Map<DateTime, KpiInterval>, KpiInterval> processRegressions(
 		String serviceId, String viewId, TimelineData timelineData, 
-		Collection<Pair<DateTime, DateTime>> periods, RelabilityKpi kpi) {
+		Collection<Pair<DateTime, DateTime>> periods, ReliabilityKpi kpi) {
 		
 		GraphDataTask graphTask = new GraphDataTask(serviceId, viewId, timelineData);
 		
@@ -845,7 +845,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 	private Pair<Map<DateTime, KpiInterval>, KpiInterval> processScores(
 			String serviceId, String viewId, ReliabilityKpiGraphInput input, 
 			TimelineData timelineData, Collection<Pair<DateTime, DateTime>> periods, 
-			boolean isKey, RelabilityKpi kpi) {
+			boolean isKey, ReliabilityKpi kpi) {
 	
 		TransactionGraphTask transactionGraphTask = new TransactionGraphTask(serviceId, viewId, timelineData);
 		
@@ -931,7 +931,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 	}
 	
 	private Map<DateTime, KpiInterval> processServiceKpis(String serviceId, String viewId, 
-		ReliabilityKpiGraphInput input, TimelineData timelineData, RelabilityKpi kpi,
+		ReliabilityKpiGraphInput input, TimelineData timelineData, ReliabilityKpi kpi,
 		Collection<Pair<DateTime, DateTime>> periods, boolean isKey) {
 						
 		Pair<Map<DateTime, KpiInterval>, KpiInterval> intervalPair;
@@ -984,7 +984,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 	
 	private List<GraphSeries> getGraphSeries(Collection<String> serviceIds,
 		String serviceId, ReliabilityKpiGraphInput input,
-		RelabilityKpi kpi, Map<DateTime, KpiInterval> intervals,
+		ReliabilityKpi kpi, Map<DateTime, KpiInterval> intervals,
 		String app) {
 		
 		String tagName = getSeriesName(input, app, serviceId, serviceIds);

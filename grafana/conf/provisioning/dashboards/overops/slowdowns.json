@@ -75,8 +75,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": null,
-  "iteration": 1555365310469,
+  "id": 56,
+  "iteration": 1555789190967,
   "links": [
     {
       "icon": "dashboard",
@@ -394,7 +394,7 @@
           "show": true
         },
         {
-          "decimals": null,
+          "decimals": 1,
           "format": "short",
           "label": "",
           "logBase": 10,
@@ -617,7 +617,7 @@
           "show": true
         },
         {
-          "decimals": null,
+          "decimals": 1,
           "format": "short",
           "label": "",
           "logBase": 10,
@@ -1004,7 +1004,10 @@
     "list": [
       {
         "allValue": "all",
-        "current": {},
+        "current": {
+          "text": "None",
+          "value": "None"
+        },
         "datasource": "OO",
         "hide": 0,
         "includeAll": false,
@@ -1025,7 +1028,10 @@
       },
       {
         "allValue": "*",
-        "current": {},
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
@@ -1046,7 +1052,10 @@
       },
       {
         "allValue": "*",
-        "current": {},
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
@@ -1067,7 +1076,10 @@
       },
       {
         "allValue": "All",
-        "current": {},
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
@@ -1088,7 +1100,10 @@
       },
       {
         "allValue": "*",
-        "current": {},
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
@@ -1109,7 +1124,10 @@
       },
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "text": "24",
+          "value": "24"
+        },
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -1507,5 +1525,5 @@
   "timezone": "",
   "title": "Slowdowns",
   "uid": "iHSORcymk",
-  "version": 22
+  "version": 9
 }

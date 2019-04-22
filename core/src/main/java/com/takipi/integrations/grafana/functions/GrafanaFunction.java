@@ -986,6 +986,7 @@ public abstract class GrafanaFunction {
 			throw new IllegalStateException("Missing slowdown settings for " + serviceId);
 		}
 		
+		/*
 		if (queryBaselineGraphs) {
 			
 			Collection<TransactionGraph> baselineAndActiveGraphs = getBaselineTransactionGraphs(serviceId, 
@@ -997,6 +998,7 @@ public abstract class GrafanaFunction {
 			updateTransactionGraphPerformance(baselineGraphs, baselineAndActiveGraphs, 
 				transactionDatas, slowdownSettings);
 		} else {
+		*/
 			Collection<Transaction> baselineTransactions = getBaselineTransactions(serviceId,
 				viewId, input, timeSpan, regressionInput, regressionWindow);
 			
@@ -1009,7 +1011,7 @@ public abstract class GrafanaFunction {
 					transactionData.stats = TransactionUtil.aggregateGraph(transactionData.graph);
 				}
 			}
-		}		
+		//}		
 	}
 	
 	protected void updateTransactionPerformance(
