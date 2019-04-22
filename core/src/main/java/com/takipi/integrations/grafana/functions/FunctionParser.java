@@ -240,8 +240,7 @@ public class FunctionParser {
 		registerFunction(new BaselineAnnotationFunction.Factory());
 		registerFunction(new RegressedEventsFunction.Factory());
 		registerFunction(new ReliabilityKpiGraphFunction.Factory());
-
-
+		
 		//deployment functions
 		registerFunction(new DeploymentsGraphFunction.Factory());
 		registerFunction(new DeploymentsAnnotation.Factory());
@@ -256,6 +255,12 @@ public class FunctionParser {
 		registerFunction(new SlowTransactionsFunction.Factory());
 		registerFunction(new TransactionsDiffFunction.Factory());
 		registerFunction(new TransactionsEventsGraphFunction.Factory());
+
+		//system metrics functions
+		registerFunction(new SystemMetricsMetadataFunction.Factory());
+		registerFunction(new SystemMetricsGraphFunction.Factory());
+		registerFunction(new CorrelateGraphMetadataFunction.Factory());
+		registerFunction(new CorrelateGraphFunction.Factory());
 
 		//variable filter functions
 		registerFunction(new EnvironmentsFunction.Factory());
@@ -282,9 +287,7 @@ public class FunctionParser {
 		registerFunction(new ConcatFunction.Factory());
 		registerFunction(new ExtendWindowFunction.Factory());
 
-		
 		//diagnostics functions
 		registerFunction(new QueryDiagnosticsFunction.Factory());
-
 	}
 }

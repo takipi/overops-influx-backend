@@ -80,7 +80,7 @@ public class TypesGraph extends GraphFunction {
 			if (types != null) {
 				for (String type : types) {
 					result.add(new GraphAsyncTask(serviceId, viewId, input.view, getInput(graphInput , type), timeSpan,
-						serviceIds));
+						serviceIds, type));
 				}
 			} else {
 				
@@ -97,7 +97,8 @@ public class TypesGraph extends GraphFunction {
 				if (defaultTypes != null) {
 					for (String type : defaultTypes) {
 						result.add(new GraphAsyncTask(serviceId, viewId, 
-							input.view, getInput(graphInput , type), timeSpan, serviceIds));
+							input.view, getInput(graphInput , type), timeSpan, 
+							serviceIds, type));
 					}
 				} 	
 			}
@@ -105,7 +106,7 @@ public class TypesGraph extends GraphFunction {
 			if (result.size() == 0) {
 				result.add(new GraphAsyncTask(serviceId, viewId, input.view, 
 					getInput(graphInput, GrafanaFunction.ALL),
-					timeSpan, serviceIds));
+					timeSpan, serviceIds, GrafanaFunction.ALL.toString()));
 
 			}
 		}

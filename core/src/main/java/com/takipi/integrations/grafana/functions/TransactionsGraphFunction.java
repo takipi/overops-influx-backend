@@ -33,6 +33,7 @@ import com.takipi.integrations.grafana.input.TransactionsGraphInput.GraphType;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput.TimeWindow;
 import com.takipi.integrations.grafana.input.TransactionsListInput;
 import com.takipi.integrations.grafana.output.Series;
+import com.takipi.integrations.grafana.settings.ServiceSettings;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionsGraphFunction extends BaseGraphFunction {
@@ -69,6 +70,10 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 
 	public TransactionsGraphFunction(ApiClient apiClient) {
 		super(apiClient);
+	}
+	
+	public TransactionsGraphFunction(ApiClient apiClient, Map<String, ServiceSettings> settingsMaps) {
+		super(apiClient, settingsMaps);
 	}
 	
 	protected TransactionGraph mergeGraphs(TransactionData transactionData) {
@@ -179,8 +184,9 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 	
     @Override
 	protected List<GraphSeries> processServiceGraph( Collection<String> serviceIds, 
-			String serviceId, String viewId, String viewName,
-			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan) {
+		String serviceId, String viewId, String viewName,
+		BaseGraphInput input, Pair<DateTime, DateTime> timeSpan,
+		Object tag) {
 
 		TransactionsGraphInput tgInput = (TransactionsGraphInput)(input);
 		

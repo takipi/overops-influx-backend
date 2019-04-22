@@ -199,7 +199,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 				boolean returnKpi) {
 
 			super(serviceId, viewId, viewName, timelineData.input, timelineData.timespan,
-				serviceIds);
+				serviceIds, app);
 			this.app = app;
 			this.isKey = isKey;
 			this.periods = periods;
@@ -1104,7 +1104,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		
 	}
 	
-	protected Collection<Callable<Object>> getTasks(Collection<String> serviceIds, BaseGraphInput input,
+	private Collection<Callable<Object>> getTasks(Collection<String> serviceIds, BaseGraphInput input,
 			Pair<DateTime, DateTime> timeSpan, 
 			boolean splitByApp, boolean returnKpi) {
 		
@@ -1217,7 +1217,8 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 
 	@Override
 	protected List<GraphSeries> processServiceGraph(Collection<String> serviceIds, String serviceId, String viewId,
-			String viewName, BaseGraphInput request, Pair<DateTime, DateTime> timeSpan) {
+		String viewName, BaseGraphInput request, 
+		Pair<DateTime, DateTime> timeSpan, Object tag) {
 		
 		throw new IllegalStateException();
 	}

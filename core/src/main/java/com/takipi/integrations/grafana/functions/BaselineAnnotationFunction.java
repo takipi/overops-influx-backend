@@ -42,7 +42,7 @@ public class BaselineAnnotationFunction extends BaseGraphFunction {
 	@Override
 	protected List<GraphSeries> processServiceGraph(Collection<String> serviceIds, 
 			String serviceId, String viewId, String viewName,
-			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan) {
+			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, Object tag) {
 	
 		BaselineAnnotationInput baInput = (BaselineAnnotationInput)input;
 				

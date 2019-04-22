@@ -1,4 +1,46 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_OO",
+      "label": "OO",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "5.3.4"
+    },
+    {
+      "type": "panel",
+      "id": "graph",
+      "name": "Graph",
+      "version": "5.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "influxdb",
+      "name": "InfluxDB",
+      "version": "5.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "singlestat",
+      "name": "Singlestat",
+      "version": "5.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": "5.0.0"
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -39,8 +81,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 31,
-  "iteration": 1555016132849,
+  "id": null,
+  "iteration": 1555448752338,
   "links": [
     {
       "icon": "dashboard",
@@ -566,9 +608,9 @@
       "links": [
         {
           "dashboard": "Errors Drill-down",
-          "includeVars": false,
+          "includeVars": true,
           "keepTime": true,
-          "params": "&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-type=Uncaught%20Exception&var-splitLimit=3&var-transactions=$transactions&var-search=$search",
+          "params": "&var-type=Uncaught Exception",
           "targetBlank": false,
           "title": "$uec Uncaught Exceptions",
           "type": "absolute",
@@ -691,9 +733,9 @@
       "links": [
         {
           "dashboard": "Errors Drill-down",
-          "includeVars": false,
+          "includeVars": true,
           "keepTime": true,
-          "params": "&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-type=Critical%20Exceptions&var-splitLimit=3&var-transactions=$transactions&var-search=$search",
+          "params": "&var-type=Critical Exceptions",
           "targetBlank": false,
           "title": "$cec Critical Exceptions",
           "type": "absolute",
@@ -816,9 +858,9 @@
       "links": [
         {
           "dashboard": "Errors Drill-down",
-          "includeVars": false,
+          "includeVars": true,
           "keepTime": true,
-          "params": "&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-type=HTTP%20Error&var-splitLimit=3&var-transactions=$transactions&var-search=$search",
+          "params": "&var-type=HTTP Error",
           "targetBlank": false,
           "title": "$hec HTTP Errors",
           "type": "absolute",
@@ -941,9 +983,9 @@
       "links": [
         {
           "dashboard": "Errors Drill-down",
-          "includeVars": false,
+          "includeVars": true,
           "keepTime": true,
-          "params": "&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-type=Logged%20Error&var-splitLimit=3&var-transactions=$transactions&var-search=$search",
+          "params": "&var-type=Logged Error",
           "targetBlank": false,
           "title": "$lec Log Errors",
           "type": "absolute",
@@ -1078,7 +1120,13 @@
           "yaxis": 2
         },
         {
-          "alias": "/^.Volume/"
+          "alias": "/^./",
+          "yaxis": 2
+        },
+        {
+          "alias": "/^.Volume/",
+          "color": "#f2c96d",
+          "yaxis": 1
         }
       ],
       "spaceLength": 10,
@@ -1104,7 +1152,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\"})",
+          "query": "correlateGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"metricNames\":\"$metricNames\"})",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -1286,7 +1334,13 @@
           "yaxis": 2
         },
         {
-          "alias": "/^.Volume/"
+          "alias": "/^./",
+          "yaxis": 2
+        },
+        {
+          "alias": "/^.Volume/",
+          "color": "#eab839",
+          "yaxis": 1
         }
       ],
       "spaceLength": 10,
@@ -1312,7 +1366,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\"})",
+          "query": "correlateGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"metricNames\":\"$metricNames\"})",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -1941,14 +1995,7 @@
     "list": [
       {
         "allValue": "None",
-        "current": {
-          "selected": false,
-          "tags": [],
-          "text": "None",
-          "value": [
-            "None"
-          ]
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 0,
         "includeAll": false,
@@ -1969,10 +2016,7 @@
       },
       {
         "allValue": "All",
-        "current": {
-          "text": "All",
-          "value": "$__all"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
@@ -1993,10 +2037,7 @@
       },
       {
         "allValue": "All",
-        "current": {
-          "text": "All",
-          "value": "$__all"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
@@ -2017,10 +2058,7 @@
       },
       {
         "allValue": "All",
-        "current": {
-          "text": "All",
-          "value": "$__all"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
@@ -2041,11 +2079,7 @@
       },
       {
         "allValue": "all",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
@@ -2099,11 +2133,7 @@
       },
       {
         "allValue": "*",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
@@ -2113,6 +2143,27 @@
         "options": [],
         "query": "transactions({\"environments\":\"$environments\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"sorted\":\"true\"})",
         "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": "Throughput",
+        "current": {},
+        "datasource": "OO",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Correlate",
+        "multi": true,
+        "name": "metricNames",
+        "options": [],
+        "query": "correlateMetadata({\"environments\":\"$environments\"})",
+        "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -2148,35 +2199,29 @@
       {
         "allValue": null,
         "current": {
-          "isNone": true,
           "selected": true,
-          "text": "None",
-          "value": ""
+          "text": "All Events",
+          "value": "All Events"
         },
-        "datasource": "OO",
-        "hide": 0,
+        "hide": 2,
         "includeAll": false,
         "label": "View",
         "multi": false,
         "name": "view",
-        "options": [],
-        "query": "views({\"environments\":\"$environments\",\"sorted\":true, \"defaultView\":\"All Events\"})",
-        "refresh": 2,
-        "regex": "",
+        "options": [
+          {
+            "selected": true,
+            "text": "All Events",
+            "value": "All Events"
+          }
+        ],
+        "query": "All Events",
         "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
+        "type": "custom"
       },
       {
         "allValue": null,
-        "current": {
-          "text": "24",
-          "value": "24"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2197,11 +2242,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "app.overops.com",
-          "value": "app.overops.com"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2222,11 +2263,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "443",
-          "value": "443"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2247,11 +2284,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "0",
-          "value": "0"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2272,11 +2305,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "0",
-          "value": "0"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2297,12 +2326,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "selected": true,
-          "text": "None",
-          "value": ""
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2323,12 +2347,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "selected": true,
-          "text": "None",
-          "value": ""
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2349,12 +2368,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "selected": true,
-          "text": "None",
-          "value": ""
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2375,12 +2389,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "selected": true,
-          "text": "None",
-          "value": ""
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2401,12 +2410,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "selected": true,
-          "text": "None",
-          "value": ""
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2427,11 +2431,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "0",
-          "value": "0"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2452,11 +2452,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "0",
-          "value": "0"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2477,10 +2473,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "0",
-          "value": "0"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2501,10 +2494,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "0",
-          "value": "0"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2525,11 +2515,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "all|Uncaught Exception",
-          "value": "all|Uncaught Exception"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2550,11 +2536,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "all|HTTP Error",
-          "value": "all|HTTP Error"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2575,11 +2557,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "all|Logged Error",
-          "value": "all|Logged Error"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2600,11 +2578,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "all|Critical Exceptions",
-          "value": "all|Critical Exceptions"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2625,11 +2599,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "8d",
-          "value": "8d"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2651,7 +2621,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "7d",
           "value": "7d"
         },
@@ -2674,7 +2643,7 @@
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-3h",
     "to": "now"
   },
   "timepicker": {
@@ -2706,5 +2675,5 @@
   "timezone": "",
   "title": "Errors",
   "uid": "HYBPMdYik",
-  "version": 167
+  "version": 40
 }

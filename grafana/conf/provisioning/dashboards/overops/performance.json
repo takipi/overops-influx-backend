@@ -1,4 +1,46 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_OO",
+      "label": "OO",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "5.3.4"
+    },
+    {
+      "type": "panel",
+      "id": "graph",
+      "name": "Graph",
+      "version": "5.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "influxdb",
+      "name": "InfluxDB",
+      "version": "5.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "singlestat",
+      "name": "Singlestat",
+      "version": "5.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": "5.0.0"
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -27,8 +69,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 19,
-  "iteration": 1554476877026,
+  "id": null,
+  "iteration": 1555448812701,
   "links": [
     {
       "icon": "dashboard",
@@ -831,6 +873,10 @@
           "alias": "/^.Avg/",
           "color": "#70dbed",
           "dashes": true
+        },
+        {
+          "alias": "/\\*$/",
+          "yaxis": 2
         }
       ],
       "spaceLength": 10,
@@ -856,7 +902,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregateMode\":Yes,\"transactions\":\"$transactions\",\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\"})",
+          "query": "correlateGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregateMode\":Yes,\"transactions\":\"$transactions\",\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\" ,\"metricNames\":\"$metricNames\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1078,6 +1124,10 @@
         },
         {
           "alias": "/^.Failures/"
+        },
+        {
+          "alias": "/\\*$/",
+          "yaxis": 2
         }
       ],
       "spaceLength": 10,
@@ -1103,7 +1153,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregateMode\":Yes,\"transactions\":\"$transactions\",\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\"})",
+          "query": "correlateGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregateMode\":Yes,\"transactions\":\"$transactions\",\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\", \"metricNames\":\"$metricNames\"})",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -1283,15 +1333,15 @@
           "decimals": 0,
           "link": true,
           "linkTargetBlank": false,
-          "linkTooltip": "${__cell_7}. Click to drill-down.",
-          "linkUrl": "d/YVh71-emz/transaction-failures?from=${__cell_2}&to=${__cell_3}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=${__cell_9}&var-type=Transaction Failures",
+          "linkTooltip": "${__cell_8}",
+          "linkUrl": "d/6TxYIh6mk/errors-drill-down?orgId=1&from=${__cell_2}&to=${__cell_3}&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-transactions=${__cell_11}&var-type=Transaction Failures",
           "mappingType": 1,
           "pattern": "error_rate",
           "thresholds": [
             "1",
             "5"
           ],
-          "type": "hidden",
+          "type": "number",
           "unit": "percent",
           "valueMaps": [
             {
@@ -1714,7 +1764,7 @@
         "useTags": false
       },
       {
-        "allValue": "*",
+        "allValue": "All",
         "current": {},
         "datasource": "OO",
         "hide": 0,
@@ -1735,7 +1785,7 @@
         "useTags": false
       },
       {
-        "allValue": "all",
+        "allValue": "All",
         "current": {},
         "datasource": "OO",
         "hide": 0,
@@ -1796,6 +1846,50 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "OO",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Correlate",
+        "multi": true,
+        "name": "metricNames",
+        "options": [],
+        "query": "correlateMetadata({\"environments\":\"$environments\"})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "<term>",
+          "value": "<term>"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Search",
+        "multi": false,
+        "name": "searchText",
+        "options": [
+          {
+            "selected": true,
+            "text": "<term>",
+            "value": "<term>"
+          }
+        ],
+        "query": "<term>",
+        "skipUrlSync": false,
+        "type": "custom"
       },
       {
         "allValue": null,
@@ -1929,29 +2023,6 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "<term>",
-          "value": "<term>"
-        },
-        "hide": 0,
-        "includeAll": false,
-        "label": "Search",
-        "multi": false,
-        "name": "searchText",
-        "options": [
-          {
-            "selected": true,
-            "text": "<term>",
-            "value": "<term>"
-          }
-        ],
-        "query": "<term>",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
         "current": {},
         "datasource": "OO",
         "hide": 2,
@@ -2036,11 +2107,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "5.3ms",
-          "value": "5.3ms"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2094,5 +2161,5 @@
   "timezone": "",
   "title": "Transactions",
   "uid": "Z40SpeJmz",
-  "version": 152
+  "version": 99
 }

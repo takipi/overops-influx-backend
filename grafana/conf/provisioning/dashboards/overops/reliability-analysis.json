@@ -1,4 +1,40 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_OO",
+      "label": "OO",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "5.3.4"
+    },
+    {
+      "type": "datasource",
+      "id": "influxdb",
+      "name": "InfluxDB",
+      "version": "5.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "singlestat",
+      "name": "Singlestat",
+      "version": "5.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": "5.0.0"
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -29,8 +65,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 20,
-  "iteration": 1554673127884,
+  "id": null,
+  "iteration": 1555448853015,
   "links": [
     {
       "icon": "dashboard",
@@ -1186,7 +1222,7 @@
     {
       "columns": [],
       "datasource": "OO",
-      "description": "A list of the top errors within the current filter set.",
+      "description": "A list of all unique errors in the selected time frame and filter set. Events are ordered by the following ranking: uncaught exceptions, critical exceptions (as defined in the Settings dashboard), HTTP errors ,log errors, log warnings, swallowed exceptions and caught exceptions. For events of the same type, ranking is done comparing the rate delta and then volume.",
       "fontSize": "100%",
       "gridPos": {
         "h": 8,
@@ -1633,7 +1669,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "events({\"fields\":\"link,rate_desc,description,rate_delta_desc,rank,typeMessage,stats.hits,rate_delta\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":60, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
+          "query": "events({\"fields\":\"link,rate_desc,description,rate_delta_desc,rank,stats.hits,rate_delta,typeMessage\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":60, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -2474,14 +2510,7 @@
     "list": [
       {
         "allValue": "all",
-        "current": {
-          "selected": false,
-          "tags": [],
-          "text": "None",
-          "value": [
-            "None"
-          ]
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 0,
         "includeAll": false,
@@ -2502,11 +2531,7 @@
       },
       {
         "allValue": "all",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
@@ -2527,11 +2552,7 @@
       },
       {
         "allValue": "all",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
@@ -2552,11 +2573,7 @@
       },
       {
         "allValue": "all",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
@@ -2600,11 +2617,7 @@
       },
       {
         "allValue": "all",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
@@ -2625,11 +2638,7 @@
       },
       {
         "allValue": "*",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
@@ -2650,10 +2659,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "24",
-          "value": "24"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2674,10 +2680,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "100",
-          "value": "100"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2731,10 +2734,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "Logged Error|Uncaught Exception|HTTP Error",
-          "value": "Logged Error|Uncaught Exception|HTTP Error"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2755,11 +2755,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "app.overops.com",
-          "value": "app.overops.com"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2780,11 +2776,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "443",
-          "value": "443"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2828,10 +2820,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "var-type=Logged Error&var-type=Uncaught Exception&var-type=HTTP Error&",
-          "value": "var-type=Logged Error&var-type=Uncaught Exception&var-type=HTTP Error&"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2852,12 +2841,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "selected": true,
-          "text": "None",
-          "value": ""
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2878,12 +2862,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "selected": true,
-          "text": "None",
-          "value": ""
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2904,12 +2883,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "selected": true,
-          "text": "None",
-          "value": ""
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2930,12 +2904,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "selected": true,
-          "text": "None",
-          "value": ""
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2956,12 +2925,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "selected": true,
-          "text": "None",
-          "value": ""
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -2982,11 +2946,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "0",
-          "value": "0"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -3007,11 +2967,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "0",
-          "value": "0"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -3055,12 +3011,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "selected": true,
-          "text": "None",
-          "value": ""
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -3081,12 +3032,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "selected": true,
-          "text": "None",
-          "value": ""
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -3107,12 +3053,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "selected": true,
-          "text": "None",
-          "value": ""
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -3133,10 +3074,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "524",
-          "value": "524"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -3181,5 +3119,5 @@
   "timezone": "",
   "title": "Reliability Analysis",
   "uid": "4DHQ63-ik",
-  "version": 260
+  "version": 65
 }

@@ -1619,7 +1619,6 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		pkInput.kpi = RelabilityKpi.Score.toString();
 		pkInput.reportInterval = regInput.reportInterval; 
-		pkInput.transactionPointsWanted = regInput.transactionPointsWanted;
 		pkInput.aggregate = false;
 		pkInput.limit = regInput.limit;
 		
