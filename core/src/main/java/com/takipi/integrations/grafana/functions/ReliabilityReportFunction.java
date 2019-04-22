@@ -2418,7 +2418,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 	}
 	
 	private String getAppStatusName(ReliabilityReportInput input, 
-		ReliabilityState state, String name) {
+		ReliabilityState state, String name, String alertDesc) {
 		
 		String prefix = getStatusPrefix(input, state);
 		
@@ -2426,9 +2426,17 @@ public class ReliabilityReportFunction extends EventsFunction {
 			return "";
 		}
 		
-		String result =  prefix + name;
+		StringBuilder result = new StringBuilder();
 		
-		return result;
+		result.append(prefix);
+		result.append(name);
+		
+		if ((input.alertNamePostfix != null) &&
+			(alertDesc != null) && (!alertDesc.isEmpty())) {
+			result.append(input.alertNamePostfix);
+		}
+		
+		return result.toString();
 		
 	}
 		
@@ -2513,7 +2521,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		if (result.hasAnomalyAlerts) {
 			
 			if (result.hasNewAlert) {
-				desc.append(", ");
+				desc.append(". ");
 			}
 			
 			desc.append("Alert on anomalies: ");
@@ -2677,8 +2685,16 @@ public class ReliabilityReportFunction extends EventsFunction {
 			ReliabilityReportInput input, ReportRow row, 
 			ReportKeyResults reportKeyResult, String serviceName,
 			Map<String, ReportKeyAlerts> reportKeyAlertsMap) {
-						
-		String appStatusName = getAppStatusName(input, reportKeyResult.relability.reliabilityState, serviceName);
+		
+		ReportKeyAlerts reportKeyAlerts = reportKeyAlertsMap.get(reportKeyResult.output.reportKey.name);
+		Pair<String, String> alertPair = getAlertStatus(input, reportKeyAlerts);
+
+		String alertStatus = alertPair.getFirst();
+		String alertDesc = alertPair.getSecond();
+
+		String appStatusName = getAppStatusName(input, reportKeyResult.relability.reliabilityState, 
+			serviceName, alertDesc);
+		
 		Object failRateDelta = getFailRateDelta(input, reportKeyResult.relability);
 				
 		row.set(ReliabilityReportInput.STATUS_NAME, appStatusName);
@@ -2697,11 +2713,16 @@ public class ReliabilityReportFunction extends EventsFunction {
 		row.set(ReliabilityReportInput.RELIABILITY_STATE, reportKeyResult.relability.reliabilityState.ordinal());	
 		row.set(ReliabilityReportInput.RELIABILITY_DESC, reportKeyResult.relability.reliabilityDesc);	
 		
-		ReportKeyAlerts reportKeyAlerts = reportKeyAlertsMap.get(reportKeyResult.output.reportKey.name);
-		Pair<String, String> alertStatus = getAlertStatus(input, reportKeyAlerts);
+		String alertDescValue;
 		
-		row.set(ReliabilityReportInput.ALERT_STATUS, alertStatus.getFirst());	
-		row.set(ReliabilityReportInput.ALERT_DESC, alertStatus.getSecond());	
+		if ((alertDesc != null) && (!alertDesc.isEmpty())) {
+			alertDescValue = alertDesc;
+		} else {	
+			alertDescValue = "Click to add alerts";
+		}
+		
+		row.set(ReliabilityReportInput.ALERT_STATUS, alertStatus);	
+		row.set(ReliabilityReportInput.ALERT_DESC, alertDescValue);	
 	}
 	
 	public Pair<String, String> getAlertStatus(ReliabilityReportInput input,
@@ -2738,10 +2759,6 @@ public class ReliabilityReportFunction extends EventsFunction {
 		} else {
 			desc = null;
 			status.append(parts[0]);	
-		}
-		
-		if ((desc == null) || (desc.isEmpty())) {
-			desc = "Click to add alerts";
 		}
 		
 		return Pair.of(status.toString(), desc);	

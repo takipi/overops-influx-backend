@@ -355,6 +355,11 @@ public class ReliabilityReportInput extends RegressionsInput {
 	public String alertStatusPrefixes;
 	
 	/**
+	 * A string postfix to be added to an app / tier name to denote it having alerts set
+	 */
+	public String alertNamePostfix;
+	
+	/**
 	 * A comma delimited array in the form of X,Y, where X defines the threshold for a failed score
 	 * and Y defines the threshold a successful score. For example: 70,85 
 	 */

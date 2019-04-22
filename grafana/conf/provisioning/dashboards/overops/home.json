@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 43,
-  "iteration": 1555789313118,
+  "iteration": 1555945416931,
   "links": [
     {
       "icon": "external link",
@@ -260,8 +260,8 @@
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": null,
-        "desc": false
+        "col": 15,
+        "desc": true
       },
       "styles": [
         {
@@ -955,7 +955,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_11}. Click to drill down into ${__cell_12}",
+          "linkTooltip": "${__cell_11}. ${__cell_12}",
           "linkUrl": "d/nxdE2gXmk/site-reliability?from=${__cell_0}&to=${__cell_1}&application-reliability?orgId=1&var-environments=${__cell_3}&var-servers=$limitServers&var-applications=${__cell_4}&var-type=$limitType",
           "mappingType": 1,
           "pattern": "StatusName",
@@ -1004,7 +1004,7 @@
           "mappingType": 1,
           "pattern": "AlertStatus",
           "thresholds": [],
-          "type": "string",
+          "type": "hidden",
           "unit": "short"
         }
       ],
@@ -1027,7 +1027,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"All\", \"render\":\"Grid\", \"mode\":\"Apps_Extended\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"minFailRate\":$minFailRate, \"failureTypes\":\"$transactionFailureTypes\", \"statusPrefixes2\":\"✅ ,⚠ ,❌ \", \"scoreRanges\":\"70,85\",  \"statusPrefixes\":\"✅,⚠️,❌\", \"failRatePrefixes\":\",↑,↑\", \"alertStatusPrefixes\":\"➕,🆕️,📈\"})",
+          "query": "regressionReport({\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"All\", \"render\":\"Grid\", \"mode\":\"Apps_Extended\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"minFailRate\":$minFailRate, \"failureTypes\":\"$transactionFailureTypes\", \"statusPrefixes2\":\"✅ ,⚠ ,❌ \", \"scoreRanges\":\"70,85\",  \"statusPrefixes\":\"✅,⚠️,❌\", \"failRatePrefixes\":\",↑,↑\", \"alertStatusPrefixes\":\"➕,🆕️,📈\", \"alertNamePostfix\":\"   ✉️\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1766,7 +1766,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "${__cell_11}. Click to drill down into ${__cell_12}",
+          "linkTooltip": "${__cell_11}. ${__cell_12}",
           "linkUrl": "d/HYBPMdYik/errors?from=${__cell_0}&to=${__cell_1}&var-environments=${__cell_3}&var-servers=$limitServers&var-applications=$limitApplications&var-type=-${__cell_4}",
           "mappingType": 1,
           "pattern": "StatusName",
@@ -1814,7 +1814,7 @@
           "mappingType": 1,
           "pattern": "AlertStatus",
           "thresholds": [],
-          "type": "number",
+          "type": "hidden",
           "unit": "short"
         }
       ],
@@ -1837,7 +1837,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"All\", \"render\":\"Grid\", \"mode\":\"Tiers_Extended\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"minFailRate\":\"$minFailRate\", \"failureTypes\":\"$transactionFailureTypes\", \"statusPrefixes2\":\"✅ ,⚠ ,❌ \", \"scoreRanges\":\"70,85\",  \"statusPrefixes\":\"✅,⚠️,❌\", \"addAppTier\":\"true\", \"failRatePrefixes\":\",↑,↑\",\"alertStatusPrefixes\":\"➕,🆕️,📈\"})",
+          "query": "regressionReport({\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"All\", \"render\":\"Grid\", \"mode\":\"Tiers_Extended\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"minFailRate\":\"$minFailRate\", \"failureTypes\":\"$transactionFailureTypes\", \"statusPrefixes2\":\"✅ ,⚠ ,❌ \", \"scoreRanges\":\"70,85\",  \"statusPrefixes\":\"✅,⚠️,❌\", \"addAppTier\":\"true\", \"failRatePrefixes\":\",↑,↑\",\"alertStatusPrefixes\":\"➕,🆕️,📈\",\"alertNamePostfix\":\"   ✉️\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",

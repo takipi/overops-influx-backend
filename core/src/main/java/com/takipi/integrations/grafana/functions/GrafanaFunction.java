@@ -975,6 +975,9 @@ public abstract class GrafanaFunction {
 		return result;
 	}
 	
+	/**
+	 * @param queryBaselineGraphs - skipped for now 
+	 */
 	private void updateTransactionPerformance(String serviceId, String viewId, 
 			Pair<DateTime, DateTime> timeSpan, BaseEventVolumeInput input, 
 			RegressionInput regressionInput, RegressionWindow regressionWindow, 
@@ -1080,6 +1083,7 @@ public abstract class GrafanaFunction {
 		return key;
 	}
 	
+	@SuppressWarnings("unused")
 	private Collection<TransactionGraph> getBaselineGraphs(
 		Collection<TransactionGraph> graphs, DateTime activeWindowStart) {
 	
