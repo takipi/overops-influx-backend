@@ -18,9 +18,9 @@ import org.joda.time.DateTime;
 import com.google.common.base.Objects;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.data.event.BaseStats;
 import com.takipi.api.client.data.event.Location;
 import com.takipi.api.client.data.event.Stats;
-import com.takipi.api.client.result.event.ApiBaseStats;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventSlimResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
@@ -775,7 +775,7 @@ public class EventsFunction extends GrafanaFunction {
 		super(apiClient, settingsMaps);
 	}
 	
-	protected static String formatRateDelta(ApiBaseStats baseline, ApiBaseStats stats) {
+	protected static String formatRateDelta(BaseStats baseline, BaseStats stats) {
 		
 		StringBuilder result = new StringBuilder();
 		
@@ -786,7 +786,7 @@ public class EventsFunction extends GrafanaFunction {
 		return result.toString(); 
 	}
 	
-	protected static String formatRate(ApiBaseStats stats) {
+	protected static String formatRate(BaseStats stats) {
 		return formatRate(stats.hits, stats.invocations);
 	}
 	
