@@ -564,6 +564,28 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		}
 		
 		Map<DateTime, KpiInterval> result = new TreeMap<DateTime, KpiInterval>();
+				
+		
+		for (EventResult eventResult : eventMap.values()) {
+			
+			for (Pair<DateTime, DateTime> period : periods) {
+				
+				DateTime firstSeen = TimeUtil.getDateTime(eventResult.first_seen);
+				
+				if ((firstSeen.isAfter(period.getFirst())) 
+				&& (firstSeen.isBefore(period.getSecond()))) {
+					
+					VolumeInterval volumeInterval = (VolumeInterval)(result.get(period.getFirst()));
+					
+					if (volumeInterval == null) {
+						volumeInterval = new VolumeInterval(period);
+						result.put(period.getSecond(), volumeInterval);
+					}
+					
+					volumeInterval.eventIds.add(eventResult.id);
+				}
+			}
+		}
 		
 		for (GraphPoint gp : graph.points) {
 			
