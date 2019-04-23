@@ -31,6 +31,7 @@ import com.takipi.api.client.data.label.Label;
 import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.request.application.ApplicationsRequest;
+import com.takipi.api.client.request.category.CategoriesRequest;
 import com.takipi.api.client.request.deployment.DeploymentsRequest;
 import com.takipi.api.client.request.event.EventRequest;
 import com.takipi.api.client.request.event.EventsRequest;
@@ -41,10 +42,12 @@ import com.takipi.api.client.request.metrics.system.SystemMetricGraphRequest;
 import com.takipi.api.client.request.metrics.system.SystemMetricMetadatasRequest;
 import com.takipi.api.client.request.process.JvmsRequest;
 import com.takipi.api.client.request.service.ServicesRequest;
+import com.takipi.api.client.request.settings.AlertsSettingsRequest;
 import com.takipi.api.client.request.transaction.TransactionsGraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsVolumeRequest;
 import com.takipi.api.client.request.view.ViewsRequest;
 import com.takipi.api.client.result.application.ApplicationsResult;
+import com.takipi.api.client.result.category.CategoriesResult;
 import com.takipi.api.client.result.deployment.DeploymentsResult;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventsResult;
@@ -55,6 +58,7 @@ import com.takipi.api.client.result.metrics.system.SystemMetricGraphResult;
 import com.takipi.api.client.result.metrics.system.SystemMetricMetadatasResult;
 import com.takipi.api.client.result.process.JvmsResult;
 import com.takipi.api.client.result.service.ServicesResult;
+import com.takipi.api.client.result.settings.AlertsSettingsResult;
 import com.takipi.api.client.result.transaction.TransactionsGraphResult;
 import com.takipi.api.client.result.transaction.TransactionsVolumeResult;
 import com.takipi.api.client.result.view.ViewsResult;
@@ -324,6 +328,67 @@ public class ApiCache {
 		}
 	}
 	
+	protected static class AlertSettingsCacheLoader extends ServiceCacheLoader {
+
+		public AlertSettingsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId) {
+			super(apiClient, request, serviceId);
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			
+			if (!(obj instanceof AlertSettingsCacheLoader)) {
+				return false;
+			}
+			
+			return super.equals(obj);
+		}	
+	}
+	
+	protected static class CategoriesCacheLoader extends ServiceCacheLoader {
+
+		protected boolean includeViews;
+		
+		public CategoriesCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, 
+			String serviceId, boolean includeViews) {
+			super(apiClient, request, serviceId);
+			this.includeViews = includeViews;
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			
+			if (!(obj instanceof CategoriesCacheLoader)) {
+				return false;
+			}
+			
+			CategoriesCacheLoader other = (CategoriesCacheLoader)obj;
+			
+			if (includeViews != other.includeViews) {
+				return false;
+			}
+			
+			return super.equals(obj);
+		}	
+	}
+	
+	protected static class ViewsCacheLoader extends ServiceCacheLoader {
+
+		public ViewsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId) {
+			super(apiClient, request, serviceId);
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			
+			if (!(obj instanceof ViewsCacheLoader)) {
+				return false;
+			}
+			
+			return super.equals(obj);
+		}	
+	}
+		
 	protected static class LabelsCacheLoader extends ServiceCacheLoader {
 
 		public LabelsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId) {
@@ -1462,6 +1527,16 @@ public class ApiCache {
 	}
 	
 	@SuppressWarnings("unchecked")
+	public static Response<AlertsSettingsResult> getAlertsSettings(ApiClient apiClient, String serviceId) {
+
+		AlertsSettingsRequest request = AlertsSettingsRequest.newBuilder().setServiceId(serviceId).build();		
+		AlertSettingsCacheLoader cacheKey = new AlertSettingsCacheLoader(apiClient, request, serviceId);
+		Response<AlertsSettingsResult> response = (Response<AlertsSettingsResult>)getItem(cacheKey);
+
+		return response;
+	}
+	
+	@SuppressWarnings("unchecked")
 	public static Response<LabelsResult> getLabels(ApiClient apiClient, String serviceId) {
 
 		LabelsRequest request = LabelsRequest.newBuilder().setServiceId(serviceId).build();		
@@ -1471,6 +1546,31 @@ public class ApiCache {
 		return response;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public static Response<CategoriesResult> getCategories(ApiClient apiClient, String serviceId,
+			boolean includeViews) {
+
+		CategoriesRequest request = CategoriesRequest.newBuilder().
+			setServiceId(serviceId).setIncludeViews(includeViews).build();		
+		
+		CategoriesCacheLoader cacheKey = new CategoriesCacheLoader(apiClient, 
+				request, serviceId, includeViews);
+		
+		Response<CategoriesResult> response = (Response<CategoriesResult>)getItem(cacheKey);
+
+		return response;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static Response<ViewsResult> getViews(ApiClient apiClient, String serviceId) {
+
+		ViewsRequest request = ViewsRequest.newBuilder().setServiceId(serviceId).build();		
+		ViewsCacheLoader cacheKey = new ViewsCacheLoader(apiClient, request, serviceId);
+		Response<ViewsResult> response = (Response<ViewsResult>)getItem(cacheKey);
+
+		return response;
+	}
+		
 	public static Collection<String> getLabelNames(ApiClient apiClient, String serviceId) {
 		
 		Response<LabelsResult> response = getLabels(apiClient, serviceId);

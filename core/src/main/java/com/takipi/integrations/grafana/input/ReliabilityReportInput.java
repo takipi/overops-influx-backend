@@ -84,7 +84,7 @@ public class ReliabilityReportInput extends RegressionsInput {
 	/**
 	 * The key value to be be used as the Y value of each point if the function is to return a graph 
 	 */
-	public enum RelabilityKpi {
+	public enum ReliabilityKpi {
 		/**
 		 * chart the number of new issues
 		 */
@@ -154,13 +154,13 @@ public class ReliabilityReportInput extends RegressionsInput {
 		ScoreDesc
 	}
 	
-	public static RelabilityKpi getKpi(String kpi) {
+	public static ReliabilityKpi getKpi(String kpi) {
 		
 		if ((kpi ==  null) || (kpi.length() == 0)) {
-			return RelabilityKpi.Score;
+			return ReliabilityKpi.Score;
 		}
 		
-		RelabilityKpi result = RelabilityKpi.valueOf(kpi.replace(" ", ""));
+		ReliabilityKpi result = ReliabilityKpi.valueOf(kpi.replace(" ", ""));
 		
 		return result;
 	}
@@ -349,6 +349,17 @@ public class ReliabilityReportInput extends RegressionsInput {
 	public String failRatePrefixes;
 	
 	/**
+	 * A comma delimited array used to visually annotate the alert status of the key
+	 * with values for: no alerts (add), new error, anomaly  for example: ➕,🆕️,📈
+	 */
+	public String alertStatusPrefixes;
+	
+	/**
+	 * A string postfix to be added to an app / tier name to denote it having alerts set
+	 */
+	public String alertNamePostfix;
+	
+	/**
 	 * A comma delimited array in the form of X,Y, where X defines the threshold for a failed score
 	 * and Y defines the threshold a successful score. For example: 70,85 
 	 */
@@ -498,6 +509,16 @@ public class ReliabilityReportInput extends RegressionsInput {
 	 */
 	public static final String STATUS_NAME = "StatusName";
 	
+	/**
+	 * Field name of the an app / tier alert status
+	 */
+	public static final String ALERT_STATUS = "AlertStatus";
+	
+	/**
+	 * Field name of the an app / tier alert description
+	 */
+	public static final String ALERT_DESC = "AlertDesc";
+	
 	
 
 	/**
@@ -515,7 +536,7 @@ public class ReliabilityReportInput extends RegressionsInput {
 			SLOWDOWNS_DESC,
 			SCORE_DESC,
 			PREV_DEP_NAME, 
-			PREV_DEP_FROM, 
+			PREV_DEP_FROM,
 			NAME,
 			PREV_DEP_STATE,
 			NEW_ISSUES, 
@@ -584,8 +605,10 @@ public class ReliabilityReportInput extends RegressionsInput {
 			SCORE_DESC,	
 			TRANSACTION_FAIL_DESC,
 			RELIABILITY_DESC,
+			ALERT_DESC,
 			NAME, 
 			STATUS_NAME,
+		 	ALERT_STATUS,
 			TRANSACTION_VOLUME,
 			TRANSACTION_AVG_RESPONSE,
 		 	NEW_ISSUES, 

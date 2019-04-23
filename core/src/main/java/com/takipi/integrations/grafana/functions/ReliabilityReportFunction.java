@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,19 +28,27 @@ import com.takipi.api.client.data.deployment.SummarizedDeployment;
 import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
+import com.takipi.api.client.data.settings.AlertSettings;
 import com.takipi.api.client.data.transaction.TransactionGraph;
+import com.takipi.api.client.data.view.SummarizedView;
+import com.takipi.api.client.data.view.ViewInfo;
+import com.takipi.api.client.result.category.CategoriesResult;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventSlimResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
+import com.takipi.api.client.result.settings.AlertsSettingsResult;
+import com.takipi.api.client.result.view.ViewsResult;
 import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.infra.Categories.Category;
 import com.takipi.api.client.util.infra.Categories.CategoryType;
+import com.takipi.api.client.util.infra.InfraUtil;
 import com.takipi.api.client.util.performance.calc.PerformanceState;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.settings.GroupSettings;
 import com.takipi.api.client.util.settings.RegressionReportSettings;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
+import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOutput;
@@ -53,7 +62,7 @@ import com.takipi.integrations.grafana.input.RegressionsInput;
 import com.takipi.integrations.grafana.input.RegressionsInput.RenderMode;
 import com.takipi.integrations.grafana.input.ReliabilityKpiGraphInput;
 import com.takipi.integrations.grafana.input.ReliabilityReportInput;
-import com.takipi.integrations.grafana.input.ReliabilityReportInput.RelabilityKpi;
+import com.takipi.integrations.grafana.input.ReliabilityReportInput.ReliabilityKpi;
 import com.takipi.integrations.grafana.input.ReliabilityReportInput.ReliabilityState;
 import com.takipi.integrations.grafana.input.ReliabilityReportInput.ReportMode;
 import com.takipi.integrations.grafana.input.ReliabilityReportInput.ScoreType;
@@ -288,6 +297,12 @@ public class ReliabilityReportFunction extends EventsFunction {
 		}
 	}
 	
+	protected static class ReportKeyAlerts {
+		protected boolean hasNewAlert;
+		protected boolean hasAnomalyAlerts;
+		protected String description;
+	}
+	
 	protected static class ReportAsyncResult {
 		protected ReportKey key;
 		
@@ -358,9 +373,9 @@ public class ReliabilityReportFunction extends EventsFunction {
 				RegressionInput regressionInput = regPair.getFirst();
 				RegressionWindow regressionWindow = regPair.getSecond();
 
+				DateTime from = regressionWindow.activeWindowStart; 
+				DateTime to = regressionWindow.activeWindowStart.plusMinutes(regressionWindow.activeTimespan);
 				
-				DateTime to = DateTime.now();
-				DateTime from = to.minusMinutes(regressionWindow.activeTimespan);
 				Pair<DateTime, DateTime> activeWindow = Pair.of(from, to);
 				
 				Collection<TransactionGraph> transactionGraphs = getTransactionGraphs(input,
@@ -530,7 +545,6 @@ public class ReliabilityReportFunction extends EventsFunction {
 		protected ReportRow(List<String> fields) {
 			this.fields = fields;
 			values = Arrays.asList(new Object[fields.size()]);
-
 		}
 		
 		protected void set(String field, Object value) {
@@ -1413,7 +1427,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		String json = gson.toJson(regInput);
 		ReliabilityKpiGraphInput pkInput = gson.fromJson(json, ReliabilityKpiGraphInput.class);
 		
-		pkInput.kpi = RelabilityKpi.Score.toString();
+		pkInput.kpi = ReliabilityKpi.Score.toString();
 		pkInput.reportInterval = regInput.reportInterval; 
 		pkInput.aggregate = false;
 		pkInput.limit = regInput.limit;
@@ -2404,7 +2418,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 	}
 	
 	private String getAppStatusName(ReliabilityReportInput input, 
-		ReliabilityState state, String name) {
+		ReliabilityState state, String name, String alertDesc) {
 		
 		String prefix = getStatusPrefix(input, state);
 		
@@ -2412,19 +2426,277 @@ public class ReliabilityReportFunction extends EventsFunction {
 			return "";
 		}
 		
-		String result =  prefix + name;
+		StringBuilder result = new StringBuilder();
+		
+		result.append(prefix);
+		result.append(name);
+		
+		if ((input.alertNamePostfix != null) &&
+			(alertDesc != null) && (!alertDesc.isEmpty())) {
+			result.append(input.alertNamePostfix);
+		}
+		
+		return result.toString();
+		
+	}
+		
+	private Map<String,ViewInfo> getViewMap(String serviceId) {
+		
+		Response<CategoriesResult> categoriesResponse = ApiCache.getCategories(apiClient, serviceId, true);
+		
+		if ((categoriesResponse.data == null) 
+		|| (categoriesResponse.data.categories == null)) {
+			return Collections.emptyMap();
+		}
+		
+		Map<String,ViewInfo> result = new HashMap<String,ViewInfo>();
+		
+		for (com.takipi.api.client.data.category.Category category : 
+			categoriesResponse.data.categories) {
+			
+			if (CollectionUtil.safeIsEmpty(category.views)) {
+				continue;
+			}
+			
+			for (ViewInfo viewInfo : category.views) {
+				result.put(viewInfo.id, viewInfo);
+			}
+		}
+		
+		if (result.size() == 0) {
+			
+			Response<ViewsResult> viewsResponse = ApiCache.getViews(apiClient, serviceId);
+			
+			if ((viewsResponse.data != null) && (viewsResponse.data.views != null)) {
+				for (SummarizedView summarizedView : viewsResponse.data.views) {
+					result.put(summarizedView.id, null);
+				}
+			}
+		}
 		
 		return result;
+	}
+	
+	private ReportKeyAlerts getReportKeyAlerts(List<AlertSettings> AlertsSettings) {
+	
+		List<String> alertOnNewChannels = new ArrayList<String>();
+		List<AlertSettings> alertOnAnomalies = new ArrayList<AlertSettings>();
+
+		for (AlertSettings alertSettings : AlertsSettings) {
+						
+			if (alertSettings.alerts.alert_on_new) {
+				
+				if (!CollectionUtil.safeIsEmpty(alertSettings.alerts.channels)) {
+					alertOnNewChannels.addAll(alertSettings.alerts.channels);	
+				}	
+				
+				if (	alertSettings.alerts.channel_function != null) {
+					alertOnNewChannels.add(alertSettings.alerts.channel_function.summary);	
+				}
+			}
+			
+			if ((alertSettings.alerts.anomaly_alert != null) 
+			&& (alertSettings.alerts.anomaly_alert.alert_on_anomaly)
+			&& (alertSettings.alerts.anomaly_alert.anomaly_function != null)) {
+				alertOnAnomalies.add(alertSettings);
+			}			
+		}
+		
+		if ((alertOnNewChannels.size() == 0) && (alertOnAnomalies.size() == 0)) {
+			return null;
+		}
+		
+		ReportKeyAlerts result = new ReportKeyAlerts();
+		
+		result.hasNewAlert = alertOnNewChannels.size() > 0;
+		result.hasAnomalyAlerts = alertOnAnomalies.size() > 0;
+
+		StringBuilder desc = new StringBuilder();
+	
+		if (result.hasNewAlert) {
+			desc.append("Alert on new events to: ");
+			desc.append(String.join(", ", alertOnNewChannels).toLowerCase());
+		}
+		
+		if (result.hasAnomalyAlerts) {
+			
+			if (result.hasNewAlert) {
+				desc.append(". ");
+			}
+			
+			desc.append("Alert on anomalies: ");
+
+			for (AlertSettings anomalySettings : alertOnAnomalies) {
+				
+				String summary = anomalySettings.alerts.anomaly_alert.anomaly_function.summary;
+				
+				desc.append(summary);
+				
+				if (!CollectionUtil.safeIsEmpty(anomalySettings.alerts.channels)) {
+					desc.append(" to ");
+					desc.append(String.join(", ", anomalySettings.alerts.channels).toLowerCase());
+				}
+			}
+		}
+		
+		result.description = desc.toString();
+		
+		return result;
+	}
+		
+	private CategoryType getReportCategoryType(ReliabilityReportInput input) {
+		
+		switch (input.getReportMode()) {
+			case Applications:
+			case Apps_Extended:
+				return CategoryType.app;
+			case Tiers:
+			case Tiers_Extended:
+				return CategoryType.infra;
+			default:
+				return null;
+		}
 		
 	}
 	
+	private void addAppToMap(Map<String, List<AlertSettings>> keysAlertsMaps,
+		String app, AlertSettings alertSettings) {
+		
+		List<AlertSettings> appAlertSettings = keysAlertsMaps.get(app);
+		
+		if (appAlertSettings == null) {
+			appAlertSettings = new ArrayList<AlertSettings>();
+			keysAlertsMaps.put(app, appAlertSettings);
+		}
+		
+		appAlertSettings.add(alertSettings);
+	}
+	
+	private Map<String, ReportKeyAlerts> getReportKeyAlerts(
+		ReliabilityReportInput input, String serviceId) {
+			
+		CategoryType categoryType = getReportCategoryType(input);
+		
+		if (categoryType == null) {
+			return Collections.emptyMap();	
+		}
+		
+		Map<String,ViewInfo> viewsMap = getViewMap(serviceId);
+		
+		if (CollectionUtil.safeIsEmpty(viewsMap)) {
+			return Collections.emptyMap();
+		}
+		
+		Response<AlertsSettingsResult> alertsResponse = ApiCache.getAlertsSettings(apiClient, serviceId);
+		 
+		if ((alertsResponse == null) || (alertsResponse.isBadResponse()) 
+		|| (alertsResponse.data == null)) {
+			return Collections.emptyMap();
+		}
+			
+		Collection<String> appNames = new HashSet<String>(ApiCache.getApplicationNames(apiClient, serviceId, false));
+		Collection<String> labelNames = new HashSet<String>(ApiCache.getLabelNames(apiClient, serviceId));
+
+		Map<String, List<AlertSettings>> keysAlertsMaps = new HashMap<String, List<AlertSettings>>();
+		
+		List<AlertSettings> alerts = alertsResponse.data.alerts;
+		  
+		for (AlertSettings alertSettings : alerts) {
+			
+			if (alertSettings.alerts == null) {
+				continue;
+			}
+			
+			String viewKey = alertSettings.view_id;
+			
+			if (!viewsMap.containsKey(viewKey)) {
+				continue;
+			}
+			
+			ViewInfo viewInfo = viewsMap.get(viewKey);
+			
+			if ((viewInfo != null) && (viewInfo.filters != null)) {
+				
+				if (!CollectionUtil.safeIsEmpty(viewInfo.filters.apps)) {
+					
+					for (String app : viewInfo.filters.apps) {
+						addAppToMap(keysAlertsMaps, app, alertSettings);			
+					}
+				}
+				
+				if (!CollectionUtil.safeIsEmpty(viewInfo.filters.labels)) {
+					
+					for (String label : viewInfo.filters.labels) {
+						
+						String tierName = InfraUtil.getTierNameFromLabel(label, categoryType);
+						
+						if (tierName == null) {
+							continue;
+						}
+						
+						String appKey;
+						
+						if (categoryType == CategoryType.app) {
+							appKey = EnvironmentsFilterInput.toAppLabel(tierName);
+						} else {
+							appKey = tierName;
+						}
+											
+						addAppToMap(keysAlertsMaps, appKey, alertSettings);			
+					}
+				}	
+			} else {
+				if (appNames.contains(alertSettings.view)) {
+					addAppToMap(keysAlertsMaps, alertSettings.view, alertSettings);
+				} else {
+					String tierLabelName = InfraUtil.toTierLabelName(alertSettings.view, categoryType);
+					
+					if (labelNames.contains(tierLabelName)) {								
+							
+						String appKey;
+							
+						if (categoryType == CategoryType.app) {
+							appKey = EnvironmentsFilterInput.toAppLabel(alertSettings.view);
+						} else {
+							appKey = alertSettings.view;
+						}
+							
+						addAppToMap(keysAlertsMaps, appKey, alertSettings);										
+					}
+				}
+			}
+		}
+				
+		Map<String, ReportKeyAlerts> result = new HashMap<>();
+		
+		for (Map.Entry<String, List<AlertSettings>> entry : keysAlertsMaps.entrySet()) {
+			
+			ReportKeyAlerts reportKeyAlerts = getReportKeyAlerts(entry.getValue());
+			
+			if (reportKeyAlerts != null) {
+				result.put(entry.getKey(), reportKeyAlerts);
+			}
+		}
+		
+		return result;
+	}
+		
 	private void addExtendedFields(
 			ReliabilityReportInput input, ReportRow row, 
-			ReportKeyResults reportKeyResult, String serviceName) {
-				
-		String appStatusName = getAppStatusName(input, reportKeyResult.relability.reliabilityState, serviceName);
-		Object failRateDelta = getFailRateDelta(input, reportKeyResult.relability);
+			ReportKeyResults reportKeyResult, String serviceName,
+			Map<String, ReportKeyAlerts> reportKeyAlertsMap) {
 		
+		ReportKeyAlerts reportKeyAlerts = reportKeyAlertsMap.get(reportKeyResult.output.reportKey.name);
+		Pair<String, String> alertPair = getAlertStatus(input, reportKeyAlerts);
+
+		String alertStatus = alertPair.getFirst();
+		String alertDesc = alertPair.getSecond();
+
+		String appStatusName = getAppStatusName(input, reportKeyResult.relability.reliabilityState, 
+			serviceName, alertDesc);
+		
+		Object failRateDelta = getFailRateDelta(input, reportKeyResult.relability);
+				
 		row.set(ReliabilityReportInput.STATUS_NAME, appStatusName);
 
 		row.set(ReliabilityReportInput.TRANSACTION_VOLUME, formatLongValue(reportKeyResult.transactions.transactionVolume));
@@ -2440,6 +2712,56 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		row.set(ReliabilityReportInput.RELIABILITY_STATE, reportKeyResult.relability.reliabilityState.ordinal());	
 		row.set(ReliabilityReportInput.RELIABILITY_DESC, reportKeyResult.relability.reliabilityDesc);	
+		
+		String alertDescValue;
+		
+		if ((alertDesc != null) && (!alertDesc.isEmpty())) {
+			alertDescValue = alertDesc;
+		} else {	
+			alertDescValue = "Click to add alerts";
+		}
+		
+		row.set(ReliabilityReportInput.ALERT_STATUS, alertStatus);	
+		row.set(ReliabilityReportInput.ALERT_DESC, alertDescValue);	
+	}
+	
+	public Pair<String, String> getAlertStatus(ReliabilityReportInput input,
+		ReportKeyAlerts reportKeyAlerts) {
+		
+		if (input.alertStatusPrefixes == null) {
+			return Pair.of("", "");
+		}
+		
+		String[] parts = input.alertStatusPrefixes.split(ARRAY_SEPERATOR);
+		
+		if (parts.length != 3) {
+			return Pair.of("", "");
+		}
+		
+		StringBuilder status = new StringBuilder();
+		String desc;
+		
+		if (reportKeyAlerts != null) {
+			
+			desc = reportKeyAlerts.description;
+			
+			if (reportKeyAlerts.hasNewAlert) {
+				status.append(parts[1]);
+			}
+			
+			if (reportKeyAlerts.hasAnomalyAlerts) {
+				status.append(parts[2]);
+			}
+			
+			if (status.length() == 0) {
+				status.append(parts[0]);	
+			}
+		} else {
+			desc = null;
+			status.append(parts[0]);	
+		}
+		
+		return Pair.of(status.toString(), desc);	
 	}
 	
 	private void addTimelineFields(ReportRow row) {
@@ -2531,6 +2853,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 		ReportMode reportMode = rrInput.getReportMode();
 		
+		Map<String, ReportKeyAlerts> reportKeyAlertsMap = getReportKeyAlerts(rrInput, serviceId);
+		
 		for (ReportKeyResults reportKeyResult : reportKeyResults) {
 			
 			RegressionWindow regressionWindow = reportKeyResult.output.regressionData.regressionOutput.regressionWindow;
@@ -2564,7 +2888,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 				case Apps_Extended:
 				case Timeline_Extended:
 				case Tiers_Extended:
-					addExtendedFields(rrInput, row, reportKeyResult, serviceValue);	
+					addExtendedFields(rrInput, row, reportKeyResult, 
+						serviceValue, reportKeyAlertsMap);	
 					break;
 				case Deployments:
 					addDepCompareFields(row, reportKeyResult, timeRangePair.getFirst());
@@ -2660,7 +2985,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 	private Object getReportKeyValue(Collection<String> serviceIds, String serviceId, Pair<DateTime, DateTime> timeSpan,
 		ReliabilityReportInput input, ReportKeyResults reportKeyResult) {
 			
-		RelabilityKpi graphType = ReliabilityReportInput.getKpi(input.graphType);
+		ReliabilityKpi graphType = ReliabilityReportInput.getKpi(input.graphType);
 
 		if (graphType == null) {
 			return reportKeyResult.score;

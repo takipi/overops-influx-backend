@@ -69,8 +69,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": null,
-  "iteration": 1555448812701,
+  "id": 19,
+  "iteration": 1555788992421,
   "links": [
     {
       "icon": "dashboard",
@@ -1066,7 +1066,7 @@
           "show": true
         },
         {
-          "decimals": null,
+          "decimals": 1,
           "format": "short",
           "label": "",
           "logBase": 1,
@@ -1241,6 +1241,7 @@
           "show": true
         },
         {
+          "decimals": 1,
           "format": "short",
           "label": "",
           "logBase": 1,
@@ -1333,15 +1334,15 @@
           "decimals": 0,
           "link": true,
           "linkTargetBlank": false,
-          "linkTooltip": "${__cell_8}",
-          "linkUrl": "d/6TxYIh6mk/errors-drill-down?orgId=1&from=${__cell_2}&to=${__cell_3}&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-transactions=${__cell_11}&var-type=Transaction Failures",
+          "linkTooltip": "${__cell_7}. Click to drill-down.",
+          "linkUrl": "d/YVh71-emz/transaction-failures?from=${__cell_2}&to=${__cell_3}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=${__cell_9}&var-type=Transaction Failures",
           "mappingType": 1,
           "pattern": "error_rate",
           "thresholds": [
             "1",
             "5"
           ],
-          "type": "number",
+          "type": "hidden",
           "unit": "percent",
           "valueMaps": [
             {
@@ -1744,7 +1745,14 @@
     "list": [
       {
         "allValue": "all",
-        "current": {},
+        "current": {
+          "selected": false,
+          "tags": [],
+          "text": "None",
+          "value": [
+            "None"
+          ]
+        },
         "datasource": "OO",
         "hide": 0,
         "includeAll": false,
@@ -1765,7 +1773,10 @@
       },
       {
         "allValue": "All",
-        "current": {},
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
@@ -1786,7 +1797,10 @@
       },
       {
         "allValue": "All",
-        "current": {},
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
@@ -1807,7 +1821,10 @@
       },
       {
         "allValue": "All",
-        "current": {},
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
@@ -1828,7 +1845,10 @@
       },
       {
         "allValue": "*",
-        "current": {},
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": "OO",
         "hide": 0,
         "includeAll": true,
@@ -1849,7 +1869,14 @@
       },
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "selected": false,
+          "tags": [],
+          "text": "Throughput",
+          "value": [
+            "Throughput"
+          ]
+        },
         "datasource": "OO",
         "hide": 0,
         "includeAll": false,
@@ -1893,7 +1920,10 @@
       },
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "text": "24",
+          "value": "24"
+        },
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -1914,7 +1944,10 @@
       },
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "text": "100",
+          "value": "100"
+        },
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,

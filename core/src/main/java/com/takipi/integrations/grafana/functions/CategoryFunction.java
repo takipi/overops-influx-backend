@@ -9,13 +9,13 @@ import java.util.Map;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.category.Category;
 import com.takipi.api.client.data.view.ViewInfo;
-import com.takipi.api.client.request.category.CategoriesRequest;
 import com.takipi.api.client.result.category.CategoriesResult;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
 import com.takipi.integrations.grafana.input.CategoryInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.Series;
+import com.takipi.integrations.grafana.util.ApiCache;
 
 public class CategoryFunction extends GraphFunction {
 	
@@ -44,11 +44,8 @@ public class CategoryFunction extends GraphFunction {
 	@Override
 	protected Map<String, String> getViews(String serviceId, BaseGraphInput input) {
 		
-		CategoriesRequest request = CategoriesRequest.newBuilder().setServiceId(serviceId).build();
-		Response<CategoriesResult> response = apiClient.get(request);
-		
-		validateResponse(response);
-		
+		Response<CategoriesResult> response = ApiCache.getCategories(apiClient, serviceId, false);
+				
 		if ((response.data == null) || (response.data.categories == null)) {
 			return Collections.emptyMap();
 		}

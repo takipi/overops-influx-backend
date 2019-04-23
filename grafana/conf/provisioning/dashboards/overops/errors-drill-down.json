@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 53,
-  "iteration": 1555363749741,
+  "iteration": 1555789141252,
   "links": [
     {
       "icon": "dashboard",
@@ -264,6 +264,7 @@
           "show": true
         },
         {
+          "decimals": 1,
           "format": "short",
           "label": "",
           "logBase": 10,
@@ -476,6 +477,7 @@
           "show": true
         },
         {
+          "decimals": 1,
           "format": "short",
           "label": "",
           "logBase": 10,
@@ -1423,5 +1425,5 @@
   "timezone": "",
   "title": "Errors Drill-down",
   "uid": "6TxYIh6mk",
-  "version": 12
+  "version": 13
 }

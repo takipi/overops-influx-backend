@@ -65,8 +65,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": null,
-  "iteration": 1555446172102,
+  "id": 39,
+  "iteration": 1555789058078,
   "links": [
     {
       "icon": "dashboard",
@@ -950,7 +950,7 @@
               "type": "fill"
             }
           ],
-          "hide": false,
+          "hide": true,
           "orderByTime": "ASC",
           "policy": "default",
           "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$transactionPointsWanted\",\"seriesName\":\"All\"})",
@@ -1041,7 +1041,7 @@
           "show": true
         },
         {
-          "decimals": null,
+          "decimals": 1,
           "format": "short",
           "label": "",
           "logBase": 10,
@@ -1267,6 +1267,7 @@
           "show": true
         },
         {
+          "decimals": 1,
           "format": "short",
           "label": "",
           "logBase": 10,
@@ -1493,7 +1494,7 @@
           "show": true
         },
         {
-          "decimals": null,
+          "decimals": 1,
           "format": "short",
           "label": "",
           "logBase": 10,
@@ -1719,6 +1720,7 @@
           "show": true
         },
         {
+          "decimals": 1,
           "format": "short",
           "label": "",
           "logBase": 10,
@@ -1943,6 +1945,7 @@
           "show": true
         },
         {
+          "decimals": 1,
           "format": "short",
           "label": "",
           "logBase": 10,
@@ -2170,6 +2173,7 @@
           "show": true
         },
         {
+          "decimals": 1,
           "format": "short",
           "label": "",
           "logBase": 10,
