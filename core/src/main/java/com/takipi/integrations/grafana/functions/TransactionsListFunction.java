@@ -604,6 +604,10 @@ public class TransactionsListFunction extends GrafanaFunction {
 			
 			for (TransactionData transactionData : transactionDataResult.items.values()) {
 				
+				if (transactionData.baselineStats == null) {
+					continue;
+				}
+				
 				if (states.contains(transactionData.state)) {
 					baselineInvocations += transactionData.baselineStats.invocations;
 				}
@@ -626,6 +630,10 @@ public class TransactionsListFunction extends GrafanaFunction {
 				
 			for (TransactionData transactionData : transactionDataResult.items.values()) {
 					
+				if (transactionData.baselineStats == null) {
+					continue;
+				}
+				
 				double baselineAvg = transactionData.baselineStats.avg_time;
 				
 				if ((states.contains(transactionData.state) && (!Double.isNaN(baselineAvg)))) {
