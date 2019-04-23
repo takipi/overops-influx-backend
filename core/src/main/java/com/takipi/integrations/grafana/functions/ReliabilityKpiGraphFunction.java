@@ -564,8 +564,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		}
 		
 		Map<DateTime, KpiInterval> result = new TreeMap<DateTime, KpiInterval>();
-				
-		
+					
 		for (EventResult eventResult : eventMap.values()) {
 			
 			for (Pair<DateTime, DateTime> period : periods) {
@@ -575,7 +574,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 				if ((firstSeen.isAfter(period.getFirst())) 
 				&& (firstSeen.isBefore(period.getSecond()))) {
 					
-					VolumeInterval volumeInterval = (VolumeInterval)(result.get(period.getFirst()));
+					VolumeInterval volumeInterval = (VolumeInterval)(result.get(period.getSecond()));
 					
 					if (volumeInterval == null) {
 						volumeInterval = new VolumeInterval(period);
@@ -596,7 +595,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 				if ((gpTime.isAfter(period.getFirst())) 
 				&& (gpTime.isBefore(period.getSecond()))) {
 					
-					VolumeInterval volumeInterval = (VolumeInterval)(result.get(period.getFirst()));
+					VolumeInterval volumeInterval = (VolumeInterval)(result.get(period.getSecond()));
 					
 					if (volumeInterval == null) {
 						volumeInterval = new VolumeInterval(period);
