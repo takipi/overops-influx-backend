@@ -52,7 +52,7 @@ public class TransactionsDiffFunction extends TransactionsListFunction
 		baselineInput.servers = tdInput.servers;
 		
 		Collection<TransactionGraph> result = getTransactionGraphs(baselineInput, serviceId, 
-			viewId, timeSpan, null, baselineInput.pointsWanted,  0, 0);
+			viewId, timeSpan, null);
 		
 		return result;
 	}

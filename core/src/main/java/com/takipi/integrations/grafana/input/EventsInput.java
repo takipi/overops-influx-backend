@@ -77,6 +77,17 @@ public class EventsInput extends BaseEventVolumeInput {
 	public static final String RATE_DELTA_DESC = "rate_delta_desc";
 	
 	/**
+	 * the order of this event within the returned list, based on its severity compared
+	 * to other events within the return list
+	 */
+	public static final String RANK = "rank";
+	
+	/**
+	 * the simple name of the event entry point class name
+	 */
+	public static final String ENTRY_POINT_NAME = "entry_point_name";
+	
+	/**
 	 * An optional value to control the volume data retrieved for objects in this query. If "hits" is specified,
 	 * "N/A" will be returned for all values of the "rate" field (if selected). 
 	 */
@@ -86,6 +97,11 @@ public class EventsInput extends BaseEventVolumeInput {
 	 * An optional value controlling the max string length of the message and typeMessage columns.
 	 */
 	public int maxColumnLength;
+	
+	/**
+	 * An optional value controlling the max string length of the transaction and location columns.
+	 */
+	public int maxClassLength;
 	
 	/**
 	 * The types of output supported by this function

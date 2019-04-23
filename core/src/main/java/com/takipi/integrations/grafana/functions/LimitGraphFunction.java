@@ -45,7 +45,8 @@ public abstract class LimitGraphFunction extends GraphFunction {
 
 	@Override
 	protected List<GraphSeries> processServiceGraph(Collection<String> serviceIds, String serviceId, 
-			String viewId, String viewName, BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
+		String viewId, String viewName, BaseGraphInput input, 
+		Pair<DateTime, DateTime> timeSpan, Object tag) {
 
 		GraphInput graphInput = (GraphInput) input;
 
@@ -56,12 +57,13 @@ public abstract class LimitGraphFunction extends GraphFunction {
  	}
 	
 	@Override
-	protected List<Series> processSeries(List<GraphSeries> series, BaseGraphInput input) {
+	protected List<Series> processSeries(Collection<String> serviceIds,
+		List<GraphSeries> series, BaseGraphInput input) {
 		
 		sortSeriesByName(series);
 		
 		GraphLimitInput graphLimitInput = (GraphLimitInput)input;
-		List<Series> output = super.processSeries(series, input);
+		List<Series> output = super.processSeries(serviceIds, series, input);
 		
 		if (graphLimitInput.limit == 0) {
 			return output;

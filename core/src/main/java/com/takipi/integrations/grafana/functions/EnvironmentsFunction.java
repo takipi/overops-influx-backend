@@ -33,16 +33,19 @@ public class EnvironmentsFunction extends VariableFunction {
 	}
 	
 	@Override
-	protected int compareValues(FunctionInput input, String o1, String o2)
-	{
-		if (NONE.equals(o1)) {
+	protected int compareValues(FunctionInput input, String o1, String o2) {
+		
+		boolean o2None = NONE.equals(o2);
+		boolean o1None = NONE.equals(o1);
+
+		if (o2None) {
 			return 1;
 		}
 		
-		if (NONE.equals(o2)) {
+		if (o1None) {
 			return 1;
 		}
-		
+
 		return super.compareValues(input, o1, o2);
 	}
 	

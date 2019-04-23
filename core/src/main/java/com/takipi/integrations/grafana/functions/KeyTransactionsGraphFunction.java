@@ -50,7 +50,7 @@ public class KeyTransactionsGraphFunction extends TransactionsGraphFunction
 			return Collections.emptyList();
 		}
 		
-		GroupSettings transactionGroups = getSettings(serviceId).transactions;
+		GroupSettings transactionGroups = getSettingsData(serviceId).transactions;
 		
 		if (transactionGroups == null) {
 			return super.processServiceGraph(serviceId, input, serviceIds, timespan, graphs);
@@ -75,7 +75,7 @@ public class KeyTransactionsGraphFunction extends TransactionsGraphFunction
 				}
 			}
 		} else {
-			GroupFilter groupFilter = getTransactionsFilter(serviceId, input, timespan);
+			GroupFilter groupFilter = getTransactionsFilter(serviceId, input, timespan, true);
 			result = createMultiGraphSeries(serviceId, graphs, input, groupFilter, serviceIds);
 		}
 		

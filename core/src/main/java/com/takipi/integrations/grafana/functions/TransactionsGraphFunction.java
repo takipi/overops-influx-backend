@@ -33,6 +33,7 @@ import com.takipi.integrations.grafana.input.TransactionsGraphInput.GraphType;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput.TimeWindow;
 import com.takipi.integrations.grafana.input.TransactionsListInput;
 import com.takipi.integrations.grafana.output.Series;
+import com.takipi.integrations.grafana.settings.ServiceSettings;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TransactionsGraphFunction extends BaseGraphFunction {
@@ -71,7 +72,11 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		super(apiClient);
 	}
 	
-	private TransactionGraph mergeGraphs(TransactionData transactionData) {
+	public TransactionsGraphFunction(ApiClient apiClient, Map<String, ServiceSettings> settingsMaps) {
+		super(apiClient, settingsMaps);
+	}
+	
+	protected TransactionGraph mergeGraphs(TransactionData transactionData) {
 		
 		TransactionGraph result = new TransactionGraph();
 		
@@ -99,11 +104,11 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 
 	protected TransactionGraphsResult getTransactionsGraphs(String serviceId, 
 		String viewId, Pair<DateTime, DateTime> timeSpan, 
-		TransactionsGraphInput input, int pointsWanted) {
+		TransactionsGraphInput input) {
 		
 		
 		Collection<TransactionGraph> activeGraphs = getTransactionGraphs(input, serviceId, 
-				viewId, timeSpan, input.getSearchText(), pointsWanted, 0, 0);
+				viewId, timeSpan, input.getSearchText());
 		
 		TimeWindow timeWindow = input.getTimeWindow();
 		
@@ -114,7 +119,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			Collection<PerformanceState> performanceStates = TransactionsListInput.getStates(input.performanceStates);
 			
 			TransactionDataResult transactionDataResult = getTransactionDatas(activeGraphs, 
-				serviceId, viewId, timeSpan, input, false, 0);
+				serviceId, viewId, timeSpan, input, true, false, false, true);
 			
 			if (transactionDataResult == null) {
 				return null;
@@ -142,7 +147,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 						break;
 
 					case All:
-						graph = mergeGraphs(transactionData);
+						graph = transactionData.baselineAndActiveGraph;
 						break;
 						
 					default:
@@ -179,12 +184,14 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 	
     @Override
 	protected List<GraphSeries> processServiceGraph( Collection<String> serviceIds, 
-			String serviceId, String viewId, String viewName,
-			BaseGraphInput input, Pair<DateTime, DateTime> timeSpan, int pointsWanted) {
+		String serviceId, String viewId, String viewName,
+		BaseGraphInput input, Pair<DateTime, DateTime> timeSpan,
+		Object tag) {
 
 		TransactionsGraphInput tgInput = (TransactionsGraphInput)(input);
 		
-		TransactionGraphsResult transactionGraphs = getTransactionsGraphs(serviceId, viewId, timeSpan, tgInput, pointsWanted);
+		TransactionGraphsResult transactionGraphs = getTransactionsGraphs(serviceId, 
+			viewId, timeSpan, tgInput);
 		
 		if (transactionGraphs == null) {
 			return Collections.emptyList();
@@ -233,7 +240,8 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
     	
 		List<GraphSeries> result;
 
-		GroupFilter transactionsFilter = getTransactionsFilter(serviceId, input, timespan);
+		GroupFilter transactionsFilter = getTransactionsFilter(serviceId, 
+			input, timespan, true);
 
 		AggregateMode aggregateMode = input.getAggregateMode();
 		
@@ -271,7 +279,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			for (String transactionGroup : transactionGroups) {
 				
 				GroupFilter groupsFilter = getTransactionsFilter(serviceId, input, timespan,
-					Collections.singletonList(transactionGroup));
+					Collections.singletonList(transactionGroup), true);
 				
 				if (groupsFilter == null) {
 					continue;
@@ -287,7 +295,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			if (singleTransactions.size() > 0) {
 				
 				GroupFilter singleTransactionsFilter = getTransactionsFilter(serviceId, input, timespan,
-					singleTransactions);
+					singleTransactions, true);
 				
 				if ((singleTransactionsFilter != null) && (!singleTransactionsFilter.isEmpty())) {
 					result.addAll(createMultiGraphSeries(serviceId, graphs, input, 
@@ -556,12 +564,12 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 	}
 	
 	@Override
-	protected List<Series> processSeries(List<GraphSeries> series, BaseGraphInput input)
-	{
+	protected List<Series> processSeries(Collection<String> serviceIds,
+		List<GraphSeries> series, BaseGraphInput input) {
 		TransactionsGraphInput tgInput = (TransactionsGraphInput)input; 
 		
 		if (tgInput.limit == 0) {
-			return super.processSeries(series, input);
+			return super.processSeries(serviceIds, series, input);
 		}
 		
 		return limitSeries(series, tgInput.limit);

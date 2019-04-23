@@ -12,6 +12,7 @@ import org.joda.time.DateTime;
 import com.takipi.api.client.data.event.Location;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.util.infra.Categories;
+import com.takipi.api.client.util.infra.Categories.CategoryType;
 import com.takipi.api.client.util.settings.GroupSettings;
 import com.takipi.api.client.util.settings.GroupSettings.GroupFilter;
 import com.takipi.common.util.CollectionUtil;
@@ -21,6 +22,8 @@ import com.takipi.integrations.grafana.util.TimeUtil;
 public class EventFilter
 {
 	public static final String CRITICAL_EXCEPTIONS = "Critical Exceptions";
+	public static final String TRANSACTION_FAILURES = "Transaction Failures";
+
 	public static final String EXCEPTION_PREFIX = "--";
 	public static final String TERM = "<term>";
 	public static final String ARCHIVE = "Archive";
@@ -120,7 +123,7 @@ public class EventFilter
 				} else if (GroupSettings.isGroup(type)) {
 					result.categoryTypes.add(GroupSettings.fromGroupName(type));
 				} else {
-					if (!type.equals(GrafanaFunction.ALL)) {
+					if (!GrafanaFunction.VAR_ALL.contains(type)) {
 						result.eventTypes.add(type);
 					}
 				}
@@ -197,7 +200,8 @@ public class EventFilter
 			
 		if (event.error_origin != null) {
 			
-			originLabels = categories.getCategories(event.error_origin.class_name);
+			originLabels = categories.getCategories(
+				event.error_origin.class_name, CategoryType.infra);
 			
 			if (matchLabels(originLabels)) {
 				return false;
@@ -206,7 +210,8 @@ public class EventFilter
 	
 		if (event.error_location != null) {
 			
-			locationLabels = categories.getCategories(event.error_location.class_name);
+			locationLabels = categories.getCategories(
+				event.error_location.class_name, CategoryType.infra);
 			
 			if (matchLabels(locationLabels)) {
 				return false;
@@ -352,8 +357,8 @@ public class EventFilter
 		return true;
 	}
 	
-	public boolean filter(EventResult event)
-	{
+	public boolean filter(EventResult event)	{
+		
 		if (event.is_rethrow) {
 			return true;
 		}

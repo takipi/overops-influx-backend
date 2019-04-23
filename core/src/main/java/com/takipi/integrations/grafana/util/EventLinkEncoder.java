@@ -2,7 +2,6 @@ package com.takipi.integrations.grafana.util;
 
 import java.util.Base64;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -37,7 +36,7 @@ public class EventLinkEncoder {
 	public static String encodeLink(ApiClient apiClient, ServiceSettingsData settingsData, String serviceId, ViewInput input, 
 		EventResult event, DateTime from, DateTime to) {
 			
-		Collection<String> apps = input.getApplications(apiClient, settingsData, serviceId);
+		Collection<String> apps = input.getApplications(apiClient, settingsData, serviceId, true, false);
 		Collection<String> deployments = input.getDeployments(serviceId, apiClient);
 		Collection<String> servers = input.getServers(serviceId);
 

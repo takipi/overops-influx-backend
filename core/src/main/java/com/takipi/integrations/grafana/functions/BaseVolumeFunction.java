@@ -91,7 +91,7 @@ public abstract class BaseVolumeFunction extends GrafanaFunction {
 		EventVolume result = new EventVolume();
 
 		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, 
-			timeSpan.getFirst(), timeSpan.getSecond(), volumeType, input.pointsWanted);
+			timeSpan.getFirst(), timeSpan.getSecond(), volumeType);
 
 		if (eventsMap == null) {
 			return result;
