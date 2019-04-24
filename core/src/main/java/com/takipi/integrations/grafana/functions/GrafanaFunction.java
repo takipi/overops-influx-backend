@@ -989,7 +989,7 @@ public abstract class GrafanaFunction {
 			throw new IllegalStateException("Missing slowdown settings for " + serviceId);
 		}
 		
-		/*
+		
 		if (queryBaselineGraphs) {
 			
 			Collection<TransactionGraph> baselineAndActiveGraphs = getBaselineTransactionGraphs(serviceId, 
@@ -1000,8 +1000,8 @@ public abstract class GrafanaFunction {
 			
 			updateTransactionGraphPerformance(baselineGraphs, baselineAndActiveGraphs, 
 				transactionDatas, slowdownSettings);
-		} else {
-		*/
+		}// else {
+		//*/
 			Collection<Transaction> baselineTransactions = getBaselineTransactions(serviceId,
 				viewId, input, timeSpan, regressionInput, regressionWindow);
 			
