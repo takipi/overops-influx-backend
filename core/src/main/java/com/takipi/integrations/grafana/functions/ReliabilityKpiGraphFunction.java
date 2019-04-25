@@ -499,6 +499,10 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			Pair<RegressionInput, RegressionWindow> regPair = regressionFunction.getRegressionInput(serviceId, viewId,
 					timelineData.input, period, true);
 			
+			if (regPair == null) {
+				continue;
+			}
+			
 			RegressionInput regressionInput = regPair.getFirst();
 			
 			Pair<Collection<TransactionGraph>, Collection<TransactionGraph>> graphPairs = getSlowdownGraphs(baselineGraphs,
@@ -1216,6 +1220,10 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			
 			Pair<RegressionInput, RegressionWindow> regInput = regressionFunction.getRegressionInput(serviceId, 
 					viewId, input, regInputwindow, false);
+			
+			if (regInput == null) {
+				continue;
+			}
 				
 			int baselineTimespan = regInput.getFirst().baselineTimespan;
 			

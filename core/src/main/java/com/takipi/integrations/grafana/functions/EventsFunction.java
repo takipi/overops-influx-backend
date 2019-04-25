@@ -982,8 +982,7 @@ public class EventsFunction extends GrafanaFunction {
 		
 		String viewId = getViewId(serviceId, input.view);
 		
-		if (viewId == null)
-		{
+		if (viewId == null) {
 			return;
 		}
 		
@@ -991,6 +990,10 @@ public class EventsFunction extends GrafanaFunction {
 		
 		Pair<RegressionInput, RegressionWindow> regPair = regressionFunction.getRegressionInput(serviceId, 
 			viewId, input, timeSpan, false);
+		
+		if (regPair == null) {
+			return;
+		}
 		
 		int baseline = regPair.getFirst().baselineTimespan;
 		
