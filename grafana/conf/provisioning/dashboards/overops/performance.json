@@ -608,7 +608,7 @@
           "targetBlank": false,
           "title": "Transaction Failures",
           "type": "dashboard",
-          "url": "/d/YVh71-emz/transaction-failures"
+          "url": "d/YVh71-emz/transaction-failures"
         }
       ],
       "mappingType": 1,
@@ -733,7 +733,7 @@
           "targetBlank": false,
           "title": "Transaction Failures",
           "type": "dashboard",
-          "url": "/d/YVh71-emz/transaction-failures"
+          "url": "d/YVh71-emz/transaction-failures"
         }
       ],
       "mappingType": 1,
