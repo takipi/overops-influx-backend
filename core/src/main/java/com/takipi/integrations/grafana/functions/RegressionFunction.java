@@ -845,7 +845,7 @@ public class RegressionFunction extends EventsFunction {
 	{
 		for (GraphSliceTaskResult graphSliceTaskResult : graphSliceTaskResults) {
 			
-			boolean isBaselineTask = baselineGraphTasks.contains(graphSliceTaskResult.task);
+			boolean isBaselineTask = (baselineGraphTasks != null ? baselineGraphTasks.contains(graphSliceTaskResult.task) : false);
 			
 			for (Graph graph : graphSliceTaskResult.graphs) {
 				

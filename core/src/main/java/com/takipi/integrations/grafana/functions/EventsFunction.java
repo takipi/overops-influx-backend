@@ -747,7 +747,7 @@ public class EventsFunction extends GrafanaFunction {
 			return new DateFormatter(field);
 		}
 		
-		if (field.getDeclaringClass().equals(Stats.class)) {
+		if (field.getDeclaringClass().equals(BaseStats.class)) {
 			return new StatsFormatter(field);
 		}
 
