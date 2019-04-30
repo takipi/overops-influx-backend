@@ -2445,7 +2445,7 @@ public abstract class GrafanaFunction {
 	}
 	
 	public Collection<EventResult> getEventList(String serviceId, String viewId, ViewInput input, DateTime from,
-												DateTime to)
+			DateTime to)
 	{
 		return getEventList(serviceId, viewId, input, from, to, false);
 	}
@@ -2521,7 +2521,7 @@ public abstract class GrafanaFunction {
 	}
 	
 	private static void safePutEventToKeysMap(Map<DeterminantKey, Map<String, EventResult>> keyToEventMap,
-											  DeterminantKey determinantKey, EventResult event) {
+			DeterminantKey determinantKey, EventResult event) {
 		
 		Map<String, EventResult> currentDeterminant = keyToEventMap.get(determinantKey);
 		

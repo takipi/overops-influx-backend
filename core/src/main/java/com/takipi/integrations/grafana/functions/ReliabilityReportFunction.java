@@ -404,7 +404,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		protected RegressionInput regressionInput;
 		
 		protected SlowdownAsyncResult(ReportKey key, Map<TransactionKey, TransactionData> transactionMap,
-									  RegressionInput regressionInput) {
+				RegressionInput regressionInput) {
 			
 			super(key);
 			this.transactionMap = transactionMap;
@@ -422,8 +422,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		protected boolean updateEvents;
 		
 		protected SlowdownAsyncTask(String serviceId, String viewId,
-									ReportKey key, RegressionsInput input,
-									Pair<DateTime, DateTime> timeSpan, boolean updateEvents) {
+				ReportKey key, RegressionsInput input, Pair<DateTime, DateTime> timeSpan, boolean updateEvents) {
 			this.reportKey = key;
 			this.serviceId = serviceId;
 			this.input = input;
@@ -494,8 +493,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		private final String viewId;
 		
 		protected RegressionAsyncTask(Map<String, Pair<ReportKey, RegressionsInput>> subRegressionInputs,
-				RegressionFunction function,
-				ReportKey aggregatedKey, String serviceId, String viewId,
+				RegressionFunction function, ReportKey aggregatedKey, String serviceId, String viewId,
 				BaseEventVolumeInput input, Pair<DateTime, DateTime> timeSpan, boolean newOnly) {
 			this.subRegressionInputs = subRegressionInputs;
 			this.function = function;
@@ -841,7 +839,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 	}
 
 	private Collection<ReportKey> getTiers(String serviceId, ReliabilityReportInput input,
-										   Pair<DateTime, DateTime> timeSpan) {
+			Pair<DateTime, DateTime> timeSpan) {
  		
 		Collection<String> keyTiers = getSettings(serviceId).getTierNames();
 		
@@ -1078,7 +1076,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 	}
 
 	private Collection<ReportKey> getActiveApplications(String serviceId, ReliabilityReportInput input,
-														Pair<DateTime, DateTime> timeSpan) {
+			Pair<DateTime, DateTime> timeSpan) {
 
 		List<String> keyApps = new ArrayList<String>();
 		
@@ -1213,7 +1211,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 	}
 	
 	private Collection<ReportKey> getActiveDeployments(String serviceId,
-													   ReliabilityReportInput input, Pair<DateTime, DateTime> timespan) {
+			ReliabilityReportInput input, Pair<DateTime, DateTime> timespan) {
 
 		List<ReportKey> result = new ArrayList<ReportKey>();
 		Collection<String> selectedDeployments = input.getDeployments(serviceId, apiClient);
@@ -1353,8 +1351,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return result;
 	}
 	
-	private Collection<ReportKey> getActiveKey(String serviceId, ReliabilityReportInput regInput,
-											   Pair<DateTime, DateTime> timeSpan) {
+	private List<ReportKey> getActiveKey(String serviceId, ReliabilityReportInput regInput,
+			Pair<DateTime, DateTime> timeSpan) {
 		
 		Collection<ReportKey> keys;
 			
@@ -1384,7 +1382,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 				throw new IllegalStateException("Unsopported mode " + mode);
 			}
 			
-		return keys;
+		return new ArrayList(keys);
 	}
 	
 	private ReportKey getDefaultReportKey(String serviceId, ReliabilityReportInput regInput) {
