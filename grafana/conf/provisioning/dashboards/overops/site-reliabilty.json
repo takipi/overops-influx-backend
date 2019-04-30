@@ -100,7 +100,7 @@
       ],
       "datasource": "OO",
       "decimals": 1,
-      "description": "A weighted score over the selected timeframe taking into account all new errors, regressions and slowdowns. Weights are defined in the Settings dashboard.",
+      "description": "A weighted score over the selected timeframe taking into account all new errors, increasing errors and transaction slowdowns. Weights are defined in the Settings dashboard.",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -223,7 +223,7 @@
       ],
       "datasource": "OO",
       "decimals": 2,
-      "description": "The ratio between selected transaction volume and the number of $transactionFailureTypes which deem the call to be unstable.",
+      "description": "The ratio between selected transaction volume and the number of transaction failures. Transaction failures are defined in the Settings dashboard.",
       "format": "percentunit",
       "gauge": {
         "maxValue": 100,
@@ -838,7 +838,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "The number of calls into each of the selected transactions overlaid on total the number of calls (Throughput) into them.",
+      "description": "The number of calls into each of the selected transactions in the left Y axis correlated to $metricNames on the right Y Axis",
       "fill": 0,
       "gridPos": {
         "h": 5,
@@ -1063,7 +1063,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "The number of errors in the selected apps overlad on the number of calls into the applications (Throughput). If no applications are selected, the first $splitLimit key applications are charted. Key applications are defined in the Settings dashboard.",
+      "description": "The number of errors in the selected apps on the left Y axis correlated to $metricNames on the right Y axis. If no applications are selected, the first $splitLimit key applications are charted. Key applications are defined in the Settings dashboard.",
       "fill": 0,
       "gridPos": {
         "h": 5,
@@ -1516,7 +1516,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "Chart errors according to key code tiers (e.g. AWS, SQL, Tomcat,..). Key code tiers are defined in the Settings dashboard. If no key tiers are defined, then 3rd party code tiers (as defined  [here](https://git.io/fpPT0) ) with the most errors are charted.",
+      "description": "Chart errors according to key code tiers (e.g. AWS, SQL, Tomcat,..) on the left Y axis correlated to $metricNames on the right Y axis. \n\nKey code tiers are defined in the Settings dashboard. If no key tiers are defined, then 3rd party code tiers (as defined  [here](https://git.io/fpPT0) ) with the most errors are charted.",
       "fill": 0,
       "gridPos": {
         "h": 5,
@@ -1742,7 +1742,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "The number of errors of type: $failureTypesArrayPretty in the selected transactions overlaid on the number of calls (throughput) into them. Transaction failures types are defined in the Settings dashboard.",
+      "description": "The number of errors transaction failures in the selected transactions on the left Y axis correlated to $metricNames on the right Y axis. Transaction failures types are defined in the Settings dashboard.",
       "fill": 0,
       "gridPos": {
         "h": 5,
@@ -1928,7 +1928,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "The number of critical exceptions for the currently selected transactions overlaid on the number of calls (throughput) into them. The list of critical exception types is defined in the Settings dashboard.",
+      "description": "The number of critical exceptions within the selected transactions on the left Y axis correlated to $metricNames on the right Y axis. The list of critical exception types is defined in the Settings dashboard.",
       "fill": 0,
       "gridPos": {
         "h": 5,
