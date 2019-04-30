@@ -270,7 +270,7 @@ public class GrafanaSettings {
 			serviceSettingsData.regression_report = bundledSettingsData.regression_report;
 		}
 		
-		if ((serviceSettingsData.version < 1) 
+		if ((serviceSettingsData.version == null) 
 		&& (!Objects.equal(serviceSettingsData.general.transaction_failures, 
 			bundledSettingsData.general.transaction_failures))) {
 			serviceSettingsData.general.transaction_failures = bundledSettingsData.general.transaction_failures;
