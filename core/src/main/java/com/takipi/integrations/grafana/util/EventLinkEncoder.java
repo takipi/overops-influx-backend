@@ -39,8 +39,23 @@ public class EventLinkEncoder {
 		Collection<String> apps = input.getApplications(apiClient, settingsData, serviceId, true, false);
 		Collection<String> deployments = input.getDeployments(serviceId, apiClient);
 		Collection<String> servers = input.getServers(serviceId);
+		
+		long firstSeenMillis;
+		
+		try {
+			firstSeenMillis = DateTime.parse(event.first_seen).getMillis();
+		}
+		catch (Exception e) {
+			firstSeenMillis = 0;
+		}
+		
+		long dataRetentionStartTime = to.minusDays(90).getMillis();
+		
+		long fromTimeframe = (firstSeenMillis == 0) ? (dataRetentionStartTime) :
+				(Math.max(dataRetentionStartTime, firstSeenMillis - 60000));
+		long toTimeframe = to.getMillis();
 
-		String json = String.format(TEMPLATE, serviceId, TimeUtil.getMillisAsString(from), TimeUtil.getMillisAsString(to),
+		String json = String.format(TEMPLATE, serviceId, String.valueOf(fromTimeframe), String.valueOf(toTimeframe),
 				toList(servers), toList(apps), toList(deployments),
 				toEventIdsList(event), TimeUtil.getMillisAsString(to));
 
