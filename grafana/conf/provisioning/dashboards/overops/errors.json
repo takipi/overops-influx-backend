@@ -81,8 +81,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": null,
-  "iteration": 1555448752338,
+  "id": 31,
+  "iteration": 1555790114781,
   "links": [
     {
       "icon": "dashboard",
@@ -490,7 +490,7 @@
           "keepTime": true,
           "title": "Increasing Errors. $ie",
           "type": "absolute",
-          "url": "/d/WZ739NYmk/increasing-errors"
+          "url": "d/WZ739NYmk/increasing-errors"
         }
       ],
       "mappingType": 1,
@@ -1278,6 +1278,7 @@
           "show": true
         },
         {
+          "decimals": 1,
           "format": "short",
           "label": "",
           "logBase": 10,
@@ -1492,6 +1493,7 @@
           "show": true
         },
         {
+          "decimals": 1,
           "format": "short",
           "label": "",
           "logBase": 10,
@@ -2643,7 +2645,7 @@
     ]
   },
   "time": {
-    "from": "now-3h",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {

@@ -978,9 +978,12 @@ public abstract class GrafanaFunction {
 		return result;
 	}
 	
-	private void updateTransactionPerformance(String serviceId, String viewId,
-			Pair<DateTime, DateTime> timeSpan, BaseEventVolumeInput input,
-			RegressionInput regressionInput, RegressionWindow regressionWindow,
+	/**
+	 * @param queryBaselineGraphs - skipped for now 
+	 */
+	private void updateTransactionPerformance(String serviceId, String viewId, 
+			Pair<DateTime, DateTime> timeSpan, BaseEventVolumeInput input, 
+			RegressionInput regressionInput, RegressionWindow regressionWindow, 
 			Map<TransactionKey, TransactionData> transactionDatas, boolean queryBaselineGraphs) {		
 		
 		SlowdownSettings slowdownSettings = getSettingsData(serviceId).slowdown;
@@ -988,6 +991,7 @@ public abstract class GrafanaFunction {
 		if (slowdownSettings == null) {
 			throw new IllegalStateException("Missing slowdown settings for " + serviceId);
 		}
+		
 		
 		if (queryBaselineGraphs) {
 			
@@ -999,7 +1003,8 @@ public abstract class GrafanaFunction {
 			
 			updateTransactionGraphPerformance(baselineGraphs, baselineAndActiveGraphs, 
 				transactionDatas, slowdownSettings);
-		} else {
+		}// else {
+		//*/
 			Collection<Transaction> baselineTransactions = getBaselineTransactions(serviceId,
 				viewId, input, timeSpan, regressionInput, regressionWindow);
 			
@@ -1012,7 +1017,7 @@ public abstract class GrafanaFunction {
 					transactionData.stats = TransactionUtil.aggregateGraph(transactionData.graph);
 				}
 			}
-		}		
+		//}		
 	}
 	
 	private TransactionKey getTransactionKey(String transactionName) {

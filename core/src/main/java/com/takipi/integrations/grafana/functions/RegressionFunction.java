@@ -997,6 +997,9 @@ public class RegressionFunction extends EventsFunction {
 		return result;
 	}
 	
+	/**
+	 * @param allowEmpty - skipped for now 
+	 */
 	public RegressionOutput executeRegression(String serviceId, BaseEventVolumeInput input, 
 			RegressionInput regressionInput, RegressionWindow regressionWindow, 
 			Map<String, EventResult> eventListMap, long volume,
@@ -1010,7 +1013,7 @@ public class RegressionFunction extends EventsFunction {
 		RegressionOutput result = createRegressionOutput(serviceId,
 				input, regressionInput, regressionWindow,
 				rateRegression, eventListMap,
-				baselineGraph, activeWindowGraph, volume, allowEmpty);
+				baselineGraph, activeWindowGraph, volume, true);//allowEmpty);
 		
 		return result;
 	}

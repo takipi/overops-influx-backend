@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 28,
-  "iteration": 1555362958021,
+  "iteration": 1555789235568,
   "links": [
     {
       "icon": "dashboard",
@@ -49,7 +49,7 @@
       "tags": [],
       "tooltip": "Home",
       "type": "link",
-      "url": "/d/lg0U4qriz/home"
+      "url": "d/lg0U4qriz/home"
     },
     {
       "asDropdown": true,
@@ -211,7 +211,7 @@
           "show": true
         },
         {
-          "decimals": 0,
+          "decimals": 1,
           "format": "short",
           "label": "",
           "logBase": 1,
@@ -373,7 +373,7 @@
           "show": true
         },
         {
-          "decimals": 0,
+          "decimals": 1,
           "format": "short",
           "label": "",
           "logBase": 1,
@@ -845,7 +845,6 @@
       {
         "allValue": "*",
         "current": {
-          "tags": [],
           "text": "None",
           "value": [
             "None"
@@ -992,7 +991,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
           "text": "None",
           "value": "None"
         },
@@ -1095,8 +1093,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "620",
-          "value": "620"
+          "tags": [],
+          "text": "<term>",
+          "value": "<term>"
         },
         "hide": 0,
         "includeAll": false,
@@ -1290,8 +1289,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "time >= 1555277318864ms and time <= 1555363718864ms",
-          "value": "time >= 1555277318864ms and time <= 1555363718864ms"
+          "text": "time >= 1555702835491ms and time <= 1555789235492ms",
+          "value": "time >= 1555702835491ms and time <= 1555789235492ms"
         },
         "datasource": "OO",
         "hide": 2,
@@ -1346,5 +1345,5 @@
   "timezone": "",
   "title": "Increasing Errors",
   "uid": "WZ739NYmk",
-  "version": 125
+  "version": 126
 }

@@ -419,8 +419,11 @@ public class TransactionsListFunction extends GrafanaFunction {
 			setOutputField(object, fields, TransactionsListInput.TOTAL, transactionData.stats.invocations);
 			setOutputField(object, fields, TransactionsListInput.AVG_RESPONSE, transactionData.stats.avg_time);
 			
-			setOutputField(object, fields, TransactionsListInput. BASELINE_AVG, transactionData.baselineStats.avg_time);
-			setOutputField(object, fields, TransactionsListInput.BASELINE_CALLS, NumberUtil.format(transactionData.baselineStats.invocations));
+			if (transactionData.baselineStats != null) {
+				setOutputField(object, fields, TransactionsListInput. BASELINE_AVG, transactionData.baselineStats.avg_time);
+				setOutputField(object, fields, TransactionsListInput.BASELINE_CALLS, NumberUtil.format(transactionData.baselineStats.invocations));
+			}
+			
 			setOutputField(object, fields, TransactionsListInput.ACTIVE_CALLS, NumberUtil.format(transactionData.stats.invocations));
 			
 			setOutputField(object, fields, TransactionsListInput.SLOW_STATE, getPerformanceStateValue(transactionData.state));
@@ -604,6 +607,10 @@ public class TransactionsListFunction extends GrafanaFunction {
 			
 			for (TransactionData transactionData : transactionDataResult.items.values()) {
 				
+				if (transactionData.baselineStats == null) {
+					continue;
+				}
+				
 				if (states.contains(transactionData.state)) {
 					baselineInvocations += transactionData.baselineStats.invocations;
 				}
@@ -626,6 +633,10 @@ public class TransactionsListFunction extends GrafanaFunction {
 				
 			for (TransactionData transactionData : transactionDataResult.items.values()) {
 					
+				if (transactionData.baselineStats == null) {
+					continue;
+				}
+				
 				double baselineAvg = transactionData.baselineStats.avg_time;
 				
 				if ((states.contains(transactionData.state) && (!Double.isNaN(baselineAvg)))) {
