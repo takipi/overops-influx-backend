@@ -785,8 +785,8 @@ public class RegressionFunction extends EventsFunction {
 		Map<DeterminantKey, Pair<Graph, Graph>> graphResults = Maps.newHashMap();
 		
 		for (DeterminantKey graphResultKey : activeWindowGraphKeys.keySet()) {
-			Pair<Graph, Graph> determinantGraphs = getDeterminantGraphs(serviceId, regressionInput, input, baselineInput, graphActiveTimespan,
-					baselineGraphKeys, activeWindowGraphKeys, graphResultKey);
+			Pair<Graph, Graph> determinantGraphs = getDeterminantGraphs(input, baselineGraphKeys, activeWindowGraphKeys,
+					graphResultKey);
 			
 			Graph baselineGraph = determinantGraphs.getFirst();
 			Graph activeWindowGraph = determinantGraphs.getSecond();
@@ -797,10 +797,8 @@ public class RegressionFunction extends EventsFunction {
 		return graphResults;
 	}
 	
-	public Pair<Graph, Graph> getDeterminantGraphs(String serviceId, RegressionInput regressionInput,
-		   BaseEventVolumeInput input, EventFilterInput baselineInput,
-		   int graphActiveTimespan, Map<DeterminantKey, List<Graph>> baselineGraphKeys, Map<DeterminantKey,
-			List<Graph>> activeWindowGraphKeys, DeterminantKey graphResultKey) {
+	public Pair<Graph, Graph> getDeterminantGraphs(BaseEventVolumeInput input, Map<DeterminantKey, List<Graph>> baselineGraphKeys,
+			Map<DeterminantKey, List<Graph>> activeWindowGraphKeys, DeterminantKey graphResultKey) {
 		List<Graph> baselineGraphs = baselineGraphKeys.get(graphResultKey);
 		List<Graph> activeWindowGraphs = activeWindowGraphKeys.get(graphResultKey);
 		
