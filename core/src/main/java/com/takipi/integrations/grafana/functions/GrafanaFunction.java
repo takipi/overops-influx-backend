@@ -2502,6 +2502,8 @@ public abstract class GrafanaFunction {
 		for (EventResult event : events) {
 			if (CollectionUtil.safeIsEmpty(event.stats.contributors)) {
 				safePutEventToKeysMap(keyToEventMap, DeterminantKey.Empty, event);
+				
+				continue;
 			}
 			
 			for (Stats contributor : event.stats.contributors) {
