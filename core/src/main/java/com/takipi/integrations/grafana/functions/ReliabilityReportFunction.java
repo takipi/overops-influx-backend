@@ -522,15 +522,15 @@ public class ReliabilityReportFunction extends EventsFunction {
 				
 				List regressionResults = Lists.newArrayList();
 				Collection<EventResult> eventList = null;
-				int retries = 0;
-				while (eventList == null && retries++ < GET_EVENT_LIST_MAX_RETRIES)
-				{
+				
+				for (int retries = 0; retries < GET_EVENT_LIST_MAX_RETRIES; retries++) {
 					eventList = function.getEventList(serviceId, viewId, input, activeWindowStart, activeWindowEnd, true);
 					
-					if (eventList == null) {
-						
-						logger.warn("Could not retrieve event list from API retry number: {}", retries);
+					if (eventList != null) {
+						break;
 					}
+					
+					logger.warn("Could not retrieve event list from API retry number: {}", retries);
 				}
 				
 				if (eventList == null)
