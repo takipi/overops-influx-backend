@@ -1,15 +1,9 @@
 package com.takipi.integrations.grafana.input;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
-import com.takipi.api.client.ApiClient;
-import com.takipi.api.client.util.settings.RegressionSettings;
 import com.takipi.integrations.grafana.functions.EventFilter;
-import com.takipi.integrations.grafana.functions.GrafanaFunction;
-import com.takipi.integrations.grafana.settings.GrafanaSettings;
 
 /**
  * The base function input used to include / exclude event objects matching a specific criteria
@@ -94,101 +88,51 @@ public abstract class EventFilterInput extends ViewInput
 		
 	}
 	
-	public boolean hasEventFilter()
-	{
+	public boolean hasEventFilter() {
 		
-		if ((introducedBy != null) && (introducedBy.length() > 0))
-		{
+		if ((introducedBy != null) && (introducedBy.length() > 0)) {
 			return true;
 		}
 		
-		if ((types != null) && (types.length() > 0))
-		{
+		if ((types != null) && (types.length() > 0)) {
 			return true;
 		}
 		
-		if ((labels != null) && (labels.length() > 0))
-		{
+		if ((labels != null) && (labels.length() > 0)) {
 			return true;
 		}
 		
-		if ((labelsRegex != null) && (labelsRegex.length() > 0))
-		{
+		if ((labelsRegex != null) && (labelsRegex.length() > 0)) {
 			return true;
 		}
 		
-		if ((firstSeen != null) && (firstSeen.length() > 0))
-		{
+		if ((firstSeen != null) && (firstSeen.length() > 0)) {
 			return true;
 		}
 		
-		if (hasTransactions())
-		{
+		if (hasTransactions()) {
 			return true;
 		}
 		
 		return false;
 	}
 	
-	public boolean hasIntroducedBy()
-	{
+	public boolean hasIntroducedBy() {
 		return hasFilter(introducedBy);
 	}
 	
-	public Collection<String> getIntroducedBy(String serviceId)
-	{
+	public Collection<String> getIntroducedBy(String serviceId) {
 		
-		if (introducedBy == null)
-		{
+		if (introducedBy == null) {
 			return Collections.emptySet();
 		}
 		
 		return getServiceFilters(introducedBy, serviceId, true);
 	}
-	
-	public Collection<String> getTypes(ApiClient apiClient, String serviceId) {
-		return getTypes(apiClient, serviceId, true);
-	}
-
-	public Collection<String> getTypes(ApiClient apiClient, String serviceId, boolean expandCriticalTypes)
-	{
 		
-		if (!hasFilter(types))
-		{
-			return null;
-		}
+	public Collection<String> geLabels(String serviceId) {
 		
-		String value = types.replace(GrafanaFunction.ARRAY_SEPERATOR_RAW,
-				GrafanaFunction.GRAFANA_SEPERATOR_RAW);
-		
-		List<String> result = new ArrayList<String>();
-		Collection<String> types = getServiceFilters(value, null, true);
-		
-		for (String type : types) {
-			
-			if ((expandCriticalTypes) && (EventFilter.CRITICAL_EXCEPTIONS.equals(type))) {
-				RegressionSettings regressionSettings = GrafanaSettings.getData(apiClient, serviceId).regression;
-				
-				if (regressionSettings != null) {
-					Collection<String> criticalExceptionTypes = regressionSettings.getCriticalExceptionTypes();
-					
-					for (String criticalExceptionType : criticalExceptionTypes) {
-						result.add(EventFilter.toExceptionFilter(criticalExceptionType));
-					}
-				}
-			} else {
-				result.add(type);
-			}
-		}
-		
-		return result;
-	}
-		
-	public Collection<String> geLabels(String serviceId)
-	{
-		
-		if (labels == null)
-		{
+		if (labels == null) {
 			return Collections.emptySet();
 		}
 		

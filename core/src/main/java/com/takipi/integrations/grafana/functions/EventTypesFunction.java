@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.util.infra.Categories;
+import com.takipi.api.client.util.infra.Categories.CategoryType;
 import com.takipi.api.client.util.settings.GeneralSettings;
 import com.takipi.api.client.util.settings.GroupSettings;
 import com.takipi.common.util.CollectionUtil;
@@ -22,12 +23,11 @@ import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.EventTypesInput;
 import com.takipi.integrations.grafana.input.EventTypesInput.EventTypes;
 import com.takipi.integrations.grafana.input.FunctionInput;
-import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class EventTypesFunction extends EnvironmentVariableFunction {
 
-	private static int DEFAULT_TIME_DAYS = 7;
+	private static int MAX_TIME_DAYS = 1;
 	
 	public static class Factory implements FunctionFactory {
 
@@ -72,9 +72,14 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 		
 		if (eventInput.timeFilter != null) {
 			Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(eventInput.timeFilter);
-			result.timeFilter = TimeUtil.getTimeFilter(timespan);	
+			
+			if (TimeUtil.getDateTimeDeltaMill(timespan) < TimeUnit.DAYS.toMillis(1)) {
+				result.timeFilter = TimeUtil.getTimeFilter(timespan);	
+			} else {
+				result.timeFilter  = TimeUtil.getLastWindowTimeFilter(TimeUnit.DAYS.toMillis(MAX_TIME_DAYS));
+			}
 		} else {			
-			result.timeFilter  = TimeUtil.getLastWindowTimeFilter(TimeUnit.DAYS.toMillis(DEFAULT_TIME_DAYS));
+			result.timeFilter  = TimeUtil.getLastWindowTimeFilter(TimeUnit.DAYS.toMillis(MAX_TIME_DAYS));
 		}
 		
 		return result;
@@ -109,7 +114,7 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 		if (eventInput.types != null) {
 			types = eventInput.getTypes();
 		} else {
-			GeneralSettings settings = getSettings(serviceId).general;
+			GeneralSettings settings = getSettingsData(serviceId).general;
 			
 			if (settings != null) {
 				types = settings.getDefaultTypes();
@@ -122,7 +127,7 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 		Set<String> exceptionTypes = new TreeSet<String>();
 		Set<String> categoryNames = new TreeSet<String>();
 			
-		Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();
+		Categories categories = getSettings(serviceId).getCategories();
 
 		for (EventResult event : events.values()) {
 			
@@ -141,7 +146,8 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 			if (categories != null) {
 			
 				if (event.error_origin != null) {
-					Set<String> originLabels = categories.getCategories(event.error_origin.class_name);
+	 				Set<String> originLabels = categories.getCategories(
+	 					event.error_origin.class_name, CategoryType.infra);
 					
 					if (!CollectionUtil.safeIsEmpty(originLabels))  {
 						categoryNames.addAll(originLabels);
@@ -149,7 +155,8 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 				}
 				
 				if (event.error_location != null) {
-					Set<String> locationLabels = categories.getCategories(event.error_location.class_name);
+					Set<String> locationLabels = categories.getCategories(
+						event.error_location.class_name, CategoryType.infra);
 					
 					if (!CollectionUtil.safeIsEmpty(locationLabels))  {
 						categoryNames.addAll(locationLabels);
@@ -163,6 +170,7 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 		if (availTypes.contains(EventTypes.EventTypes)) {
 			
 			appender.append(EventFilter.CRITICAL_EXCEPTIONS);
+			appender.append(EventFilter.TRANSACTION_FAILURES);
 
 			for (String type : eventTypes) {
 				appender.append(type);

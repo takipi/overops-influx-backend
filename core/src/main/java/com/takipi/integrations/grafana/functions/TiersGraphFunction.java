@@ -17,12 +17,12 @@ import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.util.infra.Categories;
+import com.takipi.api.client.util.infra.Categories.CategoryType;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.input.GraphLimitInput;
 import com.takipi.integrations.grafana.input.TiersGraphInput;
-import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TiersGraphFunction extends LimitGraphFunction {
@@ -56,14 +56,14 @@ public class TiersGraphFunction extends LimitGraphFunction {
 		
 		GraphLimitInput limitInput = (GraphLimitInput)input;
 		
-		Map<String, EventResult> eventMap = getEventMap(serviceId, input, timeSpan.getFirst(), timeSpan.getSecond(), input.volumeType,
-					input.pointsWanted);
+		Map<String, EventResult> eventMap = getEventMap(serviceId, input,
+			timeSpan.getFirst(), timeSpan.getSecond(), input.volumeType);
 		
 		if (eventMap == null) {
 			return Collections.emptyList();
 		}
 		
-		Graph graph = getEventsGraph(serviceId, viewId, input.pointsWanted, input, input.volumeType,
+		Graph graph = getEventsGraph(serviceId, viewId, input, input.volumeType,
 				timeSpan.getFirst(), timeSpan.getSecond());
 		
 		if (graph == null) {
@@ -81,8 +81,8 @@ public class TiersGraphFunction extends LimitGraphFunction {
 		
 		Long key = null;
 		Long lastKey = null;
-		
-		Categories categories = GrafanaSettings.getServiceSettings(apiClient, serviceId).getCategories();		
+				
+		Categories categories = getSettings(serviceId).getCategories();		
 		
 		for (GraphPoint gp : graph.points) {
 
@@ -108,8 +108,11 @@ public class TiersGraphFunction extends LimitGraphFunction {
 					continue;
 				}
 
-				Set<String> originLabels = categories.getCategories(event.error_origin.class_name);
-				Set<String> locationLabels = categories.getCategories(event.error_location.class_name);
+				Set<String> originLabels = categories.getCategories(
+					event.error_origin.class_name, CategoryType.infra);
+				
+				Set<String> locationLabels = categories.getCategories(
+					event.error_location.class_name, CategoryType.infra);
 
 				if ((originLabels == null) && (locationLabels == null)) {
 					continue;
@@ -173,7 +176,7 @@ public class TiersGraphFunction extends LimitGraphFunction {
 			graphsInPoint.clear();	
 		}
 		
-		Collection<String> tiers = GrafanaSettings.getServiceSettings(apiClient, serviceId).getTierNames();
+		Collection<String> tiers = getSettings(serviceId).getTierNames();
 		
 		List<GraphData> limitedGraphs = null;
 		

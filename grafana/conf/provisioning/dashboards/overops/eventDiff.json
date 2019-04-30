@@ -28,8 +28,17 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 38,
-  "iteration": 1551951695296,
+  "iteration": 1553057861974,
   "links": [
+    {
+      "icon": "dashboard",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "tooltip": "Home",
+      "type": "link",
+      "url": "d/lg0U4qriz/home"
+    },
     {
       "asDropdown": true,
       "icon": "external link",
@@ -39,15 +48,6 @@
         "OverOps"
       ],
       "type": "dashboards"
-    },
-    {
-      "icon": "dashboard",
-      "includeVars": true,
-      "keepTime": true,
-      "tags": [],
-      "tooltip": "Home",
-      "type": "link",
-      "url": "d/lg0U4qriz/home"
     }
   ],
   "panels": [
@@ -968,7 +968,7 @@
             "rgba(50, 172, 45, 0.97)"
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 0,
+          "decimals": 1,
           "link": false,
           "linkTargetBlank": true,
           "linkTooltip": "",
@@ -1352,7 +1352,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "eventsDiff({\"fields\":\"link,jira_issue_url,rate_desc,diff_desc,type,diff,description,message,stats.hits,rate,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":100, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"compareToApplications\":\"$compareToApplications\", \"compareToDeployments\":\"$compareToDeployments\",\"compareToServers\":\"$compareToServers\", \"timeDiff\":\"$timeDiff\", \"diffTypes\":\"Increasing\"})\n",
+          "query": "eventsDiff({\"fields\":\"link,jira_issue_url,rate_desc,diff_desc,type,diff,description,message,stats.hits,first_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":100, \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"compareToApplications\":\"$compareToApplications\", \"compareToDeployments\":\"$compareToDeployments\",\"compareToServers\":\"$compareToServers\", \"timeDiff\":\"$timeDiff\", \"diffTypes\":\"Increasing\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -1390,7 +1390,6 @@
         "allValue": "None",
         "current": {
           "selected": true,
-          "tags": [],
           "text": "None",
           "value": "None"
         },
@@ -1415,6 +1414,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1439,6 +1439,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1463,6 +1464,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1510,6 +1512,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1567,9 +1570,8 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
-          "text": "All Events",
-          "value": "All Events"
+          "text": "",
+          "value": ""
         },
         "hide": 2,
         "includeAll": false,
@@ -1578,7 +1580,7 @@
         "name": "view",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "All Events",
             "value": "All Events"
           }
@@ -1590,6 +1592,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "app.overops.com",
           "value": "app.overops.com"
         },
@@ -1614,6 +1617,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "443",
           "value": "443"
         },
@@ -1710,6 +1714,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1745,7 +1750,7 @@
         "name": "timeDiff",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "0m",
             "value": "0m"
           },
@@ -1765,7 +1770,7 @@
             "value": "8h"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "24h",
             "value": "24h"
           },
@@ -2012,5 +2017,5 @@
   "timezone": "",
   "title": "Event Diff",
   "uid": "CVCRTgwmz",
-  "version": 35
+  "version": 37
 }

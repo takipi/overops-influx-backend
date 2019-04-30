@@ -19,6 +19,8 @@ import com.takipi.integrations.grafana.util.ApiCache;
  */
 public abstract class EnvironmentsFilterInput extends BaseEnvironmentsInput {
 	
+	public static final String APP_LABEL_PREFIX = "--";
+	
 	/**
 	 * A comma delimited array of application names to use as a filter. Specify null, "", "all" or "*" to skip
 	 */
@@ -48,13 +50,16 @@ public abstract class EnvironmentsFilterInput extends BaseEnvironmentsInput {
 	}
 	
 	public Collection<String> getApplications(ApiClient apiClient,
-		ServiceSettingsData settingsData, String serviceId) {
-		return getApplications(apiClient, settingsData, serviceId, true);
+		ServiceSettingsData settingsData, String serviceId,
+		boolean expandGroups, boolean includeLabelApps) {
+		
+		return getApplications(apiClient, settingsData, serviceId, applications,
+				expandGroups, includeLabelApps);
 	}
 	
-	public Collection<String> getApplications(ApiClient apiClient, 
+	public static Collection<String> getApplications(ApiClient apiClient, 
 		ServiceSettingsData settingsData, String serviceId,
-		boolean expandGroups) {
+		String applications, boolean expandGroups, boolean includeLabelApps) {
 		
 		Collection<String> apps = getServiceFilters(applications, serviceId, true);
 		
@@ -63,14 +68,18 @@ public abstract class EnvironmentsFilterInput extends BaseEnvironmentsInput {
 		}
 			
 		Set<String> result = new HashSet<String>();
-		
+				
 		if ((settingsData != null) && (settingsData.applications != null) && (expandGroups)) {			
 				
 			Collection<String> serviceApps = null;
 
 			for (String app : apps) {
 				
-				if (GroupSettings.isGroup(app)) {
+				if (isLabelApp(app)) {
+					if (includeLabelApps) {
+						result.addAll(apps);
+					}
+				} else if (GroupSettings.isGroup(app)) {
 					
 					Group group = settingsData.applications.getGroup(app);
 					
@@ -103,10 +112,35 @@ public abstract class EnvironmentsFilterInput extends BaseEnvironmentsInput {
 				}				
 			} 			
 		} else {
-			result.addAll(apps);
+			if (includeLabelApps) {
+				result.addAll(apps);
+			} else {
+				for (String app : apps) {
+					if (!isLabelApp(app)) {
+						result.add(app);
+					}
+				}
+			}
 		}
 		
 		return result;
+	}
+	
+	public static String toAppLabel(String app) {
+		return APP_LABEL_PREFIX + app;
+	}
+	
+	public static boolean isLabelApp(String app) {
+		return app.startsWith(APP_LABEL_PREFIX);
+	}
+	
+	public static String getLabelAppName(String value) {
+		
+		if ((value == null) || (!isLabelApp(value))) {
+			return value;
+		}
+
+		return value.substring(APP_LABEL_PREFIX.length());
 	}
 
 	public Collection<String> getDeployments(String serviceId) {

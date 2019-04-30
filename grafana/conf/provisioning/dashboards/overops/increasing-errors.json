@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 28,
-  "iteration": 1552989101595,
+  "iteration": 1555789235568,
   "links": [
     {
       "icon": "dashboard",
@@ -89,15 +89,20 @@
         "total": false,
         "values": false
       },
-      "lines": false,
+      "lines": true,
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
       "pointradius": 3,
-      "points": true,
+      "points": false,
       "renderer": "flot",
-      "seriesOverrides": [],
+      "seriesOverrides": [
+        {
+          "alias": "/\\*$/",
+          "yaxis": 2
+        }
+      ],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
@@ -123,6 +128,43 @@
           "query": "regressionGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\",\"limit\":$splitLimit, \"searchText\":\"$search\",\"eventLocations\":\"$increasingErrors\",\"graphType\":\"Percentage\", \"types\":\"$type\",\"timeFilterVar\":\"$timeFilterVar\"})\n\n",
           "rawQuery": true,
           "refId": "I",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "systemMetricsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregateMode\":Yes\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$search\",\"metricNames\":\"$metricNames\"})",
+          "rawQuery": true,
+          "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
@@ -169,7 +211,7 @@
           "show": true
         },
         {
-          "decimals": 0,
+          "decimals": 1,
           "format": "short",
           "label": "",
           "logBase": 1,
@@ -219,12 +261,8 @@
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "Errors",
-          "color": "#cca300"
-        },
-        {
-          "alias": "Calls",
-          "color": "#9ac48a"
+          "alias": "/\\*$/",
+          "yaxis": 2
         }
       ],
       "spaceLength": 10,
@@ -270,7 +308,6 @@
           "tags": []
         },
         {
-          "alias": "",
           "groupBy": [
             {
               "params": [
@@ -285,12 +322,11 @@
               "type": "fill"
             }
           ],
-          "hide": true,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionGraph({\"type\":\"sum\",\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"pointsWanted\":\"$pointsWanted\", \"types\":\"$type\",\"limit\":$splitLimit, \"searchText\":\"$search\", \"graphType\":\"Absolute\"})\n\n",
+          "query": "systemMetricsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregateMode\":Yes\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$search\",\"metricNames\":\"$metricNames\"})",
           "rawQuery": true,
-          "refId": "A",
+          "refId": "B",
           "resultFormat": "time_series",
           "select": [
             [
@@ -337,7 +373,7 @@
           "show": true
         },
         {
-          "decimals": 0,
+          "decimals": 1,
           "format": "short",
           "label": "",
           "logBase": 1,
@@ -795,7 +831,7 @@
           "tags": []
         }
       ],
-      "title": "$eventCount Events",
+      "title": "",
       "transform": "table",
       "type": "table"
     }
@@ -955,6 +991,30 @@
       {
         "allValue": null,
         "current": {
+          "text": "None",
+          "value": "None"
+        },
+        "datasource": "OO",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Correlate",
+        "multi": true,
+        "name": "metricNames",
+        "options": [],
+        "query": "systemMetricsMetadata({\"environments\":\"$environments\", \"addNone\":\"true\"})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
           "selected": true,
           "text": "3",
           "value": "3"
@@ -1009,28 +1069,26 @@
         "type": "custom"
       },
       {
-        "allValue": "All",
+        "allValue": null,
         "current": {
           "text": "All",
-          "value": "$__all"
+          "value": "All"
         },
-        "datasource": "OO",
-        "hide": 0,
-        "includeAll": true,
+        "hide": 2,
+        "includeAll": false,
         "label": "Increases",
-        "multi": true,
+        "multi": false,
         "name": "increasingErrors",
-        "options": [],
-        "query": "increasingErrors({\"timeFilter\":\"$timeFilter\", \"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\"})",
-        "refresh": 2,
-        "regex": "",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "All"
+          }
+        ],
+        "query": "All",
         "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
+        "type": "custom"
       },
       {
         "allValue": null,
@@ -1231,8 +1289,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "time >= 1552902700863ms and time <= 1552989100863ms",
-          "value": "time >= 1552902700863ms and time <= 1552989100863ms"
+          "text": "time >= 1555702835491ms and time <= 1555789235492ms",
+          "value": "time >= 1555702835491ms and time <= 1555789235492ms"
         },
         "datasource": "OO",
         "hide": 2,
@@ -1242,31 +1300,6 @@
         "name": "timeFilterVar",
         "options": [],
         "query": "timeFilter({\"timeFilter\":\"$timeFilter\"})",
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": "OO",
-        "hide": 2,
-        "includeAll": false,
-        "label": null,
-        "multi": false,
-        "name": "eventCount",
-        "options": [],
-        "query": "regressions({\"render\":\"SingleStat\", \"regressionTypes\":\"Regressions,SevereRegressions\", \"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"maxColumnLength\":120,\"pointsWanted\":\"$pointsWanted\",\"searchText\":\"$search\", \"eventLocations\":\"$increasingErrors\", \"types\":\"$type\", \"timeFilterVar\":\"true\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1312,5 +1345,5 @@
   "timezone": "",
   "title": "Increasing Errors",
   "uid": "WZ739NYmk",
-  "version": 120
+  "version": 126
 }

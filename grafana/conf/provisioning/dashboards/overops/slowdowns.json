@@ -1,4 +1,40 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_OO",
+      "label": "OO",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "5.3.4"
+    },
+    {
+      "type": "panel",
+      "id": "graph",
+      "name": "Graph",
+      "version": "5.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "influxdb",
+      "name": "InfluxDB",
+      "version": "5.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": "5.0.0"
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -39,8 +75,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 37,
-  "iteration": 1551951897040,
+  "id": 56,
+  "iteration": 1555789190967,
   "links": [
     {
       "icon": "dashboard",
@@ -104,8 +140,7 @@
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "Throughput",
-          "color": "#9ac48a",
+          "alias": "/^\\./",
           "fill": 2,
           "linewidth": 0,
           "yaxis": 2
@@ -123,6 +158,12 @@
           "alias": "/^Baseline/",
           "color": "#f9934e",
           "dashes": true
+        },
+        {
+          "alias": "/\\*$/",
+          "fill": 0,
+          "linewidth": 1,
+          "yaxis": 2
         }
       ],
       "spaceLength": 10,
@@ -130,7 +171,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "Throughput",
+          "alias": "",
           "groupBy": [
             {
               "params": [
@@ -148,7 +189,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregate\":true,\"transactions\":\"$transactions\",\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\",\"performanceStates\":\"$performanceStates\",\"timeFilterVar\":\"$timeFilterVar\"})",
+          "query": "correlateGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregate\":true,\"transactions\":\"$transactions\",\"pointsWanted\":\"$transactionPointsWanted\", \"seriesName\":\"Throughput\",\"searchText\":\"$searchText\",\"performanceStates\":\"$performanceStates\",\"timeFilterVar\":\"$timeFilterVar\", \"timeWindow\":\"All\",\"metricNames\":\"$metricNames\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -187,7 +228,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregate\":\"true\",\"transactions\":\"$transactions\",\"seriesName\":\"Avg Response (ms)\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\",\"performanceStates\":\"$performanceStates\",\"timeFilterVar\":\"$timeFilterVar\"})",
+          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"avg_time\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregate\":\"true\",\"transactions\":\"$transactions\",\"seriesName\":\"Avg Response (ms)\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\",\"performanceStates\":\"$performanceStates\",\"timeFilterVar\":\"$timeFilterVar\", \"timeWindow\":\"All\"})",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -353,10 +394,10 @@
           "show": true
         },
         {
-          "decimals": null,
+          "decimals": 1,
           "format": "short",
           "label": "",
-          "logBase": 1,
+          "logBase": 10,
           "max": null,
           "min": null,
           "show": true
@@ -405,8 +446,7 @@
       "renderer": "flot",
       "seriesOverrides": [
         {
-          "alias": "Throughput",
-          "color": "#9ac48a",
+          "alias": "/^\\./",
           "fill": 2,
           "linewidth": 0,
           "yaxis": 2
@@ -419,6 +459,12 @@
           "alias": "/^Last/",
           "color": "#82b5d8",
           "dashes": true
+        },
+        {
+          "alias": "/\\*$/",
+          "fill": 0,
+          "linewidth": 1,
+          "yaxis": 2
         }
       ],
       "spaceLength": 10,
@@ -426,7 +472,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "Throughput",
+          "alias": "",
           "groupBy": [
             {
               "params": [
@@ -444,7 +490,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregate\":true,\"transactions\":\"$transactions\",\"seriesName\":\"Throughput\",\"pointsWanted\":\"$transactionPointsWanted\", \"searchText\":\"$searchText\",\"timeFilterVar\":\"$timeFilterVar\"})",
+          "query": "correlateGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"deployments\":\"$deployments\", \"aggregate\":true,\"transactions\":\"$transactions\",\"pointsWanted\":\"$transactionPointsWanted\", \"seriesName\":\"Throughput\",\"searchText\":\"$searchText\",\"timeFilterVar\":\"$timeFilterVar\",\"metricNames\":\"$metricNames\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -571,10 +617,10 @@
           "show": true
         },
         {
-          "decimals": null,
+          "decimals": 1,
           "format": "short",
           "label": "",
-          "logBase": 1,
+          "logBase": 10,
           "max": null,
           "min": null,
           "show": true
@@ -654,7 +700,7 @@
         },
         {
           "alias": "Failure Rate",
-          "colorMode": "value",
+          "colorMode": null,
           "colors": [
             "rgba(50, 172, 45, 0.97)",
             "rgba(237, 129, 40, 0.89)",
@@ -665,7 +711,7 @@
           "link": true,
           "linkTargetBlank": false,
           "linkTooltip": "${__cell_7}. Click to drill-in",
-          "linkUrl": "d/HYBPMdYik/errors?from=${__cell_3}&to=${__cell_4}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=${__cell_8}&var-type=$transactionFailureTypes",
+          "linkUrl": "d/YVh71-emz?from=${__cell_3}&to=${__cell_4}&var-environments=$environments&var-applications=$applications&var-servers=$servers&var-deployments=$deployments&var-transactions=${__cell_8}&var-type=$transactionFailureTypes",
           "mappingType": 1,
           "pattern": "error_rate",
           "thresholds": [
@@ -960,9 +1006,7 @@
         "allValue": "all",
         "current": {
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -986,9 +1030,7 @@
         "allValue": "*",
         "current": {
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1106,10 +1148,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "100",
-          "value": "100"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -1176,6 +1215,27 @@
       },
       {
         "allValue": null,
+        "current": {},
+        "datasource": "OO",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Correlate",
+        "multi": true,
+        "name": "metricNames",
+        "options": [],
+        "query": "correlateMetadata({\"environments\":\"$environments\"})",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
         "current": {
           "selected": true,
           "text": "<term>",
@@ -1199,10 +1259,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "Logged Error|Uncaught Exception|HTTP Error",
-          "value": "Logged Error|Uncaught Exception|HTTP Error"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -1223,10 +1280,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "Logged Error,Uncaught Exception,HTTP Error",
-          "value": "Logged Error,Uncaught Exception,HTTP Error"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -1247,10 +1301,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "app.overops.com",
-          "value": "app.overops.com"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -1271,10 +1322,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "443",
-          "value": "443"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -1295,11 +1343,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -1343,11 +1387,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -1368,11 +1408,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -1393,11 +1429,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -1418,11 +1450,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "isNone": true,
-          "text": "None",
-          "value": ""
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -1443,10 +1471,7 @@
       },
       {
         "allValue": null,
-        "current": {
-          "text": "time >= 1551865496510ms and time <= 1551951896510ms",
-          "value": "time >= 1551865496510ms and time <= 1551951896510ms"
-        },
+        "current": {},
         "datasource": "OO",
         "hide": 2,
         "includeAll": false,
@@ -1500,5 +1525,5 @@
   "timezone": "",
   "title": "Slowdowns",
   "uid": "iHSORcymk",
-  "version": 83
+  "version": 9
 }

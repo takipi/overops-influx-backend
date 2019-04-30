@@ -200,7 +200,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 		private void executeEventsGraph(Map<String, EventResult> eventsMap, EventFilter eventFilter,
 				List<Pair<DateTime, DateTime>> intervals) {
 
-			Graph graph = getEventsGraph(serviceId, viewId, intervals.size() * 5, input, input.volumeType,
+			Graph graph = getEventsGraph(serviceId, viewId, input, input.volumeType,
 					timeSpan.getFirst(), timeSpan.getSecond());
 			
 			if (graph == null) {
@@ -260,7 +260,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 			try {
 
 				Map<String, EventResult> eventsMap = getEventMap(serviceId, input, timeSpan.getFirst(),
-						timeSpan.getSecond(), input.volumeType, input.pointsWanted);
+						timeSpan.getSecond(), input.volumeType);
 
 				if (eventsMap == null) {
 					return null;
@@ -452,12 +452,13 @@ public class GroupByFunction extends BaseVolumeFunction {
 		List<String> apps;
 
 		if (input.hasApplications()) {
-			apps = new ArrayList<String>(input.getApplications(apiClient, getSettings(serviceId), serviceId));
+			apps = new ArrayList<String>(input.getApplications(apiClient, 
+				getSettingsData(serviceId), serviceId, false, true));
 		} else {
 			
 			List<String> keyApps = new ArrayList<String>();
 			
-			GroupSettings appGroups = getSettings(serviceId).applications;
+			GroupSettings appGroups = getSettingsData(serviceId).applications;
 			
 			if ((appGroups != null) && (appGroups.groups != null)) {
 				
@@ -541,14 +542,15 @@ public class GroupByFunction extends BaseVolumeFunction {
 			size = serverList.size();
 		}
 
-		String json = new Gson().toJson(input);
+		Gson gson = new Gson();
+		String json = gson.toJson(input);
 
 		for (int i = 0; i < size; i++) {
 
 			String server = serverList.get(i);
 			
-			GroupByInput serverInput = new Gson().fromJson(json, input.getClass());
-			serverInput.applications = server;
+			GroupByInput serverInput = gson.fromJson(json, input.getClass());
+			serverInput.servers = server;
 			
 			result.add(new GroupByFilterAsyncTask(map, server, serverInput, serviceId, viewId, timeSpan));
 		}
@@ -560,14 +562,15 @@ public class GroupByFunction extends BaseVolumeFunction {
 			String serviceId, String viewId, Pair<DateTime, DateTime> timespan,
 			List<Pair<DateTime, DateTime>> intervals, String key) {
 		
-		Graph graph = getEventsGraph(serviceId, viewId, input.pointsWanted, input, input.volumeType, timespan.getFirst(), timespan.getSecond());
+		Graph graph = getEventsGraph(serviceId, viewId,
+			input, input.volumeType, timespan.getFirst(), timespan.getSecond());
 
 		if (graph == null) {
 			return;
 		}
 		
 		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, timespan.getFirst(),
-				timespan.getSecond(), input.volumeType, input.pointsWanted);
+				timespan.getSecond(), input.volumeType);
 
 		if (eventsMap == null) {
 			return;
@@ -622,7 +625,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 		String serviceId, Pair<DateTime, DateTime> timespan) {
 
 		Map<String, EventResult> events = getEventMap(serviceId, input, timespan.getFirst(), timespan.getSecond(), 
-			input.volumeType, input.pointsWanted);
+			input.volumeType);
 		
 		if (events != null) {
 			updateMap(map, serviceId, key, timespan, events.values(), input);

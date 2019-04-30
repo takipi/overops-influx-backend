@@ -9,7 +9,6 @@ import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.SettingsVarInput;
 import com.takipi.integrations.grafana.output.Series;
-import com.takipi.integrations.grafana.settings.GrafanaSettings;
 
 
 public class SettingsVarFunction extends EnvironmentVariableFunction
@@ -51,7 +50,7 @@ public class SettingsVarFunction extends EnvironmentVariableFunction
 			return;
 		}
 				
-		GeneralSettings settings = GrafanaSettings.getServiceSettings(apiClient, serviceId).getData().general;
+		GeneralSettings settings = getSettingsData(serviceId).general;
 		
 		if (settings == null) {
 			return;

@@ -43,12 +43,11 @@ public class ViewsFunction extends EnvironmentVariableFunction {
 	protected int compareValues(FunctionInput input, String o1, String o2) {
 		ViewsInput viewsInput = (ViewsInput)input;
 		
-		if (o2.equals(viewsInput.defaultView)) {
-			return 1;
-		}
+		int defaultViewDelta = Boolean.compare(o2.equals(viewsInput.defaultView),
+			o1.equals(viewsInput.defaultView));
 		
-		if (o1.equals(viewsInput.defaultView)) {
-			return 1;
+		if (defaultViewDelta != 0) {
+			return defaultViewDelta;
 		}
 		
 		return super.compareValues(viewsInput, o1, o2);
