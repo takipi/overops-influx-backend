@@ -243,8 +243,8 @@
           "dashboard": "Errors",
           "includeVars": true,
           "keepTime": true,
-          "params": "$failureTypesArray",
-          "targetBlank": true,
+          "params": "",
+          "targetBlank": false,
           "title": "Transaction Failures. $fr",
           "type": "dashboard",
           "url": "d/HYBPMdYik/errors"
@@ -366,12 +366,14 @@
       "interval": null,
       "links": [
         {
+          "dashboard": "Slowdowns",
           "includeVars": true,
           "keepTime": true,
+          "params": "&var-performanceStates=CRITICAL",
           "targetBlank": false,
-          "title": "Performance. $sd",
+          "title": "Slowdowns",
           "type": "absolute",
-          "url": "d/Z40SpeJmz/performance"
+          "url": "d/iHSORcymk/slowdowns"
         }
       ],
       "mappingType": 1,
@@ -1711,7 +1713,7 @@
           "dashboard": "Performance",
           "includeVars": true,
           "keepTime": true,
-          "targetBlank": true,
+          "targetBlank": false,
           "title": "Performance",
           "type": "absolute",
           "url": "d/Z40SpeJmz/performance"
@@ -3117,7 +3119,7 @@
     ]
   },
   "timezone": "",
-  "title": "Reliability Analysis",
+  "title": "Root Cause",
   "uid": "4DHQ63-ik",
-  "version": 65
+  "version": 272
 }

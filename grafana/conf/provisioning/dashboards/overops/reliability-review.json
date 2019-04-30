@@ -460,8 +460,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": false,
-          "tags": [],
           "text": "None",
           "value": "None"
         },
@@ -512,7 +510,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -537,7 +534,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -585,7 +581,6 @@
       {
         "allValue": "all",
         "current": {
-          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -871,7 +866,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -896,7 +890,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -921,7 +914,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
           "value": "All"
         },
@@ -946,7 +938,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "",
           "value": ""
         },

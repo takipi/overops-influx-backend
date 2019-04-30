@@ -223,7 +223,7 @@
       "datasource": "OO",
       "decimals": null,
       "description": "The average response time of the selected transactions.",
-      "format": "locale",
+      "format": "ms",
       "gauge": {
         "maxValue": 100,
         "minValue": 0,
@@ -1746,12 +1746,9 @@
       {
         "allValue": "all",
         "current": {
-          "selected": false,
-          "tags": [],
+          "selected": true,
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1774,6 +1771,7 @@
       {
         "allValue": "All",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1798,6 +1796,7 @@
       {
         "allValue": "All",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1822,6 +1821,7 @@
       {
         "allValue": "All",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1846,6 +1846,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1870,12 +1871,9 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
-          "tags": [],
+          "selected": true,
           "text": "Throughput",
-          "value": [
-            "Throughput"
-          ]
+          "value": "Throughput"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1921,6 +1919,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1945,6 +1944,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -2014,24 +2014,26 @@
       },
       {
         "allValue": null,
-        "current": {},
-        "datasource": "OO",
+        "current": {
+          "selected": true,
+          "text": "Transaction Failures",
+          "value": "Transaction Failures"
+        },
         "hide": 2,
         "includeAll": false,
         "label": null,
         "multi": false,
         "name": "transactionFailureTypes",
-        "options": [],
-        "query": "settingsVar({\"environments\":\"$environments\", \"name\":\"transaction_failures\", \"convertToArray\":\"true\", \"defaultValue\":\"Logged Error|Uncaught Exception|HTTP Error\"})",
-        "refresh": 1,
-        "regex": "",
+        "options": [
+          {
+            "selected": true,
+            "text": "Transaction Failures",
+            "value": "Transaction Failures"
+          }
+        ],
+        "query": "Transaction Failures",
         "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
+        "type": "custom"
       },
       {
         "allValue": null,
