@@ -358,6 +358,7 @@
           "dashboard": "Slowdowns",
           "includeVars": true,
           "keepTime": true,
+          "params": "&var-performanceStates=CRITICAL",
           "title": "Slowdowns",
           "type": "absolute",
           "url": "d/iHSORcymk/slowdowns"
@@ -481,6 +482,7 @@
           "dashboard": "Slowdowns",
           "includeVars": true,
           "keepTime": true,
+          "params": "&var-performanceStates=SLOWING",
           "title": "Slowdowns",
           "type": "absolute",
           "url": "d/iHSORcymk/slowdowns"
@@ -1419,7 +1421,7 @@
           "link": true,
           "linkTargetBlank": false,
           "linkTooltip": "${__cell_1}. Thresholds are defined in the Settings dashboard",
-          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&from=${__cell_2}&to=${__cell_3}&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-transactions=${__cell_11}&var-performanceStates=OK%7CSLOWING%7CCRITICAL%7CNO_DATA",
+          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&from=${__cell_2}&to=${__cell_3}&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-transactions=${__cell_11}&var-performanceStates=OK%7CSLOWING%7CCRITICAL%7CNO_DATA&var-metricNames=$metricNames",
           "mappingType": 1,
           "pattern": "slow_state",
           "thresholds": [
@@ -1666,7 +1668,7 @@
           "decimals": 2,
           "link": true,
           "linkTooltip": "${__cell_8}",
-          "linkUrl": "d/6TxYIh6mk/errors-drill-down?orgId=1&from=${__cell_2}&to=${__cell_3}&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-transactions=${__cell_11}&var-type=Transaction Failures",
+          "linkUrl": "d/6TxYIh6mk/errors-drill-down?orgId=1&from=${__cell_2}&to=${__cell_3}&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-transactions=${__cell_11}&var-type=Transaction Failures&var-metricNames=$metricNames",
           "mappingType": 1,
           "pattern": "error_rate_delta_state",
           "thresholds": [
