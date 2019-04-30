@@ -818,23 +818,16 @@ public class RegressionFunction extends EventsFunction {
 			
 			activeGraphResult.graphs = Collections.singletonList(activeWindowGraph);
 		
-		
-			if ((input.hasDeployments())) {
+			if ((input.hasDeployments()) && (baselineGraph == null)) {
+				List<Graph> allBaselineGraphs = baselineGraphKeys.get(DeterminantKey.Empty);
 				
-				if (baselineGraph == null) {
+				if (!CollectionUtil.safeIsEmpty(allBaselineGraphs)) {
 					
-					if ((baselineGraphKeys.get(DeterminantKey.Empty) != null) &&
-						(!(CollectionUtil.safeIsEmpty(baselineGraphKeys.get(DeterminantKey.Empty))))) {
-						
-						List<Graph> allBaselineGraphs = baselineGraphKeys.get(DeterminantKey.Empty);
-						
-						baselineGraph = mergeGraphs(allBaselineGraphs);
-					}
+					baselineGraph = mergeGraphs(allBaselineGraphs);
 				}
 			}
-			
-			}
-			
+		}
+		
 		return Pair.of(baselineGraph, activeWindowGraph);
 	}
 	
