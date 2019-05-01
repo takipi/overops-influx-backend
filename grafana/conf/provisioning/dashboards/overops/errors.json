@@ -1783,7 +1783,7 @@
           ]
         },
         {
-          "alias": "Tkt",
+          "alias": "Ticket",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1794,7 +1794,7 @@
           "decimals": 2,
           "link": true,
           "linkTargetBlank": true,
-          "linkTooltip": "🔎",
+          "linkTooltip": "View",
           "linkUrl": "http://${__cell_1:raw}",
           "mappingType": 1,
           "pattern": "Jira state",

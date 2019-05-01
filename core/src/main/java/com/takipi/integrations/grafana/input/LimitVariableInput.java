@@ -7,8 +7,10 @@ import java.util.Collection;
  * first element when using within a URL of dashboard opened from a table link
  *
  */
-public class LimitVariableInput extends VariableInput
-{
+public class LimitVariableInput extends VariableInput {
+	
+	public String name;
+	
 	public String values;
 	
 	public Collection<String> getValues() {

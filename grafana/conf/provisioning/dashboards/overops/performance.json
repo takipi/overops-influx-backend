@@ -223,7 +223,7 @@
       "datasource": "OO",
       "decimals": null,
       "description": "The average response time of the selected transactions.",
-      "format": "locale",
+      "format": "ms",
       "gauge": {
         "maxValue": 100,
         "minValue": 0,
@@ -358,6 +358,7 @@
           "dashboard": "Slowdowns",
           "includeVars": true,
           "keepTime": true,
+          "params": "&var-performanceStates=CRITICAL",
           "title": "Slowdowns",
           "type": "absolute",
           "url": "d/iHSORcymk/slowdowns"
@@ -481,6 +482,7 @@
           "dashboard": "Slowdowns",
           "includeVars": true,
           "keepTime": true,
+          "params": "&var-performanceStates=SLOWING",
           "title": "Slowdowns",
           "type": "absolute",
           "url": "d/iHSORcymk/slowdowns"
@@ -1419,7 +1421,7 @@
           "link": true,
           "linkTargetBlank": false,
           "linkTooltip": "${__cell_1}. Thresholds are defined in the Settings dashboard",
-          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&from=${__cell_2}&to=${__cell_3}&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-transactions=${__cell_11}&var-performanceStates=OK%7CSLOWING%7CCRITICAL%7CNO_DATA",
+          "linkUrl": "d/iHSORcymk/slowdowns?orgId=1&from=${__cell_2}&to=${__cell_3}&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-transactions=${__cell_11}&var-performanceStates=OK%7CSLOWING%7CCRITICAL%7CNO_DATA&var-metricNames=$metricNames",
           "mappingType": 1,
           "pattern": "slow_state",
           "thresholds": [
@@ -1666,7 +1668,7 @@
           "decimals": 2,
           "link": true,
           "linkTooltip": "${__cell_8}",
-          "linkUrl": "d/6TxYIh6mk/errors-drill-down?orgId=1&from=${__cell_2}&to=${__cell_3}&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-transactions=${__cell_11}&var-type=Transaction Failures",
+          "linkUrl": "d/6TxYIh6mk/errors-drill-down?orgId=1&from=${__cell_2}&to=${__cell_3}&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-transactions=${__cell_11}&var-type=Transaction Failures&var-metricNames=$metricNames",
           "mappingType": 1,
           "pattern": "error_rate_delta_state",
           "thresholds": [
@@ -1746,12 +1748,9 @@
       {
         "allValue": "all",
         "current": {
-          "selected": false,
-          "tags": [],
+          "selected": true,
           "text": "None",
-          "value": [
-            "None"
-          ]
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1774,6 +1773,7 @@
       {
         "allValue": "All",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1798,6 +1798,7 @@
       {
         "allValue": "All",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1822,6 +1823,7 @@
       {
         "allValue": "All",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1846,6 +1848,7 @@
       {
         "allValue": "*",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1870,12 +1873,9 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
-          "tags": [],
+          "selected": true,
           "text": "Throughput",
-          "value": [
-            "Throughput"
-          ]
+          "value": "Throughput"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1921,6 +1921,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -1945,6 +1946,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -2014,24 +2016,26 @@
       },
       {
         "allValue": null,
-        "current": {},
-        "datasource": "OO",
+        "current": {
+          "selected": true,
+          "text": "Transaction Failures",
+          "value": "Transaction Failures"
+        },
         "hide": 2,
         "includeAll": false,
         "label": null,
         "multi": false,
         "name": "transactionFailureTypes",
-        "options": [],
-        "query": "settingsVar({\"environments\":\"$environments\", \"name\":\"transaction_failures\", \"convertToArray\":\"true\", \"defaultValue\":\"Logged Error|Uncaught Exception|HTTP Error\"})",
-        "refresh": 1,
-        "regex": "",
+        "options": [
+          {
+            "selected": true,
+            "text": "Transaction Failures",
+            "value": "Transaction Failures"
+          }
+        ],
+        "query": "Transaction Failures",
         "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
+        "type": "custom"
       },
       {
         "allValue": null,

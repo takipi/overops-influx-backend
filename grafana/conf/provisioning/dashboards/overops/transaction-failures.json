@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 54,
-  "iteration": 1555789274047,
+  "iteration": 1556629771357,
   "links": [
     {
       "icon": "dashboard",
@@ -1024,7 +1024,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
           "text": "Throughput",
           "value": "Throughput"
         },
@@ -1143,26 +1142,24 @@
       {
         "allValue": null,
         "current": {
-          "text": "Logged Error|Uncaught Exception|HTTP Error",
-          "value": "Logged Error|Uncaught Exception|HTTP Error"
+          "text": "Transaction Failures",
+          "value": "Transaction Failures"
         },
-        "datasource": "OO",
         "hide": 2,
         "includeAll": false,
         "label": null,
         "multi": false,
         "name": "transactionFailureTypes",
-        "options": [],
-        "query": "settingsVar({\"environments\":\"$environments\", \"name\":\"transaction_failures\", \"convertToArray\":\"true\", \"defaultValue\":\"Logged Error|Uncaught Exception|HTTP Error\"})",
-        "refresh": 1,
-        "regex": "",
+        "options": [
+          {
+            "selected": true,
+            "text": "Transaction Failures",
+            "value": "Transaction Failures"
+          }
+        ],
+        "query": "Transaction Failures",
         "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
+        "type": "custom"
       },
       {
         "allValue": null,
@@ -1262,8 +1259,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "var-type=Logged Error&var-type=Uncaught Exception&var-type=HTTP Error&",
-          "value": "var-type=Logged Error&var-type=Uncaught Exception&var-type=HTTP Error&"
+          "text": "var-type=Transaction Failures&",
+          "value": "var-type=Transaction Failures&"
         },
         "datasource": "OO",
         "hide": 2,
@@ -1418,5 +1415,5 @@
   "timezone": "",
   "title": "Transaction Failures",
   "uid": "YVh71-emz",
-  "version": 24
+  "version": 26
 }

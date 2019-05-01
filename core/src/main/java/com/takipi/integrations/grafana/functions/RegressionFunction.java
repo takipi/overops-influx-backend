@@ -1066,7 +1066,7 @@ public class RegressionFunction extends EventsFunction {
 				
 				EventResult newEvent = regressionData.event;
 				
-				if ((newEvent.error_location != null) && (newEvent.stats.hits > 0)) {
+				if (newEvent.error_location != null) {
 					result.append(newEvent.name);
 					result.append(" in ");
 					result.append(getSimpleClassName(newEvent.error_location.class_name));

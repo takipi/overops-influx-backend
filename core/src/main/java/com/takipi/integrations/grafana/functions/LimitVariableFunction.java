@@ -10,6 +10,10 @@ import com.takipi.integrations.grafana.output.Series;
 
 public class LimitVariableFunction extends VariableFunction {
 	
+	private static final String prefix = "var-%s=";
+	private static final String postfix = "&";
+
+	
 	public static class Factory implements FunctionFactory {
 		@Override
 		public GrafanaFunction create(ApiClient apiClient) {
@@ -36,17 +40,32 @@ public class LimitVariableFunction extends VariableFunction {
 		
 		LimitVariableInput pvInput = (LimitVariableInput)input;
 		
+		String value;  
 		Collection<String> values = pvInput.getValues();
 		
-		String value;  
-		
-		if (values.size() > 0) {		
-			value = values.iterator().next();
+		if (pvInput.name == null) {
+					
+			if (values.size() > 0) {		
+				value = values.iterator().next();
+			} else {
+				value = GrafanaFunction.ALL;
+			}
+			
+			appender.append(value);
 		} else {
-			value = GrafanaFunction.ALL;
+			
+			String varPrefix = String.format(prefix, pvInput.name);
+			String joined = String.join(postfix + varPrefix, values);
+			
+			if (values.size() > 0) {
+				value = varPrefix + joined;
+			} else {
+				value = "";
+			}
 		}
 		
 		appender.append(value);
+
 		
 	}
 	
