@@ -1003,6 +1003,7 @@ public class EventsFunction extends GrafanaFunction {
 		String json = gson.toJson(input);
 		EventsInput baselineInput = gson.fromJson(json, input.getClass());
 		baselineInput.timeFilter = TimeUtil.toTimeFilter(baselineTimespan);
+		baselineInput.deployments = null;
 		
 		EventsSlimVolumeResult eventsVolume = getEventsVolume(serviceId,
 			viewId, baselineInput, baselineTimespan.getFirst(), baselineTimespan.getSecond(),
