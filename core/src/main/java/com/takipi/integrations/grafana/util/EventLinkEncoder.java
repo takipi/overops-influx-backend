@@ -35,12 +35,29 @@ public class EventLinkEncoder {
 
 	public static String encodeLink(ApiClient apiClient, ServiceSettingsData settingsData, String serviceId, ViewInput input, 
 		EventResult event, DateTime from, DateTime to) {
-			
+		
+		// "from" paramater isn't used on purpose but being kept in case heuristic will change
+		//
 		Collection<String> apps = input.getApplications(apiClient, settingsData, serviceId, true, false);
 		Collection<String> deployments = input.getDeployments(serviceId, apiClient);
 		Collection<String> servers = input.getServers(serviceId);
+		
+		long firstSeenMillis;
+		
+		try {
+			firstSeenMillis = DateTime.parse(event.first_seen).getMillis();
+		}
+		catch (Exception e) {
+			firstSeenMillis = 0l;
+		}
+		
+		long dataRetentionStartTime = to.minusDays(90).getMillis();
+			
+		long fromTimeMillis = (firstSeenMillis == 0l) ? (dataRetentionStartTime) :
+				(Math.max(dataRetentionStartTime, firstSeenMillis - 60000));
+		long toTimeMillis = to.getMillis();
 
-		String json = String.format(TEMPLATE, serviceId, TimeUtil.getMillisAsString(from), TimeUtil.getMillisAsString(to),
+		String json = String.format(TEMPLATE, serviceId, String.valueOf(fromTimeMillis), String.valueOf(toTimeMillis),
 				toList(servers), toList(apps), toList(deployments),
 				toEventIdsList(event), TimeUtil.getMillisAsString(to));
 
