@@ -52,8 +52,8 @@ public class EventLinkEncoder {
 		}
 		
 		long dataRetentionStartTime = to.minusDays(90).getMillis();
-		
-		long fromTimeMillis = (firstSeenMillis == 0) ? (dataRetentionStartTime) :
+			
+		long fromTimeMillis = (firstSeenMillis == 0l) ? (dataRetentionStartTime) :
 				(Math.max(dataRetentionStartTime, firstSeenMillis - 60000));
 		long toTimeMillis = to.getMillis();
 
