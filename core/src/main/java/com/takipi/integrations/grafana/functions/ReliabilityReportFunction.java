@@ -969,7 +969,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 	}
 
 	protected List<ReportAsyncResult> processAsync(String serviceId, ReliabilityReportInput input,
-			Pair<DateTime, DateTime> timeSpan, Collection<ReportKey> activeKeys) {
+			Pair<DateTime, DateTime> timeSpan, List<ReportKey> activeKeys) {
 
 		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
 		List<ReportAsyncResult> result = new ArrayList<ReportAsyncResult>();
@@ -982,20 +982,16 @@ public class ReliabilityReportFunction extends EventsFunction {
 			return Collections.emptyList();
 		}
 		
-		
 		if (scoreType.includeRegressions()) {
-			Iterator<ReportKey> iterator = activeKeys.iterator();
 			
-			while (iterator.hasNext()) {
-				List<ReportKey> keysToSend = Lists.newArrayList();
+			int startIndex = 0;
+			
+			while (startIndex < activeKeys.size()) {
+				int endIndex = Math.min(activeKeys.size(), startIndex + GrafanaConfig.BATCH_REQUEST_SIZE);
 				
-				for (int i = 0; i < GrafanaConfig.BATCH_REQUEST_SIZE; i++) {
-					if (!iterator.hasNext()) {
-						break;
-					}
-					
-					keysToSend.add(iterator.next());
-				}
+				List<ReportKey> keysToSend = activeKeys.subList(startIndex, endIndex);
+				
+				startIndex += GrafanaConfig.BATCH_REQUEST_SIZE;
 				
 				ReportKey aggregatedActiveKey = new ReportKey(keysToSend);
 				
@@ -1747,7 +1743,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			return executeTimeline(serviceId, regInput, timeSpan);
 		}
 		
-		Collection<ReportKey> keys = getActiveKey(serviceId, regInput, timeSpan);
+		List<ReportKey> keys = getActiveKey(serviceId, regInput, timeSpan);
 		
 		logger.debug("Executing report " + reportMode + " keys: " + Arrays.toString(keys.toArray()));
 		
