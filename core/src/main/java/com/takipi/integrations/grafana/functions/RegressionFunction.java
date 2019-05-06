@@ -11,12 +11,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.takipi.integrations.grafana.functions.ReliabilityReportFunction.DeterminantKey;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.metrics.Graph;
@@ -33,6 +32,7 @@ import com.takipi.api.client.util.settings.RegressionSettings;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
+import com.takipi.integrations.grafana.functions.ReliabilityReportFunction.DeterminantKey;
 import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
 import com.takipi.integrations.grafana.input.EventFilterInput;
 import com.takipi.integrations.grafana.input.EventsInput;
@@ -802,7 +802,9 @@ public class RegressionFunction extends EventsFunction {
 		List<Graph> baselineGraphs = baselineGraphKeys.get(graphResultKey);
 		List<Graph> activeWindowGraphs = activeWindowGraphKeys.get(graphResultKey);
 		
-		Graph baselineGraph = null;
+		Graph baselineGraph = new Graph();
+		baselineGraph.points = new ArrayList<>();
+		
 		Graph activeWindowGraph = null;
 		
 		if (!CollectionUtil.safeIsEmpty(baselineGraphs)) {
