@@ -67,7 +67,7 @@ public class SystemMetricsMetadata {
 	protected static class CpuLoadSystemMetric extends SystemMetric {
 
 		public CpuLoadSystemMetric(SystemMetricMetadataResult first, SystemMetricMetadataResult second){
-			super("CPU Load Average", first, second);
+			super("CPU Usage", first, second);
 		}
 		
 		@Override

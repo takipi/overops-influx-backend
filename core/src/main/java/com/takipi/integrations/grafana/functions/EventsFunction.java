@@ -991,14 +991,16 @@ public class EventsFunction extends GrafanaFunction {
 			return;
 		}
 		
-		int baseline = regPair.getFirst().baselineTimespan;
+		int baseline = regPair.getFirst().baselineTimespan;		
+		Pair<DateTime, DateTime> baselineTimespan = Pair.of(timeSpan.getFirst().minusMinutes(baseline) ,timeSpan.getFirst());
+
 		
 		Gson gson = new Gson();
 		String json = gson.toJson(input);
 		EventsInput baselineInput = gson.fromJson(json, input.getClass());
+		baselineInput.timeFilter = TimeUtil.toTimeFilter(baselineTimespan);
+		baselineInput.deployments = null;
 		
-		Pair<DateTime, DateTime> baselineTimespan = Pair.of(timeSpan.getFirst().minusMinutes(baseline) ,timeSpan.getFirst());
-		     
 		EventsSlimVolumeResult eventsVolume = getEventsVolume(serviceId,
 			viewId, baselineInput, baselineTimespan.getFirst(), baselineTimespan.getSecond(),
 			VolumeType.all);

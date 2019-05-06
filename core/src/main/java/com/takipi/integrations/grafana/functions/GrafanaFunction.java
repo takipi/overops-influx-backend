@@ -645,7 +645,7 @@ public abstract class GrafanaFunction {
 
 			for (String failureType : failureTypes) {
 				
-				if (EventFilter.CRITICAL_EXCEPTIONS.equals(failureType)) {
+				if (EventFilter.isCriticalExceptionsType(failureType)) {
 					result.addAll(getCriticalExceptions(serviceId));
 				} else {
 					result.add(failureType);
@@ -673,7 +673,7 @@ public abstract class GrafanaFunction {
 			
 			if (expandCriticalTypes) {
 				
-				if (EventFilter.CRITICAL_EXCEPTIONS.equals(type)) {
+				if (EventFilter.isCriticalExceptionsType(type)) {
 					result.addAll(getCriticalExceptions(serviceId));	
 				} else if (EventFilter.TRANSACTION_FAILURES.equals(type)) {
 					result.addAll(getTransactionFailures(serviceId));		
@@ -1705,10 +1705,13 @@ public abstract class GrafanaFunction {
 		Collection<String> eventLocations = VariableInput.getServiceFilters(input.eventLocations, 
 			serviceId, true);
 	
+		Collection<String> nonExpandedTypes = getTypes(serviceId, false, input);
+		boolean mutexTypes = !CollectionUtil.safeContains(nonExpandedTypes, EventFilter.TRANSACTION_FAILURES);
+				
 		return EventFilter.of(getTypes(serviceId, input), allowedTypes, 
 				input.getIntroducedBy(serviceId), eventLocations, transactionsFilter,
 				labels, input.labelsRegex, input.firstSeen, categories, input.searchText, 
-				input.transactionSearchText);
+				input.transactionSearchText, mutexTypes);
 	}
 	
 	protected Collection<Transaction> getTransactions(String serviceId, String viewId,
@@ -2707,8 +2710,7 @@ public abstract class GrafanaFunction {
 		
 		SummarizedView view = getView(serviceId, viewName);
 		
-		if (view == null)
-		{
+		if (view == null) {
 			return null;
 		}
 		
@@ -2753,6 +2755,11 @@ public abstract class GrafanaFunction {
 	}
 	
 	protected String formatMilli(Double mill) {
+		
+		if (mill > 1000) {
+			return doubleDigitFormatter.format(mill.doubleValue() / 1000) + "sec";
+		}
+		
 		return singleDigitFormatter.format(mill.doubleValue()) + "ms";
 	}
 	
