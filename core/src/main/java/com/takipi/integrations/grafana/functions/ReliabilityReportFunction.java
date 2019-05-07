@@ -28,6 +28,7 @@ import com.takipi.api.client.data.deployment.SummarizedDeployment;
 import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
+import com.takipi.api.client.data.service.SummarizedService;
 import com.takipi.api.client.data.settings.AlertSettings;
 import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.data.view.SummarizedView;
@@ -36,6 +37,7 @@ import com.takipi.api.client.result.category.CategoriesResult;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventSlimResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
+import com.takipi.api.client.result.service.ServicesResult;
 import com.takipi.api.client.result.settings.AlertsSettingsResult;
 import com.takipi.api.client.result.view.ViewsResult;
 import com.takipi.api.client.util.infra.Categories;
@@ -2839,6 +2841,24 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return Pair.of(fromTo, timeRange);	
 	}
 	
+	private Map<String, String> getServiceNames() {
+		
+		Response<ServicesResult> response = ApiCache.getServices(apiClient);
+		
+		if ((response.isBadResponse()) || (response.data == null)
+		|| (response.data.services == null)) {
+			return Collections.emptyMap();
+		}
+		
+		Map<String, String> result = new HashMap<String, String>();
+		
+		for (SummarizedService service: response.data.services) {
+			result.put(service.id, EnvironmentsFunction.toServiceValue(service));
+		}
+		
+		return result;
+	}
+	
 	@Override
 	protected List<List<Object>> processServiceEvents(Collection<String> serviceIds,
 			String serviceId, EventsInput input,
@@ -2855,6 +2875,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		Map<String, ReportKeyAlerts> reportKeyAlertsMap = getReportKeyAlerts(rrInput, serviceId);
 		
+		 Map<String, String> serviceNames = getServiceNames();
+		 
 		for (ReportKeyResults reportKeyResult : reportKeyResults) {
 			
 			RegressionWindow regressionWindow = reportKeyResult.output.regressionData.regressionOutput.regressionWindow;
@@ -2879,7 +2901,13 @@ public class ReliabilityReportFunction extends EventsFunction {
 			row.set(ViewInput.TO, timeRangePair.getFirst().getSecond());
 			row.set(ViewInput.TIME_RANGE, timeRangePair.getSecond());
 
-			row.set(ReliabilityReportInput.SERVICE, serviceId);
+			String serviceName = serviceNames.get(serviceId);
+			
+			if (serviceName == null) {
+				serviceName = serviceId;
+			}
+				
+			row.set(ReliabilityReportInput.SERVICE, serviceName);
 			row.set(ReliabilityReportInput.KEY, name);
 			row.set(ReliabilityReportInput.NAME, serviceValue);
 			
