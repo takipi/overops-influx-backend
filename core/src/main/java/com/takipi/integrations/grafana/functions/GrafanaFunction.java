@@ -2499,7 +2499,9 @@ public abstract class GrafanaFunction {
 	}
 	
 	
-	public static Map<DeterminantKey, Map<String, EventResult>> getEventsMapByKey(Collection<EventResult> events) {
+	public static Map<DeterminantKey, Map<String, EventResult>> getEventsMapByKey(Collection<EventResult> events,
+			Map<String, Collection<String>> applicationGroupsMap) {
+		
 		Map<DeterminantKey, Map<String, EventResult>> keyToEventMap = Maps.newHashMap();
 		
 		for (EventResult event : events) {
@@ -2519,6 +2521,19 @@ public abstract class GrafanaFunction {
 				contributorEventResult.stats = new MainEventStats();
 				
 				safePutEventToKeysMap(keyToEventMap, determinantKey, contributorEventResult);
+				
+				Collection<String> appGroups = applicationGroupsMap.get(contributor.application_name);
+				
+				if (!CollectionUtil.safeIsEmpty(appGroups))
+				{
+					for (String appGroup : appGroups)
+					{
+						DeterminantKey groupDeterminantKey = new DeterminantKey(contributor.machine_name,
+								appGroup, contributor.deployment_name);
+						
+						safePutEventToKeysMap(keyToEventMap, groupDeterminantKey, contributorEventResult);
+					}
+				}
 			}
 		}
 		

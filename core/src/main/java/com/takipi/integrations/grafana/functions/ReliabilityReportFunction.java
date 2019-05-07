@@ -9,7 +9,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -487,6 +487,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		protected ReportKey reportKey;
 		protected String serviceId;
 		protected BaseEventVolumeInput input;
+		protected Map<String, Collection<String>> applicationGroupsMap;
 		protected Pair<DateTime, DateTime> timeSpan;
 		protected boolean newOnly;
 		
@@ -494,12 +495,13 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		protected RegressionAsyncTask(Map<String, Pair<ReportKey, RegressionsInput>> subRegressionInputs,
 				RegressionFunction function, ReportKey aggregatedKey, String serviceId, String viewId,
-				BaseEventVolumeInput input, Pair<DateTime, DateTime> timeSpan, boolean newOnly) {
+				BaseEventVolumeInput input, Map<String, Collection<String>> applicationGroupsMap, Pair<DateTime, DateTime> timeSpan, boolean newOnly) {
 			this.subRegressionInputs = subRegressionInputs;
 			this.function = function;
 			this.reportKey = aggregatedKey;
 			this.serviceId = serviceId;
 			this.input = input;
+			this.applicationGroupsMap = applicationGroupsMap;
 			this.timeSpan = timeSpan;
 			this.newOnly = newOnly;
 			this.viewId = viewId;
@@ -540,10 +542,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 					return null;
 				}
 				
-				Map<DeterminantKey, Map<String, EventResult>> eventsMap = getEventsMapByKey(eventList);
+				Map<DeterminantKey, Map<String, EventResult>> eventsMap = getEventsMapByKey(eventList, applicationGroupsMap);
 				
 				Map<DeterminantKey, Pair<Graph, Graph>> regressionGraphsMap = function.getRegressionGraphs(serviceId,
-						viewId, regressionInput, activeWindow,
+						viewId, regressionInput, activeWindow, applicationGroupsMap,
 						input, newOnly);
 				
 				for (DeterminantKey determinantKey : regressionGraphsMap.keySet())
@@ -1003,6 +1005,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 					subRegressionInputs.put(key.name, Pair.of(key, regInput));
 				}
 				
+				Map<String, Collection<String>> applicationGroupsMap = getApplicationGroupsMap(serviceId, input, keysToSend);
+				
 				RegressionFunction regressionFunction = new RegressionFunction(apiClient, settingsMaps);
 				
 				RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient,
@@ -1014,7 +1018,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 					RegressionsInput regressionInput = getInput(input, serviceId, aggregatedActiveKey.name, true);
 					
 					tasks.add(new RegressionAsyncTask(subRegressionInputs, regressionFunction,
-							aggregatedActiveKey, serviceId, viewId, regressionInput ,timeSpan, false));
+							aggregatedActiveKey, serviceId, viewId, regressionInput, applicationGroupsMap, timeSpan, false));
 				}
 			}
 		}
@@ -1049,6 +1053,34 @@ public class ReliabilityReportFunction extends EventsFunction {
 		}
 
 		return result;
+	}
+	
+	private Map<String, Collection<String>> getApplicationGroupsMap(String serviceId, ReliabilityReportInput input,
+			List<ReportKey> keysToSend)
+	{
+		Map<String, Collection<String>> applicationGroupsMap = Maps.newHashMap();
+		
+		for (ReportKey key : keysToSend) {
+			if (key.isKey)
+			{
+				Collection<String> applications = input.getApplications(apiClient, getSettingsData(serviceId), serviceId, key.name, true, false);
+				
+				for (String app : applications)
+				{
+					Collection<String> appGroups = applicationGroupsMap.get(app);
+					
+					if (appGroups == null)
+					{
+						appGroups = Sets.newHashSet();
+						
+						applicationGroupsMap.put(app, appGroups);
+					}
+					
+					appGroups.add(key.name);
+				}
+			}
+		}
+		return applicationGroupsMap;
 	}
 
 	private Collection<String> limitVolumes(List<VolumeOutput> volumes, int limit) {

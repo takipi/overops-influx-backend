@@ -16,6 +16,7 @@ import org.joda.time.DateTime;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.metrics.Graph;
@@ -722,7 +723,7 @@ public class RegressionFunction extends EventsFunction {
 	
 	public Map<DeterminantKey, Pair<Graph, Graph>> getRegressionGraphs(String serviceId, String viewId,
 			RegressionInput regressionInput, RegressionWindow regressionWindow,
-			BaseEventVolumeInput input, boolean newOnly) {
+			Map<String, Collection<String>> applicationGroupsMap, BaseEventVolumeInput input, boolean newOnly) {
 		
 		EventFilterInput baselineInput;
 		DateTime baselineStart = regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan);
@@ -780,7 +781,7 @@ public class RegressionFunction extends EventsFunction {
 		Map<DeterminantKey, List<Graph>> baselineGraphKeys = Maps.newHashMap();
 		Map<DeterminantKey, List<Graph>> activeWindowGraphKeys = Maps.newHashMap();
 		
-		divideGraphsByDeterminant(baselineGraphTasks, graphSliceTaskResults, baselineGraphKeys, activeWindowGraphKeys);
+		divideGraphsByDeterminant(baselineGraphTasks, graphSliceTaskResults, baselineGraphKeys, activeWindowGraphKeys, applicationGroupsMap);
 		
 		Map<DeterminantKey, Pair<Graph, Graph>> graphResults = Maps.newHashMap();
 		
@@ -834,7 +835,8 @@ public class RegressionFunction extends EventsFunction {
 	}
 	
 	private void divideGraphsByDeterminant(Collection<GraphSliceTask> baselineGraphTasks, Collection<GraphSliceTaskResult> graphSliceTaskResults,
-			Map<DeterminantKey, List<Graph>> baselineGraphKeys, Map<DeterminantKey, List<Graph>> activeWindowGraphKeys)
+			Map<DeterminantKey, List<Graph>> baselineGraphKeys, Map<DeterminantKey, List<Graph>> activeWindowGraphKeys,
+			Map<String, Collection<String>> applicationGroupsMap)
 	{
 		for (GraphSliceTaskResult graphSliceTaskResult : graphSliceTaskResults) {
 			
@@ -842,12 +844,26 @@ public class RegressionFunction extends EventsFunction {
 			
 			for (Graph graph : graphSliceTaskResult.graphs) {
 				
-				DeterminantKey graphsKey = new DeterminantKey(graph.machine_name, graph.application_name, graph.deployment_name);
+				Set<DeterminantKey> graphsKeys = Sets.newHashSet();
 				
-				if (isBaselineTask) {
-					putGraphToDeterminantMap(baselineGraphKeys, graph, graphsKey);
-				} else {
-					putGraphToDeterminantMap(activeWindowGraphKeys, graph, graphsKey);
+				graphsKeys.add(new DeterminantKey(graph.machine_name, graph.application_name, graph.deployment_name));
+				
+				if (!CollectionUtil.safeIsEmpty(applicationGroupsMap)) {
+					Collection<String> appGroups = applicationGroupsMap.get(graph.application_name);
+					
+					if (!CollectionUtil.safeIsEmpty(appGroups)) {
+						for (String appGroup : appGroups) {
+							graphsKeys.add(new DeterminantKey(graph.machine_name, appGroup, graph.deployment_name));
+						}
+					}
+				}
+				
+				for (DeterminantKey determinantKey : graphsKeys) {
+					if (isBaselineTask) {
+						putGraphToDeterminantMap(baselineGraphKeys, graph, determinantKey);
+					} else {
+						putGraphToDeterminantMap(activeWindowGraphKeys, graph, determinantKey);
+					}
 				}
 			}
 			
@@ -947,7 +963,7 @@ public class RegressionFunction extends EventsFunction {
 		}
 		
 		Collection<Pair<Graph, Graph>> regressionGraphsCollection = getRegressionGraphs(serviceId,
-				viewId, regressionInput, regressionWindow, input, newOnly).values();
+				viewId, regressionInput, regressionWindow, null, input, newOnly).values();
 		
 		if (CollectionUtil.safeIsEmpty(regressionGraphsCollection)) {
 			return RegressionOutput.emptyOutput;
