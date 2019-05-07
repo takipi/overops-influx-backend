@@ -63,13 +63,19 @@ public class EnvironmentsFunction extends VariableFunction {
 		
 		for (SummarizedService service : response.data.services) {
 			
-			String cleanServiceName = service.name.replace(ARRAY_SEPERATOR_RAW, "").
+			String value = toServiceValue(service);
+			appender.append(value);
+		}
+	}
+	
+	public static String toServiceValue(SummarizedService service) {
+		
+		String cleanServiceName = service.name.replace(ARRAY_SEPERATOR_RAW, "").
 				replace(GRAFANA_SEPERATOR_RAW, "");//replace(SERVICE_SEPERATOR_RAW, "");
 			
-			String value = getServiceValue(cleanServiceName, service.id);
-			
-			appender.append(value);
-			
-		}
+		String result = getServiceValue(cleanServiceName, service.id);
+		
+		return result;
+		
 	}
 }
