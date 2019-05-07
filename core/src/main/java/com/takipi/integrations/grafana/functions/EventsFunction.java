@@ -664,8 +664,8 @@ public class EventsFunction extends GrafanaFunction {
 			if (eventData.event.stats.invocations > 0) {
 				double rate = (double) eventData.event.stats.hits / (double) eventData.event.stats.invocations;
 				
-				if (rate > 10) {
-					return "> 1000%";
+				if (rate >= 1.0) {
+					return "100%";
 				}
 								
 				return rate;
