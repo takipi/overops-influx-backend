@@ -18,7 +18,9 @@ import org.joda.time.DateTime;
 import com.google.common.base.Objects;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.data.event.BaseStats;
 import com.takipi.api.client.data.event.Location;
+import com.takipi.api.client.data.event.MainEventStats;
 import com.takipi.api.client.data.event.Stats;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventSlimResult;
@@ -776,7 +778,7 @@ public class EventsFunction extends GrafanaFunction {
 		super(apiClient, settingsMaps);
 	}
 	
-	protected static String formatRateDelta(Stats baseline, Stats stats) {
+	protected static String formatRateDelta(BaseStats baseline, BaseStats stats) {
 		
 		StringBuilder result = new StringBuilder();
 		
@@ -787,7 +789,7 @@ public class EventsFunction extends GrafanaFunction {
 		return result.toString(); 
 	}
 	
-	protected static String formatRate(Stats stats) {
+	protected static String formatRate(BaseStats stats) {
 		return formatRate(stats.hits, stats.invocations);
 	}
 	
@@ -936,7 +938,7 @@ public class EventsFunction extends GrafanaFunction {
 		}
 
 		String jiraUrl = null;
-		Stats stats = new Stats();
+		MainEventStats stats = new MainEventStats();
 		
 		EventResult event = null;
 		
@@ -963,11 +965,7 @@ public class EventsFunction extends GrafanaFunction {
 		
 		EventResult clone;
 		
-		try {
-			clone = (EventResult)event.clone();
-		} catch (CloneNotSupportedException e) {
-			throw new IllegalStateException(e);
-		}
+		clone = (EventResult)event.clone();
 		
 		clone.stats = stats;
 		clone.jira_issue_url = jiraUrl;
