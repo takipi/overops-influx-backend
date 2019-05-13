@@ -31,7 +31,7 @@ import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.Location;
-import com.takipi.api.client.data.event.Stats;
+import com.takipi.api.client.data.event.MainEventStats;
 import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
@@ -2236,7 +2236,7 @@ public abstract class GrafanaFunction {
 				}
 				
 				if (event.stats == null) {
-					event.stats = new Stats();
+					event.stats = new MainEventStats();
 				}
 				
 				event.stats.hits += gpc.stats.hits;
@@ -2382,7 +2382,7 @@ public abstract class GrafanaFunction {
 				continue;
 			}
 			
-			event.stats = eventSlimResult.stats;
+			event.stats = MainEventStats.fromStats(eventSlimResult.stats);
 		}
 	}
 	
@@ -2417,22 +2417,15 @@ public abstract class GrafanaFunction {
 		
 		List<EventResult> result = new ArrayList<EventResult>(events.size());
 		
-		try {
-			for (EventResult event : events) {
-				
-				EventResult clone = (EventResult)event.clone();
-				clone.stats = new Stats();
-				
-				if (copyStats) {
-					clone.stats.hits = event.stats.hits;
-					clone.stats.invocations = event.stats.invocations;
-				}
-				
-				result.add(clone);
-			}
-		} catch (CloneNotSupportedException e) {
-			throw new IllegalStateException(e);
+		for (EventResult event : events) {
 			
+			EventResult clone = (EventResult)event.clone();
+
+			if (!copyStats) {
+				clone.stats = new MainEventStats();
+			}
+			
+			result.add(clone);
 		}
 		
 		return result;
