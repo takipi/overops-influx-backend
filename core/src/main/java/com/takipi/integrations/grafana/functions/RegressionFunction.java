@@ -808,7 +808,9 @@ public class RegressionFunction extends EventsFunction {
 		
 		Graph activeWindowGraph = null;
 		
-		if (!CollectionUtil.safeIsEmpty(baselineGraphs)) {
+		boolean hasBaselineGraphs = (!CollectionUtil.safeIsEmpty(baselineGraphs));
+		
+		if (hasBaselineGraphs) {
 			baselineGraph = mergeGraphs(baselineGraphs);
 		}
 		
@@ -821,7 +823,7 @@ public class RegressionFunction extends EventsFunction {
 			
 			activeGraphResult.graphs = Collections.singletonList(activeWindowGraph);
 		
-			if ((input.hasDeployments()) && (baselineGraph == null)) {
+			if ((input.hasDeployments()) && (!hasBaselineGraphs)) {
 				List<Graph> allBaselineGraphs = baselineGraphKeys.get(DeterminantKey.Empty);
 				
 				if (!CollectionUtil.safeIsEmpty(allBaselineGraphs)) {
@@ -862,6 +864,13 @@ public class RegressionFunction extends EventsFunction {
 					if (isBaselineTask) {
 						putGraphToDeterminantMap(baselineGraphKeys, graph, determinantKey);
 					} else {
+						ViewInput input = graphSliceTaskResult.task.input;
+						
+						if (determinantKey.equals(DeterminantKey.Empty) && input.hasDeterminantFilter()) {
+							// The relevant apps for the filter does not exist
+							continue;
+						}
+						
 						putGraphToDeterminantMap(activeWindowGraphKeys, graph, determinantKey);
 					}
 				}

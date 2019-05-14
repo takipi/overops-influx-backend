@@ -49,6 +49,8 @@ public abstract class EnvironmentsFilterInput extends BaseEnvironmentsInput {
 		return hasFilter(deployments);
 	}
 	
+	public boolean hasDeterminantFilter() { return hasApplications() || hasDeployments() || hasServers(); }
+	
 	public Collection<String> getApplications(ApiClient apiClient,
 		ServiceSettingsData settingsData, String serviceId,
 		boolean expandGroups, boolean includeLabelApps) {

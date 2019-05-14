@@ -580,6 +580,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 					
 					Pair<ReportKey, RegressionsInput> subInputData = subRegressionInputs.get(determinantKey.determinantKey);
 					
+					if ((applicationGroupsMap.containsKey(determinantKey.determinantKey)) && (subRegressionInputs.get(determinantKey.determinantKey) == null)) {
+						continue;
+					}
+					
 					// For tiers we create a single graph request without deployments, machine, apps filter but need to break
 					// the input afterwards by the specific type of regression input
 					if (subInputData == null) {
