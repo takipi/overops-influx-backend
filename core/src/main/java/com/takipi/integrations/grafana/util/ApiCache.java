@@ -74,6 +74,7 @@ import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.GrafanaFunction;
 import com.takipi.integrations.grafana.functions.GrafanaThreadPool;
 import com.takipi.integrations.grafana.functions.RegressionFunction;
+import com.takipi.integrations.grafana.functions.RegressionFunction.AggregatedRegressionOutput;
 import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOutput;
 import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
@@ -1758,13 +1759,13 @@ public class ApiCache {
 	}
 	
 	public static void setAggregatedRegressionOutput(ApiClient apiClient, String serviceId,
-			EventFilterInput input, RegressionFunction function, boolean newOnly, List value) {
+			EventFilterInput input, RegressionFunction function, boolean newOnly, AggregatedRegressionOutput value) {
 		RegressionCacheLoader key = new RegressionCacheLoader(apiClient, serviceId, input, function, newOnly);
 		
 		aggregatedRegressionOutputCache.put(key, value);
 	}
 	
-	public static List getAggregatedRegressionOutput(ApiClient apiClient, String serviceId,
+	public static AggregatedRegressionOutput getAggregatedRegressionOutput(ApiClient apiClient, String serviceId,
 			EventFilterInput input, RegressionFunction function, boolean newOnly) {
 		RegressionCacheLoader key = new RegressionCacheLoader(apiClient, serviceId, input, function, newOnly);
 		
@@ -1842,7 +1843,7 @@ public class ApiCache {
 				}
 			});
 	
-	public static final Cache<RegressionCacheLoader, List> aggregatedRegressionOutputCache = CacheBuilder
+	public static final Cache<RegressionCacheLoader, AggregatedRegressionOutput> aggregatedRegressionOutputCache = CacheBuilder
 			.newBuilder().maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_REFRESH_RETENTION, TimeUnit.SECONDS).build();
 
 	private static final LoadingCache<RegresionWindowCacheLoader, RegressionWindow> regressionWindowCache = CacheBuilder

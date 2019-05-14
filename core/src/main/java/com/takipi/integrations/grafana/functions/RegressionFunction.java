@@ -34,6 +34,7 @@ import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.ReliabilityReportFunction.DeterminantKey;
+import com.takipi.integrations.grafana.functions.ReliabilityReportFunction.ReportKey;
 import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
 import com.takipi.integrations.grafana.input.EventFilterInput;
 import com.takipi.integrations.grafana.input.EventsInput;
@@ -576,6 +577,16 @@ public class RegressionFunction extends EventsFunction {
 		}
 		
 		return super.getFormatter(serviceId, column);
+	}
+	
+	public static class AggregatedRegressionOutput {
+		public Map<ReportKey, RegressionOutput> keyRegressionOutputMap;
+		
+		public AggregatedRegressionOutput() { }
+		
+		public AggregatedRegressionOutput(Map<ReportKey, RegressionOutput> regressionOutputMap) {
+			this.keyRegressionOutputMap = regressionOutputMap;
+		}
 	}
 	
 	public static class RegressionOutput {	

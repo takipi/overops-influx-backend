@@ -57,6 +57,7 @@ import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
+import com.takipi.integrations.grafana.functions.RegressionFunction.AggregatedRegressionOutput;
 import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOutput;
 import com.takipi.integrations.grafana.functions.ReliabilityKpiGraphFunction.KpiInterval;
 import com.takipi.integrations.grafana.functions.ReliabilityKpiGraphFunction.ScoreInterval;
@@ -525,7 +526,6 @@ public class ReliabilityReportFunction extends EventsFunction {
 				DateTime activeWindowStart = activeWindow.activeWindowStart;
 				DateTime activeWindowEnd = activeWindow.activeWindowStart.plusMinutes(regressionInput.activeTimespan);
 				
-				List<AggregatedRegressionAsyncResult> regressionResults = Lists.newArrayList();
 				Collection<EventResult> eventList = null;
 				
 				for (int retries = 0; retries < GET_EVENT_LIST_MAX_RETRIES; retries++) {
@@ -549,6 +549,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 				Map<DeterminantKey, Pair<Graph, Graph>> regressionGraphsMap = function.getRegressionGraphs(serviceId,
 						viewId, regressionInput, activeWindow, applicationGroupsMap,
 						input, newOnly);
+				
+				Map<ReportKey, RegressionOutput> regressionOutputMap = Maps.newHashMap();
 				
 				for (DeterminantKey determinantKey : regressionGraphsMap.keySet()) {
 					Map<String, EventResult> eventResultMap = eventsMap.get(determinantKey);
@@ -591,51 +593,51 @@ public class ReliabilityReportFunction extends EventsFunction {
 						for (String transactionGraphKey : subRegressionInputs.keySet()) {
 							subInputData = subRegressionInputs.get(transactionGraphKey);
 							
-							RegressionInput subRegressionInput =
-									function.getRegressionInput(serviceId, viewId, subInputData.getSecond(), timeSpan, newOnly)
-									.getFirst();
+							RegressionOutput regressionOutput = getRegressionOutput(activeWindow, eventResultMap, baselineGraph, activeWindowGraph, subInputData);
 							
-							AggregatedRegressionAsyncResult regressionsOutput = getRegressionsOutput(eventResultMap, baselineGraph, activeWindowGraph,
-									subInputData, subRegressionInput, activeWindow);
-							
-							regressionResults.add(regressionsOutput);
+							regressionOutputMap.put(subInputData.getFirst(), regressionOutput);
 						}
 					}
 					else {
-						RegressionInput subRegressionInput =
-								function.getRegressionInput(serviceId, viewId, subInputData.getSecond(), timeSpan, newOnly)
-								.getFirst();
+						RegressionOutput regressionOutput = getRegressionOutput(activeWindow, eventResultMap, baselineGraph, activeWindowGraph, (Pair<ReportKey, RegressionsInput>) subInputData);
 						
-						AggregatedRegressionAsyncResult regressionsOutput = getRegressionsOutput(eventResultMap, baselineGraph,
-								activeWindowGraph, subInputData, subRegressionInput, activeWindow);
-						
-						regressionResults.add(regressionsOutput);
+						regressionOutputMap.put(subInputData.getFirst(), regressionOutput);
 					}
 				}
 				
-				ApiCache.setAggregatedRegressionOutput(function.apiClient, serviceId, input, function, newOnly, regressionResults);
+				AggregatedRegressionOutput aggregatedRegressionOutput = new AggregatedRegressionOutput(regressionOutputMap);
 				
-				return regressionResults;
+				ApiCache.setAggregatedRegressionOutput(function.apiClient, serviceId, input, function, newOnly, aggregatedRegressionOutput);
+				
+				return createRegressionTaskResults(regressionOutputMap);
 			} finally {
 				afterCall();
 			}
 
 		}
 		
-		private AggregatedRegressionAsyncResult getRegressionsOutput(Map<String, EventResult> eventResultMap,
-				Graph baselineGraph, Graph activeWindowGraph, Pair<ReportKey, RegressionsInput> subInputData,
-				RegressionInput subRegressionInput, RegressionWindow activeWindow) {
-			ReportKey subReportKey = subInputData.getFirst();
-			RegressionsInput subRegressionsInput = subInputData.getSecond();
+		private RegressionOutput getRegressionOutput(RegressionWindow activeWindow, Map<String, EventResult> eventResultMap, Graph baselineGraph, Graph activeWindowGraph, Pair<ReportKey, RegressionsInput> subInputData)
+		{
+			RegressionsInput regressionsInput = subInputData.getSecond();
 			
-			RegressionOutput regressionOutput = function.getRegressionOutput(serviceId, subRegressionsInput, newOnly,
-					TimeUtil.getTimeFilter(subRegressionsInput.timeFilter), subRegressionInput,
+			RegressionInput subRegressionInput =
+					function.getRegressionInput(serviceId, viewId, regressionsInput, timeSpan, newOnly)
+							.getFirst();
+			
+			return function.getRegressionOutput(serviceId, regressionsInput, newOnly,
+					TimeUtil.getTimeFilter(regressionsInput.timeFilter), subRegressionInput,
 					activeWindow, eventResultMap, baselineGraph, activeWindowGraph);
+		}
+		
+		private List<AggregatedRegressionAsyncResult> createRegressionTaskResults(Map<ReportKey, RegressionOutput> regressionOutputMap)
+		{
+			List<AggregatedRegressionAsyncResult> regressionAsyncTaskResults = Lists.newArrayList();
 			
-			AggregatedRegressionAsyncResult result = new AggregatedRegressionAsyncResult(
-					subReportKey, regressionOutput);
+			for (Map.Entry<ReportKey, RegressionOutput> regressionEntry : regressionOutputMap.entrySet()) {
+				regressionAsyncTaskResults.add(new AggregatedRegressionAsyncResult(regressionEntry.getKey(), regressionEntry.getValue()));
+			}
 			
-			return result;
+			return regressionAsyncTaskResults;
 		}
 		
 		@Override
@@ -1015,14 +1017,13 @@ public class ReliabilityReportFunction extends EventsFunction {
 				
 				RegressionsInput regressionInput = getInput(input, serviceId, aggregatedActiveKey.name, true);
 				
-				List regressionOutput = ApiCache.getAggregatedRegressionOutput(apiClient,
+				AggregatedRegressionOutput regressionOutput = ApiCache.getAggregatedRegressionOutput(apiClient,
 					serviceId, regressionInput, regressionFunction, false);
 				
-				if (!CollectionUtil.safeIsEmpty(regressionOutput)) {
-					for (Object asyncResult : regressionOutput) {
-						if (asyncResult instanceof AggregatedRegressionAsyncResult) {
-							result.add((AggregatedRegressionAsyncResult) asyncResult);
-						}
+				if ((regressionOutput != null) && (regressionOutput.keyRegressionOutputMap != null)) {
+					for (Map.Entry<ReportKey, RegressionOutput> aggregatedRegressionOutput : regressionOutput.keyRegressionOutputMap.entrySet()) {
+							result.add(new AggregatedRegressionAsyncResult(aggregatedRegressionOutput.getKey(),
+									aggregatedRegressionOutput.getValue()));
 					}
 				} else {
 					
