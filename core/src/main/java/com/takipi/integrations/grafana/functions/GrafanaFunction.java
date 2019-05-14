@@ -2432,6 +2432,18 @@ public abstract class GrafanaFunction {
 		return eventsMap.values();
 	}
 	
+	protected EventsSlimVolumeResult getEventsVolume(String serviceId, ViewInput input, DateTime from,
+			DateTime to, VolumeType volumeType) {	
+		
+		String viewId = getViewId(serviceId, input.view);
+		
+		if (viewId == null) {
+			return null;	
+		}
+		
+		return getEventsVolume(serviceId, viewId, input, from, to, volumeType);
+	}
+	
 	protected EventsSlimVolumeResult getEventsVolume(String serviceId, String viewId, ViewInput input, DateTime from,
 		DateTime to, VolumeType volumeType) {	
 		

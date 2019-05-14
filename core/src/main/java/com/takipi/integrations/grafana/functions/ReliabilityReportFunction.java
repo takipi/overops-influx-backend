@@ -32,6 +32,7 @@ import com.takipi.api.client.data.deployment.SummarizedDeployment;
 import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
+import com.takipi.api.client.data.service.SummarizedService;
 import com.takipi.api.client.data.settings.AlertSettings;
 import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.data.view.SummarizedView;
@@ -40,6 +41,7 @@ import com.takipi.api.client.result.category.CategoriesResult;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventSlimResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
+import com.takipi.api.client.result.service.ServicesResult;
 import com.takipi.api.client.result.settings.AlertsSettingsResult;
 import com.takipi.api.client.result.view.ViewsResult;
 import com.takipi.api.client.util.infra.Categories;
@@ -89,6 +91,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 	private static final SimpleDateFormat singleDayDateformat;
 	private static final SimpleDateFormat dayInMonthDateformat;
 		
+	private static final int MAX_FIND_DEP_TRIES = 5;
+	
 	static  {
 		singleDayDateformat = new SimpleDateFormat("EEEE"); 
 		dayInMonthDateformat = new SimpleDateFormat("EEE, MMM d"); 
@@ -250,14 +254,13 @@ public class ReliabilityReportFunction extends EventsFunction {
 	protected class DeploymentReportKey extends ReportKey {
 		
 		protected SummarizedDeployment current;
-		protected SummarizedDeployment previous;
+		protected SummarizedDeployment compareToDep;
 
 		protected DeploymentReportKey(String name, boolean isKey, 
-			SummarizedDeployment current, SummarizedDeployment previous) {
+			SummarizedDeployment current) {
 			super(name, isKey);
 			
 			this.current = current;
-			this.previous = previous;
 		}
 		
 		@Override
@@ -1205,19 +1208,35 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return result;
 	}
 
-	private static void sortDeploymentNames(List<SummarizedDeployment> deps, boolean desc) {
+	private static void sortDeployments(List<SummarizedDeployment> deps) {
 		
 		deps.sort(new Comparator<SummarizedDeployment>() {
 
 			@Override
 			public int compare(SummarizedDeployment o1, SummarizedDeployment o2) {
 				
-				if (desc) {
-					return DeploymentUtil.compareDeployments(o1.name, o2.name);
-				} else {
+				if ((o1.first_seen == null) && (o2.first_seen == null)) {
 					return DeploymentUtil.compareDeployments(o2.name, o1.name);
-
 				}
+				
+				int hasFirstSeen = Boolean.compare(o2.first_seen != null, o1.first_seen != null);
+				
+				if (hasFirstSeen != 0) {
+					return hasFirstSeen;
+				}
+				
+				DateTime l1 = TimeUtil.getDateTime(o1.first_seen);
+				DateTime l2 = TimeUtil.getDateTime(o2.first_seen);
+
+				int firstSeenCompare = Long.compare(l2.getMillis(), l1.getMillis());
+				
+				if (firstSeenCompare != 0) {
+					return firstSeenCompare;
+				}
+				
+				int nameCompare = DeploymentUtil.compareDeployments(o1.name, o2.name);
+				
+				return nameCompare;
 			}
 		});
 	}
@@ -1244,58 +1263,45 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return result;
 	}
 	
-	private Collection<ReportKey> getActiveDeployments(String serviceId,
-			ReliabilityReportInput input, Pair<DateTime, DateTime> timespan) {
-
+	private List<ReportKey> getSelectedDeployments(
+		Collection<String> selectedDeployments, Collection<SummarizedDeployment> allDeps) {
+		
 		List<ReportKey> result = new ArrayList<ReportKey>();
-		Collection<String> selectedDeployments = input.getDeployments(serviceId, apiClient);
-		
-		if (!CollectionUtil.safeIsEmpty(selectedDeployments)) {
+						
+		for (String selectedDeployment : selectedDeployments) {
 			
-			Collection<SummarizedDeployment> allDeps = DeploymentUtil.getDeployments(apiClient, serviceId, false);
-			
-			List<SummarizedDeployment> sortedDeps;
-			
+			SummarizedDeployment curr = null;
+	
 			if (allDeps != null) {
-				sortedDeps = new ArrayList<SummarizedDeployment>(allDeps);
-				sortDeploymentNames(sortedDeps, false);
-
-			} else {
-				sortedDeps = null;
-			}
-						
-			for (String selectedDeployment :  selectedDeployments) {
-				
-				SummarizedDeployment prev = null;
-				SummarizedDeployment curr = null;
-		
-				if (sortedDeps != null) {
-						
-					for (int i = 0; i < sortedDeps.size(); i++) {
-						
-						SummarizedDeployment dep = sortedDeps.get(i);
-						
-						if ((i > 0) && (dep.name.equals(selectedDeployment))) {
-							curr = dep;
-							prev = sortedDeps.get(i -1);
-							break;
-						}
+					
+				for (SummarizedDeployment dep : allDeps) {
+										
+					if (dep.name.equals(selectedDeployment)) {
+						curr = dep;
+						break;
 					}
 				}
-				
-				result.add(new DeploymentReportKey(selectedDeployment, false, curr, prev));
 			}
 			
-			return result;
-			
+			result.add(new DeploymentReportKey(selectedDeployment, false, curr));
 		}
 		
+		return result;
+	}
+	
+	private List<ReportKey> getLiveDeployments(String serviceId, 
+			ReliabilityReportInput input, Pair<DateTime, DateTime> timespan,
+			Pair<Gson, String> gsonPair) {
+	
+		List<ReportKey> result = new ArrayList<ReportKey>();
 		Collection<SummarizedDeployment> activeDeps = DeploymentUtil.getDeployments(apiClient, serviceId, true);
-			
+		
+		boolean hasApps = input.hasApplications();
+		
 		if (activeDeps != null) {
 			
 			List<SummarizedDeployment> sortedActive = new ArrayList<SummarizedDeployment>(activeDeps);
-			sortDeploymentNames(sortedActive, true);
+			sortDeployments(sortedActive);
 	
 			for (int i = 0; i < Math.min(input.limit, sortedActive.size()); i++) {
 				
@@ -1308,79 +1314,168 @@ public class ReliabilityReportFunction extends EventsFunction {
 					}
 				}
 				
-				SummarizedDeployment previous;
-				
-				if (i < sortedActive.size() - 1) {
-					previous = sortedActive.get(i + 1);					
-				} else {
-					previous = null;
+				if ((hasApps) && (!appHasDeployVolume(serviceId, 
+					gsonPair, timespan, activeDep.name))) {
+					continue;
 				}
 				
-				result.add(new DeploymentReportKey(activeDep.name, true, activeDep, previous));
+				result.add(new DeploymentReportKey(activeDep.name, true, activeDep));
 			}
 		}
 		
-		if ((!input.liveDeploymentsOnly) && (input.limit - result.size() > 0)) {
-			
-			Collection<SummarizedDeployment> nonActiveDeps = DeploymentUtil.getDeployments(apiClient, serviceId, false);
-			
-			if (nonActiveDeps != null) {
-			
-				List<SummarizedDeployment> sortedNonActive = new ArrayList<SummarizedDeployment>(nonActiveDeps);
+		return result;
+	}
 	
-				sortDeploymentNames(sortedNonActive, true);
-			
-				for (int i = 0; i < sortedNonActive.size(); i++) {
+	void addNonActiveDeployments(List<ReportKey> output, 
+		ReliabilityReportInput input, Pair<DateTime, DateTime> timespan,
+		Collection<SummarizedDeployment> allDeps ) {
+		
+		if (allDeps == null) {
+			return;
+		}
+		
+		for (SummarizedDeployment dep : allDeps) {
+				
+			boolean canAdd = true;
+				
+			if (dep.last_seen != null) {
+				DateTime lastSeen = TimeUtil.getDateTime(dep.last_seen);
+				if (lastSeen.isBefore(timespan.getFirst())) {
+					canAdd = false;					}
+			}
+				
+			boolean isLive = false;
+				
+			if (dep.last_seen != null) {
+				DateTime lastSeen = TimeUtil.getDateTime(dep.last_seen);
+				isLive = lastSeen.plusHours(1).isAfter(timespan.getSecond());
+			}
+								
+			DeploymentReportKey key = new DeploymentReportKey(dep.name, isLive, dep);
+				
+			int keyIndex = output.indexOf(key);
+				
+			if (keyIndex == -1) {
 					
-					boolean canAdd = true;
-					SummarizedDeployment dep = sortedNonActive.get(i);
-					
-					if (dep.last_seen != null) {
-						DateTime firstSeen = TimeUtil.getDateTime(dep.last_seen);
-						if (firstSeen.isBefore(timespan.getFirst())) {
-							canAdd = false;
-						}
-					}
-					
-					boolean isLive = false;
-					
-					if (dep.last_seen != null) {
-						DateTime lastSeen = TimeUtil.getDateTime(dep.last_seen);
-						isLive = lastSeen.plusHours(1).isAfter(timespan.getSecond());
-					}
-					
-					SummarizedDeployment previous;
-					
-					if (i < sortedNonActive.size() - 1) {
-						previous = sortedNonActive.get(i + 1);					
-					} else {
-						previous = null;
-					}
-			
-					DeploymentReportKey key = new DeploymentReportKey(dep.name, isLive, dep, previous);
-					
-					int keyIndex = result.indexOf(key);
-					
-					if (keyIndex == -1) {
-						
-						if (canAdd) {
-							result.add(key);
-						}
-
-					} else {
-						DeploymentReportKey existingKey = (DeploymentReportKey)result.get(keyIndex);
-						
-						if (existingKey.previous == null) {
-							existingKey.previous = previous;
-						}
-					}
-					
-					if (result.size() >= input.limit) {
-						break;
-					}
+				if (canAdd) {
+					output.add(key);
 				}
+
+			} 
+				
+			if (output.size() >= input.limit) {
+				break;
+			}
+		}		
+	}
+	
+	private boolean appHasDeployVolume(String serviceId, 
+		Pair<Gson, String> gson, Pair<DateTime, DateTime> timespan, String dep) {
+		
+		ViewInput viewInput = gson.getFirst().fromJson(gson.getSecond(), ViewInput.class);
+		viewInput.deployments = dep;
+		
+		EventsSlimVolumeResult volumeResult = getEventsVolume(serviceId, viewInput, 
+			timespan.getFirst(), timespan.getSecond(), VolumeType.hits);
+		
+		if ((volumeResult == null) || (CollectionUtil.safeIsEmpty(volumeResult.events))) {
+			return false;
+		}
+		
+		for (EventSlimResult eventSlimResult : volumeResult.events) {
+			if (eventSlimResult.stats.hits > 0) {
+				return true;
 			}
 		}
+		
+		return false;
+	}
+	
+	private void updateCompareDeployments(List<ReportKey> output, 
+		String serviceId, ReliabilityReportInput input, Pair<DateTime, DateTime> timespan,
+		List<SummarizedDeployment> sortedDeps, Pair<Gson, String> gsonPair) {
+		
+		boolean hasApps = input.hasApplications();
+	
+		for (ReportKey reportKey : output) {
+						
+			for (int i = 0; i < sortedDeps.size(); i++) {
+				
+				SummarizedDeployment dep = sortedDeps.get(i);			
+
+				if (dep.name.equals(reportKey.name)) {
+					
+					if (i < sortedDeps.size() - 1) {
+						
+						DeploymentReportKey depReportKey = (DeploymentReportKey)reportKey;
+						SummarizedDeployment compareToDep;
+						
+						if (hasApps) {
+							compareToDep = findPrevDeployment(serviceId, 
+								timespan, gsonPair, sortedDeps, i);
+						} else {
+							compareToDep = sortedDeps.get(i + 1);
+						}
+						
+						depReportKey.compareToDep = compareToDep;
+					}
+					
+					break;
+				}				
+			}
+		}	
+	}
+	
+	private SummarizedDeployment findPrevDeployment(String serviceId, 
+		Pair<DateTime, DateTime> timespan, Pair<Gson, String> gsonPair, 
+		List<SummarizedDeployment> depsList, int index) {
+		
+		for (int tryIndex = 0; tryIndex < MAX_FIND_DEP_TRIES; tryIndex++) {
+			
+			int prevIdex = index + tryIndex + 1;
+			
+			if (prevIdex > depsList.size() - 1) {
+				break;
+			}
+			
+			SummarizedDeployment prevDep = depsList.get(prevIdex);
+			
+			if (appHasDeployVolume(serviceId, gsonPair, timespan, prevDep.name)) {
+				return prevDep;
+			}
+		}
+		
+		return null;
+	}
+		
+	private Collection<ReportKey> getActiveDeployments(String serviceId, 
+		ReliabilityReportInput input, Pair<DateTime, DateTime> timespan) {
+
+		List<ReportKey> result = new ArrayList<ReportKey>();
+		Collection<String> selectedDeployments = input.getDeployments(serviceId, apiClient);
+		
+		Collection<SummarizedDeployment> allDeps = DeploymentUtil.getDeployments(apiClient, serviceId, false);
+		List<SummarizedDeployment> sortedDeps = new ArrayList<SummarizedDeployment>(allDeps);
+		
+		sortDeployments(sortedDeps);
+	
+		Gson gson = new Gson();
+		String json = gson.toJson(input);
+		Pair<Gson, String> gsonPair = Pair.of(gson, json);
+		
+		if (!CollectionUtil.safeIsEmpty(selectedDeployments)) {
+			result = getSelectedDeployments(selectedDeployments, allDeps);
+		} else {
+			
+			result = getLiveDeployments(serviceId, input, timespan, gsonPair);
+			
+			if ((!input.liveDeploymentsOnly) && (input.limit - result.size() > 0)) {
+				addNonActiveDeployments(result, input, timespan, sortedDeps);	
+			}
+		}
+		
+		updateCompareDeployments(result, serviceId, input, timespan, 
+			sortedDeps, gsonPair);
 
 		return result;
 	}
@@ -3016,12 +3111,12 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			DeploymentReportKey depKey = (DeploymentReportKey)reportKeyResult.output.reportKey;
 			
-			if (depKey.previous != null) {
-				previousDepName = depKey.previous.name;
+			if (depKey.compareToDep != null) {
+				previousDepName = depKey.compareToDep.name;
 				previousDepState = Integer.valueOf(1);
 				
-				if (depKey.previous.first_seen != null) {
-					DateTime firstSeen = TimeUtil.getDateTime(depKey.previous.first_seen);
+				if (depKey.compareToDep.first_seen != null) {
+					DateTime firstSeen = TimeUtil.getDateTime(depKey.compareToDep.first_seen);
 					
 					long delta = DateTime.now().minus(firstSeen.getMillis()).getMillis();
 					long timespan = TimeUnit.MILLISECONDS.toMinutes(delta) + TimeUnit.HOURS.toMinutes(1);
@@ -3075,6 +3170,24 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return Pair.of(fromTo, timeRange);	
 	}
 	
+	private Map<String, String> getServiceNames() {
+		
+		Response<ServicesResult> response = ApiCache.getServices(apiClient);
+		
+		if ((response.isBadResponse()) || (response.data == null)
+		|| (response.data.services == null)) {
+			return Collections.emptyMap();
+		}
+		
+		Map<String, String> result = new HashMap<String, String>();
+		
+		for (SummarizedService service: response.data.services) {
+			result.put(service.id, EnvironmentsFunction.toServiceValue(service));
+		}
+		
+		return result;
+	}
+	
 	@Override
 	protected List<List<Object>> processServiceEvents(Collection<String> serviceIds,
 			String serviceId, EventsInput input,
@@ -3091,6 +3204,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		Map<String, ReportKeyAlerts> reportKeyAlertsMap = getReportKeyAlerts(rrInput, serviceId);
 		
+		 Map<String, String> serviceNames = getServiceNames();
+		 
 		for (ReportKeyResults reportKeyResult : reportKeyResults) {
 			
 			RegressionWindow regressionWindow = reportKeyResult.output.regressionData.regressionOutput.regressionWindow;
@@ -3115,7 +3230,13 @@ public class ReliabilityReportFunction extends EventsFunction {
 			row.set(ViewInput.TO, timeRangePair.getFirst().getSecond());
 			row.set(ViewInput.TIME_RANGE, timeRangePair.getSecond());
 
-			row.set(ReliabilityReportInput.SERVICE, serviceId);
+			String serviceName = serviceNames.get(serviceId);
+			
+			if (serviceName == null) {
+				serviceName = serviceId;
+			}
+				
+			row.set(ReliabilityReportInput.SERVICE, serviceName);
 			row.set(ReliabilityReportInput.KEY, name);
 			row.set(ReliabilityReportInput.NAME, serviceValue);
 			

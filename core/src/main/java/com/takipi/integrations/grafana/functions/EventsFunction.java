@@ -74,7 +74,6 @@ public class EventsFunction extends GrafanaFunction {
 			return "events";
 		}
 	}
-
 	
 	protected class EventData {
 		
@@ -113,6 +112,7 @@ public class EventsFunction extends GrafanaFunction {
 			return true;
 		}
 		
+		
 		@Override
 		public boolean equals(Object obj) {
 			
@@ -122,9 +122,11 @@ public class EventsFunction extends GrafanaFunction {
 				
 			EventData other = (EventData)obj;
 			
+			/** Removed for consistency with oo classic
 			if (!Objects.equal(event.type, other.event.type)) {
 				return false;
 			}
+			*/
 			
 			if (!equalLocations(event.error_origin, other.event.error_origin)) {
 				return false;
@@ -663,8 +665,8 @@ public class EventsFunction extends GrafanaFunction {
 			if (eventData.event.stats.invocations > 0) {
 				double rate = (double) eventData.event.stats.hits / (double) eventData.event.stats.invocations;
 				
-				if (rate > 10) {
-					return "> 1000%";
+				if (rate >= 1.0) {
+					return "100%";
 				}
 								
 				return rate;
@@ -1207,10 +1209,10 @@ public class EventsFunction extends GrafanaFunction {
 					
 			result.add(eventData);
 		}
-
+		
 		return result;
 	}
-
+	
 	/**
 	 * @param input - needed for children  
 	 */
