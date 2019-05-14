@@ -1756,7 +1756,14 @@ public class ApiCache {
 		}
 	}
 	
-	public static RegressionOutput getRegressionOutput(ApiClient apiClient, String serviceId, 
+	public static void setRegressionOutput(ApiClient apiClient, String serviceId,
+			EventFilterInput input, RegressionFunction function, boolean newOnly, RegressionOutput value) {
+		RegressionCacheLoader key = new RegressionCacheLoader(apiClient, serviceId, input, function, newOnly);
+		
+		regressionOutputCache.put(key, value);
+	}
+	
+	public static RegressionOutput getRegressionOutput(ApiClient apiClient, String serviceId,
 		EventFilterInput input, RegressionFunction function, boolean newOnly, boolean load) {
 			
 		RegressionCacheLoader key = new RegressionCacheLoader(apiClient, serviceId, input, function, newOnly);

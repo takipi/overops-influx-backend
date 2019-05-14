@@ -596,8 +596,12 @@ public class ReliabilityReportFunction extends EventsFunction {
 									function.getRegressionInput(serviceId, viewId, subInputData.getSecond(), timeSpan, newOnly)
 									.getFirst();
 							
-							regressionResults.add(getRegressionsOutput(eventResultMap, baselineGraph, activeWindowGraph,
-									subInputData ,subRegressionInput, activeWindow));
+							AggregatedRegressionAsyncResult regressionsOutput = getRegressionsOutput(eventResultMap, baselineGraph, activeWindowGraph,
+									subInputData, subRegressionInput, activeWindow);
+							
+							regressionResults.add(regressionsOutput);
+							
+							ApiCache.setRegressionOutput(function.apiClient, serviceId, input, function, newOnly, regressionsOutput.output);
 						}
 					}
 					else
@@ -606,8 +610,12 @@ public class ReliabilityReportFunction extends EventsFunction {
 								function.getRegressionInput(serviceId, viewId, subInputData.getSecond(), timeSpan, newOnly)
 								.getFirst();
 						
-						regressionResults.add(getRegressionsOutput(eventResultMap, baselineGraph,
-								activeWindowGraph, subInputData, subRegressionInput, activeWindow));
+						AggregatedRegressionAsyncResult regressionsOutput = getRegressionsOutput(eventResultMap, baselineGraph,
+								activeWindowGraph, subInputData, subRegressionInput, activeWindow);
+						
+						regressionResults.add(regressionsOutput);
+						
+						ApiCache.setRegressionOutput(function.apiClient, serviceId, input, function, newOnly, regressionsOutput.output);
 					}
 				}
 				
@@ -1009,13 +1017,14 @@ public class ReliabilityReportFunction extends EventsFunction {
 				
 				RegressionFunction regressionFunction = new RegressionFunction(apiClient, settingsMaps);
 				
+				RegressionsInput regressionInput = getInput(input, serviceId, aggregatedActiveKey.name, true);
+				
 				RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient,
-					serviceId, input, regressionFunction, false, false);
+					serviceId, regressionInput, regressionFunction, false, false);
 				
 				if (regressionOutput != null) {
 					result.add(new AggregatedRegressionAsyncResult(aggregatedActiveKey, regressionOutput));
 				} else {
-					RegressionsInput regressionInput = getInput(input, serviceId, aggregatedActiveKey.name, true);
 					
 					tasks.add(new RegressionAsyncTask(subRegressionInputs, regressionFunction,
 							aggregatedActiveKey, serviceId, viewId, regressionInput, applicationGroupsMap, timeSpan, false));
