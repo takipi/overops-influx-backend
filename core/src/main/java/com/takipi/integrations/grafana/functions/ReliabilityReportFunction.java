@@ -573,8 +573,6 @@ public class ReliabilityReportFunction extends EventsFunction {
 									eventResultMap);
 							
 							baselineGraph = deploymentsRegressionGraphs.baselineGraph;
-							activeWindowGraph = deploymentsRegressionGraphs.activeGraph;
-							eventResultMap = deploymentsRegressionGraphs.eventMap;
 						}
 					}
 					
