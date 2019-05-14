@@ -1017,7 +1017,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 				
 				if (!CollectionUtil.safeIsEmpty(regressionOutput)) {
 					for (Object asyncResult : regressionOutput) {
-						if ((AggregatedRegressionAsyncResult) asyncResult != null) {
+						if (asyncResult instanceof AggregatedRegressionAsyncResult) {
 							result.add((AggregatedRegressionAsyncResult) asyncResult);
 						}
 					}
