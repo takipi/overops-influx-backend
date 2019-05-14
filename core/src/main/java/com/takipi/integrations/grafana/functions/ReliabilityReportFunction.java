@@ -522,7 +522,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 				DateTime activeWindowStart = activeWindow.activeWindowStart;
 				DateTime activeWindowEnd = activeWindow.activeWindowStart.plusMinutes(regressionInput.activeTimespan);
 				
-				List regressionResults = Lists.newArrayList();
+				List<AggregatedRegressionAsyncResult> regressionResults = Lists.newArrayList();
 				Collection<EventResult> eventList = null;
 				
 				for (int retries = 0; retries < GET_EVENT_LIST_MAX_RETRIES; retries++) {
@@ -535,8 +535,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 					logger.warn("Could not retrieve event list from API retry number: {}", retries);
 				}
 				
-				if (eventList == null)
-				{
+				if (eventList == null) {
 					logger.error("Could not retrieve event list from API after max retries");
 					
 					return null;
@@ -548,8 +547,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 						viewId, regressionInput, activeWindow, applicationGroupsMap,
 						input, newOnly);
 				
-				for (DeterminantKey determinantKey : regressionGraphsMap.keySet())
-				{
+				for (DeterminantKey determinantKey : regressionGraphsMap.keySet()) {
 					Map<String, EventResult> eventResultMap = eventsMap.get(determinantKey);
 					
 					Pair<Graph, Graph> regressionGraphs = regressionGraphsMap.get(determinantKey);
@@ -557,12 +555,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 					Graph baselineGraph = regressionGraphs.getFirst();
 					Graph activeWindowGraph = regressionGraphs.getSecond();
 					
-					if (activeWindow.deploymentFound)
-					{
+					if (activeWindow.deploymentFound) {
 						Pair<DateTime, DateTime> dateTimeDateTimePair = activeWindow.deploymentsTimespan.get(determinantKey.determinantKey);
 						
-						if (dateTimeDateTimePair != null)
-						{
+						if (dateTimeDateTimePair != null) {
 							activeWindow.activeWindowStart = dateTimeDateTimePair.getFirst();
 							DateTime deploymentActiveWindowEnd = dateTimeDateTimePair.getSecond();
 							
@@ -586,10 +582,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 					
 					// For tiers we create a single graph request without deployments, machine, apps filter but need to break
 					// the input afterwards by the specific type of regression input
-					if (subInputData == null)
-					{
-						for (String transactionGraphKey : subRegressionInputs.keySet())
-						{
+					if (subInputData == null) {
+						for (String transactionGraphKey : subRegressionInputs.keySet()) {
 							subInputData = subRegressionInputs.get(transactionGraphKey);
 							
 							RegressionInput subRegressionInput =
@@ -604,8 +598,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 							ApiCache.setRegressionOutput(function.apiClient, serviceId, input, function, newOnly, regressionsOutput.output);
 						}
 					}
-					else
-					{
+					else {
 						RegressionInput subRegressionInput =
 								function.getRegressionInput(serviceId, viewId, subInputData.getSecond(), timeSpan, newOnly)
 								.getFirst();
