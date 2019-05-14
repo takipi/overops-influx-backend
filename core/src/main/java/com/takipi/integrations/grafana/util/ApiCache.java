@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -1756,11 +1757,18 @@ public class ApiCache {
 		}
 	}
 	
-	public static void setRegressionOutput(ApiClient apiClient, String serviceId,
-			EventFilterInput input, RegressionFunction function, boolean newOnly, RegressionOutput value) {
+	public static void setAggregatedRegressionOutput(ApiClient apiClient, String serviceId,
+			EventFilterInput input, RegressionFunction function, boolean newOnly, List value) {
 		RegressionCacheLoader key = new RegressionCacheLoader(apiClient, serviceId, input, function, newOnly);
 		
-		regressionOutputCache.put(key, value);
+		aggregatedRegressionOutputCache.put(key, value);
+	}
+	
+	public static List getAggregatedRegressionOutput(ApiClient apiClient, String serviceId,
+			EventFilterInput input, RegressionFunction function, boolean newOnly) {
+		RegressionCacheLoader key = new RegressionCacheLoader(apiClient, serviceId, input, function, newOnly);
+		
+		return aggregatedRegressionOutputCache.getIfPresent(key);
 	}
 	
 	public static RegressionOutput getRegressionOutput(ApiClient apiClient, String serviceId,
@@ -1833,6 +1841,9 @@ public class ApiCache {
 					return key.executeRegression();
 				}
 			});
+	
+	public static final Cache<RegressionCacheLoader, List> aggregatedRegressionOutputCache = CacheBuilder
+			.newBuilder().maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_REFRESH_RETENTION, TimeUnit.SECONDS).build();
 
 	private static final LoadingCache<RegresionWindowCacheLoader, RegressionWindow> regressionWindowCache = CacheBuilder
 			.newBuilder().maximumSize(CACHE_SIZE)

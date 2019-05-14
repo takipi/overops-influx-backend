@@ -594,8 +594,6 @@ public class ReliabilityReportFunction extends EventsFunction {
 									subInputData, subRegressionInput, activeWindow);
 							
 							regressionResults.add(regressionsOutput);
-							
-							ApiCache.setRegressionOutput(function.apiClient, serviceId, input, function, newOnly, regressionsOutput.output);
 						}
 					}
 					else {
@@ -607,10 +605,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 								activeWindowGraph, subInputData, subRegressionInput, activeWindow);
 						
 						regressionResults.add(regressionsOutput);
-						
-						ApiCache.setRegressionOutput(function.apiClient, serviceId, input, function, newOnly, regressionsOutput.output);
 					}
 				}
+				
+				ApiCache.setAggregatedRegressionOutput(function.apiClient, serviceId, input, function, newOnly, regressionResults);
 				
 				return regressionResults;
 			} finally {
@@ -1012,11 +1010,15 @@ public class ReliabilityReportFunction extends EventsFunction {
 				
 				RegressionsInput regressionInput = getInput(input, serviceId, aggregatedActiveKey.name, true);
 				
-				RegressionOutput regressionOutput = ApiCache.getRegressionOutput(apiClient,
-					serviceId, regressionInput, regressionFunction, false, false);
+				List regressionOutput = ApiCache.getAggregatedRegressionOutput(apiClient,
+					serviceId, regressionInput, regressionFunction, false);
 				
-				if (regressionOutput != null) {
-					result.add(new AggregatedRegressionAsyncResult(aggregatedActiveKey, regressionOutput));
+				if (!CollectionUtil.safeIsEmpty(regressionOutput)) {
+					for (Object asyncResult : regressionOutput) {
+						if ((AggregatedRegressionAsyncResult) asyncResult != null) {
+							result.add((AggregatedRegressionAsyncResult) asyncResult);
+						}
+					}
 				} else {
 					
 					tasks.add(new RegressionAsyncTask(subRegressionInputs, regressionFunction,
