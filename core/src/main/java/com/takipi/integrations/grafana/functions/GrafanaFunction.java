@@ -2109,7 +2109,13 @@ public abstract class GrafanaFunction {
 	protected static void printGraph(Graph graph) {
 		
 		for (GraphPoint gp : graph.points) {
-			System.out.println(gp.time + ", " + gp.stats.hits + ", " + gp.stats.invocations);
+			System.out.println("gp: " + gp.time + ", " + gp.stats.hits + ", " + gp.stats.invocations);
+			
+			if (gp.contributors != null) {
+				for (GraphPointContributor contributors : gp.contributors) {
+					System.out.println("ctbr: " + contributors.id + ", " + contributors.stats.hits + ", " + contributors.stats.invocations);
+				}
+			}
 		}
 		
 	}
@@ -2243,11 +2249,35 @@ public abstract class GrafanaFunction {
 			if (result.id == null) {
 				result.id = graph.id;
 				result.type = graph.type;
+				
+				result.machine_name = graph.machine_name;
+				result.deployment_name = graph.deployment_name;
+				result.application_name = graph.application_name;
 			}
 			
-			for (GraphPoint gp : graph.points) {
+			List<GraphPoint> points = graph.points;
+			for (GraphPoint gp : points) {
 				DateTime dateTime = TimeUtil.getDateTime(gp.time);
-				graphPoints.put(Long.valueOf(dateTime.getMillis()), gp);
+				GraphPoint graphPoint = graphPoints.get(Long.valueOf(dateTime.getMillis()));
+				
+				if (graphPoint == null) {
+					graphPoints.put(Long.valueOf(dateTime.getMillis()), gp.clone());
+				} else {
+					graphPoint.stats.hits += gp.stats.hits;
+					graphPoint.stats.invocations += gp.stats.invocations;
+					
+					if (!CollectionUtil.safeIsEmpty(gp.contributors)) {
+						if (graphPoint.contributors == null) {
+							graphPoint.contributors = Lists.newArrayList();
+						}
+						
+						for (GraphPointContributor contributor : gp.contributors) {
+							if (contributor != null) {
+								graphPoint.contributors.add(contributor.clone());
+							}
+						}
+					}
+				}
 			}
 		}
 		
