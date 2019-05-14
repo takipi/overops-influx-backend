@@ -750,7 +750,7 @@ public class EventsFunction extends GrafanaFunction {
 			return new DateFormatter(field);
 		}
 		
-		if (field.getDeclaringClass().equals(Stats.class)) {
+		if (field.getDeclaringClass().equals(BaseStats.class)) {
 			return new StatsFormatter(field);
 		}
 
@@ -1264,7 +1264,7 @@ public class EventsFunction extends GrafanaFunction {
 		String fieldName;
 
 		if (column.startsWith(STATS)) {
-			clazz = Stats.class;
+			clazz = BaseStats.class;
 			fieldName = column.substring(column.indexOf(".") + 1);
 		} else {
 			clazz = EventResult.class;
