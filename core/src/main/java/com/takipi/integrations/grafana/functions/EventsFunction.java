@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.BaseStats;
 import com.takipi.api.client.data.event.Location;
+import com.takipi.api.client.data.event.MainEventStats;
 import com.takipi.api.client.data.event.Stats;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventSlimResult;
@@ -937,7 +938,7 @@ public class EventsFunction extends GrafanaFunction {
 		}
 
 		String jiraUrl = null;
-		Stats stats = new Stats();
+		MainEventStats stats = new MainEventStats();
 		
 		EventResult event = null;
 		
@@ -1262,7 +1263,7 @@ public class EventsFunction extends GrafanaFunction {
 		String fieldName;
 
 		if (column.startsWith(STATS)) {
-			clazz = Stats.class;
+			clazz = BaseStats.class;
 			fieldName = column.substring(column.indexOf(".") + 1);
 		} else {
 			clazz = EventResult.class;
