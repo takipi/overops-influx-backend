@@ -64,6 +64,17 @@ public class TransactionsListInput extends BaseGraphInput {
 		SingleStatBaselineAvg,
 		
 		/**
+		 * Output a number of failures in the list
+		 */
+		SingleStatFailures,
+		
+		/**
+		 * Output a number of failures divided by number of invocations in the list
+		 */
+		SingleStatFailureRate,
+		
+		
+		/**
 		 * Output a row for each transaction
 		 */
 		Grid

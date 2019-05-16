@@ -197,7 +197,8 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 		
 		List<EventData> eventDatas = regressionFunction.processRegression(serviceId,
 			graphInput, regressionOutput.regressionInput,
-			regressionOutput.rateRegression, includeNew, includeRegressions);
+			regressionOutput.rateRegression, regressionOutput.eventListMap,
+			includeNew, includeRegressions);
 		
 		EventFilter eventFilter = getEventFilter(serviceId, graphInput, timeSpan);
 		
@@ -271,7 +272,7 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 		
 		return result;
 	}
-	
+
 	private GraphSeries getGraphSeries(Collection<String> serviceIds,
 			String serviceId, GraphData graphData, 
 		RegressionGraphInput rgInput) {

@@ -88,32 +88,6 @@ public class EventsFunction extends GrafanaFunction {
 			this.rank = -1;
 		}
 		
-		private boolean equalLocations(Location a, Location b) {
-			
-			if (a == null) {
-				return b == null;
-			} 
-			
-			if (b == null) {
-				return false;
-			} 
-			
-			if (!Objects.equal(a.class_name, b.class_name)) {
-				return false;
-			}
-
-			if (!Objects.equal(a.method_name, b.method_name)) {
-				return false;
-			}
-
-			if (!Objects.equal(a.method_desc, b.method_desc)) {
-				return false;
-			}
-
-			return true;
-		}
-		
-		
 		@Override
 		public boolean equals(Object obj) {
 			
@@ -129,18 +103,9 @@ public class EventsFunction extends GrafanaFunction {
 			}
 			*/
 			
-			if (!equalLocations(event.error_origin, other.event.error_origin)) {
+			if (!compareEvents(event, other.event)) {
 				return false;
 			}
-			
-			if (!equalLocations(event.error_location, other.event.error_location)) {
-				return false;
-			}
-			
-			if (!Objects.equal(event.call_stack_group, other.event.call_stack_group)) {
-				return false;
-			}
-			
 			return true;	
 		}
 		
@@ -281,7 +246,7 @@ public class EventsFunction extends GrafanaFunction {
 					
 			return result;
 		}
-
+		
 		protected Object formatValue(Object value, EventsInput input) {
 
 			if (value == null) {
@@ -787,6 +752,48 @@ public class EventsFunction extends GrafanaFunction {
 		result.append(formatRate(baseline));
 	
 		return result.toString(); 
+	}
+	
+	private boolean equalLocations(Location a, Location b) {
+		
+		if (a == null) {
+			return b == null;
+		} 
+		
+		if (b == null) {
+			return false;
+		} 
+		
+		if (!Objects.equal(a.class_name, b.class_name)) {
+			return false;
+		}
+
+		if (!Objects.equal(a.method_name, b.method_name)) {
+			return false;
+		}
+
+		if (!Objects.equal(a.method_desc, b.method_desc)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	protected boolean compareEvents(EventResult e1, EventResult e2) {
+		
+		if (!equalLocations(e1.error_origin, e2.error_origin)) {
+			return false;
+		}
+		
+		if (!equalLocations(e1.error_location, e2.error_location)) {
+			return false;
+		}
+		
+		if (!Objects.equal(e1.call_stack_group, e2.call_stack_group)) {
+			return false;
+		}
+		
+		return true;
 	}
 	
 	protected static String formatRate(BaseStats stats) {
