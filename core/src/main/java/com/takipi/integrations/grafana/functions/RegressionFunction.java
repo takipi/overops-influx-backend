@@ -435,8 +435,44 @@ public class RegressionFunction extends EventsFunction {
 		});
 	}
 	
+	private List<EventData> getUniqueEventData(List<EventData> eventDatas, Map<String, EventResult> eventListMap) {
+		
+		List<EventData> result = new ArrayList<EventData>();
+		
+		for (EventData eventData : eventDatas) {
+			
+			RegressionData regData = (RegressionData)eventData;
+			
+			if (regData.regression != null) {
+				result.add(regData);
+			} else {
+				
+				boolean found = false;
+						
+				for (EventResult eventResult : eventListMap.values()) {
+					
+					if (eventResult.id.equals(regData.event.id)) {
+						continue;
+					}
+					
+					if (compareEvents(regData.event, eventResult)) {
+						found = true;
+						break;
+					}
+				}
+				
+				if (!found) {
+					result.add(regData);
+				}
+			}
+		}
+		
+		return result;
+	}
+	
 	public List<EventData> processRegression(String serviceId, EventFilterInput functionInput, RegressionInput input,
-			RateRegression rateRegression, boolean includeNew, boolean includeRegressions) {
+			RateRegression rateRegression, Map<String, EventResult> eventListMap,
+			boolean includeNew, boolean includeRegressions) {
 		
 		List<EventData> result;
 		List<EventData> eventDatas = processRegressionData(serviceId, input, rateRegression, includeNew, includeRegressions);
@@ -444,7 +480,8 @@ public class RegressionFunction extends EventsFunction {
 		if (functionInput.hasTransactions()) {
 			result = eventDatas;
 		} else {
-			result = doMergeSimilarEvents(input.serviceId, eventDatas);
+			List<EventData> uniqueEventDatas = getUniqueEventData(eventDatas, eventListMap);
+			result = doMergeSimilarEvents(input.serviceId, uniqueEventDatas);
 		}
 		
 		return result;
@@ -806,7 +843,8 @@ public class RegressionFunction extends EventsFunction {
 		
 		if ((regressionInput != null) && (rateRegression != null)) {
 			
-			result.eventDatas = processRegression(serviceId, input, regressionInput, rateRegression, true, true);
+			result.eventDatas = processRegression(serviceId, input, regressionInput, 
+				rateRegression, eventListMap, true, true);
 			
 			for (EventData eventData : result.eventDatas) {
 				
