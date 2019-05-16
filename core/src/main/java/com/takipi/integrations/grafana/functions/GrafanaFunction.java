@@ -2255,8 +2255,7 @@ public abstract class GrafanaFunction {
 				result.application_name = graph.application_name;
 			}
 			
-			List<GraphPoint> points = graph.points;
-			for (GraphPoint gp : points) {
+			for (GraphPoint gp : graph.points) {
 				DateTime dateTime = TimeUtil.getDateTime(gp.time);
 				GraphPoint graphPoint = graphPoints.get(Long.valueOf(dateTime.getMillis()));
 				
