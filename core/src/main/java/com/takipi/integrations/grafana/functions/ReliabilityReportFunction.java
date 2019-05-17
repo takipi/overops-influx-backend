@@ -1133,28 +1133,6 @@ public class ReliabilityReportFunction extends EventsFunction {
 		}		
 	}
 	
-	private boolean appHasDeployVolume(String serviceId, 
-		Pair<Gson, String> gson, Pair<DateTime, DateTime> timespan, String dep) {
-		
-		ViewInput viewInput = gson.getFirst().fromJson(gson.getSecond(), ViewInput.class);
-		viewInput.deployments = dep;
-		
-		EventsSlimVolumeResult volumeResult = getEventsVolume(serviceId, viewInput, 
-			timespan.getFirst(), timespan.getSecond(), VolumeType.hits);
-		
-		if ((volumeResult == null) || (CollectionUtil.safeIsEmpty(volumeResult.events))) {
-			return false;
-		}
-		
-		for (EventSlimResult eventSlimResult : volumeResult.events) {
-			if (eventSlimResult.stats.hits > 0) {
-				return true;
-			}
-		}
-		
-		return false;
-	}
-	
 	private void updateCompareDeployments(List<ReportKey> output, 
 		String serviceId, ReliabilityReportInput input, Pair<DateTime, DateTime> timespan,
 		List<SummarizedDeployment> sortedDeps, Pair<Gson, String> gsonPair) {
