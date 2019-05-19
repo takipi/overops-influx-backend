@@ -131,6 +131,11 @@ public class TimeUtil {
 	}
 	
 	public static DateTime getDateTime(String value) {
+		
+		if (value == null) {
+			return null;
+		}
+		
 		return fmt.parseDateTime(value);
 	}
 
