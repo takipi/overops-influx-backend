@@ -136,6 +136,11 @@ public class DeploymentsAnnotation extends BaseGraphFunction {
 		Collection<String> selectedDeployments = input.getDeployments(serviceId, apiClient);
 
 		List<DeploymentData> deployments = getDeploymentData(selectedDeployments, serviceId, false);
+		
+		if (deployments == null) {
+			return Collections.emptyList();
+		}
+		
 		sortDeployments(deployments);
 		
 		int maxDeployments;
