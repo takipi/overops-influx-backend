@@ -338,13 +338,13 @@ public class ReliabilityReportInput extends RegressionsInput {
 	
 	/**
 	 * A comma delimited array used to visually annotate the reliability status of the key
-	 * based on the score ranges for example: ✅,⚠️,❌
+	 * based on the score ranges for example: (\xE2\x9C\x85,\xE2\x9A\xA0\xEF\xB8\x8F,\xE2\x9D\x8C)
 	 */
 	public String statusPrefixes;
 	
 	/**
 	 * A comma delimited array used to visually annotate the fail rate status of the key
-	 * based on the score ranges for example: ✅,⚠️,❌
+	 * based on the score ranges for example: (\xE2\x9C\x85,\xE2\x9A\xA0\xEF\xB8\x8F,\xE2\x9D\x8C)
 	 */
 	public String failRatePrefixes;
 	
