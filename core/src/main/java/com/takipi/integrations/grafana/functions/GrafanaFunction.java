@@ -2521,6 +2521,28 @@ public abstract class GrafanaFunction {
 		
 	}
 	
+	protected boolean appHasDeployVolume(String serviceId, 
+		Pair<Gson, String> gson, Pair<DateTime, DateTime> timespan, String dep) {
+			
+		ViewInput viewInput = gson.getFirst().fromJson(gson.getSecond(), ViewInput.class);
+		viewInput.deployments = dep;
+			
+		EventsSlimVolumeResult volumeResult = getEventsVolume(serviceId, viewInput, 
+			timespan.getFirst(), timespan.getSecond(), VolumeType.hits);
+			
+		if ((volumeResult == null) || (CollectionUtil.safeIsEmpty(volumeResult.events))) {
+			return false;
+		}
+			
+		for (EventSlimResult eventSlimResult : volumeResult.events) {
+			if (eventSlimResult.stats.hits > 0) {
+				return true;
+			}
+		}
+			
+		return false;
+	}
+	
 	protected Collection<EventResult> cloneEvents(Collection<EventResult> events, boolean copyStats) {
 		
 		List<EventResult> result = new ArrayList<EventResult>(events.size());
