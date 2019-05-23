@@ -529,7 +529,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 				Collection<EventResult> eventList = null;
 				
 				for (int retries = 0; retries < GET_EVENT_LIST_MAX_RETRIES; retries++) {
-					eventList = function.getEventList(serviceId, viewId, input, activeWindowStart, activeWindowEnd, true);
+					eventList = function.getEventList(serviceId, viewId, input, activeWindowStart, activeWindowEnd, true, true);
 					
 					if (eventList != null) {
 						break;

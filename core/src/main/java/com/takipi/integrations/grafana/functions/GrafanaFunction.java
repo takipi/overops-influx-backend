@@ -21,6 +21,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
+import com.takipi.api.client.request.metrics.GraphRequest.Builder;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -2048,7 +2049,7 @@ public abstract class GrafanaFunction {
 	protected GraphSliceTask createGraphAsyncTask(String serviceId, String viewId, 
 			ViewInput input, VolumeType volumeType, 
 			DateTime from, DateTime to, int baselineWindow, int activeWindow, 
-			int windowSlice, boolean cache) {
+			int windowSlice, boolean cache, boolean applyBreakFilter) {
 		
 		GraphResolution graphResolution;
 		
@@ -2060,12 +2061,16 @@ public abstract class GrafanaFunction {
 		
 		GraphRequest.Builder builder = GraphRequest.newBuilder().setServiceId(serviceId).setViewId(viewId)
 				.setGraphType(GraphType.view).setFrom(from.toString(dateTimeFormatter)).setTo(to.toString(dateTimeFormatter))
-				.setVolumeType(volumeType).setRaw(true).setResolution(graphResolution).setBreakdown(true);
+				.setVolumeType(volumeType).setRaw(true).setResolution(graphResolution);
 				//setWantedPointCount(pointsCount);
 		
 		applyFilters(input, serviceId, builder);
 		
-		GraphSliceTask task = new GraphSliceTask(builder, serviceId, viewId, 
+		if (applyBreakFilter) {
+			builder.applyBreakFilter();
+		}
+		
+		GraphSliceTask task = new GraphSliceTask(builder, serviceId, viewId,
 			input, volumeType, from, to, baselineWindow, activeWindow,
 			windowSlice, cache);
 		
@@ -2180,7 +2185,7 @@ public abstract class GrafanaFunction {
 			GraphSliceTask task = createGraphAsyncTask(serviceId, viewId,
 				input, volumeType, 
 				sliceRequest.from, sliceRequest.to, 
-				baselineWindow, activeWindow, sliceIndex, sliceRequest.cache);
+				baselineWindow, activeWindow, sliceIndex, sliceRequest.cache, true);
 				
 			index++;
 			
@@ -2491,14 +2496,19 @@ public abstract class GrafanaFunction {
 	public Collection<EventResult> getEventList(String serviceId, String viewId, ViewInput input, DateTime from,
 			DateTime to)
 	{
-		return getEventList(serviceId, viewId, input, from, to, false);
+		return getEventList(serviceId, viewId, input, from, to, false, true);
 	}
 	
 	public Collection<EventResult> getEventList(String serviceId, String viewId, ViewInput input, DateTime from,
-			DateTime to, boolean copyStats) {
+			DateTime to, boolean copyStats, boolean applyBreakFilter) {
 		
-		EventsRequest.Builder builder = EventsRequest.newBuilder().setRaw(true).setBreakdown(true);
+		EventsRequest.Builder builder = EventsRequest.newBuilder().setRaw(true);
+		
 		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);
+		
+		if (applyBreakFilter) {
+			builder.applyBreakFilter();
+		}
 		
 		Response<?> response = ApiCache.getEventList(apiClient, serviceId, input,
 			getSettingsData(serviceId), builder.build());
