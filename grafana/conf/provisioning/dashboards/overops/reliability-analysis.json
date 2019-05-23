@@ -3021,7 +3021,7 @@
         "multi": false,
         "name": "nec",
         "options": [],
-        "query": "regressions({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"render\":\"SingleStat\", \"regressionTypes\":\"NewIssues,SevereNewIssues\", \"searchText\":\"$search\", \"timeFilterVar\":\"true\"})",
+        "query": "regressions({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"render\":\"SingleStat\", \"regressionTypes\":\"NewIssues,SevereNewIssues\", \"searchText\":\"$search\"})",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -3121,5 +3121,5 @@
   "timezone": "",
   "title": "Root Cause",
   "uid": "4DHQ63-ik",
-  "version": 272
+  "version": 273
 }
