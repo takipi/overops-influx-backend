@@ -2439,8 +2439,7 @@ public abstract class GrafanaFunction {
 		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);
 		
 		Response<?> response = ApiCache.getEventList(apiClient, serviceId, input,
-				breakdownTypes, getSettingsData(serviceId), 
-				(ApiGetRequest<?>)(builder.build()), 
+				breakdownTypes, getSettingsData(serviceId), builder.build(), 
 				((volumeType == null) || (volumeType == VolumeType.hits)));
 		
 		validateResponse(response);
