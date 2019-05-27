@@ -116,10 +116,8 @@ public abstract class VariableFunction extends GrafanaFunction {
 		
 		VariableInput varInput = (VariableInput)functionInput;
 
-		Series series = new Series();
-		series.name = SERIES_NAME;
-		series.columns = Arrays.asList(new String[] { KEY_COLUMN, VALUE_COLUMN });
-		series.values = new ArrayList<List<Object>>();
+		Series series = createSeries(new ArrayList<List<Object>>(), 
+			Arrays.asList(new String[] { KEY_COLUMN, VALUE_COLUMN }));
 		
 		VariableAppender appender;
 		

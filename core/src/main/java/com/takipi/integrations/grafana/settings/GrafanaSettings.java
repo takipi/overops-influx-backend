@@ -90,7 +90,7 @@ public class GrafanaSettings {
 			return;
 		}
 		
-		Response<ServicesResult> response = ApiCache.getServices(apiClient);
+		Response<ServicesResult> response = ApiCache.getServices(apiClient, null);
 		
 		if ((response.data != null) && (response.data.services != null)) {
 				

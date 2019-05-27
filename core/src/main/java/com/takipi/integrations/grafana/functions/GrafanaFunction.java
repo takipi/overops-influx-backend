@@ -41,8 +41,10 @@ import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.data.view.SummarizedView;
 import com.takipi.api.client.request.TimeframeRequest;
 import com.takipi.api.client.request.ViewTimeframeRequest;
+import com.takipi.api.client.request.event.BaseEventsRequest;
 import com.takipi.api.client.request.event.EventsRequest;
 import com.takipi.api.client.request.event.EventsSlimVolumeRequest;
+import com.takipi.api.client.request.event.EventsVolumeRequest;
 import com.takipi.api.client.request.metrics.GraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsGraphRequest;
 import com.takipi.api.client.request.transaction.TransactionsVolumeRequest;
@@ -77,6 +79,7 @@ import com.takipi.api.client.util.transaction.TransactionUtil;
 import com.takipi.api.client.util.validation.ValidationUtil.GraphResolution;
 import com.takipi.api.client.util.validation.ValidationUtil.GraphType;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
+import com.takipi.api.core.request.intf.ApiGetRequest;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
@@ -92,6 +95,7 @@ import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
 import com.takipi.integrations.grafana.settings.ServiceSettings;
 import com.takipi.integrations.grafana.util.ApiCache;
+import com.takipi.integrations.grafana.util.ApiCache.BreakdownType;
 import com.takipi.integrations.grafana.util.TimeUtil;
 import com.takipi.integrations.grafana.util.TimeUtil.Interval;
 
@@ -105,7 +109,7 @@ public abstract class GrafanaFunction {
 	}
 		
 	public static final DecimalFormat singleDigitFormatter = new DecimalFormat("#.#");
-	private static final DecimalFormat doubleDigitFormatter = new DecimalFormat("#.##");
+	public static final DecimalFormat doubleDigitFormatter = new DecimalFormat("#.##");
 
 	protected static final PrettyTime prettyTime = new PrettyTime();
 	
@@ -129,6 +133,8 @@ public abstract class GrafanaFunction {
 
 	public static final String GRAFANA_SEPERATOR = Pattern.quote(GRAFANA_SEPERATOR_RAW);
 	public static final String ARRAY_SEPERATOR = Pattern.quote(ARRAY_SEPERATOR_RAW);
+	public static final String TEXT_SEPERATOR = ARRAY_SEPERATOR_RAW + " ";
+
 	
 	public static final String SERVICE_SEPERATOR_RAW = ":";
 	public static final String SERVICE_SEPERATOR = SERVICE_SEPERATOR_RAW + " ";
@@ -187,6 +193,7 @@ public abstract class GrafanaFunction {
 	protected static final List<String> EXCEPTION_TYPES = Arrays.asList(new String[] {
 			 CAUGHT_EXCEPTION, SWALLOWED_EXCEPTION, UNCAUGHT_EXCEPTION
 			});
+	
 	
 	static {
 		TYPES_MAP = new HashMap<String, String>();
@@ -1823,9 +1830,9 @@ public abstract class GrafanaFunction {
 	}
 	
 	protected void sortApplicationsByProcess(String serviceId, List<String> apps, 
-		Collection<String> serversFilter, Collection<String> deploymentsFilter) {
+		Collection<String> serversFilter, Collection<String> deploymentsFilter, FunctionInput input) {
 		
-		Response<JvmsResult> response =  ApiCache.getProcesses(apiClient, serviceId, true);
+		Response<JvmsResult> response =  ApiCache.getProcesses(apiClient, serviceId, true, input.query);
 		
 		if ((response == null) || (response.isBadResponse()) || (response.data == null) ||
 			(response.data.clients == null)) {
@@ -1961,6 +1968,19 @@ public abstract class GrafanaFunction {
 		return volDelta;
 	}
 	
+	protected Graph getEventsGraph(String serviceId, 
+		ViewInput input, VolumeType volumeType, DateTime from, DateTime to) {
+		
+		String viewId = getViewId(serviceId, input.view);
+		
+		if (viewId == null) {
+			return null;
+		}
+		
+		return getEventsGraph(serviceId, viewId,  
+			input, volumeType, from, to, 0, 0);
+	}
+	
 	protected Graph getEventsGraph(String serviceId, String viewId, 
 			ViewInput input, VolumeType volumeType, DateTime from, DateTime to) {
 		
@@ -2034,7 +2054,7 @@ public abstract class GrafanaFunction {
 	protected static void printGraph(Graph graph) {
 		
 		for (GraphPoint gp : graph.points) {
-			System.out.println(gp.time + ", " + gp.stats.hits + ", " + gp.stats.invocations);
+			System.out.println(gp.time + TEXT_SEPERATOR + gp.stats.hits + TEXT_SEPERATOR + gp.stats.invocations);
 		}
 		
 	}
@@ -2048,7 +2068,7 @@ public abstract class GrafanaFunction {
 		boolean sliceGraph;
 		
 		if (dynamicRes) {
-			sliceGraph = TimeUtil.getTimespanMill(timespan) > H8_THRESHOLD;
+			sliceGraph = TimeUtil.getTimespanMill(timespan) >= H8_THRESHOLD;
 		} else {
 			sliceGraph = true;
 		}
@@ -2318,7 +2338,8 @@ public abstract class GrafanaFunction {
 			return null;
 		}
 		
-		Collection<EventResult> events = getEventList(serviceId, viewId, input, from, to);
+		Collection<EventResult> events = getEventList(serviceId,
+			viewId, input, from, to, null, false, null);
 		
 		if (events == null) {
 			return null;
@@ -2387,13 +2408,39 @@ public abstract class GrafanaFunction {
 	}
 	
 	private Collection<EventResult> getEventList(String serviceId, String viewId, ViewInput input, DateTime from,
-			DateTime to) {
+			DateTime to, Set<BreakdownType> breakdownTypes, 
+			boolean copyStats, VolumeType volumeType) {
 		
-		EventsRequest.Builder builder = EventsRequest.newBuilder().setRaw(true);
+		BaseEventsRequest.Builder builder;
+		
+		if ((volumeType != null) && (volumeType != VolumeType.hits)) {
+			builder = EventsVolumeRequest.newBuilder().setVolumeType(volumeType);
+		} else {
+			builder = EventsRequest.newBuilder();
+		}
+		
+		builder.setRaw(true);
+		
+		if (breakdownTypes != null) {
+			
+			if (breakdownTypes.contains(BreakdownType.App)) {
+				builder.setBreakApps(true);
+			}
+			
+			if (breakdownTypes.contains(BreakdownType.Deployment)) {
+				builder.setBreakDeployments(true);
+			}
+			
+			if (breakdownTypes.contains(BreakdownType.Server)) {
+				builder.setBreakServers(true);
+			}
+		}
+		
 		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);
 		
 		Response<?> response = ApiCache.getEventList(apiClient, serviceId, input,
-			getSettingsData(serviceId), builder.build());
+				breakdownTypes, getSettingsData(serviceId), builder.build(), 
+				((volumeType == null) || (volumeType == VolumeType.hits)));
 		
 		validateResponse(response);
 		
@@ -2409,8 +2456,7 @@ public abstract class GrafanaFunction {
 			return null;
 		}
 		
-		return cloneEvents(events, false);
-		
+		return cloneEvents(events, copyStats);
 	}
 	
 	protected boolean appHasDeployVolume(String serviceId, 
@@ -2472,11 +2518,11 @@ public abstract class GrafanaFunction {
 	
 	protected Map<String, EventResult> getEventMap(String serviceId, ViewInput input, DateTime from, DateTime to,
 			VolumeType volumeType) {
-		return getEventMap(serviceId, input, from, to, volumeType, false);
+		return getEventMap(serviceId, input, from, to, volumeType, false, null);
 	}
 	
 	protected Map<String, EventResult> getEventMap(String serviceId, ViewInput input, DateTime from, DateTime to,
-			VolumeType volumeType, boolean useGraph) {
+			VolumeType volumeType, boolean useGraph, Set<BreakdownType> breakdownTypes) {
 		
 		String viewId = getViewId(serviceId, input.view);
 		
@@ -2493,16 +2539,26 @@ public abstract class GrafanaFunction {
 			if (useGraph) {
 				events = getEventListFromGraph(serviceId, viewId, input, from, to, volumeType);	
 			} else {
-				events = getEventList(serviceId, viewId, input, from, to);
-				
-				if (events != null) {
-					applyVolumeToEvents(serviceId, viewId, input, from, to, 
-						volumeType, getEventsMap(events));
+												
+				if (!CollectionUtil.safeIsEmpty(breakdownTypes) ) {
+					events = getEventList(serviceId, viewId, input, from, to, 
+						breakdownTypes, true, volumeType);
+					
+				} else {
+					events = getEventList(serviceId, viewId, input, from, to, 
+						null, true, null);
+					
+					if ((events != null) && (volumeType != VolumeType.hits)) {
+						
+						Map<String, EventResult> eventsMap = getEventsMap(events);
+						applyVolumeToEvents(serviceId, viewId, input, from, to, 
+							volumeType, eventsMap);
+					}
 				}
-			}
-			
+			}	
 		} else {
-			events = getEventList(serviceId, viewId, input, from, to);
+			events = getEventList(serviceId, viewId, input, from, to, 
+				breakdownTypes, false, null);
 		}
 		
 		if (events == null) {
@@ -2579,7 +2635,7 @@ public abstract class GrafanaFunction {
 		
 		ViewsRequest request = ViewsRequest.newBuilder().setServiceId(serviceId).setViewName(viewName).build();
 		
-		Response<ViewsResult> response = ApiCache.getView(apiClient, serviceId, viewName, request);
+		Response<ViewsResult> response = ApiCache.getView(apiClient, serviceId, viewName, request, null);
 		
 		if ((response.isBadResponse()) ||	(response.data == null) || (response.data.views == null) ||
 			(response.data.views.size() == 0)) {
@@ -2668,6 +2724,18 @@ public abstract class GrafanaFunction {
 		return String.valueOf(value);
 	}
 	
+	protected String formatDate(String value) {
+		
+		if (value == null) {
+			return "";
+		}
+		
+		DateTime date = TimeUtil.getDateTime(value);
+		String result = (prettyTime.format(date.toDate()));
+		
+		return result;
+	}
+	
 	protected String formatMilli(Double mill) {
 		
 		if (mill > 1000) {
@@ -2721,16 +2789,26 @@ public abstract class GrafanaFunction {
 		
 		return result;
 	}
-
-	protected List<Series> createSingleStatSeries(Pair<DateTime, DateTime> timespan, Object singleStat) {
+	
+	protected Series createSeries(List<List<Object>> values, List<String> columns) {
 		
 		Series series = new Series();
 		
 		series.name = SERIES_NAME;
-		series.columns = Arrays.asList(new String[] { TIME_COLUMN, SUM_COLUMN });
+		series.values = values;
+		series.columns = columns;
 		
+		return series;
+		
+	}
+
+	protected List<Series> createSingleStatSeries(Pair<DateTime, DateTime> timespan, Object singleStat) {
+			
 		Long time = Long.valueOf(timespan.getSecond().getMillis());
-		series.values = Collections.singletonList(Arrays.asList(new Object[] { time, singleStat }));
+		
+		Series series = createSeries(
+			Collections.singletonList(Arrays.asList(new Object[] { time, singleStat })),
+			Arrays.asList(new String[] { TIME_COLUMN, SUM_COLUMN }));
 		
 		return Collections.singletonList(series);
 	}

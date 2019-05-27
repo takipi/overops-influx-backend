@@ -101,6 +101,7 @@ public class FunctionParser {
 		
 		try {
 			input = (FunctionInput)(new Gson().fromJson(json, factory.getInputClass()));
+			input.query = query;
 			function = factory.create(apiClient);
 		} catch (Exception e) {
 			throw new IllegalStateException("Could not parse query: " + e.toString() + " query:" + json, e);
@@ -223,6 +224,7 @@ public class FunctionParser {
 		registerFunction(new VolumeFunction.Factory());
 		registerFunction(new EventsDiffFunction.Factory());
 		registerFunction(new EventsDiffDescFunction.Factory());
+		registerFunction(new EventGroupFunction.Factory());
 		
 		//Routing graphs
 		registerFunction(new CategoryFunction.Factory());
@@ -286,6 +288,8 @@ public class FunctionParser {
 		registerFunction(new ConvertToArrayFunction.Factory());
 		registerFunction(new ConcatFunction.Factory());
 		registerFunction(new ExtendWindowFunction.Factory());
+		registerFunction(new VariableConditionFunction.Factory());
+
 
 		//diagnostics functions
 		registerFunction(new QueryDiagnosticsFunction.Factory());

@@ -83,7 +83,7 @@ public class DeploymentsGraphFunction extends GraphFunction {
 			return selectedDeployments;
 		}
 		
-		Response<DeploymentsResult> response = ApiCache.getDeployments(apiClient, serviceId, false);
+		Response<DeploymentsResult> response = ApiCache.getDeployments(apiClient, serviceId, false, input.query);
 		
 		if ((response == null) || (response.data == null) || (response.data.deployments == null)) {
 			return Collections.emptyList();

@@ -34,7 +34,6 @@ import com.takipi.api.client.request.application.ApplicationsRequest;
 import com.takipi.api.client.request.category.CategoriesRequest;
 import com.takipi.api.client.request.deployment.DeploymentsRequest;
 import com.takipi.api.client.request.event.EventRequest;
-import com.takipi.api.client.request.event.EventsRequest;
 import com.takipi.api.client.request.event.EventsSlimVolumeRequest;
 import com.takipi.api.client.request.label.LabelsRequest;
 import com.takipi.api.client.request.metrics.GraphRequest;
@@ -84,10 +83,20 @@ import com.takipi.integrations.grafana.storage.KeyValueStorage;
 
 public class ApiCache {
 	
+	public enum BreakdownType {
+		App,
+		Server,
+		Deployment
+	}
+	
 	private static final Logger logger = LoggerFactory.getLogger(ApiCache.class);
+	
+	protected static boolean CACHE_LOAD = true;
 	
 	private static final int CACHE_SIZE = 500;
 	private static final int CACHE_REFRESH_RETENTION = 90;
+	
+	private static final int SLOW_QUERY_THRESHOLD = 10;
 		
 	public static final int NO_GRAPH_SLICE = -1;
 	public static final int MIN_SLICE_POINTS = 3;
@@ -164,14 +173,16 @@ public class ApiCache {
 
 		public ApiClient apiClient;
 		public ApiGetRequest<?> request;
+		protected String query;
 		
 		public long loadT1;
 		public long loadT2;
 
 		
-		public BaseCacheLoader(ApiClient apiClient, ApiGetRequest<?> request) {
+		public BaseCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String query) {
 			this.apiClient = apiClient;
 			this.request = request;
+			this.query = query;
 		}
 		
 		/**
@@ -246,7 +257,11 @@ public class ApiCache {
 				}
 				
 				if ((PRINT_DURATIONS)  && (this.printDuration())) {
-					logger.info(queryLogItem.toString());
+					if (loadT2 - loadT1 > TimeUnit.SECONDS.toMillis(SLOW_QUERY_THRESHOLD)) {
+						logger.error(queryLogItem.toString() + " " + query);
+					} else {
+						logger.info(queryLogItem.toString());
+					}					
 				}
 								
 				return result;
@@ -269,8 +284,8 @@ public class ApiCache {
 	
 	protected static class ServicesCacheLoader extends BaseCacheLoader {
 
-		public ServicesCacheLoader(ApiClient apiClient, ApiGetRequest<?> request) {
-			super(apiClient, request);
+		public ServicesCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String query) {
+			super(apiClient, request, query);
 		}
 		
 		@Override
@@ -292,8 +307,8 @@ public class ApiCache {
 
 		protected String serviceId;
 
-		public ServiceCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId) {
-			super(apiClient, request);
+		public ServiceCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, String query) {
+			super(apiClient, request, query);
 			this.serviceId = serviceId;
 		}
 
@@ -330,8 +345,8 @@ public class ApiCache {
 	
 	protected static class AlertSettingsCacheLoader extends ServiceCacheLoader {
 
-		public AlertSettingsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId) {
-			super(apiClient, request, serviceId);
+		public AlertSettingsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, String query) {
+			super(apiClient, request, serviceId, query);
 		}
 		
 		@Override
@@ -350,8 +365,8 @@ public class ApiCache {
 		protected boolean includeViews;
 		
 		public CategoriesCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, 
-			String serviceId, boolean includeViews) {
-			super(apiClient, request, serviceId);
+			String serviceId, boolean includeViews, String query) {
+			super(apiClient, request, serviceId, query);
 			this.includeViews = includeViews;
 		}
 		
@@ -374,8 +389,9 @@ public class ApiCache {
 	
 	protected static class ViewsCacheLoader extends ServiceCacheLoader {
 
-		public ViewsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId) {
-			super(apiClient, request, serviceId);
+		public ViewsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, 
+			String serviceId, String query) {
+			super(apiClient, request, serviceId, query);
 		}
 		
 		@Override
@@ -391,8 +407,9 @@ public class ApiCache {
 		
 	protected static class LabelsCacheLoader extends ServiceCacheLoader {
 
-		public LabelsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId) {
-			super(apiClient, request, serviceId);
+		public LabelsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, 
+			String serviceId, String query) {
+			super(apiClient, request, serviceId, query);
 		}
 		
 		@Override
@@ -408,8 +425,9 @@ public class ApiCache {
 	
 	protected static class SystemMetricsMetadataCacheLoader extends ServiceCacheLoader {
 
-		public SystemMetricsMetadataCacheLoader(ApiClient apiClient, String serviceId) {
-			super(apiClient, null, serviceId);
+		public SystemMetricsMetadataCacheLoader(ApiClient apiClient, 
+			String serviceId, String query) {
+			super(apiClient, null, serviceId, query);
 		}
 		
 		@Override
@@ -427,8 +445,8 @@ public class ApiCache {
 	protected static class SystemMetricMetadatasCacheLoader extends ServiceCacheLoader {
 		
 		public SystemMetricMetadatasCacheLoader(ApiClient apiClient, 
-			ApiGetRequest<?> request, String serviceId) {
-			super(apiClient, request, serviceId);
+			ApiGetRequest<?> request, String serviceId, String query) {
+			super(apiClient, request, serviceId, query);
 		}
 		
 		@Override
@@ -447,9 +465,10 @@ public class ApiCache {
 
 		protected String Id;
 
-		public EventCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, String Id) {
+		public EventCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, 
+			String serviceId, String Id, String query) {
 
-			super(apiClient, request, serviceId);
+			super(apiClient, request, serviceId, query);
 			this.Id = Id;
 		}
 		
@@ -500,9 +519,9 @@ public class ApiCache {
 		protected boolean active;
 		
 		public DeploymentsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, 
-			String serviceId, boolean active) {
+			String serviceId, boolean active, String query) {
 
-			super(apiClient, request, serviceId);
+			super(apiClient, request, serviceId, query);
 			
 			this.active = active;
 		}
@@ -543,9 +562,9 @@ public class ApiCache {
 		protected boolean active;
 		
 		public ProcessesCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, 
-			String serviceId, boolean active) {
+			String serviceId, boolean active, String query) {
 
-			super(apiClient, request, serviceId);
+			super(apiClient, request, serviceId, query);
 			
 			this.active = active;
 		}
@@ -586,9 +605,9 @@ public class ApiCache {
 		protected boolean active;
 		
 		public ApplicationsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, 
-			String serviceId, boolean active) {
+			String serviceId, boolean active, String query) {
 
-			super(apiClient, request, serviceId);
+			super(apiClient, request, serviceId, query);
 			
 			this.active = active;
 		}
@@ -628,9 +647,10 @@ public class ApiCache {
 
 		protected String viewName;
 
-		public ViewCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, String viewName) {
+		public ViewCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, 
+			String serviceId, String viewName, String query) {
 
-			super(apiClient, request, serviceId);
+			super(apiClient, request, serviceId, query);
 			
 			this.viewName = viewName;
 		}
@@ -685,7 +705,7 @@ public class ApiCache {
 		
 		public ViewInputCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
 			ServiceSettingsData settingsData) {
-			super(apiClient, request, serviceId);
+			super(apiClient, request, serviceId, input.query);
 			
 			this.input = input;
 			this.apps = getApps(settingsData);	
@@ -726,8 +746,12 @@ public class ApiCache {
 		
 		protected boolean compareTimeframes(ViewInputCacheLoader other) {
 			
-			if ((input.timeFilter != null) && (other.input.timeFilter != null) &&
-		    		(!compareTimeFilters(input.timeFilter, other.input.timeFilter))) {	
+			String timeFilter = input.timeFilter;
+			String otherTimeFilter = other.input.timeFilter;
+
+			
+			if ((timeFilter != null) && (otherTimeFilter != null) &&
+		    		(!compareTimeFilters(timeFilter, otherTimeFilter))) {	
 				return false;	
 			}
 		
@@ -798,7 +822,8 @@ public class ApiCache {
 		protected VolumeType volumeType;
 
 		public VolumeCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
-			ServiceSettingsData settingsData, VolumeType volumeType) {
+			ServiceSettingsData settingsData, 
+			VolumeType volumeType) {
 
 			super(apiClient, request, serviceId, input, settingsData);
 			this.volumeType = volumeType;
@@ -855,7 +880,8 @@ public class ApiCache {
 	protected static class SlimVolumeCacheLoader extends VolumeCacheLoader {
 		
 		public SlimVolumeCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, String serviceId, ViewInput input,
-				ServiceSettingsData settingsData, VolumeType volumeType) {
+				ServiceSettingsData settingsData, VolumeType volumeType
+				) {
 
 			super(apiClient, request, serviceId, input, settingsData, volumeType);
 		}
@@ -878,11 +904,14 @@ public class ApiCache {
 
 	protected static class EventsCacheLoader extends VolumeCacheLoader {
 		
+		protected Set<BreakdownType> breakdownTypes;
+		
 		public EventsCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, 
 			String serviceId, ViewInput input, ServiceSettingsData settingsData, 
-			VolumeType volumeType) {
+			VolumeType volumeType, Set<BreakdownType> breakdownTypes) {
 
 			super(apiClient, request, serviceId, input, settingsData, volumeType);
+			this.breakdownTypes = breakdownTypes;
 		}
 		
 		@Override
@@ -895,7 +924,13 @@ public class ApiCache {
 			if (!super.equals(obj)) {
 				return false;
 			}
-
+			
+			EventsCacheLoader other = (EventsCacheLoader)obj;
+			
+			if (!Objects.equal(breakdownTypes, other.breakdownTypes)) {
+				return false;
+			}
+			
 			return true;
 		}
 		
@@ -1422,7 +1457,7 @@ public class ApiCache {
 		public RegressionCacheLoader(ApiClient apiClient, String serviceId, 
 				ViewInput input, RegressionFunction function, boolean newOnly) {
 
-			super(apiClient, null, serviceId, input, null, null);
+			super(apiClient, null, serviceId, input, null, null, null);
 			this.function = function;
 			this.newOnly = newOnly;
 		}
@@ -1439,7 +1474,14 @@ public class ApiCache {
 	private static Response<?> getItem(BaseCacheLoader key) {
 		
 		try {
-			Response<?> result = queryCache.get(key);
+			
+			Response<?> result;
+			
+			if (CACHE_LOAD) {
+				result = queryCache.get(key);
+			} else {
+				result = key.load();
+			}
 			
 			if (result.isBadResponse()) {
 				queryCache.invalidate(key);
@@ -1454,28 +1496,29 @@ public class ApiCache {
 
 	@SuppressWarnings("unchecked")
 	public static Response<ViewsResult> getView(ApiClient apiClient, String serviceId, String viewName,
-		ViewsRequest viewsRequest) {
+		ViewsRequest viewsRequest, String query) {
 
-		ViewCacheLoader cacheKey = new ViewCacheLoader(apiClient, viewsRequest, serviceId, viewName);
+		ViewCacheLoader cacheKey = new ViewCacheLoader(apiClient, viewsRequest, serviceId, viewName, query);
 		Response<ViewsResult> response = (Response<ViewsResult>)getItem(cacheKey);
 
 		return response;
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Response<DeploymentsResult> getDeployments(ApiClient apiClient, String serviceId, boolean active) {
+	public static Response<DeploymentsResult> getDeployments(ApiClient apiClient, String serviceId, boolean active, String query) {
 
 		DeploymentsRequest request = DeploymentsRequest.newBuilder().setServiceId(serviceId).setActive(active).build();
-		DeploymentsCacheLoader cacheKey = new DeploymentsCacheLoader(apiClient, request, serviceId, active);
+		DeploymentsCacheLoader cacheKey = new DeploymentsCacheLoader(apiClient, request, serviceId, active, query);
 		Response<DeploymentsResult> response = (Response<DeploymentsResult>)getItem(cacheKey);
 
 		return response;
 	}
 	
-	public static Collection<String> getDeploymentNames(ApiClient apiClient, String serviceId, boolean active) {
+	public static Collection<String> getDeploymentNames(ApiClient apiClient, 
+		String serviceId, boolean active, String query) {
 
 		List<String> result;
-		Response<DeploymentsResult> response = getDeployments(apiClient, serviceId, active);	
+		Response<DeploymentsResult> response = getDeployments(apiClient, serviceId, active, query);	
 		
 		if ((response.data != null) && (response.data.deployments != null)) {
 			
@@ -1492,20 +1535,21 @@ public class ApiCache {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Response<JvmsResult> getProcesses(ApiClient apiClient, String serviceId, boolean connected) {
+	public static Response<JvmsResult> getProcesses(ApiClient apiClient, String serviceId, 
+		boolean connected, String query) {
 
 		JvmsRequest request = JvmsRequest.newBuilder().setServiceId(serviceId).setConnected(connected).build();
-		ProcessesCacheLoader cacheKey = new ProcessesCacheLoader(apiClient, request, serviceId, connected);
+		ProcessesCacheLoader cacheKey = new ProcessesCacheLoader(apiClient, request, serviceId, connected, query);
 		Response<JvmsResult> response = (Response<JvmsResult>)getItem(cacheKey);
 
 		return response;
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Response<ServicesResult> getServices(ApiClient apiClient) {
+	public static Response<ServicesResult> getServices(ApiClient apiClient, String query) {
 
 		ServicesRequest request = ServicesRequest.newBuilder().build();
-		ServicesCacheLoader cacheKey = new ServicesCacheLoader(apiClient, request);
+		ServicesCacheLoader cacheKey = new ServicesCacheLoader(apiClient, request, query);
 		Response<ServicesResult> response = (Response<ServicesResult>)getItem(cacheKey);
 
 		return response;
@@ -1513,13 +1557,13 @@ public class ApiCache {
 	
 	@SuppressWarnings("unchecked")
 	public static Response<SystemMetricMetadatasResult> getSystemMetricMetadatas(ApiClient apiClient,
-		String serviceId) {
+		String serviceId, String query) {
 		
 		SystemMetricMetadatasRequest request = SystemMetricMetadatasRequest.
 			newBuilder().setServiceId(serviceId).build();
 		
 		SystemMetricMetadatasCacheLoader key = new SystemMetricMetadatasCacheLoader(apiClient, 
-			request, serviceId);
+			request, serviceId, query);
 		
 		Response<SystemMetricMetadatasResult> response = (Response<SystemMetricMetadatasResult>)getItem(key);
 
@@ -1527,20 +1571,21 @@ public class ApiCache {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Response<AlertsSettingsResult> getAlertsSettings(ApiClient apiClient, String serviceId) {
+	public static Response<AlertsSettingsResult> getAlertsSettings(ApiClient apiClient, String serviceId, String query) {
 
 		AlertsSettingsRequest request = AlertsSettingsRequest.newBuilder().setServiceId(serviceId).build();		
-		AlertSettingsCacheLoader cacheKey = new AlertSettingsCacheLoader(apiClient, request, serviceId);
+		AlertSettingsCacheLoader cacheKey = new AlertSettingsCacheLoader(apiClient, request, serviceId, query);
 		Response<AlertsSettingsResult> response = (Response<AlertsSettingsResult>)getItem(cacheKey);
 
 		return response;
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Response<LabelsResult> getLabels(ApiClient apiClient, String serviceId) {
+	public static Response<LabelsResult> getLabels(ApiClient apiClient, 
+		String serviceId, String query) {
 
 		LabelsRequest request = LabelsRequest.newBuilder().setServiceId(serviceId).build();		
-		LabelsCacheLoader cacheKey = new LabelsCacheLoader(apiClient, request, serviceId);
+		LabelsCacheLoader cacheKey = new LabelsCacheLoader(apiClient, request, serviceId, query);
 		Response<LabelsResult> response = (Response<LabelsResult>)getItem(cacheKey);
 
 		return response;
@@ -1548,13 +1593,13 @@ public class ApiCache {
 	
 	@SuppressWarnings("unchecked")
 	public static Response<CategoriesResult> getCategories(ApiClient apiClient, String serviceId,
-			boolean includeViews) {
+			boolean includeViews, String query) {
 
 		CategoriesRequest request = CategoriesRequest.newBuilder().
 			setServiceId(serviceId).setIncludeViews(includeViews).build();		
 		
 		CategoriesCacheLoader cacheKey = new CategoriesCacheLoader(apiClient, 
-				request, serviceId, includeViews);
+				request, serviceId, includeViews, query);
 		
 		Response<CategoriesResult> response = (Response<CategoriesResult>)getItem(cacheKey);
 
@@ -1562,18 +1607,18 @@ public class ApiCache {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Response<ViewsResult> getViews(ApiClient apiClient, String serviceId) {
+	public static Response<ViewsResult> getViews(ApiClient apiClient, String serviceId, String query) {
 
 		ViewsRequest request = ViewsRequest.newBuilder().setServiceId(serviceId).build();		
-		ViewsCacheLoader cacheKey = new ViewsCacheLoader(apiClient, request, serviceId);
+		ViewsCacheLoader cacheKey = new ViewsCacheLoader(apiClient, request, serviceId, query);
 		Response<ViewsResult> response = (Response<ViewsResult>)getItem(cacheKey);
 
 		return response;
 	}
 		
-	public static Collection<String> getLabelNames(ApiClient apiClient, String serviceId) {
+	public static Collection<String> getLabelNames(ApiClient apiClient, String serviceId, String query) {
 		
-		Response<LabelsResult> response = getLabels(apiClient, serviceId);
+		Response<LabelsResult> response = getLabels(apiClient, serviceId, query);
 		
 		if ((response == null) || (response.data == null)) {
 			return Collections.emptyList();
@@ -1589,18 +1634,18 @@ public class ApiCache {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Response<ApplicationsResult> getApplications(ApiClient apiClient, String serviceId, boolean active) {
+	public static Response<ApplicationsResult> getApplications(ApiClient apiClient, String serviceId, boolean active, String query) {
 
 		ApplicationsRequest request = ApplicationsRequest.newBuilder().setServiceId(serviceId).setActive(active).build();
-		ApplicationsCacheLoader cacheKey = new ApplicationsCacheLoader(apiClient, request, serviceId, active);
+		ApplicationsCacheLoader cacheKey = new ApplicationsCacheLoader(apiClient, request, serviceId, active, query);
 		Response<ApplicationsResult> response = (Response<ApplicationsResult>)getItem(cacheKey);
 
 		return response;
 	}
 	
-	public static Collection<String> getApplicationNames(ApiClient apiClient, String serviceId, boolean active) {
+	public static Collection<String> getApplicationNames(ApiClient apiClient, String serviceId, boolean active, String query) {
 
-		Response<ApplicationsResult> response = getApplications(apiClient, serviceId, active);
+		Response<ApplicationsResult> response = getApplications(apiClient, serviceId, active, query);
 		
 		List<String> result;
 		
@@ -1654,7 +1699,8 @@ public class ApiCache {
 
 	@SuppressWarnings("unchecked")
 	public static Response<EventsSlimVolumeResult> getEventVolume(ApiClient apiClient, String serviceId, 
-			ViewInput input, ServiceSettingsData settingsData, VolumeType volumeType, EventsSlimVolumeRequest request) {
+		ViewInput input, ServiceSettingsData settingsData, 
+		VolumeType volumeType, EventsSlimVolumeRequest request) {
 
 		SlimVolumeCacheLoader cacheKey = new SlimVolumeCacheLoader(apiClient, 
 			request, serviceId, input, settingsData,volumeType);
@@ -1663,11 +1709,11 @@ public class ApiCache {
 	}
 
 	private static Response<?> getEventList(ApiClient apiClient, String serviceId, 
-		ViewInput input, EventsRequest request, ServiceSettingsData settingsData,
-		VolumeType volumeType, boolean load) {
+		ViewInput input, ApiGetRequest<?> request, ServiceSettingsData settingsData,
+		VolumeType volumeType, Set<BreakdownType> breakdownTypes, boolean load) {
 		
 		EventsCacheLoader cacheKey = new EventsCacheLoader(apiClient, 
-				request, serviceId, input, settingsData, volumeType);		
+				request, serviceId, input, settingsData, volumeType, breakdownTypes);		
 		
 		Response<?> response;
 		
@@ -1681,22 +1727,25 @@ public class ApiCache {
 	}
 	
 	public static Response<?> getEventList(ApiClient apiClient, String serviceId, 
-			ViewInput input, ServiceSettingsData settingsData, EventsRequest request) {
+			ViewInput input, Set<BreakdownType> breakdownTypes, 
+			ServiceSettingsData settingsData, ApiGetRequest<?> request, boolean searchCache) {
 		
 		Response<?> response;
 		
-		for (VolumeType volumeType : VolumeType.values()) {
-			
-			response = getEventList(apiClient, serviceId, 
-					input, request, settingsData, volumeType, false);
-			
-			if ((response != null)  && (response.data != null)) {
-				return response;
+		if (searchCache) {
+			for (VolumeType volumeType : VolumeType.values()) {
+					
+				response = getEventList(apiClient, serviceId, 
+						input, request, settingsData, volumeType, breakdownTypes, false);
+					
+				if ((response != null)  && (response.data != null)) {
+					return response;
+				}
 			}
 		}
 		
 		response = getEventList(apiClient, serviceId, 
-				input, request,settingsData, null, true);
+				input, request,settingsData, null, breakdownTypes, true);
 		
 		return response;
 	}
@@ -1736,11 +1785,11 @@ public class ApiCache {
 	
 	@SuppressWarnings("unchecked")
 	public static Response<EventResult> getEvent(ApiClient apiClient, String serviceId,
-			String Id) {
+			String Id, String query) {
 
 		EventRequest.Builder builder = EventRequest.newBuilder().setServiceId(serviceId).setEventId(Id);
 		
-		EventCacheLoader cacheKey = new EventCacheLoader(apiClient, builder.build(), serviceId, Id);
+		EventCacheLoader cacheKey = new EventCacheLoader(apiClient, builder.build(), serviceId, Id, query);
 		Response<EventResult> response = (Response<EventResult>) ApiCache.getItem(cacheKey);
 		
 		return response;

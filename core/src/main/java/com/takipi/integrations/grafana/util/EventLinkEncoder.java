@@ -33,11 +33,12 @@ public class EventLinkEncoder {
 				"\"request_ids\":[%s]},\"timestamp\":\"%s\"}";
 	
 
+	/**
+	 * @param from  - isn't used on purpose but being kept in case heuristic will change
+	 */
 	public static String encodeLink(ApiClient apiClient, ServiceSettingsData settingsData, String serviceId, ViewInput input, 
 		EventResult event, DateTime from, DateTime to) {
 		
-		// "from" paramater isn't used on purpose but being kept in case heuristic will change
-		//
 		Collection<String> apps = input.getApplications(apiClient, settingsData, serviceId, true, false);
 		Collection<String> deployments = input.getDeployments(serviceId, apiClient);
 		Collection<String> servers = input.getServers(serviceId);

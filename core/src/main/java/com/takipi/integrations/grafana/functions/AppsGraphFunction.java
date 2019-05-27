@@ -109,7 +109,8 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction
 			return keyApps.subList(0, limit);
 		}
 		
-		List<String> activeApps = new ArrayList<String>(ApiCache.getApplicationNames(apiClient, serviceId, true));  
+		Collection<String> appNames = ApiCache.getApplicationNames(apiClient, serviceId, true, input.query);
+		List<String> activeApps = new ArrayList<String>(appNames);  
 		
 		List<Category> categories = getSettingsData(serviceId).tiers;
 		 
@@ -130,7 +131,7 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction
 		}
 		
 		sortApplicationsByProcess(serviceId, activeApps,
-			input.getServers(serviceId), input.getDeployments(serviceId, apiClient));	
+			input.getServers(serviceId), input.getDeployments(serviceId, apiClient), input);	
 		
 		result = new ArrayList<String>(keyApps.size() + activeApps.size());
 		result.addAll(keyApps);

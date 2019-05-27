@@ -55,9 +55,9 @@ public class ApplicationsFunction extends EnvironmentVariableFunction {
 			}
 		}
 				
-		Collection<String> activeApps = ApiCache.getApplicationNames(apiClient, serviceId, true);
-		Collection<String> nonActiveApps = ApiCache.getApplicationNames(apiClient, serviceId, false);
-		Collection<String> labelsApps = getLabelApps(serviceId);
+		Collection<String> activeApps = ApiCache.getApplicationNames(apiClient, serviceId, true, input.query);
+		Collection<String> nonActiveApps = ApiCache.getApplicationNames(apiClient, serviceId, false, input.query);
+		Collection<String> labelsApps = getLabelApps(serviceId, input);
 
 		
 		Collection<String> apps = addApps(input, serviceId, serviceIds, activeApps, appender, null);		
@@ -66,9 +66,9 @@ public class ApplicationsFunction extends EnvironmentVariableFunction {
 
 	}
 	
-	private Collection<String> getLabelApps(String serviceId) {
+	private Collection<String> getLabelApps(String serviceId, BaseEnvironmentsInput input) {
 		
-		Collection<String> labels = ApiCache.getLabelNames(apiClient, serviceId);
+		Collection<String> labels = ApiCache.getLabelNames(apiClient, serviceId, input.query);
 		Set<String> result = new HashSet<String>();
 		
 		for (String label : labels) {
