@@ -322,7 +322,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			Collection<String> apps = EnvironmentsFilterInput.getApplications(apiClient,
 				getSettingsData(serviceId), serviceId, name, true, true);
 			
-			String result = String.join(", ", apps);		
+			String result = String.join(TEXT_SEPERATOR, apps);		
 
 			return result;		
 		}
@@ -529,7 +529,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 				Collection<EventResult> eventList = null;
 				
 				for (int retries = 0; retries < GET_EVENT_LIST_MAX_RETRIES; retries++) {
-					eventList = function.getEventList(serviceId, viewId, input, activeWindowStart, activeWindowEnd, true, true);
+					eventList = function.getEventList(serviceId, viewId, input, activeWindowStart, activeWindowEnd,
+							null, true, VolumeType.all, true);
 					
 					if (eventList != null) {
 						break;
@@ -1145,7 +1146,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 			return toAppReportKeys(keyApps, true);
 		}
 				
-		List<String> activeApps = new ArrayList<String>(ApiCache.getApplicationNames(apiClient, serviceId, true));
+		List<String> activeApps = new ArrayList<String>(ApiCache.getApplicationNames(apiClient, 
+			serviceId, true, input.query));
 		
 		List<Category> categories = getSettingsData(serviceId).tiers;
 		 
@@ -1187,7 +1189,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		} else {
 			List<String> sortedActiveApps = new ArrayList<String>(activeApps);
 			sortApplicationsByProcess(serviceId, sortedActiveApps,
-				input.getServers(serviceId), input.getDeployments(serviceId, apiClient));			
+				input.getServers(serviceId), input.getDeployments(serviceId, apiClient), input);			
 			nonKeyApps =  sortedActiveApps; 
 		}
 		
@@ -2750,9 +2752,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 	}
 		
-	private Map<String,ViewInfo> getViewMap(String serviceId) {
+	private Map<String,ViewInfo> getViewMap(String serviceId, ReliabilityReportInput input) {
 		
-		Response<CategoriesResult> categoriesResponse = ApiCache.getCategories(apiClient, serviceId, true);
+		Response<CategoriesResult> categoriesResponse = ApiCache.getCategories(apiClient, 
+			serviceId, true, input.query);
 		
 		if ((categoriesResponse.data == null) 
 		|| (categoriesResponse.data.categories == null)) {
@@ -2775,7 +2778,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		if (result.size() == 0) {
 			
-			Response<ViewsResult> viewsResponse = ApiCache.getViews(apiClient, serviceId);
+			Response<ViewsResult> viewsResponse = ApiCache.getViews(apiClient, serviceId, input.query);
 			
 			if ((viewsResponse.data != null) && (viewsResponse.data.views != null)) {
 				for (SummarizedView summarizedView : viewsResponse.data.views) {
@@ -2825,7 +2828,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 	
 		if (result.hasNewAlert) {
 			desc.append("Alert on new events to: ");
-			desc.append(String.join(", ", alertOnNewChannels).toLowerCase());
+			desc.append(String.join(TEXT_SEPERATOR, alertOnNewChannels).toLowerCase());
 		}
 		
 		if (result.hasAnomalyAlerts) {
@@ -2844,7 +2847,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 				
 				if (!CollectionUtil.safeIsEmpty(anomalySettings.alerts.channels)) {
 					desc.append(" to ");
-					desc.append(String.join(", ", anomalySettings.alerts.channels).toLowerCase());
+					desc.append(String.join(TEXT_SEPERATOR, anomalySettings.alerts.channels).toLowerCase());
 				}
 			}
 		}
@@ -2891,21 +2894,21 @@ public class ReliabilityReportFunction extends EventsFunction {
 			return Collections.emptyMap();	
 		}
 		
-		Map<String,ViewInfo> viewsMap = getViewMap(serviceId);
+		Map<String,ViewInfo> viewsMap = getViewMap(serviceId, input);
 		
 		if (CollectionUtil.safeIsEmpty(viewsMap)) {
 			return Collections.emptyMap();
 		}
 		
-		Response<AlertsSettingsResult> alertsResponse = ApiCache.getAlertsSettings(apiClient, serviceId);
+		Response<AlertsSettingsResult> alertsResponse = ApiCache.getAlertsSettings(apiClient, serviceId, input.query);
 		 
 		if ((alertsResponse == null) || (alertsResponse.isBadResponse()) 
 		|| (alertsResponse.data == null)) {
 			return Collections.emptyMap();
 		}
 			
-		Collection<String> appNames = new HashSet<String>(ApiCache.getApplicationNames(apiClient, serviceId, false));
-		Collection<String> labelNames = new HashSet<String>(ApiCache.getLabelNames(apiClient, serviceId));
+		Collection<String> appNames = new HashSet<String>(ApiCache.getApplicationNames(apiClient, serviceId, false, input.query));
+		Collection<String> labelNames = new HashSet<String>(ApiCache.getLabelNames(apiClient, serviceId, input.query));
 
 		Map<String, List<AlertSettings>> keysAlertsMaps = new HashMap<String, List<AlertSettings>>();
 		
@@ -3149,9 +3152,9 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return Pair.of(fromTo, timeRange);	
 	}
 	
-	private Map<String, String> getServiceNames() {
+	private Map<String, String> getServiceNames(EventsInput input) {
 		
-		Response<ServicesResult> response = ApiCache.getServices(apiClient);
+		Response<ServicesResult> response = ApiCache.getServices(apiClient, input.query);
 		
 		if ((response.isBadResponse()) || (response.data == null)
 		|| (response.data.services == null)) {
@@ -3183,7 +3186,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		Map<String, ReportKeyAlerts> reportKeyAlertsMap = getReportKeyAlerts(rrInput, serviceId);
 		
-		 Map<String, String> serviceNames = getServiceNames();
+		 Map<String, String> serviceNames = getServiceNames(input);
 		 
 		for (ReportKeyResults reportKeyResult : reportKeyResults) {
 			

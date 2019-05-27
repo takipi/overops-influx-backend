@@ -192,13 +192,8 @@ public class QueryDiagnosticsFunction extends GrafanaFunction
 	
 	private List<Series> processGrid(QueryDiagnosticsInput input) {
 		
-		Series series = new Series();
-
 		ReportMode reportMode = input.getReportMode();
-		
-		series.name = SERIES_NAME;
-		series.values = new ArrayList<List<Object>>();
-		series.columns = getColumns(reportMode);
+		Series series = createSeries(new ArrayList<List<Object>>(), getColumns(reportMode));
 				
 		switch (reportMode) {
 			

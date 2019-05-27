@@ -124,7 +124,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 			}
 			
 			if (index < values.size() - 1) {
-				result.append(", ");
+				result.append(TEXT_SEPERATOR);
 			}
 			
 			index++;
@@ -844,16 +844,17 @@ public class TransactionsListFunction extends GrafanaFunction {
 	
 	private List<Series> processGrid(TransactionsListInput input, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds) {
 		
-		Series series = new Series();
-		
-		series.name = SERIES_NAME;
+		List<String> columns;
 		
 		if (input.fields != null) {
-			series.columns = Arrays.asList(input.fields.split(ARRAY_SEPERATOR));
+			columns = Arrays.asList(input.fields.split(ARRAY_SEPERATOR));
 		} else {
-			series.columns = TransactionsListInput.FIELDS;
+			columns = TransactionsListInput.FIELDS;
 		}
-		series.values = new ArrayList<List<Object>>();
+		
+		List<List<Object>> values = new ArrayList<List<Object>>();
+
+		Series series = createSeries(values, columns);
 
 		Collection<PerformanceState> performanceStates = TransactionsListInput.getStates(input.performanceStates);
 		
@@ -929,7 +930,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 			index++;
 			
 			if ((index < severeSlowdowns.size()) || (slowdowns.size() > 0)) {
-				result.append(", ");
+				result.append(TEXT_SEPERATOR);
 			}
 		}
 		
@@ -947,7 +948,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 			index++;
 		
 			if (index < slowdowns.size()) {
-				result.append(", ");
+				result.append(TEXT_SEPERATOR);
 			}
 		}
 		

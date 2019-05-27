@@ -26,7 +26,7 @@ public class DeploymentUtil {
 	
 	public static Collection<SummarizedDeployment> getDeployments(ApiClient apiClient, String serviceId, boolean active) {
 		
-		Response<DeploymentsResult> response = ApiCache.getDeployments(apiClient, serviceId, active);
+		Response<DeploymentsResult> response = ApiCache.getDeployments(apiClient, serviceId, active, null);
 		
 		if ((response == null) || (response.data == null)) {
 			return Collections.emptyList();

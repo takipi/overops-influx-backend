@@ -44,7 +44,7 @@ public class CategoryFunction extends GraphFunction {
 	@Override
 	protected Map<String, String> getViews(String serviceId, BaseGraphInput input) {
 		
-		Response<CategoriesResult> response = ApiCache.getCategories(apiClient, serviceId, false);
+		Response<CategoriesResult> response = ApiCache.getCategories(apiClient, serviceId, false, input.query);
 				
 		if ((response.data == null) || (response.data.categories == null)) {
 			return Collections.emptyMap();
