@@ -54,7 +54,7 @@ public class EnvironmentsFunction extends VariableFunction {
 
 		appender.append(NONE);
 		
-		Response<ServicesResult> response = ApiCache.getServices(apiClient);
+		Response<ServicesResult> response = ApiCache.getServices(apiClient, input.query);
 
 		if ((response == null) || (response.isBadResponse()) 
 		|| (response.data == null) || (response.data.services ==  null)) {

@@ -87,12 +87,12 @@ public class EventsDiffDescFunction extends EnvironmentVariableFunction {
 			if (!CollectionUtil.safeIsEmpty(deps)) {
 				
 				if (comma) {
-					value.append(", ");	
+					value.append(TEXT_SEPERATOR);	
 				}
 				
 				value.append("Deployment");
 				addPlural(value, deps);
-				value.append(String.join(", ", deps));
+				value.append(String.join(TEXT_SEPERATOR, deps));
 				
 				comma = true;
 			}
@@ -100,12 +100,12 @@ public class EventsDiffDescFunction extends EnvironmentVariableFunction {
 			if (!CollectionUtil.safeIsEmpty(srvs)) {
 				
 				if (comma) {
-					value.append(", ");	
+					value.append(TEXT_SEPERATOR);	
 				}
 				
 				value.append("Server");
 				addPlural(value, srvs);
-				value.append(String.join(", ", srvs));
+				value.append(String.join(TEXT_SEPERATOR, srvs));
 			}
 		}
 		

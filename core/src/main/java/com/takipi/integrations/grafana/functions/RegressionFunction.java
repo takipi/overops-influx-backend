@@ -497,7 +497,7 @@ public class RegressionFunction extends EventsFunction {
 			result = eventDatas;
 		} else {
 			List<EventData> uniqueEventDatas = getUniqueEventData(eventDatas, eventListMap);
-			result = doMergeSimilarEvents(input.serviceId, uniqueEventDatas);
+			result = doMergeSimilarEvents(input.serviceId, false, uniqueEventDatas);
 		}
 		
 		return result;
@@ -1039,9 +1039,11 @@ public class RegressionFunction extends EventsFunction {
 		return result;
 	}
 	
-	private List<EventData> doMergeSimilarEvents(String serviceId, List<EventData> eventDatas) {
+	private List<EventData> doMergeSimilarEvents(String serviceId,
+		boolean skipGrouping, List<EventData> eventDatas) {
 		
-		List<EventData> result = new ArrayList<EventData>(super.mergeSimilarEvents(serviceId, eventDatas));
+		List<EventData> result = new ArrayList<EventData>(super.mergeSimilarEvents(serviceId,
+			skipGrouping, eventDatas));
 		sortRegressions(serviceId, result);
 		
 		return result;
@@ -1053,7 +1055,8 @@ public class RegressionFunction extends EventsFunction {
 	}
 	
 	@Override
-	protected List<EventData> mergeSimilarEvents(String serviceId, List<EventData> eventDatas) {
+	protected List<EventData> mergeSimilarEvents(String serviceId,
+		boolean skipGrouping, List<EventData> eventDatas) {
 		return eventDatas;
 	}
 		
@@ -1133,7 +1136,7 @@ public class RegressionFunction extends EventsFunction {
 					break;
 				} else {
 					if (size < issuesSize) {
-						result.append(", ");
+						result.append(TEXT_SEPERATOR);
 					}
 				}
 			}
@@ -1201,7 +1204,7 @@ public class RegressionFunction extends EventsFunction {
 					break;
 				} else {
 					if (size < regressionsSize) {
-						result.append(", ");
+						result.append(TEXT_SEPERATOR);
 					}
 				}
 			}

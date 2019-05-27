@@ -28,7 +28,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 29,
-  "iteration": 1554363127262,
+  "iteration": 1558892446191,
   "links": [
     {
       "icon": "dashboard",
@@ -350,7 +350,7 @@
           "pattern": "First seen",
           "thresholds": [],
           "type": "number",
-          "unit": "short"
+          "unit": "dateTimeFromNow"
         },
         {
           "alias": "",

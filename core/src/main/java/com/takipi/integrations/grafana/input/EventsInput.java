@@ -72,6 +72,11 @@ public class EventsInput extends BaseEventVolumeInput {
 	public static final String RATE_DELTA = "rate_delta";
 	
 	/**
+	 *  A value showing  when this event was first observed
+	 */
+	public static final String LAST_SEEN = "last_seen";
+	
+	/**
 	 * A value describing the change between the event rate in the selected timeframe and the baseline
 	 */
 	public static final String RATE_DELTA_DESC = "rate_delta_desc";
@@ -102,6 +107,11 @@ public class EventsInput extends BaseEventVolumeInput {
 	 * An optional value controlling the max string length of the transaction and location columns.
 	 */
 	public int maxClassLength;
+	
+	/**
+	 * Controls whether events with the same code location but different entry points are grouped together. True to skip grouping
+	 */
+	public boolean skipGrouping;
 	
 	/**
 	 * The types of output supported by this function
