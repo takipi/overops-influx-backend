@@ -539,7 +539,6 @@ public class EventsFunction extends GrafanaFunction {
 						if (eventData.event.stats.hits > 0) {
 							double appPercentage = (double)stats.hits / (double)eventData.event.stats.hits * 100;
 							
-							result.append(TEXT_SEPERATOR);
 							result.append(stats.application_name);
 							result.append(": ");
 							
@@ -1214,6 +1213,31 @@ public class EventsFunction extends GrafanaFunction {
 		target.similar_event_ids = new ArrayList<String>(similarIds);
 	}
 	
+	private void appendStats(List <Stats> statsList, Stats stats) {
+		
+		Stats match = null;
+		
+		for (Stats item : statsList) {
+			if ((Objects.equal(item.application_name, stats.application_name))
+			&& (Objects.equal(item.deployment_name, stats.deployment_name))
+			&& (Objects.equal(item.machine_name, stats.machine_name))) {
+				match = item;
+				break;
+			}
+		}
+		
+		if (match == null) {
+			match = new Stats();
+			match.application_name = stats.application_name;
+			match.deployment_name = stats.deployment_name;
+			match.machine_name = stats.machine_name;
+			statsList.add(match);
+		}
+		
+		match.hits += stats.hits;
+		match.invocations += stats.invocations;	
+	}
+	
 	protected List<EventData> mergeEventDatas(List<EventData> eventDatas) {
 		
 		if (eventDatas.size() == 0) {
@@ -1222,6 +1246,7 @@ public class EventsFunction extends GrafanaFunction {
 
 		String jiraUrl = null;
 		MainEventStats stats = new MainEventStats();
+		stats.contributors = new ArrayList<Stats>();
 		
 		EventResult event = null;
 		
@@ -1230,6 +1255,12 @@ public class EventsFunction extends GrafanaFunction {
 			stats.hits += eventData.event.stats.hits;
 			stats.invocations += eventData.event.stats.invocations;	
 
+			if (!CollectionUtil.safeIsEmpty(eventData.event.stats.contributors)) {
+				for (Stats sc : eventData.event.stats.contributors) {
+					appendStats(stats.contributors, sc);
+				}
+			}
+			
 			if ((event == null) || (eventData.event.stats.hits > event.stats.hits)) {
 				mergeSimilarIds(eventData.event, event);
 				event = 	eventData.event;	
