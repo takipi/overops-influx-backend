@@ -2086,7 +2086,7 @@ public abstract class GrafanaFunction {
 		applyFilters(input, serviceId, builder);
 		
 		if (applyBreakFilter) {
-			builder.applyBreakFilter();
+			builder.breakExistingFilters();
 		}
 		
 		GraphSliceTask task = new GraphSliceTask(builder, serviceId, viewId,
