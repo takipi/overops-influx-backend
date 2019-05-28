@@ -17,15 +17,15 @@ import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.deployment.SummarizedDeployment;
@@ -600,7 +600,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 						}
 					}
 					else {
-						RegressionOutput regressionOutput = getRegressionOutput(activeWindow, eventResultMap, baselineGraph, activeWindowGraph, (Pair<ReportKey, RegressionsInput>) subInputData);
+						RegressionOutput regressionOutput = getRegressionOutput(activeWindow, 
+							eventResultMap, baselineGraph, activeWindowGraph, subInputData);
 						
 						regressionOutputMap.put(subInputData.getFirst(), regressionOutput);
 					}
@@ -1012,7 +1013,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 					subRegressionInputs.put(key.name, Pair.of(key, regInput));
 				}
 				
-				Map<String, Collection<String>> applicationGroupsMap = getApplicationGroupsMap(serviceId, input, keysToSend);
+				Map<String, Collection<String>> applicationGroupsMap = getApplicationGroupsMap(serviceId, keysToSend);
 				
 				RegressionFunction regressionFunction = new RegressionFunction(apiClient, settingsMaps);
 				
@@ -1049,16 +1050,19 @@ public class ReliabilityReportFunction extends EventsFunction {
 		for (Object taskResult : taskResults) {
 			
 			if (taskResult instanceof Collection) {
-				for (Object taskResultItem : ((Collection) taskResult)) {
+				
+				@SuppressWarnings("unchecked")
+				Collection<Object> taskResultItems = (Collection<Object>)taskResult;
+				
+				for (Object taskResultItem :taskResultItems) {
+					
 					if (!(taskResultItem instanceof ReportAsyncResult)) {
 						continue;
 					}
-					
+						
 					result.add((ReportAsyncResult) taskResultItem);
 				}
-			}
-			else if (taskResult instanceof ReportAsyncResult)
-			{
+			} else if (taskResult instanceof ReportAsyncResult) {
 				result.add((ReportAsyncResult) taskResult);
 			}
 		}
@@ -1066,15 +1070,16 @@ public class ReliabilityReportFunction extends EventsFunction {
 		return result;
 	}
 	
-	private Map<String, Collection<String>> getApplicationGroupsMap(String serviceId, ReliabilityReportInput input,
-			List<ReportKey> keysToSend)
+	private Map<String, Collection<String>> getApplicationGroupsMap(String serviceId, 
+		List<ReportKey> keysToSend)
 	{
 		Map<String, Collection<String>> applicationGroupsMap = Maps.newHashMap();
 		
 		for (ReportKey key : keysToSend) {
 			if (key.isKey)
 			{
-				Collection<String> applications = input.getApplications(apiClient, getSettingsData(serviceId), serviceId, key.name, true, false);
+				Collection<String> applications = EnvironmentsFilterInput.getApplications(apiClient, 
+					getSettingsData(serviceId), serviceId, key.name, true, false);
 				
 				for (String app : applications)
 				{
@@ -1436,6 +1441,11 @@ public class ReliabilityReportFunction extends EventsFunction {
 		Collection<String> selectedDeployments = input.getDeployments(serviceId, apiClient);
 		
 		Collection<SummarizedDeployment> allDeps = DeploymentUtil.getDeployments(apiClient, serviceId, false);
+		
+		if (allDeps == null) {
+			return Collections.emptyList();
+		}
+		
 		List<SummarizedDeployment> sortedDeps = new ArrayList<SummarizedDeployment>(allDeps);
 		
 		sortDeployments(sortedDeps);
@@ -1492,7 +1502,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 				throw new IllegalStateException("Unsopported mode " + mode);
 			}
 			
-		return new ArrayList(keys);
+		return new ArrayList<ReportKey>(keys);
 	}
 	
 	private ReportKey getDefaultReportKey(String serviceId, ReliabilityReportInput regInput) {
