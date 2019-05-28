@@ -27,6 +27,7 @@ import com.takipi.api.client.data.event.Stats;
 import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
+import com.takipi.api.client.request.event.BreakdownType;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.event.EventSlimResult;
 import com.takipi.api.client.result.event.EventsSlimVolumeResult;
@@ -46,7 +47,6 @@ import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.ServiceSettings;
 import com.takipi.integrations.grafana.util.ApiCache;
-import com.takipi.integrations.grafana.util.ApiCache.BreakdownType;
 import com.takipi.integrations.grafana.util.EventLinkEncoder;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
@@ -891,7 +891,7 @@ public class EventsFunction extends GrafanaFunction {
 			return new FirstSeenFormatter(field);
 		}
 		
-		if (field.getDeclaringClass().equals(BaseStats.class)) {
+		if (BaseStats.class.isAssignableFrom(field.getDeclaringClass())) {
 			return new StatsFormatter(field);
 		}
 
@@ -1281,7 +1281,6 @@ public class EventsFunction extends GrafanaFunction {
 		
 		clone = (EventResult)event.clone();
 		
-		clone.stats = stats;
 		clone.jira_issue_url = jiraUrl;
 		
 		EventData result = new EventData(clone);

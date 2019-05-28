@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -369,12 +368,6 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			return score;
 		}
 	}
-	
-	protected class RegressionPeriodData {
-		protected Graph activeGraph;
-		protected Graph baselineGraph;
-		protected Map<String, EventResult> eventMap;
-	}
 
 	public ReliabilityKpiGraphFunction(ApiClient apiClient) {
 		super(apiClient);
@@ -427,57 +420,6 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		Collection<TransactionGraph> resultActiveGraphs = sectionGraphs(activeGraphs, period.getFirst(), period.getSecond());
 		
 		return Pair.of(resultBaselineGraphs, resultActiveGraphs);
-	}
-		
-	private RegressionPeriodData getRegressionGraphs(Map<String, EventResult> eventMap, 
-		Graph graph, Pair<DateTime, DateTime> period,
-		int baselineWindow) {
-		
-		RegressionPeriodData result = new RegressionPeriodData();
-		
-		result.activeGraph = new Graph();
-		result.baselineGraph = new Graph();
-		result.eventMap = new HashMap<String, EventResult>();
-		
-		result.activeGraph.id = graph.id;
-		result.activeGraph.type = graph.type;
-		result.activeGraph.points = new ArrayList<GraphPoint>();
-		
-		result.baselineGraph.id = graph.id;
-		result.baselineGraph.type = graph.type;
-		result.baselineGraph.points = new ArrayList<GraphPoint>();
-
-		DateTime baselineEnd = period.getFirst();
-		DateTime baselineStart = baselineEnd.minusMinutes(baselineWindow);
-						
-		for (GraphPoint gp : graph.points) {
-			
-			if (gp.contributors == null) {
-				continue;
-			}
-			
-			DateTime gpTime = TimeUtil.getDateTime(gp.time);
-						
-			if (timespanContains(period.getFirst(), period.getSecond(), gpTime)) {
-				
-				result.activeGraph.points.add(gp);
-				
-				for (GraphPointContributor gpc : gp.contributors) {
-					
-					EventResult event = eventMap.get(gpc.id);
-					
-					if (event != null) {
-						result.eventMap.put(event.id, event);
-					}		
-				}
-			} 
-			
-			if (timespanContains(baselineStart, baselineEnd, gpTime)) {
-				result.baselineGraph.points.add(gp);
-			}	
-		}
-		
-		return result;
 	}
 		
 	private NavigableMap<DateTime, KpiInterval> processSlowdowns(String serviceId,
@@ -737,8 +679,8 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 			Pair<Map<String, EventResult>, Long> filteredResult = filterEvents(serviceId, 
 				period, timelineData.input, graphData.eventListMap.values());
 
-			RegressionPeriodData regressionPeriodData = getRegressionGraphs(filteredResult.getFirst(),
-				graphData.graph, period, regressionInput.baselineTimespan);
+			RegressionPeriodData regressionPeriodData = cropGraphByPeriod(
+				graphData.graph, period, regressionInput.baselineTimespan, filteredResult.getFirst());
 			
 			Graph baselineGraph = regressionPeriodData.baselineGraph;
 			Graph activeGraph = regressionPeriodData.activeGraph;

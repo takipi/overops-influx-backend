@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -33,6 +34,7 @@ import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.request.application.ApplicationsRequest;
 import com.takipi.api.client.request.category.CategoriesRequest;
 import com.takipi.api.client.request.deployment.DeploymentsRequest;
+import com.takipi.api.client.request.event.BreakdownType;
 import com.takipi.api.client.request.event.EventRequest;
 import com.takipi.api.client.request.event.EventsSlimVolumeRequest;
 import com.takipi.api.client.request.label.LabelsRequest;
@@ -72,6 +74,7 @@ import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.GrafanaFunction;
 import com.takipi.integrations.grafana.functions.GrafanaThreadPool;
 import com.takipi.integrations.grafana.functions.RegressionFunction;
+import com.takipi.integrations.grafana.functions.RegressionFunction.AggregatedRegressionOutput;
 import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOutput;
 import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
@@ -82,13 +85,6 @@ import com.takipi.integrations.grafana.storage.FolderStorage;
 import com.takipi.integrations.grafana.storage.KeyValueStorage;
 
 public class ApiCache {
-	
-	public enum BreakdownType {
-		App,
-		Server,
-		Deployment
-	}
-	
 	private static final Logger logger = LoggerFactory.getLogger(ApiCache.class);
 	
 	protected static boolean CACHE_LOAD = true;
@@ -1805,7 +1801,21 @@ public class ApiCache {
 		}
 	}
 	
-	public static RegressionOutput getRegressionOutput(ApiClient apiClient, String serviceId, 
+	public static void setAggregatedRegressionOutput(ApiClient apiClient, String serviceId,
+			EventFilterInput input, RegressionFunction function, boolean newOnly, AggregatedRegressionOutput value) {
+		RegressionCacheLoader key = new RegressionCacheLoader(apiClient, serviceId, input, function, newOnly);
+		
+		aggregatedRegressionOutputCache.put(key, value);
+	}
+	
+	public static AggregatedRegressionOutput getAggregatedRegressionOutput(ApiClient apiClient, String serviceId,
+			EventFilterInput input, RegressionFunction function, boolean newOnly) {
+		RegressionCacheLoader key = new RegressionCacheLoader(apiClient, serviceId, input, function, newOnly);
+		
+		return aggregatedRegressionOutputCache.getIfPresent(key);
+	}
+	
+	public static RegressionOutput getRegressionOutput(ApiClient apiClient, String serviceId,
 		EventFilterInput input, RegressionFunction function, boolean newOnly, boolean load) {
 			
 		RegressionCacheLoader key = new RegressionCacheLoader(apiClient, serviceId, input, function, newOnly);
@@ -1875,6 +1885,9 @@ public class ApiCache {
 					return key.executeRegression();
 				}
 			});
+	
+	public static final Cache<RegressionCacheLoader, AggregatedRegressionOutput> aggregatedRegressionOutputCache = CacheBuilder
+			.newBuilder().maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_REFRESH_RETENTION, TimeUnit.SECONDS).build();
 
 	private static final LoadingCache<RegresionWindowCacheLoader, RegressionWindow> regressionWindowCache = CacheBuilder
 			.newBuilder().maximumSize(CACHE_SIZE)
@@ -1884,7 +1897,7 @@ public class ApiCache {
 				@Override
 				public RegressionWindow load(RegresionWindowCacheLoader key) {
 					
-					RegressionWindow result = RegressionUtil.getActiveWindow(key.apiClient, key.input, 
+					RegressionWindow result = RegressionUtil.getActiveWindow(key.apiClient, key.input,
 							System.out);
 					
 					return result;

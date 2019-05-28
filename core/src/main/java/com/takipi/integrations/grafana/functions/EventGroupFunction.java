@@ -19,6 +19,7 @@ import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.deployment.SummarizedDeployment;
 import com.takipi.api.client.data.event.Stats;
+import com.takipi.api.client.request.event.BreakdownType;
 import com.takipi.api.client.result.deployment.DeploymentsResult;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
@@ -32,7 +33,6 @@ import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.TimeUtil;
-import com.takipi.integrations.grafana.util.ApiCache.BreakdownType;
 import com.takipi.integrations.grafana.util.DeploymentUtil;
 
 public class EventGroupFunction extends EventsFunction
@@ -89,7 +89,7 @@ public class EventGroupFunction extends EventsFunction
 		new HashSet<>(Arrays.asList(new BreakdownType[] {
 				BreakdownType.App, BreakdownType.Deployment}));
 	
-	private static final Set<BreakdownType> DEP_TYPES = 
+	private static final Set<BreakdownType> DEP_TYPES =
 		new HashSet<>(Arrays.asList(new BreakdownType[] {
 				BreakdownType.Deployment, BreakdownType.App}));			
 	
