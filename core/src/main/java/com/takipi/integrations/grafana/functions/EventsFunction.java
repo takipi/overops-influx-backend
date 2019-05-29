@@ -62,7 +62,13 @@ public class EventsFunction extends GrafanaFunction {
 	private static final String UNAMED_DEPLOMENT = "Unnamed Deployment";
 	
 	private static final int MAX_JIRA_BATCH_SIZE = 10;
+	
+	private static final int MAX_BASELINE_DAYS = 7;
+	private static final int MAX_EVENT_OUTPUT = 1000;
 
+	
+
+	
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -90,7 +96,7 @@ public class EventsFunction extends GrafanaFunction {
 		protected DateTime lastSeen;
 
 		
-		protected EventData(EventResult event) {
+		protected EventData(EventResult event) {		
 			this.event = event;
 			this.rank = -1;
 		}
@@ -127,8 +133,7 @@ public class EventsFunction extends GrafanaFunction {
 		}
 		
 		@Override
-		public String toString()
-		{
+		public String toString() {
 			if (event.entry_point != null) {
 				return event.entry_point.class_name;
 			}
@@ -339,11 +344,11 @@ public class EventsFunction extends GrafanaFunction {
 		protected Object formatValue(Object value, EventsInput input) {
 			
 			if ((value instanceof Long) && (((Long)value).longValue() == 0)) {
-				return "";
+				return "NA";
 			}
 			
 			if ((value instanceof Integer) && (((Integer)value).intValue() == 0)) {
-				return "";
+				return "NA";
 			}
 			
 			return value;
@@ -527,7 +532,20 @@ public class EventsFunction extends GrafanaFunction {
 				result.append(String.join(TEXT_SEPERATOR, eventData.event.labels));
 			}
 			
-			if ((!CollectionUtil.safeIsEmpty(eventData.event.stats.contributors))) {		
+			boolean hasApps = false;
+			
+			if (!CollectionUtil.safeIsEmpty(eventData.event.stats.contributors)) {
+				for (Stats stats : eventData.event.stats.contributors) {
+					if ((stats.application_name != null) 
+					|| (stats.deployment_name != null)
+					|| (stats.machine_name != null)) {
+						hasApps = true;
+						break;
+					}
+				}		
+			}
+	
+			if (hasApps) {		
 				result.append(". Apps: ");
 				
 				int index = 0;
@@ -564,6 +582,7 @@ public class EventsFunction extends GrafanaFunction {
 							
 			if (!CollectionUtil.safeIsEmpty(eventData.mergedEvents)) {
 				
+				long volume = 0;
 				Map<String, EventTransactionsStats> transactionsStats = new TreeMap<String, EventTransactionsStats>();
 				
 				for (EventData mergedEvent : eventData.mergedEvents) {
@@ -585,6 +604,8 @@ public class EventsFunction extends GrafanaFunction {
 					
 					transactionStats.volume += mergedEvent.event.stats.hits;
 					transactionStats.ids.add(mergedEvent.event.id);
+					
+					volume += mergedEvent.event.stats.hits;
 				}
 				
 				result.append(". Transactions: ");
@@ -596,8 +617,8 @@ public class EventsFunction extends GrafanaFunction {
 					result.append(entry.getKey());		
 					result.append("(");
 						
-					if (eventData.event.stats.hits > 0) {
-						double entryPointPercentage = (double)entry.getValue().volume / (double)eventData.event.stats.hits * 100;
+					if (volume > 0) {
+						double entryPointPercentage = (double)entry.getValue().volume / (double)volume * 100;
 						
 						if (entryPointPercentage > 1) {
 							result.append(singleDigitFormatter.format(entryPointPercentage));
@@ -699,7 +720,16 @@ public class EventsFunction extends GrafanaFunction {
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
 				Pair<DateTime, DateTime> timeSpan) {
 
-			return eventData.lastSeen;
+			DateTime result;
+			
+			if (eventData.lastSeen != null) {
+				result = eventData.lastSeen;
+			} else {
+				result = TimeUtil.getDateTime(eventData.event.first_seen);
+			}
+			
+			return result;
+			
 		}
 		
 		@Override
@@ -1109,8 +1139,8 @@ public class EventsFunction extends GrafanaFunction {
 		for (EventData eventData : eventDatas) {
 			eventData.lastSeen = lastSeenMap.get(eventData.event.id);
 			
-			if ((eventData.lastSeen != null) && (eventData.lastSeen.isAfter(TimeUtil.now()))) {
-				System.out.println();
+			if (eventData.rank > MAX_EVENT_OUTPUT) {
+				continue;
 			}
 			
 			if (CollectionUtil.safeIsEmpty(eventData.mergedEvents)) {
@@ -1137,9 +1167,19 @@ public class EventsFunction extends GrafanaFunction {
 	protected List<EventData> getEventData(String serviceId, EventsInput input, 
 			Pair<DateTime, DateTime> timeSpan) {
 		
+		Set<BreakdownType> breakdownTypes;
+		
+		long delta = timeSpan.getSecond().getMillis() - timeSpan.getFirst().getMillis();
+		
+		if (delta <= TimeUnit.DAYS.toMillis(MAX_BASELINE_DAYS)) {
+			breakdownTypes = Collections.singleton(BreakdownType.App);
+		} else {
+			breakdownTypes = Collections.emptySet();
+		}
+		
 		Map<String, EventResult> eventsMap = getEventMap(serviceId, input, 
-			timeSpan.getFirst(), timeSpan.getSecond(), input.volumeType, 
-			false, Collections.singleton(BreakdownType.App));
+			timeSpan.getFirst(), timeSpan.getSecond(), input.volumeType, // VolumeType.hits,//
+			false, breakdownTypes);
 		
 		if (eventsMap == null) {
 			return Collections.emptyList();
@@ -1157,6 +1197,7 @@ public class EventsFunction extends GrafanaFunction {
 	/**
 	 * @param serviceId - needed for children 
 	 */
+	@SuppressWarnings("unchecked")
 	protected List<EventData> mergeSimilarEvents(String serviceId,
 		boolean skipGrouping, List<EventData> eventDatas) {
 				
@@ -1164,28 +1205,34 @@ public class EventsFunction extends GrafanaFunction {
 			return eventDatas;
 		}
 		
-		Map<EventData, List<EventData>> eventDataMap = new HashMap<EventData, List<EventData>>(eventDatas.size());
+		Map<EventData, Object> eventDataMap = new HashMap<EventData, Object>(eventDatas.size());
 		
 		for (EventData eventData : eventDatas) {
 			
-			List<EventData> eventDataMatches = eventDataMap.get(eventData);
+			Object eventDataMatch = eventDataMap.get(eventData);
 			
-			if (eventDataMatches == null) {
-				eventDataMatches = new ArrayList<EventData>();
-				eventDataMap.put(eventData, eventDataMatches);		
+			if (eventDataMatch instanceof List) {
+				List<EventData> eventDataMatches = (List<EventData>)eventDataMatch;
+				eventDataMatches.add(eventData);
+			} else if (eventDataMatch instanceof EventData) {
+				List<EventData> matchesList = new ArrayList<EventData>();
+				matchesList.add((EventData)eventDataMatch);
+				matchesList.add(eventData);
+				eventDataMap.put(eventData, matchesList);		
+			} else {
+				eventDataMap.put(eventData, eventData);		
 			}
-			
-			eventDataMatches.add(eventData);
 		}
 		
 		List<EventData> result = new ArrayList<EventData>();
 		
-		for (List<EventData> similarEventDatas : eventDataMap.values()) {
+		for (Object similarEventDatas : eventDataMap.values()) {
 			
-			if (similarEventDatas.size() > 1) {
-				result.addAll(mergeEventDatas(similarEventDatas));
+			if (similarEventDatas instanceof List) {
+				List<EventData> toMerge = (List<EventData>)similarEventDatas;
+				result.addAll(mergeEventDatas(toMerge));
 			} else {
-				result.add(similarEventDatas.get(0));
+				result.add((EventData)similarEventDatas);
 			}
 		}
 		
@@ -1365,6 +1412,10 @@ public class EventsFunction extends GrafanaFunction {
 		
 		for (EventData eventData : eventDatas) {
 			
+			if (eventData.rank > MAX_EVENT_OUTPUT) {
+				continue;
+			}
+			
 			if (eventData.event.jira_issue_url != null) {
 				continue;
 			}
@@ -1465,22 +1516,29 @@ public class EventsFunction extends GrafanaFunction {
 			
 		Map<String, FieldFormatter> formatters = getFieldFormatters(serviceId, input.getFields());
 
+		if ((formatters.containsKey(EventsInput.RATE_DELTA)) 
+		|| (formatters.containsKey(EventsInput.RANK)) 
+		|| (formatters.containsKey(EventsInput.RATE_DELTA_DESC))) {
+		
+			long delta = timeSpan.getSecond().getMillis() - timeSpan.getFirst().getMillis();
+			
+			if (delta <= TimeUnit.DAYS.toMillis(MAX_BASELINE_DAYS)) {
+				updateEventBaselineStats(serviceId, input, timeSpan, eventDatas);
+			}
+		}
+		
+		sortEventDatas(serviceId, eventDatas);
+		
 		if ((formatters.containsKey(JIRA_ISSUE_URL)) 
 		|| (formatters.containsKey(EventsInput.JIRA_STATE))) {
 			updateJiraUrls(serviceId, input, eventDatas);
 		}
-		
+				
 		if (formatters.containsKey(EventsInput.LAST_SEEN)) { 
 			updateLastSeen(serviceId, input, eventDatas);
 		}
 		
-		if ((formatters.containsKey(EventsInput.RATE_DELTA)) 
-		|| (formatters.containsKey(EventsInput.RANK)) 
-		|| (formatters.containsKey(EventsInput.RATE_DELTA_DESC))) {
-			updateEventBaselineStats(serviceId, input, timeSpan, eventDatas);
-		}
-		
-		sortEventDatas(serviceId, eventDatas);
+		int index = 0;
 		
 		for (EventData eventData : eventDatas) {	 
 	
@@ -1489,6 +1547,12 @@ public class EventsFunction extends GrafanaFunction {
 			
 			if (outputObject != null) {
 				result.add(outputObject);
+			}
+			
+			index++;
+			
+			if (index > MAX_EVENT_OUTPUT) {
+				break;
 			}
 		}
 
@@ -1652,15 +1716,20 @@ public class EventsFunction extends GrafanaFunction {
   
 		OutputMode outputMode = input.getOutputMode();
 		
-		switch (outputMode) {
+		List<Series> result;
 			
+		switch (outputMode) {
+				
 			case Grid:
-				return processGrid(input, timeSpan);
+				result = processGrid(input, timeSpan);
+				break;
 			case SingleStat:
-				return processSingleStat(input, timeSpan);
+				result = processSingleStat(input, timeSpan);
+				break;
 			default:
 				throw new IllegalStateException(String.valueOf(outputMode));
-			
 		}
+		
+		return result;
 	}
 }

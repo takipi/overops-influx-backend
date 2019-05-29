@@ -114,6 +114,11 @@ public class EventsInput extends BaseEventVolumeInput {
 	public boolean skipGrouping;
 	
 	/**
+	 * Controls whether events should break their stats by app .true to skip breakdown
+	 */
+	public boolean appBreakdown;
+	
+	/**
 	 * The types of output supported by this function
 	 */
 	public enum OutputMode {
