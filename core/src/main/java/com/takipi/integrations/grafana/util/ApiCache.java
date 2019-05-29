@@ -90,7 +90,7 @@ public class ApiCache {
 	protected static boolean CACHE_LOAD = true;
 	
 	private static final int CACHE_SIZE = 500;
-	private static final int CACHE_REFRESH_RETENTION = 900;
+	private static final int CACHE_REFRESH_RETENTION = 90;
 	
 	private static final int SLOW_QUERY_THRESHOLD = 10;
 		
