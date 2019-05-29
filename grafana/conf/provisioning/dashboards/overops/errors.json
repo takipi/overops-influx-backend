@@ -1770,7 +1770,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "events({\"fields\":\"link,jira_issue_url,rate_desc,description,rate_delta_desc,rank,type,message,entry_point_name,stats.hits,rate,rate_delta,first_seen,last_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":90, \"maxClassLength\":\"40\", \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
+          "query": "events({\"fields\":\"link,jira_issue_url,rate_desc,description,rate_delta_desc,rank,type,message,entry_point_name,stats.hits,rate,rate_delta,first_seen,last_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":90, \"maxClassLength\":\"40\", \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"maxRows\":\"$maxRows\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -2472,6 +2472,28 @@
           }
         ],
         "query": "7d",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "1000",
+          "value": "1000"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "label": "maxRows",
+        "multi": false,
+        "name": "maxRows",
+        "options": [
+          {
+            "selected": true,
+            "text": "1000",
+            "value": "1000"
+          }
+        ],
+        "query": "1000",
         "skipUrlSync": false,
         "type": "custom"
       }

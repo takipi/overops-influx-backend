@@ -64,11 +64,7 @@ public class EventsFunction extends GrafanaFunction {
 	private static final int MAX_JIRA_BATCH_SIZE = 10;
 	
 	private static final int MAX_BASELINE_DAYS = 7;
-	private static final int MAX_EVENT_OUTPUT = 1000;
 
-	
-
-	
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -1139,7 +1135,7 @@ public class EventsFunction extends GrafanaFunction {
 		for (EventData eventData : eventDatas) {
 			eventData.lastSeen = lastSeenMap.get(eventData.event.id);
 			
-			if (eventData.rank > MAX_EVENT_OUTPUT) {
+			if ((input.maxRows != 0) && (eventData.rank > input.maxRows)) {
 				continue;
 			}
 			
@@ -1412,7 +1408,7 @@ public class EventsFunction extends GrafanaFunction {
 		
 		for (EventData eventData : eventDatas) {
 			
-			if (eventData.rank > MAX_EVENT_OUTPUT) {
+			if ((input.maxRows != 0) && (eventData.rank > input.maxRows)) {
 				continue;
 			}
 			
@@ -1551,7 +1547,7 @@ public class EventsFunction extends GrafanaFunction {
 			
 			index++;
 			
-			if (index > MAX_EVENT_OUTPUT) {
+			if ((input.maxRows != 0) && (index > input.maxRows)) {
 				break;
 			}
 		}

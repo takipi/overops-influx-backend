@@ -119,6 +119,11 @@ public class EventsInput extends BaseEventVolumeInput {
 	public boolean appBreakdown;
 	
 	/**
+	 * An optional limit on the number of rows returned. Zero to ignore
+	 */
+	public int maxRows;
+	
+	/**
 	 * The types of output supported by this function
 	 */
 	public enum OutputMode {
