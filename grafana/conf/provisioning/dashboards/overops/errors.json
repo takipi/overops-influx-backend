@@ -82,7 +82,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 31,
-  "iteration": 1558892485762,
+  "iteration": 1559097181478,
   "links": [
     {
       "icon": "dashboard",
@@ -338,15 +338,16 @@
     {
       "cacheTimeout": null,
       "colorBackground": false,
-      "colorValue": true,
+      "colorValue": false,
       "colors": [
         "#299c46",
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
       "datasource": "OO",
-      "description": "The number of new errors detected in the selected timeframe of type $type.",
-      "format": "none",
+      "decimals": 0,
+      "description": "The number of unique uncaught exceptions",
+      "format": "short",
       "gauge": {
         "maxValue": 100,
         "minValue": 0,
@@ -360,16 +361,18 @@
         "x": 6,
         "y": 0
       },
-      "id": 39,
+      "id": 44,
       "interval": null,
       "links": [
         {
+          "dashboard": "Errors Drill-down",
           "includeVars": true,
           "keepTime": true,
+          "params": "&var-type=Uncaught Exception",
           "targetBlank": false,
-          "title": "New Errors. $ne",
+          "title": "Uncaught Exceptions",
           "type": "absolute",
-          "url": "d/3NZ83NLik/new-errors"
+          "url": "d/6TxYIh6mk/errors-drill-down"
         }
       ],
       "mappingType": 1,
@@ -387,7 +390,7 @@
       "nullPointMode": "connected",
       "nullText": null,
       "postfix": "",
-      "postfixFontSize": "30%",
+      "postfixFontSize": "50%",
       "prefix": "",
       "prefixFontSize": "50%",
       "rangeMaps": [
@@ -398,14 +401,15 @@
         }
       ],
       "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "fillColor": "rgb(255,255,255, 0)",
         "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
+        "lineColor": "#f2c96d",
+        "show": true
       },
       "tableColumn": "",
       "targets": [
         {
+          "alias": "",
           "groupBy": [
             {
               "params": [
@@ -422,7 +426,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressions({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"render\":\"SingleStat\", \"regressionTypes\":\"NewIssues,SevereNewIssues\"})",
+          "query": "events({\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"types\":\"$uncaughtType\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"outputMode\":\"SingleStat\", \"varTimeFilter\":\"true\"}) ",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -443,8 +447,8 @@
           "tags": []
         }
       ],
-      "thresholds": "5,15",
-      "title": "New",
+      "thresholds": "25,50",
+      "title": "Uncaught Exceptions",
       "type": "singlestat",
       "valueFontSize": "70%",
       "valueMaps": [
@@ -459,15 +463,16 @@
     {
       "cacheTimeout": null,
       "colorBackground": false,
-      "colorValue": true,
+      "colorValue": false,
       "colors": [
         "#299c46",
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
       "datasource": "OO",
-      "description": "Errors whose rate (i.e. times / calls) has increased significantly in the selected timeframe. The thresholds to control what is considered to be an increase are set in the Settings dashboard.",
-      "format": "none",
+      "decimals": 1,
+      "description": "The volume of uncaught exceptions",
+      "format": "short",
       "gauge": {
         "maxValue": 100,
         "minValue": 0,
@@ -481,129 +486,7 @@
         "x": 9,
         "y": 0
       },
-      "id": 40,
-      "interval": null,
-      "links": [
-        {
-          "dashboard": "Increasing Errors",
-          "includeVars": true,
-          "keepTime": true,
-          "title": "Increasing Errors. $ie",
-          "type": "absolute",
-          "url": "d/WZ739NYmk/increasing-errors"
-        }
-      ],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "30%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "regressions({\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"view\":\"$view\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\", \"render\":\"SingleStat\", \"regressionTypes\":\"Regressions,SevereRegressions\"})",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "thresholds": "5,15",
-      "title": "Increasing",
-      "type": "singlestat",
-      "valueFontSize": "70%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "current"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
-      "datasource": "OO",
-      "decimals": 1,
-      "description": "Click to drill into Uncaught Exceptions",
-      "format": "short",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": false,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 2,
-        "w": 3,
-        "x": 12,
-        "y": 0
-      },
-      "id": 44,
+      "id": 49,
       "interval": null,
       "links": [
         {
@@ -612,7 +495,7 @@
           "keepTime": true,
           "params": "&var-type=Uncaught Exception",
           "targetBlank": false,
-          "title": "$uec Uncaught Exceptions",
+          "title": "Uncaught Exceptions",
           "type": "absolute",
           "url": "d/6TxYIh6mk/errors-drill-down"
         }
@@ -690,7 +573,132 @@
         }
       ],
       "thresholds": "25,50",
-      "title": "$uec Uncaught",
+      "title": "Uncaught Volume",
+      "type": "singlestat",
+      "valueFontSize": "70%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "total"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "OO",
+      "decimals": 0,
+      "description": "The number of unique. Critical exception types are defined in the Settings dashboard.",
+      "format": "short",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 3,
+        "x": 12,
+        "y": 0
+      },
+      "id": 41,
+      "interval": null,
+      "links": [
+        {
+          "dashboard": "Errors Drill-down",
+          "includeVars": true,
+          "keepTime": true,
+          "params": "&var-type=Critical Exceptions",
+          "targetBlank": false,
+          "title": "Critical Exceptions",
+          "type": "absolute",
+          "url": "d/6TxYIh6mk/errors-drill-down"
+        }
+      ],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgb(255,255,255, 0)",
+        "full": false,
+        "lineColor": "#f2c96d",
+        "show": true
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "alias": "",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "events({\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"types\":\"$criticalExType\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"outputMode\":\"SingleStat\", \"varTimeFilter\":\"true\"})",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "25,50",
+      "title": "Critical Exceptions",
       "type": "singlestat",
       "valueFontSize": "70%",
       "valueMaps": [
@@ -713,7 +721,7 @@
       ],
       "datasource": "OO",
       "decimals": 1,
-      "description": "The number of $criticalExceptionTypes that occured in the selected transactions. Failure types are defined in the Settings dashboard.",
+      "description": "The volume of critical exceptions. Critical exception types are defined in the Settings dashboard.",
       "format": "short",
       "gauge": {
         "maxValue": 100,
@@ -728,7 +736,7 @@
         "x": 15,
         "y": 0
       },
-      "id": 41,
+      "id": 50,
       "interval": null,
       "links": [
         {
@@ -737,7 +745,7 @@
           "keepTime": true,
           "params": "&var-type=Critical Exceptions",
           "targetBlank": false,
-          "title": "$cec Critical Exceptions",
+          "title": "Critical Exceptions",
           "type": "absolute",
           "url": "d/6TxYIh6mk/errors-drill-down"
         }
@@ -815,7 +823,7 @@
         }
       ],
       "thresholds": "25,50",
-      "title": "$cec Critical Ex",
+      "title": "Critical Volume",
       "type": "singlestat",
       "valueFontSize": "70%",
       "valueMaps": [
@@ -838,7 +846,7 @@
       ],
       "datasource": "OO",
       "decimals": 1,
-      "description": "Click to drill into HTTP Errors.",
+      "description": "The Unique number of Log Errors",
       "format": "short",
       "gauge": {
         "maxValue": 100,
@@ -853,16 +861,16 @@
         "x": 18,
         "y": 0
       },
-      "id": 45,
+      "id": 46,
       "interval": null,
       "links": [
         {
           "dashboard": "Errors Drill-down",
           "includeVars": true,
           "keepTime": true,
-          "params": "&var-type=HTTP Error",
+          "params": "&var-type=Logged Error",
           "targetBlank": false,
-          "title": "$hec HTTP Errors",
+          "title": "Unique Log Errors",
           "type": "absolute",
           "url": "d/6TxYIh6mk/errors-drill-down"
         }
@@ -918,7 +926,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$httpErrorType\",\"seriesName\":\"Volume\", \"transactions\":\"$transactions\", \"searchText\":\"$search\",\"sparkline\":\"true\"})\n",
+          "query": "events({\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"types\":\"$logErrorType\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"outputMode\":\"SingleStat\", \"varTimeFilter\":\"true\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -940,7 +948,7 @@
         }
       ],
       "thresholds": "25,50",
-      "title": "$hec HTTP Error",
+      "title": "Log Errors",
       "type": "singlestat",
       "valueFontSize": "70%",
       "valueMaps": [
@@ -963,7 +971,7 @@
       ],
       "datasource": "OO",
       "decimals": 1,
-      "description": "Click to drill into Log Errors",
+      "description": "The volume of log errors",
       "format": "short",
       "gauge": {
         "maxValue": 100,
@@ -978,7 +986,7 @@
         "x": 21,
         "y": 0
       },
-      "id": 46,
+      "id": 51,
       "interval": null,
       "links": [
         {
@@ -987,7 +995,7 @@
           "keepTime": true,
           "params": "&var-type=Logged Error",
           "targetBlank": false,
-          "title": "$lec Log Errors",
+          "title": "Log Errors",
           "type": "absolute",
           "url": "d/6TxYIh6mk/errors-drill-down"
         }
@@ -1065,7 +1073,7 @@
         }
       ],
       "thresholds": "25,50",
-      "title": "$lec Log Error",
+      "title": "Log Error Volume",
       "type": "singlestat",
       "valueFontSize": "70%",
       "valueMaps": [
@@ -1083,227 +1091,12 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "This graph shows the volume of the selected events overlaid onto calls into the selected transactions. To the left of the dashed red vertical annotation is the baseline period which can be used to compare against the current timeframe, which is to the right of the baseline annotation.",
-      "fill": 0,
-      "gridPos": {
-        "h": 5,
-        "w": 12,
-        "x": 0,
-        "y": 2
-      },
-      "hideTimeOverride": true,
-      "id": 37,
-      "interval": "1h",
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [
-        {
-          "alias": "/^.Throughput/",
-          "color": "#7eb26d",
-          "fill": 2,
-          "linewidth": 0,
-          "yaxis": 2
-        },
-        {
-          "alias": "/^./",
-          "yaxis": 2
-        },
-        {
-          "alias": "/^.Volume/",
-          "color": "#f2c96d",
-          "yaxis": 1
-        }
-      ],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "alias": "",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "correlateGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"deployments\":\"$deployments\",\"servers\":\"$servers\",\"aggregateMode\":Yes,\"seriesName\":\"Throughput\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"metricNames\":\"$metricNames\"})",
-          "rawQuery": true,
-          "refId": "B",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        },
-        {
-          "alias": "",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",\"seriesName\":\"Volume\", \"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        },
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": true,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "splitGraph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",\"transactions\":\"$transactions\", \"limit\":\"$splitLimit\", \"searchText\":\"$search\"})\n",
-          "rawQuery": true,
-          "refId": "C",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": "$extendWindow",
-      "timeShift": null,
-      "title": "$type: Last $activeWindowFmt vs preceding $extendWindowRange",
-      "tooltip": {
-        "shared": true,
-        "sort": 2,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": null,
-          "format": "short",
-          "label": "",
-          "logBase": 10,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "decimals": 1,
-          "format": "short",
-          "label": "",
-          "logBase": 10,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "OO",
       "description": "This graph shows the volume of the selected events overlaid onto calls into the selected transactions.",
       "fill": 0,
       "gridPos": {
         "h": 5,
-        "w": 12,
-        "x": 12,
+        "w": 24,
+        "x": 0,
         "y": 2
       },
       "hideTimeOverride": false,
@@ -1468,7 +1261,7 @@
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "$type: $activeWindowFmt",
+      "title": "",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -1977,7 +1770,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "events({\"fields\":\"link,jira_issue_url,rate_desc,description,rate_delta_desc,rank,type,message,entry_point_name,stats.hits,rate,rate_delta,first_seen,last_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":90, \"maxClassLength\":\"40\", \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\"})\n",
+          "query": "events({\"fields\":\"link,jira_issue_url,rate_desc,description,rate_delta_desc,rank,type,message,entry_point_name,stats.hits,rate,rate_delta,first_seen,last_seen,jira_state\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"deployments\":\"$deployments\",\"volumeType\":\"all\",\"maxColumnLength\":90, \"maxClassLength\":\"40\", \"types\":\"$type\",\"pointsWanted\":\"$pointsWanted\",\"transactions\":\"$transactions\", \"searchText\":\"$search\", \"maxRows\":\"$maxRows\"})\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -2679,6 +2472,28 @@
           }
         ],
         "query": "7d",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "1000",
+          "value": "1000"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "label": "maxRows",
+        "multi": false,
+        "name": "maxRows",
+        "options": [
+          {
+            "selected": true,
+            "text": "1000",
+            "value": "1000"
+          }
+        ],
+        "query": "1000",
         "skipUrlSync": false,
         "type": "custom"
       }

@@ -148,9 +148,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			this.determinantKey = String.join("_", determinantValues);
 			
-			if (Strings.isNullOrEmpty(determinantKey)) {
-				logger.info("Empty determinant value for item");
-				
+			if (Strings.isNullOrEmpty(determinantKey)) {				
 				this.determinantKey = ALL;
 			}
 		}

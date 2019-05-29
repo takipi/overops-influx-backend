@@ -90,7 +90,7 @@ public class ApiCache {
 	protected static boolean CACHE_LOAD = true;
 	
 	private static final int CACHE_SIZE = 500;
-	private static final int CACHE_REFRESH_RETENTION = 90;
+	private static final int CACHE_REFRESH_RETENTION = 900;
 	
 	private static final int SLOW_QUERY_THRESHOLD = 10;
 		
@@ -837,15 +837,16 @@ public class ApiCache {
 			}
 
 			VolumeCacheLoader other = (VolumeCacheLoader) obj;
-			
+			/*
 			if (volumeType != null) {
 				
 				switch (volumeType) {
 					case hits: 
-						if ((other.volumeType == null) || (other.volumeType.equals(VolumeType.invocations))) {
-							return false;
-						}
-						break;
+						//if ((other.volumeType == null) || (other.volumeType.equals(VolumeType.invocations))) {
+						//	return false;
+						//}
+						return true;
+						//break;
 					
 					case invocations: 
 						if ((other.volumeType == null) || (other.volumeType.equals(VolumeType.hits))) {
@@ -859,6 +860,7 @@ public class ApiCache {
 						break;
 				}
 			}
+			*/
 			
 			if (!Objects.equal(volumeType, other.volumeType)) {
 				return false;
@@ -1466,21 +1468,24 @@ public class ApiCache {
 			return result;
 		}
 	}
-
 	private static Response<?> getItem(BaseCacheLoader key) {
+		return getItem(queryCache, key);
+	}
+
+	private static Response<?> getItem(LoadingCache<BaseCacheLoader, Response<?>> cache, BaseCacheLoader key) {
 		
 		try {
 			
 			Response<?> result;
 			
 			if (CACHE_LOAD) {
-				result = queryCache.get(key);
+				result = cache.get(key);
 			} else {
 				result = key.load();
 			}
 			
 			if (result.isBadResponse()) {
-				queryCache.invalidate(key);
+				cache.invalidate(key);
 			} 
 			
 			return result;
@@ -1688,7 +1693,15 @@ public class ApiCache {
 		GraphCacheLoader cacheKey = new GraphCacheLoader(apiClient, request, serviceId, input, 
 			settingsData, volumeType, baselineWindow, activeWindow, windowSlice, timespan, cachable);
 		
-		Response<GraphResult> response = (Response<GraphResult>) getItem(cacheKey);
+		LoadingCache<BaseCacheLoader, Response<?>> loadingCache;
+		
+		if (cachable) {
+			loadingCache = graphSliceCache;
+		} else {
+			loadingCache = queryCache;
+		}
+		
+		Response<GraphResult> response = (Response<GraphResult>) getItem(loadingCache, cacheKey);
 
 		return response;
 	}
@@ -1905,6 +1918,19 @@ public class ApiCache {
 			});
 	
 	public static final LoadingCache<BaseCacheLoader, Response<?>> queryCache = CacheBuilder.newBuilder()
+			.maximumSize(CACHE_SIZE)
+			.expireAfterWrite(CACHE_REFRESH_RETENTION, TimeUnit.SECONDS)
+			.build(new CacheLoader<BaseCacheLoader, Response<?>>() {
+				
+				@Override
+				public Response<?> load(BaseCacheLoader key) {
+					
+					Response<?> result = key.load();
+					return result;
+				}
+			});
+	
+	public static final LoadingCache<BaseCacheLoader, Response<?>> graphSliceCache = CacheBuilder.newBuilder()
 			.maximumSize(CACHE_SIZE)
 			.expireAfterWrite(CACHE_REFRESH_RETENTION, TimeUnit.SECONDS)
 			.build(new CacheLoader<BaseCacheLoader, Response<?>>() {

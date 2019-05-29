@@ -446,20 +446,15 @@ public class RegressionFunction extends EventsFunction {
 		});
 	}
 	
-	private EventData findEventData(List<EventData> eventDatas, String Id) {
-		
-		for (EventData eventData : eventDatas) {
-			if (eventData.event.id.equals(Id)) {
-				return eventData;
-			}
-		}
-		
-		return null;
-	}
-	
 	private List<EventData> getUniqueEventData(List<EventData> eventDatas, Map<String, EventResult> eventListMap) {
 		
 		List<EventData> result = new ArrayList<EventData>();
+		
+		Map<String, EventData> eventDataMap = new HashMap<String, EventData>(eventDatas.size());
+		
+		for (EventData eventData : eventDatas) {
+			eventDataMap.put(eventData.event.id, eventData);
+		}
 		
 		for (EventData eventData : eventDatas) {
 			
@@ -479,7 +474,7 @@ public class RegressionFunction extends EventsFunction {
 					
 					if (compareEvents(regData.event, eventResult)) {
 						
-						EventData matchingNewEvent = findEventData(eventDatas, eventResult.id);
+						EventData matchingNewEvent = eventDataMap.get(eventResult.id);
 						
 						if (matchingNewEvent == null) {
 							found = true;
