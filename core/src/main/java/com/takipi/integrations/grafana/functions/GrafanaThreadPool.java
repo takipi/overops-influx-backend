@@ -40,7 +40,7 @@ public class GrafanaThreadPool {
 				public Pair<ThreadPoolExecutor, ThreadPoolExecutor> load(ApiClient key) {
 					
 					//the thread pools must be separated to prevent deadlocking between 
-					//a func query slice thats waiting on a thread, but the thread pool has been depleted
+					//a func query slice that's waiting on a thread, but the thread pool has been depleted
 					//by other functions waiting on this query to come back from the guava cache 
 					ThreadPoolExecutor functionExecutor = (ThreadPoolExecutor)Executors.newFixedThreadPool(THREADS_PER_API_KEY / 2);
 					ThreadPoolExecutor queryExecutor = (ThreadPoolExecutor)Executors.newFixedThreadPool(THREADS_PER_API_KEY / 2);
