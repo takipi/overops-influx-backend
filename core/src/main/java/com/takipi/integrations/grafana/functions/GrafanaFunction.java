@@ -2183,7 +2183,8 @@ public abstract class GrafanaFunction {
 				index++;
 			}	
 		} else {
-			sliceRequests = Collections.singletonList(new SliceRequest(from, to, false));	
+			sliceRequests = Collections.singletonList(new SliceRequest(from, to, false));
+			sliceGraph = false;
 		}
 		
 		List<GraphSliceTask> tasks = new ArrayList<GraphSliceTask>(sliceRequests.size());
