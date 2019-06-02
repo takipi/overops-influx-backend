@@ -518,22 +518,9 @@ public class ReliabilityReportFunction extends EventsFunction {
 				DateTime activeWindowStart = activeWindow.activeWindowStart;
 				DateTime activeWindowEnd = activeWindow.activeWindowStart.plusMinutes(regressionInput.activeTimespan);
 				
-				Collection<EventResult> eventList = null;
-				
-				for (int retries = 0; retries < GET_EVENT_LIST_MAX_RETRIES; retries++) {
-					eventList = function.getEventList(serviceId, viewId, input, activeWindowStart, activeWindowEnd,
-							null, true, VolumeType.all, true);
-					
-					if (eventList != null) {
-						break;
-					}
-					
-					logger.warn("Could not retrieve event list from API retry number: {}", retries);
-				}
+				Collection<EventResult> eventList = getEventResultsWithRetries(activeWindowStart, activeWindowEnd);
 				
 				if (eventList == null) {
-					logger.error("Could not retrieve event list from API after max retries");
-					
 					return null;
 				}
 				
@@ -543,61 +530,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 						viewId, regressionInput, activeWindow, applicationGroupsMap,
 						input, newOnly);
 				
-				Map<ReportKey, RegressionOutput> regressionOutputMap = new HashMap<ReportKey, RegressionOutput>();
-				
-				for (DeterminantKey determinantKey : regressionGraphsMap.keySet()) {
-					Map<String, EventResult> eventResultMap = eventsMap.get(determinantKey);
-					
-					Pair<Graph, Graph> regressionGraphs = regressionGraphsMap.get(determinantKey);
-					
-					Graph baselineGraph = regressionGraphs.getFirst();
-					Graph activeWindowGraph = regressionGraphs.getSecond();
-					
-					if (activeWindow.deploymentFound) {
-						Pair<DateTime, DateTime> dateTimeDateTimePair = activeWindow.deploymentsTimespan.get(determinantKey.determinantKey);
-						
-						if (dateTimeDateTimePair != null) {
-							activeWindow.activeWindowStart = dateTimeDateTimePair.getFirst();
-							DateTime deploymentActiveWindowEnd = dateTimeDateTimePair.getSecond();
-							
-							activeWindow.activeTimespan = (int) TimeUnit.MILLISECONDS
-									.toMinutes(deploymentActiveWindowEnd.minus(
-											activeWindow.activeWindowStart.getMillis()).getMillis());
-							
-							int baselineTimespan = function.expandBaselineTimespan(serviceId, activeWindow);
-							
-							RegressionPeriodData deploymentsRegressionGraphs = cropGraphByPeriod(baselineGraph,
-									dateTimeDateTimePair, baselineTimespan,
-									eventResultMap);
-							
-							baselineGraph = deploymentsRegressionGraphs.baselineGraph;
-						}
-					}
-					
-					Pair<ReportKey, RegressionsInput> subInputData = subRegressionInputs.get(determinantKey.determinantKey);
-					
-					if ((applicationGroupsMap.containsKey(determinantKey.determinantKey)) && (subRegressionInputs.get(determinantKey.determinantKey) == null)) {
-						continue;
-					}
-					
-					// For tiers we create a single graph request without deployments, machine, apps filter but need to break
-					// the input afterwards by the specific type of regression input
-					if (subInputData == null) {
-						for (String transactionGraphKey : subRegressionInputs.keySet()) {
-							subInputData = subRegressionInputs.get(transactionGraphKey);
-							
-							RegressionOutput regressionOutput = getRegressionOutput(activeWindow, eventResultMap, baselineGraph, activeWindowGraph, subInputData);
-							
-							regressionOutputMap.put(subInputData.getFirst(), regressionOutput);
-						}
-					}
-					else {
-						RegressionOutput regressionOutput = getRegressionOutput(activeWindow, 
-							eventResultMap, baselineGraph, activeWindowGraph, subInputData);
-						
-						regressionOutputMap.put(subInputData.getFirst(), regressionOutput);
-					}
-				}
+				Map<ReportKey, RegressionOutput> regressionOutputMap =
+						getRegressionsOutputs(activeWindow, eventsMap, regressionGraphsMap);
 				
 				AggregatedRegressionOutput aggregatedRegressionOutput = new AggregatedRegressionOutput(regressionOutputMap);
 				
@@ -608,6 +542,102 @@ public class ReliabilityReportFunction extends EventsFunction {
 				afterCall();
 			}
 
+		}
+		
+		private Map<ReportKey, RegressionOutput> getRegressionsOutputs(RegressionWindow activeWindow,
+				Map<DeterminantKey, Map<String, EventResult>> eventsMap,
+				Map<DeterminantKey, Pair<Graph, Graph>> regressionGraphsMap)
+		{
+			Map<ReportKey, RegressionOutput>  regressionOutputMap = new HashMap<ReportKey, RegressionOutput>();
+			
+			for (DeterminantKey determinantKey : regressionGraphsMap.keySet()) {
+				Map<String, EventResult> eventResultMap = eventsMap.get(determinantKey);
+				
+				Pair<Graph, Graph> regressionGraphs = regressionGraphsMap.get(determinantKey);
+				
+				Graph baselineGraph = regressionGraphs.getFirst();
+				Graph activeWindowGraph = regressionGraphs.getSecond();
+				
+				if (activeWindow.deploymentFound) {
+					baselineGraph = adjustDeploymentsBaselineGraph(activeWindow, determinantKey, eventResultMap, baselineGraph);
+				}
+				
+				Pair<ReportKey, RegressionsInput> subInputData = subRegressionInputs.get(determinantKey.determinantKey);
+				
+				if ((applicationGroupsMap.containsKey(determinantKey.determinantKey)) &&
+					(subRegressionInputs.get(determinantKey.determinantKey) == null)) {
+					
+					continue;
+				}
+				
+				// For tiers we create a single graph request without deployments, machine, apps filter but need to break
+				// the input afterwards by the specific type of regression input
+				if (subInputData == null) {
+					for (String transactionGraphKey : subRegressionInputs.keySet()) {
+						subInputData = subRegressionInputs.get(transactionGraphKey);
+						
+						RegressionOutput regressionOutput = getRegressionOutput(activeWindow, eventResultMap, baselineGraph, activeWindowGraph, subInputData);
+						
+						regressionOutputMap.put(subInputData.getFirst(), regressionOutput);
+					}
+				}
+				else {
+					RegressionOutput regressionOutput = getRegressionOutput(activeWindow,
+						eventResultMap, baselineGraph, activeWindowGraph, subInputData);
+					
+					regressionOutputMap.put(subInputData.getFirst(), regressionOutput);
+				}
+			}
+			
+			return regressionOutputMap;
+		}
+		
+		private Graph adjustDeploymentsBaselineGraph(RegressionWindow activeWindow, DeterminantKey determinantKey, Map<String, EventResult> eventResultMap, Graph baselineGraph)
+		{
+			Pair<DateTime, DateTime> dateTimeDateTimePair = activeWindow.deploymentsTimespan.get(determinantKey.determinantKey);
+			
+			if (dateTimeDateTimePair != null) {
+				activeWindow.activeWindowStart = dateTimeDateTimePair.getFirst();
+				DateTime deploymentActiveWindowEnd = dateTimeDateTimePair.getSecond();
+				
+				activeWindow.activeTimespan = (int) TimeUnit.MILLISECONDS
+						.toMinutes(deploymentActiveWindowEnd.minus(
+								activeWindow.activeWindowStart.getMillis()).getMillis());
+				
+				int baselineTimespan = function.expandBaselineTimespan(serviceId, activeWindow);
+				
+				RegressionPeriodData deploymentsRegressionGraphs = cropGraphByPeriod(baselineGraph,
+						dateTimeDateTimePair, baselineTimespan,
+						eventResultMap);
+				
+				baselineGraph = deploymentsRegressionGraphs.baselineGraph;
+			}
+			
+			return baselineGraph;
+		}
+		
+		private Collection<EventResult> getEventResultsWithRetries(DateTime activeWindowStart, DateTime activeWindowEnd)
+		{
+			Collection<EventResult> eventList = null;
+			
+			for (int retries = 0; retries < GET_EVENT_LIST_MAX_RETRIES; retries++) {
+				eventList = function.getEventList(serviceId, viewId, input, activeWindowStart, activeWindowEnd,
+						null, true, VolumeType.all, true);
+				
+				if (eventList != null) {
+					break;
+				}
+				
+				logger.warn("Could not retrieve event list from API retry number: {}", retries);
+			}
+			
+			if (eventList == null) {
+				logger.error("Could not retrieve event list from API after max retries");
+				
+				return null;
+			}
+			
+			return eventList;
 		}
 		
 		private RegressionOutput getRegressionOutput(RegressionWindow activeWindow,
@@ -1015,9 +1045,15 @@ public class ReliabilityReportFunction extends EventsFunction {
 					serviceId, regressionInput, regressionFunction, false);
 				
 				if ((regressionOutput != null) && (regressionOutput.keyRegressionOutputMap != null)) {
-					for (Map.Entry<ReportKey, RegressionOutput> aggregatedRegressionOutput : regressionOutput.keyRegressionOutputMap.entrySet()) {
-							result.add(new AggregatedRegressionAsyncResult(aggregatedRegressionOutput.getKey(),
-									aggregatedRegressionOutput.getValue()));
+					
+					for (Map.Entry<ReportKey, RegressionOutput> aggregatedRegressionOutput :
+							regressionOutput.keyRegressionOutputMap.entrySet()) {
+						
+						AggregatedRegressionAsyncResult aggregatedRegressionAsyncResult =
+								new AggregatedRegressionAsyncResult(aggregatedRegressionOutput.getKey(),
+								aggregatedRegressionOutput.getValue());
+						
+						result.add(aggregatedRegressionAsyncResult);
 					}
 				} else {
 					
