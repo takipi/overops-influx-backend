@@ -13,8 +13,7 @@ package com.takipi.integrations.grafana.input;
  * 		"windowType":"Active"})
  */
 
-public class BaselineWindowInput extends BaseEventVolumeInput
-{
+public class BaselineWindowInput extends BaseEventVolumeInput {
 	/**
 	 * 
 	 * The type of window to return

@@ -7,12 +7,10 @@ import com.takipi.integrations.grafana.functions.FunctionParser;
 import com.takipi.integrations.grafana.output.QueryResult;
 import com.takipi.integrations.grafana.servlet.ServletUtil.Auth;
 
-public class QueryUtil
-{
+public class QueryUtil {
 	public static final DecimalFormat df = new DecimalFormat("#.00");
 	
-	public static String query(Auth auth, String query)
-	{
+	public static String query(Auth auth, String query) {
 		if (query == null) {
 			return "No query provided";
 		}

@@ -33,8 +33,7 @@ public class TransactionsListInput extends BaseGraphInput {
 	 * Control whether to return a list of rows or a single stat value
 	 *
 	 */
-	public enum RenderMode
-	{
+	public enum RenderMode {
 		
 		/**
 		 * Output the volume of transactions matching the target state (e.t. OK, Slowing, Critical)

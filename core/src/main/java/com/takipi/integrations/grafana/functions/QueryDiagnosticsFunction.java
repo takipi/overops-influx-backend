@@ -22,8 +22,7 @@ import com.takipi.integrations.grafana.util.ApiCache.QueryLogItem;
 import com.takipi.integrations.grafana.util.ApiCache.RegressionCacheLoader;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
-public class QueryDiagnosticsFunction extends GrafanaFunction
-{
+public class QueryDiagnosticsFunction extends GrafanaFunction {
 	public QueryDiagnosticsFunction(ApiClient apiClient) {
 		super(apiClient);
 	}

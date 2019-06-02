@@ -35,8 +35,7 @@ import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.TimeUtil;
 import com.takipi.integrations.grafana.util.DeploymentUtil;
 
-public class EventGroupFunction extends EventsFunction
-{
+public class EventGroupFunction extends EventsFunction {
 	public EventGroupFunction(ApiClient apiClient) {
 		super(apiClient);
 	}

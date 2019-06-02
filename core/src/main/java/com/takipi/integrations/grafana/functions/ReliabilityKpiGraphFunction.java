@@ -821,8 +821,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 
 		GraphDataTask graphTask = new GraphDataTask(serviceId, viewId, timelineData);
 
-		List<Object> taskResults = executeTasks(Arrays.asList(new Callable[] 
-			{transactionGraphTask, baselineGraphTask, graphTask}), true);
+		List<Object> taskResults = executeTasks(Arrays.asList(new Callable[]  {transactionGraphTask, baselineGraphTask, graphTask}), true);
 		
 		TasksResultData tasksResultData = getTaskResults(taskResults);
 		
@@ -877,8 +876,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 
 		GraphDataTask graphTask = new GraphDataTask(serviceId, viewId, timelineData);
 
-		List<Object> taskResults = executeTasks(Arrays.asList(new Callable[] 
-			{transactionGraphTask, baselineGraphTask, graphTask}), true);		
+		List<Object> taskResults = executeTasks(Arrays.asList(new Callable[]  {transactionGraphTask, baselineGraphTask, graphTask}), true);
 		
 		TasksResultData tasksResultData = getTaskResults(taskResults);
 		

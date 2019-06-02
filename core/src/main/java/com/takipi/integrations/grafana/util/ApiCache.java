@@ -469,8 +469,7 @@ public class ApiCache {
 		}
 		
 		@Override
-		protected boolean printDuration()
-		{
+		protected boolean printDuration() {
 			return false;
 		}
 		

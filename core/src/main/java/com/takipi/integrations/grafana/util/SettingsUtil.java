@@ -38,8 +38,7 @@ public class SettingsUtil {
 		return serviceIds.iterator().next();
 	}
 
-	public static class SettingsPair
-	{
+	public static class SettingsPair {
 		public String serviceId;
 		public String settings;
 		

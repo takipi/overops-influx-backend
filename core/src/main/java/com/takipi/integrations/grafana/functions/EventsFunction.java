@@ -677,8 +677,7 @@ public class EventsFunction extends GrafanaFunction {
 
 		@Override
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
-				Pair<DateTime, DateTime> timeSpan)
-		{
+				Pair<DateTime, DateTime> timeSpan) {
 			Double deltaValue = getRateDelta(eventData);
 			
 			if (deltaValue == null) {

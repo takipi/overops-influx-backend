@@ -7,7 +7,6 @@ package com.takipi.integrations.grafana.input;
  * Example query:
  * 		environmentSettings({"environments":"$environments"})
  */
-public class EnvironmentSettingsInput
-{
+public class EnvironmentSettingsInput {
 	
 }

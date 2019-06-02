@@ -38,8 +38,7 @@ public class RegressedEventsFunction extends EnvironmentVariableFunction {
 
 	@Override
 	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
-			VariableAppender appender)
-	{
+			VariableAppender appender) {
 		RegressedEventsInput reInput = (RegressedEventsInput)getInput((RegressedEventsInput)input);
 		
 		Gson gson = new Gson();

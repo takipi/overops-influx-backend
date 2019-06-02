@@ -23,8 +23,7 @@ import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.util.ArrayUtil;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
-public class EventsDiffFunction extends EventsFunction
-{
+public class EventsDiffFunction extends EventsFunction {
 	public final static String NO_DIFF = "0m";
 
 	public EventsDiffFunction(ApiClient apiClient) {
@@ -53,8 +52,7 @@ public class EventsDiffFunction extends EventsFunction
 
 		protected EventResult source;
 		
-		protected DiffEventData(EventResult event, EventResult source)
-		{
+		protected DiffEventData(EventResult event, EventResult source) {
 			super(event);
 			this.source = source;
 		}
@@ -278,8 +276,7 @@ public class EventsDiffFunction extends EventsFunction
 		eventDatas.sort(new Comparator<EventData>() {
 			
 			@Override
-			public int compare(EventData o1, EventData o2)
-			{
+			public int compare(EventData o1, EventData o2) {
 				DiffEventData d1;
 				DiffEventData d2;
 				

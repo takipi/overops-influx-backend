@@ -121,8 +121,7 @@ public class RegressionFunction extends EventsFunction {
 			
 			String description;
 			
-			switch (type)
-			{
+			switch (type) {
 				case NewIssues:
 					
 					if (event.stats.hits < input.minVolumeThreshold) {
@@ -189,8 +188,7 @@ public class RegressionFunction extends EventsFunction {
 		}
 		
 		@Override
-		public boolean equals(Object obj)
-		{
+		public boolean equals(Object obj) {
 			if (!super.equals(obj)) {
 				return false;
 			}
@@ -322,8 +320,7 @@ public class RegressionFunction extends EventsFunction {
 		}
 	}
 	
-	protected class RegressionToFormatter extends FieldFormatter
-	{
+	protected class RegressionToFormatter extends FieldFormatter {
 		
 		@Override
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
@@ -897,8 +894,7 @@ public class RegressionFunction extends EventsFunction {
 	
 	private void divideGraphsByDeterminant(Collection<GraphSliceTask> baselineGraphTasks, Collection<GraphSliceTaskResult> graphSliceTaskResults,
 			Map<DeterminantKey, List<Graph>> baselineGraphKeys, Map<DeterminantKey, List<Graph>> activeWindowGraphKeys,
-			Map<String, Collection<String>> applicationGroupsMap)
-	{
+			Map<String, Collection<String>> applicationGroupsMap) {
 		for (GraphSliceTaskResult graphSliceTaskResult : graphSliceTaskResults) {
 			
 			boolean isBaselineTask = (baselineGraphTasks != null ? baselineGraphTasks.contains(graphSliceTaskResult.task) : false);
@@ -1049,8 +1045,7 @@ public class RegressionFunction extends EventsFunction {
 	
 	public RegressionOutput getRegressionOutput(String serviceId, BaseEventVolumeInput input, boolean newOnly,
 				Pair<DateTime, DateTime> timespan, RegressionInput regressionInput, RegressionWindow regressionWindow,
-				Map<String, EventResult> eventListMap, Graph baselineGraph, Graph activeWindowGraph)
-	{
+				Map<String, EventResult> eventListMap, Graph baselineGraph, Graph activeWindowGraph) {
 		if ((activeWindowGraph == null) ||(activeWindowGraph.points == null)) {
 			return RegressionOutput.emptyOutput;
 		}

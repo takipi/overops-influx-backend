@@ -19,8 +19,7 @@ import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
-public class EventFilter
-{
+public class EventFilter {
 	public static final String CRITICAL_EXCEPTIONS = "Critical Exceptions";
 	public static final String CRITICAL_EXCEPTION = "Critical Exception";
 

@@ -6,8 +6,7 @@ import com.takipi.api.client.RemoteApiClient;
 import com.takipi.api.client.observe.LoggingObserver;
 import com.takipi.integrations.grafana.servlet.ServletUtil.Auth;
 
-public class GrafanaApiClient
-{
+public class GrafanaApiClient {
 	private static final String API_TIMEOUT_PROPERTY	= "api.timeout";
 	private static final String API_AUTH_PROPERTY		= "api.auth";
 	private static final String API_OBSERVE_PROPERTY	= "api.observe";
@@ -17,36 +16,29 @@ public class GrafanaApiClient
 	
 	private static final boolean DEFAULT_OBSERVE	= false;
 	
-	public static ApiClient getApiClient()
-	{
+	public static ApiClient getApiClient() {
 		return getApiClient(null); 
 	}
 	
-	public static ApiClient getApiClient(Auth auth)
-	{
+	public static ApiClient getApiClient(Auth auth) {
 		String host;
 		String token;
 		
-		if (auth != null)
-		{
+		if (auth != null) {
 			host = auth.hostname;
 			token = auth.token;
 		}
-		else
-		{
+		else {
 			String authProp = System.getProperty(API_AUTH_PROPERTY);
 			
-			if (authProp == null)
-			{
+			if (authProp == null) {
 				host = "null";
 				token = "null";
 			}
-			else
-			{
+			else {
 				int index = authProp.indexOf('=');
 				
-				if (index == -1)
-				{
+				if (index == -1) {
 					throw new IllegalArgumentException(authProp);
 				}
 				
@@ -58,30 +50,25 @@ public class GrafanaApiClient
 		return getApiClient(host, token);
 	}
 	
-	public static ApiClient getApiClient(String hostname, String token)
-	{
+	public static ApiClient getApiClient(String hostname, String token) {
 		RemoteApiClient.Builder builder =
 				RemoteApiClient.newBuilder()
 		            .setHostname(hostname)
 		            .setApiKey(token)
 		            .setConnectTimeout(getApiTimeout());
 		
-		if (shouldObserve())
-		{
+		if (shouldObserve()) {
 			builder.addObserver(LoggingObserver.create(false));
 		}
 		
 		return builder.build();
 	}
 	
-	private static int getApiTimeout()
-	{
-		try
-		{
+	private static int getApiTimeout() {
+		try {
 			String apiTimeoutProp = System.getProperty(API_TIMEOUT_PROPERTY);
 			
-			if (Strings.isNullOrEmpty(apiTimeoutProp))
-			{
+			if (Strings.isNullOrEmpty(apiTimeoutProp)) {
 				return DEFAULT_TIMEOUT;
 			}
 			
@@ -89,27 +76,22 @@ public class GrafanaApiClient
 			
 			return Math.max(MIN_TIMEOUT, apiTimeout);
 		}
-		catch (Exception e)
-		{
+		catch (Exception e) {
 			return DEFAULT_TIMEOUT;
 		}
 	}
 	
-	private static boolean shouldObserve()
-	{
-		try
-		{
+	private static boolean shouldObserve() {
+		try {
 			String shouldObserveProp = System.getProperty(API_OBSERVE_PROPERTY);
 			
-			if (Strings.isNullOrEmpty(shouldObserveProp))
-			{
+			if (Strings.isNullOrEmpty(shouldObserveProp)) {
 				return DEFAULT_OBSERVE;
 			}
 			
 			return Boolean.parseBoolean(shouldObserveProp);
 		}
-		catch (Exception e)
-		{
+		catch (Exception e) {
 			return DEFAULT_OBSERVE;
 		}
 	}

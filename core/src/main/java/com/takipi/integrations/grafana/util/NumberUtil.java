@@ -4,8 +4,7 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
-public class NumberUtil
-{
+public class NumberUtil {
 	private static final NavigableMap<Long, String> suffixes = new TreeMap<> ();
 	static {
 	  suffixes.put(1_000L, "k");

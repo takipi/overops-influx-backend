@@ -4,8 +4,7 @@ package com.takipi.integrations.grafana.input;
  * A function used to describe the components of an event diff 
  */
 
-public class EventsDiffDescInput extends EventsDiffInput
-{
+public class EventsDiffDescInput extends EventsDiffInput {
 	/**
 	 * 
 	 *	Defines the description types available

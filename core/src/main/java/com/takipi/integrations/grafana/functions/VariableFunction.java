@@ -35,8 +35,7 @@ public abstract class VariableFunction extends GrafanaFunction {
 		}
 		
 		@Override
-		protected void sort(FunctionInput input)
-		{
+		protected void sort(FunctionInput input) {
 			sortValues(input, series.values);	
 		}
 	}
@@ -58,13 +57,10 @@ public abstract class VariableFunction extends GrafanaFunction {
 		}
 		
 		@Override
-		protected void sort(FunctionInput input)
-		{
-			values.sort(new Comparator<String>()
-			{
+		protected void sort(FunctionInput input) {
+			values.sort(new Comparator<String>() {
 				@Override
-				public int compare(String o1, String o2)
-				{
+				public int compare(String o1, String o2) {
 					return compareValues(input, o1, o2);
 				}
 			});

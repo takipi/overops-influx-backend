@@ -706,8 +706,7 @@ public abstract class GrafanaFunction {
 		return value.replace(INTERNAL_DELIM, QUALIFIED_DELIM);
 	}
 	
-	protected String toTransactionName(Location location)
-	{
+	protected String toTransactionName(Location location) {
 		String transactionName =
 				location.class_name + TRANS_DELIM + location.method_name + TRANS_DELIM + location.method_desc;
 		return transactionName;
@@ -1175,12 +1174,10 @@ public abstract class GrafanaFunction {
 				result.activeGraph.points.add(gp);
 				
 				for (GraphPointContributor gpc : gp.contributors) {
-					if (eventMap != null)
-					{
+					if (eventMap != null) {
 						EventResult event = eventMap.get(gpc.id);
 						
-						if (event != null)
-						{
+						if (event != null) {
 							result.eventMap.put(event.id, event);
 						}
 					}
@@ -1461,8 +1458,7 @@ public abstract class GrafanaFunction {
 
 	}
 	
-	private static Collection<String> toArray(String value)
-	{
+	private static Collection<String> toArray(String value) {
 		if (value == null) {
 			return Collections.emptyList();
 		}
@@ -1876,8 +1872,7 @@ public abstract class GrafanaFunction {
 		seriesValues.sort(new Comparator<List<Object>>() {
 
 			@Override
-			public int compare(List<Object> o1, List<Object> o2)
-			{
+			public int compare(List<Object> o1, List<Object> o2) {
 				int o1Index = -1;
 				int o2Index = -1;
 					
@@ -2224,8 +2219,7 @@ public abstract class GrafanaFunction {
 		result.add(new SliceRequest(from, from.plusDays(1).withTimeAtStartOfDay().minusMinutes(1), END_SLICE_POINT_COUNT));
 
 		// Only full days (<2018-11-23T00:00:00.000+02:00, 2018-11-23T23:59:00.000+02:00>)
-		for (int i = 1; i < days; i++)
-		{
+		for (int i = 1; i < days; i++) {
 			DateTime fullDayStart = from.plusDays(i).withTimeAtStartOfDay(); 
 			DateTime fullDayEnd = fullDayStart.plusDays(1).withTimeAtStartOfDay().minusMinutes(1);
 			
@@ -2531,8 +2525,7 @@ public abstract class GrafanaFunction {
 		
 		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);
 		
-		if (applyBreakFilter)
-		{
+		if (applyBreakFilter) {
 			breakdownSet = builder.getBreakFilters();
 		} else {
 			breakdownSet = breakdownTypes;
@@ -2640,10 +2633,8 @@ public abstract class GrafanaFunction {
 				
 				Collection<String> appGroups = applicationGroupsMap.get(contributor.application_name);
 				
-				if (!CollectionUtil.safeIsEmpty(appGroups))
-				{
-					for (String appGroup : appGroups)
-					{
+				if (!CollectionUtil.safeIsEmpty(appGroups)) {
+					for (String appGroup : appGroups) {
 						DeterminantKey groupDeterminantKey = new DeterminantKey(contributor.machine_name,
 								appGroup, contributor.deployment_name);
 						

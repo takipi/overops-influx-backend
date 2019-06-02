@@ -155,8 +155,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		@Override
 		public boolean equals(Object obj) {
-			if (!(obj instanceof  DeterminantKey))
-			{
+			if (!(obj instanceof  DeterminantKey)) {
 				return false;
 			}
 			
@@ -169,8 +168,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		}
 		
 		@Override
-		public int compareTo(DeterminantKey o)
-		{
+		public int compareTo(DeterminantKey o) {
 			return determinantKey.compareTo(o.getDeterminantKey());
 		}
 	}
@@ -185,8 +183,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			this.isKey = isKey;
 		}
 		
-		public ReportKey(Collection<ReportKey> reportKeys)
-		{
+		public ReportKey(Collection<ReportKey> reportKeys) {
 			Collection<String> reportKeyNames = Lists.newArrayList();
 			
 			isKey = true;
@@ -616,8 +613,9 @@ public class ReliabilityReportFunction extends EventsFunction {
 
 		}
 		
-		private RegressionOutput getRegressionOutput(RegressionWindow activeWindow, Map<String, EventResult> eventResultMap, Graph baselineGraph, Graph activeWindowGraph, Pair<ReportKey, RegressionsInput> subInputData)
-		{
+		private RegressionOutput getRegressionOutput(RegressionWindow activeWindow,
+				Map<String, EventResult> eventResultMap, Graph baselineGraph,
+				Graph activeWindowGraph, Pair<ReportKey, RegressionsInput> subInputData) {
 			RegressionsInput regressionsInput = subInputData.getSecond();
 			
 			RegressionInput subRegressionInput =
@@ -629,8 +627,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 					activeWindow, eventResultMap, baselineGraph, activeWindowGraph);
 		}
 		
-		private List<AggregatedRegressionAsyncResult> createRegressionTaskResults(Map<ReportKey, RegressionOutput> regressionOutputMap)
-		{
+		private List<AggregatedRegressionAsyncResult> createRegressionTaskResults(Map<ReportKey, RegressionOutput> regressionOutputMap) {
 			List<AggregatedRegressionAsyncResult> regressionAsyncTaskResults = Lists.newArrayList();
 			
 			for (Map.Entry<ReportKey, RegressionOutput> regressionEntry : regressionOutputMap.entrySet()) {
@@ -1034,8 +1031,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		}
 		
 		if ((scoreType.includeSlowdowns())) {
-			for (ReportKey reportKey : activeKeys)
-			{
+			for (ReportKey reportKey : activeKeys) {
 				RegressionsInput transactionInput = getInput(input, serviceId, reportKey.name, true);
 				
 				tasks.add(new SlowdownAsyncTask(serviceId, viewId,
@@ -1069,22 +1065,18 @@ public class ReliabilityReportFunction extends EventsFunction {
 	}
 	
 	private Map<String, Collection<String>> getApplicationGroupsMap(String serviceId, 
-		List<ReportKey> keysToSend)
-	{
+		List<ReportKey> keysToSend) {
 		Map<String, Collection<String>> applicationGroupsMap = Maps.newHashMap();
 		
 		for (ReportKey key : keysToSend) {
-			if (key.isKey)
-			{
+			if (key.isKey) {
 				Collection<String> applications = EnvironmentsFilterInput.getApplications(apiClient, 
 					getSettingsData(serviceId), serviceId, key.name, true, false);
 				
-				for (String app : applications)
-				{
+				for (String app : applications) {
 					Collection<String> appGroups = applicationGroupsMap.get(app);
 					
-					if (appGroups == null)
-					{
+					if (appGroups == null) {
 						appGroups = Sets.newHashSet();
 						
 						applicationGroupsMap.put(app, appGroups);
@@ -2013,8 +2005,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 	}
 	
 	private Object getSingleStat(Collection<String> serviceIds, Pair<DateTime, DateTime> timeSpan, 
-		ReliabilityReportInput input)
-	{	
+		ReliabilityReportInput input) {
 		if (CollectionUtil.safeIsEmpty(serviceIds)) {
 			return 0;
 		}
@@ -2200,11 +2191,9 @@ public class ReliabilityReportFunction extends EventsFunction {
 	
 	private void sortByScore(List<ReportKeyResults> results) {
 		
-		results.sort(new Comparator<ReportKeyResults>()
-		{
+		results.sort(new Comparator<ReportKeyResults>() {
 			@Override
-			public int compare(ReportKeyResults o1, ReportKeyResults o2)
-			{	
+			public int compare(ReportKeyResults o1, ReportKeyResults o2) {
 				ReportKey k1 = o1.output.reportKey;
 				ReportKey k2 = o2.output.reportKey;
 				
