@@ -15,7 +15,6 @@ import java.util.regex.Pattern;
 
 import org.joda.time.DateTime;
 
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.BaseStats;
@@ -934,7 +933,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 	private static Collection<AggregationType> getColumnTypes(GroupByInput input) {
 
-		List<AggregationType> result = Lists.newArrayList();
+		List<AggregationType> result = new ArrayList<AggregationType>();
 		String[] types = input.type.split(ARRAY_SEPERATOR);
 
 		for (String type : types) {

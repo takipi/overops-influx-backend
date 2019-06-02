@@ -23,9 +23,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.deployment.SummarizedDeployment;
@@ -132,7 +129,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		public DeterminantKey(String machineName, String agentName, String deploymentName) {
 			
-			List<String> determinantValues = Lists.newArrayList();
+			List<String> determinantValues = new ArrayList<String>();
 			
 			if (machineName != null) {
 				determinantValues.add(machineName);
@@ -148,7 +145,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			this.determinantKey = String.join("_", determinantValues);
 			
-			if (Strings.isNullOrEmpty(determinantKey)) {				
+			if (Strings.isNullOrEmpty(determinantKey)) {
 				this.determinantKey = ALL;
 			}
 		}
@@ -184,7 +181,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		}
 		
 		public ReportKey(Collection<ReportKey> reportKeys) {
-			Collection<String> reportKeyNames = Lists.newArrayList();
+			Collection<String> reportKeyNames = new ArrayList<String>();
 			
 			isKey = true;
 			
@@ -546,7 +543,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 						viewId, regressionInput, activeWindow, applicationGroupsMap,
 						input, newOnly);
 				
-				Map<ReportKey, RegressionOutput> regressionOutputMap = Maps.newHashMap();
+				Map<ReportKey, RegressionOutput> regressionOutputMap = new HashMap<ReportKey, RegressionOutput>();
 				
 				for (DeterminantKey determinantKey : regressionGraphsMap.keySet()) {
 					Map<String, EventResult> eventResultMap = eventsMap.get(determinantKey);
@@ -628,7 +625,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		}
 		
 		private List<AggregatedRegressionAsyncResult> createRegressionTaskResults(Map<ReportKey, RegressionOutput> regressionOutputMap) {
-			List<AggregatedRegressionAsyncResult> regressionAsyncTaskResults = Lists.newArrayList();
+			List<AggregatedRegressionAsyncResult> regressionAsyncTaskResults = new ArrayList<AggregatedRegressionAsyncResult>();
 			
 			for (Map.Entry<ReportKey, RegressionOutput> regressionEntry : regressionOutputMap.entrySet()) {
 				regressionAsyncTaskResults.add(new AggregatedRegressionAsyncResult(regressionEntry.getKey(), regressionEntry.getValue()));
@@ -1000,7 +997,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 				
 				ReportKey aggregatedActiveKey = new ReportKey(keysToSend);
 				
-				Map<String, Pair<ReportKey, RegressionsInput>> subRegressionInputs = Maps.newHashMap();
+				Map<String, Pair<ReportKey, RegressionsInput>> subRegressionInputs = new HashMap<String, Pair<ReportKey, RegressionsInput>>();
 				
 				for (ReportKey key : keysToSend) {
 					RegressionsInput regInput = getInput(input, serviceId, key.name, true);
@@ -1066,7 +1063,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 	
 	private Map<String, Collection<String>> getApplicationGroupsMap(String serviceId, 
 		List<ReportKey> keysToSend) {
-		Map<String, Collection<String>> applicationGroupsMap = Maps.newHashMap();
+		Map<String, Collection<String>> applicationGroupsMap = new HashMap<String, Collection<String>>();
 		
 		for (ReportKey key : keysToSend) {
 			if (key.isKey) {
@@ -1077,7 +1074,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 					Collection<String> appGroups = applicationGroupsMap.get(app);
 					
 					if (appGroups == null) {
-						appGroups = Sets.newHashSet();
+						appGroups = new HashSet<String>();
 						
 						applicationGroupsMap.put(app, appGroups);
 					}

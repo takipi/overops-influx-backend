@@ -14,9 +14,6 @@ import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.metrics.Graph;
@@ -834,12 +831,12 @@ public class RegressionFunction extends EventsFunction {
 		
 		Collection<GraphSliceTaskResult> graphSliceTaskResults = executeGraphTasks(graphTasks, false);
 		
-		Map<DeterminantKey, List<Graph>> baselineGraphKeys = Maps.newHashMap();
-		Map<DeterminantKey, List<Graph>> activeWindowGraphKeys = Maps.newHashMap();
+		Map<DeterminantKey, List<Graph>> baselineGraphKeys = new HashMap<DeterminantKey, List<Graph>>();
+		Map<DeterminantKey, List<Graph>> activeWindowGraphKeys = new HashMap<DeterminantKey, List<Graph>>();
 		
 		divideGraphsByDeterminant(baselineGraphTasks, graphSliceTaskResults, baselineGraphKeys, activeWindowGraphKeys, applicationGroupsMap);
 		
-		Map<DeterminantKey, Pair<Graph, Graph>> graphResults = Maps.newHashMap();
+		Map<DeterminantKey, Pair<Graph, Graph>> graphResults = new HashMap<DeterminantKey, Pair<Graph, Graph>>();
 		
 		for (DeterminantKey graphResultKey : activeWindowGraphKeys.keySet()) {
 			Pair<Graph, Graph> determinantGraphs = getDeterminantGraphs(input, baselineGraphKeys, activeWindowGraphKeys,
@@ -901,7 +898,7 @@ public class RegressionFunction extends EventsFunction {
 			
 			for (Graph graph : graphSliceTaskResult.graphs) {
 				
-				Set<DeterminantKey> graphsKeys = Sets.newHashSet();
+				Set<DeterminantKey> graphsKeys = new HashSet<DeterminantKey>();
 				
 				graphsKeys.add(new DeterminantKey(graph.machine_name, graph.application_name, graph.deployment_name));
 				
@@ -938,7 +935,7 @@ public class RegressionFunction extends EventsFunction {
 		List<Graph> graphList = graphKeys.get(graphsKey);
 		
 		if (CollectionUtil.safeIsEmpty(graphList)) {
-			graphList = Lists.newArrayList();
+			graphList = new ArrayList<Graph>();
 			graphKeys.put(graphsKey, graphList);
 		}
 		
@@ -1034,8 +1031,8 @@ public class RegressionFunction extends EventsFunction {
 			return RegressionOutput.emptyOutput;
 		}
 		
-		Set<Graph> baselineGraphs = Sets.newHashSet();
-		Set<Graph> activeWindowGraphs = Sets.newHashSet();
+		Set<Graph> baselineGraphs = new HashSet<Graph>();
+		Set<Graph> activeWindowGraphs = new HashSet<Graph>();
 		
 		for (Pair<Graph, Graph> graphPairs : regressionGraphsCollection) {
 			baselineGraphs.add(graphPairs.getFirst());
