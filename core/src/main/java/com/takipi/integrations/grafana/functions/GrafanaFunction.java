@@ -29,6 +29,7 @@ import org.ocpsoft.prettytime.PrettyTime;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.Location;
@@ -2258,6 +2259,12 @@ public abstract class GrafanaFunction {
 		Graph result = new Graph();
 		Map<Long, GraphPoint> graphPoints = new TreeMap<Long, GraphPoint>();
 		
+		Set<String> ids = Sets.newHashSet();
+		Set<String> types = Sets.newHashSet();
+		Set<String> machines = Sets.newHashSet();
+		Set<String> deployments = Sets.newHashSet();
+		Set<String> applications = Sets.newHashSet();
+		
 		for (Graph graph : graphs) {
 			
 			if (graph == null) {
@@ -2265,12 +2272,12 @@ public abstract class GrafanaFunction {
 			}
 			
 			if (result.id == null) {
-				result.id = graph.id;
-				result.type = graph.type;
+				ids.add(graph.id);
+				types.add(graph.type);
 				
-				result.machine_name = graph.machine_name;
-				result.deployment_name = graph.deployment_name;
-				result.application_name = graph.application_name;
+				machines.add(graph.machine_name);
+				deployments.add(graph.deployment_name);
+				applications.add(graph.application_name);
 			}
 			
 			for (GraphPoint gp : graph.points) {
@@ -2298,9 +2305,24 @@ public abstract class GrafanaFunction {
 			}
 		}
 		
+		result.id = getMergedFieldName(ids);
+		result.type = getMergedFieldName(types);
+		
+		result.machine_name = getMergedFieldName(machines);
+		result.deployment_name = getMergedFieldName(deployments);
+		result.application_name = getMergedFieldName(applications);
+		
 		result.points = new ArrayList<GraphPoint>(graphPoints.values());
 		
 		return result;
+	}
+	
+	private String getMergedFieldName(Set<String> mergedField) {
+		if (CollectionUtil.safeIsEmpty(mergedField)) {
+			return "";
+		}
+		
+		return mergedField.size() == 1 ? mergedField.iterator().next() : "(" + String.join("|", mergedField) + ")";
 	}
 	
 	protected Collection<GraphSliceTaskResult> executeGraphTasks(Collection<GraphSliceTask> slices, boolean sync) {

@@ -1034,7 +1034,15 @@ public class RegressionFunction extends EventsFunction {
 			return RegressionOutput.emptyOutput;
 		}
 		
-		Pair<Graph, Graph> regressionGraphs = Lists.newArrayList(regressionGraphsCollection).get(0);
+		Set<Graph> baselineGraphs = Sets.newHashSet();
+		Set<Graph> activeWindowGraphs = Sets.newHashSet();
+		
+		for (Pair<Graph, Graph> graphPairs : regressionGraphsCollection) {
+			baselineGraphs.add(graphPairs.getFirst());
+			activeWindowGraphs.add(graphPairs.getSecond());
+		}
+		
+		Pair<Graph, Graph> regressionGraphs = Pair.of(mergeGraphs(baselineGraphs), mergeGraphs(activeWindowGraphs));
 			
 		Graph baselineGraph = regressionGraphs.getFirst();
 		Graph activeWindowGraph = regressionGraphs.getSecond();
