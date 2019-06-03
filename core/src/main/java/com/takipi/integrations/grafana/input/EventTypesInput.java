@@ -84,22 +84,18 @@ public class EventTypesInput extends ViewInput {
 		return Arrays.asList(ArrayUtil.safeSplitArray(types, GrafanaFunction.GRAFANA_SEPERATOR, false));
 	}
 	
-	public Collection<EventTypes> getEventTypes()
-	{	
-		if (eventTypes == null)
-		{
+	public Collection<EventTypes> getEventTypes() {
+		if (eventTypes == null) {
 			return Arrays.asList(EventTypes.values());
 		}
 		
 		String[] parts = eventTypes.split(GrafanaFunction.ARRAY_SEPERATOR);
 		Collection<EventTypes> result = new ArrayList<EventTypes>(parts.length);
 		
-		for (String part : parts)
-		{
+		for (String part : parts) {
 			EventTypes type = EventTypes.valueOf(part);
 			
-			if (type != null)
-			{
+			if (type != null) {
 				result.add(type);
 			}
 		}

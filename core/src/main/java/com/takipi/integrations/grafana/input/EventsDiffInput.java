@@ -27,8 +27,7 @@ import com.takipi.integrations.grafana.functions.GrafanaFunction;
  *  Screenshot: https://drive.google.com/file/d/1l6ARZfTCR3UfBh649uO_VhAipeX8njZ4/view?usp=sharing
  *
  */
-public class EventsDiffInput extends EventsInput
-{
+public class EventsDiffInput extends EventsInput {
 	/**
 	 * A comma delimited array of application names to compare against
 	 */
@@ -89,23 +88,19 @@ public class EventsDiffInput extends EventsInput
 	public static final String DIFF = "diff";
 	public static final String DIFF_DESC = "diff_desc";
 	
-	public Collection<DiffType> getDiffTypes()
-	{
+	public Collection<DiffType> getDiffTypes() {
 		
-		if (diffTypes == null)
-		{
+		if (diffTypes == null) {
 			return Collections.emptyList();
 		}
 		
 		String[] parts = diffTypes.split(GrafanaFunction.ARRAY_SEPERATOR);
 		Collection<DiffType> result = new ArrayList<DiffType>(parts.length);
 		
-		for (String part : parts)
-		{
+		for (String part : parts) {
 			DiffType type = DiffType.valueOf(part);
 			
-			if (type != null)
-			{
+			if (type != null) {
 				result.add(type);
 			}
 		}

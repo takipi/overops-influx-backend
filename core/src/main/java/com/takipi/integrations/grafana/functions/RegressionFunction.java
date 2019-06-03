@@ -14,9 +14,6 @@ import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.metrics.Graph;
@@ -121,8 +118,7 @@ public class RegressionFunction extends EventsFunction {
 			
 			String description;
 			
-			switch (type)
-			{
+			switch (type) {
 				case NewIssues:
 					
 					if (event.stats.hits < input.minVolumeThreshold) {
@@ -189,8 +185,7 @@ public class RegressionFunction extends EventsFunction {
 		}
 		
 		@Override
-		public boolean equals(Object obj)
-		{
+		public boolean equals(Object obj) {
 			if (!super.equals(obj)) {
 				return false;
 			}
@@ -322,8 +317,7 @@ public class RegressionFunction extends EventsFunction {
 		}
 	}
 	
-	protected class RegressionToFormatter extends FieldFormatter
-	{
+	protected class RegressionToFormatter extends FieldFormatter {
 		
 		@Override
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
@@ -837,12 +831,12 @@ public class RegressionFunction extends EventsFunction {
 		
 		Collection<GraphSliceTaskResult> graphSliceTaskResults = executeGraphTasks(graphTasks, false);
 		
-		Map<DeterminantKey, List<Graph>> baselineGraphKeys = Maps.newHashMap();
-		Map<DeterminantKey, List<Graph>> activeWindowGraphKeys = Maps.newHashMap();
+		Map<DeterminantKey, List<Graph>> baselineGraphKeys = new HashMap<DeterminantKey, List<Graph>>();
+		Map<DeterminantKey, List<Graph>> activeWindowGraphKeys = new HashMap<DeterminantKey, List<Graph>>();
 		
 		divideGraphsByDeterminant(baselineGraphTasks, graphSliceTaskResults, baselineGraphKeys, activeWindowGraphKeys, applicationGroupsMap);
 		
-		Map<DeterminantKey, Pair<Graph, Graph>> graphResults = Maps.newHashMap();
+		Map<DeterminantKey, Pair<Graph, Graph>> graphResults = new HashMap<DeterminantKey, Pair<Graph, Graph>>();
 		
 		for (DeterminantKey graphResultKey : activeWindowGraphKeys.keySet()) {
 			Pair<Graph, Graph> determinantGraphs = getDeterminantGraphs(input, baselineGraphKeys, activeWindowGraphKeys,
@@ -897,15 +891,14 @@ public class RegressionFunction extends EventsFunction {
 	
 	private void divideGraphsByDeterminant(Collection<GraphSliceTask> baselineGraphTasks, Collection<GraphSliceTaskResult> graphSliceTaskResults,
 			Map<DeterminantKey, List<Graph>> baselineGraphKeys, Map<DeterminantKey, List<Graph>> activeWindowGraphKeys,
-			Map<String, Collection<String>> applicationGroupsMap)
-	{
+			Map<String, Collection<String>> applicationGroupsMap) {
 		for (GraphSliceTaskResult graphSliceTaskResult : graphSliceTaskResults) {
 			
 			boolean isBaselineTask = (baselineGraphTasks != null ? baselineGraphTasks.contains(graphSliceTaskResult.task) : false);
 			
 			for (Graph graph : graphSliceTaskResult.graphs) {
 				
-				Set<DeterminantKey> graphsKeys = Sets.newHashSet();
+				Set<DeterminantKey> graphsKeys = new HashSet<DeterminantKey>();
 				
 				graphsKeys.add(new DeterminantKey(graph.machine_name, graph.application_name, graph.deployment_name));
 				
@@ -942,7 +935,7 @@ public class RegressionFunction extends EventsFunction {
 		List<Graph> graphList = graphKeys.get(graphsKey);
 		
 		if (CollectionUtil.safeIsEmpty(graphList)) {
-			graphList = Lists.newArrayList();
+			graphList = new ArrayList<Graph>();
 			graphKeys.put(graphsKey, graphList);
 		}
 		
@@ -1038,7 +1031,15 @@ public class RegressionFunction extends EventsFunction {
 			return RegressionOutput.emptyOutput;
 		}
 		
-		Pair<Graph, Graph> regressionGraphs = Lists.newArrayList(regressionGraphsCollection).get(0);
+		Set<Graph> baselineGraphs = new HashSet<Graph>();
+		Set<Graph> activeWindowGraphs = new HashSet<Graph>();
+		
+		for (Pair<Graph, Graph> graphPairs : regressionGraphsCollection) {
+			baselineGraphs.add(graphPairs.getFirst());
+			activeWindowGraphs.add(graphPairs.getSecond());
+		}
+		
+		Pair<Graph, Graph> regressionGraphs = Pair.of(mergeGraphs(baselineGraphs), mergeGraphs(activeWindowGraphs));
 			
 		Graph baselineGraph = regressionGraphs.getFirst();
 		Graph activeWindowGraph = regressionGraphs.getSecond();
@@ -1049,8 +1050,7 @@ public class RegressionFunction extends EventsFunction {
 	
 	public RegressionOutput getRegressionOutput(String serviceId, BaseEventVolumeInput input, boolean newOnly,
 				Pair<DateTime, DateTime> timespan, RegressionInput regressionInput, RegressionWindow regressionWindow,
-				Map<String, EventResult> eventListMap, Graph baselineGraph, Graph activeWindowGraph)
-	{
+				Map<String, EventResult> eventListMap, Graph baselineGraph, Graph activeWindowGraph) {
 		if ((activeWindowGraph == null) ||(activeWindowGraph.points == null)) {
 			return RegressionOutput.emptyOutput;
 		}

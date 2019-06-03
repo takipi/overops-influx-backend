@@ -1,14 +1,14 @@
 package com.takipi.integrations.grafana.util;
 
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.joda.time.DateTime;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.util.settings.ServiceSettingsData;
@@ -71,7 +71,7 @@ public class EventLinkEncoder {
 	}
 	
 	private static String toEventIdsList(EventResult event) {
-		Set<String> allEventIds = Sets.newHashSet();
+		Set<String> allEventIds = new HashSet<String>();
 		
 		allEventIds.add(event.id);
 		
@@ -87,7 +87,7 @@ public class EventLinkEncoder {
 	}
 	
 	private static String toList(Collection<String> col, boolean addQuotes) {
-		List<String> lst = Lists.newArrayList(col);
+		List<String> lst = new ArrayList<String>(col);
 
 		StringBuilder sb = new StringBuilder();
 

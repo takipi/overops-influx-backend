@@ -4,11 +4,9 @@ import com.takipi.api.client.ApiClient;
 import com.takipi.integrations.grafana.input.ConvertToArrayInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 
-public class ConvertToArrayFunction extends VariableFunction
-{
+public class ConvertToArrayFunction extends VariableFunction {
 	
-	public ConvertToArrayFunction(ApiClient apiClient)
-	{
+	public ConvertToArrayFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
 

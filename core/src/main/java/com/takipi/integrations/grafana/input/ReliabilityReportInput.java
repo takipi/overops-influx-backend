@@ -233,13 +233,11 @@ public class ReliabilityReportInput extends RegressionsInput {
 			this.includeTransactions = includeTransactions;
 		}
 		
-		public boolean includeSlowdowns()
-		{
+		public boolean includeSlowdowns() {
 			return includeTransactions;
 		}
 		
-		public boolean includeRegressions()
-		{
+		public boolean includeRegressions() {
 			return includeRegressions;
 		}
 	}

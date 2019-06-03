@@ -10,8 +10,7 @@ package com.takipi.integrations.grafana.input;
  * 		"timeFilter":"$timeFilter","sorted":"true", 
  * 		"pointsWanted":"$transactionPointsWanted", "performanceStates":"SLOWING|CRITICAL"})
  */
-public class SlowTransactionsInput extends BaseEventVolumeInput
-{
+public class SlowTransactionsInput extends BaseEventVolumeInput {
 	/**
 	 * A | delimited array of performance states, that a target transaction must meet in order to be returned
 	 * by this function. Possible values are: 	NO_DATA, OK, SLOWING, CRITICAL

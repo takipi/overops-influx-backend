@@ -117,8 +117,7 @@ public class GrafanaSettings {
 		
 		String json;
 		
-		synchronized (bundledSettingsLock)
-		{
+		synchronized (bundledSettingsLock) {
 			if (bundledSettingsData != null) {
 				return bundledSettingsData;
 			}
@@ -156,8 +155,7 @@ public class GrafanaSettings {
 		}
 	}
 	
-	public static void init(SettingsStorage newSettingsStorage)
-	{
+	public static void init(SettingsStorage newSettingsStorage) {
 		setSettingsStorage(newSettingsStorage);
 		initCache();
 	}
@@ -213,8 +211,7 @@ public class GrafanaSettings {
 		return result;
 	}
 	
-	private static void initCache()
-	{
+	private static void initCache() {
 		if (ENABLE_CACHE) {
 			settingsCache = CacheBuilder.newBuilder()
 					.maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_RETENTION, TimeUnit.SECONDS)

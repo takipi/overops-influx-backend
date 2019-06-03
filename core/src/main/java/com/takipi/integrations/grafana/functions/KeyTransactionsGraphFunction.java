@@ -16,8 +16,7 @@ import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput;
 import com.takipi.integrations.grafana.input.TransactionsGraphInput.AggregateMode;
 
-public class KeyTransactionsGraphFunction extends TransactionsGraphFunction
-{
+public class KeyTransactionsGraphFunction extends TransactionsGraphFunction {
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -36,16 +35,14 @@ public class KeyTransactionsGraphFunction extends TransactionsGraphFunction
 		}
 	}
 
-	public KeyTransactionsGraphFunction(ApiClient apiClient)
-	{
+	public KeyTransactionsGraphFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
 	
 	@Override
 	protected List<GraphSeries> processServiceGraph(String serviceId, TransactionsGraphInput input,
 			Collection<String> serviceIds, Pair<DateTime, DateTime> timespan,  
-			Collection<TransactionGraph> graphs)
-	{
+			Collection<TransactionGraph> graphs) {
 		if (!input.hasTransactions()) {
 			return Collections.emptyList();
 		}

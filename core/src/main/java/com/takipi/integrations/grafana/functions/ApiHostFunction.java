@@ -8,8 +8,7 @@ import com.takipi.integrations.grafana.input.ApiHostInput;
 import com.takipi.integrations.grafana.input.ApiHostInput.HostType;
 import com.takipi.integrations.grafana.input.FunctionInput;
 
-public class ApiHostFunction extends VariableFunction
-{
+public class ApiHostFunction extends VariableFunction {
 	private static final String SAAS_API = "api.overops.com";
 	private static final String SAAS_APP = "app.overops.com";
 	
@@ -90,8 +89,7 @@ public class ApiHostFunction extends VariableFunction
 				appender.append(value);
 			}
 		}
-		catch (MalformedURLException e)
-		{
+		catch (MalformedURLException e) {
 			throw new IllegalStateException(e);
 		}
 		

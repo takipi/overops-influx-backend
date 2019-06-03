@@ -31,8 +31,7 @@ public class VariableConditionFunction extends VariableFunction{
 	}
 
 	@Override
-	protected void populateValues(FunctionInput input, VariableAppender appender)
-	{
+	protected void populateValues(FunctionInput input, VariableAppender appender) {
 		VariableConditionInput vcInput = (VariableConditionInput)input;
 		
 		String value;

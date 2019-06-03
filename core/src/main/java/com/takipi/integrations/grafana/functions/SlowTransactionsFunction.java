@@ -19,8 +19,7 @@ import com.takipi.integrations.grafana.input.TransactionsListInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
-public class SlowTransactionsFunction extends EnvironmentVariableFunction
-{
+public class SlowTransactionsFunction extends EnvironmentVariableFunction {
 
 	public static class Factory implements FunctionFactory {
 
@@ -40,14 +39,12 @@ public class SlowTransactionsFunction extends EnvironmentVariableFunction
 		}
 	}
 	
-	public SlowTransactionsFunction(ApiClient apiClient)
-	{
+	public SlowTransactionsFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
 	
 	private Collection<String> getSlowTransactions(String serviceId, 
-			SlowTransactionsInput input, Pair<DateTime, DateTime> timeSpan)
-	{				
+			SlowTransactionsInput input, Pair<DateTime, DateTime> timeSpan) {
 		String viewId = getViewId(serviceId, input.view);
 		
 		if (viewId == null) {
@@ -92,8 +89,7 @@ public class SlowTransactionsFunction extends EnvironmentVariableFunction
 
 	@Override
 	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
-			VariableAppender appender)
-	{
+			VariableAppender appender) {
 		SlowTransactionsInput stInput = (SlowTransactionsInput)input;
 	
 		Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(stInput.timeFilter);

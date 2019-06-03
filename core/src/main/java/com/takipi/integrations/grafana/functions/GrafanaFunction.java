@@ -27,8 +27,6 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.ocpsoft.prettytime.PrettyTime;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.Location;
@@ -706,8 +704,7 @@ public abstract class GrafanaFunction {
 		return value.replace(INTERNAL_DELIM, QUALIFIED_DELIM);
 	}
 	
-	protected String toTransactionName(Location location)
-	{
+	protected String toTransactionName(Location location) {
 		String transactionName =
 				location.class_name + TRANS_DELIM + location.method_name + TRANS_DELIM + location.method_desc;
 		return transactionName;
@@ -1175,12 +1172,10 @@ public abstract class GrafanaFunction {
 				result.activeGraph.points.add(gp);
 				
 				for (GraphPointContributor gpc : gp.contributors) {
-					if (eventMap != null)
-					{
+					if (eventMap != null) {
 						EventResult event = eventMap.get(gpc.id);
 						
-						if (event != null)
-						{
+						if (event != null) {
 							result.eventMap.put(event.id, event);
 						}
 					}
@@ -1461,8 +1456,7 @@ public abstract class GrafanaFunction {
 
 	}
 	
-	private static Collection<String> toArray(String value)
-	{
+	private static Collection<String> toArray(String value) {
 		if (value == null) {
 			return Collections.emptyList();
 		}
@@ -1876,8 +1870,7 @@ public abstract class GrafanaFunction {
 		seriesValues.sort(new Comparator<List<Object>>() {
 
 			@Override
-			public int compare(List<Object> o1, List<Object> o2)
-			{
+			public int compare(List<Object> o1, List<Object> o2) {
 				int o1Index = -1;
 				int o2Index = -1;
 					
@@ -2118,7 +2111,7 @@ public abstract class GrafanaFunction {
 
 		Collection<GraphSliceTaskResult> graphTaskResults = executeGraphTasks(tasks, false);
 		
-		ArrayList<Graph> graphs = Lists.newArrayList();
+		ArrayList<Graph> graphs = new ArrayList<Graph>();
 		
 		for (GraphSliceTaskResult graphSliceTaskResult : graphTaskResults) {
 			graphs.addAll(graphSliceTaskResult.graphs);
@@ -2224,8 +2217,7 @@ public abstract class GrafanaFunction {
 		result.add(new SliceRequest(from, from.plusDays(1).withTimeAtStartOfDay().minusMinutes(1), END_SLICE_POINT_COUNT));
 
 		// Only full days (<2018-11-23T00:00:00.000+02:00, 2018-11-23T23:59:00.000+02:00>)
-		for (int i = 1; i < days; i++)
-		{
+		for (int i = 1; i < days; i++) {
 			DateTime fullDayStart = from.plusDays(i).withTimeAtStartOfDay(); 
 			DateTime fullDayEnd = fullDayStart.plusDays(1).withTimeAtStartOfDay().minusMinutes(1);
 			
@@ -2264,6 +2256,12 @@ public abstract class GrafanaFunction {
 		Graph result = new Graph();
 		Map<Long, GraphPoint> graphPoints = new TreeMap<Long, GraphPoint>();
 		
+		Set<String> ids = new HashSet<String>();
+		Set<String> types = new HashSet<String>();
+		Set<String> machines = new HashSet<String>();
+		Set<String> deployments = new HashSet<String>();
+		Set<String> applications = new HashSet<String>();
+		
 		for (Graph graph : graphs) {
 			
 			if (graph == null) {
@@ -2271,12 +2269,12 @@ public abstract class GrafanaFunction {
 			}
 			
 			if (result.id == null) {
-				result.id = graph.id;
-				result.type = graph.type;
+				ids.add(graph.id);
+				types.add(graph.type);
 				
-				result.machine_name = graph.machine_name;
-				result.deployment_name = graph.deployment_name;
-				result.application_name = graph.application_name;
+				machines.add(graph.machine_name);
+				deployments.add(graph.deployment_name);
+				applications.add(graph.application_name);
 			}
 			
 			for (GraphPoint gp : graph.points) {
@@ -2291,7 +2289,7 @@ public abstract class GrafanaFunction {
 					
 					if (!CollectionUtil.safeIsEmpty(gp.contributors)) {
 						if (graphPoint.contributors == null) {
-							graphPoint.contributors = Lists.newArrayList();
+							graphPoint.contributors = new ArrayList<GraphPointContributor>();
 						}
 						
 						for (GraphPointContributor contributor : gp.contributors) {
@@ -2304,20 +2302,35 @@ public abstract class GrafanaFunction {
 			}
 		}
 		
+		result.id = getMergedFieldName(ids);
+		result.type = getMergedFieldName(types);
+		
+		result.machine_name = getMergedFieldName(machines);
+		result.deployment_name = getMergedFieldName(deployments);
+		result.application_name = getMergedFieldName(applications);
+		
 		result.points = new ArrayList<GraphPoint>(graphPoints.values());
 		
 		return result;
 	}
 	
+	private String getMergedFieldName(Set<String> mergedField) {
+		if (CollectionUtil.safeIsEmpty(mergedField)) {
+			return "";
+		}
+		
+		return mergedField.size() == 1 ? mergedField.iterator().next() : "(" + String.join("|", mergedField) + ")";
+	}
+	
 	protected Collection<GraphSliceTaskResult> executeGraphTasks(Collection<GraphSliceTask> slices, boolean sync) {
 		
-		List<Callable<Object>> tasks = Lists.newArrayList(slices);
+		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>(slices);
 		
 		Collection<Object> taskResults;
 		
 		if ((sync) || (tasks.size() == 1)) {
 			
-			taskResults = Lists.newArrayList();
+			taskResults = new ArrayList<Object>();
 			
 			for (Callable<Object> task : tasks) {
 				try {
@@ -2330,7 +2343,7 @@ public abstract class GrafanaFunction {
 			taskResults = executeTasks(tasks, true);	
 		}
 		
-		List<GraphSliceTaskResult> result = Lists.newArrayList();
+		List<GraphSliceTaskResult> result = new ArrayList<GraphSliceTaskResult>();
 		
 		for (Object taskResult : taskResults) {
 			
@@ -2531,8 +2544,7 @@ public abstract class GrafanaFunction {
 		
 		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);
 		
-		if (applyBreakFilter)
-		{
+		if (applyBreakFilter) {
 			breakdownSet = builder.getBreakFilters();
 		} else {
 			breakdownSet = breakdownTypes;
@@ -2618,7 +2630,7 @@ public abstract class GrafanaFunction {
 	public static Map<DeterminantKey, Map<String, EventResult>> getEventsMapByKey(Collection<EventResult> events,
 			Map<String, Collection<String>> applicationGroupsMap) {
 		
-		Map<DeterminantKey, Map<String, EventResult>> keyToEventMap = Maps.newHashMap();
+		Map<DeterminantKey, Map<String, EventResult>> keyToEventMap = new HashMap<DeterminantKey, Map<String, EventResult>>();
 		
 		for (EventResult event : events) {
 			if (CollectionUtil.safeIsEmpty(event.stats.contributors)) {
@@ -2640,10 +2652,8 @@ public abstract class GrafanaFunction {
 				
 				Collection<String> appGroups = applicationGroupsMap.get(contributor.application_name);
 				
-				if (!CollectionUtil.safeIsEmpty(appGroups))
-				{
-					for (String appGroup : appGroups)
-					{
+				if (!CollectionUtil.safeIsEmpty(appGroups)) {
+					for (String appGroup : appGroups) {
 						DeterminantKey groupDeterminantKey = new DeterminantKey(contributor.machine_name,
 								appGroup, contributor.deployment_name);
 						
@@ -2662,7 +2672,7 @@ public abstract class GrafanaFunction {
 		Map<String, EventResult> currentDeterminant = keyToEventMap.get(determinantKey);
 		
 		if (currentDeterminant == null) {
-			currentDeterminant = Maps.newHashMap();
+			currentDeterminant = new HashMap<String, EventResult>();
 			
 			keyToEventMap.put(determinantKey, currentDeterminant);
 		}
