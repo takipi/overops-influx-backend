@@ -366,7 +366,7 @@ public class ReliabilityReportInput extends RegressionsInput {
 	
 	/**
 	 * A comma delimited array used to visually annotate the alert status of the key
-	 * with values for: no alerts (add), new error, anomaly  for example: ➕,🆕️,📈
+	 * with values for: no alerts (add), new error, anomaly for example: (\xE2\x9E\x95,\xF0\x9F\x86\x95\xEF\xB8\x8F,\xF0\x9F\x93\x88)
 	 */
 	public String alertStatusPrefixes;
 	
