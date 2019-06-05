@@ -1074,7 +1074,7 @@ public abstract class GrafanaFunction {
 		
 		DirectStatsPerformanceCalculator calc = DirectStatsPerformanceCalculator.of(
 				slowdownSettings.active_invocations_threshold, slowdownSettings.baseline_invocations_threshold,
-				slowdownSettings.min_delta_threshold,
+				slowdownSettings.min_delta_threshold, slowdownSettings.min_delta_threshold_percentage,
 				slowdownSettings.over_avg_slowing_percentage, slowdownSettings.over_avg_critical_percentage,
 				slowdownSettings.std_dev_factor);
 	
@@ -1198,7 +1198,7 @@ public abstract class GrafanaFunction {
 
 		GraphPerformanceCalculator calc = GraphPerformanceCalculator.of(
 				slowdownSettings.active_invocations_threshold, slowdownSettings.baseline_invocations_threshold,
-				slowdownSettings.min_delta_threshold,
+				slowdownSettings.min_delta_threshold, slowdownSettings.min_delta_threshold_percentage,
 				slowdownSettings.over_avg_slowing_percentage, slowdownSettings.over_avg_critical_percentage,
 				slowdownSettings.std_dev_factor);			
 				
