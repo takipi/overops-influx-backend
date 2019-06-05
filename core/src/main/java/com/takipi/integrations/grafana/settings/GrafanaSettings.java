@@ -42,6 +42,8 @@ public class GrafanaSettings {
 	private static final int CACHE_SIZE = 1000;
 	private static final int CACHE_RETENTION = 20;
 	
+	private static final SettingsVersion MIN_SLOWDOWN_PERCENTAGE_THRESHOLD = SettingsVersion.of(1, 1, 0);
+	
 	private static LoadingCache<SettingsCacheKey, ServiceSettings> settingsCache = null;
 	private static SettingsStorage settingsStorage = null;
 	
@@ -234,6 +236,7 @@ public class GrafanaSettings {
 		}
 		
 		ServiceSettingsData bundledSettingsData = bundledSettings.getFirst();
+		SettingsVersion bundledVersion = SettingsVersion.safeParse(bundledSettingsData.version);
 		
 		if (serviceSettingsData.general == null) {
 			serviceSettingsData.general = bundledSettingsData.general;
@@ -261,6 +264,11 @@ public class GrafanaSettings {
 		
 		if (serviceSettingsData.slowdown == null) {
 			serviceSettingsData.slowdown = bundledSettingsData.slowdown;
+		}
+		
+		if ((MIN_SLOWDOWN_PERCENTAGE_THRESHOLD.isNewerThan(bundledVersion)) &&
+			(serviceSettingsData.slowdown.min_delta_threshold_percentage == 0.0)) {
+			serviceSettingsData.slowdown.min_delta_threshold_percentage = 0.20;
 		}
 		
 		if (serviceSettingsData.regression_report == null) {
