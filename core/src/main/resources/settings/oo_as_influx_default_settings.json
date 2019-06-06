@@ -1,5 +1,5 @@
 {
-	"version": "1.0.0",
+	"version": "1.1.0",
 	
 	"general": {
 		"group_by_entryPoint": true,
@@ -49,6 +49,7 @@
 		"active_invocations_threshold": 50,
 		"baseline_invocations_threshold": 50,
 		"min_delta_threshold": 5,
+		"min_delta_threshold_percentage": 0.20,
 		"over_avg_slowing_percentage": 0.3,
 		"over_avg_critical_percentage": 0.6,
 		"std_dev_factor": 1.5
