@@ -606,6 +606,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		private Graph adjustDeploymentsBaselineGraph(RegressionWindow activeWindow, DeterminantKey determinantKey, Map<String, EventResult> eventResultMap, Graph baselineGraph)
 		{
+			Graph resultGraph = baselineGraph;
+			
 			Pair<DateTime, DateTime> dateTimeDateTimePair = activeWindow.deploymentsTimespan.get(determinantKey.determinantKey);
 			
 			if (dateTimeDateTimePair != null) {
@@ -622,10 +624,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 						dateTimeDateTimePair, baselineTimespan,
 						eventResultMap);
 				
-				baselineGraph = deploymentsRegressionGraphs.baselineGraph;
+				resultGraph = deploymentsRegressionGraphs.baselineGraph;
 			}
 			
-			return baselineGraph;
+			return resultGraph;
 		}
 		
 		private Collection<EventResult> getEventResultsWithRetries(DateTime activeWindowStart, DateTime activeWindowEnd)
