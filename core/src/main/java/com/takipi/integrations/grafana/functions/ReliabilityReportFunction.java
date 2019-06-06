@@ -1109,7 +1109,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 	
 	private void runRegressionBatch(String serviceId, ReliabilityReportInput input, Pair<DateTime, DateTime> timeSpan,
 			List<ReportKey> activeKeys, List<Callable<Object>> tasks, List<ReportAsyncResult> result, String viewId, int startIndex) {
-		runRegressionBatch(serviceId, input, timeSpan, activeKeys, tasks, result, viewId, startIndex, null);
+		runRegressionBatch(serviceId, input, timeSpan, activeKeys, tasks, result, viewId, startIndex, input);
 	}
 	
 	
