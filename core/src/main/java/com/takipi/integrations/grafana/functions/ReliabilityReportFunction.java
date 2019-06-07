@@ -180,6 +180,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 			this.isKey = isKey;
 		}
 		
+		public boolean isLabelApp() {
+			return false;
+		}
+		
 		public ReportKey(Collection<ReportKey> reportKeys) {
 			Collection<String> reportKeyNames = new ArrayList<String>();
 			
@@ -288,6 +292,11 @@ public class ReliabilityReportFunction extends EventsFunction {
 
 		protected AppReportKey(String name, boolean isKey) {
 			super(name, isKey);
+		}
+		
+		@Override
+		public boolean isLabelApp() {
+			return BaseEventVolumeInput.isLabelApp(name);
 		}
 		
 		@Override
@@ -491,7 +500,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		protected RegressionAsyncTask(Map<String, Pair<ReportKey, RegressionsInput>> subRegressionInputs,
 				RegressionFunction function, ReportKey aggregatedKey, String serviceId, String viewId,
-				BaseEventVolumeInput input, Map<String, Collection<String>> applicationGroupsMap, Pair<DateTime, DateTime> timeSpan, boolean newOnly) {
+				BaseEventVolumeInput input, Map<String,
+				Collection<String>> applicationGroupsMap, Pair<DateTime, DateTime> timeSpan, boolean newOnly) {
 			this.subRegressionInputs = subRegressionInputs;
 			this.function = function;
 			this.reportKey = aggregatedKey;
@@ -594,6 +604,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		private Graph adjustDeploymentsBaselineGraph(RegressionWindow activeWindow, DeterminantKey determinantKey, Map<String, EventResult> eventResultMap, Graph baselineGraph)
 		{
+			Graph resultGraph = baselineGraph;
+			
 			Pair<DateTime, DateTime> dateTimeDateTimePair = activeWindow.deploymentsTimespan.get(determinantKey.determinantKey);
 			
 			if (dateTimeDateTimePair != null) {
@@ -610,10 +622,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 						dateTimeDateTimePair, baselineTimespan,
 						eventResultMap);
 				
-				baselineGraph = deploymentsRegressionGraphs.baselineGraph;
+				resultGraph = deploymentsRegressionGraphs.baselineGraph;
 			}
 			
-			return baselineGraph;
+			return resultGraph;
 		}
 		
 		private Collection<EventResult> getEventResultsWithRetries(DateTime activeWindowStart, DateTime activeWindowEnd)
@@ -1016,51 +1028,22 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		if (scoreType.includeRegressions()) {
 			
-			int startIndex = 0;
+			List<ReportKey> labelApps = new ArrayList<ReportKey>();
+			List<ReportKey> generalKeys = new ArrayList<ReportKey>();
 			
-			while (startIndex < activeKeys.size()) {
-				int endIndex = Math.min(activeKeys.size(), startIndex + GrafanaConfig.BATCH_REQUEST_SIZE);
-				
-				List<ReportKey> keysToSend = activeKeys.subList(startIndex, endIndex);
-				
-				startIndex += GrafanaConfig.BATCH_REQUEST_SIZE;
-				
-				ReportKey aggregatedActiveKey = new ReportKey(keysToSend);
-				
-				Map<String, Pair<ReportKey, RegressionsInput>> subRegressionInputs = new HashMap<String, Pair<ReportKey, RegressionsInput>>();
-				
-				for (ReportKey key : keysToSend) {
-					RegressionsInput regInput = getInput(input, serviceId, key.name, true);
-					
-					subRegressionInputs.put(key.name, Pair.of(key, regInput));
-				}
-				
-				Map<String, Collection<String>> applicationGroupsMap = getApplicationGroupsMap(serviceId, keysToSend);
-				
-				RegressionFunction regressionFunction = new RegressionFunction(apiClient, settingsMaps);
-				
-				RegressionsInput regressionInput = getInput(input, serviceId, aggregatedActiveKey.name, true);
-				
-				AggregatedRegressionOutput regressionOutput = ApiCache.getAggregatedRegressionOutput(apiClient,
-					serviceId, regressionInput, regressionFunction, false);
-				
-				if ((regressionOutput != null) && (regressionOutput.keyRegressionOutputMap != null)) {
-					
-					for (Map.Entry<ReportKey, RegressionOutput> aggregatedRegressionOutput :
-							regressionOutput.keyRegressionOutputMap.entrySet()) {
-						
-						AggregatedRegressionAsyncResult aggregatedRegressionAsyncResult =
-								new AggregatedRegressionAsyncResult(aggregatedRegressionOutput.getKey(),
-								aggregatedRegressionOutput.getValue());
-						
-						result.add(aggregatedRegressionAsyncResult);
-					}
+			for (ReportKey key : activeKeys) {
+				if (key.isLabelApp()) {
+					labelApps.add(key);
 				} else {
-					
-					tasks.add(new RegressionAsyncTask(subRegressionInputs, regressionFunction,
-							aggregatedActiveKey, serviceId, viewId, regressionInput, applicationGroupsMap, timeSpan, false));
+					generalKeys.add(key);
 				}
 			}
+			
+			if (!CollectionUtil.safeIsEmpty(labelApps)) {
+				runSubGroupRegressionBatch(serviceId, input, timeSpan, tasks, result, viewId, labelApps);
+			}
+			
+			runSubGroupRegressionBatch(serviceId, input, timeSpan, tasks, result, viewId, generalKeys);
 		}
 		
 		if ((scoreType.includeSlowdowns())) {
@@ -1095,6 +1078,81 @@ public class ReliabilityReportFunction extends EventsFunction {
 		}
 
 		return result;
+	}
+	
+	
+	private void runSubGroupRegressionBatch(String serviceId, ReliabilityReportInput input, Pair<DateTime, DateTime> timeSpan,
+			List<Callable<Object>> tasks, List<ReportAsyncResult> result, String viewId, List<ReportKey> keys) {
+		List<String> keyNames = new ArrayList<>();
+		
+		boolean labelAppsRequest = true;
+		
+		for (ReportKey key : keys) {
+			keyNames.add(key.name);
+			
+			labelAppsRequest &= key.isLabelApp();
+		}
+		
+		String appsStr = String.join(GrafanaFunction.GRAFANA_SEPERATOR_RAW,
+				keyNames);
+		
+		ReliabilityReportInput appsInput = getInput(input, serviceId, appsStr, true);
+		
+		runRegressionBatch(serviceId, appsInput, timeSpan, keys, tasks, result, viewId, labelAppsRequest);
+	}
+	
+	private void runRegressionBatch(String serviceId, ReliabilityReportInput input, Pair<DateTime, DateTime> timeSpan,
+			List<ReportKey> activeKeys, List<Callable<Object>> tasks, List<ReportAsyncResult> result, String viewId,
+			boolean labelAppsRequest) {
+		int startIndex = 0;
+		
+		while (startIndex < activeKeys.size()) {
+			int endIndex = Math.min(activeKeys.size(), startIndex + GrafanaConfig.BATCH_REQUEST_SIZE);
+			
+			List<ReportKey> keysToSend = activeKeys.subList(startIndex, endIndex);
+			
+			startIndex += GrafanaConfig.BATCH_REQUEST_SIZE;
+			
+			ReportKey aggregatedActiveKey = new ReportKey(keysToSend);
+			
+			Map<String, Pair<ReportKey, RegressionsInput>> subRegressionInputs = new HashMap<String, Pair<ReportKey, RegressionsInput>>();
+			
+			for (ReportKey key : keysToSend) {
+				RegressionsInput regInput = getInput(input, serviceId, key.name, true);
+				
+				subRegressionInputs.put(key.name, Pair.of(key, regInput));
+			}
+			
+			Map<String, Collection<String>> applicationGroupsMap = getApplicationGroupsMap(serviceId, keysToSend);
+			
+			RegressionFunction regressionFunction = new RegressionFunction(apiClient, settingsMaps);
+			
+			RegressionsInput regressionInput = getInput(input, serviceId, aggregatedActiveKey.name, true);
+			
+			if (labelAppsRequest) {
+				regressionInput.applications = GrafanaFunction.ALL;
+			}
+			
+			AggregatedRegressionOutput regressionOutput = ApiCache.getAggregatedRegressionOutput(apiClient,
+				serviceId, regressionInput, regressionFunction, false);
+			
+			if ((regressionOutput != null) && (regressionOutput.keyRegressionOutputMap != null)) {
+				
+				for (Map.Entry<ReportKey, RegressionOutput> aggregatedRegressionOutput :
+						regressionOutput.keyRegressionOutputMap.entrySet()) {
+					
+					AggregatedRegressionAsyncResult aggregatedRegressionAsyncResult =
+							new AggregatedRegressionAsyncResult(aggregatedRegressionOutput.getKey(),
+							aggregatedRegressionOutput.getValue());
+					
+					result.add(aggregatedRegressionAsyncResult);
+				}
+			} else {
+				
+				tasks.add(new RegressionAsyncTask(subRegressionInputs, regressionFunction,
+						aggregatedActiveKey, serviceId, viewId, regressionInput, applicationGroupsMap, timeSpan, false));
+			}
+		}
 	}
 	
 	private Map<String, Collection<String>> getApplicationGroupsMap(String serviceId, 
