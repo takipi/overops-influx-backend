@@ -543,7 +543,7 @@
           "link": true,
           "linkTargetBlank": false,
           "linkTooltip": "${__cell_7}",
-          "linkUrl": "d/6TxYIh6mk/errors-drill-down?orgId=1&from=${__cell_2}&to=${__cell_3}&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-transactions=${__cell_9}&var-type=Transaction Failures",
+          "linkUrl": "d/6TxYIh6mk/errors-drill-down?orgId=1&from=${__cell_2}&to=${__cell_3}&var-environments=$environments&var-servers=$servers&var-applications=$applications&var-deployments=$deployments&var-transactions=${__cell_10}&var-type=Transaction Failures",
           "mappingType": 1,
           "pattern": "transaction",
           "thresholds": [],
