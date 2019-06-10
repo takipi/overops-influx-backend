@@ -101,7 +101,6 @@ public class ApiCache {
 		
 	public static final int NO_GRAPH_SLICE = -1;
 	public static final int MIN_SLICE_POINTS = 3;
-	public static final int GET_EVENT_LIST_MAX_RETRIES = 5;
 	
 	public static boolean CACHE_GRAPHS = true;
 	public static boolean SLICE_GRAPHS = true;
@@ -1387,124 +1386,7 @@ public class ApiCache {
 		}
 	}
 	
-	public static class RegressionApiResultsCacheLoader extends EventsCacheLoader {
-		private final RegressionWindow activeWindow;
-		private final Map<String, Collection<String>> applicationGroupsMap;
-		private final RegressionFunction regressionFunction;
-		private final RegressionInput subRegressionInput;
-		private final String viewId;
-		private final boolean newOnly;
-		
-		public RegressionApiResultsCacheLoader(ApiClient apiClient, String serviceId, RegressionWindow activeWindow,
-				Map<String, Collection<String>> applicationGroupsMap, RegressionFunction regressionFunction,
-				RegressionInput subRegressionInput, BaseEventVolumeInput regressionInput, String viewId, boolean newOnly) {
-			
-			super(apiClient, null, serviceId, regressionInput, null, null, null);
-			
-			this.activeWindow = activeWindow;
-			this.applicationGroupsMap = applicationGroupsMap;
-			this.regressionFunction = regressionFunction;
-			this.subRegressionInput = subRegressionInput;
-			this.viewId = viewId;
-			this.newOnly = newOnly;
-		}
-		
-		public Set<RegressionEventsOutput> getRegressionApiResults() {
-			
-			DateTime activeWindowStart = activeWindow.activeWindowStart;
-			DateTime activeWindowEnd = activeWindow.activeWindowStart.plusMinutes(subRegressionInput.activeTimespan);
-			
-			Collection<EventResult> eventList = getEventResultsWithRetries(input, activeWindowStart, activeWindowEnd);
-			
-			if (eventList == null) {
-				return null;
-			}
-			
-			EventsDeterminantMap eventsMap = getEventsMapByKey(eventList, applicationGroupsMap);
-			
-			Map<DeterminantKey, Pair<Graph, Graph>> regressionGraphsMap = regressionFunction.getRegressionGraphs(serviceId,
-					viewId, subRegressionInput, activeWindow, applicationGroupsMap,
-					(BaseEventVolumeInput) input, newOnly);
-			
-			Set<RegressionEventsOutput> result = new HashSet<RegressionEventsOutput>();
-			
-			for (DeterminantKey determinantKey : regressionGraphsMap.keySet()) {
-				Map<String, EventResult> eventResultMap = eventsMap.get(determinantKey);
-				Pair<Graph, Graph> regressionGraphs = regressionGraphsMap.get(determinantKey);
-				
-				result.add(new RegressionEventsOutput(determinantKey, regressionGraphs.getFirst(), regressionGraphs.getSecond(), eventResultMap));
-			}
-			
-			return result;
-		}
-		
-		private Collection<EventResult> getEventResultsWithRetries(ViewInput regressionInput, DateTime activeWindowStart, DateTime activeWindowEnd) {
-			
-			Collection<EventResult> result = null;
-			
-			for (int retries = 0; retries < GET_EVENT_LIST_MAX_RETRIES; retries++) {
-				result = regressionFunction.getEventList(serviceId, viewId, regressionInput, activeWindowStart, activeWindowEnd,
-						null, true, VolumeType.all, true);
-				
-				if (result != null) {
-					break;
-				}
-				
-				logger.warn("Could not retrieve event list from API retry number: {}", retries);
-			}
-			
-			if (result == null) {
-				logger.error("Could not retrieve event list from API after max retries");
-				
-				return null;
-			}
-			
-			return result;
-		}
-		
-		
-		public static EventsDeterminantMap getEventsMapByKey(Collection<EventResult> events,
-				Map<String, Collection<String>> applicationGroupsMap) {
-			
-			EventsDeterminantMap result = new EventsDeterminantMap();
-			
-			for (EventResult event : events) {
-				if (CollectionUtil.safeIsEmpty(event.stats.contributors)) {
-					result.safeAddEventResult(DeterminantKey.Empty, event);
-					
-					continue;
-				}
-				
-				for (Stats contributor : event.stats.contributors) {
-					
-					DeterminantKey determinantKey = new DeterminantKey(contributor.machine_name,
-							contributor.application_name, contributor.deployment_name);
-					
-					EventResult contributorEventResult = (EventResult) event.clone();
-					
-					contributorEventResult.stats = new MainEventStats();
-					
-					result.safeAddEventResult(determinantKey, contributorEventResult);
-					
-					Collection<String> appGroups = applicationGroupsMap.get(contributor.application_name);
-					
-					if (!CollectionUtil.safeIsEmpty(appGroups)) {
-						for (String appGroup : appGroups) {
-							DeterminantKey groupDeterminantKey = new DeterminantKey(contributor.machine_name,
-									appGroup, contributor.deployment_name);
-							
-							result.safeAddEventResult(groupDeterminantKey, contributorEventResult);
-						}
-					}
-				}
-			}
-			
-			return result;
-		}
-	}
-	
 	public static class AggregatedRegressionCacheLoader extends RegressionCacheLoader {
-		private final RegressionsInput regressionsInput;
 		private final RegressionInput regressionInput;
 		private RegressionWindow activeWindow;
 		private Map<String, EventResult> eventResultMap;
@@ -1512,13 +1394,12 @@ public class ApiCache {
 		private Graph activeWindowGraph;
 		
 		public AggregatedRegressionCacheLoader(ApiClient apiClient, String serviceId,
-				BaseEventVolumeInput input, boolean newOnly, RegressionFunction regressionFunction,
+				boolean newOnly, RegressionFunction regressionFunction,
 				RegressionsInput regressionsInput, RegressionInput regressionInput, RegressionWindow activeWindow,
 				Map<String, EventResult> eventResultMap, Graph baselineGraph, Graph activeWindowGraph) {
 			
-			super(apiClient, serviceId, input, regressionFunction, newOnly);
+			super(apiClient, serviceId, regressionsInput, regressionFunction, newOnly);
 			
-			this.regressionsInput = regressionsInput;
 			this.regressionInput = regressionInput;
 			this.activeWindow = activeWindow;
 			this.eventResultMap = eventResultMap;
@@ -1527,7 +1408,7 @@ public class ApiCache {
 		}
 		
 		public RegressionOutput executeRegression() {
-			RegressionOutput result = function.executeRegression(serviceId, regressionsInput, newOnly, regressionInput, activeWindow,
+			RegressionOutput result = function.executeRegression(serviceId, (ReliabilityReportInput) input, newOnly, regressionInput, activeWindow,
 					eventResultMap, baselineGraph, activeWindowGraph);
 			
 			return result;
@@ -1980,12 +1861,12 @@ public class ApiCache {
 		}
 	}
 	
-	public static RegressionOutput getRegressionOutput(ApiClient apiClient, String serviceId, ReliabilityReportInput input,
+	public static RegressionOutput getRegressionOutput(ApiClient apiClient, String serviceId,
 			boolean newOnly, RegressionFunction regressionFunction, RegressionsInput subInputData,
 			RegressionInput regressionInput, RegressionWindow activeWindow, Map<String, EventResult> eventResultMap,
 			Graph baselineGraph, Graph activeWindowGraph, boolean load) {
 		
-		AggregatedRegressionCacheLoader key = new AggregatedRegressionCacheLoader(apiClient, serviceId, input, newOnly,
+		AggregatedRegressionCacheLoader key = new AggregatedRegressionCacheLoader(apiClient, serviceId, newOnly,
 				regressionFunction, subInputData, regressionInput, activeWindow, eventResultMap, baselineGraph, activeWindowGraph);
 		
 		return getRegressionOutput(key, load);
@@ -2016,30 +1897,6 @@ public class ApiCache {
 			}
 		} else {
 			return regressionOutputCache.getIfPresent(key);
-		}
-	}
-	
-	public static Set<RegressionEventsOutput> getRegressionApiResults(ApiClient apiClient,
-			String serviceId, RegressionWindow activeWindow, Map<String, Collection<String>> applicationGroupsMap, RegressionFunction regressionFunction,
-			RegressionInput subRegressionInput, BaseEventVolumeInput regressionInput, String viewId, boolean newOnly, boolean load) {
-		
-		RegressionApiResultsCacheLoader key = new RegressionApiResultsCacheLoader(apiClient, serviceId, activeWindow,
-				applicationGroupsMap, regressionFunction, subRegressionInput, regressionInput, viewId, newOnly);
-		
-		if (load) {
-			try {
-				Set<RegressionEventsOutput> result = regressionApiOutputCache.get(key);
-				
-				if (result == null) {
-					regressionOutputCache.invalidate(key);
-				}
-				
-				return result;
-			} catch (ExecutionException e) {
-				throw new IllegalStateException(e);
-			}
-		} else {
-			return regressionApiOutputCache.getIfPresent(key);
 		}
 	}
 	
@@ -2080,16 +1937,6 @@ public class ApiCache {
 	}
 	
 	private static KeyValueStorage cacheStorage = new FolderStorage(CACHE_FOLDER);
-	
-	public static final LoadingCache<RegressionApiResultsCacheLoader, Set<RegressionEventsOutput>>
-			regressionApiOutputCache = CacheBuilder.newBuilder().maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_REFRESH_RETENTION, TimeUnit.SECONDS)
-			.build(new CacheLoader<RegressionApiResultsCacheLoader, Set<RegressionEventsOutput>>() {
-				
-				@Override
-				public Set<RegressionEventsOutput> load(RegressionApiResultsCacheLoader key) {
-					return key.getRegressionApiResults();
-				}
-			});
 	
 	public static final LoadingCache<RegressionCacheLoader, RegressionOutput> regressionOutputCache = CacheBuilder
 			.newBuilder().maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_REFRESH_RETENTION, TimeUnit.SECONDS)
