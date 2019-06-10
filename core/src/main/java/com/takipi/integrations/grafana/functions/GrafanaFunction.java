@@ -2751,28 +2751,67 @@ public abstract class GrafanaFunction {
 		return result;
 	}
 	
-	protected List<Object> executeTasks(Collection<Callable<Object>> tasks, boolean queryPool) {	
+	protected List<Object> executeTasks(Collection<Callable<Object>> tasks, boolean queryPool) {
+		
+		List<Future<Object>> completionService = startTasksExecution(tasks, queryPool);
+		
+		return getTasksResults(completionService);
+	}
+	
+	protected List<Future<Object>> startTaskExecution(Callable<Object> task, boolean queryPool) {
+		
+		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
+		
+		tasks.add(task);
+		
+		List<Future<Object>> result = startTasksExecution(tasks, queryPool);
+		
+		return result;
+	}
+	
+	private List<Future<Object>> startTasksExecution(Collection<Callable<Object>> tasks, boolean queryPool) {
 		Executor executor;
 		
 		if (queryPool) {
 			executor = GrafanaThreadPool.getQueryExecutor(apiClient);
 		} else {
 			executor  = GrafanaThreadPool.getFunctionExecutor(apiClient);
-		} 
+		}
 		
 		CompletionService<Object> completionService = new ExecutorCompletionService<Object>(executor);
 		
+		List<Future<Object>> result = new ArrayList<Future<Object>>();
+		
 		for (Callable<Object> task : tasks)	{
 			completionService.submit(task);
+			Future<Object> future = null;
+			
+			try {
+				future = completionService.take();
+				result.add(future);
+			} catch (InterruptedException e) {
+			}
+			
 		}
 		
+		return result;
+	}
+	
+	protected Object getTaskResult(List<Future<Object>> futures) {
+		
+		List<Object> result = getTasksResults(futures);
+		
+		return result.get(0);
+	}
+	
+	private List<Object> getTasksResults(List<Future<Object>> futures) {
 		List<Object> result = new ArrayList<Object>();
 		
 		int received = 0;
 		
-		while (received < tasks.size()) {
+		while (received < futures.size()) {
 			try {
-				Future<Object> future = completionService.take();
+				Future<Object> future = futures.get(received);
 				
 				received++;
 				Object asynResult = future.get();
