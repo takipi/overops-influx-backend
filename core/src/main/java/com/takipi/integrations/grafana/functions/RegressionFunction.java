@@ -993,6 +993,15 @@ public class RegressionFunction extends EventsFunction {
 		return result;
 	}
 	
+	public RegressionOutput executeRegression(String serviceId, RegressionsInput regressionsInput, boolean newOnly,
+			RegressionInput regressionInput, RegressionWindow activeWindow, Map<String, EventResult>  eventResultMap,
+			Graph baselineGraph, Graph activeWindowGraph) {
+		
+		return getRegressionOutput(serviceId, regressionsInput, newOnly,
+				TimeUtil.getTimeFilter(regressionsInput.timeFilter), regressionInput,
+				activeWindow, eventResultMap, baselineGraph, activeWindowGraph);
+	}
+	
 	public RegressionOutput executeRegression(String serviceId, 
 			BaseEventVolumeInput input, boolean newOnly) {
 		
