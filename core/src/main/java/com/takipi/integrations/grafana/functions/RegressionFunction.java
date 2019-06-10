@@ -621,16 +621,6 @@ public class RegressionFunction extends EventsFunction {
 		return super.getFormatter(serviceId, column);
 	}
 	
-	public static class AggregatedRegressionOutput {
-		public Map<ReportKey, RegressionOutput> keyRegressionOutputMap;
-		
-		public AggregatedRegressionOutput() { }
-		
-		public AggregatedRegressionOutput(Map<ReportKey, RegressionOutput> regressionOutputMap) {
-			this.keyRegressionOutputMap = regressionOutputMap;
-		}
-	}
-	
 	public static class RegressionOutput {	
 		
 		public static final RegressionOutput emptyOutput = new RegressionOutput(true);
