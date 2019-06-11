@@ -486,12 +486,12 @@ public class ReliabilityReportFunction extends EventsFunction {
 				Set<RegressionEventsOutput> aggregatedRegressionOutputMap = this.getRegressionApiResults(activeWindow,
 						applicationGroupsMap, regressionFunction, aggregatedRegressionInput ,regressionInput, newOnly);
 				
-				Map<ReportKey, BreakdownRegressionData> breakdownRegressionMap = getBreakdownRegressionMap(activeWindow,
-						aggregatedRegressionOutputMap, applicationGroupsMap, regressionFunction, newOnly);
-				
-				if (breakdownRegressionMap == null) {
+				if (CollectionUtil.safeIsEmpty(aggregatedRegressionOutputMap)) {
 					continue;
 				}
+				
+				Map<ReportKey, BreakdownRegressionData> breakdownRegressionMap = getBreakdownRegressionMap(activeWindow,
+						aggregatedRegressionOutputMap, applicationGroupsMap, regressionFunction, newOnly);
 				
 				for (Entry<ReportKey, BreakdownRegressionData> regressionOutputEntry : breakdownRegressionMap.entrySet()) {
 					result.put(regressionOutputEntry.getKey(), regressionOutputEntry.getValue());
