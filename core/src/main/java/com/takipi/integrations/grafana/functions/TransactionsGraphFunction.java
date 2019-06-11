@@ -318,8 +318,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 
 			Pair<String, String> nameAndMethod = getFullNameAndMethod(graph.name);
 			
-			if (filterTransaction(transactionFilter, input.searchText, nameAndMethod.getFirst(), nameAndMethod.getSecond()))
-			{
+			if (filterTransaction(transactionFilter, input.searchText, nameAndMethod.getFirst(), nameAndMethod.getSecond())) {
 				continue;
 			}
 			
@@ -348,8 +347,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		
 				Pair<String, String> nameAndMethod = getFullNameAndMethod(graph.name);
 				
-				if (filterTransaction(transactionsFilter, searchText, nameAndMethod.getFirst(), nameAndMethod.getSecond()))
-				{
+				if (filterTransaction(transactionsFilter, searchText, nameAndMethod.getFirst(), nameAndMethod.getSecond())) {
 					continue;
 				}
 				
@@ -433,8 +431,7 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 			
 			Pair<String, String> nameAndMethod = getFullNameAndMethod(graph.name);
 			
-			if (filterTransaction(transactionFilter, searchText, nameAndMethod.getFirst(), nameAndMethod.getSecond()))
-			{
+			if (filterTransaction(transactionFilter, searchText, nameAndMethod.getFirst(), nameAndMethod.getSecond())) {
 				continue;
 			}
 			

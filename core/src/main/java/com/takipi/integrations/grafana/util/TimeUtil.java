@@ -130,7 +130,21 @@ public class TimeUtil {
 		return fmt.parseDateTime(value).getMillis();
 	}
 	
+	public static long getEpoch(String value) {
+		
+		if (value == null) {
+			return 0;
+		}
+		
+		return TimeUtil.getDateTime(value).getMillis();	
+	}
+	
 	public static DateTime getDateTime(String value) {
+		
+		if (value == null) {
+			return null;
+		}
+		
 		return fmt.parseDateTime(value);
 	}
 

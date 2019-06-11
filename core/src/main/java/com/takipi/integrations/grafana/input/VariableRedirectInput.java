@@ -5,8 +5,7 @@ package com.takipi.integrations.grafana.input;
  * Used for internal purposes.
  *
  */
-public class VariableRedirectInput extends VariableInput
-{
+public class VariableRedirectInput extends VariableInput {
 	public String variable;
 	public String dictionary;
 }

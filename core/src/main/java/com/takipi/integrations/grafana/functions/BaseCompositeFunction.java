@@ -13,8 +13,7 @@ import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.Series;
 
-public abstract class BaseCompositeFunction extends GrafanaFunction
-{
+public abstract class BaseCompositeFunction extends GrafanaFunction {
 	protected class FunctionResult {
 		protected GrafanaFunction function;
 		protected FunctionInput input;

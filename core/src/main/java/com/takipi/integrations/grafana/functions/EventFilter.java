@@ -19,9 +19,10 @@ import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
-public class EventFilter
-{
+public class EventFilter {
 	public static final String CRITICAL_EXCEPTIONS = "Critical Exceptions";
+	public static final String CRITICAL_EXCEPTION = "Critical Exception";
+
 	public static final String TRANSACTION_FAILURES = "Transaction Failures";
 
 	public static final String EXCEPTION_PREFIX = "--";
@@ -44,6 +45,7 @@ public class EventFilter
 	private List<String> exceptionTypes;
 	private List<String> eventTypes;
 	private List<String> categoryTypes;
+	private boolean mutexTypes;
 	
 	public static String toExceptionFilter(String value) {
 		
@@ -67,14 +69,30 @@ public class EventFilter
 		return value.substring(EXCEPTION_PREFIX.length());
 	}
 	
+	public static boolean isCriticalExceptionsType(String type) {
+		
+		if (EventFilter.CRITICAL_EXCEPTIONS.equals(type)) {
+			return true;
+		}
+		
+		if (EventFilter.CRITICAL_EXCEPTION.equals(type)) {
+			return true;
+		}
+		
+		return false;
+	}
+	
 	
 	public static EventFilter of(Collection<String> types, Collection<String> allowedTypes,
 			Collection<String> introducedBy, Collection<String> eventLocations, GroupFilter transactionsFilter,
 			Collection<String> labels, String labelsRegex, String firstSeen, Categories categories,
-			String searchText, String transactionSearchText) {
+			String searchText, String transactionSearchText, boolean mutexTypes) {
 		
 		EventFilter result = new EventFilter();
+		
 		result.types = types;
+		result.mutexTypes = mutexTypes;
+		
 		result.allowedTypes = allowedTypes;
 		result.introducedBy = introducedBy;
 		
@@ -176,10 +194,10 @@ public class EventFilter
 			|| (labelsPattern.matcher(label).find());
 	}
 	
-	private boolean filterExceptionType(EventResult event) {
+	private boolean filterExceptionType(EventResult event, boolean filterEmpty) {
 		
 		if (exceptionTypes.size() == 0)	{
-			return false;
+			return filterEmpty;
 		}
 		
 		if (exceptionTypes.contains(event.name)) {
@@ -189,10 +207,10 @@ public class EventFilter
 		return true;
 	}
 	
-	private boolean filterCategoryType(EventResult event) {
+	private boolean filterCategoryType(EventResult event, boolean filterEmpty) {
 		
 		if (categoryTypes.size() == 0) 	{
-			return false;
+			return filterEmpty;
 		}
 		
 		Set<String> originLabels = null;
@@ -228,10 +246,10 @@ public class EventFilter
 		return true;
 	}
 	
-	private boolean filterEventType(EventResult event) {
+	private boolean filterEventType(EventResult event, boolean filterEmpty) {
 		
 		if (eventTypes.size() == 0) {
-			return false;
+			return filterEmpty;
 		}
 		
 		if (eventTypes.contains(event.type)) {
@@ -243,16 +261,18 @@ public class EventFilter
 	
 	private boolean filterType(EventResult event) {
 		
-		if (filterExceptionType(event)) {
-			return true;
-		}
+		boolean filterExceptionType = filterExceptionType(event, !mutexTypes);
+		boolean filterCategoryType = filterCategoryType(event, !mutexTypes);
+		boolean filterEventType = filterEventType(event, !mutexTypes);
 		
-		if (filterCategoryType(event)) {
-			return true;
-		}
-		
-		if (filterEventType(event)) {
-			return true;
+		if (mutexTypes) {
+			if ((filterExceptionType) || (filterCategoryType) || (filterEventType)) {
+				return true;
+			}
+		} else {
+			if ((filterExceptionType) && (filterCategoryType) && (filterEventType)) {
+				return true;
+			}
 		}
 			
 		return false;

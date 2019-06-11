@@ -11,31 +11,25 @@ import com.takipi.integrations.grafana.input.SettingsVarInput;
 import com.takipi.integrations.grafana.output.Series;
 
 
-public class SettingsVarFunction extends EnvironmentVariableFunction
-{	
-	public static class Factory implements FunctionFactory
-	{
+public class SettingsVarFunction extends EnvironmentVariableFunction {
+	public static class Factory implements FunctionFactory {
 		@Override
-		public GrafanaFunction create(ApiClient apiClient)
-		{
+		public GrafanaFunction create(ApiClient apiClient) {
 			return new SettingsVarFunction(apiClient);
 		}
 		
 		@Override
-		public Class<?> getInputClass()
-		{
+		public Class<?> getInputClass() {
 			return SettingsVarInput.class;
 		}
 		
 		@Override
-		public String getName()
-		{
+		public String getName() {
 			return "settingsVar";
 		}
 	}
 	
-	public SettingsVarFunction(ApiClient apiClient)
-	{
+	public SettingsVarFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
 	
@@ -58,8 +52,7 @@ public class SettingsVarFunction extends EnvironmentVariableFunction
 		
 		Object value;
 		
-		try
-		{
+		try {
 			Object rawValue = settings.getClass().getField(settingsVarInput.name).get(settings);
 			
 			if ((rawValue != null) && (settingsVarInput.convertToArray)) {
@@ -68,8 +61,7 @@ public class SettingsVarFunction extends EnvironmentVariableFunction
 				 value = rawValue;
 			}
 		}
-		catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e)
-		{
+		catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
 			throw new IllegalStateException(e);
 		}
 		

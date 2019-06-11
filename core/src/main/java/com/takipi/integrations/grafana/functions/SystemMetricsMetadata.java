@@ -67,7 +67,7 @@ public class SystemMetricsMetadata {
 	protected static class CpuLoadSystemMetric extends SystemMetric {
 
 		public CpuLoadSystemMetric(SystemMetricMetadataResult first, SystemMetricMetadataResult second){
-			super("CPU Load Average", first, second);
+			super("CPU Usage", first, second);
 		}
 		
 		@Override
@@ -172,7 +172,7 @@ public class SystemMetricsMetadata {
 	private void init(ApiClient apiClient) {
 		
 		Response<SystemMetricMetadatasResult> response = 
-				ApiCache.getSystemMetricMetadatas(apiClient, serviceId);
+				ApiCache.getSystemMetricMetadatas(apiClient, serviceId, null);
 		
 		if ((response.isBadResponse()) || (response.data == null)
 		||  (response.data.metrics == null)) {

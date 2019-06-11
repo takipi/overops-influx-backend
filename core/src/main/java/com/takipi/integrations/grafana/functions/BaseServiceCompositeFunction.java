@@ -10,8 +10,7 @@ import com.takipi.integrations.grafana.input.EnvironmentsFilterInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.Series;
 
-public abstract class BaseServiceCompositeFunction extends BaseCompositeFunction
-{
+public abstract class BaseServiceCompositeFunction extends BaseCompositeFunction {
 	public BaseServiceCompositeFunction(ApiClient apiClient) {
 		super(apiClient);
 	}

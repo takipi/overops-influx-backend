@@ -11,8 +11,7 @@ package com.takipi.integrations.grafana.input;
  * 		"pointsWanted":"$pointsWanted", "types":"$type","limit":3,
  * 		"searchText":"$search", "graphType":"Absolute"})
  */
-public class RegressionGraphInput extends GraphLimitInput
-{
+public class RegressionGraphInput extends GraphLimitInput {
 	/**
 	 * Types of  time series returned by this graph. 
 	 *

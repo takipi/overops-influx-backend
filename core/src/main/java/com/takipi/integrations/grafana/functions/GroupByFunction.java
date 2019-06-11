@@ -15,10 +15,9 @@ import java.util.regex.Pattern;
 
 import org.joda.time.DateTime;
 
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
-import com.takipi.api.client.data.event.Stats;
+import com.takipi.api.client.data.event.BaseStats;
 import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
@@ -381,7 +380,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static void processEventGroupBy(GroupByInput request, Map<GroupByKey, GroupByVolume> map, EventResult event,
-			EventFilter filter, Stats stats, DateTime time) {
+			EventFilter filter, BaseStats stats, DateTime time) {
 
 		long value;
 
@@ -934,7 +933,7 @@ public class GroupByFunction extends BaseVolumeFunction {
 
 	private static Collection<AggregationType> getColumnTypes(GroupByInput input) {
 
-		List<AggregationType> result = Lists.newArrayList();
+		List<AggregationType> result = new ArrayList<AggregationType>();
 		String[] types = input.type.split(ARRAY_SEPERATOR);
 
 		for (String type : types) {

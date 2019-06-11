@@ -43,12 +43,10 @@ public class ServletUtil {
 			
 			Auth auth = new Auth();
 			
-			if (hostname != null)
-			{
+			if (hostname != null) {
 				auth.hostname = hostname;
 			}
-			else
-			{
+			else {
 				auth.hostname = user;
 			}
 			
@@ -65,8 +63,7 @@ public class ServletUtil {
 		public String token;
 		
 		@Override
-		public String toString()
-		{
+		public String toString() {
 			return hostname + ", token size: " + token.length();
 		}
 	}

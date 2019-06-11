@@ -165,7 +165,7 @@ public class TransactionsEventsGraphFunction extends LimitGraphFunction {
 					}
 					
 					graphData.points.put(key, newValue);
-					graphData.volume += newValue;
+					graphData.volume += pointValue;
 					
 					graphsInPoint.add(graphData);
 				}	
@@ -344,7 +344,7 @@ public class TransactionsEventsGraphFunction extends LimitGraphFunction {
 					}
 					
 					graphData.points.put(key, newValue);
-					graphData.volume += newValue;
+					graphData.volume += pointValue;
 					
 					graphsInPoint.add(graphData);
 				}	

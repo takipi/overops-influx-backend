@@ -22,8 +22,7 @@ import com.takipi.integrations.grafana.util.ApiCache.QueryLogItem;
 import com.takipi.integrations.grafana.util.ApiCache.RegressionCacheLoader;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
-public class QueryDiagnosticsFunction extends GrafanaFunction
-{
+public class QueryDiagnosticsFunction extends GrafanaFunction {
 	public QueryDiagnosticsFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
@@ -192,13 +191,8 @@ public class QueryDiagnosticsFunction extends GrafanaFunction
 	
 	private List<Series> processGrid(QueryDiagnosticsInput input) {
 		
-		Series series = new Series();
-
 		ReportMode reportMode = input.getReportMode();
-		
-		series.name = SERIES_NAME;
-		series.values = new ArrayList<List<Object>>();
-		series.columns = getColumns(reportMode);
+		Series series = createSeries(new ArrayList<List<Object>>(), getColumns(reportMode));
 				
 		switch (reportMode) {
 			

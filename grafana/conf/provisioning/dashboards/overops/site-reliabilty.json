@@ -100,7 +100,7 @@
       ],
       "datasource": "OO",
       "decimals": 1,
-      "description": "A weighted score over the selected timeframe taking into account all new errors, regressions and slowdowns. Weights are defined in the Settings dashboard.",
+      "description": "A weighted score over the selected timeframe taking into account all new errors, increasing errors and transaction slowdowns. Weights are defined in the Settings dashboard.",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -223,7 +223,7 @@
       ],
       "datasource": "OO",
       "decimals": 2,
-      "description": "The ratio between selected transaction volume and the number of $transactionFailureTypes which deem the call to be unstable.",
+      "description": "The ratio between selected transaction volume and the number of transaction failures. Transaction failures are defined in the Settings dashboard.",
       "format": "percentunit",
       "gauge": {
         "maxValue": 100,
@@ -369,12 +369,14 @@
       "interval": null,
       "links": [
         {
+          "dashboard": "Slowdowns",
           "includeVars": true,
           "keepTime": true,
+          "params": "&var-performanceStates=CRITICAL",
           "targetBlank": false,
-          "title": "Performance. $sd",
+          "title": "Slowdowns",
           "type": "absolute",
-          "url": "d/Z40SpeJmz/performance"
+          "url": "d/iHSORcymk/slowdowns"
         }
       ],
       "mappingType": 1,
@@ -836,7 +838,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "The number of calls into each of the selected transactions overlaid on total the number of calls (Throughput) into them.",
+      "description": "The number of calls into each of the selected transactions in the left Y axis correlated to $metricNames on the right Y Axis",
       "fill": 0,
       "gridPos": {
         "h": 5,
@@ -950,7 +952,7 @@
               "type": "fill"
             }
           ],
-          "hide": true,
+          "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
           "query": "transactionsGraph({\"graphType\":\"view\",\"volumeType\":\"invocations\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\",\"transactions\":\"$transactions\",\"pointsWanted\":\"$transactionPointsWanted\",\"seriesName\":\"All\"})",
@@ -1016,7 +1018,7 @@
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "$tc Transactions, Throughput= $tv",
+      "title": "$tc Unique Transactions, Throughput= $tv",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -1061,7 +1063,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "The number of errors in the selected apps overlad on the number of calls into the applications (Throughput). If no applications are selected, the first $splitLimit key applications are charted. Key applications are defined in the Settings dashboard.",
+      "description": "The number of errors in the selected apps on the left Y axis correlated to $metricNames on the right Y axis. If no applications are selected, the first $splitLimit key applications are charted. Key applications are defined in the Settings dashboard.",
       "fill": 0,
       "gridPos": {
         "h": 5,
@@ -1468,7 +1470,7 @@
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Transaction Response ($ta avg, baseline: $tba)",
+      "title": "Response Time ($ta avg, baseline: $tba)",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -1514,7 +1516,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "Chart errors according to key code tiers (e.g. AWS, SQL, Tomcat,..). Key code tiers are defined in the Settings dashboard. If no key tiers are defined, then 3rd party code tiers (as defined  [here](https://git.io/fpPT0) ) with the most errors are charted.",
+      "description": "Chart errors according to key code tiers (e.g. AWS, SQL, Tomcat,..) on the left Y axis correlated to $metricNames on the right Y axis. \n\nKey code tiers are defined in the Settings dashboard. If no key tiers are defined, then 3rd party code tiers (as defined  [here](https://git.io/fpPT0) ) with the most errors are charted.",
       "fill": 0,
       "gridPos": {
         "h": 5,
@@ -1740,7 +1742,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "The number of errors of type: $failureTypesArrayPretty in the selected transactions overlaid on the number of calls (throughput) into them. Transaction failures types are defined in the Settings dashboard.",
+      "description": "The number of errors transaction failures in the selected transactions on the left Y axis correlated to $metricNames on the right Y axis. Transaction failures types are defined in the Settings dashboard.",
       "fill": 0,
       "gridPos": {
         "h": 5,
@@ -1839,45 +1841,6 @@
           "tags": []
         },
         {
-          "alias": "",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": true,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "graph({\"graphType\":\"view\",\"volumeType\":\"all\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$transactionFailureTypes\",seriesName\":\"Times\", \"transactions\":\"$transactions\"})\n",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        },
-        {
           "groupBy": [
             {
               "params": [
@@ -1895,7 +1858,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "transactionsEventsGraph({\"graphType\":\"view\",\"volumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$type\",\"transactions\":\"$transactions\", \"limit\":\"$splitLimit\"})\n",
+          "query": "transactionsEventsGraph({\"graphType\":\"view\",\"volumeType\":\"hits\",\"view\":\"$view\",\"timeFilter\":\"$timeFilter\",\"environments\":\"$environments\", \"applications\":\"$applications\", \"servers\":\"$servers\", \"deployments\":\"$deployments\",\"pointsWanted\":\"$pointsWanted\",\"types\":\"$transactionFailureTypes\",\"transactions\":\"$transactions\", \"limit\":\"$splitLimit\"})\n",
           "rawQuery": true,
           "refId": "C",
           "resultFormat": "time_series",
@@ -1919,7 +1882,7 @@
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "$tfc Transaction Failures ,Volume = $tf",
+      "title": "$tfc Unique Failures ,Volume = $tf",
       "tooltip": {
         "shared": true,
         "sort": 2,
@@ -1965,7 +1928,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "OO",
-      "description": "The number of critical exceptions for the currently selected transactions overlaid on the number of calls (throughput) into them. The list of critical exception types is defined in the Settings dashboard.",
+      "description": "The number of critical exceptions within the selected transactions on the left Y axis correlated to $metricNames on the right Y axis. The list of critical exception types is defined in the Settings dashboard.",
       "fill": 0,
       "gridPos": {
         "h": 5,
@@ -2443,24 +2406,26 @@
       },
       {
         "allValue": null,
-        "current": {},
-        "datasource": "OO",
+        "current": {
+          "selected": true,
+          "text": "Transaction Failures",
+          "value": "Transaction Failures"
+        },
         "hide": 2,
         "includeAll": false,
         "label": null,
         "multi": false,
         "name": "transactionFailureTypes",
-        "options": [],
-        "query": "settingsVar({\"environments\":\"$environments\", \"name\":\"transaction_failures\", \"convertToArray\":\"true\", \"defaultValue\":\"Logged Error|Uncaught Exception|HTTP Error\"})",
-        "refresh": 1,
-        "regex": "",
+        "options": [
+          {
+            "selected": true,
+            "text": "Transaction Failures",
+            "value": "Transaction Failures"
+          }
+        ],
+        "query": "Transaction Failures",
         "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
+        "type": "custom"
       },
       {
         "allValue": null,
@@ -2933,5 +2898,5 @@
   "timezone": "",
   "title": "Site Reliability",
   "uid": "nxdE2gXmk",
-  "version": 21
+  "version": 68
 }

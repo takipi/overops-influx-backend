@@ -13,7 +13,6 @@ package com.takipi.integrations.grafana.input;
  * 
  * 	Screenshot: https://drive.google.com/file/d/1Hq-4iamqMxyDMRVb7nIQJVi1sW7R479Q/view?usp=sharing
  */
-public class TransactionAvgGraphInput extends TransactionsGraphInput
-{
+public class TransactionAvgGraphInput extends TransactionsGraphInput {
 	
 }

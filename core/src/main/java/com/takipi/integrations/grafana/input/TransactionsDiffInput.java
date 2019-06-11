@@ -18,8 +18,7 @@ package com.takipi.integrations.grafana.input;
 		"diffTypes":"Increasing"})
  *
  */
-public class TransactionsDiffInput extends TransactionsListInput
-{
+public class TransactionsDiffInput extends TransactionsListInput {
 	/**
 	 * A comma delimited array of application names to compare against
 	 */

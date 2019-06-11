@@ -16,8 +16,7 @@ import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
  * 
  * 	Screenshot: https://drive.google.com/file/d/1__-49ejQq0TAiRZ2l7sJC16nZRzA7kQZ/view?usp=sharing
  */
-public class TransactionsRateInput extends TransactionsVolumeInput
-{
+public class TransactionsRateInput extends TransactionsVolumeInput {
 	/**
 	 * the event volume type which serves as the denominator between throughput and volume returned 
 	 * by this function
