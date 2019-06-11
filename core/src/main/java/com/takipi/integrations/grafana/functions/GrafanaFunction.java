@@ -31,7 +31,6 @@ import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.Location;
 import com.takipi.api.client.data.event.MainEventStats;
-import com.takipi.api.client.data.event.Stats;
 import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
 import com.takipi.api.client.data.metrics.Graph.GraphPointContributor;
@@ -83,7 +82,6 @@ import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
-import com.takipi.integrations.grafana.functions.ReliabilityReportFunction.DeterminantKey;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
 import com.takipi.integrations.grafana.input.BaseGraphInput;
@@ -175,11 +173,12 @@ public abstract class GrafanaFunction {
 	protected static final String HTTP_ERROR = "HTTP Error";
 
 	public static final int TOP_TRANSACTIONS_MAX = 3;
-	public static final int GET_EVENT_LIST_MAX_RETRIES = 5;
 	public static final String TOP_ERRORING_TRANSACTIONS = String.format("Top %d Failing", TOP_TRANSACTIONS_MAX);
 	public static final String SLOWEST_TRANSACTIONS = String.format("Top %d Slowest", TOP_TRANSACTIONS_MAX);
 	public static final String SLOWING_TRANSACTIONS = String.format("Top %d Slowing", TOP_TRANSACTIONS_MAX);
 	public static final String HIGHEST_VOLUME_TRANSACTIONS = String.format("Top %d Volume", TOP_TRANSACTIONS_MAX);
+	
+	public static final int GET_EVENT_LIST_MAX_RETRIES = 5;
 		
 	public static final List<String> TOP_TRANSACTION_FILTERS = Arrays.asList(new String[] {
 			TOP_ERRORING_TRANSACTIONS, 	SLOWEST_TRANSACTIONS, SLOWING_TRANSACTIONS, HIGHEST_VOLUME_TRANSACTIONS});
@@ -2626,60 +2625,6 @@ public abstract class GrafanaFunction {
 		return result;
 	}
 	
-	
-	public static Map<DeterminantKey, Map<String, EventResult>> getEventsMapByKey(Collection<EventResult> events,
-			Map<String, Collection<String>> applicationGroupsMap) {
-		
-		Map<DeterminantKey, Map<String, EventResult>> keyToEventMap = new HashMap<DeterminantKey, Map<String, EventResult>>();
-		
-		for (EventResult event : events) {
-			if (CollectionUtil.safeIsEmpty(event.stats.contributors)) {
-				safePutEventToKeysMap(keyToEventMap, DeterminantKey.Empty, event);
-				
-				continue;
-			}
-			
-			for (Stats contributor : event.stats.contributors) {
-				
-				DeterminantKey determinantKey = new DeterminantKey(contributor.machine_name,
-						contributor.application_name, contributor.deployment_name);
-				
-				EventResult contributorEventResult = (EventResult) event.clone();
-				
-				contributorEventResult.stats = new MainEventStats();
-				
-				safePutEventToKeysMap(keyToEventMap, determinantKey, contributorEventResult);
-				
-				Collection<String> appGroups = applicationGroupsMap.get(contributor.application_name);
-				
-				if (!CollectionUtil.safeIsEmpty(appGroups)) {
-					for (String appGroup : appGroups) {
-						DeterminantKey groupDeterminantKey = new DeterminantKey(contributor.machine_name,
-								appGroup, contributor.deployment_name);
-						
-						safePutEventToKeysMap(keyToEventMap, groupDeterminantKey, contributorEventResult);
-					}
-				}
-			}
-		}
-		
-		return keyToEventMap;
-	}
-	
-	private static void safePutEventToKeysMap(Map<DeterminantKey, Map<String, EventResult>> keyToEventMap,
-			DeterminantKey determinantKey, EventResult event) {
-		
-		Map<String, EventResult> currentDeterminant = keyToEventMap.get(determinantKey);
-		
-		if (currentDeterminant == null) {
-			currentDeterminant = new HashMap<String, EventResult>();
-			
-			keyToEventMap.put(determinantKey, currentDeterminant);
-		}
-		
-		currentDeterminant.put(event.id, event);
-	}
-	
 	protected static Map<String, EventResult> getEventsMap(Collection<EventResult> events) {
 		return getEventsMap(events, true);
 	}
@@ -2751,14 +2696,14 @@ public abstract class GrafanaFunction {
 		return result;
 	}
 	
-	protected List<Object> executeTasks(Collection<Callable<Object>> tasks, boolean queryPool) {	
+	protected List<Object> executeTasks(Collection<Callable<Object>> tasks, boolean queryPool) {
 		Executor executor;
 		
 		if (queryPool) {
 			executor = GrafanaThreadPool.getQueryExecutor(apiClient);
 		} else {
 			executor  = GrafanaThreadPool.getFunctionExecutor(apiClient);
-		} 
+		}
 		
 		CompletionService<Object> completionService = new ExecutorCompletionService<Object>(executor);
 		
