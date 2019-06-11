@@ -1225,8 +1225,6 @@ public class ReliabilityReportFunction extends EventsFunction {
 
 		return result;
 	}
-	
-	
 
 	private Collection<String> limitVolumes(List<VolumeOutput> volumes, int limit) {
 
