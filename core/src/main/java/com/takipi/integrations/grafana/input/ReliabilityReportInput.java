@@ -208,22 +208,38 @@ public class ReliabilityReportInput extends RegressionsInput {
 		/**
 		 * Include regression analysis for new events only
 		 */
-		NewOnly, 
+		NewOnly(true, false),
 		
 		/**
 		 * Include regression analysis for new and increasing events
 		 */
-		Regressions, 
+		Regressions(true, false),
 		
 		/**
 		 * Include slowdown analysis 
 		 */
-		Slowdowns, 
+		Slowdowns(false, true),
 	
 		/**
 		 * Combine regression and slowdown analysis in the output (default)
 		 */
-		Combined
+		Combined(true, true);
+		
+		private final boolean includeRegressions;
+		private final boolean includeTransactions;
+		
+		ScoreType(boolean includeRegressions, boolean includeTransactions) {
+			this.includeRegressions = includeRegressions;
+			this.includeTransactions = includeTransactions;
+		}
+		
+		public boolean includeSlowdowns() {
+			return includeTransactions;
+		}
+		
+		public boolean includeRegressions() {
+			return includeRegressions;
+		}
 	}
 	
 	public ScoreType scoreType;
@@ -338,19 +354,19 @@ public class ReliabilityReportInput extends RegressionsInput {
 	
 	/**
 	 * A comma delimited array used to visually annotate the reliability status of the key
-	 * based on the score ranges for example: ✅,⚠️,❌
+	 * based on the score ranges for example: (\xE2\x9C\x85,\xE2\x9A\xA0\xEF\xB8\x8F,\xE2\x9D\x8C)
 	 */
 	public String statusPrefixes;
 	
 	/**
 	 * A comma delimited array used to visually annotate the fail rate status of the key
-	 * based on the score ranges for example: ✅,⚠️,❌
+	 * based on the score ranges for example: (\xE2\x9C\x85,\xE2\x9A\xA0\xEF\xB8\x8F,\xE2\x9D\x8C)
 	 */
 	public String failRatePrefixes;
 	
 	/**
 	 * A comma delimited array used to visually annotate the alert status of the key
-	 * with values for: no alerts (add), new error, anomaly  for example: ➕,🆕️,📈
+	 * with values for: no alerts (add), new error, anomaly for example: (\xE2\x9E\x95,\xF0\x9F\x86\x95\xEF\xB8\x8F,\xF0\x9F\x93\x88)
 	 */
 	public String alertStatusPrefixes;
 	

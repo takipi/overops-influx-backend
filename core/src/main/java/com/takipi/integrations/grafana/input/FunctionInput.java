@@ -87,4 +87,9 @@ public abstract class FunctionInput {
 		return timeFormat;
 	}
 	
+	/**
+	 * The query sent by the user this function is processing 
+	 */
+	public String query;
+	
 }

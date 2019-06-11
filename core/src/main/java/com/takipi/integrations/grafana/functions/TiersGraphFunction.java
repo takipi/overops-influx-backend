@@ -81,9 +81,10 @@ public class TiersGraphFunction extends LimitGraphFunction {
 		
 		Long key = null;
 		Long lastKey = null;
-				
+			
+		Set<String> labels = new HashSet<String>();
 		Categories categories = getSettings(serviceId).getCategories();		
-		
+
 		for (GraphPoint gp : graph.points) {
 
 			DateTime gpTime = TimeUtil.getDateTime(gp.time);
@@ -118,7 +119,7 @@ public class TiersGraphFunction extends LimitGraphFunction {
 					continue;
 				}
 				
-				Set<String> labels = new HashSet<String>();
+				labels.clear();
 				
 				if (originLabels != null)  {
 					labels.addAll(originLabels);

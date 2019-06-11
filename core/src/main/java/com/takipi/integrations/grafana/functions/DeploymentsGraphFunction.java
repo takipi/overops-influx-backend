@@ -83,7 +83,7 @@ public class DeploymentsGraphFunction extends GraphFunction {
 			return selectedDeployments;
 		}
 		
-		Response<DeploymentsResult> response = ApiCache.getDeployments(apiClient, serviceId, false);
+		Response<DeploymentsResult> response = ApiCache.getDeployments(apiClient, serviceId, false, input.query);
 		
 		if ((response == null) || (response.data == null) || (response.data.deployments == null)) {
 			return Collections.emptyList();
@@ -95,12 +95,10 @@ public class DeploymentsGraphFunction extends GraphFunction {
 		
 		List<SummarizedDeployment> sorted = new ArrayList<>(response.data.deployments);
 		
-		sorted.sort(new Comparator<SummarizedDeployment>()
-		{
+		sorted.sort(new Comparator<SummarizedDeployment>() {
 
 			@Override
-			public int compare(SummarizedDeployment o1, SummarizedDeployment o2)
-			{
+			public int compare(SummarizedDeployment o1, SummarizedDeployment o2) {
 				long t1;
 				long t2;
 				

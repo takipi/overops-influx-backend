@@ -49,6 +49,8 @@ public abstract class EnvironmentsFilterInput extends BaseEnvironmentsInput {
 		return hasFilter(deployments);
 	}
 	
+	public boolean hasDeterminantFilter() { return hasApplications() || hasDeployments() || hasServers(); }
+	
 	public Collection<String> getApplications(ApiClient apiClient,
 		ServiceSettingsData settingsData, String serviceId,
 		boolean expandGroups, boolean includeLabelApps) {
@@ -90,7 +92,7 @@ public abstract class EnvironmentsFilterInput extends BaseEnvironmentsInput {
 						if (!CollectionUtil.safeIsEmpty(filter.patterns)) {
 							
 							if (serviceApps == null) {
-								serviceApps  = ApiCache.getApplicationNames(apiClient, serviceId, false);
+								serviceApps  = ApiCache.getApplicationNames(apiClient, serviceId, false, null);
 							}
 							
 							for (String serviceApp : serviceApps) {
@@ -168,7 +170,7 @@ public abstract class EnvironmentsFilterInput extends BaseEnvironmentsInput {
 			
 			if (!CollectionUtil.safeIsEmpty(filter.patterns)) {
 				
-				Collection<String> deps = ApiCache.getDeploymentNames(apiClient, serviceId, false);
+				Collection<String> deps = ApiCache.getDeploymentNames(apiClient, serviceId, false, null);
 				
 				for (String dep : deps) {
 					 

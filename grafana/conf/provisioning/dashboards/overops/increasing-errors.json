@@ -40,7 +40,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 28,
-  "iteration": 1555789235568,
+  "iteration": 1558892388813,
   "links": [
     {
       "icon": "dashboard",
@@ -393,7 +393,7 @@
       "description": "Shows a list of increasing errors, comparing them between the last $activeWindowFmt window and the preceding $baselineOnlyFmt baseline period, as denoted by the red annotation on the graph.",
       "fontSize": "100%",
       "gridPos": {
-        "h": 11,
+        "h": 13,
         "w": 24,
         "x": 0,
         "y": 6
@@ -404,7 +404,7 @@
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": null,
+        "col": 9,
         "desc": false
       },
       "styles": [
@@ -508,7 +508,7 @@
           "pattern": "First seen",
           "thresholds": [],
           "type": "number",
-          "unit": "short"
+          "unit": "dateTimeFromNow"
         },
         {
           "alias": "",

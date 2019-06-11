@@ -11,8 +11,7 @@ import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.VariableRedirectInput;
 import com.takipi.integrations.grafana.output.Series;
 
-public class VariableRedirectFunction extends VariableFunction
-{
+public class VariableRedirectFunction extends VariableFunction {
 	private static final String DICTIONARY_SEPERATOR = Pattern.quote(":");
 	
 	public static class Factory implements FunctionFactory {
@@ -32,8 +31,7 @@ public class VariableRedirectFunction extends VariableFunction
 		}
 	}
 	
-	public VariableRedirectFunction(ApiClient apiClient)
-	{
+	public VariableRedirectFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
 	
@@ -62,8 +60,7 @@ public class VariableRedirectFunction extends VariableFunction
 	}
 	
 	@Override
-	protected void populateValues(FunctionInput input, VariableAppender appender)
-	{
+	protected void populateValues(FunctionInput input, VariableAppender appender) {
 		VariableRedirectInput varReInput = (VariableRedirectInput)input;
 		
 		if (varReInput.variable == null) {

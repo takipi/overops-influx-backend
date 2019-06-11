@@ -16,37 +16,31 @@ import com.takipi.integrations.grafana.output.Series;
 
 public class EventsDiffDescFunction extends EnvironmentVariableFunction {
 
-	public static class Factory implements FunctionFactory
-	{
+	public static class Factory implements FunctionFactory {
 		@Override
-		public GrafanaFunction create(ApiClient apiClient)
-		{
+		public GrafanaFunction create(ApiClient apiClient) {
 			return new EventsDiffDescFunction(apiClient);
 		}
 		
 		@Override
-		public Class<?> getInputClass()
-		{
+		public Class<?> getInputClass() {
 			return EventsDiffDescInput.class;
 		}
 		
 		@Override
-		public String getName()
-		{
+		public String getName() {
 			return "eventsDiffDesc";
 		}
 	}
 	
 	
-	public EventsDiffDescFunction(ApiClient apiClient)
-		{
+	public EventsDiffDescFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
 	
 	
 	@Override
-	public List<Series> process(FunctionInput functionInput)
-	{
+	public List<Series> process(FunctionInput functionInput) {
 		if (!(functionInput instanceof EventsDiffDescInput)) {
 			throw new IllegalArgumentException("functionInput");
 		}
@@ -87,12 +81,12 @@ public class EventsDiffDescFunction extends EnvironmentVariableFunction {
 			if (!CollectionUtil.safeIsEmpty(deps)) {
 				
 				if (comma) {
-					value.append(", ");	
+					value.append(TEXT_SEPERATOR);	
 				}
 				
 				value.append("Deployment");
 				addPlural(value, deps);
-				value.append(String.join(", ", deps));
+				value.append(String.join(TEXT_SEPERATOR, deps));
 				
 				comma = true;
 			}
@@ -100,12 +94,12 @@ public class EventsDiffDescFunction extends EnvironmentVariableFunction {
 			if (!CollectionUtil.safeIsEmpty(srvs)) {
 				
 				if (comma) {
-					value.append(", ");	
+					value.append(TEXT_SEPERATOR);	
 				}
 				
 				value.append("Server");
 				addPlural(value, srvs);
-				value.append(String.join(", ", srvs));
+				value.append(String.join(TEXT_SEPERATOR, srvs));
 			}
 		}
 		
@@ -221,8 +215,7 @@ public class EventsDiffDescFunction extends EnvironmentVariableFunction {
 	
 	@Override
 	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
-			VariableAppender appender)
-	{
+			VariableAppender appender) {
 		
 		EventsDiffDescInput edInput = (EventsDiffDescInput)input;
 		

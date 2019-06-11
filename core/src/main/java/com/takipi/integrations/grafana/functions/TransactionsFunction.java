@@ -77,8 +77,7 @@ public class TransactionsFunction extends EnvironmentVariableFunction {
 	}
 	
 	@Override
-	protected void populateValues(FunctionInput input, VariableAppender appender)
-	{
+	protected void populateValues(FunctionInput input, VariableAppender appender) {
 		for (String topTransactionFilter : GrafanaFunction.TOP_TRANSACTION_FILTERS) {
 			appender.append(topTransactionFilter);	
 		}

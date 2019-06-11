@@ -52,6 +52,10 @@ public class BaselineAnnotationFunction extends BaseGraphFunction {
 		Pair<RegressionInput, RegressionWindow> inputPair = regressionFunction.getRegressionInput(serviceId,
 			viewId, input, timeSpan, false);
 		
+		if (inputPair == null) {
+			return Collections.emptyList();
+		}
+		
 		RegressionInput regressionInput = inputPair.getFirst();
 		RegressionWindow regressionWindow = inputPair.getSecond();
 		

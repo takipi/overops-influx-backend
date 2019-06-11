@@ -124,7 +124,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 			}
 			
 			if (index < values.size() - 1) {
-				result.append(", ");
+				result.append(TEXT_SEPERATOR);
 			}
 			
 			index++;
@@ -733,6 +733,76 @@ public class TransactionsListFunction extends GrafanaFunction {
 		return createSingleStatSeries(timeSpan, formatLongValue(volume));
 	}
 	
+	private List<Series> processSingleFailures(TransactionsListInput input, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds) {
+		
+		if (CollectionUtil.safeIsEmpty(serviceIds)) {
+			return Collections.emptyList();
+		}
+						
+		long volume = 0;
+		
+		Collection<PerformanceState> states = TransactionsListInput.getStates(input.performanceStates);
+				
+		for (String serviceId : serviceIds) {
+			
+			TransactionDataResult transactionDataResult = getTransactionDatas(serviceId,
+				timeSpan, input, true, false, true);
+
+			if (transactionDataResult == null) {
+				continue;
+			}
+				
+			for (TransactionData transactionData : transactionDataResult.items.values()) {
+					
+				if (states.contains(transactionData.state)) {
+					volume += transactionData.errorsHits;
+				}
+			}		
+		}
+		
+		return createSingleStatSeries(timeSpan, formatLongValue(volume));
+	}
+	
+	private List<Series> processSingleFailuresRate(TransactionsListInput input, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds) {
+		
+		if (CollectionUtil.safeIsEmpty(serviceIds)) {
+			return Collections.emptyList();
+		}
+						
+		long failures = 0;
+		long invocations = 0;
+
+		Collection<PerformanceState> states = TransactionsListInput.getStates(input.performanceStates);
+				
+		for (String serviceId : serviceIds) {
+			
+			TransactionDataResult transactionDataResult = getTransactionDatas(serviceId,
+				timeSpan, input, true, false, true);
+
+			if (transactionDataResult == null) {
+				continue;
+			}
+				
+			for (TransactionData transactionData : transactionDataResult.items.values()) {
+					
+				if (states.contains(transactionData.state)) {
+					failures += transactionData.errorsHits;
+					invocations += transactionData.stats.invocations;
+				}
+			}		
+		}
+		
+		double value;
+		
+		if (invocations >  0) {
+			value = 	failures / invocations;
+		} else {
+			value = 0;
+		}
+		
+		return createSingleStatSeries(timeSpan, value);
+	}
+	
 	private List<Series> processSingleStat(TransactionsListInput input, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds) {
 				
 		if (CollectionUtil.safeIsEmpty(serviceIds)) {
@@ -774,16 +844,17 @@ public class TransactionsListFunction extends GrafanaFunction {
 	
 	private List<Series> processGrid(TransactionsListInput input, Pair<DateTime, DateTime> timeSpan, Collection<String> serviceIds) {
 		
-		Series series = new Series();
-		
-		series.name = SERIES_NAME;
+		List<String> columns;
 		
 		if (input.fields != null) {
-			series.columns = Arrays.asList(input.fields.split(ARRAY_SEPERATOR));
+			columns = Arrays.asList(input.fields.split(ARRAY_SEPERATOR));
 		} else {
-			series.columns = TransactionsListInput.FIELDS;
+			columns = TransactionsListInput.FIELDS;
 		}
-		series.values = new ArrayList<List<Object>>();
+		
+		List<List<Object>> values = new ArrayList<List<Object>>();
+
+		Series series = createSeries(values, columns);
 
 		Collection<PerformanceState> performanceStates = TransactionsListInput.getStates(input.performanceStates);
 		
@@ -859,7 +930,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 			index++;
 			
 			if ((index < severeSlowdowns.size()) || (slowdowns.size() > 0)) {
-				result.append(", ");
+				result.append(TEXT_SEPERATOR);
 			}
 		}
 		
@@ -877,7 +948,7 @@ public class TransactionsListFunction extends GrafanaFunction {
 			index++;
 		
 			if (index < slowdowns.size()) {
-				result.append(", ");
+				result.append(TEXT_SEPERATOR);
 			}
 		}
 		
@@ -955,7 +1026,13 @@ public class TransactionsListFunction extends GrafanaFunction {
 				
 			case SingleStatBaselineAvg:
 				return processSingleStatBaselineAvg(input, timeSpan, serviceIds);
-										
+				
+			case SingleStatFailures:
+				return processSingleFailures(input, timeSpan, serviceIds);
+			
+			case SingleStatFailureRate:
+				return processSingleFailuresRate(input, timeSpan, serviceIds);
+					
 			default:
 				throw new IllegalStateException(String.valueOf(renderMode));
 			

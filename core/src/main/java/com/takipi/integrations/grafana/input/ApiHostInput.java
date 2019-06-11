@@ -13,8 +13,7 @@ package com.takipi.integrations.grafana.input;
  * 		apiHost({"type":"PORT"})
  */
 
-public class ApiHostInput extends VariableInput
-{
+public class ApiHostInput extends VariableInput {
 	/**
 	 * The function can be used to retrieve either the backend URL, port or combination of both,
 	 * depending on the value of the "type" value which can be set to either: 

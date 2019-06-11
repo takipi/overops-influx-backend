@@ -16,8 +16,7 @@ import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.TransactionsDiffInput;
 import com.takipi.integrations.grafana.output.Series;
 
-public class TransactionsDiffFunction extends TransactionsListFunction
-{
+public class TransactionsDiffFunction extends TransactionsListFunction {
 	public static class Factory implements FunctionFactory {
 
 		@Override

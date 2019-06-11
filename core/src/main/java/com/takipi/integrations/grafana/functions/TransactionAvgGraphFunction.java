@@ -18,8 +18,7 @@ import com.takipi.integrations.grafana.input.TransactionsGraphInput.TimeWindow;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
-public class TransactionAvgGraphFunction extends TransactionsGraphFunction
-{
+public class TransactionAvgGraphFunction extends TransactionsGraphFunction {
 
 	public static class Factory implements FunctionFactory {
 

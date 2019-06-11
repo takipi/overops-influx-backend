@@ -1,10 +1,10 @@
 package com.takipi.integrations.grafana.settings;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.google.common.collect.Lists;
 import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.infra.Categories.Category;
 import com.takipi.api.client.util.settings.ServiceSettingsData;
@@ -49,7 +49,7 @@ public class ServiceSettings {
 			return Collections.emptyList();
 		}
 
-		List<String> result = Lists.newArrayList();
+		List<String> result = new ArrayList<String>();
 
 		for (Category category : data.tiers) {
 			result.addAll(category.labels);

@@ -42,6 +42,8 @@ public class GrafanaSettings {
 	private static final int CACHE_SIZE = 1000;
 	private static final int CACHE_RETENTION = 20;
 	
+	private static final SettingsVersion MIN_SLOWDOWN_PERCENTAGE_THRESHOLD = SettingsVersion.of(1, 1, 0);
+	
 	private static LoadingCache<SettingsCacheKey, ServiceSettings> settingsCache = null;
 	private static SettingsStorage settingsStorage = null;
 	
@@ -90,7 +92,7 @@ public class GrafanaSettings {
 			return;
 		}
 		
-		Response<ServicesResult> response = ApiCache.getServices(apiClient);
+		Response<ServicesResult> response = ApiCache.getServices(apiClient, null);
 		
 		if ((response.data != null) && (response.data.services != null)) {
 				
@@ -117,8 +119,7 @@ public class GrafanaSettings {
 		
 		String json;
 		
-		synchronized (bundledSettingsLock)
-		{
+		synchronized (bundledSettingsLock) {
 			if (bundledSettingsData != null) {
 				return bundledSettingsData;
 			}
@@ -156,8 +157,7 @@ public class GrafanaSettings {
 		}
 	}
 	
-	public static void init(SettingsStorage newSettingsStorage)
-	{
+	public static void init(SettingsStorage newSettingsStorage) {
 		setSettingsStorage(newSettingsStorage);
 		initCache();
 	}
@@ -213,8 +213,7 @@ public class GrafanaSettings {
 		return result;
 	}
 	
-	private static void initCache()
-	{
+	private static void initCache() {
 		if (ENABLE_CACHE) {
 			settingsCache = CacheBuilder.newBuilder()
 					.maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_RETENTION, TimeUnit.SECONDS)
@@ -236,38 +235,50 @@ public class GrafanaSettings {
 			return;
 		}
 		
-		ServiceSettingsData settingsData = bundledSettings.getFirst();
+		ServiceSettingsData bundledSettingsData = bundledSettings.getFirst();
+		SettingsVersion bundledVersion = SettingsVersion.safeParse(bundledSettingsData.version);
 		
 		if (serviceSettingsData.general == null) {
-			serviceSettingsData.general = settingsData.general;
+			serviceSettingsData.general = bundledSettingsData.general;
 		}
 		
 		if (serviceSettingsData.general.transaction_points_wanted <= 0) {
-			serviceSettingsData.general.transaction_points_wanted = settingsData.general.transaction_points_wanted;
+			serviceSettingsData.general.transaction_points_wanted = bundledSettingsData.general.transaction_points_wanted;
 		}
 		
 		if (serviceSettingsData.general.points_wanted <= 0) {
-			serviceSettingsData.general.points_wanted = settingsData.general.points_wanted;
+			serviceSettingsData.general.points_wanted = bundledSettingsData.general.points_wanted;
 		}
 		
 		if (serviceSettingsData.regression == null) {
-			serviceSettingsData.regression = settingsData.regression;
+			serviceSettingsData.regression = bundledSettingsData.regression;
 		}
 		
 		if (serviceSettingsData.regression.baseline_timespan_factor <= 0) {
-			serviceSettingsData.regression.baseline_timespan_factor = settingsData.regression.baseline_timespan_factor;
+			serviceSettingsData.regression.baseline_timespan_factor = bundledSettingsData.regression.baseline_timespan_factor;
 		}
 		
 		if (serviceSettingsData.regression.min_baseline_timespan <= 0) {
-			serviceSettingsData.regression.min_baseline_timespan = settingsData.regression.min_baseline_timespan;
+			serviceSettingsData.regression.min_baseline_timespan = bundledSettingsData.regression.min_baseline_timespan;
 		}
 		
 		if (serviceSettingsData.slowdown == null) {
-			serviceSettingsData.slowdown = settingsData.slowdown;
+			serviceSettingsData.slowdown = bundledSettingsData.slowdown;
+		}
+		
+		if ((MIN_SLOWDOWN_PERCENTAGE_THRESHOLD.isNewerThan(bundledVersion)) &&
+			(serviceSettingsData.slowdown.min_delta_threshold_percentage == 0.0)) {
+			serviceSettingsData.slowdown.min_delta_threshold_percentage = 0.20;
 		}
 		
 		if (serviceSettingsData.regression_report == null) {
-			serviceSettingsData.regression_report = settingsData.regression_report;
+			serviceSettingsData.regression_report = bundledSettingsData.regression_report;
+		}
+		
+		if ((serviceSettingsData.version == null) 
+		&& (!Objects.equal(serviceSettingsData.general.transaction_failures, 
+			bundledSettingsData.general.transaction_failures))) {
+			serviceSettingsData.general.transaction_failures = bundledSettingsData.general.transaction_failures;
 		}
 	}
 	

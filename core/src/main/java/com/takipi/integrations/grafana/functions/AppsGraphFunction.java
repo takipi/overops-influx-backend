@@ -21,8 +21,7 @@ import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.ServiceSettings;
 import com.takipi.integrations.grafana.util.ApiCache;
 
-public class AppsGraphFunction extends BaseServiceCompositeFunction
-{
+public class AppsGraphFunction extends BaseServiceCompositeFunction {
 	public static class Factory implements FunctionFactory {
 
 		@Override
@@ -76,8 +75,7 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction
 		}
 	}
 	
-	public AppsGraphFunction(ApiClient apiClient)
-	{
+	public AppsGraphFunction(ApiClient apiClient) {
 		super(apiClient);
 	}
 		
@@ -109,7 +107,8 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction
 			return keyApps.subList(0, limit);
 		}
 		
-		List<String> activeApps = new ArrayList<String>(ApiCache.getApplicationNames(apiClient, serviceId, true));  
+		Collection<String> appNames = ApiCache.getApplicationNames(apiClient, serviceId, true, input.query);
+		List<String> activeApps = new ArrayList<String>(appNames);  
 		
 		List<Category> categories = getSettingsData(serviceId).tiers;
 		 
@@ -130,7 +129,7 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction
 		}
 		
 		sortApplicationsByProcess(serviceId, activeApps,
-			input.getServers(serviceId), input.getDeployments(serviceId, apiClient));	
+			input.getServers(serviceId), input.getDeployments(serviceId, apiClient), input);	
 		
 		result = new ArrayList<String>(keyApps.size() + activeApps.size());
 		result.addAll(keyApps);
@@ -158,8 +157,7 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction
 	
 	@Override
 	protected Collection<Pair<GrafanaFunction, FunctionInput>> getServiceFunctions(String serviceId,
-			EnvironmentsFilterInput functionInput)
-	{
+			EnvironmentsFilterInput functionInput) {
 		GraphLimitInput input = (GraphLimitInput)functionInput;
 		List<Pair<GrafanaFunction, FunctionInput>> result = new ArrayList<Pair<GrafanaFunction,FunctionInput>>();
 		
@@ -178,8 +176,7 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction
 	}
 	
 	@Override
-	public List<Series> process(FunctionInput functionInput)
-	{
+	public List<Series> process(FunctionInput functionInput) {
 		if (!(functionInput instanceof GraphLimitInput)) {
 			throw new IllegalArgumentException("functionInput");
 		}

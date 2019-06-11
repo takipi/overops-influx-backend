@@ -37,13 +37,11 @@ import com.takipi.integrations.grafana.functions.GrafanaFunction;
  * 	
  */
 
-public class RegressionsInput extends EventsInput
-{
+public class RegressionsInput extends EventsInput {
 	/**
 	 * The types of regression that can be reported by this function
 	 */
-	public static enum RegressionType
-	{
+	public static enum RegressionType {
 		/**
 		 * A severe new issue detected within the context of this regression report
 		 */
@@ -65,8 +63,7 @@ public class RegressionsInput extends EventsInput
 		Regressions	
 	}
 	
-	public enum RenderMode
-	{
+	public enum RenderMode {
 		/**
 		 * return a single stat value
 		 */
@@ -173,20 +170,17 @@ public class RegressionsInput extends EventsInput
 	
 	public Collection<RegressionType> getRegressionTypes() {
 		
-		if (regressionTypes == null)
-		{
+		if (regressionTypes == null) {
 			return Collections.emptyList();
 		}
 		
 		String[] parts = regressionTypes.split(GrafanaFunction.ARRAY_SEPERATOR);
 		Collection<RegressionType> result = new ArrayList<RegressionType>(parts.length);
 		
-		for (String part : parts)
-		{
+		for (String part : parts) {
 			RegressionType type = RegressionType.valueOf(part);
 			
-			if (type != null)
-			{
+			if (type != null) {
 				result.add(type);
 			}
 		}

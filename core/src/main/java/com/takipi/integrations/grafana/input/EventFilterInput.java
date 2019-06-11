@@ -10,8 +10,7 @@ import com.takipi.integrations.grafana.functions.EventFilter;
  * the could be selected by the user. 
  *
  */
-public abstract class EventFilterInput extends ViewInput
-{
+public abstract class EventFilterInput extends ViewInput {
 	/**
 	 * An optional comma delimited string array of deployment names to select all objects introduced by 
 	 * a target set of deployments

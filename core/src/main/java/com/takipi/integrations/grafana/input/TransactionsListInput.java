@@ -33,8 +33,7 @@ public class TransactionsListInput extends BaseGraphInput {
 	 * Control whether to return a list of rows or a single stat value
 	 *
 	 */
-	public enum RenderMode
-	{
+	public enum RenderMode {
 		
 		/**
 		 * Output the volume of transactions matching the target state (e.t. OK, Slowing, Critical)
@@ -62,6 +61,17 @@ public class TransactionsListInput extends BaseGraphInput {
 		 * Output a weighted avg of transaction baseline response time
 		 */
 		SingleStatBaselineAvg,
+		
+		/**
+		 * Output a number of failures in the list
+		 */
+		SingleStatFailures,
+		
+		/**
+		 * Output a number of failures divided by number of invocations in the list
+		 */
+		SingleStatFailureRate,
+		
 		
 		/**
 		 * Output a row for each transaction
