@@ -886,14 +886,14 @@ public class RegressionFunction extends EventsFunction {
 				
 				Set<DeterminantKey> graphsKeys = new HashSet<DeterminantKey>();
 				
-				graphsKeys.add(new DeterminantKey(graph.machine_name, graph.application_name, graph.deployment_name));
+				graphsKeys.add(DeterminantKey.create(graph.machine_name, graph.application_name, graph.deployment_name));
 				
 				if (!CollectionUtil.safeIsEmpty(applicationGroupsMap)) {
 					Collection<String> appGroups = applicationGroupsMap.get(graph.application_name);
 					
 					if (!CollectionUtil.safeIsEmpty(appGroups)) {
 						for (String appGroup : appGroups) {
-							graphsKeys.add(new DeterminantKey(graph.machine_name, appGroup, graph.deployment_name));
+							graphsKeys.add(DeterminantKey.create(graph.machine_name, appGroup, graph.deployment_name));
 						}
 					}
 				}
