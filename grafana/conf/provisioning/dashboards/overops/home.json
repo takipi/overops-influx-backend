@@ -999,7 +999,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "${__cell_12}",
-          "linkUrl": "http://hackintosh.local:8080/environments/${__cell_3}/alerts",
+          "linkUrl": "//$apiHost:$apiPort/environments/${__cell_3}/alerts",
           "mappingType": 1,
           "pattern": "AlertStatus",
           "thresholds": [],
@@ -1809,7 +1809,7 @@
           "decimals": 2,
           "link": true,
           "linkTooltip": "${__cell_12}",
-          "linkUrl": "http://hackintosh.local:8080/environments/${__cell_3}/alerts",
+          "linkUrl": "//$apiHost:$apiPort/environments/${__cell_3}/alerts",
           "mappingType": 1,
           "pattern": "AlertStatus",
           "thresholds": [],
@@ -1886,8 +1886,9 @@
       {
         "allValue": "None",
         "current": {
-          "text": "Dave's Key 1: S2",
-          "value": "Dave's Key 1: S2"
+          "selected": true,
+          "text": "None",
+          "value": "None"
         },
         "datasource": "OO",
         "hide": 0,
@@ -1910,6 +1911,7 @@
       {
         "allValue": "all",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -1934,6 +1936,7 @@
       {
         "allValue": "All",
         "current": {
+          "selected": true,
           "text": "All",
           "value": "$__all"
         },
@@ -2050,6 +2053,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "24",
           "value": "24"
         },
@@ -2367,8 +2371,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "8080",
-          "value": "8080"
+          "selected": true,
+          "text": "443",
+          "value": "443"
         },
         "datasource": "OO",
         "hide": 2,
@@ -2391,8 +2396,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "host.docker.internal",
-          "value": "host.docker.internal"
+          "selected": true,
+          "text": "app.overops.com",
+          "value": "app.overops.com"
         },
         "datasource": "OO",
         "hide": 2,
@@ -2570,5 +2576,5 @@
   "timezone": "",
   "title": "Home",
   "uid": "lg0U4qriz",
-  "version": 1
+  "version": 297
 }
