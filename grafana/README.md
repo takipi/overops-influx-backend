@@ -4,7 +4,7 @@ In order to make Grafana work as OverOps Dashboards as well as the oo-as-influx 
 
 When setting up Grafana, choose the approach which best describes your architecture:
 
-* **Proxy (Recommended) ** - the Grafana is proxied by the OverOps UI (e.g. https://app.oveorps.com/grafana)
+* **Proxy (Recommended)** - the Grafana is proxied by the OverOps UI (e.g. https://app.oveorps.com/grafana)
 
 * **Bundle** - the overops-influx-backend code runs inside an OverOps API Server (e.g. https://api.overops.com)
 
