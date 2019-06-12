@@ -29,7 +29,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1560222079250,
+  "id": 43,
+  "iteration": 1556711877057,
   "links": [
     {
       "icon": "external link",
@@ -2078,6 +2079,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "100",
           "value": "100"
         },
@@ -2576,5 +2578,5 @@
   "timezone": "",
   "title": "Home",
   "uid": "lg0U4qriz",
-  "version": 297
+  "version": 296
 }
