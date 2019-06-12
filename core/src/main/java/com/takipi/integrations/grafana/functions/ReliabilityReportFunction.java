@@ -700,7 +700,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 				
 				for (Stats contributor : event.stats.contributors) {
 					
-					DeterminantKey determinantKey = new DeterminantKey(contributor.machine_name,
+					DeterminantKey determinantKey = DeterminantKey.create(contributor.machine_name,
 							contributor.application_name, contributor.deployment_name);
 					
 					EventResult contributorEventResult = (EventResult) event.clone();
@@ -713,7 +713,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 					
 					if (!CollectionUtil.safeIsEmpty(appGroups)) {
 						for (String appGroup : appGroups) {
-							DeterminantKey groupDeterminantKey = new DeterminantKey(contributor.machine_name,
+							DeterminantKey groupDeterminantKey = DeterminantKey.create(contributor.machine_name,
 									appGroup, contributor.deployment_name);
 							
 							result.safeAddEventResult(groupDeterminantKey, contributorEventResult);
