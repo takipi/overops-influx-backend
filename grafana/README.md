@@ -18,11 +18,6 @@ When setting up Grafana, choose the approach which best describes your architect
 4. Change to user: `chown -R ubuntu:ubuntu /opt/grafana-6.2.2`
 5. Override `grafana` folder here in the repo onto `/opt/grafana-6.2.2` to override conf provisioning code and public assets.
 
-## Installing plugins
-1. Get Boom table plugin:  
-`wget https://grafana.com/api/plugins/yesoreyeram-boomtable-panel/versions/0.4.6/download`
-2. Unpack it to `/opt/grafana-6.2.2/data/plugins`
-
 ## Setup Datasource
 Based on the chosen architecture, rename one of the templates in `conf/provisioning/datasources` as `conf/provisioning/datasources/oo.yaml` 
 
