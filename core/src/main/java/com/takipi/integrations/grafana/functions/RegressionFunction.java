@@ -765,7 +765,7 @@ public class RegressionFunction extends EventsFunction {
 	
 	public Map<DeterminantKey, Pair<Graph, Graph>> getRegressionGraphs(String serviceId, String viewId,
 			RegressionInput regressionInput, RegressionWindow regressionWindow,
-			Map<String, Collection<String>> applicationGroupsMap, BaseEventVolumeInput input, boolean newOnly) {
+			Map<String, Collection<String>> applicationGroupsMap, BaseEventVolumeInput input, boolean newOnly, boolean shouldBreak) {
 		
 		EventFilterInput baselineInput;
 		DateTime baselineStart = regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan);
@@ -793,7 +793,7 @@ public class RegressionFunction extends EventsFunction {
 		if (!newOnly) {
 			baselineGraphTasks = getGraphTasks(serviceId, viewId, baselineInput, 
 				VolumeType.all, baselineStart, baselineEnd,
-				regressionInput.baselineTimespan, regressionWindow.activeTimespan, false);
+				regressionInput.baselineTimespan, regressionWindow.activeTimespan, false, shouldBreak);
 		} else {
 			baselineGraphTasks = null;
 		}
@@ -807,7 +807,7 @@ public class RegressionFunction extends EventsFunction {
 		}
 		
 		Collection<GraphSliceTask> activeGraphTasks = getGraphTasks(serviceId, viewId, 
-			input, VolumeType.all, activeStart, activeEnd, 0, graphActiveTimespan, false);
+			input, VolumeType.all, activeStart, activeEnd, 0, graphActiveTimespan, false, shouldBreak);
 		
 		List<GraphSliceTask> graphTasks = new ArrayList<GraphSliceTask>(); 
 		
@@ -920,7 +920,7 @@ public class RegressionFunction extends EventsFunction {
 					} else {
 						ViewInput input = graphSliceTaskResult.task.input;
 						
-						if (determinantKey.equals(DeterminantKey.Empty) && input.hasDeterminantFilter()) {
+						if (graph == null || CollectionUtil.safeIsEmpty(graph.points)) {
 							// The relevant apps for the filter does not exist
 							continue;
 						}
@@ -1027,7 +1027,7 @@ public class RegressionFunction extends EventsFunction {
 		}
 		
 		Collection<Pair<Graph, Graph>> regressionGraphsCollection = getRegressionGraphs(serviceId,
-				viewId, regressionInput, regressionWindow, null, input, newOnly).values();
+				viewId, regressionInput, regressionWindow, null, input, newOnly, true).values();
 		
 		if (CollectionUtil.safeIsEmpty(regressionGraphsCollection)) {
 			return RegressionOutput.emptyOutput;

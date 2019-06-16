@@ -199,6 +199,10 @@ public class ReliabilityReportInput extends RegressionsInput {
 		return mode;	
 	}
 	
+	public boolean isTiersReportMode() {
+		return (mode == ReportMode.Tiers || mode == ReportMode.Tiers_Extended);
+	}
+	
 	/**
 	 * Control the type of events used to compute the report score
 	 *

@@ -653,8 +653,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 			DateTime activeWindowStart = activeWindow.activeWindowStart;
 			DateTime activeWindowEnd = activeWindow.activeWindowStart.plusMinutes(subRegressionInput.activeTimespan);
 			
+			boolean shouldBreak = !(reliabilityReportInput.isTiersReportMode());
+			
 			Collection<EventResult> eventList = getEventResultsWithRetries(regressionInput, regressionFunction,
-					activeWindowStart, activeWindowEnd);
+					activeWindowStart, activeWindowEnd, shouldBreak);
 			
 			if (eventList == null) {
 				return null;
@@ -664,7 +666,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			Map<DeterminantKey, Pair<Graph, Graph>> regressionGraphsMap = regressionFunction.getRegressionGraphs(serviceId,
 					viewId, subRegressionInput, activeWindow, applicationGroupsMap,
-					regressionInput, newOnly);
+					regressionInput, newOnly, shouldBreak);
 			
 			Set<RegressionEventsOutput> result = new HashSet<RegressionEventsOutput>();
 			
@@ -679,13 +681,13 @@ public class ReliabilityReportFunction extends EventsFunction {
 		}
 		
 		private Collection<EventResult> getEventResultsWithRetries(ViewInput regressionInput,
-				RegressionFunction regressionFunction, DateTime activeWindowStart, DateTime activeWindowEnd) {
+				RegressionFunction regressionFunction, DateTime activeWindowStart, DateTime activeWindowEnd, boolean shouldBreak) {
 			
 			Collection<EventResult> result = null;
 			
 			for (int retries = 0; retries < GET_EVENT_LIST_MAX_RETRIES; retries++) {
 				result = regressionFunction.getEventList(serviceId, viewId, regressionInput, activeWindowStart, activeWindowEnd,
-						null, true, VolumeType.all, true);
+						null, true, VolumeType.all, shouldBreak);
 				
 				if (result != null) {
 					break;

@@ -2168,7 +2168,7 @@ public abstract class GrafanaFunction {
 		int baselineWindow, int activeWindow, boolean bestRes) {		
 		
 		Collection<GraphSliceTask> tasks = getGraphTasks(serviceId, viewId, 
-			input, volumeType, from, to, baselineWindow, activeWindow, bestRes);
+			input, volumeType, from, to, baselineWindow, activeWindow, bestRes, true);
 
 		Collection<GraphSliceTaskResult> graphTaskResults = executeGraphTasks(tasks, false);
 		
@@ -2197,9 +2197,9 @@ public abstract class GrafanaFunction {
 		
 	}
 	
-	protected Collection<GraphSliceTask> getGraphTasks(String serviceId, String viewId, 
-			ViewInput input, VolumeType volumeType, DateTime from, DateTime to, 
-			int baselineWindow, int activeWindow, boolean dynamicRes) {
+	protected Collection<GraphSliceTask> getGraphTasks(String serviceId, String viewId,
+			ViewInput input, VolumeType volumeType, DateTime from, DateTime to,
+			int baselineWindow, int activeWindow, boolean dynamicRes, boolean shouldBreak) {
 		
 		Pair<DateTime, DateTime> timespan = Pair.of(from, to);
 
@@ -2258,7 +2258,7 @@ public abstract class GrafanaFunction {
 			GraphSliceTask task = createGraphAsyncTask(serviceId, viewId,
 				input, volumeType, 
 				sliceRequest.from, sliceRequest.to, 
-				baselineWindow, activeWindow, sliceIndex, sliceRequest.cache, true);
+				baselineWindow, activeWindow, sliceIndex, sliceRequest.cache, shouldBreak);
 				
 			index++;
 			
