@@ -926,7 +926,11 @@ public class ApiCache {
 			
 			EventsCacheLoader other = (EventsCacheLoader)obj;
 			
-			if (!Objects.equal(breakdownTypes, other.breakdownTypes)) {
+			if (breakdownTypes == null || other.breakdownTypes == null) {
+				return breakdownTypes == other.breakdownTypes;
+			}
+			
+			if (!(breakdownTypes.contains(other.breakdownTypes) && other.breakdownTypes.contains(breakdownTypes))) {
 				return false;
 			}
 			
@@ -959,7 +963,7 @@ public class ApiCache {
 		protected Pair<DateTime, DateTime> timespan;
 		protected boolean cachable;
 
-		public GraphCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, 
+		public GraphCacheLoader(ApiClient apiClient, ApiGetRequest<?> request,
 				String serviceId, ViewInput input, ServiceSettingsData settingsData,
 				VolumeType volumeType, int baselineWindow, int activeWindow, int windowSlice,
 				Pair<DateTime, DateTime> timespan, boolean cachable) {
@@ -995,7 +999,23 @@ public class ApiCache {
 			if (windowSlice != other.windowSlice) {
 				return false;
 			}
-
+			
+			GraphRequest graphRequest = (GraphRequest) request;
+			
+			GraphRequest otherRequest = (GraphRequest) other.request;
+			
+			if (graphRequest.breakDeployments != otherRequest.breakDeployments) {
+				return false;
+			}
+			
+			if (graphRequest.breakApps != otherRequest.breakApps) {
+				return false;
+			}
+			
+			if (graphRequest.breakServers != otherRequest.breakServers) {
+				return false;
+			}
+			
 			return true;
 		}
 		
