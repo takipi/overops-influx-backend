@@ -234,12 +234,13 @@ public abstract class GrafanaFunction {
 		protected int baselineWindow;
 		protected int activeWindow;
 		protected int windowSlice;
+		private Set<BreakdownType> breakdownTypes;
 		protected boolean cache;
 		protected GraphRequest.Builder builder;
 		
 		protected GraphSliceTask(GraphRequest.Builder builder, String serviceId, String viewId, 
 				ViewInput input, VolumeType volumeType, DateTime from, DateTime to,
-				int baselineWindow, int activeWindow, int windowSlice, boolean cache) {
+				int baselineWindow, int activeWindow, int windowSlice, Set<BreakdownType> breakdownTypes, boolean cache) {
 			
 			this.builder = builder;
 			this.serviceId = serviceId;
@@ -251,6 +252,7 @@ public abstract class GrafanaFunction {
 			this.baselineWindow = baselineWindow;
 			this.activeWindow = activeWindow;
 			this.windowSlice = windowSlice;
+			this.breakdownTypes = breakdownTypes;
 			this.cache = cache;
 		}
 		
@@ -261,7 +263,7 @@ public abstract class GrafanaFunction {
 				serviceId, input, getSettingsData(serviceId),
 				volumeType, builder.build(), 
 				baselineWindow, activeWindow, windowSlice,
-				Pair.of(from, to), cache);
+				Pair.of(from, to), breakdownTypes, cache);
 			
 			if (response.isBadResponse()) {
 				return null;
@@ -2156,7 +2158,7 @@ public abstract class GrafanaFunction {
 		
 		GraphSliceTask task = new GraphSliceTask(builder, serviceId, viewId,
 			input, volumeType, from, to, baselineWindow, activeWindow,
-			windowSlice, cache);
+			windowSlice, breakdownTypes, cache);
 		
 		return task;
 	}

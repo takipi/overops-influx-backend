@@ -961,18 +961,20 @@ public class ApiCache {
 		protected int baselineWindow;
 		protected int windowSlice;
 		protected Pair<DateTime, DateTime> timespan;
+		protected Set<BreakdownType> breakdownTypes;
 		protected boolean cachable;
 
 		public GraphCacheLoader(ApiClient apiClient, ApiGetRequest<?> request,
 				String serviceId, ViewInput input, ServiceSettingsData settingsData,
 				VolumeType volumeType, int baselineWindow, int activeWindow, int windowSlice,
-				Pair<DateTime, DateTime> timespan, boolean cachable) {
+				Pair<DateTime, DateTime> timespan, Set<BreakdownType> breakdownTypes, boolean cachable) {
 
 			super(apiClient, request, serviceId, input, settingsData, volumeType);
 			this.activeWindow = activeWindow;
 			this.baselineWindow = baselineWindow;
 			this.windowSlice = windowSlice;
 			this.timespan = timespan;
+			this.breakdownTypes = breakdownTypes;
 			this.cachable = cachable;
 		}
 				
@@ -1000,19 +1002,11 @@ public class ApiCache {
 				return false;
 			}
 			
-			GraphRequest graphRequest = (GraphRequest) request;
-			
-			GraphRequest otherRequest = (GraphRequest) other.request;
-			
-			if (graphRequest.breakDeployments != otherRequest.breakDeployments) {
-				return false;
+			if (breakdownTypes == null || other.breakdownTypes == null) {
+				return breakdownTypes == other.breakdownTypes;
 			}
 			
-			if (graphRequest.breakApps != otherRequest.breakApps) {
-				return false;
-			}
-			
-			if (graphRequest.breakServers != otherRequest.breakServers) {
+			if (!(breakdownTypes.contains(other.breakdownTypes) && other.breakdownTypes.contains(breakdownTypes))) {
 				return false;
 			}
 			
@@ -1754,12 +1748,12 @@ public class ApiCache {
 			ViewInput input, ServiceSettingsData settingsData,
 			VolumeType volumeType, GraphRequest request, 
 			int baselineWindow, int activeWindow, int windowSlice,
-			Pair<DateTime, DateTime> timespan, boolean cache) {
+			Pair<DateTime, DateTime> timespan, Set<BreakdownType> breakdownTypes, boolean cache) {
 
 		boolean cachable = (CACHE_GRAPHS) && (cacheStorage != null) && (cache);
 		
 		GraphCacheLoader cacheKey = new GraphCacheLoader(apiClient, request, serviceId, input, 
-			settingsData, volumeType, baselineWindow, activeWindow, windowSlice, timespan, cachable);
+			settingsData, volumeType, baselineWindow, activeWindow, windowSlice, timespan, breakdownTypes , cachable);
 		
 		LoadingCache<BaseCacheLoader, Response<?>> loadingCache;
 		
