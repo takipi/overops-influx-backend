@@ -43,6 +43,7 @@ import com.takipi.api.client.result.event.EventsSlimVolumeResult;
 import com.takipi.api.client.result.service.ServicesResult;
 import com.takipi.api.client.result.settings.AlertsSettingsResult;
 import com.takipi.api.client.result.view.ViewsResult;
+import com.takipi.api.client.request.event.BreakdownType;
 import com.takipi.api.client.util.infra.Categories;
 import com.takipi.api.client.util.infra.Categories.Category;
 import com.takipi.api.client.util.infra.Categories.CategoryType;
@@ -653,20 +654,19 @@ public class ReliabilityReportFunction extends EventsFunction {
 			DateTime activeWindowStart = activeWindow.activeWindowStart;
 			DateTime activeWindowEnd = activeWindow.activeWindowStart.plusMinutes(subRegressionInput.activeTimespan);
 			
-			boolean shouldBreak = !(reliabilityReportInput.isTiersReportMode());
-			
 			Collection<EventResult> eventList = getEventResultsWithRetries(regressionInput, regressionFunction,
-					activeWindowStart, activeWindowEnd, shouldBreak);
+					activeWindowStart, activeWindowEnd);
 			
 			if (eventList == null) {
 				return null;
 			}
 			
 			EventsDeterminantMap eventsMap = getEventsMapByKey(eventList, applicationGroupsMap);
+			Set<BreakdownType> breakdownTypes = getBreakDownTypesFromSelection(reliabilityReportInput, regressionInput, serviceId);
 			
 			Map<DeterminantKey, Pair<Graph, Graph>> regressionGraphsMap = regressionFunction.getRegressionGraphs(serviceId,
 					viewId, subRegressionInput, activeWindow, applicationGroupsMap,
-					regressionInput, newOnly, shouldBreak);
+					regressionInput, newOnly, breakdownTypes);
 			
 			Set<RegressionEventsOutput> result = new HashSet<RegressionEventsOutput>();
 			
@@ -681,13 +681,15 @@ public class ReliabilityReportFunction extends EventsFunction {
 		}
 		
 		private Collection<EventResult> getEventResultsWithRetries(ViewInput regressionInput,
-				RegressionFunction regressionFunction, DateTime activeWindowStart, DateTime activeWindowEnd, boolean shouldBreak) {
+				RegressionFunction regressionFunction, DateTime activeWindowStart, DateTime activeWindowEnd) {
 			
 			Collection<EventResult> result = null;
 			
+			Set<BreakdownType> breakdownTypes = getBreakDownTypesFromSelection(reliabilityReportInput, regressionInput, serviceId);
+				
 			for (int retries = 0; retries < GET_EVENT_LIST_MAX_RETRIES; retries++) {
 				result = regressionFunction.getEventList(serviceId, viewId, regressionInput, activeWindowStart, activeWindowEnd,
-						null, true, VolumeType.all, shouldBreak);
+						breakdownTypes, true, VolumeType.all);
 				
 				if (result != null) {
 					break;

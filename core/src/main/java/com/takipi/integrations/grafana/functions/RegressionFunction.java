@@ -18,6 +18,7 @@ import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.metrics.GraphResult;
+import com.takipi.api.client.request.event.BreakdownType;
 import com.takipi.api.client.util.regression.DeterminantKey;
 import com.takipi.api.client.util.regression.RateRegression;
 import com.takipi.api.client.util.regression.RegressionInput;
@@ -765,7 +766,8 @@ public class RegressionFunction extends EventsFunction {
 	
 	public Map<DeterminantKey, Pair<Graph, Graph>> getRegressionGraphs(String serviceId, String viewId,
 			RegressionInput regressionInput, RegressionWindow regressionWindow,
-			Map<String, Collection<String>> applicationGroupsMap, BaseEventVolumeInput input, boolean newOnly, boolean shouldBreak) {
+			Map<String, Collection<String>> applicationGroupsMap, BaseEventVolumeInput input, boolean newOnly,
+			Set<BreakdownType> breakdownTypes) {
 		
 		EventFilterInput baselineInput;
 		DateTime baselineStart = regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan);
@@ -787,13 +789,13 @@ public class RegressionFunction extends EventsFunction {
 		} else {
 			baselineInput = input;
 		}
-				
+		
 		Collection<GraphSliceTask> baselineGraphTasks;
 		
 		if (!newOnly) {
 			baselineGraphTasks = getGraphTasks(serviceId, viewId, baselineInput, 
 				VolumeType.all, baselineStart, baselineEnd,
-				regressionInput.baselineTimespan, regressionWindow.activeTimespan, false, shouldBreak);
+				regressionInput.baselineTimespan, regressionWindow.activeTimespan, false, breakdownTypes);
 		} else {
 			baselineGraphTasks = null;
 		}
@@ -807,7 +809,7 @@ public class RegressionFunction extends EventsFunction {
 		}
 		
 		Collection<GraphSliceTask> activeGraphTasks = getGraphTasks(serviceId, viewId, 
-			input, VolumeType.all, activeStart, activeEnd, 0, graphActiveTimespan, false, shouldBreak);
+			input, VolumeType.all, activeStart, activeEnd, 0, graphActiveTimespan, false, breakdownTypes);
 		
 		List<GraphSliceTask> graphTasks = new ArrayList<GraphSliceTask>(); 
 		
@@ -1027,7 +1029,7 @@ public class RegressionFunction extends EventsFunction {
 		}
 		
 		Collection<Pair<Graph, Graph>> regressionGraphsCollection = getRegressionGraphs(serviceId,
-				viewId, regressionInput, regressionWindow, null, input, newOnly, true).values();
+				viewId, regressionInput, regressionWindow, null, input, newOnly, null).values();
 		
 		if (CollectionUtil.safeIsEmpty(regressionGraphsCollection)) {
 			return RegressionOutput.emptyOutput;

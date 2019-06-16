@@ -89,6 +89,7 @@ import com.takipi.integrations.grafana.input.EnvironmentsFilterInput;
 import com.takipi.integrations.grafana.input.EventFilterInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.input.VariableInput;
+import com.takipi.integrations.grafana.input.ReliabilityReportInput;
 import com.takipi.integrations.grafana.input.ViewInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.settings.GrafanaSettings;
@@ -2118,10 +2119,10 @@ public abstract class GrafanaFunction {
 			input, volumeType, from, to, baselineWindow, activeWindow, true);
 	}
 	
-	protected GraphSliceTask createGraphAsyncTask(String serviceId, String viewId, 
-			ViewInput input, VolumeType volumeType, 
-			DateTime from, DateTime to, int baselineWindow, int activeWindow, 
-			int windowSlice, boolean cache, boolean applyBreakFilter) {
+	protected GraphSliceTask createGraphAsyncTask(String serviceId, String viewId,
+			ViewInput input, VolumeType volumeType,
+			DateTime from, DateTime to, int baselineWindow, int activeWindow,
+			int windowSlice, boolean cache, Set<BreakdownType> breakdownTypes) {
 		
 		GraphResolution graphResolution;
 		
@@ -2138,8 +2139,19 @@ public abstract class GrafanaFunction {
 		
 		applyFilters(input, serviceId, builder);
 		
-		if (applyBreakFilter) {
-			builder.breakExistingFilters();
+		if (breakdownTypes != null) {
+			
+			if (breakdownTypes.contains(BreakdownType.App)) {
+				builder.setBreakApps(true);
+			}
+			
+			if (breakdownTypes.contains(BreakdownType.Deployment)) {
+				builder.setBreakDeployments(true);
+			}
+			
+			if (breakdownTypes.contains(BreakdownType.Server)) {
+				builder.setBreakServers(true);
+			}
 		}
 		
 		GraphSliceTask task = new GraphSliceTask(builder, serviceId, viewId,
@@ -2168,7 +2180,7 @@ public abstract class GrafanaFunction {
 		int baselineWindow, int activeWindow, boolean bestRes) {		
 		
 		Collection<GraphSliceTask> tasks = getGraphTasks(serviceId, viewId, 
-			input, volumeType, from, to, baselineWindow, activeWindow, bestRes, true);
+			input, volumeType, from, to, baselineWindow, activeWindow, bestRes, null);
 
 		Collection<GraphSliceTaskResult> graphTaskResults = executeGraphTasks(tasks, false);
 		
@@ -2199,7 +2211,7 @@ public abstract class GrafanaFunction {
 	
 	protected Collection<GraphSliceTask> getGraphTasks(String serviceId, String viewId,
 			ViewInput input, VolumeType volumeType, DateTime from, DateTime to,
-			int baselineWindow, int activeWindow, boolean dynamicRes, boolean shouldBreak) {
+			int baselineWindow, int activeWindow, boolean dynamicRes, Set<BreakdownType> breakdownTypes) {
 		
 		Pair<DateTime, DateTime> timespan = Pair.of(from, to);
 
@@ -2258,7 +2270,7 @@ public abstract class GrafanaFunction {
 			GraphSliceTask task = createGraphAsyncTask(serviceId, viewId,
 				input, volumeType, 
 				sliceRequest.from, sliceRequest.to, 
-				baselineWindow, activeWindow, sliceIndex, sliceRequest.cache, shouldBreak);
+				baselineWindow, activeWindow, sliceIndex, sliceRequest.cache, breakdownTypes);
 				
 			index++;
 			
@@ -2518,7 +2530,7 @@ public abstract class GrafanaFunction {
 		}
 		
 		Collection<EventResult> events = getEventList(serviceId,
-			viewId, input, from, to, null, false, null, false);
+			viewId, input, from, to, null, false, null);
 		
 		if (events == null) {
 			return null;
@@ -2589,9 +2601,7 @@ public abstract class GrafanaFunction {
 	
 	public Collection<EventResult> getEventList(String serviceId, String viewId, ViewInput input, DateTime from,
 			DateTime to, Set<BreakdownType> breakdownTypes,
-			boolean copyStats, VolumeType volumeType, boolean applyBreakFilter) {
-		
-		Set<BreakdownType> breakdownSet;
+			boolean copyStats, VolumeType volumeType) {
 		
 		BaseEventsRequest.Builder builder;
 		
@@ -2605,29 +2615,23 @@ public abstract class GrafanaFunction {
 		
 		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);
 		
-		if (applyBreakFilter) {
-			breakdownSet = builder.getBreakFilters();
-		} else {
-			breakdownSet = breakdownTypes;
-		}
-		
-		if (breakdownSet != null) {
+		if (breakdownTypes != null) {
 			
-			if (breakdownSet.contains(BreakdownType.App)) {
+			if (breakdownTypes.contains(BreakdownType.App)) {
 				builder.setBreakApps(true);
 			}
 			
-			if (breakdownSet.contains(BreakdownType.Deployment)) {
+			if (breakdownTypes.contains(BreakdownType.Deployment)) {
 				builder.setBreakDeployments(true);
 			}
 			
-			if (breakdownSet.contains(BreakdownType.Server)) {
+			if (breakdownTypes.contains(BreakdownType.Server)) {
 				builder.setBreakServers(true);
 			}
 		}
 		
 		Response<?> response = ApiCache.getEventList(apiClient, serviceId, input,
-				breakdownSet, getSettingsData(serviceId), builder.build(),
+				breakdownTypes, getSettingsData(serviceId), builder.build(),
 				((volumeType == null) || (volumeType == VolumeType.hits)));
 		
 		validateResponse(response);
@@ -2730,11 +2734,11 @@ public abstract class GrafanaFunction {
 												
 				if (!CollectionUtil.safeIsEmpty(breakdownTypes) ) {
 					events = getEventList(serviceId, viewId, input, from, to, 
-						breakdownTypes, true, volumeType, false);
+						breakdownTypes, true, volumeType);
 					
 				} else {
 					events = getEventList(serviceId, viewId, input, from, to, 
-						null, true, null, false);
+						null, true, null);
 					
 					if ((events != null) && (volumeType != VolumeType.hits)) {
 						
@@ -2746,7 +2750,7 @@ public abstract class GrafanaFunction {
 			}	
 		} else {
 			events = getEventList(serviceId, viewId, input, from, to, 
-				breakdownTypes, false, null, false);
+				breakdownTypes, false, null);
 		}
 		
 		if (events == null) {
@@ -2790,6 +2794,32 @@ public abstract class GrafanaFunction {
 		}
 		
 		return result;
+	}
+	
+	public Set<BreakdownType> getBreakDownTypesFromSelection(ReliabilityReportInput reliabilityReportInput,
+		ViewInput regressionInput, String serviceId)
+	{
+		Set<BreakdownType> breakdownTypes = null;
+		
+		if (!reliabilityReportInput.isTiersReportMode())
+		{
+			breakdownTypes = new HashSet<BreakdownType>();
+			
+			if (!CollectionUtil.safeIsEmpty(regressionInput.getServers(serviceId))) {
+				breakdownTypes.add(BreakdownType.Server);
+			}
+			
+			if (!CollectionUtil.safeIsEmpty(regressionInput.getApplications(apiClient,
+					getSettingsData(serviceId), serviceId, true, false))) {
+				breakdownTypes.add(BreakdownType.App);
+			}
+			
+			if (!CollectionUtil.safeIsEmpty(regressionInput.getDeployments(serviceId, apiClient))) {
+				breakdownTypes.add(BreakdownType.Deployment);
+			}
+		}
+		
+		return breakdownTypes;
 	}
 	
 	protected void applyFilters(EnvironmentsFilterInput input, String serviceId,
