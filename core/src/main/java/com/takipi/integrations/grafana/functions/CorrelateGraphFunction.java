@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.integrations.grafana.input.CorrelateGraphInput;
@@ -72,7 +71,6 @@ public class CorrelateGraphFunction extends GrafanaFunction {
 		
 		if (hasSysMetrics) {
 			
-			Gson gson = new Gson();
 			String json = gson.toJson(input);
 			
 			SystemMetricsGraphInput smInput = gson.fromJson(json, SystemMetricsGraphInput.class);

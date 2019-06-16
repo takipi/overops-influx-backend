@@ -14,7 +14,6 @@ import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Objects;
-import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.result.event.EventResult;
@@ -26,7 +25,6 @@ import com.takipi.api.client.util.regression.RegressionResult;
 import com.takipi.api.client.util.regression.RegressionStringUtil;
 import com.takipi.api.client.util.regression.RegressionUtil;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
-import com.takipi.api.client.util.settings.RegressionReportSettings;
 import com.takipi.api.client.util.settings.RegressionSettings;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.CollectionUtil;
@@ -63,6 +61,9 @@ public class RegressionFunction extends EventsFunction {
 			return "regressions";
 		}
 	}
+	
+	public static final int P1 = 2;
+	public static final int P2 = 1;
 	
 	protected class RegressionData extends EventData {
 		
@@ -121,10 +122,10 @@ public class RegressionFunction extends EventsFunction {
 				case NewIssues:
 					
 					if (event.stats.hits < input.minVolumeThreshold) {
-						description = String.format("Nonsevere: volume %d < %d", 
+						description = String.format("Non severe error: volume %d < %d", 
 								event.stats.hits, input.minVolumeThreshold);	
 					} else {
-						description = String.format("Nonsevere:rate %s < %.2f", 
+						description = String.format("Non severe error: rate %s < %.2f", 
 								ratio, input.minErrorRateThreshold);
 					}
 					
@@ -135,13 +136,13 @@ public class RegressionFunction extends EventsFunction {
 					if (regResult.getCriticalNewEvents().containsKey(event.id)) {
 
 						if (event.type.equals(UNCAUGHT_EXCEPTION)) {
-							description = String.format("Severe: event is uncaught exception");					
+							description = String.format("Severe error: event is uncaught exception");					
 						} else {
-							description = String.format("Severe: event type " + 
+							description = String.format("Severe error: event type " + 
 								event.name + " is defined as a critical exception type");	
 						}
 					} else {
-						description = String.format("Severe: (volume  %d > %s) AND (rate %s > %.2f)",
+						description = String.format("Severe error: (volume  %d > %s) AND (rate %s > %.2f)",
 							event.stats.hits, input.minVolumeThreshold, ratio,  input.minErrorRateThreshold);
 					}
 					
@@ -150,7 +151,7 @@ public class RegressionFunction extends EventsFunction {
 					
 				case Regressions:
 					
-					description = String.format("Nonsevere: (volume %d > %d) AND (rate %s > %.2f) AND (rate change from baseline %.2f > %.2f)",
+					description = String.format("Increase Warning : (volume %d > %d) AND (rate %s > %.2f) AND (rate change from baseline %.2f > %.2f)",
 							event.stats.hits, input.minVolumeThreshold,
 							ratio, input.minErrorRateThreshold,
 							getRateDelta(), input.regressionDelta);
@@ -158,7 +159,7 @@ public class RegressionFunction extends EventsFunction {
 					
 				case SevereRegressions:
 					
-					description = String.format("Severe: (volume %d > %d) AND (rate %s > %.2f) AND (rate change from baseline %.2f > %.2f)",
+					description = String.format("Severe Increase: (volume %d > %d) AND (rate %s > %.2f) AND (rate change from baseline %.2f > %.2f)",
 							event.stats.hits, input.minVolumeThreshold,
 							ratio, input.minErrorRateThreshold,
 							getRateDelta(), input.criticalRegressionDelta);
@@ -167,7 +168,7 @@ public class RegressionFunction extends EventsFunction {
 				default: throw new IllegalStateException(String.valueOf(type));
 			}
 			
-			return description + ". Thresholds are set in the Settings dashboard.";	
+			return description;
 		}
 		
 		private double getRateDelta() {
@@ -215,6 +216,28 @@ public class RegressionFunction extends EventsFunction {
 			}
 		}
 		
+		public int getSeverity() {
+			
+			if (type == null) {
+				return Integer.valueOf(0);
+			}
+			
+			switch (type) {
+				
+				case NewIssues:
+				case Regressions:
+					return Integer.valueOf(P2);
+					
+				case SevereNewIssues:
+				case SevereRegressions:
+					return Integer.valueOf(P1);
+				default:
+					break;
+			}
+			
+			return Integer.valueOf(0);
+		}
+		
 		@Override
 		public String toString() {
 			return String.valueOf(type) + " " + event.toString();
@@ -252,35 +275,15 @@ public class RegressionFunction extends EventsFunction {
 			}
 		}
 	}
-	
-	protected class RegressionSeverityFormatter extends FieldFormatter {
+		
+	protected static class RegressionSeverityFormatter extends FieldFormatter {
 		
 		@Override
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
 				Pair<DateTime, DateTime> timeSpan) {
-			
-			RegressionReportSettings settings = getSettingsData(serviceId).regression_report;
-			
-			if (settings == null) {
-				return Integer.valueOf(0);
-			}
-			
+						
 			RegressionData regData = (RegressionData)eventData;
-			
-			switch (regData.type) {
-				
-				case NewIssues:
-				case Regressions:
-					return Integer.valueOf(1);
-					
-				case SevereNewIssues:
-				case SevereRegressions:
-					return Integer.valueOf(2);
-				default:
-					break;
-			}
-			
-			return Integer.valueOf(0);
+			return regData.getSeverity();
 		}
 	}
 	
@@ -401,6 +404,31 @@ public class RegressionFunction extends EventsFunction {
 		super(apiClient, settingsMaps);
 	}
 	
+	public static int compareRegressions(RegressionData r1, RegressionData r2, 
+		List<String> criticalExceptionList, int minThreshold ) {
+		
+		int typeDelta = r1.type.ordinal() - r2.type.ordinal();
+		
+		if (typeDelta != 0) {
+			return typeDelta;
+		}
+		
+		if ((r1.type == RegressionType.SevereNewIssues) ||
+			(r1.type == RegressionType.NewIssues)) {
+					
+			return compareEvents(r1.event, r2.event, 0, 0, 
+				criticalExceptionList, minThreshold);
+		}			
+		
+		if ((r1.type == RegressionType.SevereRegressions) ||
+			(r1.type == RegressionType.Regressions)) {
+			return r2.getDelta() - r1.getDelta();		
+		}		
+		
+		throw new IllegalStateException(String.valueOf(r1.type));
+		
+	}
+	
 	private void sortRegressions(String serviceId, List<EventData> eventData) {	
 		
 		RegressionSettings regressionSettings = getSettingsData(serviceId).regression;
@@ -413,28 +441,8 @@ public class RegressionFunction extends EventsFunction {
 			@Override
 			public int compare(EventData o1, EventData o2) {
 				
-				RegressionData r1 = (RegressionData)o1;
-				RegressionData r2 = (RegressionData)o2;
-				
-				int typeDelta = r1.type.ordinal() - r2.type.ordinal();
-				
-				if (typeDelta != 0) {
-					return typeDelta;
-				}
-				
-				if ((r1.type == RegressionType.SevereNewIssues) ||
-					(r1.type == RegressionType.NewIssues)) {
-							
-					return compareEvents(o1.event, o2.event, 0, 0, 
-						criticalExceptionList, minThreshold);
-				}			
-				
-				if ((r1.type == RegressionType.SevereRegressions) ||
-					(r1.type == RegressionType.Regressions)) {
-					return r2.getDelta() - r1.getDelta();		
-				}		
-				
-				throw new IllegalStateException(String.valueOf(r1.type));
+				return compareRegressions((RegressionData)o1, (RegressionData)o2, 
+					criticalExceptionList, minThreshold);
 			}
 		});
 	}
@@ -626,6 +634,7 @@ public class RegressionFunction extends EventsFunction {
 		
 		public boolean empty;
 		
+		public BaseEventVolumeInput input;
 		public RegressionInput regressionInput;
 		public RegressionWindow regressionWindow;
 		public RateRegression rateRegression;
@@ -766,7 +775,6 @@ public class RegressionFunction extends EventsFunction {
 		DateTime activeEnd = regressionWindow.activeWindowStart.plusMinutes(regressionWindow.activeTimespan);
 		
 		if (input.hasDeployments()) {
-			Gson gson = new Gson();
 			// for deployments baseline graph will start baseline timespan before the first deployment
 			// and finish at the end of current deployment the cache therefore should return the results quickly for
 			// the actual active window. Each deployment baseline will be calculated afterwards in code
@@ -927,13 +935,14 @@ public class RegressionFunction extends EventsFunction {
 	}
 	
 	protected RegressionOutput createRegressionOutput(String serviceId,
-			EventFilterInput input, RegressionInput regressionInput, RegressionWindow regressionWindow,
+			BaseEventVolumeInput input, RegressionInput regressionInput, RegressionWindow regressionWindow,
 			RateRegression rateRegression, Map<String, EventResult> eventListMap,
 			Graph baseVolumeGraph, Graph activeVolumeGraph, long volume,
 			boolean allowEmpty) {
 		
 		RegressionOutput result = new RegressionOutput(false);
 		
+		result.input = input;
 		result.regressionInput = regressionInput;
 		result.regressionWindow = regressionWindow;
 		result.rateRegression = rateRegression;

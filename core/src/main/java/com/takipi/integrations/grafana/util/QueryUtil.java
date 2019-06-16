@@ -2,12 +2,13 @@ package com.takipi.integrations.grafana.util;
 
 import java.text.DecimalFormat;
 
-import com.google.gson.Gson;
 import com.takipi.integrations.grafana.functions.FunctionParser;
+import com.takipi.integrations.grafana.functions.GrafanaFunction;
 import com.takipi.integrations.grafana.output.QueryResult;
 import com.takipi.integrations.grafana.servlet.ServletUtil.Auth;
 
-public class QueryUtil {
+public class QueryUtil
+{
 	public static final DecimalFormat df = new DecimalFormat("#.00");
 	
 	public static String query(Auth auth, String query) {
@@ -26,7 +27,7 @@ public class QueryUtil {
 		String json = null;
 		
 		try {
-			json = new Gson().toJson(output);
+			json =GrafanaFunction.gson.toJson(output);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}

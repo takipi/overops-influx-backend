@@ -18,7 +18,6 @@ import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Objects;
-import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.BaseStats;
 import com.takipi.api.client.data.event.Location;
@@ -138,7 +137,7 @@ public class EventsFunction extends GrafanaFunction {
 		}
 	}
 	
-	protected class EventsJiraAsyncTask extends BaseAsyncTask implements Callable<Object> {
+	protected class EventsJiraAsyncTask extends BaseAsyncTask {
 
 		protected String serviceId;
 		protected Collection<EventResult> events;
@@ -471,7 +470,7 @@ public class EventsFunction extends GrafanaFunction {
 				Set<String> originLabels;
 				
 				if (eventData.event.error_origin != null) {
-					originLabels = categories.getCategories(
+					originLabels = ApiCache.getCategories(categories,
 						eventData.event.error_origin.class_name, CategoryType.infra);
 				} else {
 					originLabels = null;
@@ -540,7 +539,12 @@ public class EventsFunction extends GrafanaFunction {
 					}
 				}		
 			}
-	
+			
+			if (eventData.event.stats.hits > 0) {
+				result.append(". Volume: ");
+				result.append(formatLongValue(eventData.event.stats.hits));
+			}
+			
 			if (hasApps) {		
 				result.append(". Apps: ");
 				
@@ -574,7 +578,7 @@ public class EventsFunction extends GrafanaFunction {
 					
 					index++;	
 				}
-			}
+			} 
 							
 			if (!CollectionUtil.safeIsEmpty(eventData.mergedEvents)) {
 				
@@ -924,7 +928,7 @@ public class EventsFunction extends GrafanaFunction {
 
 	}
 
-	private Map<String, FieldFormatter> getFieldFormatters(String serviceId, Collection<String> columns) {
+	protected Map<String, FieldFormatter> getFieldFormatters(String serviceId, Collection<String> columns) {
 		
 		Map<String, FieldFormatter> result = new LinkedHashMap<String, FieldFormatter>(columns.size());
 
@@ -1068,7 +1072,6 @@ public class EventsFunction extends GrafanaFunction {
 	private void updateLastSeenMap(String serviceId, EventsInput input, 
 		Map<String, DateTime> map, long timeRange) {
 		
-		Gson gson = new Gson();
 		String json = gson.toJson(input);
 		EventsInput timeRangeInput = gson.fromJson(json, input.getClass());
 		timeRangeInput.timeFilter = TimeUtil.getLastWindowTimeFilter(timeRange);
@@ -1352,9 +1355,7 @@ public class EventsFunction extends GrafanaFunction {
 		
 		int baseline = regPair.getFirst().baselineTimespan;		
 		Pair<DateTime, DateTime> baselineTimespan = Pair.of(timeSpan.getFirst().minusMinutes(baseline) ,timeSpan.getFirst());
-
 		
-		Gson gson = new Gson();
 		String json = gson.toJson(input);
 		EventsInput baselineInput = gson.fromJson(json, input.getClass());
 		baselineInput.timeFilter = TimeUtil.toTimeFilter(baselineTimespan);
@@ -1497,44 +1498,63 @@ public class EventsFunction extends GrafanaFunction {
 			index++;
 		}
 	}
+	
+	public Pair<List<EventData>, Map<String, FieldFormatter>> processServiceEventDatas(String serviceId, 
+		EventsInput input, Pair<DateTime, DateTime> timeSpan) { 
+		
+		List<EventData> eventDatas = processEventDatas(serviceId, 
+				input, timeSpan);
+									
+		Map<String, FieldFormatter> formatters = getFieldFormatters(serviceId, input.getFields());
+
+		if ((formatters.containsKey(EventsInput.RATE_DELTA)) 
+		|| (formatters.containsKey(EventsInput.RANK)) 
+		|| (formatters.containsKey(EventsInput.RATE_DELTA_DESC))) {
+			
+			long delta = timeSpan.getSecond().getMillis() - timeSpan.getFirst().getMillis();
+				
+			if (delta <= TimeUnit.DAYS.toMillis(MAX_BASELINE_DAYS)) {
+				updateEventBaselineStats(serviceId, input, timeSpan, eventDatas);
+			}
+		}
+			
+		sortEventDatas(serviceId, eventDatas);
+			
+		if ((formatters.containsKey(JIRA_ISSUE_URL)) 
+		|| (formatters.containsKey(EventsInput.JIRA_STATE))) {
+			updateJiraUrls(serviceId, input, eventDatas);
+		}
+					
+		if (formatters.containsKey(EventsInput.LAST_SEEN)) { 
+			updateLastSeen(serviceId, input, eventDatas);
+		}
+			
+		return Pair.of(eventDatas, formatters);	
+	}
 
 	/**
 	 * @param serviceIds - needed for children
 	 */
 	protected List<List<Object>> processServiceEvents(Collection<String> serviceIds, 
 		String serviceId, EventsInput input, Pair<DateTime, DateTime> timeSpan) {
-		
-		List<EventData> eventDatas = processEventDatas(serviceId, 
-			input, timeSpan);
 				
-		List<List<Object>> result = new ArrayList<List<Object>>(eventDatas.size());
-			
-		Map<String, FieldFormatter> formatters = getFieldFormatters(serviceId, input.getFields());
+		Pair<List<EventData>, Map<String, FieldFormatter>> eventDataPair = 
+			processServiceEventDatas(serviceId, input, timeSpan);
+		
+		List<EventData> eventDatas = eventDataPair.getFirst();
+		Map<String, FieldFormatter> formatters = eventDataPair.getSecond();
+		
+		int index = 0;		
+		int size;
+		
+		if (input.maxRows != 0) {
+			size = input.maxRows;
+		} else {
+			size = eventDatas.size();
+		}
+		
+		List<List<Object>> result = new ArrayList<List<Object>>(size);
 
-		if ((formatters.containsKey(EventsInput.RATE_DELTA)) 
-		|| (formatters.containsKey(EventsInput.RANK)) 
-		|| (formatters.containsKey(EventsInput.RATE_DELTA_DESC))) {
-		
-			long delta = timeSpan.getSecond().getMillis() - timeSpan.getFirst().getMillis();
-			
-			if (delta <= TimeUnit.DAYS.toMillis(MAX_BASELINE_DAYS)) {
-				updateEventBaselineStats(serviceId, input, timeSpan, eventDatas);
-			}
-		}
-		
-		sortEventDatas(serviceId, eventDatas);
-		
-		if ((formatters.containsKey(JIRA_ISSUE_URL)) 
-		|| (formatters.containsKey(EventsInput.JIRA_STATE))) {
-			updateJiraUrls(serviceId, input, eventDatas);
-		}
-				
-		if (formatters.containsKey(EventsInput.LAST_SEEN)) { 
-			updateLastSeen(serviceId, input, eventDatas);
-		}
-		
-		int index = 0;
-		
 		for (EventData eventData : eventDatas) {	 
 	
 			List<Object> outputObject = processEvent(serviceId, 
@@ -1620,7 +1640,7 @@ public class EventsFunction extends GrafanaFunction {
 		return result;
 	}
 
-	private List<Object> processEvent(String serviceId, EventsInput input, EventData eventData,
+	protected List<Object> processEvent(String serviceId, EventsInput input, EventData eventData,
 			Collection<FieldFormatter> formatters, Pair<DateTime, DateTime> timeSpan) {
 
 		List<Object> result = new ArrayList<Object>(formatters.size());

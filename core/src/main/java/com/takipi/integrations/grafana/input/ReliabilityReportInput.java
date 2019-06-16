@@ -279,12 +279,6 @@ public class ReliabilityReportInput extends RegressionsInput {
 	 */
 	public String postfixes;
 	
-	/** 
-	 * The number of graph points to retrieve per time transaction time series when calculating 
-	 * slowdowns
-	 */
-	public int transactionPointsWanted;
-	
 	/**
 	 * The string format used to present a row value containing both severe and non severe items
 	 * will receive the number of issues and the number of severe issues as string format %d parameters,
@@ -348,11 +342,6 @@ public class ReliabilityReportInput extends RegressionsInput {
 	}
 	
 	/**
-	 * the min transaction fail rate above which to calc the transction fail rate  
-	 */
-	public double minFailRate;
-	
-	/**
 	 * A comma delimited array used to visually annotate the reliability status of the key
 	 * based on the score ranges for example: (\xE2\x9C\x85,\xE2\x9A\xA0\xEF\xB8\x8F,\xE2\x9D\x8C)
 	 */
@@ -381,10 +370,33 @@ public class ReliabilityReportInput extends RegressionsInput {
 	 */
 	public String scoreRanges;
 	
+	
+	public enum FeedEventType {
+		NewError,
+		SevereNewError,
+		IncError,
+		SevereIncError,
+		Slowdown,
+		SevereSlowdown
+	}
+	
+	public String newErrorDashboardId;
+	
+	public String incErrorDashboardId;
+	
+	public String slowdownDashboardId;
+	
+	public String newErrorDashboardField;
+	
+	public String incErrorDashboardField;
+	
+	public String slowdownDashboardField;
+	
 	/**
 	 * Below are the constants describing the field supported by this function for each of the available 
 	 * report modes
 	 */
+	
 	
 	/**
 	 * The field name  for the env ID for this row
@@ -535,7 +547,44 @@ public class ReliabilityReportInput extends RegressionsInput {
 	 */
 	public static final String ALERT_DESC = "AlertDesc";
 	
+	/**
+	 * Field name of the description of a feed event
+	 */
+	public static final String EVENT_NAME = "EventName";
 	
+	/**
+	 * Field name of the description of a feed event
+	 */
+	public static final String EVENT_DESC = "EventDesc";
+	
+	/**
+	 * Field name of the description of a feed event
+	 */
+	public static final String EVENT_TYPE_DESC = "EventTypeDesc";
+	
+	
+	/**
+	 * Field name of the description of a feed event type
+	 */
+	public static final String EVENT_TYPE = "EventType";
+	
+	/**
+	 * Field name of the description of a feed event type
+	 */
+	public static final String EVENT_APP = "EventApp";
+	
+	/**
+	 * Field name of the description of a feed event type
+	 */
+	public static final String DASHBOARD_ID = "DashboardId";
+	
+	/**
+	 * Field name of the description of a feed event type
+	 */
+	public static final String DASHBOARD_FIELD = "DashboardField";
+	
+	public static final String DASHBOARD_VALUE = "DashboardValue";
+
 
 	/**
 	 * The list of default fields returned for dep reporting
@@ -636,5 +685,22 @@ public class ReliabilityReportInput extends RegressionsInput {
 			TRANSACTION_FAIL_RATE, 
 		 	TRANSACTION_FAILURES,
 		 	TRANSACTION_FAIL_RATE_DELTA
+		});
+	
+	public static final List<String> FEED_FIELDS = Arrays.asList(
+			 new String[] { 	
+				ViewInput.FROM, 
+				ViewInput.TO, 
+				ViewInput.TIME_RANGE, 
+				SERVICE,
+				KEY,
+				DASHBOARD_ID,
+				DASHBOARD_FIELD,
+				DASHBOARD_VALUE,
+				EVENT_DESC,
+				EVENT_TYPE_DESC,
+				EVENT_TYPE,
+				EVENT_NAME,
+				EVENT_APP
 		});
 }

@@ -15,7 +15,6 @@ import java.util.TreeSet;
 
 import org.joda.time.DateTime;
 
-import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.deployment.SummarizedDeployment;
 import com.takipi.api.client.data.event.Stats;
@@ -32,8 +31,8 @@ import com.takipi.integrations.grafana.input.EventsInput;
 import com.takipi.integrations.grafana.input.FunctionInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.util.ApiCache;
-import com.takipi.integrations.grafana.util.TimeUtil;
 import com.takipi.integrations.grafana.util.DeploymentUtil;
+import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class EventGroupFunction extends EventsFunction {
 	public EventGroupFunction(ApiClient apiClient) {
@@ -279,7 +278,6 @@ public class EventGroupFunction extends EventsFunction {
 		for (EventData merged : mergedIntroBy) {
 			System.out.print(merged.event.id + ",");
 		}
-		System.out.println();
 		
 		setRow(result, fields, EventGroupInput.DEPLOYMENT, key);
 		setRow(result, fields, EventGroupInput.EVENTS, groupData.volume);
@@ -447,7 +445,6 @@ public class EventGroupFunction extends EventsFunction {
 		if (groupType == GroupType.CodeLocation) {
 			eventInput = input;
 		} else {
-			Gson gson = new Gson();
 			String json = gson.toJson(input);
 			eventInput = gson.fromJson(json, input.getClass());
 			eventInput.skipGrouping = true;
