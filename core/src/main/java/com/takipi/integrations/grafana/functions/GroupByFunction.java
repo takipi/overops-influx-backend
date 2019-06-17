@@ -15,7 +15,6 @@ import java.util.regex.Pattern;
 
 import org.joda.time.DateTime;
 
-import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.event.BaseStats;
 import com.takipi.api.client.data.metrics.Graph;
@@ -159,7 +158,8 @@ public class GroupByFunction extends BaseVolumeFunction {
 		}
 	}
 
-	protected class BaseGroupByAsyncTask extends BaseAsyncTask implements Callable<Object> {
+	protected class BaseGroupByAsyncTask extends BaseAsyncTask  {
+		
 		public Map<GroupByKey, GroupByVolume> map;
 
 		protected BaseGroupByAsyncTask(Map<GroupByKey, GroupByVolume> map) {
@@ -492,13 +492,13 @@ public class GroupByFunction extends BaseVolumeFunction {
 			size = applications.size();
 		}
 		
-		String json = new Gson().toJson(input);
+		String json = gson.toJson(input);
 		
 		for (int i = 0; i < size; i++) {
 
 			String application = applications.get(i);
 			
-			GroupByInput appInput = new Gson().fromJson(json, input.getClass());
+			GroupByInput appInput = gson.fromJson(json, input.getClass());
 			appInput.applications = application;
 			
 			result.add(new GroupByFilterAsyncTask(map, GroupSettings.fromGroupName(application),
@@ -541,7 +541,6 @@ public class GroupByFunction extends BaseVolumeFunction {
 			size = serverList.size();
 		}
 
-		Gson gson = new Gson();
 		String json = gson.toJson(input);
 
 		for (int i = 0; i < size; i++) {
@@ -676,7 +675,6 @@ public class GroupByFunction extends BaseVolumeFunction {
 			size = deployments.size();
 		}
 		
-		Gson gson =  new Gson();
 		String json = gson.toJson(input);
 
 		for (String deployment : deployments) {

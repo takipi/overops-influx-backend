@@ -23,11 +23,9 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.Queues;
-import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.application.SummarizedApplication;
 import com.takipi.api.client.data.deployment.SummarizedDeployment;
-import com.takipi.api.client.util.regression.DeterminantKey;
 import com.takipi.api.client.data.label.Label;
 import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.transaction.TransactionGraph;
@@ -63,6 +61,9 @@ import com.takipi.api.client.result.settings.AlertsSettingsResult;
 import com.takipi.api.client.result.transaction.TransactionsGraphResult;
 import com.takipi.api.client.result.transaction.TransactionsVolumeResult;
 import com.takipi.api.client.result.view.ViewsResult;
+import com.takipi.api.client.util.infra.Categories;
+import com.takipi.api.client.util.infra.Categories.CategoryType;
+import com.takipi.api.client.util.regression.DeterminantKey;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionUtil;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
@@ -70,7 +71,6 @@ import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.request.intf.ApiGetRequest;
 import com.takipi.api.core.url.UrlClient.Response;
-import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.GrafanaFunction;
 import com.takipi.integrations.grafana.functions.GrafanaThreadPool;
@@ -1032,8 +1032,7 @@ public class ApiCache {
 
 				if (value != null) {
 					
-					Gson gson = new Gson();
-					GraphResult graphResult = gson.fromJson(value, GraphResult.class);
+					GraphResult graphResult = GrafanaFunction.gson.fromJson(value, GraphResult.class);
 					
 					if (graphResult != null) {
 						Response<GraphResult> response = Response.of(200, graphResult);						
@@ -1049,8 +1048,7 @@ public class ApiCache {
 			&& (response.data != null) && (response.isOK())) {
 				
 				try {
-					Gson gson = new Gson();
-					String value = gson.toJson(response.data); 
+					String value = GrafanaFunction.gson.toJson(response.data); 
 					cacheStorage.setValue(writeKeyName, value);
 				} catch (Exception e) {
 					logger.error("Could not store data for " + writeKeyName, e);
@@ -1370,6 +1368,11 @@ public class ApiCache {
 	}
 	
 	public static class EventsDeterminantMap extends HashMap<DeterminantKey, Map<String, EventResult>> {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		public void safeAddEventResult(DeterminantKey determinantKey, EventResult event) {
 			Map<String, EventResult> currentDeterminant = this.get(determinantKey);
 			
@@ -1404,6 +1407,7 @@ public class ApiCache {
 			this.activeWindowGraph = activeWindowGraph;
 		}
 		
+		@Override
 		public RegressionOutput executeRegression() {
 			RegressionOutput result = function.executeRegression(serviceId, (ReliabilityReportInput) input, newOnly, regressionInput, activeWindow,
 					eventResultMap, baselineGraph, activeWindowGraph);
@@ -1897,6 +1901,21 @@ public class ApiCache {
 		}
 	}
 	
+	public static Set<String> getCategories(Categories categories, String className, CategoryType type) {
+		
+		Set<String> result;
+		EventCategoriesCacheLoader loader = new EventCategoriesCacheLoader(type, className, categories);
+		
+		try {
+			result = categoryCache.get(loader);
+		}
+		catch (ExecutionException e) {
+			throw new IllegalStateException(e);
+		}
+		
+		return result;
+	}
+	
 	public static void setCacheStorage(KeyValueStorage cacheStorage) {
 		ApiCache.cacheStorage = cacheStorage;
 	}
@@ -1942,6 +1961,56 @@ public class ApiCache {
 				@Override
 				public RegressionOutput load(RegressionCacheLoader key) {
 					return key.executeRegression();
+				}
+			});
+	
+	protected static class EventCategoriesCacheLoader {
+		protected CategoryType categoryType;
+		protected String className;
+		protected Categories categories;
+		
+		protected EventCategoriesCacheLoader(CategoryType categoryType,
+			String className, Categories categories) {
+			this.categoryType = categoryType;
+			this.className = className;
+			this.categories = categories;
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			
+			EventCategoriesCacheLoader other = (EventCategoriesCacheLoader)obj;
+			
+			
+			if (!Objects.equal(categoryType, other.categoryType)) {
+				return false;
+			}
+			
+			if (!Objects.equal(className, other.className)) {
+				return false;
+			}
+			
+			return true;
+			
+		}
+		
+		@Override
+		public int hashCode() {
+			return categoryType.hashCode() ^ className.hashCode();
+		}
+		
+		protected Set<String> load() {
+			 return categories.getCategories(className, categoryType);
+		}	
+	}
+	
+	private static final LoadingCache<EventCategoriesCacheLoader, Set<String>> categoryCache = CacheBuilder
+			.newBuilder().maximumSize(CACHE_SIZE).expireAfterWrite(CACHE_REFRESH_RETENTION, TimeUnit.SECONDS)
+			.build(new CacheLoader<EventCategoriesCacheLoader, Set<String>>() {
+				
+				@Override
+				public Set<String> load(EventCategoriesCacheLoader key) {
+					return key.load();
 				}
 			});
 	

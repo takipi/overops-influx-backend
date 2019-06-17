@@ -105,6 +105,8 @@ public abstract class GrafanaFunction {
 		public String getName();
 	}
 	
+	public static final Gson gson = new Gson();
+	
 	public static final DecimalFormat singleDigitFormatter = new DecimalFormat("#.#");
 	public static final DecimalFormat doubleDigitFormatter = new DecimalFormat("#.##");
 
@@ -220,7 +222,7 @@ public abstract class GrafanaFunction {
 		}
 	}
 	
-	protected class GraphSliceTask extends BaseAsyncTask implements Callable<Object> {
+	protected class GraphSliceTask extends BaseAsyncTask {
 
 		protected String serviceId;
 		protected String viewId;
@@ -324,6 +326,69 @@ public abstract class GrafanaFunction {
 		public String toString() {
 			return graph.name;
 		}
+		
+		public int getSeverity() {
+			
+			if (state == null) {
+				return Integer.valueOf(0);
+			}
+			
+			switch (state) {
+				
+				case SLOWING:
+					return Integer.valueOf(RegressionFunction.P2);
+					
+				case CRITICAL:
+					return Integer.valueOf(RegressionFunction.P1);
+				default:
+					break;
+			}
+			
+			return Integer.valueOf(0);
+		}
+		
+		public String getSlowdownDesc(SlowdownSettings slowdownSettings) {
+							
+				StringBuilder result = new StringBuilder();
+				
+				boolean isSlowdown = (state == PerformanceState.CRITICAL) ||
+						(state == PerformanceState.SLOWING);
+				
+				if (isSlowdown) {
+					
+					double baseline = baselineStats.avg_time_std_deviation 
+							* slowdownSettings.std_dev_factor + baselineStats.avg_time;
+					
+					if  (state == PerformanceState.CRITICAL) {
+						result.append("Severe");
+					} else {
+						result.append("Warning");
+					}
+					
+					result.append(" Slowdown");
+	
+					result.append(": (");	
+					result.append((int)(score));
+					result.append("% of calls > baseline avg ");
+					result.append((int)(baselineStats.avg_time));
+					result.append("ms + ");
+					result.append(slowdownSettings.std_dev_factor);
+					result.append("x stdDev = ");
+					result.append((int)(baseline));
+					result.append("ms");
+					result.append(") AND (avg response ");
+					result.append((int)(stats.avg_time));
+					result.append("ms - ");
+					result.append((int)(baselineStats.avg_time));
+					result.append("ms baseline > ");
+					result.append(slowdownSettings.min_delta_threshold);
+					result.append("ms threshold)");			
+				} else {
+					result.append("OK: Avg response falls within baseline tolerance");
+				}
+			
+				return result.toString();
+			}
 	}
 	
 	public static class TransactionKey {
@@ -919,7 +984,6 @@ public abstract class GrafanaFunction {
 		BaseEventVolumeInput result;
 		
 		if ((input.hasDeployments()) || (input.hasTransactions())) {
-			Gson gson = new Gson();
 			String json = gson.toJson(input);
 			result = gson.fromJson(json, input.getClass());
 			result.deployments = null;
@@ -1266,7 +1330,6 @@ public abstract class GrafanaFunction {
 		BaseEventVolumeInput eventsInput;
 		
 		if (input.deployments != null) {
-			Gson gson = new Gson();
 			String json = gson.toJson(input);
 			eventsInput = gson.fromJson(json, input.getClass()); 
 			eventsInput.deployments = null;
@@ -1495,7 +1558,6 @@ public abstract class GrafanaFunction {
 	private Collection<String> getTopTransactions(String serviceId, BaseEventVolumeInput input,
 		Pair<DateTime, DateTime> timespan, TopTransactionProcessor processor) {
 		
-		Gson gson = new Gson();
 		String json = gson.toJson(input);
 		BaseEventVolumeInput cleanInput = gson.fromJson(json, input.getClass());
 		cleanInput.transactions = null;
@@ -1963,7 +2025,7 @@ public abstract class GrafanaFunction {
 		
 	}
 	
-	protected int compareEvents(EventResult o1, EventResult o2, 
+	protected static int compareEvents(EventResult o1, EventResult o2, 
 		double o1RateDelta, double o2RateDelta,
 		List<String> criticalExceptionList, int minThreshold) {
 		
@@ -2819,7 +2881,6 @@ public abstract class GrafanaFunction {
 			return input;
 		}
 		
-		Gson gson = new Gson();
 		String json = gson.toJson(input);
 		
 		ViewInput result = gson.fromJson(json, input.getClass());

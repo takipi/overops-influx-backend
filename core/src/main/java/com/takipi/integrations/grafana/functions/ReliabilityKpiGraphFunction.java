@@ -97,7 +97,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		}
 	}
 	
-	protected class GraphDataTask extends BaseGraphAsyncTask implements Callable<Object>{
+	protected class GraphDataTask extends BaseGraphAsyncTask {
 
 		protected GraphDataTask(String serviceId, String viewId, TimelineData timelineData) {
 			super(serviceId, viewId, timelineData);
@@ -132,7 +132,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		protected GraphResultData graphResultData;
 	}
 		
-	protected class TransactionGraphTask extends BaseGraphAsyncTask implements Callable<Object>{
+	protected class TransactionGraphTask extends BaseGraphAsyncTask {
 			
 		protected TransactionGraphTask(String serviceId, String viewId, 
 				TimelineData timelineData) {
@@ -152,7 +152,7 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		}
 	}
 	
-	protected class TransactionBaselineGraphTask extends BaseGraphAsyncTask implements Callable<Object>{
+	protected class TransactionBaselineGraphTask extends BaseGraphAsyncTask {
 		
 		
 		protected TransactionBaselineGraphTask(String serviceId, String viewId, 
@@ -821,7 +821,8 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 
 		GraphDataTask graphTask = new GraphDataTask(serviceId, viewId, timelineData);
 
-		List<Object> taskResults = executeTasks(Arrays.asList(new Callable[]  {transactionGraphTask, baselineGraphTask, graphTask}), true);
+		List<Object> taskResults = executeTasks(Arrays.asList(new Callable[] 
+			{transactionGraphTask, baselineGraphTask, graphTask}), true);
 		
 		TasksResultData tasksResultData = getTaskResults(taskResults);
 		
@@ -876,7 +877,8 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 
 		GraphDataTask graphTask = new GraphDataTask(serviceId, viewId, timelineData);
 
-		List<Object> taskResults = executeTasks(Arrays.asList(new Callable[]  {transactionGraphTask, baselineGraphTask, graphTask}), true);
+		List<Object> taskResults = executeTasks(Arrays.asList(new Callable[] 
+			{transactionGraphTask, baselineGraphTask, graphTask}), true);		
 		
 		TasksResultData tasksResultData = getTaskResults(taskResults);
 		
@@ -1147,7 +1149,6 @@ public class ReliabilityKpiGraphFunction extends BaseGraphFunction {
 		Collection<Pair<DateTime, DateTime>> periods = TimeUtil.getTimespanPeriods(timeSpan, 
 			periodStart, timeDelta, false);
 		
-		Gson gson = new Gson();
 		String json = gson.toJson(input);
 		
 		AppsGraphFunction appsFunction = new AppsGraphFunction(apiClient);

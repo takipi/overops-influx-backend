@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
@@ -14,7 +13,6 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.integrations.grafana.functions.GrafanaFunction.FunctionFactory;
 import com.takipi.integrations.grafana.input.FunctionInput;
@@ -30,7 +28,7 @@ public class FunctionParser {
 	
 	private static final Map<String, FunctionFactory> factories;
 
-	protected static class FunctionAsyncTask extends BaseAsyncTask implements Callable<Object>  {
+	protected static class FunctionAsyncTask extends BaseAsyncTask {
 
 		protected ApiClient apiClient; 
 		protected String query;
@@ -100,7 +98,7 @@ public class FunctionParser {
 		GrafanaFunction function;
 		
 		try {
-			input = (FunctionInput)(new Gson().fromJson(json, factory.getInputClass()));
+			input = (FunctionInput)(GrafanaFunction.gson.fromJson(json, factory.getInputClass()));
 			input.query = query;
 			function = factory.create(apiClient);
 		} catch (Exception e) {
@@ -225,6 +223,7 @@ public class FunctionParser {
 		registerFunction(new EventsDiffFunction.Factory());
 		registerFunction(new EventsDiffDescFunction.Factory());
 		registerFunction(new EventGroupFunction.Factory());
+		registerFunction(new EventsFeedFunction.Factory());
 		
 		//Routing graphs
 		registerFunction(new CategoryFunction.Factory());

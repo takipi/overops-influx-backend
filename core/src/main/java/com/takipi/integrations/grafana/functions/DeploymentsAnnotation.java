@@ -152,7 +152,6 @@ public class DeploymentsAnnotation extends BaseGraphFunction {
 				Math.max(MAX_DEPLOY_ANNOTATIONS, dgInput.limit));
 		}
 		
-		Gson gson = new Gson();
 		String json = gson.toJson(input);
 		Pair<Gson, String> gsonPair = Pair.of(gson, json);
 		

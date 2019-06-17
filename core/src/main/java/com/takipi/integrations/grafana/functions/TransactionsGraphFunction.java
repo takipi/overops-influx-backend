@@ -13,7 +13,6 @@ import java.util.TreeMap;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 
-import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.data.transaction.TransactionGraph.GraphPoint;
@@ -171,7 +170,6 @@ public class TransactionsGraphFunction extends BaseGraphFunction {
 		TransactionsGraphInput result;
 
 		if (input.timeFilterVar != null) {
-			Gson gson = new Gson();
 			result = gson.fromJson(gson.toJson(input), input.getClass());
 			Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(input.timeFilterVar);
 			result.timeFilter = TimeUtil.getTimeFilter(timespan);

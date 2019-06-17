@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 
-import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.transaction.TransactionGraph;
 import com.takipi.api.client.util.regression.RegressionInput;
@@ -42,7 +41,6 @@ public class TransactionsDiffFunction extends TransactionsListFunction {
 			RegressionInput regressionInput, RegressionWindow regressionWindow) {
 		TransactionsDiffInput tdInput = (TransactionsDiffInput)input;
 		
-		Gson gson = new Gson();
 		String json = gson.toJson(input);
 		BaseEventVolumeInput baselineInput = gson.fromJson(json, input.getClass());
 		

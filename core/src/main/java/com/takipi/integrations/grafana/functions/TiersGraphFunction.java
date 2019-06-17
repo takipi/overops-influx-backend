@@ -23,6 +23,7 @@ import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.GraphInput;
 import com.takipi.integrations.grafana.input.GraphLimitInput;
 import com.takipi.integrations.grafana.input.TiersGraphInput;
+import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class TiersGraphFunction extends LimitGraphFunction {
@@ -85,6 +86,8 @@ public class TiersGraphFunction extends LimitGraphFunction {
 		Set<String> labels = new HashSet<String>();
 		Categories categories = getSettings(serviceId).getCategories();		
 
+		HashSet<String> filtered = new HashSet<String>(eventMap.size());
+		
 		for (GraphPoint gp : graph.points) {
 
 			DateTime gpTime = TimeUtil.getDateTime(gp.time);
@@ -103,19 +106,26 @@ public class TiersGraphFunction extends LimitGraphFunction {
 			
 			for (GraphPointContributor gpc : gp.contributors) {
 
+				if (filtered.contains(gpc.id)) {
+					continue;
+				}
+				
 				EventResult event = eventMap.get(gpc.id);
 
-				if ((event == null) || (event.error_location == null) || (event.error_origin == null) || (eventFilter.filter(event))) {
+				if ((event == null) || (event.error_location == null) 
+				|| (event.error_origin == null) || (eventFilter.filter(event))) {
+					filtered.add(gpc.id);
 					continue;
 				}
 
-				Set<String> originLabels = categories.getCategories(
+				Set<String> originLabels = ApiCache.getCategories(categories,
 					event.error_origin.class_name, CategoryType.infra);
 				
-				Set<String> locationLabels = categories.getCategories(
+				Set<String> locationLabels = ApiCache.getCategories(categories,
 					event.error_location.class_name, CategoryType.infra);
 
 				if ((originLabels == null) && (locationLabels == null)) {
+					filtered.add(gpc.id);
 					continue;
 				}
 				

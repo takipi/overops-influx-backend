@@ -5,8 +5,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.joda.time.DateTime;
 
@@ -113,6 +115,8 @@ public class GraphFunction extends BaseGraphFunction {
 		EventFilter eventFilter;
 		Map<String, EventResult> eventMap;
 		
+		Set<String> filtered;
+
 		if (input.hasEventFilter()) {
 			
 			eventMap = getEventMap(serviceId, input, timeSpan.getFirst(), timeSpan.getSecond(),
@@ -123,18 +127,28 @@ public class GraphFunction extends BaseGraphFunction {
 			if (eventFilter == null) {
 				return SeriesVolume.of(values, volume);
 			}
-
 		} else {
 			eventMap = null;
 			eventFilter = null;
+			filtered = null;
+		}
+		
+		if (eventMap != null) {
+			filtered = new HashSet<String>(eventMap.size());
+		} else {
+			filtered = null;
 		}
 		
 		Map<String, Long> debugMap;
+		Set<String> debugTransactions;
 		
 		if (PRINT_GRAPH_EVENTS) {
 			debugMap = new HashMap<String, Long>();
+			debugTransactions = new HashSet<String>();
+
 		} else {
 			debugMap = null;
+			debugTransactions = null;
 		}	
 		
 		for (GraphPoint gp : graph.points) {
@@ -158,10 +172,24 @@ public class GraphFunction extends BaseGraphFunction {
 
 			for (GraphPointContributor gpc : gp.contributors) {
 
+				if ((filtered != null) && (filtered.contains(gpc.id))) {
+					continue;
+				}
+				
 				if (eventMap != null) {
+					
 					event = eventMap.get(gpc.id);
+					
+					if (event == null) {
+						continue;
+					}
 
-					if ((event == null) || ((eventFilter != null) && (eventFilter.filter(event)))) {
+					if ((eventFilter != null) && (eventFilter.filter(event))) {
+						
+						if (filtered != null) {
+							filtered.add(event.id);
+						}
+						
 						continue;
 					}
 				}
@@ -180,6 +208,15 @@ public class GraphFunction extends BaseGraphFunction {
 					value += gpc.stats.invocations;
 				} else {
 					value += gpc.stats.hits;
+					
+					
+					if ((event != null) && (debugTransactions != null)) {
+						String s = formatLocation(event.entry_point);
+	
+						if (!debugTransactions.contains(s)) {
+							debugTransactions.add(s);
+						}
+					}
 				}
 			}
 
@@ -187,9 +224,12 @@ public class GraphFunction extends BaseGraphFunction {
 			values.add(Arrays.asList(new Object[] { timeValue, Long.valueOf(value) }));
 		}
 			
-		if (debugMap != null) {
+		if ((debugMap != null) && (debugTransactions != null)) {
 			for (Map.Entry<String, Long> entry : debugMap.entrySet()) {
 				System.err.println(entry.getKey() + " = " + entry.getValue());
+			}
+			for (String transaction : debugTransactions) {
+				System.err.println(transaction);
 			}
 		}
 		

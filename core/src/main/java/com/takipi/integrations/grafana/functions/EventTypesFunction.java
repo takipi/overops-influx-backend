@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.joda.time.DateTime;
 
-import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.util.infra.Categories;
@@ -23,6 +22,7 @@ import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
 import com.takipi.integrations.grafana.input.EventTypesInput;
 import com.takipi.integrations.grafana.input.EventTypesInput.EventTypes;
 import com.takipi.integrations.grafana.input.FunctionInput;
+import com.takipi.integrations.grafana.util.ApiCache;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 public class EventTypesFunction extends EnvironmentVariableFunction {
@@ -65,9 +65,7 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 		
 		EventTypesInput eventInput = (EventTypesInput) input;
 
-		Gson gson = new Gson();
-		String json = gson.toJson(eventInput);
-		
+		String json = gson.toJson(eventInput);		
 		EventTypesInput result = gson.fromJson(json, eventInput.getClass());
 		
 		if (eventInput.timeFilter != null) {
@@ -146,7 +144,7 @@ public class EventTypesFunction extends EnvironmentVariableFunction {
 			if (categories != null) {
 			
 				if (event.error_origin != null) {
-	 				Set<String> originLabels = categories.getCategories(
+	 				Set<String> originLabels = ApiCache.getCategories(categories,
 	 					event.error_origin.class_name, CategoryType.infra);
 					
 					if (!CollectionUtil.safeIsEmpty(originLabels))  {
