@@ -1791,24 +1791,17 @@ public class ApiCache {
 	
 	public static Response<?> getEventList(ApiClient apiClient, String serviceId, 
 			ViewInput input, Set<BreakdownType> breakdownTypes, 
-			ServiceSettingsData settingsData, ApiGetRequest<?> request, boolean searchCache) {
+			ServiceSettingsData settingsData, ApiGetRequest<?> request, VolumeType volumeType) {
 		
-		Response<?> response;
-		
-		if (searchCache) {
-			for (VolumeType volumeType : VolumeType.values()) {
-					
-				response = getEventList(apiClient, serviceId, 
-						input, request, settingsData, volumeType, breakdownTypes, false);
-					
-				if ((response != null)  && (response.data != null)) {
-					return response;
-				}
-			}
+		Response<?> response = getEventList(apiClient, serviceId,
+				input, request, settingsData, volumeType, breakdownTypes, false);
+			
+		if ((response != null)  && (response.data != null)) {
+			return response;
 		}
 		
 		response = getEventList(apiClient, serviceId, 
-				input, request,settingsData, null, breakdownTypes, true);
+				input, request,settingsData, volumeType, breakdownTypes, true);
 		
 		return response;
 	}

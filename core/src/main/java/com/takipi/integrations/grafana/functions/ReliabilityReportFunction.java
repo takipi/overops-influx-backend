@@ -718,7 +718,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			for (int retries = 0; retries < GET_EVENT_LIST_MAX_RETRIES; retries++) {
 				result = regressionFunction.getEventList(serviceId, viewId, regressionInput, activeWindowStart, activeWindowEnd,
-						breakdownTypes, true, VolumeType.all);
+						breakdownTypes, true, null);
 				
 				if (result != null) {
 					break;
