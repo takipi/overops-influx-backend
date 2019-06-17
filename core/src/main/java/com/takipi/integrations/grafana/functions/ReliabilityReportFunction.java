@@ -685,6 +685,31 @@ public class ReliabilityReportFunction extends EventsFunction {
 			return result;
 		}
 		
+		public Set<BreakdownType> getBreakDownTypesFromSelection(ReliabilityReportInput reliabilityReportInput,
+				ViewInput regressionInput, String serviceId) {
+			Set<BreakdownType> breakdownTypes = null;
+			
+			if (!reliabilityReportInput.isTiersReportMode())
+			{
+				breakdownTypes = new HashSet<BreakdownType>();
+				
+				if (!CollectionUtil.safeIsEmpty(regressionInput.getServers(serviceId))) {
+					breakdownTypes.add(BreakdownType.Server);
+				}
+				
+				if (!CollectionUtil.safeIsEmpty(regressionInput.getApplications(apiClient,
+						getSettingsData(serviceId), serviceId, true, false))) {
+					breakdownTypes.add(BreakdownType.App);
+				}
+				
+				if (!CollectionUtil.safeIsEmpty(regressionInput.getDeployments(serviceId, apiClient))) {
+					breakdownTypes.add(BreakdownType.Deployment);
+				}
+			}
+			
+			return breakdownTypes;
+		}
+		
 		private Collection<EventResult> getEventResultsWithRetries(ViewInput regressionInput,
 				RegressionFunction regressionFunction, DateTime activeWindowStart, DateTime activeWindowEnd,
 				Set<BreakdownType> breakdownTypes) {

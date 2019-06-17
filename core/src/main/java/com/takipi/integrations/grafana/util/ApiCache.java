@@ -926,11 +926,7 @@ public class ApiCache {
 			
 			EventsCacheLoader other = (EventsCacheLoader)obj;
 			
-			if (breakdownTypes == null || other.breakdownTypes == null) {
-				return breakdownTypes == other.breakdownTypes;
-			}
-			
-			if (!(breakdownTypes.contains(other.breakdownTypes) && other.breakdownTypes.contains(breakdownTypes))) {
+			if (!Objects.equal(breakdownTypes, other.breakdownTypes)) {
 				return false;
 			}
 			
@@ -1002,11 +998,7 @@ public class ApiCache {
 				return false;
 			}
 			
-			if (breakdownTypes == null || other.breakdownTypes == null) {
-				return breakdownTypes == other.breakdownTypes;
-			}
-			
-			if (!(breakdownTypes.contains(other.breakdownTypes) && other.breakdownTypes.contains(breakdownTypes))) {
+			if (!Objects.equal(breakdownTypes, other.breakdownTypes)) {
 				return false;
 			}
 			

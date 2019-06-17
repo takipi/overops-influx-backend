@@ -2136,25 +2136,10 @@ public abstract class GrafanaFunction {
 		
 		GraphRequest.Builder builder = GraphRequest.newBuilder().setServiceId(serviceId).setViewId(viewId)
 				.setGraphType(GraphType.view).setFrom(from.toString(dateTimeFormatter)).setTo(to.toString(dateTimeFormatter))
-				.setVolumeType(volumeType).setRaw(true).setResolution(graphResolution);
+				.setVolumeType(volumeType).setRaw(true).setResolution(graphResolution).setBreakFilters(breakdownTypes);
 				//setWantedPointCount(pointsCount);
 		
 		applyFilters(input, serviceId, builder);
-		
-		if (breakdownTypes != null) {
-			
-			if (breakdownTypes.contains(BreakdownType.App)) {
-				builder.setBreakApps(true);
-			}
-			
-			if (breakdownTypes.contains(BreakdownType.Deployment)) {
-				builder.setBreakDeployments(true);
-			}
-			
-			if (breakdownTypes.contains(BreakdownType.Server)) {
-				builder.setBreakServers(true);
-			}
-		}
 		
 		GraphSliceTask task = new GraphSliceTask(builder, serviceId, viewId,
 			input, volumeType, from, to, baselineWindow, activeWindow,
@@ -2613,24 +2598,9 @@ public abstract class GrafanaFunction {
 			builder = EventsRequest.newBuilder();
 		}
 		
-		builder.setRaw(true);
+		builder.setRaw(true).setBreakFilters(breakdownTypes);
 		
 		applyBuilder(builder, serviceId, viewId, TimeUtil.toTimespan(from, to), input);
-		
-		if (breakdownTypes != null) {
-			
-			if (breakdownTypes.contains(BreakdownType.App)) {
-				builder.setBreakApps(true);
-			}
-			
-			if (breakdownTypes.contains(BreakdownType.Deployment)) {
-				builder.setBreakDeployments(true);
-			}
-			
-			if (breakdownTypes.contains(BreakdownType.Server)) {
-				builder.setBreakServers(true);
-			}
-		}
 		
 		Response<?> response = ApiCache.getEventList(apiClient, serviceId, input,
 				breakdownTypes, getSettingsData(serviceId), builder.build(),
@@ -2796,32 +2766,6 @@ public abstract class GrafanaFunction {
 		}
 		
 		return result;
-	}
-	
-	public Set<BreakdownType> getBreakDownTypesFromSelection(ReliabilityReportInput reliabilityReportInput,
-		ViewInput regressionInput, String serviceId)
-	{
-		Set<BreakdownType> breakdownTypes = null;
-		
-		if (!reliabilityReportInput.isTiersReportMode())
-		{
-			breakdownTypes = new HashSet<BreakdownType>();
-			
-			if (!CollectionUtil.safeIsEmpty(regressionInput.getServers(serviceId))) {
-				breakdownTypes.add(BreakdownType.Server);
-			}
-			
-			if (!CollectionUtil.safeIsEmpty(regressionInput.getApplications(apiClient,
-					getSettingsData(serviceId), serviceId, true, false))) {
-				breakdownTypes.add(BreakdownType.App);
-			}
-			
-			if (!CollectionUtil.safeIsEmpty(regressionInput.getDeployments(serviceId, apiClient))) {
-				breakdownTypes.add(BreakdownType.Deployment);
-			}
-		}
-		
-		return breakdownTypes;
 	}
 	
 	protected void applyFilters(EnvironmentsFilterInput input, String serviceId,
