@@ -920,9 +920,7 @@ public class RegressionFunction extends EventsFunction {
 					if (isBaselineTask) {
 						determinantGraphsLists.baselineGraph.add(graph);
 					} else {
-						ViewInput input = graphSliceTaskResult.task.input;
-						
-						if (graph == null || CollectionUtil.safeIsEmpty(graph.points)) {
+						if (CollectionUtil.safeIsEmpty(graph.points)) {
 							// The relevant apps for the filter does not exist
 							continue;
 						}
