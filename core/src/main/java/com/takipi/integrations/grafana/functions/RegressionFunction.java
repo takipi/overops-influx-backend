@@ -776,6 +776,8 @@ public class RegressionFunction extends EventsFunction {
 		DateTime activeStart = regressionWindow.activeWindowStart;
 		DateTime activeEnd = regressionWindow.activeWindowStart.plusMinutes(regressionWindow.activeTimespan);
 		
+		Set<BreakdownType> baselineBreakdownTypes = breakdownTypes;
+		
 		if (input.hasDeployments()) {
 			// for deployments baseline graph will start baseline timespan before the first deployment
 			// and finish at the end of current deployment the cache therefore should return the results quickly for
@@ -786,6 +788,7 @@ public class RegressionFunction extends EventsFunction {
 			//deployments by definition nature do not have their own baseline - 
 			//they are compared against the general baseline (all prev deps)
 			baselineInput.deployments = null;
+			baselineBreakdownTypes = null;
 		} else {
 			baselineInput = input;
 		}
@@ -795,7 +798,7 @@ public class RegressionFunction extends EventsFunction {
 		if (!newOnly) {
 			baselineGraphTasks = getGraphTasks(serviceId, viewId, baselineInput, 
 				VolumeType.all, baselineStart, baselineEnd,
-				regressionInput.baselineTimespan, regressionWindow.activeTimespan, false, breakdownTypes);
+				regressionInput.baselineTimespan, regressionWindow.activeTimespan, false, baselineBreakdownTypes);
 		} else {
 			baselineGraphTasks = null;
 		}
