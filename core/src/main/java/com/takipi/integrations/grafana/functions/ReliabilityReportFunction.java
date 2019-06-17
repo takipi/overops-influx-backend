@@ -439,7 +439,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 							serviceId, false, regressionFunction, breakdownRegressionData.subInputData,
 							breakdownRegressionData.regressionInput, breakdownRegressionData.activeWindow,
 							breakdownRegressionData.eventResultMap, breakdownRegressionData.baselineGraph,
-							breakdownRegressionData.activeWindowGraph, true);
+							breakdownRegressionData.activeWindowGraph, breakdownRegressionData.breakdownTypes, true);
 					
 					regressionOutputMap.put(reortKey ,regressionOutput);
 				}
@@ -583,6 +583,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 					continue;
 				}
 				
+				Set<BreakdownType> breakdownTypes = regressionApiResult.breakdownTypes;
+				
 				// For tiers we create a single graph request without deployments, machine, apps filter but need to break
 				// the input afterwards by the specific type of regression input
 				if (reportDataPair == null) {
@@ -596,8 +598,9 @@ public class ReliabilityReportFunction extends EventsFunction {
 						RegressionInput regressionInput = regressionFunction.getRegressionInput(serviceId, viewId, regressionsInput, timeSpan, newOnly)
 								.getFirst();
 						
+						
 						BreakdownRegressionData breakdownRegressionData = new BreakdownRegressionData(regressionsInput,
-								regressionInput, activeWindow, baselineGraph, activeWindowGraph, eventResultMap);
+								regressionInput, activeWindow, baselineGraph, activeWindowGraph, eventResultMap, breakdownTypes);
 						
 						result.put(reportKey, breakdownRegressionData);
 					}
@@ -611,7 +614,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 							.getFirst();
 					
 					BreakdownRegressionData breakdownRegressionData = new BreakdownRegressionData(regressionsInput,
-							regressionInput, activeWindow, baselineGraph, activeWindowGraph, eventResultMap);
+							regressionInput, activeWindow, baselineGraph, activeWindowGraph, eventResultMap, breakdownTypes);
 					
 					result.put(reportKey, breakdownRegressionData);
 				}
@@ -654,15 +657,16 @@ public class ReliabilityReportFunction extends EventsFunction {
 			DateTime activeWindowStart = activeWindow.activeWindowStart;
 			DateTime activeWindowEnd = activeWindow.activeWindowStart.plusMinutes(subRegressionInput.activeTimespan);
 			
+			Set<BreakdownType> breakdownTypes = getBreakDownTypesFromSelection(reliabilityReportInput, regressionInput, serviceId);
+			
 			Collection<EventResult> eventList = getEventResultsWithRetries(regressionInput, regressionFunction,
-					activeWindowStart, activeWindowEnd);
+					activeWindowStart, activeWindowEnd, breakdownTypes);
 			
 			if (eventList == null) {
 				return null;
 			}
 			
 			EventsDeterminantMap eventsMap = getEventsMapByKey(eventList, applicationGroupsMap);
-			Set<BreakdownType> breakdownTypes = getBreakDownTypesFromSelection(reliabilityReportInput, regressionInput, serviceId);
 			
 			Map<DeterminantKey, Pair<Graph, Graph>> regressionGraphsMap = regressionFunction.getRegressionGraphs(serviceId,
 					viewId, subRegressionInput, activeWindow, applicationGroupsMap,
@@ -674,19 +678,19 @@ public class ReliabilityReportFunction extends EventsFunction {
 				Map<String, EventResult> eventResultMap = eventsMap.get(determinantKey);
 				Pair<Graph, Graph> regressionGraphs = regressionGraphsMap.get(determinantKey);
 				
-				result.add(new RegressionEventsOutput(determinantKey, regressionGraphs.getFirst(), regressionGraphs.getSecond(), eventResultMap));
+				result.add(new RegressionEventsOutput(determinantKey, regressionGraphs.getFirst(),
+						regressionGraphs.getSecond(), eventResultMap, breakdownTypes));
 			}
 			
 			return result;
 		}
 		
 		private Collection<EventResult> getEventResultsWithRetries(ViewInput regressionInput,
-				RegressionFunction regressionFunction, DateTime activeWindowStart, DateTime activeWindowEnd) {
+				RegressionFunction regressionFunction, DateTime activeWindowStart, DateTime activeWindowEnd,
+				Set<BreakdownType> breakdownTypes) {
 			
 			Collection<EventResult> result = null;
 			
-			Set<BreakdownType> breakdownTypes = getBreakDownTypesFromSelection(reliabilityReportInput, regressionInput, serviceId);
-				
 			for (int retries = 0; retries < GET_EVENT_LIST_MAX_RETRIES; retries++) {
 				result = regressionFunction.getEventList(serviceId, viewId, regressionInput, activeWindowStart, activeWindowEnd,
 						breakdownTypes, true, VolumeType.all);
@@ -766,9 +770,11 @@ public class ReliabilityReportFunction extends EventsFunction {
 		private final Graph baselineGraph;
 		private final Graph activeWindowGraph;
 		private final Map<String, EventResult> eventResultMap;
+		private Set<BreakdownType> breakdownTypes;
 		
 		public BreakdownRegressionData(RegressionsInput subInputData, RegressionInput regressionInput,
-				RegressionWindow activeWindow, Graph baselineGraph, Graph activeWindowGraph, Map<String, EventResult> eventResultMap) {
+				RegressionWindow activeWindow, Graph baselineGraph, Graph activeWindowGraph,
+				Map<String, EventResult> eventResultMap, Set<BreakdownType> breakdownTypes) {
 			
 			this.subInputData = subInputData;
 			this.regressionInput = regressionInput;
@@ -776,6 +782,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			this.baselineGraph = baselineGraph;
 			this.activeWindowGraph = activeWindowGraph;
 			this.eventResultMap = eventResultMap;
+			this.breakdownTypes = breakdownTypes;
 		}
 	}
 	

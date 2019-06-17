@@ -1410,9 +1410,9 @@ public class ApiCache {
 		public AggregatedRegressionCacheLoader(ApiClient apiClient, String serviceId,
 				boolean newOnly, RegressionFunction regressionFunction,
 				RegressionsInput regressionsInput, RegressionInput regressionInput, RegressionWindow activeWindow,
-				Map<String, EventResult> eventResultMap, Graph baselineGraph, Graph activeWindowGraph) {
+				Map<String, EventResult> eventResultMap, Graph baselineGraph, Graph activeWindowGraph, Set<BreakdownType> breakdownTypes) {
 			
-			super(apiClient, serviceId, regressionsInput, regressionFunction, newOnly);
+			super(apiClient, serviceId, regressionsInput, breakdownTypes, regressionFunction, newOnly);
 			
 			this.regressionInput = regressionInput;
 			this.activeWindow = activeWindow;
@@ -1515,9 +1515,9 @@ public class ApiCache {
 		}
 
 		public RegressionCacheLoader(ApiClient apiClient, String serviceId, 
-				ViewInput input, RegressionFunction function, boolean newOnly) {
+				ViewInput input, Set<BreakdownType> breakdownTypes, RegressionFunction function, boolean newOnly) {
 
-			super(apiClient, null, serviceId, input, null, null, null);
+			super(apiClient, null, serviceId, input, null, null, breakdownTypes);
 			this.function = function;
 			this.newOnly = newOnly;
 		}
@@ -1879,10 +1879,10 @@ public class ApiCache {
 	public static RegressionOutput getRegressionOutput(ApiClient apiClient, String serviceId,
 			boolean newOnly, RegressionFunction regressionFunction, RegressionsInput subInputData,
 			RegressionInput regressionInput, RegressionWindow activeWindow, Map<String, EventResult> eventResultMap,
-			Graph baselineGraph, Graph activeWindowGraph, boolean load) {
+			Graph baselineGraph, Graph activeWindowGraph, Set<BreakdownType> breakdownTypes, boolean load) {
 		
 		AggregatedRegressionCacheLoader key = new AggregatedRegressionCacheLoader(apiClient, serviceId, newOnly,
-				regressionFunction, subInputData, regressionInput, activeWindow, eventResultMap, baselineGraph, activeWindowGraph);
+				regressionFunction, subInputData, regressionInput, activeWindow, eventResultMap, baselineGraph, activeWindowGraph, breakdownTypes);
 		
 		return getRegressionOutput(key, load);
 	}
@@ -1890,7 +1890,7 @@ public class ApiCache {
 	public static RegressionOutput getRegressionOutput(ApiClient apiClient, String serviceId,
 			EventFilterInput input, RegressionFunction function, boolean newOnly, boolean load) {
 		
-		RegressionCacheLoader key = new RegressionCacheLoader(apiClient, serviceId, input, function, newOnly);
+		RegressionCacheLoader key = new RegressionCacheLoader(apiClient, serviceId, input, null, function, newOnly);
 		
 		return getRegressionOutput(key, load);
 	}
