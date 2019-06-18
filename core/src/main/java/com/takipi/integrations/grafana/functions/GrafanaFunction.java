@@ -3000,5 +3000,49 @@ public abstract class GrafanaFunction {
 		return Collections.singletonList(series);
 	}
 	
+	protected Series createNoDataSeries(Collection<String> serviceIds) {
+		
+		int index = 0;
+		StringBuilder result = new StringBuilder();
+		
+		result.append("No data is available within the selected environments, timeframe and filters. ");
+		
+		for (String serviceId : serviceIds) {
+			Response<JvmsResult> response = ApiCache.getProcesses(apiClient, serviceId, true, null);
+			
+			int proccessSize = 0;
+			
+			if ((response.isOK()) && (response.data != null) 
+			&& (response.data.clients != null)) {
+				
+				for (Jvm jvm : response.data.clients) {
+					
+					if (jvm.pids != null) {
+						proccessSize += jvm.pids.size();
+					}
+				}	
+			}
+			
+			result.append(serviceId);
+			result.append(" has " );
+			result.append(proccessSize);
+			result.append(" connected process");
+
+			if (index < serviceIds.size() - 1) {
+				result.append(" has " );
+			}
+			
+			index++;
+		}
+		
+		return createSeries(Collections.singletonList(Collections.singletonList(result.toString()))
+			, Collections.singletonList("No Data"));
+	}
+	
+	protected Series createNoServiceSeries() {
+		return createSeries(Collections.singletonList(Collections.singletonList("No environments have been selected"))
+			, Collections.singletonList("No Environments"));
+	}
+	
 	public abstract List<Series> process(FunctionInput functionInput);
 }

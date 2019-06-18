@@ -1684,6 +1684,10 @@ public class EventsFunction extends GrafanaFunction {
 		
 		Collection<String> serviceIds = getServiceIds(input);
 
+		if (serviceIds.size() == 0) {
+			return Collections.singletonList(createNoServiceSeries());
+		}
+		
 		List<List<List<Object>>> servicesValues = new ArrayList<List<List<Object>>>(serviceIds.size());
 		
 		for (String serviceId : serviceIds) {
@@ -1692,6 +1696,10 @@ public class EventsFunction extends GrafanaFunction {
 			servicesValues.add(serviceEvents);
 		}
 
+		if (series.values.size() == 0) {
+			return Collections.singletonList(createNoDataSeries(serviceIds));
+		}
+		
 		sortSeriesValues(series.values, servicesValues);
 		
 		return Collections.singletonList(series);

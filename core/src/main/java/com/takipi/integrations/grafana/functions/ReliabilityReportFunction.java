@@ -2314,9 +2314,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 						continue	;
 					}
 				}
-				
-				
-				
+						
 				result.add(reportKeyResults);
 			}			
 		}
@@ -2478,6 +2476,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		BaseEventVolumeInput appInput = reportKeyResult.output.regressionData.regressionOutput.input;
 
+		if (appInput == null) {
+			return null;
+		}
+		 
 		String json = gson.toJson(appInput);
 		BaseEventVolumeInput failureInput = gson.fromJson(json, appInput.getClass());
 		
@@ -2703,7 +2705,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		Pair<ReliabilityState, Double> failurePair;
 		
-		if (failureData.failures > regressionInput.minVolumeThreshold) {
+		if ((regressionInput != null) && (failureData.failures > regressionInput.minVolumeThreshold)) {
 			failurePair = getReliabilityState(baseFailRate, result.failRate,
 				transactionData.transactionVolume, regressionInput);
 		} else {
@@ -3659,8 +3661,13 @@ public class ReliabilityReportFunction extends EventsFunction {
 	
 	private List<Series> processFeed(ReliabilityReportInput input) {
 
-		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
 		Collection<String> serviceIds = getServiceIds(input);
+
+		if (serviceIds.size() == 0) {
+			return Collections.singletonList(createNoServiceSeries());
+		}
+		
+		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
 		
 		Map<String, Collection<Pair<RegressionData, ReportKeyResults>>> regressionMap = new HashMap<String, 
 			Collection<Pair<RegressionData, ReportKeyResults>>>();
@@ -3669,6 +3676,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 			Collection<Pair<TransactionData, ReportKeyResults>>>();
 		
 		Collection<FeedEventType> feedEventTypes = input.getEventFeedTypes();
+		
+		int reportKeyResultSize = 0;
 		
 		for (String serviceId : serviceIds) {
 
@@ -3683,6 +3692,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			for (ReportKeyResults reportKeyResult : reportKeyResults) {
 
+				reportKeyResultSize += reportKeyResults.size();
 				Collection<EventData> eventDatas = reportKeyResult.output.regressionData.regressionOutput.eventDatas;
 				
 				if (!CollectionUtil.safeIsEmpty(eventDatas)) {
@@ -3727,6 +3737,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 					}
 				}	
 			}
+		}
+		
+		if (reportKeyResultSize == 0) {
+			return Collections.singletonList(createNoDataSeries(serviceIds));
 		}
 		
 		List<List<Object>> values = new ArrayList<List<Object>>();
