@@ -923,7 +923,8 @@ public class RegressionFunction extends EventsFunction {
 					if (isBaselineTask) {
 						determinantGraphsLists.baselineGraph.add(graph);
 					} else {
-						if (CollectionUtil.safeIsEmpty(graph.points)) {
+						if ((CollectionUtil.safeIsEmpty(graph.points)) ||
+							(graphSliceTaskResult.task.hasBreakdownTypes() && determinantKey.equals(DeterminantKey.Empty))) {
 							// The relevant apps for the filter does not exist
 							continue;
 						}

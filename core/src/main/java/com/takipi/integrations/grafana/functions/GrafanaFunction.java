@@ -295,6 +295,10 @@ public abstract class GrafanaFunction {
 			
 			return new GraphSliceTaskResult(this, graphResult.graphs);
 		}
+		
+		public boolean hasBreakdownTypes() {
+			return !CollectionUtil.safeIsEmpty(breakdownTypes);
+		}
 	}
 	
 	protected class SliceRequest {
