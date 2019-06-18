@@ -152,16 +152,16 @@ public class RegressionFunction extends EventsFunction {
 					
 				case Regressions:
 					
-					description = String.format("Increase Warning : (volume %d > %d) AND (rate %s > %.2f) AND (rate change from baseline %.2f > %.2f)",
-							event.stats.hits, input.minVolumeThreshold,
+					description = String.format("Increase Warning : (volume %s > %d) AND (rate %s > %.2f) AND (rate change from baseline %.2f > %.2f)",
+							formatLongValue(event.stats.hits), input.minVolumeThreshold,
 							ratio, input.minErrorRateThreshold,
 							getRateDelta(), input.regressionDelta);
 					break;
 					
 				case SevereRegressions:
 					
-					description = String.format("Severe Increase: (volume %d > %d) AND (rate %s > %.2f) AND (rate change from baseline %.2f > %.2f)",
-							event.stats.hits, input.minVolumeThreshold,
+					description = String.format("Severe Increase: (volume %s > %d) AND (rate %s > %.2f) AND (rate change from baseline %.2f > %.2f)",
+							formatLongValue(event.stats.hits), input.minVolumeThreshold,
 							ratio, input.minErrorRateThreshold,
 							getRateDelta(), input.criticalRegressionDelta);
 					break;
