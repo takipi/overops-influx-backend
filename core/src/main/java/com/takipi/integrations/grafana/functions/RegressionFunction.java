@@ -18,6 +18,7 @@ import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.metrics.GraphResult;
+import com.takipi.api.client.request.event.BreakdownType;
 import com.takipi.api.client.util.regression.DeterminantKey;
 import com.takipi.api.client.util.regression.RateRegression;
 import com.takipi.api.client.util.regression.RegressionInput;
@@ -765,7 +766,8 @@ public class RegressionFunction extends EventsFunction {
 	
 	public Map<DeterminantKey, Pair<Graph, Graph>> getRegressionGraphs(String serviceId, String viewId,
 			RegressionInput regressionInput, RegressionWindow regressionWindow,
-			Map<String, Collection<String>> applicationGroupsMap, BaseEventVolumeInput input, boolean newOnly) {
+			Map<String, Collection<String>> applicationGroupsMap, BaseEventVolumeInput input, boolean newOnly,
+			Set<BreakdownType> breakdownTypes) {
 		
 		EventFilterInput baselineInput;
 		DateTime baselineStart = regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan);
@@ -773,6 +775,8 @@ public class RegressionFunction extends EventsFunction {
 		
 		DateTime activeStart = regressionWindow.activeWindowStart;
 		DateTime activeEnd = regressionWindow.activeWindowStart.plusMinutes(regressionWindow.activeTimespan);
+		
+		Set<BreakdownType> baselineBreakdownTypes = breakdownTypes;
 		
 		if (input.hasDeployments()) {
 			// for deployments baseline graph will start baseline timespan before the first deployment
@@ -784,16 +788,17 @@ public class RegressionFunction extends EventsFunction {
 			//deployments by definition nature do not have their own baseline - 
 			//they are compared against the general baseline (all prev deps)
 			baselineInput.deployments = null;
+			baselineBreakdownTypes = null;
 		} else {
 			baselineInput = input;
 		}
-				
+		
 		Collection<GraphSliceTask> baselineGraphTasks;
 		
 		if (!newOnly) {
 			baselineGraphTasks = getGraphTasks(serviceId, viewId, baselineInput, 
 				VolumeType.all, baselineStart, baselineEnd,
-				regressionInput.baselineTimespan, regressionWindow.activeTimespan, false);
+				regressionInput.baselineTimespan, regressionWindow.activeTimespan, false, baselineBreakdownTypes);
 		} else {
 			baselineGraphTasks = null;
 		}
@@ -807,7 +812,7 @@ public class RegressionFunction extends EventsFunction {
 		}
 		
 		Collection<GraphSliceTask> activeGraphTasks = getGraphTasks(serviceId, viewId, 
-			input, VolumeType.all, activeStart, activeEnd, 0, graphActiveTimespan, false);
+			input, VolumeType.all, activeStart, activeEnd, 0, graphActiveTimespan, false, breakdownTypes);
 		
 		List<GraphSliceTask> graphTasks = new ArrayList<GraphSliceTask>(); 
 		
@@ -918,9 +923,8 @@ public class RegressionFunction extends EventsFunction {
 					if (isBaselineTask) {
 						determinantGraphsLists.baselineGraph.add(graph);
 					} else {
-						ViewInput input = graphSliceTaskResult.task.input;
-						
-						if (determinantKey.equals(DeterminantKey.Empty) && input.hasDeterminantFilter()) {
+						if ((CollectionUtil.safeIsEmpty(graph.points)) ||
+							(graphSliceTaskResult.task.hasBreakdownTypes() && determinantKey.equals(DeterminantKey.Empty))) {
 							// The relevant apps for the filter does not exist
 							continue;
 						}
@@ -1027,7 +1031,7 @@ public class RegressionFunction extends EventsFunction {
 		}
 		
 		Collection<Pair<Graph, Graph>> regressionGraphsCollection = getRegressionGraphs(serviceId,
-				viewId, regressionInput, regressionWindow, null, input, newOnly).values();
+				viewId, regressionInput, regressionWindow, null, input, newOnly, null).values();
 		
 		if (CollectionUtil.safeIsEmpty(regressionGraphsCollection)) {
 			return RegressionOutput.emptyOutput;

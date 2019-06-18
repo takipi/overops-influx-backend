@@ -957,18 +957,20 @@ public class ApiCache {
 		protected int baselineWindow;
 		protected int windowSlice;
 		protected Pair<DateTime, DateTime> timespan;
+		protected Set<BreakdownType> breakdownTypes;
 		protected boolean cachable;
 
-		public GraphCacheLoader(ApiClient apiClient, ApiGetRequest<?> request, 
+		public GraphCacheLoader(ApiClient apiClient, ApiGetRequest<?> request,
 				String serviceId, ViewInput input, ServiceSettingsData settingsData,
 				VolumeType volumeType, int baselineWindow, int activeWindow, int windowSlice,
-				Pair<DateTime, DateTime> timespan, boolean cachable) {
+				Pair<DateTime, DateTime> timespan, Set<BreakdownType> breakdownTypes, boolean cachable) {
 
 			super(apiClient, request, serviceId, input, settingsData, volumeType);
 			this.activeWindow = activeWindow;
 			this.baselineWindow = baselineWindow;
 			this.windowSlice = windowSlice;
 			this.timespan = timespan;
+			this.breakdownTypes = breakdownTypes;
 			this.cachable = cachable;
 		}
 				
@@ -995,7 +997,11 @@ public class ApiCache {
 			if (windowSlice != other.windowSlice) {
 				return false;
 			}
-
+			
+			if (!Objects.equal(breakdownTypes, other.breakdownTypes)) {
+				return false;
+			}
+			
 			return true;
 		}
 		
@@ -1396,9 +1402,9 @@ public class ApiCache {
 		public AggregatedRegressionCacheLoader(ApiClient apiClient, String serviceId,
 				boolean newOnly, RegressionFunction regressionFunction,
 				RegressionsInput regressionsInput, RegressionInput regressionInput, RegressionWindow activeWindow,
-				Map<String, EventResult> eventResultMap, Graph baselineGraph, Graph activeWindowGraph) {
+				Map<String, EventResult> eventResultMap, Graph baselineGraph, Graph activeWindowGraph, Set<BreakdownType> breakdownTypes) {
 			
-			super(apiClient, serviceId, regressionsInput, regressionFunction, newOnly);
+			super(apiClient, serviceId, regressionsInput, breakdownTypes, regressionFunction, newOnly);
 			
 			this.regressionInput = regressionInput;
 			this.activeWindow = activeWindow;
@@ -1501,9 +1507,9 @@ public class ApiCache {
 		}
 
 		public RegressionCacheLoader(ApiClient apiClient, String serviceId, 
-				ViewInput input, RegressionFunction function, boolean newOnly) {
+				ViewInput input, Set<BreakdownType> breakdownTypes, RegressionFunction function, boolean newOnly) {
 
-			super(apiClient, null, serviceId, input, null, null, null);
+			super(apiClient, null, serviceId, input, null, null, breakdownTypes);
 			this.function = function;
 			this.newOnly = newOnly;
 		}
@@ -1734,12 +1740,12 @@ public class ApiCache {
 			ViewInput input, ServiceSettingsData settingsData,
 			VolumeType volumeType, GraphRequest request, 
 			int baselineWindow, int activeWindow, int windowSlice,
-			Pair<DateTime, DateTime> timespan, boolean cache) {
+			Pair<DateTime, DateTime> timespan, Set<BreakdownType> breakdownTypes, boolean cache) {
 
 		boolean cachable = (CACHE_GRAPHS) && (cacheStorage != null) && (cache);
 		
 		GraphCacheLoader cacheKey = new GraphCacheLoader(apiClient, request, serviceId, input, 
-			settingsData, volumeType, baselineWindow, activeWindow, windowSlice, timespan, cachable);
+			settingsData, volumeType, baselineWindow, activeWindow, windowSlice, timespan, breakdownTypes , cachable);
 		
 		LoadingCache<BaseCacheLoader, Response<?>> loadingCache;
 		
@@ -1785,24 +1791,17 @@ public class ApiCache {
 	
 	public static Response<?> getEventList(ApiClient apiClient, String serviceId, 
 			ViewInput input, Set<BreakdownType> breakdownTypes, 
-			ServiceSettingsData settingsData, ApiGetRequest<?> request, boolean searchCache) {
+			ServiceSettingsData settingsData, ApiGetRequest<?> request, VolumeType volumeType) {
 		
-		Response<?> response;
-		
-		if (searchCache) {
-			for (VolumeType volumeType : VolumeType.values()) {
-					
-				response = getEventList(apiClient, serviceId, 
-						input, request, settingsData, volumeType, breakdownTypes, false);
-					
-				if ((response != null)  && (response.data != null)) {
-					return response;
-				}
-			}
+		Response<?> response = getEventList(apiClient, serviceId,
+				input, request, settingsData, volumeType, breakdownTypes, false);
+			
+		if ((response != null)  && (response.data != null)) {
+			return response;
 		}
 		
 		response = getEventList(apiClient, serviceId, 
-				input, request,settingsData, null, breakdownTypes, true);
+				input, request,settingsData, volumeType, breakdownTypes, true);
 		
 		return response;
 	}
@@ -1865,10 +1864,10 @@ public class ApiCache {
 	public static RegressionOutput getRegressionOutput(ApiClient apiClient, String serviceId,
 			boolean newOnly, RegressionFunction regressionFunction, RegressionsInput subInputData,
 			RegressionInput regressionInput, RegressionWindow activeWindow, Map<String, EventResult> eventResultMap,
-			Graph baselineGraph, Graph activeWindowGraph, boolean load) {
+			Graph baselineGraph, Graph activeWindowGraph, Set<BreakdownType> breakdownTypes, boolean load) {
 		
 		AggregatedRegressionCacheLoader key = new AggregatedRegressionCacheLoader(apiClient, serviceId, newOnly,
-				regressionFunction, subInputData, regressionInput, activeWindow, eventResultMap, baselineGraph, activeWindowGraph);
+				regressionFunction, subInputData, regressionInput, activeWindow, eventResultMap, baselineGraph, activeWindowGraph, breakdownTypes);
 		
 		return getRegressionOutput(key, load);
 	}
@@ -1876,7 +1875,7 @@ public class ApiCache {
 	public static RegressionOutput getRegressionOutput(ApiClient apiClient, String serviceId,
 			EventFilterInput input, RegressionFunction function, boolean newOnly, boolean load) {
 		
-		RegressionCacheLoader key = new RegressionCacheLoader(apiClient, serviceId, input, function, newOnly);
+		RegressionCacheLoader key = new RegressionCacheLoader(apiClient, serviceId, input, null, function, newOnly);
 		
 		return getRegressionOutput(key, load);
 	}
