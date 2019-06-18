@@ -30,7 +30,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 43,
-  "iteration": 1560827568578,
+  "iteration": 1560827568592,
   "links": [
     {
       "icon": "external link",
@@ -2027,7 +2027,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "regressionReport({\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"All\", \"render\":\"Feed\", \"mode\":\"Apps_Extended\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"minFailRate\":$minFailRate, \"failureTypes\":\"$transactionFailureTypes\", \"statusPrefixes2\":\"✅ ,⚠ ,❌ \", \"scoreRanges\":\"70,85\",  \"statusPrefixes\":\"✅,⚠️,❌\", \"failRatePrefixes\":\",↑,↑\", \"alertStatusPrefixes\":\"➕,🆕️,📈\", \"alertNamePostfix\":\"\", \"maxColumnLength\":\"100\", \"newErrorDashboardId\":\"MKvwYc7Wk\", \"incErrorDashboardId\":\"WZ739NYmk\", \"slowdownDashboardId\":\"iHSORcymk\", \"newErrorDashboardField\":\"link\", \"incErrorDashboardField\":\"increasingErrors\",\"slowdownDashboardField\":\"transactions\", \"eventFeedTypes\":\"$eventFeedTypes\"})",
+          "query": "regressionReport({\"timeFilter\":\"time >= now() - $timeRange\",\"environments\":\"$environments\",\"applications\":\"$applications\",\"servers\":\"$servers\",\"view\":\"$view\",\"pointsWanted\":\"$pointsWanted\", \"transactionPointsWanted\":\"$transactionPointsWanted\",\"types\":\"All\", \"render\":\"Feed\", \"mode\":\"Apps_Extended\", \"limit\":\"$limit\", \"sevAndNonSevFormat\":\"%d  (%d p1)\", \"sevOnlyFormat\":\"%d p1\", \"minFailRate\":$minFailRate, \"failureTypes\":\"$transactionFailureTypes\", \"statusPrefixes2\":\"✅ ,⚠ ,❌ \", \"scoreRanges\":\"70,85\",  \"statusPrefixes\":\"✅,⚠️,❌\", \"failRatePrefixes\":\",↑,↑\", \"alertStatusPrefixes\":\"➕,🆕️,📈\", \"alertNamePostfix\":\"\", \"maxColumnLength\":\"70\", \"newErrorDashboardId\":\"MKvwYc7Wk\", \"incErrorDashboardId\":\"WZ739NYmk\", \"slowdownDashboardId\":\"iHSORcymk\", \"newErrorDashboardField\":\"link\", \"incErrorDashboardField\":\"increasingErrors\",\"slowdownDashboardField\":\"transactions\", \"eventFeedTypes\":\"$eventFeedTypes\"})",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -3627,5 +3627,5 @@
   "timezone": "",
   "title": "Home",
   "uid": "lg0U4qriz",
-  "version": 316
+  "version": 317
 }
