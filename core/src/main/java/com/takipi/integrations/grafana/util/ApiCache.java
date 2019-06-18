@@ -2021,7 +2021,15 @@ public class ApiCache {
 				@Override
 				public RegressionWindow load(RegresionWindowCacheLoader key) {
 					
-					RegressionWindow result = RegressionUtil.getActiveWindow(key.apiClient, key.input,
+					Response<DeploymentsResult> deploymentsResult = ApiCache.getDeployments(key.apiClient, key.input.serviceId, false, null);
+					
+					List<SummarizedDeployment> summarizedDeployments = null;
+					
+					if (deploymentsResult != null && deploymentsResult.data != null) {
+						summarizedDeployments = deploymentsResult.data.deployments;
+					}
+					
+					RegressionWindow result = RegressionUtil.getActiveWindow(key.apiClient, key.input, summarizedDeployments,
 							System.out);
 					
 					return result;

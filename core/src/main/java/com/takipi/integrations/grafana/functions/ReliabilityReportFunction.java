@@ -689,8 +689,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 				ViewInput regressionInput, String serviceId) {
 			Set<BreakdownType> breakdownTypes = null;
 			
-			if (!reliabilityReportInput.isTiersReportMode())
-			{
+			if (!reliabilityReportInput.isTiersReportMode()) {
 				breakdownTypes = new HashSet<BreakdownType>();
 				
 				if (!CollectionUtil.safeIsEmpty(regressionInput.getServers(serviceId))) {
