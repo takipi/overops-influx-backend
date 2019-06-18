@@ -842,6 +842,10 @@ public class TransactionsListFunction extends GrafanaFunction {
 			servicesValues.add(serviceEvents);
 		}
 		
+		if (series.values.size() == 0) {
+			return Collections.singletonList(createNoDataSeries(serviceIds));
+		}
+		
 		sortSeriesValues(series.values, servicesValues);
 
 
@@ -975,8 +979,13 @@ public class TransactionsListFunction extends GrafanaFunction {
 			throw new IllegalStateException("Missing render mode");
 		}
 		
-		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
 		Collection<String> serviceIds = getServiceIds(input);
+
+		if (serviceIds.size() == 0) {
+			return Collections.singletonList(createNoServiceSeries());
+		}
+		
+		Pair<DateTime, DateTime> timeSpan = TimeUtil.getTimeFilter(input.timeFilter);
 		
 		RenderMode renderMode = input.getRenderMore();
 		
