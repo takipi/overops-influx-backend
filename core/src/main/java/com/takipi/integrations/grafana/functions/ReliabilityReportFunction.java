@@ -3667,7 +3667,9 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		Map<String, Collection<Pair<TransactionData, ReportKeyResults>>> slowdownsMap = new HashMap<String, 
 			Collection<Pair<TransactionData, ReportKeyResults>>>();
-				
+		
+		Collection<FeedEventType> feedEventTypes = input.getEventFeedTypes();
+		
 		for (String serviceId : serviceIds) {
 
 			Collection<ReportKeyOutput> reportKeyOutputs = executeReport(serviceId, input, timeSpan);
@@ -3692,6 +3694,16 @@ public class ReliabilityReportFunction extends EventsFunction {
 						}
 						
 						RegressionData regData = (RegressionData)eventData;
+						
+						if (!CollectionUtil.safeIsEmpty(feedEventTypes)) {
+							
+							FeedEventType feedEventType = FeedEventType.getFeedEventType(regData.type);
+							
+							if (!CollectionUtil.safeContains(feedEventTypes, feedEventType)) {
+								continue;
+							}
+						}
+						
 						regressions.add(Pair.of(regData, reportKeyResult));
 					}
 				}
@@ -3699,10 +3711,19 @@ public class ReliabilityReportFunction extends EventsFunction {
 				if (!CollectionUtil.safeIsEmpty(reportKeyResult.output.transactionMap.values())) {
 					
 					for (TransactionData transactionData : reportKeyResult.output.transactionMap.values()) {
-						if ((transactionData.state == PerformanceState.SLOWING)
-						|| (transactionData.state == PerformanceState.CRITICAL)) {
-							slowdowns.add(Pair.of(transactionData, reportKeyResult));
+						
+						FeedEventType feedEventType = FeedEventType.getFeedEventType(transactionData.state);
+						
+						if (feedEventType == null) {
+							continue;
 						}
+						
+						if ((!CollectionUtil.safeIsEmpty(feedEventTypes)) 
+						&& (!CollectionUtil.safeContains(feedEventTypes, feedEventType))) {
+							continue;
+						}
+											
+						slowdowns.add(Pair.of(transactionData, reportKeyResult));
 					}
 				}	
 			}
@@ -3719,23 +3740,32 @@ public class ReliabilityReportFunction extends EventsFunction {
 	private Object formatRegressionNameDesc(ReliabilityReportInput input,
 		String serviceId, Pair<DateTime, DateTime> timespan,
 		RegressionData regressionData, EventDescriptionFormatter descFormater) {
-		
-		StringBuilder result = new StringBuilder();
-		
-		if (regressionData.regression != null) {
-			result.append("Increasing ");
-		} else {
-			result.append("New ");
-		}
-		
-		result.append(descFormater.getValue(regressionData, 
-			serviceId, input, timespan));
+	
+		Object result = descFormater.getValue(regressionData, 
+			serviceId, input, timespan);
 		
 		return result;
 	}
 	
-	private Object formatRegressionTypeDesc(RegressionData regressionData) {
-		Object result = regressionData.getDescription();
+	private Object formatRegressionTypeDesc(RegressionData regressionData, Object eventDesc) {
+		
+		StringBuilder result = new StringBuilder();
+		
+		if (regressionData.regression == null) {
+			result.append("New ");
+		}
+		
+		result.append(regressionData.getDescription());
+
+		if (regressionData.regression == null) {
+			result.append(". ");
+		} else {
+			result.append(" in ");
+
+		}
+	
+		result.append(eventDesc);
+		
 		return result;
 	}
 	
@@ -3760,9 +3790,14 @@ public class ReliabilityReportFunction extends EventsFunction {
 	}
 	
 	private String formatslowdownTypeDesc(TransactionData transactionData,
-		SlowdownSettings slowdownSettings) {
-		String result = transactionData.getSlowdownDesc(slowdownSettings);
-		return result;
+		SlowdownSettings slowdownSettings, String transactionName) {
+		StringBuilder result = new StringBuilder();
+				
+		result.append(transactionData.getSlowdownDesc(slowdownSettings));
+		result.append(" in ");
+		result.append(transactionName);
+		
+		return result.toString();
 	}
 	
 	private String formatslowdownName(TransactionData transactionData) {
@@ -3817,11 +3852,11 @@ public class ReliabilityReportFunction extends EventsFunction {
 				Pair<Pair<Object, Object>, String> timeRangePair = getReportKeyTimeRange(input, 
 					timespan, input.getReportMode(), regressionWindow);
 				
-				String slowdownName = formatslowdownName(transactionData);
-				String slowdownTypeDesc = formatslowdownTypeDesc(transactionData, slowdownSettings);
-				
 				String transactionName = getTransactionName(transactionData.graph.name, true);
-				
+
+				String slowdownName = formatslowdownName(transactionData);
+				String slowdownTypeDesc = formatslowdownTypeDesc(transactionData, slowdownSettings, transactionName);
+			
 				FeedEventType eventType;
 				
 				if (transactionData.getSeverity() == RegressionFunction.P1) {
@@ -3934,10 +3969,10 @@ public class ReliabilityReportFunction extends EventsFunction {
 					dashboardValue = formatLocation(regressionData.event.error_location);
 					
 					if (regressionData.getSeverity() == RegressionFunction.P1) {
-						eventType = FeedEventType.SevereIncError;
+						eventType = FeedEventType.SevereIncreasingError;
 
 					} else {
-						eventType = FeedEventType.IncError;
+						eventType = FeedEventType.IncreasingError;
 					}
 				} else {
 					dashboardId = input.newErrorDashboardId;
@@ -3954,7 +3989,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 				Object eventNameDesc = formatRegressionNameDesc(input, serviceId, timespan, 
 					regressionData, descFormater);
 				
-				Object eventTypeDesc = formatRegressionTypeDesc(regressionData);
+				Object eventTypeDesc = formatRegressionTypeDesc(regressionData, eventNameDesc);
 				
 				String eventName = formatRegressionName(input, serviceId, timespan, regressionData, 
 					messageFormatter);
