@@ -777,8 +777,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 					
 					if (!CollectionUtil.safeIsEmpty(appGroups)) {
 						for (String appGroup : appGroups) {
-							DeterminantKey groupDeterminantKey = DeterminantKey.create(contributor.machine_name,
-									appGroup, contributor.deployment_name);
+							DeterminantKey groupDeterminantKey = DeterminantKey.create(determinantBreakdownTypes,
+									"", appGroup, contributor.deployment_name);
 							
 							result.safeAddEventResult(groupDeterminantKey, contributorEventResult);
 						}
