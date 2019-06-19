@@ -427,8 +427,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			try {
 				RegressionFunction regressionFunction = new RegressionFunction(apiClient, settingsMaps);
 				
-				Map<ReportKey, BreakdownRegressionData> regressionDataMap =
-						this.getRegressionDataMap(regressionFunction);
+				Map<ReportKey, BreakdownRegressionData> regressionDataMap = getRegressionDataMap(regressionFunction);
 				
 				for (Entry<ReportKey, BreakdownRegressionData> entry : regressionDataMap.entrySet()) {
 					
@@ -501,7 +500,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 				
 				Map<String, Collection<String>> applicationGroupsMap = getApplicationGroupsMap(serviceId, reportKeys);
 				
-				Set<RegressionEventsOutput> aggregatedRegressionOutputMap = this.getRegressionApiResults(activeWindow,
+				Set<RegressionEventsOutput> aggregatedRegressionOutputMap = getRegressionApiResults(activeWindow,
 						applicationGroupsMap, regressionFunction, aggregatedRegressionInput ,regressionInput, newOnly);
 				
 				if (CollectionUtil.safeIsEmpty(aggregatedRegressionOutputMap)) {
