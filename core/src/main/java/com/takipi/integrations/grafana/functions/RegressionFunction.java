@@ -856,8 +856,7 @@ public class RegressionFunction extends EventsFunction {
 		return result;
 	}
 	
-	public boolean shouldExcludeEmptyDetreminantGraph(Set<BreakdownType> determinantBreakdownTypes, DeterminantKey determinantGraphListsMapKey)
-	{
+	public boolean shouldExcludeEmptyDetreminantGraph(Set<BreakdownType> determinantBreakdownTypes, DeterminantKey determinantGraphListsMapKey) {
 		// Take empty determinant graph only if determinant breakdown was requested
 		boolean result = ((determinantGraphListsMapKey.equals(DeterminantKey.Empty)) && (!CollectionUtil.safeIsEmpty(determinantBreakdownTypes)));
 		
