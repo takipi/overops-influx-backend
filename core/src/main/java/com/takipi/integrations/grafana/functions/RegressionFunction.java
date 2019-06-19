@@ -1109,11 +1109,9 @@ public class RegressionFunction extends EventsFunction {
 		
 		regressionInput.validate();
 		
-		Response<DeploymentsResult> deployments = ApiCache.getDeployments(apiClient, serviceId, true, null);
+		RegressionWindow regressionInputWindow = ApiCache.getRegressionWindow(apiClient, regressionInput);
 		
-		List<SummarizedDeployment> summarizedDeployments = deployments.data.deployments;
-		
-		RateRegression rateRegression = RegressionUtil.calculateRateRegressions(apiClient, regressionInput, summarizedDeployments,
+		RateRegression rateRegression = RegressionUtil.calculateRateRegressions(apiClient, regressionInput, regressionInputWindow,
 				null, false);
 		
 		RegressionOutput result = createRegressionOutput(serviceId,
