@@ -403,18 +403,18 @@ public class ReliabilityReportFunction extends EventsFunction {
 		private final ReliabilityReportInput reliabilityReportInput;
 		private final Pair<DateTime, DateTime> timeSpan;
 		private final String viewId;
-		private boolean tierApps;
+		private boolean appTiers;
 		
 		public AggregatedRegressionAsyncTask(List<ReportKey> reportKeys, String serviceId,  
 				ReliabilityReportInput reliabilityReportInput,
-				Pair<DateTime, DateTime> timeSpan, String viewId, boolean tierApps) {
+				Pair<DateTime, DateTime> timeSpan, String viewId, boolean appTiers) {
 			
 			this.reportKeys = reportKeys;
 			this.serviceId = serviceId;
 			this.reliabilityReportInput = reliabilityReportInput;
 			this.timeSpan = timeSpan;
 			this.viewId = viewId;
-			this.tierApps = tierApps;
+			this.appTiers = appTiers;
 		}
 		
 		@Override
@@ -465,7 +465,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			ReliabilityReportInput appsInput = getInput(reliabilityReportInput, serviceId, appsStr, true);
 			
 			Map<ReportKey, BreakdownRegressionData> result = getRegressionOutputBatch(appsInput,
-					regressionFunction, false, tierApps);
+					regressionFunction, false, appTiers);
 			
 			return result;
 		}
@@ -655,7 +655,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			DateTime activeWindowEnd = activeWindow.activeWindowStart.plusMinutes(subRegressionInput.activeTimespan);
 			
 			Set<BreakdownType> queryBreakdownTypes = getQueryBreakdownTypesFromSelection(reliabilityReportInput, regressionInput, serviceId);
-			Set<BreakdownType> determinantBreakdownTypes = getDeterminantBreakdownTypesFromReport(reliabilityReportInput);
+			Set<BreakdownType> determinantBreakdownTypes = getDeterminantBreakdownTypesFromReport(reliabilityReportInput, appTiers);
 			
 			Collection<EventResult> eventList = getEventResultsWithRetries(regressionInput, regressionFunction,
 					activeWindowStart, activeWindowEnd, queryBreakdownTypes);
@@ -707,7 +707,12 @@ public class ReliabilityReportFunction extends EventsFunction {
 			return breakdownTypes;
 		}
 		
-		public Set<BreakdownType> getDeterminantBreakdownTypesFromReport(ReliabilityReportInput reliabilityReportInput) {
+		public Set<BreakdownType> getDeterminantBreakdownTypesFromReport(ReliabilityReportInput reliabilityReportInput, boolean appTiers) {
+			
+			if (appTiers) {
+				return Collections.emptySet();
+			}
+			
 			switch (reliabilityReportInput.getReportMode()) {
 				case Applications:
 				case Apps_Extended:
