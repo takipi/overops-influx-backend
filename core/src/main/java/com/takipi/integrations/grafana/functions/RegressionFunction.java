@@ -770,7 +770,7 @@ public class RegressionFunction extends EventsFunction {
 	public Map<DeterminantKey, Pair<Graph, Graph>> getRegressionGraphs(String serviceId, String viewId,
 			RegressionInput regressionInput, RegressionWindow regressionWindow,
 			Map<String, Collection<String>> applicationGroupsMap, BaseEventVolumeInput input, boolean newOnly,
-			Set<BreakdownKey> queryBreakdownKeys, Set<BreakdownKey> determinantBreakdownKeys) {
+			Set<BreakdownType> queryBreakdownTypes, Set<BreakdownType> determinantBreakdownTypes) {
 		
 		EventFilterInput baselineInput;
 		DateTime baselineStart = regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan);
@@ -779,7 +779,7 @@ public class RegressionFunction extends EventsFunction {
 		DateTime activeStart = regressionWindow.activeWindowStart;
 		DateTime activeEnd = regressionWindow.activeWindowStart.plusMinutes(regressionWindow.activeTimespan);
 		
-		Set<BreakdownKey> baselineQueryBreakdownKeys = queryBreakdownKeys;
+		Set<BreakdownType> baselineQueryBreakdownTypes = queryBreakdownTypes;
 		
 		if (input.hasDeployments()) {
 			// for deployments baseline graph will start baseline timespan before the first deployment
@@ -791,7 +791,7 @@ public class RegressionFunction extends EventsFunction {
 			//deployments by definition nature do not have their own baseline - 
 			//they are compared against the general baseline (all prev deps)
 			baselineInput.deployments = null;
-			baselineQueryBreakdownKeys = null;
+			baselineQueryBreakdownTypes = null;
 		} else {
 			baselineInput = input;
 		}
@@ -801,7 +801,7 @@ public class RegressionFunction extends EventsFunction {
 		if (!newOnly) {
 			baselineGraphTasks = getGraphTasks(serviceId, viewId, baselineInput, 
 				VolumeType.all, baselineStart, baselineEnd,
-				regressionInput.baselineTimespan, regressionWindow.activeTimespan, false, baselineQueryBreakdownKeys);
+				regressionInput.baselineTimespan, regressionWindow.activeTimespan, false, baselineQueryBreakdownTypes);
 		} else {
 			baselineGraphTasks = null;
 		}
@@ -815,7 +815,7 @@ public class RegressionFunction extends EventsFunction {
 		}
 		
 		Collection<GraphSliceTask> activeGraphTasks = getGraphTasks(serviceId, viewId, 
-			input, VolumeType.all, activeStart, activeEnd, 0, graphActiveTimespan, false, queryBreakdownKeys);
+			input, VolumeType.all, activeStart, activeEnd, 0, graphActiveTimespan, false, queryBreakdownTypes);
 		
 		List<GraphSliceTask> graphTasks = new ArrayList<GraphSliceTask>(); 
 		
@@ -828,7 +828,7 @@ public class RegressionFunction extends EventsFunction {
 		Collection<GraphSliceTaskResult> graphSliceTaskResults = executeGraphTasks(graphTasks, false);
 		
 		Map<DeterminantKey, DeterminantGraphsLists> determinantGraphsMap = divideGraphsByDeterminant(baselineGraphTasks,
-				graphSliceTaskResults, applicationGroupsMap, determinantBreakdownKeys);
+				graphSliceTaskResults, applicationGroupsMap, determinantBreakdownTypes);
 		
 		Map<DeterminantKey, Pair<Graph, Graph>> result = new HashMap<DeterminantKey, Pair<Graph, Graph>>();
 		
@@ -841,7 +841,7 @@ public class RegressionFunction extends EventsFunction {
 		}
 		
 		for (DeterminantKey determinantGraphListsMapKey : determinantGraphsMap.keySet()) {
-			if (shouldExcludeEmptyDetreminantGraph(determinantBreakdownKeys, determinantGraphListsMapKey)) {
+			if (shouldExcludeEmptyDetreminantGraph(determinantBreakdownTypes, determinantGraphListsMapKey)) {
 				continue;
 			}
 			
@@ -859,10 +859,10 @@ public class RegressionFunction extends EventsFunction {
 		return result;
 	}
 	
-	public boolean shouldExcludeEmptyDetreminantGraph(Set<BreakdownKey> determinantBreakdownKeys, DeterminantKey determinantGraphListsMapKey)
+	public boolean shouldExcludeEmptyDetreminantGraph(Set<BreakdownType> determinantBreakdownTypes, DeterminantKey determinantGraphListsMapKey)
 	{
 		// Take empty determinant graph only if determinant breakdown was requested
-		boolean result = ((determinantGraphListsMapKey.equals(DeterminantKey.Empty)) && (!CollectionUtil.safeIsEmpty(determinantBreakdownKeys)));
+		boolean result = ((determinantGraphListsMapKey.equals(DeterminantKey.Empty)) && (!CollectionUtil.safeIsEmpty(determinantBreakdownTypes)));
 		
 		return result;
 	}
@@ -903,7 +903,7 @@ public class RegressionFunction extends EventsFunction {
 	
 	private Map<DeterminantKey, DeterminantGraphsLists> divideGraphsByDeterminant(Collection<GraphSliceTask> baselineGraphTasks,
 			Collection<GraphSliceTaskResult> graphSliceTaskResults, Map<String, Collection<String>> applicationGroupsMap,
-			Set<BreakdownKey> determinantBreakdownKeys) {
+			Set<BreakdownType> determinantBreakdownTypes) {
 		
 		Map<DeterminantKey, DeterminantGraphsLists> result = new HashMap<DeterminantKey, DeterminantGraphsLists>();
 		
@@ -915,7 +915,7 @@ public class RegressionFunction extends EventsFunction {
 				
 				Set<DeterminantKey> graphsKeys = new HashSet<DeterminantKey>();
 				
-				DeterminantKey determinantKey = DeterminantKey.create(determinantBreakdownKeys, "",
+				DeterminantKey determinantKey = DeterminantKey.create(determinantBreakdownTypes, "",
 						graph.application_name, graph.deployment_name);
 				
 				graphsKeys.add(determinantKey);

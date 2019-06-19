@@ -438,7 +438,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 							serviceId, false, regressionFunction, breakdownRegressionData.subInputData,
 							breakdownRegressionData.regressionInput, breakdownRegressionData.activeWindow,
 							breakdownRegressionData.eventResultMap, breakdownRegressionData.baselineGraph,
-							breakdownRegressionData.activeWindowGraph, breakdownRegressionData.determinantBreakdownKeys,true);
+							breakdownRegressionData.activeWindowGraph, breakdownRegressionData.determinantBreakdownTypes,true);
 					
 					regressionOutputMap.put(reortKey ,regressionOutput);
 				}
@@ -582,11 +582,11 @@ public class ReliabilityReportFunction extends EventsFunction {
 					continue;
 				}
 				
-				Set<BreakdownKey> determinantBreakdownKeys = regressionApiResult.determinantBreakdownKeys;
+				Set<BreakdownType> determinantBreakdownTypes = regressionApiResult.determinantBreakdownTypes;
 				
 				// For tiers we create a single graph request without deployments, machine, apps filter but need to break
 				// the input afterwards by the specific type of regression input
-				if (CollectionUtil.safeIsEmpty(determinantBreakdownKeys)) {
+				if (CollectionUtil.safeIsEmpty(determinantBreakdownTypes)) {
 					for (String transactionGraphKey : subRegressionInputs.keySet()) {
 						reportDataPair = subRegressionInputs.get(transactionGraphKey);
 						
@@ -598,7 +598,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 								.getFirst();
 						
 						BreakdownRegressionData breakdownRegressionData = new BreakdownRegressionData(regressionsInput,
-								regressionInput, activeWindow, baselineGraph, activeWindowGraph, eventResultMap, determinantBreakdownKeys);
+								regressionInput, activeWindow, baselineGraph, activeWindowGraph, eventResultMap, determinantBreakdownTypes);
 						
 						result.put(reportKey, breakdownRegressionData);
 					}
@@ -611,7 +611,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 							.getFirst();
 					
 					BreakdownRegressionData breakdownRegressionData = new BreakdownRegressionData(regressionsInput,
-							regressionInput, activeWindow, baselineGraph, activeWindowGraph, eventResultMap, determinantBreakdownKeys);
+							regressionInput, activeWindow, baselineGraph, activeWindowGraph, eventResultMap, determinantBreakdownTypes);
 					
 					result.put(reportKey, breakdownRegressionData);
 				}
@@ -654,21 +654,21 @@ public class ReliabilityReportFunction extends EventsFunction {
 			DateTime activeWindowStart = activeWindow.activeWindowStart;
 			DateTime activeWindowEnd = activeWindow.activeWindowStart.plusMinutes(subRegressionInput.activeTimespan);
 			
-			Set<BreakdownKey> queryBreakdownKeys = getQueryBreakdownKeysFromSelection(reliabilityReportInput, regressionInput, serviceId);
-			Set<BreakdownKey> determinantBreakdownKeys = getDeterminantBreakdownKeysFromReport(reliabilityReportInput);
+			Set<BreakdownType> queryBreakdownTypes = getQueryBreakdownTypesFromSelection(reliabilityReportInput, regressionInput, serviceId);
+			Set<BreakdownType> determinantBreakdownTypes = getDeterminantBreakdownTypesFromReport(reliabilityReportInput);
 			
 			Collection<EventResult> eventList = getEventResultsWithRetries(regressionInput, regressionFunction,
-					activeWindowStart, activeWindowEnd, queryBreakdownKeys);
+					activeWindowStart, activeWindowEnd, queryBreakdownTypes);
 			
 			if (eventList == null) {
 				return null;
 			}
 			
-			EventsDeterminantMap eventsMap = getEventsMapByKey(eventList, applicationGroupsMap, determinantBreakdownKeys);
+			EventsDeterminantMap eventsMap = getEventsMapByKey(eventList, applicationGroupsMap, determinantBreakdownTypes);
 			
 			Map<DeterminantKey, Pair<Graph, Graph>> regressionGraphsMap = regressionFunction.getRegressionGraphs(serviceId,
 					viewId, subRegressionInput, activeWindow, applicationGroupsMap,
-					regressionInput, newOnly, queryBreakdownKeys, determinantBreakdownKeys);
+					regressionInput, newOnly, queryBreakdownTypes, determinantBreakdownTypes);
 			
 			Set<RegressionEventsOutput> result = new HashSet<RegressionEventsOutput>();
 			
@@ -677,43 +677,43 @@ public class ReliabilityReportFunction extends EventsFunction {
 				Pair<Graph, Graph> regressionGraphs = regressionGraphsMap.get(determinantKey);
 				
 				result.add(new RegressionEventsOutput(determinantKey, regressionGraphs.getFirst(),
-						regressionGraphs.getSecond(), eventResultMap, queryBreakdownKeys, determinantBreakdownKeys));
+						regressionGraphs.getSecond(), eventResultMap, queryBreakdownTypes, determinantBreakdownTypes));
 			}
 			
 			return result;
 		}
 		
-		public Set<BreakdownKey> getQueryBreakdownKeysFromSelection(ReliabilityReportInput reliabilityReportInput,
+		public Set<BreakdownType> getQueryBreakdownTypesFromSelection(ReliabilityReportInput reliabilityReportInput,
 				ViewInput regressionInput, String serviceId) {
-			Set<BreakdownKey> breakdownKeys = null;
+			Set<BreakdownType> breakdownTypes = null;
 			
 			if (!reliabilityReportInput.isTiersReportMode()) {
-				breakdownKeys = new HashSet<BreakdownKey>();
+				breakdownTypes = new HashSet<BreakdownType>();
 				
 				if (!CollectionUtil.safeIsEmpty(regressionInput.getServers(serviceId))) {
-					breakdownKeys.add(BreakdownKey.Server);
+					breakdownTypes.add(BreakdownType.Server);
 				}
 				
 				if (!CollectionUtil.safeIsEmpty(regressionInput.getApplications(apiClient,
 						getSettingsData(serviceId), serviceId, true, false))) {
-					breakdownKeys.add(BreakdownKey.App);
+					breakdownTypes.add(BreakdownType.App);
 				}
 				
 				if (!CollectionUtil.safeIsEmpty(regressionInput.getDeployments(serviceId, apiClient))) {
-					breakdownKeys.add(BreakdownKey.Deployment);
+					breakdownTypes.add(BreakdownType.Deployment);
 				}
 			}
 			
-			return breakdownKeys;
+			return breakdownTypes;
 		}
 		
-		public Set<BreakdownKey> getDeterminantBreakdownKeysFromReport(ReliabilityReportInput reliabilityReportInput) {
+		public Set<BreakdownType> getDeterminantBreakdownTypesFromReport(ReliabilityReportInput reliabilityReportInput) {
 			switch (reliabilityReportInput.getReportMode()) {
 				case Applications:
 				case Apps_Extended:
-					return Collections.singleton(BreakdownKey.App);
+					return Collections.singleton(BreakdownType.App);
 				case Deployments:
-					return Collections.singleton(BreakdownKey.Deployment);
+					return Collections.singleton(BreakdownType.Deployment);
 				case Tiers:
 				case Tiers_Extended:
 				case Timeline:
@@ -726,13 +726,13 @@ public class ReliabilityReportFunction extends EventsFunction {
 		
 		private Collection<EventResult> getEventResultsWithRetries(ViewInput regressionInput,
 				RegressionFunction regressionFunction, DateTime activeWindowStart, DateTime activeWindowEnd,
-				Set<BreakdownKey> queryBreakdownKeys) {
+				Set<BreakdownType> queryBreakdownTypes) {
 			
 			Collection<EventResult> result = null;
 			
 			for (int retries = 0; retries < GET_EVENT_LIST_MAX_RETRIES; retries++) {
 				result = regressionFunction.getEventList(serviceId, viewId, regressionInput, activeWindowStart, activeWindowEnd,
-						queryBreakdownKeys, true, null);
+						queryBreakdownTypes, true, null);
 				
 				if (result != null) {
 					break;
@@ -751,7 +751,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 		}
 		
 		public EventsDeterminantMap getEventsMapByKey(Collection<EventResult> events,
-				Map<String, Collection<String>> applicationGroupsMap, Set<BreakdownKey> determinantBreakdownKeys) {
+				Map<String, Collection<String>> applicationGroupsMap, Set<BreakdownType> determinantBreakdownTypes) {
 			
 			EventsDeterminantMap result = new EventsDeterminantMap();
 			
@@ -764,7 +764,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 				
 				for (Stats contributor : event.stats.contributors) {
 					
-					DeterminantKey determinantKey = DeterminantKey.create(determinantBreakdownKeys, "",
+					DeterminantKey determinantKey = DeterminantKey.create(determinantBreakdownTypes, "",
 							contributor.application_name, contributor.deployment_name);
 					
 					EventResult contributorEventResult = (EventResult) event.clone();
@@ -809,11 +809,11 @@ public class ReliabilityReportFunction extends EventsFunction {
 		private final Graph baselineGraph;
 		private final Graph activeWindowGraph;
 		private final Map<String, EventResult> eventResultMap;
-		private final Set<BreakdownKey> determinantBreakdownKeys;
+		private final Set<BreakdownType> determinantBreakdownTypes;
 		
 		public BreakdownRegressionData(RegressionsInput subInputData, RegressionInput regressionInput,
 				RegressionWindow activeWindow, Graph baselineGraph, Graph activeWindowGraph,
-				Map<String, EventResult> eventResultMap, Set<BreakdownKey> determinantBreakdownKeys) {
+				Map<String, EventResult> eventResultMap, Set<BreakdownType> determinantBreakdownTypes) {
 			
 			this.subInputData = subInputData;
 			this.regressionInput = regressionInput;
@@ -821,7 +821,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			this.baselineGraph = baselineGraph;
 			this.activeWindowGraph = activeWindowGraph;
 			this.eventResultMap = eventResultMap;
-			this.determinantBreakdownKeys = determinantBreakdownKeys;
+			this.determinantBreakdownTypes = determinantBreakdownTypes;
 		}
 	}
 	
