@@ -916,8 +916,9 @@ public class RegressionFunction extends EventsFunction {
 				
 				graphsKeys.add(determinantKey);
 				
-				if ((determinantBreakdownTypes.contains(BreakdownType.App)) &&
-					(!CollectionUtil.safeIsEmpty(applicationGroupsMap))) {
+				if ((!CollectionUtil.safeIsEmpty(determinantBreakdownTypes)) &&
+					(!CollectionUtil.safeIsEmpty(applicationGroupsMap)) &&
+					(determinantBreakdownTypes.contains(BreakdownType.App))) {
 					
 					Collection<String> appGroups = applicationGroupsMap.get(graph.application_name);
 					
