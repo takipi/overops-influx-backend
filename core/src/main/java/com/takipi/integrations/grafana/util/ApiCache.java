@@ -71,6 +71,7 @@ import com.takipi.api.client.util.settings.ServiceSettingsData;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.request.intf.ApiGetRequest;
 import com.takipi.api.core.url.UrlClient.Response;
+import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.functions.GrafanaFunction;
 import com.takipi.integrations.grafana.functions.GrafanaThreadPool;
@@ -2021,7 +2022,38 @@ public class ApiCache {
 				@Override
 				public RegressionWindow load(RegresionWindowCacheLoader key) {
 					
-					RegressionWindow result = RegressionUtil.getActiveWindow(key.apiClient, key.input,
+					RegressionWindow result;
+					
+					if (CollectionUtil.safeIsEmpty(key.input.deployments)) {
+						result = RegressionUtil.getActiveWindow(key.apiClient, key.input, Collections.emptyList(),
+								System.out);
+						
+						return result;
+					}
+					
+					Response<DeploymentsResult> activeDeploymentsResult = getDeployments(key.apiClient, key.input.serviceId, true, null);
+					
+					if (activeDeploymentsResult.data != null) {
+						RegressionWindow activeDeploymentsWindow = RegressionUtil.getActiveWindow(key.apiClient, key.input,
+								activeDeploymentsResult.data.deployments, System.out);
+						
+						if ((activeDeploymentsWindow != null) && (activeDeploymentsWindow.deploymentFound)) {
+							result = activeDeploymentsWindow;
+							
+							return result;
+						}
+					}
+					
+					Response<DeploymentsResult> nonActiveDeploymentsResult = getDeployments(key.apiClient, key.input.serviceId, false, null);
+					
+					if (nonActiveDeploymentsResult.data != null) {
+						result = RegressionUtil.getActiveWindow(key.apiClient, key.input,
+								nonActiveDeploymentsResult.data.deployments, System.out);
+						
+						return result;
+					}
+					
+					result = RegressionUtil.getActiveWindow(key.apiClient, key.input, Collections.emptyList(),
 							System.out);
 					
 					return result;

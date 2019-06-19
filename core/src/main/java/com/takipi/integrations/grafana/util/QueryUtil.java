@@ -7,8 +7,7 @@ import com.takipi.integrations.grafana.functions.GrafanaFunction;
 import com.takipi.integrations.grafana.output.QueryResult;
 import com.takipi.integrations.grafana.servlet.ServletUtil.Auth;
 
-public class QueryUtil
-{
+public class QueryUtil {
 	public static final DecimalFormat df = new DecimalFormat("#.00");
 	
 	public static String query(Auth auth, String query) {
