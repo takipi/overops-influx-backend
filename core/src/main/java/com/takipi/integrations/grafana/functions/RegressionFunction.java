@@ -841,6 +841,10 @@ public class RegressionFunction extends EventsFunction {
 		}
 		
 		for (DeterminantKey determinantGraphListsMapKey : determinantGraphsMap.keySet()) {
+			if (shouldExcludeEmptyDetreminantGraph(determinantBreakdownKeys, determinantGraphListsMapKey)) {
+				continue;
+			}
+			
 			DeterminantGraphsLists determinantGraphsLists = determinantGraphsMap.get(determinantGraphListsMapKey);
 			
 			Pair<Graph, Graph> determinantGraphs = getDeterminantGraphs(input, allBaselineGraphs,
@@ -851,6 +855,14 @@ public class RegressionFunction extends EventsFunction {
 			
 			result.put(determinantGraphListsMapKey, Pair.of(baselineGraph, activeWindowGraph));
 		}
+		
+		return result;
+	}
+	
+	public boolean shouldExcludeEmptyDetreminantGraph(Set<BreakdownKey> determinantBreakdownKeys, DeterminantKey determinantGraphListsMapKey)
+	{
+		// Take empty determinant graph only if determinant breakdown was requested
+		boolean result = ((determinantGraphListsMapKey.equals(DeterminantKey.Empty)) && (!CollectionUtil.safeIsEmpty(determinantBreakdownKeys)));
 		
 		return result;
 	}
