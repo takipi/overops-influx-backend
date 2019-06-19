@@ -920,7 +920,9 @@ public class RegressionFunction extends EventsFunction {
 				
 				graphsKeys.add(determinantKey);
 				
-				if (!CollectionUtil.safeIsEmpty(applicationGroupsMap)) {
+				if ((determinantBreakdownTypes.contains(BreakdownType.App)) &&
+					(!CollectionUtil.safeIsEmpty(applicationGroupsMap))) {
+					
 					Collection<String> appGroups = applicationGroupsMap.get(graph.application_name);
 					
 					if (!CollectionUtil.safeIsEmpty(appGroups)) {
@@ -942,8 +944,7 @@ public class RegressionFunction extends EventsFunction {
 					if (isBaselineTask) {
 						determinantGraphsLists.baselineGraph.add(graph);
 					} else {
-						if ((CollectionUtil.safeIsEmpty(graph.points)) ||
-							(graphSliceTaskResult.task.hasBreakdownTypes() && graphKey.equals(DeterminantKey.Empty))) {
+						if (shouldExcludeEmptyDetreminantGraph(determinantBreakdownTypes, graphKey)) {
 							// The relevant apps for the filter does not exist
 							continue;
 						}
