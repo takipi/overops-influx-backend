@@ -65,7 +65,7 @@ public abstract class BaseGraphFunction extends GrafanaFunction {
 		}
 	}
 	
-	protected class GraphAsyncTask extends BaseAsyncTask implements Callable<Object>{
+	protected class GraphAsyncTask extends BaseAsyncTask {
 		
 		protected String serviceId;
 		protected String viewId;

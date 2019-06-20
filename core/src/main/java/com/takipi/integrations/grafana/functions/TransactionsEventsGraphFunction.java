@@ -11,7 +11,6 @@ import java.util.Set;
 
 import org.joda.time.DateTime;
 
-import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
@@ -72,10 +71,9 @@ public class TransactionsEventsGraphFunction extends LimitGraphFunction {
 		
 		Map<String, EventFilter> eventFilters = new HashMap<String, EventFilter>();
 		
-		String json = new Gson().toJson(input);
+		String json = gson.toJson(input);
 		
 		for (String type : types) {
-			Gson gson = new Gson();
 			GraphLimitInput typeInput = gson.fromJson(json, limitInput.getClass());
 			typeInput.types = type;
 			EventFilter eventFilter = getEventFilter(serviceId, typeInput, timeSpan);

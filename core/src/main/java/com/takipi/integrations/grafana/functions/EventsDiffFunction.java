@@ -10,7 +10,6 @@ import java.util.Map;
 
 import org.joda.time.DateTime;
 
-import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.common.util.CollectionUtil;
@@ -138,8 +137,8 @@ public class EventsDiffFunction extends EventsFunction {
 		
 		EventsDiffInput eventsDiffInput = (EventsDiffInput)input;
 		
-		String json = new Gson().toJson(input);
-		EventsInput targetInput =  new Gson().fromJson(json, input.getClass());
+		String json = gson.toJson(input);
+		EventsInput targetInput =  gson.fromJson(json, input.getClass());
 				
 		targetInput.applications = eventsDiffInput.compareToApplications;
 		targetInput.servers = eventsDiffInput.compareToServers;

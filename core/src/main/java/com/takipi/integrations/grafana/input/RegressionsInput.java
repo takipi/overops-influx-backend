@@ -98,7 +98,9 @@ public class RegressionsInput extends EventsInput {
 		 * This mode is only supported if the function is invoked to produce a reliabilty report,
 		 * where each point depicts a key value from the report
 		 */
-		Graph;
+		Graph,
+		
+		Feed
 	}
 	
 	/**

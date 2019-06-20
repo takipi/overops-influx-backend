@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.infra.Categories.Category;
 import com.takipi.api.client.util.infra.Categories.CategoryType;
@@ -163,7 +162,6 @@ public class AppsGraphFunction extends BaseServiceCompositeFunction {
 		
 		Collection<String> apps = getApplications(serviceId, functionInput, input.limit);
 		
-		Gson gson = new Gson();
 		String json = gson.toJson(functionInput);
 		
 		for (String app : apps) {

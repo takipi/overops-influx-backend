@@ -1,9 +1,12 @@
 package com.takipi.integrations.grafana.functions;
 
+import java.util.concurrent.Callable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BaseAsyncTask {
+public abstract class BaseAsyncTask implements Callable<Object> {
+	
 	private static final Logger logger = LoggerFactory.getLogger(BaseAsyncTask.class);
 	
 	private String oldName;
