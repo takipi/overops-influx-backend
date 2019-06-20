@@ -1202,7 +1202,7 @@ public abstract class GrafanaFunction {
 	}
 	
 	protected static RegressionPeriodData cropGraphByPeriod(Graph graph, Pair<DateTime, DateTime> period,
-															int baselineWindow, Map<String, EventResult> eventMap) {
+			int baselineWindow, Map<String, EventResult> eventMap) {
 		
 		RegressionPeriodData result = new RegressionPeriodData();
 		
