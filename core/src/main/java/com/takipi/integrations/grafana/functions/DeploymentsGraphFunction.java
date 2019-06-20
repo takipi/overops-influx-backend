@@ -9,7 +9,6 @@ import java.util.concurrent.Callable;
 
 import org.joda.time.DateTime;
 
-import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.deployment.SummarizedDeployment;
 import com.takipi.api.client.result.deployment.DeploymentsResult;
@@ -47,7 +46,6 @@ public class DeploymentsGraphFunction extends GraphFunction {
 	}
 
 	private DeploymentsGraphInput getInput(DeploymentsGraphInput input, String depName) {
-		Gson gson = new Gson();
 		String json = gson.toJson(input);
 		DeploymentsGraphInput result = gson.fromJson(json, DeploymentsGraphInput.class);
 		result.deployments = depName;

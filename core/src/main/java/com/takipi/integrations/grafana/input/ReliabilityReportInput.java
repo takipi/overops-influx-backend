@@ -1,8 +1,12 @@
 package com.takipi.integrations.grafana.input;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import com.takipi.api.client.util.performance.calc.PerformanceState;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
 /** 
@@ -199,6 +203,10 @@ public class ReliabilityReportInput extends RegressionsInput {
 		return mode;	
 	}
 	
+	public boolean isTiersReportMode() {
+		return (mode == ReportMode.Tiers || mode == ReportMode.Tiers_Extended);
+	}
+	
 	/**
 	 * Control the type of events used to compute the report score
 	 *
@@ -279,12 +287,6 @@ public class ReliabilityReportInput extends RegressionsInput {
 	 */
 	public String postfixes;
 	
-	/** 
-	 * The number of graph points to retrieve per time transaction time series when calculating 
-	 * slowdowns
-	 */
-	public int transactionPointsWanted;
-	
 	/**
 	 * The string format used to present a row value containing both severe and non severe items
 	 * will receive the number of issues and the number of severe issues as string format %d parameters,
@@ -348,11 +350,6 @@ public class ReliabilityReportInput extends RegressionsInput {
 	}
 	
 	/**
-	 * the min transaction fail rate above which to calc the transction fail rate  
-	 */
-	public double minFailRate;
-	
-	/**
 	 * A comma delimited array used to visually annotate the reliability status of the key
 	 * based on the score ranges for example: (\xE2\x9C\x85,\xE2\x9A\xA0\xEF\xB8\x8F,\xE2\x9D\x8C)
 	 */
@@ -380,6 +377,99 @@ public class ReliabilityReportInput extends RegressionsInput {
 	 * and Y defines the threshold a successful score. For example: 70,85 
 	 */
 	public String scoreRanges;
+	
+	
+	public enum FeedEventType {
+		NewError,
+		SevereNewError,
+		IncreasingError,
+		SevereIncreasingError,
+		Slowdown,
+		SevereSlowdown;
+		
+		public static FeedEventType getFeedEventType(RegressionType type) {
+			
+			switch (type) {
+				case NewIssues:
+					return FeedEventType.NewError;
+				case Regressions:
+					return FeedEventType.IncreasingError;
+				case SevereNewIssues:
+					return FeedEventType.SevereNewError;
+				case SevereRegressions:
+					return FeedEventType.SevereIncreasingError;
+				default:
+					throw new IllegalStateException(String.valueOf(type));
+			}
+		}
+		
+		public static FeedEventType getFeedEventType(PerformanceState state) {
+			
+			switch (state) {
+				case CRITICAL:
+					return FeedEventType.SevereSlowdown;
+				case SLOWING:
+					return FeedEventType.Slowdown;
+				case OK:
+				case NO_DATA:
+					return null;
+				default:
+					throw new IllegalStateException(String.valueOf(state));
+			}
+		}	
+	}
+	
+	public String eventFeedTypes;
+	
+	public Collection<FeedEventType> getEventFeedTypes() {
+		
+		if ((eventFeedTypes ==  null) || (eventFeedTypes.length() == 0)) {
+			return null;
+		}
+		
+		Collection<String> values = getServiceFilters(eventFeedTypes, null, true);
+		Set<FeedEventType> result = new HashSet<FeedEventType>(values.size());
+
+		for (String value : values) {
+			FeedEventType feedEventType = FeedEventType.valueOf(value.replace(" ", ""));
+			
+			if (feedEventType != null) {
+				result.add(feedEventType);
+			}
+		}
+			
+		return result;
+	}
+	
+	/**
+	 * The id of the dashboard to which new errors drill into
+	 */
+	public String newErrorDashboardId;
+	
+	/**
+	 * The id of the dashboard to which inc errors drill into
+	 */
+	public String incErrorDashboardId;
+	
+	/**
+	 * The id of the dashboard to which slowdown events drill into
+	 */
+	public String slowdownDashboardId;
+	
+	/**
+	 * The var name within the new errors dashboard to which an ARC link for this error will be set 
+	 */
+	public String newErrorDashboardField;
+	
+	/**
+	 * The var name within the inc errors dashboard to which the code location this error will be set 
+	 */
+	public String incErrorDashboardField;
+	
+	/**
+	 * The var name within the slowdowns dashboard to which the transaction name for this slowdown will be set 
+	 */
+	public String slowdownDashboardField;
 	
 	/**
 	 * Below are the constants describing the field supported by this function for each of the available 
@@ -535,7 +625,46 @@ public class ReliabilityReportInput extends RegressionsInput {
 	 */
 	public static final String ALERT_DESC = "AlertDesc";
 	
+	/**
+	 * Field name of the message of a feed event
+	 */
+	public static final String EVENT_NAME = "EventName";
 	
+	/**
+	 * Field name of the description of a feed event
+	 */
+	public static final String EVENT_DESC = "EventDesc";
+	
+	/**
+	 * Field name of the description of a feed event type
+	 */
+	public static final String EVENT_TYPE_DESC = "EventTypeDesc";
+	
+	/**
+	 * Field name of the type for the current event feed item
+	 */
+	public static final String EVENT_TYPE = "EventType";
+	
+	/**
+	 * Field name of the app for the current event feed item
+	 */
+	public static final String EVENT_APP = "EventApp";
+	
+	/**
+	 * Field name of the drill down dashboard for the current event feed item
+	 */
+	public static final String DASHBOARD_ID = "DashboardId";
+	
+	/**
+	 * Field name of the drill down field within the drill down dashboard for the current event feed item
+	 */
+	public static final String DASHBOARD_FIELD = "DashboardField";
+	
+	/**
+	 * Field name of the drill down field value within the drill down dashboard for the current event feed item
+	 */
+	public static final String DASHBOARD_VALUE = "DashboardValue";
+
 
 	/**
 	 * The list of default fields returned for dep reporting
@@ -636,5 +765,25 @@ public class ReliabilityReportInput extends RegressionsInput {
 			TRANSACTION_FAIL_RATE, 
 		 	TRANSACTION_FAILURES,
 		 	TRANSACTION_FAIL_RATE_DELTA
+		});
+	
+	/**
+	 * The list of default fields returned for an event feed report
+	 */
+	public static final List<String> FEED_FIELDS = Arrays.asList(
+			 new String[] { 	
+				ViewInput.FROM, 
+				ViewInput.TO, 
+				ViewInput.TIME_RANGE, 
+				SERVICE,
+				KEY,
+				DASHBOARD_ID,
+				DASHBOARD_FIELD,
+				DASHBOARD_VALUE,
+				EVENT_DESC,
+				EVENT_TYPE_DESC,
+				EVENT_TYPE,
+				EVENT_NAME,
+				EVENT_APP
 		});
 }

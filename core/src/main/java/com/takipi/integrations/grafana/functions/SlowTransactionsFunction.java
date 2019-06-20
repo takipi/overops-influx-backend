@@ -1,10 +1,9 @@
 package com.takipi.integrations.grafana.functions;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import org.joda.time.DateTime;
 
@@ -19,7 +18,7 @@ import com.takipi.integrations.grafana.input.TransactionsListInput;
 import com.takipi.integrations.grafana.output.Series;
 import com.takipi.integrations.grafana.util.TimeUtil;
 
-public class SlowTransactionsFunction extends EnvironmentVariableFunction {
+public class SlowTransactionsFunction extends TransactionsFunction {
 
 	public static class Factory implements FunctionFactory {
 
@@ -43,41 +42,6 @@ public class SlowTransactionsFunction extends EnvironmentVariableFunction {
 		super(apiClient);
 	}
 	
-	private Collection<String> getSlowTransactions(String serviceId, 
-			SlowTransactionsInput input, Pair<DateTime, DateTime> timeSpan) {
-		String viewId = getViewId(serviceId, input.view);
-		
-		if (viewId == null) {
-			return Collections.emptyList();
-		}
-		
-		Collection<PerformanceState> performanceStates = TransactionsListInput.getStates(input.performanceStates);
-		
-		Collection<TransactionGraph> activeGraphs = getTransactionGraphs(input, serviceId, 
-				viewId, timeSpan, input.getSearchText());
-		
-		TransactionDataResult transactionDataResult = getTransactionDatas(activeGraphs,
-			serviceId, viewId, timeSpan, input, true, false, false, true);
-			
-		if (transactionDataResult == null) {
-			return Collections.emptyList();
-		}
-		
-		Set<String> result = new HashSet<String>();
-		
-		for (TransactionData transactionData : transactionDataResult.items.values()) {
-			
-			if (!performanceStates.contains(transactionData.state)) {
-				continue;
-			}
-			
-			String name = getTransactionName(transactionData.graph.name, false);
-			result.add(name);
-		}
-		
-		return result;
-	}
-	
 	@Override
 	public List<Series> process(FunctionInput functionInput) {
 		if (!(functionInput instanceof SlowTransactionsInput)) {
@@ -90,15 +54,39 @@ public class SlowTransactionsFunction extends EnvironmentVariableFunction {
 	@Override
 	protected void populateServiceValues(BaseEnvironmentsInput input, Collection<String> serviceIds, String serviceId,
 			VariableAppender appender) {
+		
 		SlowTransactionsInput stInput = (SlowTransactionsInput)input;
 	
-		Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(stInput.timeFilter);
-		Collection<String> transactions = getSlowTransactions(serviceId, stInput, timespan);
-				
-		for (String transaction : transactions) {
-			String value = getServiceValue(transaction, serviceId, serviceIds);
-			appender.append(value);
+		String viewId = getViewId(serviceId, stInput.view);
+		
+		if (viewId == null) {
+			return;
 		}
-	}
-	
+		
+		Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(stInput.timeFilter);		
+		Collection<PerformanceState> performanceStates = TransactionsListInput.getStates(stInput.performanceStates);
+		
+		Collection<TransactionGraph> activeGraphs = getTransactionGraphs(stInput, serviceId, 
+				viewId, timespan, stInput.getSearchText());
+		
+		TransactionDataResult transactionDataResult = getTransactionDatas(activeGraphs,
+			serviceId, viewId, timespan, stInput, true, false, false, true);
+			
+		if (transactionDataResult == null) {
+			return;
+		}
+		
+		Map<String, List<String>> transactionMap = new HashMap<String, List<String>>();
+
+		for (TransactionData transactionData : transactionDataResult.items.values()) {
+			
+			if (!performanceStates.contains(transactionData.state)) {
+				continue;
+			}
+			
+			appendTransaction(transactionData.graph.name, transactionMap);
+		}
+		
+		appendTransactions(serviceIds, serviceId, appender, transactionMap);
+	}	
 }

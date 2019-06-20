@@ -10,7 +10,6 @@ import java.util.Set;
 
 import org.joda.time.DateTime;
 
-import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.transaction.Transaction;
 import com.takipi.api.client.util.settings.GroupSettings;
@@ -89,7 +88,6 @@ public class TransactionsFunction extends EnvironmentVariableFunction {
 		
 		BaseEventVolumeInput beInput = (BaseEventVolumeInput)input;
 		
-		Gson gson = new Gson();
 		String json = gson.toJson(input);
 		
 		BaseEventVolumeInput result = gson.fromJson(json, beInput.getClass());
@@ -146,11 +144,6 @@ public class TransactionsFunction extends EnvironmentVariableFunction {
 		
 		for (Transaction transaction : transactions) {
 			
-			Pair<String, String> nameAndMethod = getTransactionNameAndMethod(transaction.name, false);
-			
-			String className = nameAndMethod.getFirst();
-			String methodName = nameAndMethod.getSecond();
-			
 			if (groupFilters != null) {
 				
 				Pair<String, String> fullNameAndMethod = getFullNameAndMethod(transaction.name);
@@ -163,26 +156,42 @@ public class TransactionsFunction extends EnvironmentVariableFunction {
 				}
 			}
 			
-			List<String> transactionMethods = transactionMap.get(className);
-
-			if (methodName != null) {
-				if (transactionMethods == null) {
-					transactionMethods = new ArrayList<String>();
-					transactionMap.put(className, transactionMethods);
-				}
-				transactionMethods.add(methodName);
-
-			} else {
-				if (!transactionMap.containsKey(className)) {
-					transactionMap.put(className, null);
-				}
-			}
+			appendTransaction(transaction.name, transactionMap);
 		}
 		
 		for (Group group : matchingGroups) {
 			String groupName = getServiceValue(group.toGroupName(), serviceId, serviceIds);
 			appender.append(groupName);	
 		}
+		
+		appendTransactions(serviceIds, serviceId, appender, transactionMap);
+	}
+	
+	protected void appendTransaction(String transactionName, Map<String, List<String>> transactionMap) {
+		
+		Pair<String, String> nameAndMethod = getTransactionNameAndMethod(transactionName, false);
+		
+		String className = nameAndMethod.getFirst();
+		String methodName = nameAndMethod.getSecond();
+			
+		List<String> transactionMethods = transactionMap.get(className);
+
+		if (methodName != null) {
+			if (transactionMethods == null) {
+				transactionMethods = new ArrayList<String>();
+				transactionMap.put(className, transactionMethods);
+			}
+			transactionMethods.add(methodName);
+
+		} else {
+			if (!transactionMap.containsKey(className)) {
+				transactionMap.put(className, null);
+			}
+		}
+	}
+	
+	protected void appendTransactions(Collection<String> serviceIds, String serviceId,
+		VariableAppender appender, Map<String, List<String>> transactionMap) {
 		
 		for (Map.Entry<String, List<String>> entry : transactionMap.entrySet()) {
 			

@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 
 import com.google.common.base.Objects;
-import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.integrations.grafana.input.BaseEnvironmentsInput;
@@ -118,8 +117,8 @@ public class EventsDiffDescFunction extends EnvironmentVariableFunction {
 		
 		StringBuilder result = new StringBuilder();
 		
-		String json = new Gson().toJson(input);
-		EventsInput targetInput =  new Gson().fromJson(json, input.getClass());
+		String json = gson.toJson(input);
+		EventsInput targetInput =  gson.fromJson(json, input.getClass());
 				
 		targetInput.applications = input.compareToApplications;
 		targetInput.servers = input.compareToServers;
@@ -153,8 +152,8 @@ public class EventsDiffDescFunction extends EnvironmentVariableFunction {
 	
 	private String getCombinedDesc(EventsDiffDescInput input, String serviceId) {
 				
-		String json = new Gson().toJson(input);
-		EventsInput targetInput =  new Gson().fromJson(json, input.getClass());
+		String json = gson.toJson(input);
+		EventsInput targetInput =  gson.fromJson(json, input.getClass());
 				
 		targetInput.applications = input.compareToApplications;
 		targetInput.servers = input.compareToServers;

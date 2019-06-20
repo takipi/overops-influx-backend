@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.util.regression.RegressionResult;
 import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOutput;
@@ -41,7 +40,6 @@ public class RegressedEventsFunction extends EnvironmentVariableFunction {
 			VariableAppender appender) {
 		RegressedEventsInput reInput = (RegressedEventsInput)getInput((RegressedEventsInput)input);
 		
-		Gson gson = new Gson();
 		String json = gson.toJson(reInput);
 		RegressionsInput rgInput = gson.fromJson(json, RegressionsInput.class);
 		

@@ -9,7 +9,6 @@ import java.util.Map;
 
 import org.joda.time.DateTime;
 
-import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.data.metrics.Graph.GraphPoint;
@@ -157,7 +156,6 @@ public class RegressionGraphFunction extends LimitGraphFunction {
 		RegressionGraphInput rgInput = (RegressionGraphInput)input;
 
 		if (rgInput.timeFilterVar != null) {
-			Gson gson = new Gson();
 			result = gson.fromJson(gson.toJson(rgInput), rgInput.getClass());
 			Pair<DateTime, DateTime> timespan = TimeUtil.getTimeFilter(rgInput.timeFilterVar);
 			result.timeFilter = TimeUtil.getTimeFilter(timespan);

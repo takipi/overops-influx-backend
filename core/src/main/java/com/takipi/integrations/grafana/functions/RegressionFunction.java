@@ -14,24 +14,22 @@ import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Objects;
-import com.google.gson.Gson;
 import com.takipi.api.client.ApiClient;
 import com.takipi.api.client.data.metrics.Graph;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.metrics.GraphResult;
+import com.takipi.api.client.request.event.BreakdownType;
+import com.takipi.api.client.util.regression.DeterminantKey;
 import com.takipi.api.client.util.regression.RateRegression;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionResult;
 import com.takipi.api.client.util.regression.RegressionStringUtil;
 import com.takipi.api.client.util.regression.RegressionUtil;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
-import com.takipi.api.client.util.settings.RegressionReportSettings;
 import com.takipi.api.client.util.settings.RegressionSettings;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
-import com.takipi.integrations.grafana.functions.ReliabilityReportFunction.DeterminantKey;
-import com.takipi.integrations.grafana.functions.ReliabilityReportFunction.ReportKey;
 import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
 import com.takipi.integrations.grafana.input.EventFilterInput;
 import com.takipi.integrations.grafana.input.EventsInput;
@@ -64,6 +62,9 @@ public class RegressionFunction extends EventsFunction {
 			return "regressions";
 		}
 	}
+	
+	public static final int P1 = 2;
+	public static final int P2 = 1;
 	
 	protected class RegressionData extends EventData {
 		
@@ -122,10 +123,10 @@ public class RegressionFunction extends EventsFunction {
 				case NewIssues:
 					
 					if (event.stats.hits < input.minVolumeThreshold) {
-						description = String.format("Nonsevere: volume %d < %d", 
+						description = String.format("Non severe error: volume %d < %d", 
 								event.stats.hits, input.minVolumeThreshold);	
 					} else {
-						description = String.format("Nonsevere:rate %s < %.2f", 
+						description = String.format("Non severe error: rate %s < %.2f", 
 								ratio, input.minErrorRateThreshold);
 					}
 					
@@ -136,13 +137,13 @@ public class RegressionFunction extends EventsFunction {
 					if (regResult.getCriticalNewEvents().containsKey(event.id)) {
 
 						if (event.type.equals(UNCAUGHT_EXCEPTION)) {
-							description = String.format("Severe: event is uncaught exception");					
+							description = String.format("Severe error: event is uncaught exception");					
 						} else {
-							description = String.format("Severe: event type " + 
+							description = String.format("Severe error: event type " + 
 								event.name + " is defined as a critical exception type");	
 						}
 					} else {
-						description = String.format("Severe: (volume  %d > %s) AND (rate %s > %.2f)",
+						description = String.format("Severe error: (volume  %d > %s) AND (rate %s > %.2f)",
 							event.stats.hits, input.minVolumeThreshold, ratio,  input.minErrorRateThreshold);
 					}
 					
@@ -151,16 +152,16 @@ public class RegressionFunction extends EventsFunction {
 					
 				case Regressions:
 					
-					description = String.format("Nonsevere: (volume %d > %d) AND (rate %s > %.2f) AND (rate change from baseline %.2f > %.2f)",
-							event.stats.hits, input.minVolumeThreshold,
+					description = String.format("Increase Warning : (volume %s > %d) AND (rate %s > %.2f) AND (rate change from baseline %.2f > %.2f)",
+							formatLongValue(event.stats.hits), input.minVolumeThreshold,
 							ratio, input.minErrorRateThreshold,
 							getRateDelta(), input.regressionDelta);
 					break;
 					
 				case SevereRegressions:
 					
-					description = String.format("Severe: (volume %d > %d) AND (rate %s > %.2f) AND (rate change from baseline %.2f > %.2f)",
-							event.stats.hits, input.minVolumeThreshold,
+					description = String.format("Severe Increase: (volume %s > %d) AND (rate %s > %.2f) AND (rate change from baseline %.2f > %.2f)",
+							formatLongValue(event.stats.hits), input.minVolumeThreshold,
 							ratio, input.minErrorRateThreshold,
 							getRateDelta(), input.criticalRegressionDelta);
 					break;
@@ -168,7 +169,7 @@ public class RegressionFunction extends EventsFunction {
 				default: throw new IllegalStateException(String.valueOf(type));
 			}
 			
-			return description + ". Thresholds are set in the Settings dashboard.";	
+			return description;
 		}
 		
 		private double getRateDelta() {
@@ -216,6 +217,28 @@ public class RegressionFunction extends EventsFunction {
 			}
 		}
 		
+		public int getSeverity() {
+			
+			if (type == null) {
+				return Integer.valueOf(0);
+			}
+			
+			switch (type) {
+				
+				case NewIssues:
+				case Regressions:
+					return Integer.valueOf(P2);
+					
+				case SevereNewIssues:
+				case SevereRegressions:
+					return Integer.valueOf(P1);
+				default:
+					break;
+			}
+			
+			return Integer.valueOf(0);
+		}
+		
 		@Override
 		public String toString() {
 			return String.valueOf(type) + " " + event.toString();
@@ -253,35 +276,15 @@ public class RegressionFunction extends EventsFunction {
 			}
 		}
 	}
-	
-	protected class RegressionSeverityFormatter extends FieldFormatter {
+		
+	protected static class RegressionSeverityFormatter extends FieldFormatter {
 		
 		@Override
 		protected Object getValue(EventData eventData, String serviceId, EventsInput input,
 				Pair<DateTime, DateTime> timeSpan) {
-			
-			RegressionReportSettings settings = getSettingsData(serviceId).regression_report;
-			
-			if (settings == null) {
-				return Integer.valueOf(0);
-			}
-			
+						
 			RegressionData regData = (RegressionData)eventData;
-			
-			switch (regData.type) {
-				
-				case NewIssues:
-				case Regressions:
-					return Integer.valueOf(1);
-					
-				case SevereNewIssues:
-				case SevereRegressions:
-					return Integer.valueOf(2);
-				default:
-					break;
-			}
-			
-			return Integer.valueOf(0);
+			return regData.getSeverity();
 		}
 	}
 	
@@ -402,6 +405,31 @@ public class RegressionFunction extends EventsFunction {
 		super(apiClient, settingsMaps);
 	}
 	
+	public static int compareRegressions(RegressionData r1, RegressionData r2, 
+		List<String> criticalExceptionList, int minThreshold ) {
+		
+		int typeDelta = r1.type.ordinal() - r2.type.ordinal();
+		
+		if (typeDelta != 0) {
+			return typeDelta;
+		}
+		
+		if ((r1.type == RegressionType.SevereNewIssues) ||
+			(r1.type == RegressionType.NewIssues)) {
+					
+			return compareEvents(r1.event, r2.event, 0, 0, 
+				criticalExceptionList, minThreshold);
+		}			
+		
+		if ((r1.type == RegressionType.SevereRegressions) ||
+			(r1.type == RegressionType.Regressions)) {
+			return r2.getDelta() - r1.getDelta();		
+		}		
+		
+		throw new IllegalStateException(String.valueOf(r1.type));
+		
+	}
+	
 	private void sortRegressions(String serviceId, List<EventData> eventData) {	
 		
 		RegressionSettings regressionSettings = getSettingsData(serviceId).regression;
@@ -414,28 +442,8 @@ public class RegressionFunction extends EventsFunction {
 			@Override
 			public int compare(EventData o1, EventData o2) {
 				
-				RegressionData r1 = (RegressionData)o1;
-				RegressionData r2 = (RegressionData)o2;
-				
-				int typeDelta = r1.type.ordinal() - r2.type.ordinal();
-				
-				if (typeDelta != 0) {
-					return typeDelta;
-				}
-				
-				if ((r1.type == RegressionType.SevereNewIssues) ||
-					(r1.type == RegressionType.NewIssues)) {
-							
-					return compareEvents(o1.event, o2.event, 0, 0, 
-						criticalExceptionList, minThreshold);
-				}			
-				
-				if ((r1.type == RegressionType.SevereRegressions) ||
-					(r1.type == RegressionType.Regressions)) {
-					return r2.getDelta() - r1.getDelta();		
-				}		
-				
-				throw new IllegalStateException(String.valueOf(r1.type));
+				return compareRegressions((RegressionData)o1, (RegressionData)o2, 
+					criticalExceptionList, minThreshold);
 			}
 		});
 	}
@@ -621,22 +629,13 @@ public class RegressionFunction extends EventsFunction {
 		return super.getFormatter(serviceId, column);
 	}
 	
-	public static class AggregatedRegressionOutput {
-		public Map<ReportKey, RegressionOutput> keyRegressionOutputMap;
-		
-		public AggregatedRegressionOutput() { }
-		
-		public AggregatedRegressionOutput(Map<ReportKey, RegressionOutput> regressionOutputMap) {
-			this.keyRegressionOutputMap = regressionOutputMap;
-		}
-	}
-	
 	public static class RegressionOutput {	
 		
 		public static final RegressionOutput emptyOutput = new RegressionOutput(true);
 		
 		public boolean empty;
 		
+		public BaseEventVolumeInput input;
 		public RegressionInput regressionInput;
 		public RegressionWindow regressionWindow;
 		public RateRegression rateRegression;
@@ -679,6 +678,11 @@ public class RegressionFunction extends EventsFunction {
 		}
 	}
 	
+	protected class DeterminantGraphsLists {
+		public List<Graph> baselineGraph = new ArrayList<Graph>();
+		public List<Graph> activeWindowGraph = new ArrayList<Graph>();
+	}
+	
 	private RegressionSettings getRegressionSettings(String serviceId) {
 		
 		RegressionSettings regressionSettings = getSettingsData(serviceId).regression;
@@ -695,20 +699,6 @@ public class RegressionFunction extends EventsFunction {
 			Pair<DateTime, DateTime> timeSpan, boolean newOnly) {
 		return getRegressionInput(serviceId, viewId, input, null, timeSpan, newOnly);
 	}
-	
-	public Pair<RegressionInput, RegressionWindow> getRegressionInput(String serviceId,
-			EventFilterInput input,
-			Pair<DateTime, DateTime> timeSpan, boolean newOnly) {
-		
-		String viewId = getViewId(serviceId, input.view);
-		
-		if (viewId == null) {
-			return null;
-		}
-		
-		return getRegressionInput(serviceId, viewId, input, null, timeSpan, newOnly);
-	}
-		
 	
 	public Pair<RegressionInput, RegressionWindow> getRegressionInput(String serviceId, String viewId,
 		EventFilterInput input, RegressionWindow window,
@@ -776,7 +766,8 @@ public class RegressionFunction extends EventsFunction {
 	
 	public Map<DeterminantKey, Pair<Graph, Graph>> getRegressionGraphs(String serviceId, String viewId,
 			RegressionInput regressionInput, RegressionWindow regressionWindow,
-			Map<String, Collection<String>> applicationGroupsMap, BaseEventVolumeInput input, boolean newOnly) {
+			Map<String, Collection<String>> applicationGroupsMap, BaseEventVolumeInput input, boolean newOnly,
+			Set<BreakdownType> queryBreakdownTypes, Set<BreakdownType> determinantBreakdownTypes) {
 		
 		EventFilterInput baselineInput;
 		DateTime baselineStart = regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan);
@@ -785,8 +776,9 @@ public class RegressionFunction extends EventsFunction {
 		DateTime activeStart = regressionWindow.activeWindowStart;
 		DateTime activeEnd = regressionWindow.activeWindowStart.plusMinutes(regressionWindow.activeTimespan);
 		
+		Set<BreakdownType> baselineQueryBreakdownTypes = queryBreakdownTypes;
+		
 		if (input.hasDeployments()) {
-			Gson gson = new Gson();
 			// for deployments baseline graph will start baseline timespan before the first deployment
 			// and finish at the end of current deployment the cache therefore should return the results quickly for
 			// the actual active window. Each deployment baseline will be calculated afterwards in code
@@ -796,16 +788,17 @@ public class RegressionFunction extends EventsFunction {
 			//deployments by definition nature do not have their own baseline - 
 			//they are compared against the general baseline (all prev deps)
 			baselineInput.deployments = null;
+			baselineQueryBreakdownTypes = null;
 		} else {
 			baselineInput = input;
 		}
-				
+		
 		Collection<GraphSliceTask> baselineGraphTasks;
 		
 		if (!newOnly) {
 			baselineGraphTasks = getGraphTasks(serviceId, viewId, baselineInput, 
 				VolumeType.all, baselineStart, baselineEnd,
-				regressionInput.baselineTimespan, regressionWindow.activeTimespan, false);
+				regressionInput.baselineTimespan, regressionWindow.activeTimespan, false, baselineQueryBreakdownTypes);
 		} else {
 			baselineGraphTasks = null;
 		}
@@ -819,7 +812,7 @@ public class RegressionFunction extends EventsFunction {
 		}
 		
 		Collection<GraphSliceTask> activeGraphTasks = getGraphTasks(serviceId, viewId, 
-			input, VolumeType.all, activeStart, activeEnd, 0, graphActiveTimespan, false);
+			input, VolumeType.all, activeStart, activeEnd, 0, graphActiveTimespan, false, queryBreakdownTypes);
 		
 		List<GraphSliceTask> graphTasks = new ArrayList<GraphSliceTask>(); 
 		
@@ -831,30 +824,47 @@ public class RegressionFunction extends EventsFunction {
 		
 		Collection<GraphSliceTaskResult> graphSliceTaskResults = executeGraphTasks(graphTasks, false);
 		
-		Map<DeterminantKey, List<Graph>> baselineGraphKeys = new HashMap<DeterminantKey, List<Graph>>();
-		Map<DeterminantKey, List<Graph>> activeWindowGraphKeys = new HashMap<DeterminantKey, List<Graph>>();
+		Map<DeterminantKey, DeterminantGraphsLists> determinantGraphsMap = divideGraphsByDeterminant(baselineGraphTasks,
+				graphSliceTaskResults, applicationGroupsMap, determinantBreakdownTypes);
 		
-		divideGraphsByDeterminant(baselineGraphTasks, graphSliceTaskResults, baselineGraphKeys, activeWindowGraphKeys, applicationGroupsMap);
+		Map<DeterminantKey, Pair<Graph, Graph>> result = new HashMap<DeterminantKey, Pair<Graph, Graph>>();
 		
-		Map<DeterminantKey, Pair<Graph, Graph>> graphResults = new HashMap<DeterminantKey, Pair<Graph, Graph>>();
+		DeterminantGraphsLists emptyDeterminantGraphs = determinantGraphsMap.get(DeterminantKey.Empty);
 		
-		for (DeterminantKey graphResultKey : activeWindowGraphKeys.keySet()) {
-			Pair<Graph, Graph> determinantGraphs = getDeterminantGraphs(input, baselineGraphKeys, activeWindowGraphKeys,
-					graphResultKey);
+		List<Graph> allBaselineGraphs = new ArrayList<Graph>();
+		
+		if (emptyDeterminantGraphs != null) {
+			allBaselineGraphs = emptyDeterminantGraphs.baselineGraph;
+		}
+		
+		for (DeterminantKey determinantGraphListsMapKey : determinantGraphsMap.keySet()) {
+			if (shouldExcludeEmptyDetreminantGraph(determinantBreakdownTypes, determinantGraphListsMapKey)) {
+				continue;
+			}
+			
+			DeterminantGraphsLists determinantGraphsLists = determinantGraphsMap.get(determinantGraphListsMapKey);
+			
+			Pair<Graph, Graph> determinantGraphs = getDeterminantGraphs(input, allBaselineGraphs,
+					determinantGraphsLists.baselineGraph, determinantGraphsLists.activeWindowGraph);
 			
 			Graph baselineGraph = determinantGraphs.getFirst();
 			Graph activeWindowGraph = determinantGraphs.getSecond();
 			
-			graphResults.put(graphResultKey, Pair.of(baselineGraph, activeWindowGraph));
+			result.put(determinantGraphListsMapKey, Pair.of(baselineGraph, activeWindowGraph));
 		}
 		
-		return graphResults;
+		return result;
 	}
 	
-	public Pair<Graph, Graph> getDeterminantGraphs(BaseEventVolumeInput input, Map<DeterminantKey, List<Graph>> baselineGraphKeys,
-			Map<DeterminantKey, List<Graph>> activeWindowGraphKeys, DeterminantKey graphResultKey) {
-		List<Graph> baselineGraphs = baselineGraphKeys.get(graphResultKey);
-		List<Graph> activeWindowGraphs = activeWindowGraphKeys.get(graphResultKey);
+	public boolean shouldExcludeEmptyDetreminantGraph(Set<BreakdownType> determinantBreakdownTypes, DeterminantKey determinantGraphListsMapKey) {
+		// Take empty determinant graph only if determinant breakdown was requested
+		boolean result = ((determinantGraphListsMapKey.equals(DeterminantKey.Empty)) && (!CollectionUtil.safeIsEmpty(determinantBreakdownTypes)));
+		
+		return result;
+	}
+	
+	public Pair<Graph, Graph> getDeterminantGraphs(BaseEventVolumeInput input,
+			List<Graph> allBaselineGraphs, List<Graph> baselineGraphs, List<Graph> activeWindowGraphs) {
 		
 		Graph baselineGraph = new Graph();
 		baselineGraph.points = new ArrayList<>();
@@ -875,10 +885,8 @@ public class RegressionFunction extends EventsFunction {
 			GraphResult activeGraphResult = new GraphResult();
 			
 			activeGraphResult.graphs = Collections.singletonList(activeWindowGraph);
-		
+			
 			if ((input.hasDeployments()) && (!hasBaselineGraphs)) {
-				List<Graph> allBaselineGraphs = baselineGraphKeys.get(DeterminantKey.Empty);
-				
 				if (!CollectionUtil.safeIsEmpty(allBaselineGraphs)) {
 					
 					baselineGraph = mergeGraphs(allBaselineGraphs);
@@ -889,9 +897,12 @@ public class RegressionFunction extends EventsFunction {
 		return Pair.of(baselineGraph, activeWindowGraph);
 	}
 	
-	private void divideGraphsByDeterminant(Collection<GraphSliceTask> baselineGraphTasks, Collection<GraphSliceTaskResult> graphSliceTaskResults,
-			Map<DeterminantKey, List<Graph>> baselineGraphKeys, Map<DeterminantKey, List<Graph>> activeWindowGraphKeys,
-			Map<String, Collection<String>> applicationGroupsMap) {
+	private Map<DeterminantKey, DeterminantGraphsLists> divideGraphsByDeterminant(Collection<GraphSliceTask> baselineGraphTasks,
+			Collection<GraphSliceTaskResult> graphSliceTaskResults, Map<String, Collection<String>> applicationGroupsMap,
+			Set<BreakdownType> determinantBreakdownTypes) {
+		
+		Map<DeterminantKey, DeterminantGraphsLists> result = new HashMap<DeterminantKey, DeterminantGraphsLists>();
+		
 		for (GraphSliceTaskResult graphSliceTaskResult : graphSliceTaskResults) {
 			
 			boolean isBaselineTask = (baselineGraphTasks != null ? baselineGraphTasks.contains(graphSliceTaskResult.task) : false);
@@ -900,56 +911,59 @@ public class RegressionFunction extends EventsFunction {
 				
 				Set<DeterminantKey> graphsKeys = new HashSet<DeterminantKey>();
 				
-				graphsKeys.add(new DeterminantKey(graph.machine_name, graph.application_name, graph.deployment_name));
+				DeterminantKey determinantKey = DeterminantKey.create(determinantBreakdownTypes, "",
+						graph.application_name, graph.deployment_name);
 				
-				if (!CollectionUtil.safeIsEmpty(applicationGroupsMap)) {
+				graphsKeys.add(determinantKey);
+				
+				if ((!CollectionUtil.safeIsEmpty(determinantBreakdownTypes)) &&
+					(!CollectionUtil.safeIsEmpty(applicationGroupsMap)) &&
+					(determinantBreakdownTypes.contains(BreakdownType.App))) {
+					
 					Collection<String> appGroups = applicationGroupsMap.get(graph.application_name);
 					
 					if (!CollectionUtil.safeIsEmpty(appGroups)) {
 						for (String appGroup : appGroups) {
-							graphsKeys.add(new DeterminantKey(graph.machine_name, appGroup, graph.deployment_name));
+							graphsKeys.add(DeterminantKey.create("", appGroup, ""));
 						}
 					}
 				}
 				
-				for (DeterminantKey determinantKey : graphsKeys) {
-					if (isBaselineTask) {
-						putGraphToDeterminantMap(baselineGraphKeys, graph, determinantKey);
-					} else {
-						ViewInput input = graphSliceTaskResult.task.input;
+				for (DeterminantKey graphKey : graphsKeys) {
+					DeterminantGraphsLists determinantGraphsLists = result.get(graphKey);
+					
+					if (determinantGraphsLists == null) {
+						determinantGraphsLists = new DeterminantGraphsLists();
 						
-						if (determinantKey.equals(DeterminantKey.Empty) && input.hasDeterminantFilter()) {
+						result.put(graphKey, determinantGraphsLists);
+					}
+					
+					if (isBaselineTask) {
+						determinantGraphsLists.baselineGraph.add(graph);
+					} else {
+						if (shouldExcludeEmptyDetreminantGraph(determinantBreakdownTypes, graphKey)) {
 							// The relevant apps for the filter does not exist
 							continue;
 						}
 						
-						putGraphToDeterminantMap(activeWindowGraphKeys, graph, determinantKey);
+						determinantGraphsLists.activeWindowGraph.add(graph);
 					}
 				}
 			}
-			
-		}
-	}
-	
-	private void putGraphToDeterminantMap(Map<DeterminantKey, List<Graph>> graphKeys, Graph graph, DeterminantKey graphsKey) {
-		List<Graph> graphList = graphKeys.get(graphsKey);
-		
-		if (CollectionUtil.safeIsEmpty(graphList)) {
-			graphList = new ArrayList<Graph>();
-			graphKeys.put(graphsKey, graphList);
 		}
 		
-		graphList.add(graph);
+		return result;
 	}
 	
-	protected RegressionOutput createRegressionOutput(String serviceId, 
-			EventFilterInput input, RegressionInput regressionInput, RegressionWindow regressionWindow,
+	protected RegressionOutput createRegressionOutput(String serviceId,
+			BaseEventVolumeInput input, RegressionInput regressionInput, RegressionWindow regressionWindow,
 			RateRegression rateRegression, Map<String, EventResult> eventListMap,
 			Graph baseVolumeGraph, Graph activeVolumeGraph, long volume,
 			boolean allowEmpty) {
 		
 		RegressionOutput result = new RegressionOutput(false);
 		
+		result.input = input;
 		result.regressionInput = regressionInput;
 		result.regressionWindow = regressionWindow;
 		result.rateRegression = rateRegression;
@@ -993,6 +1007,15 @@ public class RegressionFunction extends EventsFunction {
 		return result;
 	}
 	
+	public RegressionOutput executeRegression(String serviceId, RegressionsInput regressionsInput, boolean newOnly,
+			RegressionInput regressionInput, RegressionWindow activeWindow, Map<String, EventResult>  eventResultMap,
+			Graph baselineGraph, Graph activeWindowGraph) {
+		
+		return getRegressionOutput(serviceId, regressionsInput, newOnly,
+				TimeUtil.getTimeFilter(regressionsInput.timeFilter), regressionInput,
+				activeWindow, eventResultMap, baselineGraph, activeWindowGraph);
+	}
+	
 	public RegressionOutput executeRegression(String serviceId, 
 			BaseEventVolumeInput input, boolean newOnly) {
 		
@@ -1025,7 +1048,8 @@ public class RegressionFunction extends EventsFunction {
 		}
 		
 		Collection<Pair<Graph, Graph>> regressionGraphsCollection = getRegressionGraphs(serviceId,
-				viewId, regressionInput, regressionWindow, null, input, newOnly).values();
+				viewId, regressionInput, regressionWindow, null, input, newOnly,
+				null, null).values();
 		
 		if (CollectionUtil.safeIsEmpty(regressionGraphsCollection)) {
 			return RegressionOutput.emptyOutput;
@@ -1085,8 +1109,10 @@ public class RegressionFunction extends EventsFunction {
 		
 		regressionInput.validate();
 		
-		RateRegression rateRegression = RegressionUtil.calculateRateRegressions(apiClient, regressionInput, null,
-				false);
+		RegressionWindow regressionInputWindow = ApiCache.getRegressionWindow(apiClient, regressionInput);
+		
+		RateRegression rateRegression = RegressionUtil.calculateRateRegressions(apiClient, regressionInput, regressionInputWindow,
+				null, false);
 		
 		RegressionOutput result = createRegressionOutput(serviceId,
 				input, regressionInput, regressionWindow,
