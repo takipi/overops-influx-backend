@@ -742,8 +742,6 @@ public class ReliabilityReportFunction extends EventsFunction {
 				if (result != null) {
 					break;
 				}
-				
-				logger.warn("Could not retrieve event list from API retry number: {}", retries);
 			}
 			
 			if (result == null) {
