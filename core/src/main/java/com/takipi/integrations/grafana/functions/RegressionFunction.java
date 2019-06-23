@@ -12,10 +12,14 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
 import com.google.common.base.Objects;
 import com.takipi.api.client.ApiClient;
+import com.takipi.api.client.data.deployment.SummarizedDeployment;
 import com.takipi.api.client.data.metrics.Graph;
+import com.takipi.api.client.result.deployment.DeploymentsResult;
 import com.takipi.api.client.result.event.EventResult;
 import com.takipi.api.client.result.metrics.GraphResult;
 import com.takipi.api.client.request.event.BreakdownType;
@@ -28,6 +32,7 @@ import com.takipi.api.client.util.regression.RegressionUtil;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.settings.RegressionSettings;
 import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
+import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
 import com.takipi.integrations.grafana.input.BaseEventVolumeInput;
@@ -683,6 +688,54 @@ public class RegressionFunction extends EventsFunction {
 		public List<Graph> activeWindowGraph = new ArrayList<Graph>();
 	}
 	
+	protected class GraphSliceResult {
+		public boolean isBaselineGraph;
+		public Graph graph;
+		
+		public GraphSliceResult(boolean isBaselineGraph, Graph graph) {
+			this.isBaselineGraph = isBaselineGraph;
+			this.graph = graph;
+		}
+	}
+	
+	protected class RegressionGraphDeterminantResult {
+		public Graph baselineGraph;
+		public Graph activeWindowGraph;
+		public RegressionWindow activeWindow;
+		
+		public RegressionGraphDeterminantResult(Graph activeWindowGraph, Graph baselineGraph, RegressionWindow activeWindow) {
+			
+			this.activeWindowGraph = activeWindowGraph;
+			this.baselineGraph = baselineGraph;
+			this.activeWindow = activeWindow;
+		}
+	}
+	
+	public static class RegressionApiResult
+	{
+		public DeterminantKey determinantKey;
+		
+		public Graph baselineGraph;
+		public Graph activeWindowGraph;
+		public RegressionWindow activeWindow;
+		public Map<String, EventResult> eventResultsMap;
+		public Set<BreakdownType> queryBreakdownTypes;
+		public Set<BreakdownType> determinantBreakdownTypes;
+		
+		public RegressionApiResult(DeterminantKey determinantKey, Graph baselineGraph, Graph activeWindowGraph,
+				RegressionWindow activeWindow, Map<String, EventResult> eventResultsMap, Set<BreakdownType> queryBreakdownTypes,
+				Set<BreakdownType> determinantBreakdownTypes) {
+			
+			this.determinantKey = determinantKey;
+			this.baselineGraph = baselineGraph;
+			this.activeWindowGraph = activeWindowGraph;
+			this.activeWindow = activeWindow;
+			this.eventResultsMap = eventResultsMap;
+			this.queryBreakdownTypes = queryBreakdownTypes;
+			this.determinantBreakdownTypes = determinantBreakdownTypes;
+		}
+	}
+	
 	private RegressionSettings getRegressionSettings(String serviceId) {
 		
 		RegressionSettings regressionSettings = getSettingsData(serviceId).regression;
@@ -764,10 +817,10 @@ public class RegressionFunction extends EventsFunction {
 		
 	}
 	
-	public Map<DeterminantKey, Pair<Graph, Graph>> getRegressionGraphs(String serviceId, String viewId,
+	public Set<GraphSliceResult> getRegressionGraphs(String serviceId, String viewId,
 			RegressionInput regressionInput, RegressionWindow regressionWindow,
-			Map<String, Collection<String>> applicationGroupsMap, BaseEventVolumeInput input, boolean newOnly,
-			Set<BreakdownType> queryBreakdownTypes, Set<BreakdownType> determinantBreakdownTypes) {
+			BaseEventVolumeInput input, boolean newOnly, Set<BreakdownType> queryBreakdownTypes,
+			Set<BreakdownType> determinantBreakdownTypes) {
 		
 		EventFilterInput baselineInput;
 		DateTime baselineStart = regressionWindow.activeWindowStart.minusMinutes(regressionInput.baselineTimespan);
@@ -778,7 +831,7 @@ public class RegressionFunction extends EventsFunction {
 		
 		Set<BreakdownType> baselineQueryBreakdownTypes = queryBreakdownTypes;
 		
-		if (input.hasDeployments()) {
+		if (CollectionUtil.safeContains(determinantBreakdownTypes, BreakdownType.Deployment)) {
 			// for deployments baseline graph will start baseline timespan before the first deployment
 			// and finish at the end of current deployment the cache therefore should return the results quickly for
 			// the actual active window. Each deployment baseline will be calculated afterwards in code
@@ -824,10 +877,18 @@ public class RegressionFunction extends EventsFunction {
 		
 		Collection<GraphSliceTaskResult> graphSliceTaskResults = executeGraphTasks(graphTasks, false);
 		
-		Map<DeterminantKey, DeterminantGraphsLists> determinantGraphsMap = divideGraphsByDeterminant(baselineGraphTasks,
-				graphSliceTaskResults, applicationGroupsMap, determinantBreakdownTypes);
+		Set<GraphSliceResult> result = getGraphSliceResultData(baselineGraphTasks, graphSliceTaskResults);
 		
-		Map<DeterminantKey, Pair<Graph, Graph>> result = new HashMap<DeterminantKey, Pair<Graph, Graph>>();
+		return result;
+	}
+	
+	public Map<DeterminantKey, RegressionGraphDeterminantResult> getGraphsDeterminantMap(String serviceId, Set<GraphSliceResult> graphSliceResults,
+			RegressionWindow activeWindow, Map<String, Collection<String>> applicationGroupsMap, Set<BreakdownType> determinantBreakdownTypes) {
+		
+		Map<DeterminantKey, DeterminantGraphsLists> determinantGraphsMap = divideGraphsByDeterminant(graphSliceResults,
+				applicationGroupsMap, determinantBreakdownTypes);
+		
+		Map<DeterminantKey, RegressionGraphDeterminantResult> result = new HashMap<DeterminantKey, RegressionGraphDeterminantResult>();
 		
 		DeterminantGraphsLists emptyDeterminantGraphs = determinantGraphsMap.get(DeterminantKey.Empty);
 		
@@ -837,6 +898,15 @@ public class RegressionFunction extends EventsFunction {
 			allBaselineGraphs = emptyDeterminantGraphs.baselineGraph;
 		}
 		
+		Map<DeterminantKey, Pair<DateTime, DateTime>> determinantToDeploymentsTimespan = new HashMap<DeterminantKey, Pair<DateTime, DateTime>>();
+		Graph mergedBaselineGraph = null;
+		
+		if (CollectionUtil.safeContains(determinantBreakdownTypes, BreakdownType.Deployment)) {
+			mergedBaselineGraph = mergeGraphs(allBaselineGraphs);
+			
+			determinantToDeploymentsTimespan = getDeploymentsTimespan(serviceId, determinantGraphsMap);
+		}
+		
 		for (DeterminantKey determinantGraphListsMapKey : determinantGraphsMap.keySet()) {
 			if (shouldExcludeEmptyDetreminantGraph(determinantBreakdownTypes, determinantGraphListsMapKey)) {
 				continue;
@@ -844,27 +914,96 @@ public class RegressionFunction extends EventsFunction {
 			
 			DeterminantGraphsLists determinantGraphsLists = determinantGraphsMap.get(determinantGraphListsMapKey);
 			
-			Pair<Graph, Graph> determinantGraphs = getDeterminantGraphs(input, allBaselineGraphs,
-					determinantGraphsLists.baselineGraph, determinantGraphsLists.activeWindowGraph);
+			Pair<DateTime, DateTime> deploymentsTimespan = determinantToDeploymentsTimespan.get(determinantGraphListsMapKey);
 			
-			Graph baselineGraph = determinantGraphs.getFirst();
-			Graph activeWindowGraph = determinantGraphs.getSecond();
+			RegressionGraphDeterminantResult determinantGraphs = getDeterminantGraphs(serviceId, activeWindow, mergedBaselineGraph,
+					determinantGraphsLists.baselineGraph, determinantGraphsLists.activeWindowGraph, deploymentsTimespan, determinantBreakdownTypes);
 			
-			result.put(determinantGraphListsMapKey, Pair.of(baselineGraph, activeWindowGraph));
+			result.put(determinantGraphListsMapKey, determinantGraphs);
 		}
 		
 		return result;
 	}
 	
-	public boolean shouldExcludeEmptyDetreminantGraph(Set<BreakdownType> determinantBreakdownTypes, DeterminantKey determinantGraphListsMapKey) {
-		// Take empty determinant graph only if determinant breakdown was requested
-		boolean result = ((determinantGraphListsMapKey.equals(DeterminantKey.Empty)) && (!CollectionUtil.safeIsEmpty(determinantBreakdownTypes)));
+	public Map<DeterminantKey, Pair<DateTime, DateTime>> getDeploymentsTimespan(String serviceId,
+			Map<DeterminantKey, DeterminantGraphsLists> determinantGraphsMap) {
+		
+		Map<DeterminantKey, Pair<DateTime, DateTime>> result = new HashMap<DeterminantKey, Pair<DateTime, DateTime>>();
+		
+		Map<DeterminantKey, Pair<DateTime, DateTime>> activeTimespanFromCache = getActiveTimespanFromCache(serviceId, true, determinantGraphsMap);
+		
+		if (activeTimespanFromCache != null) {
+			result = activeTimespanFromCache;
+			
+			return result;
+		}
+		
+		Map<DeterminantKey, Pair<DateTime, DateTime>> nonActiveTimespanFromCache = getActiveTimespanFromCache(serviceId, false, determinantGraphsMap);
+		
+		if (nonActiveTimespanFromCache != null) {
+			result = nonActiveTimespanFromCache;
+			
+			return result;
+		}
 		
 		return result;
 	}
 	
-	public Pair<Graph, Graph> getDeterminantGraphs(BaseEventVolumeInput input,
-			List<Graph> allBaselineGraphs, List<Graph> baselineGraphs, List<Graph> activeWindowGraphs) {
+	public Map<DeterminantKey, Pair<DateTime, DateTime>> getActiveTimespanFromCache(String serviceId, boolean active,
+			Map<DeterminantKey, DeterminantGraphsLists> determinantGraphsMap) {
+		
+		Response<DeploymentsResult> deployments = ApiCache.getDeployments(apiClient, serviceId, active, null);
+		
+		Map<DeterminantKey, Pair<DateTime, DateTime>> result = null;
+		
+		if (deployments.data != null) {
+			Map<DeterminantKey, Pair<DateTime, DateTime>> deploymentsTimespan = getDeploymentsTimespan(deployments.data.deployments, determinantGraphsMap);
+			
+			if (deploymentsTimespan != null) {
+				result = deploymentsTimespan;
+				
+				return result;
+			}
+		}
+		
+		return result;
+	}
+	
+	private Map<DeterminantKey, Pair<DateTime, DateTime>> getDeploymentsTimespan(List<SummarizedDeployment> summarizedDeployments,
+			Map<DeterminantKey, DeterminantGraphsLists> determinantGraphsMap) {
+		
+		Map<DeterminantKey, Pair<DateTime, DateTime>> result = new HashMap<DeterminantKey, Pair<DateTime, DateTime>>();
+		
+		for (SummarizedDeployment summarizedDeployment : summarizedDeployments) {
+			
+			DeterminantKey determinantKey = DeterminantKey.create("", "", summarizedDeployment.name);
+			if (determinantGraphsMap.get(determinantKey) != null) {
+				DateTimeFormatter dateTimeFormatter = ISODateTimeFormat.dateTime().withZoneUTC();
+				
+				DateTime start = dateTimeFormatter.parseDateTime(summarizedDeployment.first_seen);
+				DateTime end = null;
+				
+				if (summarizedDeployment.last_seen != null) {
+					end = dateTimeFormatter.parseDateTime(summarizedDeployment.last_seen);
+				}
+				
+				result.put(determinantKey, Pair.of(start, end));
+			}
+		}
+		
+		Set<DeterminantKey> difference = new HashSet<DeterminantKey>(determinantGraphsMap.keySet());
+		difference.removeAll(result.keySet());
+		
+		if (!difference.equals(Collections.singleton(DeterminantKey.Empty))) {
+			
+			return null;
+		}
+		
+		return result;
+	}
+	
+	public RegressionGraphDeterminantResult getDeterminantGraphs(String serviceId, RegressionWindow activeWindow, Graph mergedBaselineGraph,
+			List<Graph> baselineGraphs, List<Graph> activeWindowGraphs, Pair<DateTime, DateTime> deploymentsTimespan, Set<BreakdownType> determinantBreakdownTypes) {
 		
 		Graph baselineGraph = new Graph();
 		baselineGraph.points = new ArrayList<>();
@@ -881,73 +1020,126 @@ public class RegressionFunction extends EventsFunction {
 			activeWindowGraph = mergeGraphs(activeWindowGraphs);
 		}
 		
+		RegressionWindow resultActiveWindow = activeWindow.clone();
+		
 		if (activeWindowGraph != null) {
 			GraphResult activeGraphResult = new GraphResult();
 			
 			activeGraphResult.graphs = Collections.singletonList(activeWindowGraph);
 			
-			if ((input.hasDeployments()) && (!hasBaselineGraphs)) {
-				if (!CollectionUtil.safeIsEmpty(allBaselineGraphs)) {
-					
-					baselineGraph = mergeGraphs(allBaselineGraphs);
-				}
+			if (CollectionUtil.safeContains(determinantBreakdownTypes, BreakdownType.Deployment)) {
+				
+				resultActiveWindow = getActiveWindowFromTimespan(deploymentsTimespan);
+				
+				baselineGraph = adjustDeploymentsBaselineGraph(serviceId, resultActiveWindow, mergedBaselineGraph, deploymentsTimespan);
 			}
 		}
 		
-		return Pair.of(baselineGraph, activeWindowGraph);
+		RegressionGraphDeterminantResult result = new RegressionGraphDeterminantResult(activeWindowGraph, baselineGraph, resultActiveWindow);
+		
+		return result;
 	}
 	
-	private Map<DeterminantKey, DeterminantGraphsLists> divideGraphsByDeterminant(Collection<GraphSliceTask> baselineGraphTasks,
-			Collection<GraphSliceTaskResult> graphSliceTaskResults, Map<String, Collection<String>> applicationGroupsMap,
-			Set<BreakdownType> determinantBreakdownTypes) {
+	private Graph adjustDeploymentsBaselineGraph(String serviceId,
+			RegressionWindow activeWindow, Graph baselineGraph, Pair<DateTime, DateTime> deploymentsTimespan) {
+		
+		Graph result = baselineGraph;
+		
+		if (deploymentsTimespan != null) {
+			int baselineTimespan = expandBaselineTimespan(serviceId, activeWindow);
+			
+			RegressionPeriodData deploymentsRegressionGraphs = cropGraphByPeriod(baselineGraph,
+					deploymentsTimespan, baselineTimespan,
+					null);
+			
+			result = deploymentsRegressionGraphs.baselineGraph;
+		}
+		
+		return result;
+	}
+	
+	private RegressionWindow getActiveWindowFromTimespan(Pair<DateTime, DateTime> deploymentsTimespan) {
+		RegressionWindow activeWindow = new RegressionWindow();
+		
+		activeWindow.activeWindowStart = deploymentsTimespan.getFirst();
+		DateTime deploymentActiveWindowEnd = deploymentsTimespan.getSecond();
+		
+		activeWindow.activeTimespan = (int) TimeUnit.MILLISECONDS
+				.toMinutes(deploymentActiveWindowEnd.minus(
+						activeWindow.activeWindowStart.getMillis()).getMillis());
+		
+		return activeWindow;
+	}
+	
+	
+	private Set<GraphSliceResult> getGraphSliceResultData(Collection<GraphSliceTask> baselineGraphTasks, Collection<GraphSliceTaskResult> graphSliceTaskResults) {
+		
+		Set<GraphSliceResult> result = new HashSet<GraphSliceResult>();
+		
+		for (GraphSliceTaskResult graphSliceTaskResult : graphSliceTaskResults) {
+			boolean baselineGraphSlice = CollectionUtil.safeContains(baselineGraphTasks, graphSliceTaskResult.task);
+			
+			for (Graph graph : graphSliceTaskResult.graphs) {
+				result.add(new GraphSliceResult(baselineGraphSlice, graph));
+			}
+		}
+		
+		return result;
+	}
+	
+	public boolean shouldExcludeEmptyDetreminantGraph(Set<BreakdownType> determinantBreakdownTypes, DeterminantKey determinantGraphListsMapKey) {
+		// Take empty determinant graph only if determinant breakdown was requested
+		boolean result = ((determinantGraphListsMapKey.equals(DeterminantKey.Empty)) && (!CollectionUtil.safeIsEmpty(determinantBreakdownTypes)));
+		
+		return result;
+	}
+	
+	private Map<DeterminantKey, DeterminantGraphsLists> divideGraphsByDeterminant(Set<GraphSliceResult> graphSliceResultSet,
+			Map<String, Collection<String>> applicationGroupsMap, Set<BreakdownType> determinantBreakdownTypes) {
 		
 		Map<DeterminantKey, DeterminantGraphsLists> result = new HashMap<DeterminantKey, DeterminantGraphsLists>();
 		
-		for (GraphSliceTaskResult graphSliceTaskResult : graphSliceTaskResults) {
+		for (GraphSliceResult graphSliceResult : graphSliceResultSet) {
 			
-			boolean isBaselineTask = (baselineGraphTasks != null ? baselineGraphTasks.contains(graphSliceTaskResult.task) : false);
+			Set<DeterminantKey> graphsKeys = new HashSet<DeterminantKey>();
 			
-			for (Graph graph : graphSliceTaskResult.graphs) {
+			Graph graph = graphSliceResult.graph;
+			
+			DeterminantKey determinantKey = DeterminantKey.create(determinantBreakdownTypes, "",
+					graph.application_name, graph.deployment_name);
+			
+			graphsKeys.add(determinantKey);
+			
+			if (CollectionUtil.safeContains(determinantBreakdownTypes, BreakdownType.App) &&
+				(!CollectionUtil.safeIsEmpty(applicationGroupsMap))) {
 				
-				Set<DeterminantKey> graphsKeys = new HashSet<DeterminantKey>();
+				Collection<String> appGroups = applicationGroupsMap.get(graph.application_name);
 				
-				DeterminantKey determinantKey = DeterminantKey.create(determinantBreakdownTypes, "",
-						graph.application_name, graph.deployment_name);
-				
-				graphsKeys.add(determinantKey);
-				
-				if ((!CollectionUtil.safeIsEmpty(determinantBreakdownTypes)) &&
-					(!CollectionUtil.safeIsEmpty(applicationGroupsMap)) &&
-					(determinantBreakdownTypes.contains(BreakdownType.App))) {
-					
-					Collection<String> appGroups = applicationGroupsMap.get(graph.application_name);
-					
-					if (!CollectionUtil.safeIsEmpty(appGroups)) {
-						for (String appGroup : appGroups) {
-							graphsKeys.add(DeterminantKey.create("", appGroup, ""));
-						}
+				if (!CollectionUtil.safeIsEmpty(appGroups)) {
+					for (String appGroup : appGroups) {
+						graphsKeys.add(DeterminantKey.create("", appGroup, ""));
 					}
 				}
+			}
+			
+			for (DeterminantKey graphKey : graphsKeys) {
+				DeterminantGraphsLists determinantGraphsLists = result.get(graphKey);
 				
-				for (DeterminantKey graphKey : graphsKeys) {
-					DeterminantGraphsLists determinantGraphsLists = result.get(graphKey);
+				if (determinantGraphsLists == null) {
+					determinantGraphsLists = new DeterminantGraphsLists();
 					
-					if (determinantGraphsLists == null) {
-						determinantGraphsLists = new DeterminantGraphsLists();
-						
-						result.put(graphKey, determinantGraphsLists);
+					result.put(graphKey, determinantGraphsLists);
+				}
+				
+				if (graphSliceResult.isBaselineGraph) {
+					determinantGraphsLists.baselineGraph.add(graph);
+				} else {
+					if (shouldExcludeEmptyDetreminantGraph(determinantBreakdownTypes, graphKey)) {
+						// The relevant apps for the filter does not exist
+						continue;
 					}
 					
-					if (isBaselineTask) {
-						determinantGraphsLists.baselineGraph.add(graph);
-					} else {
-						if (shouldExcludeEmptyDetreminantGraph(determinantBreakdownTypes, graphKey)) {
-							// The relevant apps for the filter does not exist
-							continue;
-						}
-						
-						determinantGraphsLists.activeWindowGraph.add(graph);
-					}
+					determinantGraphsLists.activeWindowGraph.add(graph);
 				}
 			}
 		}
@@ -1047,9 +1239,12 @@ public class RegressionFunction extends EventsFunction {
 			return RegressionOutput.emptyOutput;
 		}
 		
-		Collection<Pair<Graph, Graph>> regressionGraphsCollection = getRegressionGraphs(serviceId,
-				viewId, regressionInput, regressionWindow, null, input, newOnly,
-				null, null).values();
+		Set<GraphSliceResult> graphSliceResults = getRegressionGraphs(serviceId,
+				viewId, regressionInput, regressionWindow, input, newOnly,
+				null, null);
+		
+		Collection<RegressionGraphDeterminantResult> regressionGraphsCollection = getGraphsDeterminantMap(serviceId, graphSliceResults,
+				regressionWindow, null, null).values();
 		
 		if (CollectionUtil.safeIsEmpty(regressionGraphsCollection)) {
 			return RegressionOutput.emptyOutput;
@@ -1058,9 +1253,9 @@ public class RegressionFunction extends EventsFunction {
 		Set<Graph> baselineGraphs = new HashSet<Graph>();
 		Set<Graph> activeWindowGraphs = new HashSet<Graph>();
 		
-		for (Pair<Graph, Graph> graphPairs : regressionGraphsCollection) {
-			baselineGraphs.add(graphPairs.getFirst());
-			activeWindowGraphs.add(graphPairs.getSecond());
+		for (RegressionGraphDeterminantResult graphPairs : regressionGraphsCollection) {
+			baselineGraphs.add(graphPairs.baselineGraph);
+			activeWindowGraphs.add(graphPairs.activeWindowGraph);
 		}
 		
 		Pair<Graph, Graph> regressionGraphs = Pair.of(mergeGraphs(baselineGraphs), mergeGraphs(activeWindowGraphs));

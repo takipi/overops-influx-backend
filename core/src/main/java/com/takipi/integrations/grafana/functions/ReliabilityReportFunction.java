@@ -50,7 +50,6 @@ import com.takipi.api.client.util.infra.Categories.CategoryType;
 import com.takipi.api.client.util.infra.InfraUtil;
 import com.takipi.api.client.util.performance.calc.PerformanceState;
 import com.takipi.api.client.util.regression.DeterminantKey;
-import com.takipi.api.client.util.regression.RegressionEventsOutput;
 import com.takipi.api.client.util.regression.RegressionInput;
 import com.takipi.api.client.util.regression.RegressionUtil.RegressionWindow;
 import com.takipi.api.client.util.settings.GroupSettings;
@@ -61,7 +60,10 @@ import com.takipi.api.client.util.validation.ValidationUtil.VolumeType;
 import com.takipi.api.core.url.UrlClient.Response;
 import com.takipi.common.util.CollectionUtil;
 import com.takipi.common.util.Pair;
+import com.takipi.integrations.grafana.functions.RegressionFunction.GraphSliceResult;
+import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionApiResult;
 import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionData;
+import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionGraphDeterminantResult;
 import com.takipi.integrations.grafana.functions.RegressionFunction.RegressionOutput;
 import com.takipi.integrations.grafana.functions.ReliabilityKpiGraphFunction.KpiInterval;
 import com.takipi.integrations.grafana.functions.ReliabilityKpiGraphFunction.ScoreInterval;
@@ -500,15 +502,15 @@ public class ReliabilityReportFunction extends EventsFunction {
 				
 				Map<String, Collection<String>> applicationGroupsMap = getApplicationGroupsMap(serviceId, reportKeys);
 				
-				Set<RegressionEventsOutput> aggregatedRegressionOutputMap = getRegressionApiResults(activeWindow,
+				Set<RegressionApiResult> regressionApiResults = getRegressionApiResults(activeWindow,
 						applicationGroupsMap, regressionFunction, aggregatedRegressionInput ,regressionInput, newOnly);
 				
-				if (CollectionUtil.safeIsEmpty(aggregatedRegressionOutputMap)) {
+				if (CollectionUtil.safeIsEmpty(regressionApiResults)) {
 					continue;
 				}
 				
-				Map<ReportKey, BreakdownRegressionData> breakdownRegressionMap = getBreakdownRegressionMap(activeWindow,
-						aggregatedRegressionOutputMap, applicationGroupsMap, regressionFunction, newOnly);
+				Map<ReportKey, BreakdownRegressionData> breakdownRegressionMap = getBreakdownRegressionMap(
+						regressionApiResults, applicationGroupsMap, regressionFunction, newOnly);
 				
 				for (Entry<ReportKey, BreakdownRegressionData> regressionOutputEntry : breakdownRegressionMap.entrySet()) {
 					result.put(regressionOutputEntry.getKey(), regressionOutputEntry.getValue());
@@ -547,9 +549,8 @@ public class ReliabilityReportFunction extends EventsFunction {
 			return result;
 		}
 		
-		private Map<ReportKey, BreakdownRegressionData> getBreakdownRegressionMap(RegressionWindow activeWindow,
-				Set<RegressionEventsOutput> regressionApiResults, Map<String, Collection<String>> applicationGroupsMap,
-				RegressionFunction regressionFunction, boolean newOnly) {
+		private Map<ReportKey, BreakdownRegressionData> getBreakdownRegressionMap(Set<RegressionApiResult> regressionApiResults,
+				Map<String, Collection<String>> applicationGroupsMap, RegressionFunction regressionFunction, boolean newOnly) {
 			
 			Map<String, Pair<ReportKey, RegressionsInput>> subRegressionInputs = new HashMap<String, Pair<ReportKey, RegressionsInput>>();
 			
@@ -561,18 +562,14 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			Map<ReportKey, BreakdownRegressionData>  result = new HashMap<ReportKey, BreakdownRegressionData>();
 			
-			for (RegressionEventsOutput regressionApiResult : regressionApiResults) {
+			for (RegressionApiResult regressionApiResult : regressionApiResults) {
 				Map<String, EventResult> eventResultMap = regressionApiResult.eventResultsMap;
 				
 				Graph baselineGraph = regressionApiResult.baselineGraph;
 				Graph activeWindowGraph = regressionApiResult.activeWindowGraph;
+				RegressionWindow activeWindow = regressionApiResult.activeWindow;
 				
 				DeterminantKey determinantKey = regressionApiResult.determinantKey;
-				
-				if (activeWindow.deploymentFound) {
-					baselineGraph = adjustDeploymentsBaselineGraph(activeWindow, determinantKey, eventResultMap,
-							baselineGraph, regressionFunction);
-				}
 				
 				Pair<ReportKey, RegressionsInput> reportDataPair = subRegressionInputs.get(determinantKey.determinantKey);
 				
@@ -620,34 +617,7 @@ public class ReliabilityReportFunction extends EventsFunction {
 			return result;
 		}
 		
-		private Graph adjustDeploymentsBaselineGraph(RegressionWindow activeWindow, DeterminantKey determinantKey,
-				Map<String, EventResult> eventResultMap, Graph baselineGraph, RegressionFunction regressionFunction) {
-			
-			Graph result = baselineGraph;
-			
-			Pair<DateTime, DateTime> dateTimeDateTimePair = activeWindow.deploymentsTimespan.get(determinantKey.determinantKey);
-			
-			if (dateTimeDateTimePair != null) {
-				activeWindow.activeWindowStart = dateTimeDateTimePair.getFirst();
-				DateTime deploymentActiveWindowEnd = dateTimeDateTimePair.getSecond();
-				
-				activeWindow.activeTimespan = (int) TimeUnit.MILLISECONDS
-						.toMinutes(deploymentActiveWindowEnd.minus(
-								activeWindow.activeWindowStart.getMillis()).getMillis());
-				
-				int baselineTimespan = regressionFunction.expandBaselineTimespan(serviceId, activeWindow);
-				
-				RegressionPeriodData deploymentsRegressionGraphs = cropGraphByPeriod(baselineGraph,
-						dateTimeDateTimePair, baselineTimespan,
-						eventResultMap);
-				
-				result = deploymentsRegressionGraphs.baselineGraph;
-			}
-			
-			return result;
-		}
-		
-		public Set<RegressionEventsOutput> getRegressionApiResults(RegressionWindow activeWindow,
+		public Set<RegressionApiResult> getRegressionApiResults(RegressionWindow activeWindow,
 				Map<String, Collection<String>> applicationGroupsMap, RegressionFunction regressionFunction,
 				RegressionInput subRegressionInput, BaseEventVolumeInput regressionInput, boolean newOnly) {
 			
@@ -666,18 +636,22 @@ public class ReliabilityReportFunction extends EventsFunction {
 			
 			EventsDeterminantMap eventsMap = getEventsMapByKey(eventList, applicationGroupsMap, determinantBreakdownTypes);
 			
-			Map<DeterminantKey, Pair<Graph, Graph>> regressionGraphsMap = regressionFunction.getRegressionGraphs(serviceId,
-					viewId, subRegressionInput, activeWindow, applicationGroupsMap,
-					regressionInput, newOnly, queryBreakdownTypes, determinantBreakdownTypes);
+			Set<GraphSliceResult> regressionGraphs = regressionFunction.getRegressionGraphs(serviceId,
+					viewId, subRegressionInput, activeWindow, regressionInput, newOnly, queryBreakdownTypes, determinantBreakdownTypes);
 			
-			Set<RegressionEventsOutput> result = new HashSet<RegressionEventsOutput>();
+			Map<DeterminantKey, RegressionGraphDeterminantResult> regressionGraphDeterminantMap = regressionFunction.getGraphsDeterminantMap(serviceId,
+					regressionGraphs, activeWindow, applicationGroupsMap, determinantBreakdownTypes);
 			
-			for (DeterminantKey determinantKey : regressionGraphsMap.keySet()) {
-				Map<String, EventResult> eventResultMap = eventsMap.get(determinantKey);
-				Pair<Graph, Graph> regressionGraphs = regressionGraphsMap.get(determinantKey);
+			Set<RegressionApiResult> result = new HashSet<RegressionApiResult>();
+			
+			for (DeterminantKey determinantKey : regressionGraphDeterminantMap.keySet()) {
 				
-				result.add(new RegressionEventsOutput(determinantKey, regressionGraphs.getFirst(),
-						regressionGraphs.getSecond(), eventResultMap, queryBreakdownTypes, determinantBreakdownTypes));
+				Map<String, EventResult> eventResultMap = eventsMap.get(determinantKey);
+				RegressionGraphDeterminantResult determinantRegressionGraphs  = regressionGraphDeterminantMap.get(determinantKey);
+				
+				result.add(new RegressionApiResult(determinantKey, determinantRegressionGraphs.baselineGraph,
+						determinantRegressionGraphs.activeWindowGraph, determinantRegressionGraphs.activeWindow,
+						eventResultMap, queryBreakdownTypes, determinantBreakdownTypes));
 			}
 			
 			return result;
