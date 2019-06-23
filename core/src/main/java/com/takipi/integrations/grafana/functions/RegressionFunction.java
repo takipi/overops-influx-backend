@@ -711,8 +711,7 @@ public class RegressionFunction extends EventsFunction {
 		}
 	}
 	
-	public static class RegressionApiResult
-	{
+	public static class RegressionApiResult {
 		public DeterminantKey determinantKey;
 		
 		public Graph baselineGraph;
