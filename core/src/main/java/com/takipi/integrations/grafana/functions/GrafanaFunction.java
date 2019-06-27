@@ -3005,7 +3005,7 @@ public abstract class GrafanaFunction {
 			result.append(serviceId);
 			result.append(" has " );
 			result.append(proccessSize);
-			result.append(" connected process");
+			result.append(" connected processes");
 
 			if (index < serviceIds.size() - 1) {
 				result.append(" has " );
