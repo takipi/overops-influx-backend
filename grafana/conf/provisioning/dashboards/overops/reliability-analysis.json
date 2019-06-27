@@ -449,7 +449,7 @@
         }
       ],
       "thresholds": "2,4",
-      "title": "Slow Transactions",
+      "title": "P1 Slow Transactions",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
