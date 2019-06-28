@@ -1075,6 +1075,11 @@ public class RegressionFunction extends EventsFunction {
 	public RegressionOutput getRegressionOutput(String serviceId, BaseEventVolumeInput input, boolean newOnly,
 				Pair<DateTime, DateTime> timespan, RegressionInput regressionInput, RegressionWindow regressionWindow,
 				Map<String, EventResult> eventListMap, Graph baselineGraph, Graph activeWindowGraph) {
+		
+		if (eventListMap == null) {
+			return RegressionOutput.emptyOutput;
+		}
+		
 		if ((activeWindowGraph == null) ||(activeWindowGraph.points == null)) {
 			return RegressionOutput.emptyOutput;
 		}
@@ -1082,6 +1087,7 @@ public class RegressionFunction extends EventsFunction {
 		if ((!newOnly) && (((baselineGraph == null) || (baselineGraph.points == null)))) {
 			return RegressionOutput.emptyOutput;
 		}
+		
 		
 		Pair<Map<String, EventResult>, Long> filteredResult = filterEvents(serviceId,
 			timespan, input, eventListMap.values());
