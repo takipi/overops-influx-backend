@@ -951,12 +951,12 @@ public class RegressionFunction extends EventsFunction {
 	public Map<DeterminantKey, Pair<DateTime, DateTime>> getActiveTimespanFromCache(String serviceId, boolean active,
 			Map<DeterminantKey, DeterminantGraphsLists> determinantGraphsMap) {
 		
-		Response<DeploymentsResult> deployments = ApiCache.getDeployments(apiClient, serviceId, active, null);
+		Response<DeploymentsResult> deploymentsResponse = ApiCache.getDeployments(apiClient, serviceId, active, null);
 		
 		Map<DeterminantKey, Pair<DateTime, DateTime>> result = null;
 		
-		if (deployments.data != null) {
-			Map<DeterminantKey, Pair<DateTime, DateTime>> deploymentsTimespan = getDeploymentsTimespan(deployments.data.deployments, determinantGraphsMap);
+		if (deploymentsResponse.data != null && deploymentsResponse.data.deployments != null) {
+			Map<DeterminantKey, Pair<DateTime, DateTime>> deploymentsTimespan = getDeploymentsTimespan(deploymentsResponse.data.deployments, determinantGraphsMap);
 			
 			if (deploymentsTimespan != null) {
 				result = deploymentsTimespan;
