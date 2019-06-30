@@ -209,7 +209,7 @@
         }
       ],
       "thresholds": "25,50",
-      "title": "Events: $type",
+      "title": "Errors: $type",
       "type": "singlestat",
       "valueFontSize": "70%",
       "valueMaps": [
